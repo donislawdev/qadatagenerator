@@ -1,0 +1,165 @@
+package cli
+
+import (
+	"fmt"
+	"sort"
+	"strings"
+)
+
+// This file holds every piece of text the command line shows a person. It is
+// the only file in the package allowed to contain one.
+//
+// Why one file instead of literals next to the code that prints them: the
+// command line is English and only English, so it needs no translation
+// machinery, but text scattered across a program drifts in tone, repeats
+// itself and is impossible to review as a whole. Collecting it here costs
+// nothing today and makes the later question of translation keys a mechanical
+// change rather than a rewrite.
+//
+// Rules that apply to everything below. Sentence one says what the thing does,
+// sentence two says the consequence or the limit, and there is no sentence
+// three. No internal vocabulary: a reader has never heard of a layer or a
+// cross cutting module. Flat hyphens only and no semicolons.
+
+const (
+	// summaryLine is the first thing a new user reads. It says what the tool
+	// produces, which is the dataset and the claim about it, not just data.
+	summaryLine = "qadg produces test data together with a manifest that says how the system under test should react to it."
+
+	usageBlock = `Usage:
+  qadg <command> [flags]
+  qadg --version
+  qadg --license`
+
+	commandsBlock = `Commands:
+  None yet. This build carries the command line skeleton only.`
+
+	flagsHeading = "Flags:"
+
+	// channelsBlock is in the help because a script that redirects standard
+	// output depends on it and has no other way to learn it.
+	channelsBlock = `Channels:
+  Data goes to standard output. The log goes to standard error. A run that
+  fails writes nothing to standard output.`
+
+	exitCodesHeading = "Exit codes:"
+
+	// licenseHeadingCode and the two below label the license report.
+	licenseHeadingCode  = "Code license:"
+	licenseHeadingSpec  = "Specification license:"
+	licenseHeadingParts = "Third party components:"
+
+	// licenseNoComponents states the empty case as a fact. "None" alone
+	// reads like something is missing.
+	licenseNoComponents = "  None. This build links no module outside the Go standard library."
+
+	// versionLabelTool and the three below label the human readable version
+	// report. A machine reads --json instead.
+	versionLabelTool     = "qadg"
+	versionLabelCatalog  = "corruption catalog"
+	versionLabelManifest = "manifest format"
+	versionLabelRecipe   = "recipe schema"
+)
+
+// flagDoc is one entry of the single list of flags.
+//
+// The help text renders this list and the failure that names what would be
+// accepted reads the same list. Two lists would answer the same question
+// differently the first time somebody adds a flag and updates one of them.
+type flagDoc struct {
+	// shown is how the flag appears in the help text.
+	shown string
+	// names is every spelling accepted for it.
+	names []string
+	// what says what the flag does, in one sentence.
+	what string
+}
+
+var flagDocs = []flagDoc{
+	{"--version", []string{"--version"}, "Print the four version numbers this build speaks."},
+	{"--license", []string{"--license"}, "Print the licenses of this tool and of everything inside it."},
+	{"--json", []string{"--json"}, "Print machine readable output. Supported by --version."},
+	{"--no-color", []string{"--no-color"}, "Turn color off even when the output is a terminal."},
+	{"--quiet", []string{"--quiet"}, "Print failures only on the log channel."},
+	{"--verbose", []string{"--verbose"}, "Print progress detail on the log channel."},
+	{"-h, --help", []string{"-h", "--help"}, "Print this text."},
+}
+
+// renderFlags formats the list for the help text.
+func renderFlags() string {
+	width := 0
+	for _, doc := range flagDocs {
+		if len(doc.shown) > width {
+			width = len(doc.shown)
+		}
+	}
+	var b strings.Builder
+	b.WriteString(flagsHeading)
+	for _, doc := range flagDocs {
+		fmt.Fprintf(&b, "\n  %-*s   %s", width, doc.shown, doc.what)
+	}
+	return b.String()
+}
+
+// acceptedFlags lists every spelling, for the moment something else was given.
+func acceptedFlags() string {
+	var names []string
+	for _, doc := range flagDocs {
+		names = append(names, doc.names...)
+	}
+	sort.Strings(names)
+	return strings.Join(names, ", ")
+}
+
+// Failure text.
+//
+// Every message below carries four things: what happened, why, what would be
+// accepted, and what to do instead. Three of the four are the ones people
+// leave out, and a message without them sends the reader to the source code.
+
+const (
+	problemNoCommand    = "no command given"
+	problemNoCommandWhy = "this build accepts flags only, because no command is implemented yet"
+	problemNoCommandDo  = "qadg --help"
+
+	problemUnknownFlagWhy = "this build does not define that flag"
+	problemUnknownFlagDo  = "qadg --help lists every flag this build accepts"
+
+	problemUnknownCommandWhy     = "no command is implemented in this build"
+	problemUnknownCommandAllowed = "no command, so flags only"
+	problemUnknownCommandDo      = "qadg --help"
+
+	problemQuietAndVerbose        = "--quiet and --verbose were both given"
+	problemQuietAndVerboseWhy     = "one asks for less log output and the other for more"
+	problemQuietAndVerboseAllowed = "one of the two, or neither"
+	problemQuietAndVerboseDo      = "drop the flag you did not mean"
+
+	problemJSONUnsupported        = "--json was given, but the requested output has no machine readable form"
+	problemJSONUnsupportedWhy     = "only --version prints machine readable output, and mixing it with another report would put JSON and prose on the same channel"
+	problemJSONUnsupportedAllowed = "--json with --version alone"
+	problemJSONUnsupportedDo      = "drop --json to get the readable form"
+
+	// problemCrash reports that this program stopped in a way it does not
+	// understand. It is worded so that a bug report can quote it.
+	problemCrash   = "internal defect: the run stopped unexpectedly"
+	problemCrashDo = "report this together with the command that produced it"
+
+	// problemMissingKind reports a defect in this program rather than a
+	// mistake by the user. It is worded so that a bug report can quote it.
+	problemMissingKind        = "internal defect: a failure reached the surface without a kind"
+	problemMissingKindWhy     = "the exit code is a property of the failure, and this one carried none"
+	problemMissingKindAllowed = "every failure inside this tool sets its kind where it happens"
+	problemMissingKindDo      = "report this together with the command that produced it"
+)
+
+// Log prefixes. They stay stable because people grep CI logs for them.
+const (
+	prefixError   = "error: "
+	prefixWarning = "warning: "
+	prefixInfo    = "info: "
+	// prefixDetail indents the three lines that follow a failure headline.
+	prefixDetail = "       "
+	// labelAllowed and labelTry name the last two of the four parts.
+	labelAllowed = "allowed: "
+	labelTry     = "try: "
+)

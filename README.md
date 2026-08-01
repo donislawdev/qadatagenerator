@@ -4,7 +4,7 @@ A **QA test data generator** with a CLI and a GUI. Cross-platform, fully offline
 
 > A test data generator that understands **what the data means**, and can corrupt it on purpose while telling you exactly what it broke, at which layer, and how your application is supposed to respond.
 
-**Status: concept phase. No code yet.**
+**Status: early development.** The specifications below are drafts, and the tool itself is a command line skeleton with no command implemented yet.
 
 ---
 
@@ -115,8 +115,8 @@ You will meet this as an unexpected rejection on data that should have passed. I
 
 | What | License |
 |---|---|
-| Code | GNU GPL v3.0 |
-| `spec/`, including the catalog entries | CC BY 4.0 |
+| Code | GNU GPL v3.0, full text in [LICENSE](LICENSE) |
+| `spec/`, including the catalog entries | CC BY 4.0, full text in [LICENSE-spec](LICENSE-spec) |
 
 **The code is GPL-3.0 and that covers the code only.** Data, files and manifests you generate with this tool are **yours**. They are not derivative works, they are not covered by this license, and there is nothing to attribute. Use them in closed-source products, in commercial test suites, anywhere.
 
