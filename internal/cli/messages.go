@@ -60,6 +60,11 @@ const (
 	// reads like something is missing.
 	licenseNoComponents = "  None. This build links no module outside the Go standard library."
 
+	// licenseHeadingData introduces the reference word lists. They ship
+	// inside the binary, so this is where their notice has to be.
+	licenseHeadingData = "Reference data built into this binary:"
+	licenseNoData      = "  None. This build carries no reference lists."
+
 	// versionLabelTool and the three below label the human readable version
 	// report. A machine reads --json instead.
 	versionLabelTool     = "qadg"

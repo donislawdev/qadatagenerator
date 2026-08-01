@@ -1,0 +1,21 @@
+# voivodeships, pl-PL
+# Source: joke2k/faker v40.36.0, MIT
+# https://github.com/joke2k/faker/blob/v40.36.0/faker/providers/address/pl_PL/__init__.py
+# Extracted with an internal tool. Do not edit by hand.
+# 16 entries, sorted by code point.
+Dolnośląskie
+Kujawsko - pomorskie
+Lubelskie
+Lubuskie
+Mazowieckie
+Małopolskie
+Opolskie
+Podkarpackie
+Podlaskie
+Pomorskie
+Warmińsko - mazurskie
+Wielkopolskie
+Zachodniopomorskie
+Łódzkie
+Śląskie
+Świętokrzyskie

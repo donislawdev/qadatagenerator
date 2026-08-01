@@ -31,6 +31,46 @@ const SpecScope = "Applies to spec/ and to the corruption catalog entries built 
 // copyleft too.
 const GeneratedDataNotice = "Data generated with this tool belongs to you. It is not a derived work, and the license of this tool does not cover it."
 
+// DataSource is one collection of reference data compiled into this binary.
+//
+// It is kept apart from Component because the two bind for different reasons.
+// A module is code this binary links. A data source is a collection somebody
+// else assembled, which was read and written down here, and keeping their
+// notice with it is the condition under which that was allowed. Reading a list
+// and keeping it takes a substantial part of a collection whether it arrived
+// through a function call or through a file, and neither route makes the data
+// this project's own work.
+type DataSource struct {
+	// Corpus is the list it produced, as locale and name.
+	Corpus string
+	// Project is where it was read from.
+	Project string
+	// Version is the exact tag it was read at, so the snapshot can be
+	// reproduced and so nobody has to guess which release it matches.
+	Version string
+	// License is the SPDX identifier of that project.
+	License string
+	// Source is where the terms and the original can be read.
+	Source string
+}
+
+// Data lists every reference collection inside this build.
+//
+// A test compares it with the files that are actually embedded, in both
+// directions, so a list added without its attribution fails the build and an
+// attribution left behind after a list was dropped fails it too.
+var Data = []DataSource{
+	{"en-US/first-names-female", "joke2k/faker", "v40.36.0", "MIT", "https://github.com/joke2k/faker"},
+	{"en-US/first-names-male", "joke2k/faker", "v40.36.0", "MIT", "https://github.com/joke2k/faker"},
+	{"en-US/last-names", "joke2k/faker", "v40.36.0", "MIT", "https://github.com/joke2k/faker"},
+	{"pl-PL/cities", "joke2k/faker", "v40.36.0", "MIT", "https://github.com/joke2k/faker"},
+	{"pl-PL/first-names-female", "joke2k/faker", "v40.36.0", "MIT", "https://github.com/joke2k/faker"},
+	{"pl-PL/first-names-male", "joke2k/faker", "v40.36.0", "MIT", "https://github.com/joke2k/faker"},
+	{"pl-PL/last-names-male", "joke2k/faker", "v40.36.0", "MIT", "https://github.com/joke2k/faker"},
+	{"pl-PL/last-names-unisex", "joke2k/faker", "v40.36.0", "MIT", "https://github.com/joke2k/faker"},
+	{"pl-PL/regions", "joke2k/faker", "v40.36.0", "MIT", "https://github.com/joke2k/faker"},
+}
+
 // Component is one external module compiled into this binary.
 type Component struct {
 	// Module is the import path, which is what go.mod calls it.

@@ -368,8 +368,58 @@ func printLicense(out *streams) {
 		out.emit("  " + component.Module + " " + component.Version)
 		out.emit("    " + component.License + "  " + component.Source)
 	}
+
+	// The reference data ships inside this binary, so whoever received the
+	// binary is the person its terms bind. Naming it only in the repository
+	// would put the notice where they will not look.
+	out.emit("")
+	out.emit(licenseHeadingData)
+	if len(license.Data) == 0 {
+		out.emit(licenseNoData)
+	}
+	for _, source := range groupData(license.Data) {
+		out.emit("  " + source.project + " " + source.version)
+		out.emit("    " + source.license + "  " + source.source)
+		for _, list := range source.lists {
+			out.emit("      " + list)
+		}
+	}
+
 	out.emit("")
 	out.emit(license.GeneratedDataNotice)
+}
+
+// takenFrom is one project and everything read from it. The registry keeps a
+// row per list, because that is what a gate can compare with the files, and a
+// person reading the licences wants the project named once.
+type takenFrom struct {
+	project string
+	version string
+	license string
+	source  string
+	lists   []string
+}
+
+func groupData(sources []license.DataSource) []takenFrom {
+	var grouped []takenFrom
+	index := map[string]int{}
+	for _, entry := range sources {
+		key := entry.Project + " " + entry.Version
+		at, seen := index[key]
+		if !seen {
+			index[key] = len(grouped)
+			grouped = append(grouped, takenFrom{
+				project: entry.Project,
+				version: entry.Version,
+				license: entry.License,
+				source:  entry.Source,
+				lists:   []string{entry.Corpus},
+			})
+			continue
+		}
+		grouped[at].lists = append(grouped[at].lists, entry.Corpus)
+	}
+	return grouped
 }
 
 func printHelp(out *streams) {

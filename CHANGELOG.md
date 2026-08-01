@@ -39,6 +39,12 @@ Nothing has been released yet. The version reported by the binary is
   the specifications. The README links to both.
 - Asking for several reports at once prints all of them. `--help --version`
   gives the help and the versions rather than quietly dropping one.
+- Reference word lists for Polish and American data are built into the binary:
+  first names by gender, surnames, cities and regions. They were read from an
+  open source project for fake data under its licence, and `--license` names
+  that project, its version and every list taken from it. Nothing external is
+  linked into the tool, so the lists cannot change under you when somebody
+  else publishes a release.
 - `qadg validate --json` prints the same findings as one machine readable
   document, so a pipeline can decide for itself which of them block a build.
   The document is printed whether or not the recipe turned out to be usable,

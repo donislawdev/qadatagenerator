@@ -60,6 +60,24 @@ Versioning.
   punctuation guard excludes them by a rule that names the exception, rather
   than by the accident of those files having no extension.
 
+- **Reference corpora as data rather than as a dependency.** Nine lists for
+  pl-PL and en-US, read out of a fake data project at a pinned tag by an
+  internal tool, through the syntax tree rather than by installing or running
+  anything. Nothing enters go.mod, and the order and contents belong here from
+  the moment they were written down.
+  Reading somebody's list and keeping it takes a substantial part of their
+  collection whether it arrived through a function or through a file, so their
+  notice travels with it: a header in every file, a registry beside the
+  licences, and `--license` printing it from the binary, which is where the
+  data actually ships. A gate fails the build in both directions, so a list
+  without attribution and an attribution without a list are equally impossible.
+  Identifiers and postcodes were deliberately left behind. An identifier has to
+  be computed from the row's own date and gender, and one with a valid check
+  digit may belong to a real person. A postcode in both libraries is a digit
+  mask unrelated to the city, so the capability that needs a real gazetteer
+  still needs one.
+  Order is asserted rather than restored at load, because a coordinate becomes
+  an index and reordering a list rewrites every dataset generated from it.
 - **Continuous integration on three systems.** Build, vet, a formatting check
   and the tests on Windows, macOS and Linux, with the toolchain pinned through
   GOTOOLCHAIN, plus a job that cross builds the command line binary for three
