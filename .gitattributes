@@ -1,0 +1,27 @@
+# ---------------------------------------------------------------------------
+# Line endings
+# ---------------------------------------------------------------------------
+# Source files are stored and checked out with LF on every platform. Without
+# this, a clone on Windows gets CRLF, the determinism test compares bytes and
+# fails, and the failure looks like a code defect rather than a checkout
+# setting.
+* text=auto eol=lf
+
+# ---------------------------------------------------------------------------
+# Files whose bytes must survive untouched
+# ---------------------------------------------------------------------------
+# This tool deliberately produces files with mixed CRLF and LF, with CR only,
+# with a byte order mark where none is expected and with no final newline.
+# Those are corruption mutators at layer L0, so the fixtures that carry them
+# are not text to be normalised. They are exact bytes under test.
+#
+# Marking them -text also means git diff reports them as binary, which is the
+# correct trade here. A diff that silently hides a line ending change is worse
+# than no diff at all for these files.
+testdata/** -text
+*.golden -text
+
+# ---------------------------------------------------------------------------
+# Generated and vendored content, kept out of language statistics
+# ---------------------------------------------------------------------------
+spec/*.yaml linguist-language=YAML
