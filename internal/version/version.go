@@ -8,10 +8,16 @@ package version
 
 // Tool is the version of this binary. Only the owner raises it.
 //
-// The suffix says that nothing has been released. It is not a placeholder to
-// be filled in by the next session, it is the honest value until the owner
-// tags a release.
-const Tool = "0.0.0-dev"
+// Set to 0.1.0 by the owner on 2026-08-02. Nothing has been released yet, and
+// this number does not claim otherwise: it says which version is being built,
+// not which version somebody can download. A release is a separate act and
+// needs its own decision.
+//
+// A major version here is a statement about mutator identifiers and the
+// manifest format, which is to say about files sitting in somebody else's test
+// repository. Raising it is never housekeeping, which is why the next session
+// does not get to do it either.
+const Tool = "0.1.0"
 
 // Catalog is the version of the corruption catalog this build carries. It
 // mirrors catalog_version in spec/corruption-catalog.yaml, which is the
