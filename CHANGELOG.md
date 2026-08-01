@@ -39,6 +39,13 @@ Nothing has been released yet. The version reported by the binary is
   the specifications. The README links to both.
 - Asking for several reports at once prints all of them. `--help --version`
   gives the help and the versions rather than quietly dropping one.
+- `qadg validate --json` prints the same findings as one machine readable
+  document, so a pipeline can decide for itself which of them block a build.
+  The document is printed whether or not the recipe turned out to be usable,
+  because withholding it exactly when it is needed would make the flag
+  pointless. Cross cutting flags work on either side of the command, so
+  `qadg validate --json r.yaml` and `qadg --json validate r.yaml` are the same
+  invocation.
 - `qadg validate <recipe>` reads a recipe and says whether it can be used. It
   reports every problem it found in one pass rather than one per run, and it
   lists separately what it could not check, so a clean result never means more

@@ -60,6 +60,20 @@ Versioning.
   punctuation guard excludes them by a rule that names the exception, rather
   than by the accident of those files having no extension.
 
+- **Continuous integration on three systems.** Build, vet, a formatting check
+  and the tests on Windows, macOS and Linux, with the toolchain pinned through
+  GOTOOLCHAIN, plus a job that cross builds the command line binary for three
+  targets from one machine with CGO switched off.
+  The reason is specific rather than tidy: a determinism test compares two runs
+  of one machine and passes on each of them separately, so it cannot see a
+  difference between systems. The golden values are what notices, and only if
+  they run somewhere other than where they were written.
+  What it cannot do is written in the file itself. The documents and the
+  internal tooling stay out of the repository, so the document guards, the
+  mutation runner and the oracle have nowhere to run there.
+- **The dependency gate now covers indirect modules as well.** They end up in
+  the binary just the same, and the licence binds whoever received the binary.
+  Proved by adding a fake indirect requirement and watching the test go red.
 - **The recipe, in three layers.** `internal/domain/recipe` holds the model and
   the schema view, `internal/adapter/recipeyaml` is the only place that knows a
   recipe is YAML, and `internal/app/validate` is the use case behind the first
@@ -126,6 +140,12 @@ Versioning.
   passed by looking for a package that could have been renamed.** The scan is
   now asserted to contain it, because a rule about something absent checks
   nothing and says nothing.
+- **A cross cutting flag only worked before the verb.** The flag package stops
+  reading flags at the first argument that is not one, so `--json` after the
+  command landed among the arguments and the run failed as a usage error. A
+  flag that works on one side of the verb is worse than one that does not
+  exist, because its refusal reads as the user's typo. Commands declare those
+  flags again and the values are folded together.
 - **A rule that could not be read shifted the positions of the ones after it.**
   The place in a message was counted from the model, and a rule left out of the
   model moved every later position by one, sending somebody to the wrong line.

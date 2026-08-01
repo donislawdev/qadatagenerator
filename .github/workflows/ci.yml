@@ -1,0 +1,103 @@
+# The build runs on three systems because one of the promises this tool makes
+# can only be checked that way: the same seed has to give the same bytes
+# everywhere. A test that compares two runs cannot see a difference between
+# machines, since it passes on each of them separately. The golden values are
+# what notices, and they only notice if they run somewhere other than the
+# machine that wrote them.
+#
+# What this cannot check, said out loud rather than left to be discovered: the
+# document guards live outside the repository, so nothing here reads them. The
+# consistency of the documents with the code stays a local step.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Reading the repository is all any job needs.
+permissions:
+  contents: read
+
+# A newer push replaces an older run of the same branch. Nobody reads the
+# result of a build that has already been superseded.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Pinned rather than treated as a minimum. Determinism is an unbreakable
+  # rule here, so the toolchain that produced a result is part of what has to
+  # be reproducible.
+  GOTOOLCHAIN: go1.26.5
+  # The command line binary has to build without a C toolchain, which is what
+  # keeps it cross compilable from one machine. Only the window needs CGO.
+  CGO_ENABLED: "0"
+
+jobs:
+  test:
+    name: test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # Every system reports. A difference between systems is the thing this
+      # matrix exists to find, so cancelling the others at the first failure
+      # would hide exactly the information it was set up to produce.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          # Quoted on purpose. This project refuses an unquoted version in a
+          # recipe because YAML reads 1.0 as a number, and the same reader is
+          # reading this file.
+          go-version: "1.26.5"
+
+      - name: build
+        run: go build ./...
+
+      - name: vet
+        run: go vet ./...
+
+      - name: formatting
+        shell: bash
+        # The shell below is written without semicolons on purpose. Both forms
+        # are equally ordinary in a shell, and the repository allows none.
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]
+          then
+            echo "these files are not formatted:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: test
+        # Counted rather than cached. A cached pass says the code was fine
+        # last time, which is not the question being asked here.
+        run: go test -count=1 ./...
+
+  cross:
+    name: cross build from one machine
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.5"
+
+      - name: build the command line binary for three systems
+        shell: bash
+        # This is the promise that the command line half needs no C toolchain
+        # and no native machine. The window is a separate application and is
+        # built natively, which is why it is not here.
+        run: |
+          for target in linux/amd64 darwin/arm64 windows/amd64
+          do
+            echo "building for $target"
+            GOOS="${target%/*}" GOARCH="${target#*/}" go build -o /dev/null ./cmd/qadg
+          done

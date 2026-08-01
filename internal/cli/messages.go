@@ -85,7 +85,7 @@ type flagDoc struct {
 var flagDocs = []flagDoc{
 	{"--version", []string{"--version"}, "Print the four version numbers this build speaks."},
 	{"--license", []string{"--license"}, "Print the licenses of this tool and of everything inside it."},
-	{"--json", []string{"--json"}, "Print machine readable output. Supported by --version."},
+	{"--json", []string{"--json"}, "Print machine readable output. Supported by --version and validate."},
 	{"--no-color", []string{"--no-color"}, "Turn color off even when the output is a terminal."},
 	{"--quiet", []string{"--quiet"}, "Print failures only on the log channel."},
 	{"--verbose", []string{"--verbose"}, "Print progress detail on the log channel."},

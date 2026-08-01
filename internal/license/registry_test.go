@@ -47,11 +47,12 @@ func directRequirements(t *testing.T) map[string]string {
 			inBlock = false
 			continue
 		}
-		// A module the build pulls in only through another one is not ours
-		// to describe, so the indirect marker takes it out.
-		if strings.Contains(trimmed, "// indirect") {
-			continue
-		}
+		// A module pulled in through another one is described too. It ends
+		// up in the binary just the same, and whoever received the binary is
+		// the person the licence of the code inside it binds. Listing one
+		// module too many costs a line here, listing one too few is a claim
+		// about somebody else's terms that nobody checked.
+		trimmed = strings.TrimSuffix(trimmed, "// indirect")
 		candidate := trimmed
 		if !inBlock {
 			if !strings.HasPrefix(trimmed, "require ") {

@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -97,16 +98,6 @@ func TestACommandAndAReportCannotBeAskedForAtOnce(t *testing.T) {
 	}
 }
 
-func TestJSONIsRefusedForACommandThatCannotProduceIt(t *testing.T) {
-	got := run("--json", "validate", "r.yaml")
-	if got.code != int(codeUsage) {
-		t.Fatalf("expected %d, got %d", codeUsage, got.code)
-	}
-	if !strings.Contains(got.log, problemJSONUnsupported) {
-		t.Fatalf("unexpected log %q", got.log)
-	}
-}
-
 func TestAnUnknownCommandNamesTheOnesThatExist(t *testing.T) {
 	got := run("frobnicate")
 	if got.code != int(codeUsage) {
@@ -114,6 +105,83 @@ func TestAnUnknownCommandNamesTheOnesThatExist(t *testing.T) {
 	}
 	if !strings.Contains(got.log, commandValidate) {
 		t.Fatalf("the failure does not name the commands: %q", got.log)
+	}
+}
+
+// A cross cutting flag that works before the verb and fails after it is worse
+// than one that does not exist, because the failure looks like a typo.
+func TestTheMachineReadableFlagWorksOnEitherSideOfTheVerb(t *testing.T) {
+	path := recipeFile(t, usableRecipe)
+	for _, arguments := range [][]string{
+		{"validate", "--json", path},
+		{"--json", "validate", path},
+	} {
+		got := run(arguments...)
+		if got.code != 0 {
+			t.Errorf("%v ended with %d, log %q", arguments[:2], got.code, got.log)
+			continue
+		}
+		var document map[string]any
+		if err := json.Unmarshal([]byte(got.data), &document); err != nil {
+			t.Errorf("%v did not produce JSON: %v", arguments[:2], err)
+			continue
+		}
+		if document["usable"] != true {
+			t.Errorf("%v: expected a usable recipe, got %v", arguments[:2], document["usable"])
+		}
+		if got.log != "" {
+			t.Errorf("%v: a pipeline reading the document should get nothing beside it, got %q", arguments[:2], got.log)
+		}
+	}
+}
+
+// The rule that a failed run writes no data exists so that half a dataset
+// never looks complete. A report asked for by name is the answer to the
+// question, and withholding it exactly when it is needed would make the flag
+// useless.
+func TestTheMachineReadableReportSurvivesAnUnusableRecipe(t *testing.T) {
+	got := run("validate", "--json", recipeFile(t, "version: 1.0\n"))
+	if got.code != int(codeConfig) {
+		t.Fatalf("expected %d, got %d", codeConfig, got.code)
+	}
+	var document struct {
+		Usable   bool `json:"usable"`
+		Problems []struct {
+			Where string `json:"where"`
+			What  string `json:"what"`
+		} `json:"problems"`
+		Unchecked []struct{} `json:"unchecked"`
+	}
+	if err := json.Unmarshal([]byte(got.data), &document); err != nil {
+		t.Fatalf("the findings are not readable by a machine: %v, data %q", err, got.data)
+	}
+	if document.Usable {
+		t.Error("the document claims a recipe that was refused is usable")
+	}
+	if len(document.Problems) == 0 {
+		t.Error("the document carries no problems, so it says nothing")
+	}
+	if document.Problems[0].Where == "" || document.Problems[0].What == "" {
+		t.Error("a problem has to say where and what, or a pipeline cannot act on it")
+	}
+}
+
+// An empty list has to arrive as an empty list. A null teaches every consumer
+// to check for it.
+func TestEmptyListsAreListsAndNotNothing(t *testing.T) {
+	got := run("validate", "--json", recipeFile(t, usableRecipe))
+	if !strings.Contains(got.data, `"problems":[]`) || !strings.Contains(got.data, `"unchecked":[]`) {
+		t.Fatalf("expected empty lists rather than null: %s", got.data)
+	}
+}
+
+func TestAnUnknownFlagAfterTheVerbIsAUsageFailure(t *testing.T) {
+	got := run("validate", "--nope", "recipe.yaml")
+	if got.code != int(codeUsage) {
+		t.Fatalf("expected %d, got %d", codeUsage, got.code)
+	}
+	if got.data != "" {
+		t.Errorf("a failed run writes nothing to the data channel, found %q", got.data)
 	}
 }
 

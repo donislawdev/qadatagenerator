@@ -68,14 +68,9 @@ func Run(env Environment) (code int) {
 
 	showVersion := set.Bool("version", false, "")
 	showLicense := set.Bool("license", false, "")
-	asJSON := set.Bool("json", false, "")
-	quiet := set.Bool("quiet", false, "")
-	verbose := set.Bool("verbose", false, "")
 	help := set.Bool("help", false, "")
 	helpShort := set.Bool("h", false, "")
-	// Defined so that the flag is accepted, and then not read here. The
-	// answer comes from colorTurnedOff, for the reason written beside it.
-	set.Bool("no-color", false, "")
+	global := declareCrossCutting(set)
 
 	parseErr := set.Parse(env.Args)
 
@@ -103,18 +98,8 @@ func Run(env Environment) (code int) {
 		})
 	}
 
-	switch {
-	case *quiet && *verbose:
-		return usage(out, problem{
-			what:    problemQuietAndVerbose,
-			why:     problemQuietAndVerboseWhy,
-			allowed: problemQuietAndVerboseAllowed,
-			instead: problemQuietAndVerboseDo,
-		})
-	case *quiet:
-		out.level = levelQuiet
-	case *verbose:
-		out.level = levelVerbose
+	if code, ok := applyVerbosity(out, global); !ok {
+		return code
 	}
 
 	wantsHelp := *help || *helpShort
@@ -139,17 +124,9 @@ func Run(env Environment) (code int) {
 				instead: problemCommandAndReportDo,
 			})
 		}
-		if *asJSON {
-			return usage(out, problem{
-				what:    problemJSONUnsupported,
-				why:     problemJSONUnsupportedWhy,
-				allowed: problemJSONUnsupportedAllowed,
-				instead: problemJSONUnsupportedDo,
-			})
-		}
 		switch command[0] {
 		case commandValidate:
-			return runValidate(out, command[1:])
+			return runValidate(out, command[1:], global)
 		default:
 			return usage(out, problem{
 				what:    "unknown command " + command[0],
@@ -167,7 +144,7 @@ func Run(env Environment) (code int) {
 	// The test is limited to runs that asked for a report, so that --json on
 	// its own is answered with the reason that is actually true: nothing was
 	// asked for at all.
-	if *asJSON && asked > 0 && !(*showVersion && asked == 1) {
+	if *global.json && asked > 0 && !(*showVersion && asked == 1) {
 		return usage(out, problem{
 			what:    problemJSONUnsupported,
 			why:     problemJSONUnsupportedWhy,
@@ -192,7 +169,7 @@ func Run(env Environment) (code int) {
 	}
 	if *showVersion {
 		separate()
-		printVersion(out, *asJSON)
+		printVersion(out, *global.json)
 	}
 	if *showLicense {
 		separate()
@@ -228,6 +205,39 @@ func reportCrash(env Environment, recovered any) int {
 	return int(codeRuntime)
 }
 
+// crossCutting holds the flags that mean the same thing wherever they appear.
+//
+// They are declared twice, once for the whole invocation and once for the
+// command, because the flag package stops reading flags at the first argument
+// that is not one. Without the second declaration --json would work before the
+// command and be an error after it, which is exactly the trap a cross cutting
+// flag is supposed to avoid.
+type crossCutting struct {
+	json    *bool
+	quiet   *bool
+	verbose *bool
+}
+
+func declareCrossCutting(set *flag.FlagSet) crossCutting {
+	// no-color is declared so that it is accepted and then never read here.
+	// The answer comes from colorTurnedOff, for the reason written beside it.
+	set.Bool("no-color", false, "")
+	return crossCutting{
+		json:    set.Bool("json", false, ""),
+		quiet:   set.Bool("quiet", false, ""),
+		verbose: set.Bool("verbose", false, ""),
+	}
+}
+
+// merge folds what the command said into what the whole invocation said. The
+// flags are all switches, so either position turning one on turns it on.
+func (c crossCutting) merge(other crossCutting) crossCutting {
+	*c.json = *c.json || *other.json
+	*c.quiet = *c.quiet || *other.quiet
+	*c.verbose = *c.verbose || *other.verbose
+	return c
+}
+
 // colorTurnedOff reads --no-color from the arguments themselves rather than
 // from the parsed flags.
 //
@@ -255,6 +265,26 @@ func colorTurnedOff(args []string) bool {
 	return false
 }
 
+// applyVerbosity turns the two switches into one level, or refuses the pair.
+// It is shared with the commands so that asking for both after the verb fails
+// the same way as asking for both before it.
+func applyVerbosity(out *streams, flags crossCutting) (int, bool) {
+	switch {
+	case *flags.quiet && *flags.verbose:
+		return usage(out, problem{
+			what:    problemQuietAndVerbose,
+			why:     problemQuietAndVerboseWhy,
+			allowed: problemQuietAndVerboseAllowed,
+			instead: problemQuietAndVerboseDo,
+		}), false
+	case *flags.quiet:
+		out.level = levelQuiet
+	case *flags.verbose:
+		out.level = levelVerbose
+	}
+	return 0, true
+}
+
 // usage reports a wrong invocation and returns its code.
 func usage(out *streams, p problem) int {
 	out.report(p)
@@ -268,6 +298,19 @@ func finish(out *streams, code exitCode) int {
 		return fail(out, fault.Wrap(fault.IO, out.dataErr, "cannot write to standard output"))
 	}
 	return int(code)
+}
+
+// finishFailed ends a run that has both a failure to report and output that
+// was already written.
+//
+// A failed write wins over the failure being reported, because a report that
+// never arrived leaves the reader with nothing, while a report that arrived
+// alongside a bad exit code leaves them with everything.
+func finishFailed(out *streams, err error) int {
+	if out.dataErr != nil {
+		return fail(out, fault.Wrap(fault.IO, out.dataErr, "cannot write to standard output"))
+	}
+	return fail(out, err)
 }
 
 // fail reports a failure on the log channel and returns the exit code that
