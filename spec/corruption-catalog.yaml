@@ -1,0 +1,1524 @@
+# Corruption Catalog - canonical entries
+#
+# This file is the single source for catalog entries. The specification beside
+# it, corruption-catalog.md, describes the identifier grammar, the layer model,
+# the shape of an entry and the rules. It does not repeat the entries.
+#
+# READ THIS BEFORE USING THE EXAMPLES.
+# Every "before" and "after" pair below is illustrative. Check digits, postal
+# codes and identifier ranges in them have NOT been verified against any
+# official source. They show the shape of the damage, not a correct value. An
+# implementation must produce examples from the real algorithms and reference
+# data, and must not copy these values into generated output.
+#
+# Ethics, applied to every example here: email addresses use reserved
+# documentation domains, payment card numbers are absent, and no value is meant
+# to resemble a real person.
+#
+# Prose in this file uses the flat hyphen and no semicolons. The semicolons in
+# L1.csv.wrong_delimiter are test data rather than prose, which is the one
+# exception. Do not remove them.
+
+catalog_version: "0.1"
+status: draft
+
+# ---------------------------------------------------------------------------
+# Vocabulary used by applies_to
+#
+#   any   - the mutator is meaningful for every value of this dimension
+#   none  - this dimension does not apply, for example a mutator that damages
+#           the file rather than a field
+#
+# Provider identifiers follow <country>.<identifier> for country bound
+# providers, using the ISO 3166-1 alpha-2 code, and a bare name for
+# international standards. A provider belongs to a country and not to a
+# language, which is why the code is PL and US rather than pl-PL and en-US. A
+# data locale selects providers, it does not name them.
+#
+# Like mutator identifiers, provider identifiers become permanent at the first
+# public release and can still change until then.
+# ---------------------------------------------------------------------------
+
+mutators:
+
+  # =========================================================================
+  # L0 - bytes and encoding
+  # =========================================================================
+
+  - id: L0.encoding.wrong_charset
+    layer: L0
+    summary: >-
+      Writes the output in a character encoding other than the declared one, so
+      that non ASCII characters arrive corrupted.
+    applies_to:
+      field_types: [none]
+      formats: [csv, json, xml, txt]
+      providers: [any]
+    parameters:
+      - name: target_charset
+        default: windows-1250
+        description: The encoding actually used to write the bytes.
+      - name: declared_charset
+        default: utf-8
+        description: The encoding the output claims to be in.
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - output.charset-control
+    example:
+      before: "Łukasz Żółć"
+      after: "£ukasz ¯ó³æ"
+      note: >-
+        The damage is only visible on characters outside ASCII, so a dataset
+        with English only names will look untouched.
+
+  - id: L0.eol.mixed
+    layer: L0
+    summary: >-
+      Mixes CRLF and LF line endings inside one file.
+    applies_to:
+      field_types: [none]
+      formats: [csv, json, xml, txt]
+      providers: [any]
+    parameters:
+      - name: ratio
+        default: 0.5
+        description: Share of lines that get the minority ending.
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - output.line-ending-control
+    example:
+      before: "row1\\r\\nrow2\\r\\nrow3\\r\\n"
+      after: "row1\\r\\nrow2\\nrow3\\r\\n"
+      note: >-
+        Confidence is soft because many parsers accept both endings by design.
+        The defect appears in tools that split on a fixed sequence.
+
+  - id: L0.file.truncated
+    layer: L0
+    summary: >-
+      Cuts the file short, optionally in the middle of a multi byte character.
+    applies_to:
+      field_types: [none]
+      formats: [csv, json, xml, xlsx, txt]
+      providers: [any]
+    parameters:
+      - name: cut_at
+        default: 0.75
+        description: Position of the cut as a share of total length.
+      - name: split_character
+        default: true
+        description: >-
+          When true, the cut lands inside a multi byte character rather than
+          between two characters.
+    expectation: rejection
+    confidence: hard
+    reversible: false
+    requires:
+      - output.byte-level-write
+    example:
+      before: "name,city\\nMaria,Kraków\\n"
+      after: "name,city\\nMaria,Krak\\xc3"
+      note: >-
+        The split_character variant is the valuable one. It breaks parsers that
+        assume one byte is one character, and Polish letters and emoji hit that
+        case regularly.
+
+  - id: L0.byte.nul_injected
+    layer: L0
+    summary: >-
+      Injects a zero byte in the middle of a text value.
+    applies_to:
+      field_types: [string]
+      formats: [csv, json, xml, txt]
+      providers: [any]
+    parameters:
+      - name: position
+        default: middle
+        description: Where the byte lands. One of start, middle or end.
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - output.byte-level-write
+    example:
+      before: "Kowalski"
+      after: "Kowal\\x00ski"
+      note: >-
+        Systems that pass the value to a C level library often truncate at the
+        zero byte instead of rejecting the input, which silently shortens data.
+
+  - id: L0.bom.unexpected
+    layer: L0
+    summary: >-
+      Adds a byte order mark where the receiver does not expect one.
+    applies_to:
+      field_types: [none]
+      formats: [csv, json, xml, txt]
+      providers: [any]
+    parameters: []
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - output.bom-control
+    example:
+      before: "id,name\\n1,Maria\\n"
+      after: "\\xef\\xbb\\xbfid,name\\n1,Maria\\n"
+      note: >-
+        The classic symptom is a first column named "\\xef\\xbb\\xbfid" instead
+        of "id", which makes every lookup by header name fail.
+
+  # =========================================================================
+  # L1 - container structure
+  # =========================================================================
+
+  - id: L1.csv.ragged_row
+    layer: L1
+    summary: >-
+      Gives one row a different number of columns than the header declares.
+    applies_to:
+      field_types: [none]
+      formats: [csv]
+      providers: [any]
+    parameters:
+      - name: delta
+        default: 1
+        description: Columns added, or removed when negative.
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - format.csv
+    example:
+      before: "1,Maria,Krakow"
+      after: "1,Maria,Krakow,extra"
+
+  - id: L1.csv.unescaped_quote
+    layer: L1
+    summary: >-
+      Places a quote character inside a quoted field without escaping it.
+    applies_to:
+      field_types: [string]
+      formats: [csv]
+      providers: [any]
+    parameters: []
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - format.csv
+    example:
+      before: "\"Maria \"\"Mania\"\" Nowak\""
+      after: "\"Maria \"Mania\" Nowak\""
+      note: >-
+        Lenient parsers do not fail here. They consume the rest of the file as
+        one field, which shifts every following row without any error.
+
+  - id: L1.csv.wrong_delimiter
+    layer: L1
+    summary: >-
+      Writes the file with a delimiter other than the declared one.
+    applies_to:
+      field_types: [none]
+      formats: [csv]
+      providers: [any]
+    parameters:
+      - name: delimiter
+        default: ";"  # punctuation: test data
+        description: The delimiter actually written.
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - format.csv
+    example:
+      before: "id,name,city"
+      after: "id;name;city"  # punctuation: test data
+      note: >-
+        This looks trivial and is one of the most common real import failures
+        in Poland, because a Polish Excel writes CSV with a semicolon.
+
+  - id: L1.json.unclosed_brace
+    layer: L1
+    summary: >-
+      Removes a closing brace or bracket so the document does not parse.
+    applies_to:
+      field_types: [none]
+      formats: [json, jsonl]
+      providers: [any]
+    parameters:
+      - name: depth
+        default: outermost
+        description: Which structure loses its closing token.
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - format.json
+    example:
+      before: "{\"id\": 1, \"name\": \"Maria\"}"
+      after: "{\"id\": 1, \"name\": \"Maria\""
+
+  - id: L1.json.duplicate_key
+    layer: L1
+    summary: >-
+      Repeats a key inside one object with a different value.
+    applies_to:
+      field_types: [any]
+      formats: [json, jsonl]
+      providers: [any]
+    parameters:
+      - name: second_value
+        default: null
+        description: Value carried by the repeated key.
+    expectation: warning
+    confidence: soft
+    reversible: true
+    requires:
+      - format.json
+    example:
+      before: "{\"email\": \"maria@example.test\"}"
+      after: "{\"email\": \"maria@example.test\", \"email\": null}"
+      note: >-
+        The expectation is warning rather than rejection because parsers
+        disagree on whether the first or the last value wins, and both
+        behaviours exist in the wild. That disagreement is the point of the
+        test.
+
+  # =========================================================================
+  # L2 - field type and format
+  # =========================================================================
+
+  - id: L2.string.exceeds_maxlength
+    layer: L2
+    summary: >-
+      Makes a text value longer than the declared maximum.
+    applies_to:
+      field_types: [string]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: overshoot
+        default: 1
+        description: How many characters past the maximum the value goes.
+      - name: unit
+        default: characters
+        description: >-
+          Whether overshoot counts characters, code points or bytes. The three
+          differ for non ASCII values.
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - schema.max-length
+    example:
+      before: "Nowak"
+      after: "Nowakkkkkk"
+      note: >-
+        The default overshoot of one is the valuable variant. It is the classic
+        boundary and the most common place where a length check is written with
+        an off by one error.
+
+  - id: L2.string.empty
+    layer: L2
+    summary: >-
+      Replaces a text value with an empty string.
+    applies_to:
+      field_types: [string]
+      formats: [any]
+      providers: [any]
+    parameters: []
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - schema.required-fields
+    example:
+      before: "Nowak"
+      after: ""
+      note: >-
+        Confidence is soft because whether an empty string is allowed is a
+        product decision. It is also the place where empty and absent are most
+        often confused.
+
+  - id: L2.type.string_in_numeric
+    layer: L2
+    summary: >-
+      Puts text where the schema declares a number.
+    applies_to:
+      field_types: [integer, decimal]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: value
+        default: "n/a"
+        description: The text written in place of the number.
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - schema.field-type
+    example:
+      before: "1250"
+      after: "n/a"
+
+  - id: L2.enum.outside_set
+    layer: L2
+    summary: >-
+      Uses a value outside the declared set.
+    applies_to:
+      field_types: [enum]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: value
+        default: UNKNOWN
+        description: The value written instead of a member of the set.
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - schema.enum-values
+    example:
+      before: "ACTIVE"
+      after: "UNKNOWN"
+
+  - id: L2.date.impossible
+    layer: L2
+    summary: >-
+      Writes a date that is correctly formatted and does not exist.
+    applies_to:
+      field_types: [date, datetime]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: kind
+        default: day_out_of_month
+        description: >-
+          One of day_out_of_month, month_out_of_range or false_leap_day.
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - date.arithmetic
+    example:
+      before: "2025-02-28"
+      after: "2025-02-30"
+      note: >-
+        The false_leap_day variant uses 29 February of a non leap year, which
+        catches calendars that treat every fourth year as a leap year.
+
+  - id: L2.date.wrong_format
+    layer: L2
+    summary: >-
+      Writes a real date in a different format than the schema declares.
+    applies_to:
+      field_types: [date, datetime]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: format
+        default: "MM/DD/YYYY"
+        description: The format actually written.
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - date.arithmetic
+    example:
+      before: "2025-03-04"
+      after: "03/04/2025"
+      note: >-
+        The dangerous case is a date where both readings are valid. 03/04 is
+        March the fourth or the third of April depending on the reader, so a
+        system that guesses will accept the value and store the wrong day.
+
+  - id: L2.number.comma_decimal_separator
+    layer: L2
+    summary: >-
+      Uses a comma as the decimal separator.
+    applies_to:
+      field_types: [decimal]
+      formats: [csv, json, xml, txt]
+      providers: [any]
+    parameters: []
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - schema.field-type
+    example:
+      before: "12.50"
+      after: "12,50"
+      note: >-
+        In CSV this interacts with the delimiter. A comma decimal separator in
+        a comma delimited file also shifts the columns, so the same value can
+        break two layers at once.
+
+  - id: L2.coercion.text_to_date
+    layer: L2
+    summary: >-
+      Supplies a text value that spreadsheet software silently converts into a
+      date.
+    applies_to:
+      field_types: [string, identifier, enum]
+      formats: [csv, xlsx, txt]
+      providers: [any]
+    parameters:
+      - name: shape
+        default: month_abbreviation
+        description: >-
+          Which coercion the value triggers. The default looks like a month
+          abbreviation followed by a number.
+    expectation: acceptance
+    confidence: soft
+    reversible: true
+    requires:
+      - corpus.coercible-values
+    example:
+      before: "MARCHF1"
+      after: "MARCH1"
+      note: >-
+        The application must accept this value and give it back unchanged.
+        Storing a date instead is the defect, and it is not a rejection, which
+        is why it needs stating. Confidence is soft because the conversion
+        happens in whatever tool sits in the pipeline rather than in the
+        application itself, so a system that never touches a spreadsheet is
+        not affected. The real world case behind this entry forced a
+        nomenclature committee to rename twenty seven human genes, because
+        their symbols kept turning into dates.
+
+  # =========================================================================
+  # L3 - domain semantics
+  # =========================================================================
+
+  - id: L2.coercion.text_to_number
+    layer: L2
+    summary: >-
+      Supplies a text value with meaningful leading zeros that spreadsheet and
+      import tools convert into a number, dropping them.
+    applies_to:
+      field_types: [string, identifier, postal_code]
+      formats: [csv, xlsx, txt]
+      providers: [any]
+    parameters:
+      - name: leading_zeros
+        default: 1
+        description: How many significant leading zeros the value carries.
+    expectation: acceptance
+    confidence: soft
+    reversible: true
+    requires:
+      - corpus.coercible-values
+    example:
+      before: "02116"
+      after: "2116"
+      note: >-
+        Not the same as the leading zeros entry under numbers, which adds zeros
+        to a numeric field. Here the field is text, the zeros carry meaning and
+        the receiver destroys them. The blame sits on opposite sides and so
+        does the fix. The import usually reports success, which is what makes
+        this worth generating rather than reasoning about.
+
+  - id: L3.checksum.off_by_one
+    layer: L3
+    summary: >-
+      Changes one digit so the format stays valid and the check digit no longer
+      matches.
+    applies_to:
+      field_types: [identifier]
+      formats: [any]
+      providers:
+        - PL.pesel
+        - PL.nip
+        - PL.regon
+        - US.aba
+        - iban
+        - vin
+        - imei
+        - ean
+        - isbn
+        - card
+    parameters:
+      - name: position
+        default: last
+        description: Which digit changes.
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - identifier.check-digit
+    example:
+      before: "1234563218"
+      after: "1234563219"
+      note: >-
+        Applies only to identifiers that actually carry a check digit. The
+        Polish KRS and the US SSN, EIN and ZIP do not, so this mutator does not
+        exist for them and a policy requesting it there produces a manifest
+        entry with applied set to false.
+
+  - id: L3.checksum.transposed_digits
+    layer: L3
+    summary: >-
+      Swaps two adjacent digits, which is the most common human typing mistake.
+    applies_to:
+      field_types: [identifier]
+      formats: [any]
+      providers:
+        - PL.pesel
+        - PL.nip
+        - PL.regon
+        - US.aba
+        - iban
+        - vin
+        - imei
+        - ean
+        - isbn
+        - card
+    parameters:
+      - name: position
+        default: random
+        description: Index of the first digit in the swapped pair.
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - identifier.check-digit
+    example:
+      before: "1234563218"
+      after: "1234653218"
+      note: >-
+        Some check digit algorithms do not detect a transposition at all. When
+        that happens the value stays valid, the manifest still records the
+        defect, and the interesting question moves to whether the application
+        catches it any other way.
+
+  - id: L3.national_id.impossible_date
+    layer: L3
+    summary: >-
+      Builds a national identifier that encodes a date which does not exist.
+    applies_to:
+      field_types: [identifier]
+      formats: [any]
+      providers:
+        - PL.pesel
+    parameters:
+      - name: kind
+        default: day_out_of_month
+        description: The same variants as L2.date.impossible.
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - identifier.check-digit
+      - identifier.encodes-date
+      - date.arithmetic
+    example:
+      before: "85011412345"
+      after: "85023112345"
+      note: >-
+        Named after the property, not the country. Any national identifier that
+        encodes a birth date can carry this defect. The check digit is
+        recomputed so the value fails only on the date, which is what separates
+        this from a checksum mutator.
+
+  - id: L3.date.future_birthdate
+    layer: L3
+    summary: >-
+      Sets a birth date in the future.
+    applies_to:
+      field_types: [date]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: offset_days
+        default: 1
+        description: How far past the current date the value lands.
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - date.arithmetic
+    example:
+      before: "1985-01-14"
+      after: "2026-08-02"
+      note: >-
+        Confidence is soft because the check belongs to the application. The
+        default offset of one day is deliberate. A birth date a century ahead
+        is caught by any range check, a birth date tomorrow is not.
+
+  - id: L3.currency.wrong_scale
+    layer: L3
+    summary: >-
+      Writes an amount with more or fewer decimal places than the currency has.
+    applies_to:
+      field_types: [money]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: scale
+        default: 3
+        description: Number of decimal places written.
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - currency.minor-units
+    example:
+      before: "1250.00 PLN"
+      after: "1250.000 PLN"
+      note: >-
+        The opposite direction matters too. A currency without minor units
+        given two decimal places is the same defect seen from the other side,
+        and it is the one that produces rounding errors downstream.
+
+  - id: L3.range.unassigned
+    layer: L3
+    summary: >-
+      Uses an identifier from a range the issuing authority does not assign.
+    applies_to:
+      field_types: [identifier]
+      formats: [any]
+      providers:
+        - US.ssn
+    parameters:
+      - name: target
+        default: structurally_never_issued
+        description: >-
+          Which never issued sub range the value moves into. The default picks
+          a pattern that any competent validator refuses, such as a zero area,
+          a zero group or a zero serial. This is deliberately a different sub
+          range from the one generated valid data occupies.
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - identifier.reserved-range
+    example:
+      before: "666-12-3456"
+      after: "000-12-3456"
+      note: >-
+        Confidence is soft because the check needs reference data rather than
+        an algorithm, and many systems do not hold that data.
+    applicability_condition: >-
+      The base value and the target must sit in different never issued sub
+      ranges, and the tool guarantees this rather than checking for it.
+      Generated valid data occupies a sub range that looks entirely ordinary
+      and is caught only by a validator that knows the assignment rules. This
+      mutator moves the value into a sub range that any competent validator
+      refuses. Those are two different lines of defence and the split is what
+      makes the mutator applicable at all. When a caller supplies a base value
+      that already sits in the target sub range, the manifest records the
+      defect with applied set to false and a reason.
+    limitation: >-
+      An application that validates identifier ranges will reject the generated
+      valid data as well, not only the corrupted rows. This is a consequence of
+      generating inside reserved ranges and it applies to every identifier that
+      has one. Say so in the interface rather than letting the user discover it
+      as a tool defect.
+
+  - id: L3.sentinel.placeholder_value
+    layer: L3
+    summary: >-
+      Replaces a real value with a placeholder that passes every format check
+      and carries no meaning.
+    applies_to:
+      field_types: [date, datetime, postal_code, string, identifier]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: kind
+        default: by_field_type
+        description: >-
+          Which placeholder to write. The default picks the one conventional
+          for the field type, such as 1900-01-01 for a date.
+    expectation: warning
+    confidence: soft
+    reversible: true
+    requires:
+      - schema.field-type
+      - corpus.sentinel-values
+    example:
+      before: "1987-03-14"
+      after: "1900-01-01"
+      note: >-
+        The value is neither missing nor malformed. It is present, valid and
+        empty of meaning, which is why the expectation is a warning rather
+        than a rejection. Storing it as a real value is the defect this entry
+        looks for. The documented case behind this entry used default map
+        coordinates, a field type the recipe does not carry yet, so the
+        starter entry works on the types it does carry.
+
+  # =========================================================================
+  # L4 - business rules
+  # =========================================================================
+
+  - id: L4.coherence.national_id_vs_birthdate
+    layer: L4
+    summary: >-
+      Leaves a valid national identifier that encodes a different birth date
+      than the birth date field beside it.
+    applies_to:
+      field_types: [identifier]
+      formats: [any]
+      providers:
+        - PL.pesel
+    parameters:
+      - name: drift_years
+        default: 5
+        description: Difference between the encoded year and the field.
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - identifier.check-digit
+      - identifier.encodes-date
+    example:
+      before: "08282298765"
+      after: "85011412345"
+      note: >-
+        Both values are correct on their own. Only the pair is wrong, which is
+        why this sits at L4 and not L3. Applications almost always catch the
+        L3 version and almost never this one.
+
+  - id: L4.coherence.national_id_vs_gender
+    layer: L4
+    summary: >-
+      Leaves a valid national identifier that encodes a different gender than
+      the gender field beside it.
+    applies_to:
+      field_types: [identifier]
+      formats: [any]
+      providers:
+        - PL.pesel
+    parameters: []
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - identifier.check-digit
+      - identifier.encodes-gender
+    example:
+      before: "85011412345"
+      after: "85011412367"
+      note: >-
+        Only meaningful where the identifier encodes gender at all and where
+        the record carries a gender field whose value set maps onto it.
+
+  - id: L4.coherence.postal_vs_city
+    layer: L4
+    summary: >-
+      Puts a real postal code next to a place it does not belong to.
+    applies_to:
+      field_types: [postal_code]
+      formats: [any]
+      providers:
+        - PL.postal
+        - US.zip
+    parameters: []
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - reference.postal-to-place
+    example:
+      before: "30-001 Krakow"
+      after: "80-001 Krakow"
+      note: >-
+        Not the same as L3.postal.nonexistent. There the code does not exist at
+        all and one field reveals it. Here the code is real and only the pair
+        is wrong.
+
+  - id: L4.order.dates_reversed
+    layer: L4
+    summary: >-
+      Puts two dates in an order the process does not allow, such as a shipment
+      before its order.
+    applies_to:
+      field_types: [date, datetime]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: gap_days
+        default: 1
+        description: How far the later date moves before the earlier one.
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - date.arithmetic
+      - schema.field-relations
+    example:
+      before: "ordered_at 2026-03-01, shipped_at 2026-03-03"
+      after: "ordered_at 2026-03-01, shipped_at 2026-02-28"
+      note: >-
+        The default gap of one day is the valuable variant, because a
+        comparison written with the wrong operator passes when the dates are
+        equal and fails only by a day.
+
+  - id: L4.sum.invoice_total_mismatch
+    layer: L4
+    summary: >-
+      Leaves a total that does not match the sum of the lines it should equal.
+    applies_to:
+      field_types: [money]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: delta
+        default: 0.01
+        description: How far the total moves from the correct sum.
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - schema.field-relations
+      - currency.minor-units
+    example:
+      before: "lines 100.00 + 23.00, total 123.00"
+      after: "lines 100.00 + 23.00, total 123.01"
+      note: >-
+        A delta of one minor unit is deliberate. It is the size a rounding
+        error produces, so it tests the same path a real defect would take.
+
+  - id: L4.range.discount_over_100
+    layer: L4
+    summary: >-
+      Sets a discount above one hundred percent, which turns a sale into a
+      payout.
+    applies_to:
+      field_types: [decimal, percentage]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: value
+        default: 120
+        description: The percentage written.
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - schema.field-type
+    example:
+      before: "15"
+      after: "120"
+      note: >-
+        Confidence is soft on purpose. In some systems this is a validation
+        error and in others a legitimate correction, which is exactly the kind
+        of case an application profile is meant to settle.
+
+  - id: L4.coherence.declared_rule
+    layer: L4
+    summary: >-
+      Breaks a consistency rule the recipe declares, whichever pair of fields
+      that rule binds together.
+    applies_to:
+      field_types: [any]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: rule
+        default: first_declared
+        description: >-
+          Which declared consistency rule to break. The default takes the
+          first rule declared for the entity.
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - schema.field-relations
+    example:
+      before: "sex F, diagnosis breast cancer"
+      after: "sex F, diagnosis prostate cancer"
+      note: >-
+        The other entries in this family each name one pair of fields, which
+        covers the pairs the catalog authors thought of. This one covers the
+        pairs the user thought of, because the rule comes from their recipe.
+        Confidence is soft for the same reason. This entry carries no domain
+        knowledge of its own, which is why the specific entries stay rather
+        than being replaced by it.
+
+  # =========================================================================
+  # L5 - set integrity
+  # =========================================================================
+
+  - id: L5.fk.orphan
+    layer: L5
+    summary: >-
+      Points a foreign key at a parent that is not in the set.
+    applies_to:
+      field_types: [identifier, integer]
+      formats: [any]
+      providers: [any]
+    parameters: []
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - relation.foreign-key
+    example:
+      before: "order.customer_id 41, customer 41 present"
+      after: "order.customer_id 9999, no such customer"
+      note: >-
+        The manifest entry carries the location of the child row and the
+        intended parent under related, because naming only one side is useless
+        to whoever has to look at it.
+
+  - id: L5.pk.duplicate
+    layer: L5
+    summary: >-
+      Repeats a primary key value on a second row.
+    applies_to:
+      field_types: [identifier, integer]
+      formats: [any]
+      providers: [any]
+    parameters: []
+    expectation: rejection
+    confidence: hard
+    reversible: true
+    requires:
+      - key.primary
+    example:
+      before: "rows with id 41 and 42"
+      after: "rows with id 41 and 41"
+
+  - id: L5.unique.case_collision
+    layer: L5
+    summary: >-
+      Produces two values that differ only by letter case in a field that has
+      to be unique.
+    applies_to:
+      field_types: [string, email]
+      formats: [any]
+      providers: [any]
+    parameters: []
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - key.unique
+    example:
+      before: "maria@example.test and jan@example.test"
+      after: "maria@example.test and Maria@example.test"
+      note: >-
+        Whether this is a collision depends on the collation of the database,
+        which is exactly why it is worth generating. The same dataset can pass
+        on one environment and fail on another, and that difference is usually
+        found in production.
+
+  - id: L5.entity.near_duplicate
+    layer: L5
+    summary: >-
+      Produces a second record for the same real world entity, with a different
+      primary key and one differing field.
+    applies_to:
+      field_types: [string, identifier]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: differing_field
+        default: middle_name
+        description: >-
+          Which field differs between the two records. The default is the one
+          that accounts for most real mismatches in record linkage.
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - key.primary
+      - corpus.names-international
+    example:
+      before: "one record: Anna Maria Kowalska"
+      after: "two records: Anna Maria Kowalska and Anna M. Kowalska, different keys"
+      note: >-
+        Every other duplicate entry in this layer assumes the collision is
+        visible in a key. Here both keys are valid and distinct, both records
+        are well formed, and only the person is duplicated. That makes it a
+        record linkage test rather than a constraint violation, and constraint
+        checks will not find it. Confidence is soft because whether two records
+        are the same entity is a judgement the system under test has to make.
+        The differing field comes from the reverse mutator corpus, which is how
+        the two pillars meet: one supplies a legitimate spelling variant, this
+        one turns it into a second record.
+
+  - id: L5.aggregate.mismatch
+    layer: L5
+    summary: >-
+      Leaves a rolled up figure that does not match the records it aggregates.
+    applies_to:
+      field_types: [money, decimal, integer]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: delta
+        default: 0.01
+        description: How far the aggregate moves away from the true total.
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - schema.field-relations
+      - currency.minor-units
+    example:
+      before: "balance 12400.00 over transactions summing to 12400.00"
+      after: "balance 12400.01 over transactions summing to 12400.00"
+      note: >-
+        Not the same as L4.sum.invoice_total_mismatch, which breaks a total
+        against the lines inside one record. This one breaks a figure that
+        rolls up a whole set, so no single record reveals it and the reader
+        has to add the set up to find the defect. A delta of one minor unit is
+        deliberate, for the same reason as in the L4 entry.
+
+  - id: L5.cardinality.violated
+    layer: L5
+    summary: >-
+      Removes a related record that the declared cardinality requires.
+    applies_to:
+      field_types: [none]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: target
+        default: child
+        description: Which side of the relation loses its required record.
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - relation.foreign-key
+    example:
+      before: "customer 1042 with one address"
+      after: "customer 1042 with no address"
+      note: >-
+        Every remaining record is valid on its own. What is wrong is that
+        something required is absent, and absence is the one thing no single
+        record can show. The manifest entry names the parent under related,
+        because the missing row has no location of its own to point at.
+
+  # =========================================================================
+  # UNI - Unicode and internationalisation
+  #
+  # Most entries here expect acceptance. This module supplies values an
+  # application ought to handle, not damage it ought to refuse.
+  # =========================================================================
+
+  - id: UNI.emoji.basic
+    layer: UNI
+    summary: >-
+      Places a single emoji inside a text value.
+    applies_to:
+      field_types: [string]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: position
+        default: end
+        description: Where the character lands in the value.
+    expectation: acceptance
+    confidence: soft
+    reversible: true
+    requires:
+      - corpus.unicode
+    example:
+      before: "Maria"
+      after: "Maria 🙂"
+      note: >-
+        Confidence is soft because refusing emoji in a name field can be a
+        deliberate product rule. It is rarely a deliberate rule in a free text
+        comment field, and the difference is worth testing separately.
+
+  - id: UNI.emoji.zwj_sequence
+    layer: UNI
+    summary: >-
+      Supplies one visible character built from several code points joined by
+      zero width joiners.
+    applies_to:
+      field_types: [string]
+      formats: [any]
+      providers: [any]
+    parameters: []
+    expectation: acceptance
+    confidence: soft
+    reversible: true
+    requires:
+      - corpus.unicode
+    example:
+      before: "Maria"
+      after: "Maria 👩‍👩‍👧‍👦"
+      note: >-
+        This is the entry that breaks length counters, because the value counts
+        as one character to a reader and as several code points or many bytes
+        to a validator. A field limit of ten can reject a name of five letters.
+
+  - id: UNI.zero_width.space
+    layer: UNI
+    summary: >-
+      Inserts a zero width space, which is invisible and still changes the
+      value.
+    applies_to:
+      field_types: [string, email]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: position
+        default: middle
+        description: Where the character lands in the value.
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - corpus.unicode
+    example:
+      before: "maria@example.test"
+      after: "maria@exa\\u200bmple.test"
+      note: >-
+        The only entry in this module that expects rejection. Two accounts whose
+        names look identical on screen are a impersonation route, so trimming
+        or refusing the character is the correct behaviour.
+
+  - id: UNI.normalization.nfc_vs_nfd
+    layer: UNI
+    summary: >-
+      Supplies the same text in a different Unicode normalisation form.
+    applies_to:
+      field_types: [string, email]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: form
+        default: NFD
+        description: The form written, given NFC input.
+    expectation: acceptance
+    confidence: hard
+    reversible: true
+    requires:
+      - unicode.normalization
+    example:
+      before: "Żółć in NFC"
+      after: "Żółć in NFD, each accent a separate code point"
+      note: >-
+        Confidence is hard because the two forms are the same text by
+        specification. An application that treats them as different values will
+        also fail to find a user who registered from another device.
+
+  - id: UNI.normalization.non_idempotent
+    layer: UNI
+    summary: >-
+      Supplies a value for which normalising twice differs from normalising
+      once.
+    applies_to:
+      field_types: [string, email]
+      formats: [any]
+      providers: [any]
+    parameters: []
+    expectation: rejection
+    confidence: soft
+    reversible: true
+    requires:
+      - unicode.normalization
+      - corpus.unicode
+    example:
+      before: "bigbird"
+      after: "ᴮᴵᴳᴮᴵᴿᴰ"
+      note: >-
+        Not the same as the NFC against NFD entry, which supplies two forms of
+        one value and finds uniqueness collisions. This one attacks the
+        stability of the normalising function itself. Whether a given value is
+        non idempotent depends on the implementation in the pipeline, which is
+        why confidence is soft and why generating the case is worth more than
+        reasoning about it. The documented real world outcome was a full
+        account takeover including the password reset, and the fix was to
+        refuse any name where normalising twice does not match normalising
+        once.
+
+  - id: UNI.case.turkish_dotless_i
+    layer: UNI
+    summary: >-
+      Supplies text whose case conversion depends on the locale of the
+      converter.
+    applies_to:
+      field_types: [string, email]
+      formats: [any]
+      providers: [any]
+    parameters: []
+    expectation: acceptance
+    confidence: hard
+    reversible: true
+    requires:
+      - corpus.unicode
+    example:
+      before: "INFO"
+      after: "info uppercased in a Turkish locale becomes \\u0130NFO"
+      note: >-
+        The defect appears when a value is upper cased or lower cased with the
+        system locale rather than an invariant one, which silently changes the
+        value on some machines and not on others.
+
+  # =========================================================================
+  # REV - reverse mutators
+  #
+  # Valid data that overzealous validation tends to refuse. Refusing it is the
+  # defect. This is the class of test almost nobody runs.
+  # =========================================================================
+
+  - id: REV.email.plus_addressing
+    layer: REV
+    summary: >-
+      Supplies an address with a plus tag in the local part.
+    applies_to:
+      field_types: [email]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: tag
+        default: shop
+        description: Text placed after the plus sign.
+    expectation: acceptance
+    confidence: hard
+    reversible: true
+    requires:
+      - provider.email
+    example:
+      before: "maria@example.test"
+      after: "maria+shop@example.test"
+      note: >-
+        The address conforms to the addressing specification. Rejecting it
+        blocks a user who is doing nothing unusual, and this is one of the most
+        frequently rejected valid formats in the wild.
+
+  - id: REV.name.apostrophe
+    layer: REV
+    summary: >-
+      Supplies a surname containing an apostrophe.
+    applies_to:
+      field_types: [string]
+      formats: [any]
+      providers: [any]
+    parameters: []
+    expectation: acceptance
+    confidence: hard
+    reversible: true
+    requires:
+      - corpus.names-international
+    example:
+      before: "Brien"
+      after: "O'Brien"
+      note: >-
+        Rejection here usually comes from a naive defence against injection,
+        which means the fix for one problem created another. The security
+        payloads belong in the SEC module and not in a name validator.
+
+  - id: REV.name.diacritics
+    layer: REV
+    summary: >-
+      Supplies a name with diacritical marks.
+    applies_to:
+      field_types: [string]
+      formats: [any]
+      providers: [any]
+    parameters: []
+    expectation: acceptance
+    confidence: hard
+    reversible: true
+    requires:
+      - corpus.names-international
+    example:
+      before: "Lukasz Zolc"
+      after: "Łukasz Żółć"
+      note: >-
+        A validator restricted to the ASCII alphabet refuses a large share of
+        Polish names. The failure often appears only after deployment to a
+        machine with a different default encoding.
+
+  - id: REV.name.null_surname
+    layer: REV
+    summary: >-
+      Supplies the surname Null, which is a real surname.
+    applies_to:
+      field_types: [string]
+      formats: [any]
+      providers: [any]
+    parameters: []
+    expectation: acceptance
+    confidence: hard
+    reversible: true
+    requires:
+      - corpus.names-international
+    example:
+      before: "Nowak"
+      after: "Null"
+      note: >-
+        Systems that conflate the text Null with an absent value lose the
+        record or refuse the form. The same trap catches the surnames True and
+        None depending on the language underneath.
+
+  - id: REV.name.cjk
+    layer: REV
+    summary: >-
+      Supplies a name written in Chinese, Japanese or Korean characters.
+    applies_to:
+      field_types: [string]
+      formats: [any]
+      providers: [any]
+    parameters: []
+    expectation: acceptance
+    confidence: hard
+    reversible: true
+    requires:
+      - corpus.names-international
+    example:
+      before: "Li Ming"
+      after: "李明"
+      note: >-
+        Two characters are a complete name here, so a minimum length of three
+        refuses it. This entry pairs with REV.name.single_letter, which is the
+        same defect approached from the other end.
+
+  - id: REV.amount.negative_legal
+    layer: REV
+    summary: >-
+      Supplies a negative amount that is legal in its domain, such as a
+      refund, a correction or a market price that can fall below zero.
+    applies_to:
+      field_types: [money, decimal]
+      formats: [any]
+      providers: [any]
+    parameters:
+      - name: value
+        default: -37.63
+        description: The negative amount written into the field.
+    expectation: acceptance
+    confidence: soft
+    reversible: true
+    requires:
+      - schema.field-type
+      - currency.minor-units
+    example:
+      before: "18.27"
+      after: "-37.63"
+      note: >-
+        Confidence is soft because whether a negative amount is legal depends
+        on the domain. Where it is legal, refusing it is the defect. The
+        default comes from a crude oil contract that settled below zero, after
+        which systems unable to represent the price left customers unable to
+        close their positions. Not to be confused with
+        L4.range.negative_price, which treats a negative amount as the defect
+        rather than as the value under test.
+
+# ---------------------------------------------------------------------------
+# Capabilities referenced by requires
+#
+# Every entry above declares what the valid data generator has to be able to
+# produce before the mutator can run at all. Read as one list, this is the set
+# of capabilities the valid data side has to carry for the starter registry to
+# work end to end.
+# ---------------------------------------------------------------------------
+
+capabilities:
+
+  output.charset-control: >-
+    Write the output in a named character encoding, independently of the
+    encoding declared in the file or its metadata.
+
+  output.line-ending-control: >-
+    Choose the line ending per line rather than per file.
+
+  output.byte-level-write: >-
+    Write arbitrary bytes into the output stream, including sequences that are
+    not valid text in the declared encoding.
+
+  output.bom-control: >-
+    Add or remove a byte order mark independently of the encoding.
+
+  format.csv: >-
+    Emit CSV with control over the delimiter, quoting and the header row.
+
+  format.json: >-
+    Emit JSON with control over the token stream, not only over the data model.
+
+  schema.field-type: >-
+    Know the declared type of every field.
+
+  schema.max-length: >-
+    Know the declared maximum length of a text field, and in which unit it is
+    counted.
+
+  schema.enum-values: >-
+    Know the declared value set of an enumerated field.
+
+  schema.required-fields: >-
+    Know which fields are required and distinguish an empty value from an
+    absent one.
+
+  schema.field-relations: >-
+    Know which fields are bound to each other by a rule, such as two dates in
+    order or a total over its lines.
+
+  date.arithmetic: >-
+    Produce dates relative to a reference point, including business days,
+    holidays and boundary cases such as leap days.
+
+  currency.minor-units: >-
+    Know how many minor units a currency has, including currencies that have
+    none.
+
+  identifier.check-digit: >-
+    Compute the correct check digit for an identifier, which is what makes it
+    possible to break it deliberately.
+
+  identifier.encodes-date: >-
+    Know that an identifier encodes a date, where in the value it sits, and how
+    the century is represented.
+
+  identifier.encodes-gender: >-
+    Know that an identifier encodes gender and which positions carry it.
+
+  identifier.reserved-range: >-
+    Know the reserved or unassigned ranges of an identifier, both to generate
+    inside them by default and to tell whether a value already sits in one.
+
+  reference.postal-to-place: >-
+    Reference data mapping postal codes to places, in both directions, per
+    locale.
+
+  relation.foreign-key: >-
+    Know the relation graph between entities, and which key of the parent the
+    child points at.
+
+  key.primary: >-
+    Know which field or fields form the primary key of an entity.
+
+  key.unique: >-
+    Know which fields carry a uniqueness constraint, and whether it is case
+    sensitive.
+
+  unicode.normalization: >-
+    Produce a value in a chosen Unicode normalisation form.
+
+  corpus.unicode: >-
+    A corpus of Unicode values covering emoji, joining sequences, invisible
+    characters and locale dependent case conversion.
+
+  corpus.coercible-values: >-
+    A corpus of text values that common spreadsheet and import tools convert to
+    another type on sight, such as strings shaped like a month abbreviation or
+    like a number with leading zeros.
+
+  corpus.sentinel-values: >-
+    A corpus of placeholder values that pass type and format checks while
+    standing in for an unknown value, such as an epoch or far future date, an
+    all nines postal code or a text field reading not applicable. Held per
+    field type, because the conventional placeholder differs between them.
+
+  corpus.names-international: >-
+    A corpus of real names across scripts and conventions, including
+    apostrophes, diacritics, single characters and names that collide with
+    reserved words.
+
+  provider.email: >-
+    Produce email addresses in reserved documentation domains, with control
+    over the shape of the local part.

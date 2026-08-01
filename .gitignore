@@ -1,0 +1,122 @@
+# ---------------------------------------------------------------------------
+# Internal, never published
+# ---------------------------------------------------------------------------
+# Product documentation, the decision register and the working notes stay on
+# the owner's disk. A fresh clone therefore carries no project context, which
+# is a known and accepted consequence.
+docs/
+CLAUDE.md
+
+# Internal tooling. Scripts we use ourselves and never ship. Backed up outside
+# this repository.
+tools/
+
+# Local assistant configuration. Machine specific and not part of the product.
+.claude/
+
+# ---------------------------------------------------------------------------
+# Generated datasets
+# ---------------------------------------------------------------------------
+# This project is a data generator, so its own working directory fills with
+# output faster than any other repository would. These are anchored to the
+# root on purpose, so that a package called data or output somewhere inside
+# the source tree is still tracked.
+/data/
+/out/
+/output/
+/fixtures/
+
+# Loose manifests dropped by a run at the root. Manifests inside testdata are
+# committed on purpose, because they are fixtures.
+/manifest.json
+/manifest.csv
+/manifest.md
+/manifest.gherkin
+
+# ---------------------------------------------------------------------------
+# Go build output
+# ---------------------------------------------------------------------------
+/qadg
+/qadg.exe
+/qadg-gui
+/qadg-gui.exe
+/bin/
+/dist/
+/build/
+
+# Compiled objects, including anything cgo leaves behind when the GUI module
+# is built.
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.a
+*.syso
+
+# Test binaries and coverage. Named exactly rather than by extension, because
+# a pattern like *.out would also swallow golden files under testdata.
+*.test
+coverage.out
+coverage.html
+*.coverprofile
+
+# Profiling output
+*.prof
+*.pprof
+cpu.pprof
+mem.pprof
+trace.out
+
+# Go workspace files. Useful locally when both modules are edited together and
+# meaningless to anybody else.
+go.work
+go.work.sum
+
+# We do not vendor dependencies, so a vendor directory means somebody was
+# experimenting.
+/vendor/
+
+# ---------------------------------------------------------------------------
+# GUI packaging
+# ---------------------------------------------------------------------------
+# Fyne packaging output and the cross build helper.
+/fyne-cross/
+*.app/
+*.dmg
+*.msi
+*.rpm
+*.deb
+
+# The compatibility package ships a software OpenGL implementation next to the
+# binary. That is build output, not source.
+opengl32.dll
+libgallium_wgl.dll
+
+# ---------------------------------------------------------------------------
+# Editors and operating systems
+# ---------------------------------------------------------------------------
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------------------------------------------------------------------------
+# Local environment
+# ---------------------------------------------------------------------------
+*.log
+*.local
+.env
+
+# ---------------------------------------------------------------------------
+# Deliberately NOT ignored, so that nobody adds them later by reflex
+# ---------------------------------------------------------------------------
+# testdata/     Go treats it as committed fixture data and the determinism
+#               golden files live there. Ignoring it would silently disable
+#               the test that protects the most important invariant.
+# go.sum        Required for reproducible builds.
+# spec/         Public specifications. The whole point of the repository.
