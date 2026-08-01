@@ -220,6 +220,42 @@ func TestProblems(t *testing.T) {
 			where: "entities",
 			what:  "declares no entities",
 		},
+		{
+			name:  "a primary key naming a field that does not exist",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    primary_key: ghost\n    fields:\n      x: { generator: y }\n",
+			where: "entities.a.primary_key",
+			what:  "has no field ghost",
+		},
+		{
+			name:  "a primary key naming the same field twice",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    primary_key: [x, x]\n    fields:\n      x: { generator: y }\n",
+			where: "entities.a.primary_key",
+			what:  "names x twice",
+		},
+		{
+			name:  "a field that is required and also asked to be empty",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y, required: true, empty: 15% }\n",
+			where: "entities.a.fields.x",
+			what:  "required and is also asked to be empty",
+		},
+		{
+			name:  "a maximum length of nothing",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y, max_length: 0 }\n",
+			where: "entities.a.fields.x.max_length",
+			what:  "not above zero",
+		},
+		{
+			name:  "a unit for a length that was never declared",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y, counted_in: bytes }\n",
+			where: "entities.a.fields.x.counted_in",
+			what:  "does not declare",
+		},
+		{
+			name:  "a unit this build does not know",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y, max_length: 10, counted_in: furlongs }\n",
+			where: "entities.a.fields.x.counted_in",
+			what:  "does not know furlongs",
+		},
 	}
 
 	for _, test := range cases {
@@ -358,6 +394,78 @@ entities:
 	}
 	if view.FieldsOf("nobody") != nil {
 		t.Error("an entity that does not exist has no fields rather than a guess")
+	}
+}
+
+// The three constraints a mutator needs in order to break them have to reach
+// the engine, and the engine reads the schema view rather than the recipe.
+func TestTheConstraintsAMutatorBreaksReachTheSchemaView(t *testing.T) {
+	result := decode(t, `
+version: "0.1"
+entities:
+  customer:
+    primary_key: [id, branch]
+    fields:
+      id:     { type: uuid }
+      branch: { type: integer }
+      name:   { generator: n, required: true, max_length: 30 }
+      note:   { generator: n, max_length: 64, counted_in: bytes }
+      status: { type: enum, values: [new, active, closed] }
+`)
+	var view recipe.SchemaView = result.Recipe
+
+	if key := view.PrimaryKeyOf("customer"); strings.Join(key, ",") != "id,branch" {
+		t.Errorf("the key has to keep the order it was written in, got %v", key)
+	}
+	if view.PrimaryKeyOf("nobody") != nil {
+		t.Error("an entity that does not exist has no key rather than a guess")
+	}
+
+	byName := map[string]recipe.FieldInfo{}
+	for _, field := range view.FieldsOf("customer") {
+		byName[field.Name] = field
+	}
+
+	name := byName["name"]
+	if !name.Required || name.MaxLength != 30 {
+		t.Errorf("the declared constraints did not survive: %+v", name)
+	}
+	// Left unwritten in the recipe, so the default has to appear rather than
+	// an empty unit the engine would have to interpret for itself.
+	if name.LengthUnit != recipe.Characters {
+		t.Errorf("expected the default unit, got %q", name.LengthUnit)
+	}
+	if unit := byName["note"].LengthUnit; unit != recipe.Bytes {
+		t.Errorf("expected bytes, got %q", unit)
+	}
+	if values := byName["status"].Values; strings.Join(values, ",") != "new,active,closed" {
+		t.Errorf("the declared value set did not reach the view: %v", values)
+	}
+
+	// A field with no limit has to be distinguishable from one limited to
+	// zero, which is why the flag exists beside the number.
+	if byName["id"].HasMaxLength {
+		t.Error("a field without a limit reports one")
+	}
+}
+
+// A share of zero and a required field are different statements, and the
+// contradiction check must not collapse them. This is the degenerate input
+// that a naive check would reject.
+func TestRequiredWithAnExplicitShareOfNothingIsLegal(t *testing.T) {
+	result := recipeyaml.Decode([]byte(`
+version: "0.1"
+entities:
+  a:
+    fields:
+      x: { generator: y, required: true, empty: 0% }
+`))
+	for _, found := range result.Problems {
+		t.Errorf("expected no problem, got %s: %s", found.Where, found.What)
+	}
+	field := result.Recipe.Entities[0].Fields[0]
+	if !field.Required || !field.HasEmptyShare || field.EmptyShare != 0 {
+		t.Fatalf("both statements have to survive: %+v", field)
 	}
 }
 

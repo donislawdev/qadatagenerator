@@ -10,10 +10,11 @@ tag: nightly
 entities:
   customer:
     count: 100
+    primary_key: id
     fields:
       id:         { type: uuid, unique: true }
-      first_name: { generator: first_name }
-      last_name:  { generator: last_name }
+      first_name: { generator: first_name, required: true, max_length: 40 }
+      last_name:  { generator: last_name, required: true, max_length: 60, counted_in: bytes }
       gender:     { generator: gender }
       birth_date: { generator: birth_date, age: 18-75 }
       pesel:      { generator: pesel }
@@ -25,16 +26,22 @@ entities:
 
   order:
     belongs_to: { customer: 0-5 }
+    primary_key: number
     fields:
       number:     { generator: order_number, unique: true }
       placed_at:  { generator: date, range: last_90_days }
       buyer_name: { expression: "${customer.last_name}" }
 
+  # A key made of two fields, which is why the key is declared at the entity
+  # and not as a flag on one field.
   order_line:
     belongs_to: { order: 1-10 }
+    primary_key: [order_number, line_no]
     fields:
-      sku:      { generator: sku }
-      quantity: { type: integer }
+      order_number: { generator: order_number }
+      line_no:      { type: integer }
+      sku:          { generator: sku }
+      quantity:     { type: integer }
 
 output:
   format: csv

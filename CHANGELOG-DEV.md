@@ -11,6 +11,74 @@ Versioning.
 
 ### Added
 
+- **`internal/domain/capability`: the capability registry, with a supplier
+  beside every name.** The architecture said a provider declares the
+  capabilities and that a mutator is available when the provider brings them.
+  Counting them showed both halves were wrong. A provider supplies eight. The
+  rest come from the format writer, the schema view, the corpus and the engine
+  itself, and reading the field the old way would have left ten mutators of
+  layer L0 and L1 permanently unapplied, since no provider brings
+  `output.charset-control` or `format.csv`.
+  The same mistake had already been caught twice, once for a mutator whose
+  applicability condition could never hold and once for one with nothing to do
+  in either supported locale. At the third occurrence the mechanism was fixed
+  rather than the entry.
+- **The supplier is data rather than a comment.** It sits in the published
+  catalog beside the capability it describes, so it can be counted by a script
+  instead of read and believed. A comment classifying twenty seven names is
+  prose, and nothing watches prose.
+- **`internal/domain/provider`: the contract, and a declared capability that
+  has to mean something.** A provider names itself, says what it brings,
+  produces a value and judges one. Four of the capabilities imply an interface,
+  and declaring one without implementing it fails, as does implementing one
+  without declaring it. A provider claiming a capability no provider can supply
+  fails too, which is the registry defect caught from the other end.
+  The contract is in the domain and the implementations belong under the
+  adapters. The engine calls the interface, so the interface sits where the
+  engine can see it, and reference data touches the world, so it does not.
+- **Findings are returned as a list rather than the first failure.** A
+  contributor writing a provider for their country sees every failing point at
+  once, which is the rule the recipe validator already follows.
+- **`internal/domain/recipe`: primary key, required and maximum length reach
+  the schema view.** A mutator cannot break a constraint it cannot see, and
+  four starter set entries were asking for constraints the model did not carry.
+  The length unit is carried rather than assumed, which is the gap already
+  named once for a mutator that needed a unit of measure and did not get one.
+  `Required` is separate from `EmptyShare` on purpose. A share of zero says no
+  row happens to be blank, while required says none may be, and collapsing them
+  would make the two indistinguishable exactly when a mutator wants to blank a
+  required field and find out whether anybody notices.
+- **A second bridge between the two surfaces, in `tools/audyt.py`.** The
+  capability names and their suppliers live in the published catalog and in the
+  code, and the catalog is not compiled into the binary yet, so no test in the
+  repository can see both. The check compares them in both directions including
+  the supplier, and a probe proves it fails when a supplier is changed on
+  either side. Matching names under different suppliers is the dangerous case,
+  because everything compiles and every test passes.
+- **`internal/adapter/provider/corpus`: reference word lists, as data rather
+  than a dependency.** Names, surnames, cities and regions for Polish and
+  American data were read out of an open source project for fake data and
+  written down here under its licence. Nothing was added to `go.mod` and the
+  binary links no external code, so an upstream release cannot move anybody's
+  generated data.
+  Reading somebody's list and keeping it takes a substantial part of their
+  collection, whether it arrived through a generating function or through a
+  file. The licence allows that on the condition that the notice travels with
+  it, so it does: a header in every file, a registry beside the licences, and
+  `--license` printing it from the binary, which is where the data actually
+  ships. A gate fails the build in both directions, so a list without
+  attribution and an attribution without a list are equally impossible.
+  Identifiers and postal codes are deliberately not taken. An identifier has to
+  be computed from the date and gender of its own row, and a number with a
+  correct check digit may belong to a real person. Their postal codes are a
+  digit mask unrelated to the city, which is this project's own
+  `L4.coherence.postal_vs_city` mutator rather than reference data.
+  The order of a list is part of the byte contract, because a coordinate maps
+  to an index. Sorting is by code point, done once at write time, never at load
+  and never by the collation of whichever machine runs the tool.
+  *This entry was written on 2026-08-02, after the change itself. The commit
+  carried the reasoning and this file did not, which is the gap that makes a
+  developer changelog worth keeping in the first place.*
 - **Module `github.com/donislawdev/qadatagenerator`, Go pinned to 1.26.5.**
   The module path has to equal the repository path, so it reaches every import
   line. The Go version is pinned rather than treated as a minimum, because

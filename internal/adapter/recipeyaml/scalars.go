@@ -103,6 +103,27 @@ func (r *reader) count(where string, node any) int {
 	return number
 }
 
+// maxLength demands a whole number above zero.
+//
+// Zero is refused here although a count of zero is accepted a few lines up,
+// and the difference is not an inconsistency. No rows of an entity is a
+// smaller dataset. A maximum length of nothing is a field no value can ever
+// satisfy, so every row would fail a limit the recipe set on itself.
+func (r *reader) maxLength(where string, node any) (int, bool) {
+	number, ok := wholeNumber(node)
+	if !ok {
+		r.report(where, "the maximum length has to be a whole number", "",
+			"write it without quotes, such as max_length: 30")
+		return 0, false
+	}
+	if number <= 0 {
+		r.report(where, "the maximum length is not above zero", "one or more",
+			"remove the limit instead, because no value can be shorter than nothing")
+		return 0, false
+	}
+	return number, true
+}
+
 func (r *reader) flag(where string, node any) bool {
 	value, ok := node.(bool)
 	if !ok {

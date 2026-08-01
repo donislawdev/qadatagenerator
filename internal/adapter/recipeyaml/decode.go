@@ -30,9 +30,13 @@ import (
 // Known keys, listed once so that the messages and the walk cannot disagree.
 var (
 	topLevelKeys = []string{"version", "seed", "locale", "name", "tag", "entities", "output"}
-	entityKeys   = []string{"count", "fields", "consistency", "belongs_to"}
-	fieldKeys    = []string{"type", "generator", "expression", "unique", "empty", "values"}
+	entityKeys   = []string{"count", "primary_key", "fields", "consistency", "belongs_to"}
+	fieldKeys    = []string{"type", "generator", "expression", "unique", "required", "max_length", "counted_in", "empty", "values"}
 	outputKeys   = []string{"format", "dir", "file_per_entity", "encoding", "delimiter"}
+
+	// How a maximum length can be counted, taken from the model so that the
+	// list a user is shown cannot drift from the list the model accepts.
+	lengthUnits = []string{string(recipe.Characters), string(recipe.Bytes), string(recipe.Graphemes)}
 
 	// The locales the catalog and the providers are built around.
 	knownLocales = []string{"en-US", "pl-PL"}
@@ -208,6 +212,8 @@ func (r *reader) entity(name, where string, node any) recipe.Entity {
 		switch key {
 		case "count":
 			built.Count = r.count(where+".count", item.Value)
+		case "primary_key":
+			built.PrimaryKey = r.listOrOne(where+".primary_key", item.Value)
 		case "fields":
 			built.Fields = r.fields(where+".fields", item.Value)
 		case "consistency":
@@ -227,7 +233,38 @@ func (r *reader) entity(name, where string, node any) recipe.Entity {
 	// this is where both halves are known and where the places the rules
 	// were written are still at hand.
 	r.checkRules(built, ruleWheres)
+	r.checkPrimaryKey(built, where)
 	return built
+}
+
+// checkPrimaryKey asks whether the key names fields that exist and names each
+// of them once.
+//
+// A key naming a field twice is worth reporting rather than tidying away. It
+// usually means somebody meant two different fields, and silently collapsing
+// it would leave a one column key where the recipe asked for two.
+func (r *reader) checkPrimaryKey(entity recipe.Entity, where string) {
+	if len(entity.PrimaryKey) == 0 {
+		return
+	}
+	fields := map[string]bool{}
+	for _, field := range entity.Fields {
+		fields[field.Name] = true
+	}
+	seen := map[string]bool{}
+	for _, name := range entity.PrimaryKey {
+		at := where + ".primary_key"
+		if !fields[name] {
+			r.report(at, "the entity has no field "+name,
+				strings.Join(entity.FieldNames(), ", "), "check the spelling")
+			continue
+		}
+		if seen[name] {
+			r.report(at, "the key names "+name+" twice", "",
+				"name each field once, or name the second field you meant")
+		}
+		seen[name] = true
+	}
 }
 
 // checkRules asks whether every field a rule names exists in the entity.
@@ -290,6 +327,12 @@ func (r *reader) field(name, where string, node any) recipe.Field {
 			built.Expression, _ = r.text(where+".expression", item.Value)
 		case "unique":
 			built.Unique = r.flag(where+".unique", item.Value)
+		case "required":
+			built.Required = r.flag(where+".required", item.Value)
+		case "max_length":
+			built.MaxLength, built.HasMaxLength = r.maxLength(where+".max_length", item.Value)
+		case "counted_in":
+			built.LengthUnit = recipe.LengthUnit(r.oneOf(where+".counted_in", item.Value, lengthUnits))
 		case "empty":
 			built.EmptyShare, built.HasEmptyShare = r.share(where+".empty", item.Value)
 		case "values":
@@ -308,6 +351,23 @@ func (r *reader) field(name, where string, node any) recipe.Field {
 				"generator settings are checked by the generator, and generators arrive with the next slice. "+
 					"A misspelling of "+strings.Join(fieldKeys, ", ")+" also lands here")
 		}
+	}
+
+	// A field that must always carry a value and is also asked to be empty
+	// part of the time. Both halves are legal on their own, so nothing else
+	// would catch this, and whichever half won at generation time would be
+	// the tool deciding which one the user meant.
+	if built.Required && built.HasEmptyShare && built.EmptyShare > 0 {
+		r.report(where, "the field is required and is also asked to be empty in some rows",
+			"either required: true or a share under empty, not both",
+			"drop required if some rows should be empty, or drop empty if none should be")
+	}
+
+	// A unit with nothing to count. It reads as though a limit was set, which
+	// is exactly why it is worth a line rather than being ignored.
+	if built.LengthUnit != "" && !built.HasMaxLength {
+		r.report(where+".counted_in", "the field says how to count a length it does not declare",
+			"", "add max_length, or remove counted_in")
 	}
 
 	sources := 0

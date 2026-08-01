@@ -1412,113 +1412,180 @@ mutators:
 # ---------------------------------------------------------------------------
 # Capabilities referenced by requires
 #
-# Every entry above declares what the valid data generator has to be able to
-# produce before the mutator can run at all. Read as one list, this is the set
-# of capabilities the valid data side has to carry for the starter registry to
-# work end to end.
+# Every entry above declares what has to be available before the mutator can
+# run at all. Read as one list, this is the set of capabilities the valid data
+# side has to carry for the starter registry to work end to end.
+#
+# supplied_by names who brings the capability into a run. There are five
+# suppliers and not one, which was measured rather than assumed:
+#
+#   writer    - the format writer, which owns the bytes and the file shape
+#   schema    - the schema view, which owns what the data declares about itself
+#   provider  - a country or locale bound provider of values and identifiers
+#   corpus    - a reference word list compiled into the binary
+#   engine    - the corruption engine itself, needing nothing external
+#
+# A mutator is applicable when the capabilities present in the run cover its
+# requires. Reading the field as though a provider supplied all of them would
+# leave every L0 and L1 mutator permanently unapplied, because no provider
+# brings output.charset-control or format.csv.
 # ---------------------------------------------------------------------------
 
 capabilities:
 
-  output.charset-control: >-
-    Write the output in a named character encoding, independently of the
-    encoding declared in the file or its metadata.
+  output.charset-control:
+    supplied_by: writer
+    description: >-
+      Write the output in a named character encoding, independently of the
+      encoding declared in the file or its metadata.
 
-  output.line-ending-control: >-
-    Choose the line ending per line rather than per file.
+  output.line-ending-control:
+    supplied_by: writer
+    description: >-
+      Choose the line ending per line rather than per file.
 
-  output.byte-level-write: >-
-    Write arbitrary bytes into the output stream, including sequences that are
-    not valid text in the declared encoding.
+  output.byte-level-write:
+    supplied_by: writer
+    description: >-
+      Write arbitrary bytes into the output stream, including sequences that are
+      not valid text in the declared encoding.
 
-  output.bom-control: >-
-    Add or remove a byte order mark independently of the encoding.
+  output.bom-control:
+    supplied_by: writer
+    description: >-
+      Add or remove a byte order mark independently of the encoding.
 
-  format.csv: >-
-    Emit CSV with control over the delimiter, quoting and the header row.
+  format.csv:
+    supplied_by: writer
+    description: >-
+      Emit CSV with control over the delimiter, quoting and the header row.
 
-  format.json: >-
-    Emit JSON with control over the token stream, not only over the data model.
+  format.json:
+    supplied_by: writer
+    description: >-
+      Emit JSON with control over the token stream, not only over the data model.
 
-  schema.field-type: >-
-    Know the declared type of every field.
+  schema.field-type:
+    supplied_by: schema
+    description: >-
+      Know the declared type of every field.
 
-  schema.max-length: >-
-    Know the declared maximum length of a text field, and in which unit it is
-    counted.
+  schema.max-length:
+    supplied_by: schema
+    description: >-
+      Know the declared maximum length of a text field, and in which unit it is
+      counted.
 
-  schema.enum-values: >-
-    Know the declared value set of an enumerated field.
+  schema.enum-values:
+    supplied_by: schema
+    description: >-
+      Know the declared value set of an enumerated field.
 
-  schema.required-fields: >-
-    Know which fields are required and distinguish an empty value from an
-    absent one.
+  schema.required-fields:
+    supplied_by: schema
+    description: >-
+      Know which fields are required and distinguish an empty value from an
+      absent one.
 
-  schema.field-relations: >-
-    Know which fields are bound to each other by a rule, such as two dates in
-    order or a total over its lines.
+  schema.field-relations:
+    supplied_by: schema
+    description: >-
+      Know which fields are bound to each other by a rule, such as two dates in
+      order or a total over its lines.
 
-  date.arithmetic: >-
-    Produce dates relative to a reference point, including business days,
-    holidays and boundary cases such as leap days.
+  date.arithmetic:
+    supplied_by: provider
+    description: >-
+      Produce dates relative to a reference point, including business days,
+      holidays and boundary cases such as leap days.
 
-  currency.minor-units: >-
-    Know how many minor units a currency has, including currencies that have
-    none.
+  currency.minor-units:
+    supplied_by: provider
+    description: >-
+      Know how many minor units a currency has, including currencies that have
+      none.
 
-  identifier.check-digit: >-
-    Compute the correct check digit for an identifier, which is what makes it
-    possible to break it deliberately.
+  identifier.check-digit:
+    supplied_by: provider
+    description: >-
+      Compute the correct check digit for an identifier, which is what makes it
+      possible to break it deliberately.
 
-  identifier.encodes-date: >-
-    Know that an identifier encodes a date, where in the value it sits, and how
-    the century is represented.
+  identifier.encodes-date:
+    supplied_by: provider
+    description: >-
+      Know that an identifier encodes a date, where in the value it sits, and how
+      the century is represented.
 
-  identifier.encodes-gender: >-
-    Know that an identifier encodes gender and which positions carry it.
+  identifier.encodes-gender:
+    supplied_by: provider
+    description: >-
+      Know that an identifier encodes gender and which positions carry it.
 
-  identifier.reserved-range: >-
-    Know the reserved or unassigned ranges of an identifier, both to generate
-    inside them by default and to tell whether a value already sits in one.
+  identifier.reserved-range:
+    supplied_by: provider
+    description: >-
+      Know the reserved or unassigned ranges of an identifier, both to generate
+      inside them by default and to tell whether a value already sits in one.
 
-  reference.postal-to-place: >-
-    Reference data mapping postal codes to places, in both directions, per
-    locale.
+  reference.postal-to-place:
+    supplied_by: provider
+    description: >-
+      Reference data mapping postal codes to places, in both directions, per
+      locale.
 
-  relation.foreign-key: >-
-    Know the relation graph between entities, and which key of the parent the
-    child points at.
+  relation.foreign-key:
+    supplied_by: schema
+    description: >-
+      Know the relation graph between entities, and which key of the parent the
+      child points at.
 
-  key.primary: >-
-    Know which field or fields form the primary key of an entity.
+  key.primary:
+    supplied_by: schema
+    description: >-
+      Know which field or fields form the primary key of an entity.
 
-  key.unique: >-
-    Know which fields carry a uniqueness constraint, and whether it is case
-    sensitive.
+  key.unique:
+    supplied_by: schema
+    description: >-
+      Know which fields carry a uniqueness constraint, and whether it is case
+      sensitive.
 
-  unicode.normalization: >-
-    Produce a value in a chosen Unicode normalisation form.
+  unicode.normalization:
+    supplied_by: engine
+    description: >-
+      Produce a value in a chosen Unicode normalisation form.
 
-  corpus.unicode: >-
-    A corpus of Unicode values covering emoji, joining sequences, invisible
-    characters and locale dependent case conversion.
+  corpus.unicode:
+    supplied_by: corpus
+    description: >-
+      A corpus of Unicode values covering emoji, joining sequences, invisible
+      characters and locale dependent case conversion.
 
-  corpus.coercible-values: >-
-    A corpus of text values that common spreadsheet and import tools convert to
-    another type on sight, such as strings shaped like a month abbreviation or
-    like a number with leading zeros.
+  corpus.coercible-values:
+    supplied_by: corpus
+    description: >-
+      A corpus of text values that common spreadsheet and import tools convert to
+      another type on sight, such as strings shaped like a month abbreviation or
+      like a number with leading zeros.
 
-  corpus.sentinel-values: >-
-    A corpus of placeholder values that pass type and format checks while
-    standing in for an unknown value, such as an epoch or far future date, an
-    all nines postal code or a text field reading not applicable. Held per
-    field type, because the conventional placeholder differs between them.
+  corpus.sentinel-values:
+    supplied_by: corpus
+    description: >-
+      A corpus of placeholder values that pass type and format checks while
+      standing in for an unknown value, such as an epoch or far future date, an
+      all nines postal code or a text field reading not applicable. Held per
+      field type, because the conventional placeholder differs between them.
 
-  corpus.names-international: >-
-    A corpus of real names across scripts and conventions, including
-    apostrophes, diacritics, single characters and names that collide with
-    reserved words.
+  corpus.names-international:
+    supplied_by: corpus
+    description: >-
+      A corpus of real names across scripts and conventions, including
+      apostrophes, diacritics, single characters and names that collide with
+      reserved words.
 
-  provider.email: >-
-    Produce email addresses in reserved documentation domains, with control
-    over the shape of the local part.
+  provider.email:
+    supplied_by: provider
+    description: >-
+      Produce email addresses in reserved documentation domains, with control
+      over the shape of the local part.

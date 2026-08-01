@@ -11,11 +11,25 @@ repository once they are released.
 
 ## [Unreleased]
 
-Nothing has been released yet. The version reported by the binary is
-0.0.0-dev and says exactly that.
+Nothing has been released yet. The binary reports 0.1.0, which is the version
+being built rather than one anybody can download. Releasing is a separate act
+and has not happened.
 
 ### Added
 
+- Recipes can declare three things they could not before: which fields form
+  the primary key of an entity, that a field is required, and how long a text
+  field is allowed to be. All three are optional, so recipes written before
+  this still read.
+- A maximum length is declared together with the unit it is counted in, one of
+  `characters`, `bytes` or `graphemes`, defaulting to characters. The unit is
+  the whole difference between a limit an application enforces and one it does
+  not: a column of thirty characters holds thirty Polish names and ten emoji.
+- `required: true` and `empty: 15%` on the same field are refused as the
+  contradiction they are. A field cannot both always carry a value and be
+  blank in some rows, and picking one silently would be the tool deciding what
+  you meant. `required: true` with `empty: 0%` is accepted, because saying no
+  row happens to be blank is not the same statement as saying none may be.
 - The `qadg` command line, so far answering `--help`, `--version` and
   `--license` only. No command is implemented yet.
 - `--version` reports four numbers at once: the tool, the corruption catalog,

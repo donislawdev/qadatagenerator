@@ -26,8 +26,15 @@ type Recipe struct {
 
 // Entity is a set of records of one kind.
 type Entity struct {
-	Name        string
-	Count       int
+	Name  string
+	Count int
+	// PrimaryKey names the fields that identify a record.
+	//
+	// It sits at the entity rather than at the field because a key is often
+	// made of several fields, and a flag on each one could not say in which
+	// order they combine. Empty means the recipe declared none, which is
+	// legal and leaves the mutators that break keys inapplicable.
+	PrimaryKey  []string
 	Fields      []Field
 	Consistency []Rule
 	Parents     []Parent
@@ -43,6 +50,27 @@ type Field struct {
 	Generator  string
 	Expression string
 	Unique     bool
+	// Required says the field must carry a value.
+	//
+	// It is a separate statement from EmptyShare on purpose. A share of zero
+	// says no row happens to be empty in this run, while Required says an
+	// empty value is not allowed at all. Deriving one from the other would
+	// make the two indistinguishable exactly when a mutator wants to leave a
+	// required field blank and find out whether the application notices.
+	Required bool
+	// MaxLength is the longest value the field accepts, counted in
+	// LengthUnit. HasMaxLength separates an absent limit from a limit of
+	// zero.
+	MaxLength    int
+	HasMaxLength bool
+	// LengthUnit is how MaxLength is counted. Empty means Characters.
+	//
+	// The unit is carried rather than assumed because it is the whole
+	// difference between a limit an application enforces and one it does
+	// not. A column of thirty characters holds thirty Polish names and ten
+	// emoji, and a tool that counted one as the other would produce a value
+	// that fits by its own arithmetic and is rejected on arrival.
+	LengthUnit LengthUnit
 	// EmptyShare is the share of rows left empty, from zero to one hundred.
 	EmptyShare    float64
 	HasEmptyShare bool
@@ -86,6 +114,36 @@ const (
 	// DerivedFrom means the value is built out of the others.
 	DerivedFrom RuleKind = "derived_from"
 )
+
+// LengthUnit is the closed set of ways a maximum length can be counted.
+//
+// Three units and not one, because the three disagree on exactly the values
+// this tool exists to produce. The Polish letter s with an acute accent is one
+// character, two bytes in UTF-8 and one grapheme. A family emoji is one
+// grapheme, several characters and more than a dozen bytes.
+type LengthUnit string
+
+const (
+	// Characters counts Unicode code points. It is the default, because it
+	// is what a person means by length and what most schema languages
+	// document.
+	Characters LengthUnit = "characters"
+	// Bytes counts the encoded form. Databases that declare a column in
+	// bytes reject values that fit by any other count.
+	Bytes LengthUnit = "bytes"
+	// Graphemes counts what a reader sees as one symbol.
+	Graphemes LengthUnit = "graphemes"
+)
+
+// Unit returns how the maximum length of this field is counted, defaulting to
+// characters. Callers use it rather than reading LengthUnit, so the default
+// lives in one place.
+func (f Field) Unit() LengthUnit {
+	if f.LengthUnit == "" {
+		return Characters
+	}
+	return f.LengthUnit
+}
 
 // Parent is a relation, declared at the child and carrying how many children
 // one parent has.
@@ -144,6 +202,18 @@ type FieldInfo struct {
 	Name   string
 	Type   string
 	Unique bool
+	// Required, MaxLength, HasMaxLength and LengthUnit are here because the
+	// engine genuinely needs them. Leaving a field blank and overrunning a
+	// declared limit are both corruptions, and neither can be produced by a
+	// mutator that cannot see the constraint it is breaking.
+	Required     bool
+	MaxLength    int
+	HasMaxLength bool
+	LengthUnit   LengthUnit
+	// Values is the declared value set of an enumerated field, empty when
+	// the field is not one. A mutator that puts a value outside the set has
+	// to know the set.
+	Values []string
 }
 
 // ParentInfo is what the engine is allowed to know about a relation.
@@ -164,6 +234,10 @@ type SchemaView interface {
 	FieldsOf(entity string) []FieldInfo
 	ParentsOf(entity string) []ParentInfo
 	RulesOf(entity string) []Rule
+	// PrimaryKeyOf returns the fields identifying a record, empty when none
+	// was declared. Duplicating a key and producing a second record for the
+	// same person are different corruptions, and both need to know it.
+	PrimaryKeyOf(entity string) []string
 }
 
 // A recipe is one source of a schema view.
@@ -186,9 +260,27 @@ func (r Recipe) FieldsOf(entity string) []FieldInfo {
 	}
 	fields := make([]FieldInfo, 0, len(found.Fields))
 	for _, field := range found.Fields {
-		fields = append(fields, FieldInfo{Name: field.Name, Type: field.Type, Unique: field.Unique})
+		fields = append(fields, FieldInfo{
+			Name:         field.Name,
+			Type:         field.Type,
+			Unique:       field.Unique,
+			Required:     field.Required,
+			MaxLength:    field.MaxLength,
+			HasMaxLength: field.HasMaxLength,
+			LengthUnit:   field.Unit(),
+			Values:       field.Values,
+		})
 	}
 	return fields
+}
+
+// PrimaryKeyOf returns the fields identifying a record of one entity.
+func (r Recipe) PrimaryKeyOf(entity string) []string {
+	found, ok := r.Entity(entity)
+	if !ok {
+		return nil
+	}
+	return found.PrimaryKey
 }
 
 // ParentsOf returns the relations declared at one entity.

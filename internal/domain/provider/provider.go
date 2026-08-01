@@ -1,0 +1,285 @@
+// Package provider is the contract a source of country bound values has to
+// meet.
+//
+// It is the contract and not the implementations. The interface lives in the
+// domain because the corruption engine calls it, and the implementations live
+// under the adapters because they carry reference data and locale knowledge.
+// That is the dependency rule applied to the one place the project promises
+// to accept contributions.
+//
+// # Three duties, and a fourth that is easy to miss
+//
+// A provider produces a value, says whether a value is correct, and declares
+// what it brings. The fourth duty is the reason the third exists: a mutator
+// asks for capabilities, and a provider that claims one has to be able to
+// answer the questions that capability implies. Claiming to encode a date and
+// being unable to say where the date sits would make a mutator that cannot
+// work but reports that it can.
+//
+// So a declared capability is checked against an implemented interface, in
+// both directions, by a test. Declaring identifier.check-digit without
+// implementing CheckDigited fails the build, and so does the reverse. This is
+// the same closing of a loop that the catalog does between its entries and
+// their implementations.
+//
+// # Ethics is a property of the provider, not of the caller
+//
+// Reserved and never assigned ranges are the default inside the provider,
+// which is what makes skipping them a deliberate act rather than a forgotten
+// flag. A value that could belong to a real person is not something a caller
+// should have to remember to avoid.
+package provider
+
+import (
+	"sort"
+
+	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
+	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
+)
+
+// Gender is what an identifier encodes, where it encodes one.
+//
+// It is deliberately a small closed set rather than free text. The values an
+// identifier can carry are decided by the numbering scheme, not by the vocabulary
+// of the recipe, and a provider has to be able to answer for all of them.
+type Gender string
+
+const (
+	// Female and Male are the two values numbering schemes actually encode.
+	Female Gender = "female"
+	Male   Gender = "male"
+	// Unknown is what a value decodes to when the scheme carries no gender
+	// or the value is malformed. It is never a thing to generate.
+	Unknown Gender = "unknown"
+)
+
+// Date is a calendar date without a clock, a zone or a format.
+//
+// The domain is not allowed to read the clock, and a date type carrying one
+// is an invitation to do it. Formatting is the business of whoever writes the
+// value out, because a date rendered by the settings of whichever machine ran
+// the tool would break byte stability across platforms.
+type Date struct {
+	Year  int
+	Month int
+	Day   int
+}
+
+// Request is everything a provider needs to produce one value.
+type Request struct {
+	// Source and At are the address of the value. Randomness is derived from
+	// them rather than drawn from a stream, so a provider must not hold a
+	// counter and must not care in what order it is called.
+	Source seed.Source
+	At     seed.Coordinate
+	// Agrees carries the values this one has to be consistent with, such as
+	// the birth date and gender a national identifier encodes. It is empty
+	// when the recipe declared no rule binding this field to another.
+	Agrees Agreement
+}
+
+// Agreement is the values a generated value has to be consistent with.
+//
+// It is a type rather than a bare map so that reading it cannot depend on map
+// iteration order by accident, and so that a missing binding is answered
+// rather than returned as an empty string that looks like a value.
+type Agreement struct {
+	values map[string]string
+}
+
+// NewAgreement records what a value has to agree with.
+func NewAgreement(values map[string]string) Agreement {
+	copied := make(map[string]string, len(values))
+	for field, value := range values {
+		copied[field] = value
+	}
+	return Agreement{values: copied}
+}
+
+// Value returns what another field holds, and whether it was bound at all.
+func (a Agreement) Value(field string) (string, bool) {
+	value, ok := a.values[field]
+	return value, ok
+}
+
+// Fields returns the bound field names, sorted.
+func (a Agreement) Fields() []string {
+	fields := make([]string, 0, len(a.values))
+	for field := range a.values {
+		fields = append(fields, field)
+	}
+	sort.Strings(fields)
+	return fields
+}
+
+// Verdict is the answer to whether a value is correct for this provider.
+//
+// A bare boolean would be cheaper and worse. The reason is what lets a report
+// say why a value was rejected, and a validator that only says no is one
+// nobody can act on.
+type Verdict struct {
+	Valid bool
+	// Reason is why the value is not valid, empty when it is. It names the
+	// rule that failed, such as a wrong check digit or a length the scheme
+	// does not allow.
+	Reason string
+}
+
+// Valid is the verdict for a correct value.
+func Valid() Verdict { return Verdict{Valid: true} }
+
+// Invalid is the verdict for a value that breaks a rule of the scheme.
+func Invalid(reason string) Verdict { return Verdict{Reason: reason} }
+
+// Provider produces and checks the values of one identifier or one kind of
+// locale bound value.
+type Provider interface {
+	// ID is the identifier of this provider, such as PL.pesel. Country bound
+	// providers carry an ISO 3166-1 alpha-2 prefix and international
+	// standards carry none, because a provider belongs to a country and not
+	// to a language.
+	ID() string
+	// Capabilities are what this provider brings into a run. Every name
+	// returned here must be supplied by a provider according to the
+	// registry, and every capability that implies an interface must be
+	// backed by one.
+	Capabilities() []capability.Name
+	// Generate produces one value for the place described by the request.
+	// The same request must always produce the same value.
+	Generate(req Request) (string, error)
+	// Validate says whether a value is correct for this scheme. It is
+	// written from the rules of the scheme and never from what Generate
+	// happens to produce, because otherwise one mistake would be made twice
+	// and agree with itself.
+	Validate(value string) Verdict
+}
+
+// CheckDigited is required of a provider declaring identifier.check-digit.
+//
+// Being able to compute the correct check digit is what makes it possible to
+// break one deliberately, which is the whole of layer L3 for identifiers.
+type CheckDigited interface {
+	// CheckDigits returns the positions carrying the check digits, as byte
+	// offsets into the value, and whether the value is long enough to have
+	// them.
+	CheckDigits(value string) ([]int, bool)
+	// WithCheckDigits returns the value with its check digits recomputed, so
+	// that a mutator can change a digit and ask for a value that is
+	// consistent again, or leave it inconsistent on purpose.
+	WithCheckDigits(value string) (string, error)
+}
+
+// DateEncoder is required of a provider declaring identifier.encodes-date.
+type DateEncoder interface {
+	// EncodedDate reads the date out of the value.
+	EncodedDate(value string) (Date, bool)
+	// WithDate returns the value carrying a different date, check digits
+	// included. This is what lets a mutator produce an identifier that is
+	// well formed and disagrees with the rest of the record.
+	WithDate(value string, date Date) (string, error)
+}
+
+// GenderEncoder is required of a provider declaring identifier.encodes-gender.
+type GenderEncoder interface {
+	EncodedGender(value string) (Gender, bool)
+	WithGender(value string, gender Gender) (string, error)
+}
+
+// RangeAware is required of a provider declaring identifier.reserved-range.
+//
+// It answers in both directions on purpose. Generating inside a reserved range
+// is the ethical default, and telling whether a value already sits in one is
+// what stops a mutator aimed at unassigned ranges from being applicable to a
+// value that is already there.
+type RangeAware interface {
+	// InReservedRange reports whether the value already sits in a range that
+	// is never assigned to a real person.
+	InReservedRange(value string) bool
+	// ReservedRanges describes the ranges in words, for the report that has
+	// to tell a user why their safe data is rejected by an application that
+	// checks ranges.
+	ReservedRanges() []string
+}
+
+// implied maps a capability to the interface a provider claiming it must
+// implement.
+//
+// Only capabilities that imply extra questions appear here. Declaring one
+// that is not listed is a claim about what the provider knows rather than
+// about what it can be asked, and needs no second interface.
+var implied = map[capability.Name]func(Provider) bool{
+	capability.IdentifierCheckDigit: func(p Provider) bool {
+		_, ok := p.(CheckDigited)
+		return ok
+	},
+	capability.IdentifierEncodesDate: func(p Provider) bool {
+		_, ok := p.(DateEncoder)
+		return ok
+	},
+	capability.IdentifierEncodesGender: func(p Provider) bool {
+		_, ok := p.(GenderEncoder)
+		return ok
+	},
+	capability.IdentifierReservedRange: func(p Provider) bool {
+		_, ok := p.(RangeAware)
+		return ok
+	},
+}
+
+// ImpliedInterfaces returns the capabilities that require an interface,
+// sorted.
+func ImpliedInterfaces() []capability.Name {
+	names := make([]capability.Name, 0, len(implied))
+	for name := range implied {
+		names = append(names, name)
+	}
+	sort.Slice(names, func(i, j int) bool { return names[i] < names[j] })
+	return names
+}
+
+// Check reports every way a provider fails the contract, sorted.
+//
+// It returns findings rather than a boolean so that a contributor adding a
+// provider for their country sees all of them at once instead of fixing them
+// one build at a time. That is the same rule the recipe validator follows.
+func Check(p Provider) []string {
+	var findings []string
+
+	if p.ID() == "" {
+		findings = append(findings, "provider has no identifier")
+	}
+
+	seen := make(map[capability.Name]bool)
+	for _, name := range p.Capabilities() {
+		if seen[name] {
+			findings = append(findings, string(name)+": declared twice")
+			continue
+		}
+		seen[name] = true
+
+		supplier, known := capability.SupplierOf(name)
+		if !known {
+			findings = append(findings, string(name)+": not a capability in the registry")
+			continue
+		}
+		if supplier != capability.Provider {
+			findings = append(findings, string(name)+": supplied by "+string(supplier)+", not by a provider")
+			continue
+		}
+		if implements, ok := implied[name]; ok && !implements(p) {
+			findings = append(findings, string(name)+": declared but the interface it implies is not implemented")
+		}
+	}
+
+	// The other direction. An interface implemented without the matching
+	// declaration is the quieter defect of the two, because everything works
+	// except that no mutator ever asks.
+	for name, implements := range implied {
+		if implements(p) && !seen[name] {
+			findings = append(findings, string(name)+": implemented but not declared")
+		}
+	}
+
+	sort.Strings(findings)
+	return findings
+}
