@@ -60,6 +60,23 @@ Versioning.
   punctuation guard excludes them by a rule that names the exception, rather
   than by the accident of those files having no extension.
 
+- **The recipe, in three layers.** `internal/domain/recipe` holds the model and
+  the schema view, `internal/adapter/recipeyaml` is the only place that knows a
+  recipe is YAML, and `internal/app/validate` is the use case behind the first
+  command. The use case takes the decoder as a port, so it never learns where
+  its input came from.
+- **Field order is the order the user wrote.** The decoding keeps the mapping
+  order rather than taking the convenient unordered form, because column order
+  in the output follows it and a pull request diff has to stay small.
+- **Everything wrong is reported in one pass.** Handing problems out one at a
+  time turns a five minute fix into five rounds.
+- **What could not be checked is reported too.** Generator settings cannot be
+  verified before the generators exist, so they are carried and listed rather
+  than accepted in silence. That also makes a misspelled generic key visible,
+  which would otherwise land among the settings and turn itself off.
+- **`github.com/goccy/go-yaml` v1.19.2, MIT.** The sieve was run rather than
+  quoted: the license was read in the module and the module graph was checked
+  for anything transitive, of which there is none.
 - **`internal/domain/seed`: randomness derived from the address of a value.**
   SHA-256 over a length framed message built from the seed, the entity, the
   row, the field, the purpose and a round counter. The lengths are what make
@@ -109,6 +126,16 @@ Versioning.
   passed by looking for a package that could have been renamed.** The scan is
   now asserted to contain it, because a rule about something absent checks
   nothing and says nothing.
+- **A rule that could not be read shifted the positions of the ones after it.**
+  The place in a message was counted from the model, and a rule left out of the
+  model moved every later position by one, sending somebody to the wrong line.
+  The places are now kept beside the rules as they are read.
+- **A cardinality that ran backwards hid a second problem on the same line.**
+  The relation was dropped before anything asked whether the parent entity
+  exists, so fixing the range revealed a new error instead of finishing.
+- **The layer rule let a use case import an adapter.** It forbade the surfaces
+  and not the adapters, which is two edges out of three, and the missing one is
+  the easiest to cross by accident because the adapter is right there.
 - **`StdoutIsTerminal` was computed and never read.** Data carries no escape
   sequences at all, so the field had no consumer. Removed rather than kept for
   a use that may never come.

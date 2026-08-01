@@ -27,12 +27,19 @@ const (
 	summaryLine = "qadg produces test data together with a manifest that says how the system under test should react to it."
 
 	usageBlock = `Usage:
-  qadg <command> [flags]
+  qadg <command> [arguments]
   qadg --version
   qadg --license`
 
 	commandsBlock = `Commands:
-  None yet. This build carries the command line skeleton only.`
+  validate <recipe>   Read a recipe and report every problem it has.
+
+  A recipe that passes says what will be generated. It does not say the data
+  will be produced, because no command generates data in this build yet.`
+
+	// commandValidate is the name as typed. It is a public contract from the
+	// first release, because it goes into other people's pipelines.
+	commandValidate = "validate"
 
 	flagsHeading = "Flags:"
 
@@ -111,6 +118,12 @@ func acceptedFlags() string {
 	return strings.Join(names, ", ")
 }
 
+// acceptedInvocations lists the commands as well, for the moment nothing at
+// all was given and naming only the flags would hide half the answer.
+func acceptedInvocations() string {
+	return commandValidate + ", " + acceptedFlags()
+}
+
 // Failure text.
 //
 // Every message below carries four things: what happened, why, what would be
@@ -119,15 +132,19 @@ func acceptedFlags() string {
 
 const (
 	problemNoCommand    = "no command given"
-	problemNoCommandWhy = "this build accepts flags only, because no command is implemented yet"
+	problemNoCommandWhy = "a command says what to do, and this run said nothing"
 	problemNoCommandDo  = "qadg --help"
 
 	problemUnknownFlagWhy = "this build does not define that flag"
 	problemUnknownFlagDo  = "qadg --help lists every flag this build accepts"
 
-	problemUnknownCommandWhy     = "no command is implemented in this build"
-	problemUnknownCommandAllowed = "no command, so flags only"
-	problemUnknownCommandDo      = "qadg --help"
+	problemUnknownCommandWhy = "this build does not define that command"
+	problemUnknownCommandDo  = "qadg --help"
+
+	problemCommandAndReport        = "a command and a report were asked for at once"
+	problemCommandAndReportWhy     = "answering one would leave the other unanswered"
+	problemCommandAndReportAllowed = "a command, or one of --help, --license and --version"
+	problemCommandAndReportDo      = "run them as two commands"
 
 	problemQuietAndVerbose        = "--quiet and --verbose were both given"
 	problemQuietAndVerboseWhy     = "one asks for less log output and the other for more"
@@ -150,6 +167,23 @@ const (
 	problemMissingKindWhy     = "the exit code is a property of the failure, and this one carried none"
 	problemMissingKindAllowed = "every failure inside this tool sets its kind where it happens"
 	problemMissingKindDo      = "report this together with the command that produced it"
+
+	problemValidateArguments        = "validate needs exactly one recipe to read"
+	problemValidateArgumentsWhy     = "it checks one file at a time, so that the report says which file it is about"
+	problemValidateArgumentsAllowed = "one path to a recipe"
+	problemValidateArgumentsDo      = "qadg validate recipe.yaml"
+)
+
+// Text of the validate report.
+const (
+	// problemUnchecked introduces what this build could not look at. It is a
+	// warning rather than a quiet note, because a report that hides its own
+	// blind spots invites trust it has not earned.
+	problemUnchecked = "some declarations were not checked"
+
+	summaryValid    = " can be used. Understood "
+	summaryEntities = " entities and "
+	summaryFields   = " fields."
 )
 
 // Log prefixes. They stay stable because people grep CI logs for them.

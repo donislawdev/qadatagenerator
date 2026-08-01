@@ -71,8 +71,8 @@ var layerRules = []layerRule{
 	},
 	{
 		pkg:       "internal/app",
-		forbidden: []string{"internal/cli", "internal/gui"},
-		why:       "a use case does not know which surface called it",
+		forbidden: []string{"internal/adapter", "internal/cli", "internal/gui"},
+		why:       "a use case takes what it needs as a port and does not know where the data comes from",
 	},
 	{
 		pkg:       "internal/cli",

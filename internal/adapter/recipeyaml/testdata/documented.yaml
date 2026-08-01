@@ -1,0 +1,44 @@
+# The recipe shape as the format document describes it, kept here so that the
+# example and the code cannot drift apart in silence. When the documented shape
+# changes, this file changes with it and the tests say what broke.
+version: "0.1"
+seed: "release-2026-08"
+locale: pl-PL
+name: shop
+tag: nightly
+
+entities:
+  customer:
+    count: 100
+    fields:
+      id:         { type: uuid, unique: true }
+      first_name: { generator: first_name }
+      last_name:  { generator: last_name }
+      gender:     { generator: gender }
+      birth_date: { generator: birth_date, age: 18-75 }
+      pesel:      { generator: pesel }
+      email:      { expression: "${first_name}.${last_name}@${random_domain}", unique: true }
+      phone:      { generator: phone, empty: 15% }
+    consistency:
+      - pesel matches: [birth_date, gender]
+      - email derived_from: [first_name, last_name]
+
+  order:
+    belongs_to: { customer: 0-5 }
+    fields:
+      number:     { generator: order_number, unique: true }
+      placed_at:  { generator: date, range: last_90_days }
+      buyer_name: { expression: "${customer.last_name}" }
+
+  order_line:
+    belongs_to: { order: 1-10 }
+    fields:
+      sku:      { generator: sku }
+      quantity: { type: integer }
+
+output:
+  format: csv
+  dir: ./data
+  file_per_entity: true
+  encoding: utf-8
+  delimiter: ","

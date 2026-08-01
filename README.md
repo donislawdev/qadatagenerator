@@ -4,7 +4,7 @@ A **QA test data generator** with a CLI and a GUI. Cross-platform, fully offline
 
 > A test data generator that understands **what the data means**, and can corrupt it on purpose while telling you exactly what it broke, at which layer, and how your application is supposed to respond.
 
-**Status: early development.** The specifications below are drafts, and the tool itself is a command line skeleton with no command implemented yet.
+**Status: early development.** The specifications below are drafts. The tool reads and checks recipes today with `qadg validate`, and it does not generate data yet.
 
 ---
 

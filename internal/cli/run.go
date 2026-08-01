@@ -125,6 +125,41 @@ func Run(env Environment) (code int) {
 		}
 	}
 
+	// The flag package stops at the first argument that is not a flag, so
+	// anything after a command belongs to that command and never to this
+	// set. A command asked for together with a report would leave one of the
+	// two unanswered, so both are refused rather than one dropped.
+	command := set.Args()
+	if len(command) > 0 {
+		if asked > 0 {
+			return usage(out, problem{
+				what:    problemCommandAndReport,
+				why:     problemCommandAndReportWhy,
+				allowed: problemCommandAndReportAllowed,
+				instead: problemCommandAndReportDo,
+			})
+		}
+		if *asJSON {
+			return usage(out, problem{
+				what:    problemJSONUnsupported,
+				why:     problemJSONUnsupportedWhy,
+				allowed: problemJSONUnsupportedAllowed,
+				instead: problemJSONUnsupportedDo,
+			})
+		}
+		switch command[0] {
+		case commandValidate:
+			return runValidate(out, command[1:])
+		default:
+			return usage(out, problem{
+				what:    "unknown command " + command[0],
+				why:     problemUnknownCommandWhy,
+				allowed: commandValidate,
+				instead: problemUnknownCommandDo,
+			})
+		}
+	}
+
 	// --json is a cross cutting flag with one report behind it so far. A run
 	// that asked for machine readable output and got prose has been quietly
 	// ignored, and asking for two reports at once with --json would put JSON
@@ -167,22 +202,13 @@ func Run(env Environment) (code int) {
 		return finish(out, codeOK)
 	}
 
-	if rest := set.Args(); len(rest) > 0 {
-		return usage(out, problem{
-			what:    "unknown command " + rest[0],
-			why:     problemUnknownCommandWhy,
-			allowed: problemUnknownCommandAllowed,
-			instead: problemUnknownCommandDo,
-		})
-	}
-
 	// A run with nothing to do ends as a usage failure rather than as
 	// success. A pipeline that called this with an empty variable has to
 	// find out now, not from an empty output file three steps later.
 	return usage(out, problem{
 		what:    problemNoCommand,
 		why:     problemNoCommandWhy,
-		allowed: acceptedFlags(),
+		allowed: acceptedInvocations(),
 		instead: problemNoCommandDo,
 	})
 }

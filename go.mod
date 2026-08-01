@@ -7,3 +7,5 @@ module github.com/donislawdev/qadatagenerator
 // so the toolchain that produced a dataset is part of what has to be
 // reproducible. CI pins the same version through GOTOOLCHAIN.
 go 1.26.5
+
+require github.com/goccy/go-yaml v1.19.2

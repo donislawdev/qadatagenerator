@@ -39,6 +39,14 @@ Nothing has been released yet. The version reported by the binary is
   the specifications. The README links to both.
 - Asking for several reports at once prints all of them. `--help --version`
   gives the help and the versions rather than quietly dropping one.
+- `qadg validate <recipe>` reads a recipe and says whether it can be used. It
+  reports every problem it found in one pass rather than one per run, and it
+  lists separately what it could not check, so a clean result never means more
+  than it says. A recipe that cannot be used ends with the configuration exit
+  code, which is different from the tool failing.
+- Recipes are read with the seed and the schema version as text. Writing them
+  without quotes is refused with a hint, because YAML reads 010 as the number
+  8 and 1.0 as 1, and a seed that changes on the way in reproduces nothing.
 - The mechanism behind the promise that a seed reproduces a dataset exactly.
   A value depends on where it sits and on nothing else, so the order in which
   values are produced does not matter, adding a field leaves the other fields

@@ -43,6 +43,19 @@ func TestLayersCatchesTheDomainReachingUpwards(t *testing.T) {
 	}
 }
 
+// A use case takes what it needs as a port. Reaching an adapter directly is
+// the same breach as reaching the surface, and it is the easier one to make by
+// accident, because the adapter is right there and already does the job.
+func TestLayersCatchesAUseCaseReachingAnAdapter(t *testing.T) {
+	broken := []Package{
+		{Path: "internal/app/validate", Imports: []string{module + "/internal/adapter/recipeyaml"}},
+	}
+	findings := Layers(broken, module)
+	if len(findings) != 1 || !strings.Contains(findings[0], "internal/adapter") {
+		t.Fatalf("expected the use case to be caught reaching an adapter, got %v", findings)
+	}
+}
+
 func TestLayersAllowsAPackageToImportItsOwnSubpackage(t *testing.T) {
 	fine := []Package{
 		{Path: "internal/domain", Imports: []string{module + "/internal/domain/seed"}},

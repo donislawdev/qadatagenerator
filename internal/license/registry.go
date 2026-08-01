@@ -45,8 +45,15 @@ type Component struct {
 
 // ThirdParty lists every external module inside this build.
 //
-// Empty is a fact rather than a gap: this build links nothing outside the Go
-// standard library. A test compares this list against the direct requirements
-// in go.mod, so a dependency that nobody described here fails the build instead
-// of shipping unlisted.
-var ThirdParty = []Component{}
+// A test compares this list against the direct requirements in go.mod, so a
+// dependency that nobody described here fails the build instead of shipping
+// unlisted. Every entry was read from the module itself rather than from
+// anybody's memory of what it is licensed under.
+var ThirdParty = []Component{
+	{
+		Module:  "github.com/goccy/go-yaml",
+		Version: "v1.19.2",
+		License: "MIT",
+		Source:  "https://github.com/goccy/go-yaml",
+	},
+}

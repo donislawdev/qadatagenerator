@@ -100,3 +100,20 @@ func (s *streams) info(text string) {
 	}
 	fmt.Fprintln(s.log, prefixInfo+text)
 }
+
+// note writes something a person asked for, such as the outcome of a check.
+// It is silent under --quiet, which asked for failures only.
+func (s *streams) note(text string) {
+	if s.level == levelQuiet {
+		return
+	}
+	fmt.Fprintln(s.log, text)
+}
+
+// detail writes a line that belongs to whatever was written above it.
+func (s *streams) detail(text string) {
+	if s.level == levelQuiet {
+		return
+	}
+	fmt.Fprintln(s.log, prefixDetail+text)
+}
