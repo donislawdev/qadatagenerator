@@ -18,7 +18,13 @@
 # Marking them -text also means git diff reports them as binary, which is the
 # correct trade here. A diff that silently hides a line ending change is worse
 # than no diff at all for these files.
-testdata/** -text
+#
+# The pattern reaches every testdata directory, not only the one at the root.
+# Measured: testdata/x was protected and internal/domain/seed/testdata/x was
+# not, because a pattern containing a slash is anchored where this file lives.
+# Go puts fixtures next to the package that owns them, so the anchored form
+# would have left most of them unprotected.
+**/testdata/** -text
 *.golden -text
 
 # ---------------------------------------------------------------------------

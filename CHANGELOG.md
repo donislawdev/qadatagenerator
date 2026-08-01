@@ -39,3 +39,9 @@ Nothing has been released yet. The version reported by the binary is
   the specifications. The README links to both.
 - Asking for several reports at once prints all of them. `--help --version`
   gives the help and the versions rather than quietly dropping one.
+- The mechanism behind the promise that a seed reproduces a dataset exactly.
+  A value depends on where it sits and on nothing else, so the order in which
+  values are produced does not matter, adding a field leaves the other fields
+  untouched, and the same seed gives the same bytes on every machine. The seed
+  is text rather than a number, because a recipe is YAML and YAML reads 010 as
+  the number 8.

@@ -60,6 +60,34 @@ Versioning.
   punctuation guard excludes them by a rule that names the exception, rather
   than by the accident of those files having no extension.
 
+- **`internal/domain/seed`: randomness derived from the address of a value.**
+  SHA-256 over a length framed message built from the seed, the entity, the
+  row, the field, the purpose and a round counter. The lengths are what make
+  the message unambiguous: plain concatenation gives the same bytes for entity
+  "ab" with field "c" and entity "a" with field "bc", and a collision that rare
+  reads as coincidence rather than as a defect.
+  No version of anything enters the message, so an upgrade moves nobody's
+  bytes. Byte stability is therefore a promise held within a major version.
+  `IntN` draws again instead of folding the remainder, because folding makes
+  the low results more likely whenever the bound does not divide evenly. The
+  lean never shows up as a failure, only as data tilted one way.
+- **Three guards rather than one, and the reason is worth keeping.** A
+  determinism test compares two runs of the same build, so it only ever finds
+  randomness that crept in and stays green when the derivation changes
+  completely. The golden values in testdata compare today with the past, and a
+  locality test asks whether drawing other places moves this one. Until there
+  is a build matrix, the golden file is also the whole of the promise that the
+  derivation does not depend on the machine.
+- **An oracle that does not trust the package.** One test builds the message by
+  hand from the documented layout, and an internal script recomputes every
+  golden value in another language on another SHA-256 implementation. Thirteen
+  of thirteen agree. Without it the golden file would defend its own mistake.
+- **The line ending protection now reaches every testdata directory.** Measured
+  before changing it: `testdata/x` was protected and
+  `internal/domain/seed/testdata/x` was not, because a pattern containing a
+  slash is anchored where the attributes file lives. Go puts fixtures next to
+  the package that owns them, so most of them would have been unprotected.
+
 ### Fixed
 
 - **`--no-color` was ignored whenever flag parsing itself failed**, which is

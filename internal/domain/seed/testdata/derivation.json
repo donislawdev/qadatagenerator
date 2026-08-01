@@ -1,0 +1,145 @@
+[
+  {
+    "seed": "",
+    "entity": "",
+    "row": 0,
+    "field": "",
+    "purpose": "",
+    "digest": "85759b3811ff7dc47b03792ac85317be51431a3f9e01dcafce317ed736a391b0",
+    "number": 9616763244441992644,
+    "bound": 1,
+    "bounded": 0
+  },
+  {
+    "seed": "run-1",
+    "entity": "customer",
+    "row": 0,
+    "field": "first_name",
+    "purpose": "value",
+    "digest": "f5375b7bb856e465a53bb01ae0b51d7ace796dada003bb0e721e26a51a3b9c4b",
+    "number": 17669692249943237733,
+    "bound": 2,
+    "bounded": 1
+  },
+  {
+    "seed": "run-1",
+    "entity": "customer",
+    "row": 1,
+    "field": "first_name",
+    "purpose": "value",
+    "digest": "e5e7f3d8ea275dd556f665af612604fda3087260dd710bb0850c4979d0c1c2c3",
+    "number": 16566477867272592853,
+    "bound": 7,
+    "bounded": 6
+  },
+  {
+    "seed": "run-1",
+    "entity": "customer",
+    "row": 0,
+    "field": "last_name",
+    "purpose": "value",
+    "digest": "95b3b0cdcc9b4ab567ce1b3d63b427322571614906ba6f81570b17d067f9676d",
+    "number": 10787159930429983413,
+    "bound": 100,
+    "bounded": 13
+  },
+  {
+    "seed": "run-1",
+    "entity": "customer",
+    "row": 0,
+    "field": "first_name",
+    "purpose": "corrupt",
+    "digest": "51b062781c2dca73eb142e23f1e5f8bf871090c1a52f5b480af58249d6adec52",
+    "number": 5886312980981598835,
+    "bound": 256,
+    "bounded": 115
+  },
+  {
+    "seed": "run-2",
+    "entity": "customer",
+    "row": 0,
+    "field": "first_name",
+    "purpose": "value",
+    "digest": "5691df236338ccb348d4683b142870cd1f31efb4fd5e0648c0fb2d4381ee37c0",
+    "number": 6238012301966363827,
+    "bound": 1000,
+    "bounded": 827
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "order",
+    "row": 4812903,
+    "field": "total",
+    "purpose": "value",
+    "digest": "aae828e238aeb3808afc2ce51f805659fd05ccd4907e14915ce5a562ce6645ac",
+    "number": 12315138133123314560,
+    "bound": 999983,
+    "bounded": 713070
+  },
+  {
+    "seed": "zażółć",
+    "entity": "kontrahent",
+    "row": 12,
+    "field": "nazwa",
+    "purpose": "value",
+    "digest": "481c693ad7121e2024b1a929ecad01fcebc2fc1869bbbcb11b135f6e623b7dd0",
+    "number": 5196143771516018208,
+    "bound": 3,
+    "bounded": 0
+  },
+  {
+    "seed": "s",
+    "entity": "ab",
+    "row": 0,
+    "field": "c",
+    "purpose": "",
+    "digest": "b6d7b0190a7ef2427e55e3d124432b9cf10c919a957d5ddc15ab957c9438ac23",
+    "number": 13175192856492438082,
+    "bound": 5,
+    "bounded": 2
+  },
+  {
+    "seed": "s",
+    "entity": "a",
+    "row": 0,
+    "field": "bc",
+    "purpose": "",
+    "digest": "e3ed93f9460069963862c9424858aedd652c36a71bb4d5239b572e30addbc111",
+    "number": 16423946114920638870,
+    "bound": 5,
+    "bounded": 0
+  },
+  {
+    "seed": "s",
+    "entity": "e",
+    "row": -1,
+    "field": "f",
+    "purpose": "",
+    "digest": "9f3f5a446e7a82f8f2eafdb26fbe73c340c4cb01cd3dcbb03e53c9149480e40c",
+    "number": 11474989625521111800,
+    "bound": 10,
+    "bounded": 0
+  },
+  {
+    "seed": "s",
+    "entity": "e",
+    "row": 9223372036854775807,
+    "field": "f",
+    "purpose": "",
+    "digest": "cc01eba08b456b1c9b85f327790b10eefd55d36a8ae933da354eef467f5d35a5",
+    "number": 14700289733477886748,
+    "bound": 10,
+    "bounded": 8
+  },
+  {
+    "seed": "s",
+    "entity": "e",
+    "row": 5,
+    "field": "f",
+    "purpose": "",
+    "digest": "f2289f311fdc7560c0a1cdf4a99da4050d9e7aff46b86c543dec88fa4a806380",
+    "number": 17449371789583742304,
+    "bound": 5000000000000000000,
+    "bounded": 2449371789583742304
+  }
+]
