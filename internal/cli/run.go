@@ -11,6 +11,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -162,13 +163,112 @@ func runCommand(out *streams, command []string, asked invocation) int {
 	case commandValidate:
 		return runValidate(out, command[1:], asked.global)
 	default:
-		return usage(out, problem{
-			what:    "unknown command " + command[0],
-			why:     problemUnknownCommandWhy,
-			allowed: commandValidate,
-			instead: problemUnknownCommandDo,
-		})
+		return usage(out, unknownCommand(command[0]))
 	}
+}
+
+// unknownCommand builds the refusal for a verb this build does not have, and
+// finishes the attempt when it can.
+//
+// The four parts stay four parts. What changes when the typed name is close to
+// a real one is the reason and the suggestion, because a message that only
+// says no leaves the reader to guess which of their letters was wrong.
+func unknownCommand(typed string) problem {
+	refusal := problem{
+		what:    "unknown command " + typed,
+		why:     problemUnknownCommandWhy,
+		allowed: strings.Join(knownCommands(), ", "),
+		instead: problemUnknownCommandDo,
+	}
+	if near, found := nearestCommand(typed); found {
+		refusal.why = problemUnknownCommandNear + near + problemUnknownCommandNearTail
+		refusal.instead = "qadg " + near
+	}
+	return refusal
+}
+
+// knownCommands are the verbs this build accepts, sorted.
+//
+// Sorted rather than in the order somebody happened to write them, because the
+// list reaches the user and two runs must not disagree about it. Go randomises
+// map iteration on purpose and this is the same rule applied to a slice.
+func knownCommands() []string {
+	commands := []string{commandValidate}
+	sort.Strings(commands)
+	return commands
+}
+
+// nearestCommand returns the known verb closest to what was typed, and whether
+// it is close enough to be worth suggesting.
+//
+// The threshold is deliberately mean. Suggesting a command for anything vaguely
+// similar turns a clear refusal into a misleading one, and somebody who typed a
+// word we simply do not have is better served by the list of what exists.
+func nearestCommand(typed string) (string, bool) {
+	best, distance := "", -1
+	for _, candidate := range knownCommands() {
+		measured := editDistance(strings.ToLower(typed), candidate)
+		if distance < 0 || measured < distance {
+			best, distance = candidate, measured
+		}
+	}
+	if best == "" {
+		return "", false
+	}
+	// Two edits, and never more than a third of the word.
+	//
+	// Which of the two binds depends on the length of the verb, and a mutation
+	// made that worth writing down: for anything six letters or longer the
+	// ceiling of two is the binding one, so with validate as the only command
+	// the division does nothing. It starts to matter the day a short verb
+	// arrives, where two edits out of three letters would match almost
+	// anything.
+	limit := len(best) / 3
+	if limit > 2 {
+		limit = 2
+	}
+	return best, distance <= limit
+}
+
+// editDistance counts single character insertions, deletions and substitutions
+// between two words, over bytes.
+//
+// Bytes rather than runes is correct here and worth saying why: command names
+// are a public contract and this project writes them in the ASCII range, so a
+// rune walk would cost a conversion and answer the same thing.
+func editDistance(from, to string) int {
+	previous := make([]int, len(to)+1)
+	current := make([]int, len(to)+1)
+	for column := range previous {
+		previous[column] = column
+	}
+	for row := 1; row <= len(from); row++ {
+		current[0] = row
+		for column := 1; column <= len(to); column++ {
+			cost := 1
+			if from[row-1] == to[column-1] {
+				cost = 0
+			}
+			current[column] = minimumOf(
+				previous[column]+1,
+				current[column-1]+1,
+				previous[column-1]+cost,
+			)
+		}
+		previous, current = current, previous
+	}
+	return previous[len(to)]
+}
+
+func minimumOf(first, second, third int) int {
+	smallest := first
+	if second < smallest {
+		smallest = second
+	}
+	if third < smallest {
+		smallest = third
+	}
+	return smallest
 }
 
 // runReports prints everything the invocation asked for, or refuses the run.
@@ -470,6 +570,7 @@ func groupData(sources []license.DataSource) []takenFrom {
 func printHelp(out *streams) {
 	blocks := []string{
 		summaryLine,
+		examplesBlock,
 		usageBlock,
 		commandsBlock,
 		renderFlags(),

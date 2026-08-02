@@ -26,6 +26,19 @@ const (
 	// produces, which is the dataset and the claim about it, not just data.
 	summaryLine = "qadg produces test data together with a manifest that says how the system under test should react to it."
 
+	// examplesBlock comes before the usage pattern, and the order is the whole
+	// point of it. A pattern like qadg <command> [arguments] tells somebody who
+	// already knows the tool what the shape is. Somebody meeting it for the
+	// first time wants a line they can paste, and every widely used command
+	// line tool leads with one.
+	examplesBlock = `Examples:
+  qadg validate recipe.yaml
+      Read a recipe and report every problem it has, all of them at once.
+
+  qadg validate --json recipe.yaml
+      The same check as one JSON document, for a pipeline that decides on its
+      own what is blocking.`
+
 	usageBlock = `Usage:
   qadg <command> [arguments]
   qadg --version
@@ -139,6 +152,13 @@ const (
 	problemNoCommand    = "no command given"
 	problemNoCommandWhy = "a command says what to do, and this run said nothing"
 	problemNoCommandDo  = "qadg --help"
+
+	// problemUnknownCommandNear replaces the plain reason when what was typed
+	// is close enough to a real command to be a slip of the fingers rather
+	// than a different word. Naming the near miss is the difference between a
+	// message that ends the attempt and one that finishes it.
+	problemUnknownCommandNear     = "this build does not define that command, and "
+	problemUnknownCommandNearTail = " is one small edit away"
 
 	problemUnknownFlagWhy = "this build does not define that flag"
 	problemUnknownFlagDo  = "qadg --help lists every flag this build accepts"

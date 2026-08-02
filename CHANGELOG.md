@@ -14,6 +14,16 @@ Nothing has been released yet. The binary reports 0.1.0, which is the version
 being built rather than one anybody can download. Releasing is a separate act
 and has not happened.
 
+### Changed
+
+- **A mistyped command now tells you which one you meant.** `qadg vlaidate`
+  answers that `validate` is one small edit away and gives you the line to run.
+  A word that is nothing like a command still gets the plain refusal and the
+  list of what exists, because a suggestion offered for anything vaguely
+  similar would be misleading rather than helpful.
+- **The help starts with two examples you can paste**, before the usage pattern
+  and the flag list. The pattern is still there for people who know the tool.
+
 ### Added
 
 - **Polish statistical numbers (REGON) can now be generated and checked.** A

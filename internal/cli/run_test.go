@@ -326,3 +326,111 @@ func TestVerboseShowsProgress(t *testing.T) {
 		t.Error("--verbose asked for detail and got none")
 	}
 }
+
+// The help has to finish somebody's first attempt, not describe it.
+//
+// A usage pattern like qadg <command> [arguments] tells a reader who already
+// knows the tool what shape a line has. Somebody meeting it for the first time
+// wants a line to paste, and clig.dev puts examples first for that reason. The
+// test pins the order rather than the presence, because an example buried
+// under the flag list answers the question too late.
+func TestTheHelpBeginsWithAnExampleBeforeTheUsagePattern(t *testing.T) {
+	got := run("--help")
+	if got.code != 0 {
+		t.Fatalf("ended with %d", got.code)
+	}
+
+	example := strings.Index(got.data, "Examples:")
+	usage := strings.Index(got.data, "Usage:")
+	flags := strings.Index(got.data, flagsHeading)
+
+	if example < 0 {
+		t.Fatal("the help carries no examples section")
+	}
+	if usage >= 0 && example > usage {
+		t.Error("the usage pattern comes before the examples")
+	}
+	if flags >= 0 && example > flags {
+		t.Error("the flag list comes before the examples")
+	}
+	// An example nobody can paste is a heading, not an example.
+	if !strings.Contains(got.data, "qadg validate recipe.yaml") {
+		t.Error("no example carries a whole command somebody could copy")
+	}
+}
+
+// A slip of the fingers gets the answer, not only the refusal.
+func TestACommandOneEditAwayIsSuggested(t *testing.T) {
+	for _, typed := range []string{"vlaidate", "validat", "Validate", "valdiate"} {
+		got := run(typed, "recipe.yaml")
+		if got.code != 2 {
+			t.Errorf("%q ended with %d, and a wrong verb is a usage failure", typed, got.code)
+		}
+		if !strings.Contains(got.log, commandValidate) {
+			t.Errorf("%q was refused without naming the command it is near: %q", typed, got.log)
+		}
+		if !strings.Contains(got.log, "try: qadg "+commandValidate) {
+			t.Errorf("%q was refused without a line to try instead: %q", typed, got.log)
+		}
+	}
+}
+
+// The threshold has to be mean, and this is the half of the pair that keeps it
+// mean. Suggesting a command for any vaguely similar word turns a clear
+// refusal into a misleading one.
+func TestAWordNothingLikeACommandIsRefusedWithoutASuggestion(t *testing.T) {
+	for _, typed := range []string{"frobnicate", "generate", "list", "rm"} {
+		got := run(typed, "recipe.yaml")
+		if got.code != 2 {
+			t.Errorf("%q ended with %d", typed, got.code)
+		}
+		if strings.Contains(got.log, "one small edit away") {
+			t.Errorf("%q was offered as a near miss, and it is not one: %q", typed, got.log)
+		}
+		// The refusal still has to say what does exist, or it is a dead end.
+		if !strings.Contains(got.log, labelAllowed) {
+			t.Errorf("%q was refused without naming what is allowed: %q", typed, got.log)
+		}
+	}
+}
+
+// Every refusal keeps its four parts, suggestion or not. The contract in
+// docs/09 is about the shape of the message, and a branch that improves the
+// wording is exactly where a part goes missing.
+func TestBothShapesOfTheUnknownCommandRefusalKeepFourParts(t *testing.T) {
+	for _, typed := range []string{"vlaidate", "frobnicate"} {
+		got := run(typed, "recipe.yaml")
+		for _, part := range []string{prefixError, labelAllowed, labelTry} {
+			if !strings.Contains(got.log, part) {
+				t.Errorf("the refusal of %q is missing %q: %q", typed, part, got.log)
+			}
+		}
+		if strings.Count(got.log, "\n") < 3 {
+			t.Errorf("the refusal of %q is not four lines: %q", typed, got.log)
+		}
+	}
+}
+
+// Every documented flag is actually accepted, asked of the parser rather than
+// of the list the help was printed from.
+//
+// This exists because the test above cannot answer it. That one compares
+// acceptedFlags() with flagDocs, and both are projections of the same slice, so
+// it holds two views of one list against each other and passes by construction.
+// What nobody checked is the step where a flag becomes real: the names are
+// registered by hand, in two separate places, and a documented flag missing its
+// registration would make the help promise something the tool refuses.
+//
+// It is the same shape of gap the neighbouring project found in its own usage
+// contract test, where the guard proved the list was self consistent while the
+// most important entry was absent from it.
+func TestEveryDocumentedFlagIsAcceptedByTheParser(t *testing.T) {
+	for _, doc := range flagDocs {
+		for _, name := range doc.names {
+			got := run(name)
+			if strings.Contains(got.log, problemUnknownFlagWhy) {
+				t.Errorf("%s is in the help and the parser refuses it: %q", name, got.log)
+			}
+		}
+	}
+}
