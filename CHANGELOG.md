@@ -17,6 +17,15 @@ and has not happened.
 
 ### Added
 
+- A recipe larger than 256 kB is refused before it is read, with the
+  configuration exit code and a message naming the limit. Reading a
+  deliberately nested document costs time growing with the square of its size,
+  and a recipe arriving through a pull request could otherwise hang a build for
+  minutes. The documented example is about one and a half kilobytes, so the
+  limit leaves room for one a hundred and seventy times larger.
+- A SECURITY.md saying how to report a vulnerability privately, which versions
+  are supported, what to expect from a project maintained by one person, and
+  what is deliberately not protected.
 - The first country provider, the Polish national identification number. It
   produces numbers that agree with the date of birth and the gender in the
   same record, reads both back out of a number, and says whether a number is

@@ -47,6 +47,36 @@ var (
 	writableFormats = []string{"csv", "json"}
 )
 
+// MaxSize is the largest recipe this build will read.
+//
+// # Why there is a limit at all
+//
+// A recipe comes from somebody else's repository. In a pipeline that means it
+// can arrive through a pull request, so it is untrusted input in the same
+// sense a downloaded file is, however ordinary it usually looks.
+//
+// Measured on 2026-08-02: reading a deliberately nested document costs time
+// that grows with the square of its size. A hundred thousand levels of nesting
+// is a hundred and ninety five kilobytes and takes close to four seconds, and
+// doubling the input quadruples that. The cost is entirely inside the YAML
+// library, measured separately, so nothing this package does with the parsed
+// tree can bring it down. The only lever before parsing is the size of the
+// input, which is why the limit is here rather than on the depth.
+//
+// # Why this number
+//
+// The first design principle of the format is that a recipe is readable and
+// writable by hand and reviewed in a pull request. The documented example is
+// about one and a half kilobytes, so this leaves room for a recipe a hundred
+// and seventy times larger, while holding the worst case at a few seconds
+// rather than minutes.
+//
+// The refusal carries the configuration exit code rather than one of its own.
+// A recipe this build will not read is a recipe that cannot be used, which is
+// what that code already means, and adding a code after a release is a
+// breaking change for everybody reading them.
+const MaxSize = 256 * 1024
+
 // Result is everything reading a recipe produced.
 type Result struct {
 	Recipe    recipe.Recipe
@@ -61,6 +91,15 @@ func (r Result) Valid() bool { return len(r.Problems) == 0 }
 // list of what could not be checked.
 func Decode(data []byte) Result {
 	reader := &reader{}
+
+	// Checked before the parser is handed anything, because the cost this
+	// guards against is the parser's own and cannot be undone afterwards.
+	if len(data) > MaxSize {
+		reader.report("", fmt.Sprintf("the recipe is %d kB and this build reads at most %d kB", len(data)/1024, MaxSize/1024),
+			fmt.Sprintf("a recipe up to %d kB", MaxSize/1024),
+			"split it into several recipes, or check that the file is a recipe and not something else")
+		return reader.result(recipe.Recipe{})
+	}
 
 	var root any
 	if err := yaml.UnmarshalWithOptions(data, &root, yaml.UseOrderedMap()); err != nil {

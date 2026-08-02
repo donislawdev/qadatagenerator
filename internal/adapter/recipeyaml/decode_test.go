@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
@@ -479,4 +480,39 @@ func decode(t *testing.T, source string) recipeyaml.Result {
 		t.FailNow()
 	}
 	return result
+}
+
+// A recipe arrives from somebody else's repository, so in a pipeline it can
+// come through a pull request. Reading a deliberately nested document costs
+// time growing with the square of its size, and that cost belongs to the YAML
+// library rather than to anything here, so the only lever is the size of the
+// input before the parser sees it.
+func TestARecipeTooLargeToReadIsRefusedBeforeParsing(t *testing.T) {
+	oversized := make([]byte, recipeyaml.MaxSize+1)
+	for i := range oversized {
+		oversized[i] = '['
+	}
+
+	start := time.Now()
+	result := recipeyaml.Decode(oversized)
+	elapsed := time.Since(start)
+
+	if result.Valid() {
+		t.Fatal("a recipe past the limit was accepted")
+	}
+	if len(result.Problems) != 1 || !strings.Contains(result.Problems[0].What, "at most") {
+		t.Fatalf("expected one problem naming the limit, got %+v", result.Problems)
+	}
+	// The refusal has to be cheap. Taking the slow path and then refusing
+	// would leave the cost this exists to avoid.
+	if elapsed > time.Second {
+		t.Errorf("the refusal took %v, so the parser was handed the input after all", elapsed)
+	}
+
+	// One byte under the limit still goes to the parser, or the guard would be
+	// refusing things nobody asked it to.
+	fine := recipeyaml.Decode([]byte("version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y }\n"))
+	if !fine.Valid() {
+		t.Fatalf("an ordinary recipe was refused: %+v", fine.Problems)
+	}
 }
