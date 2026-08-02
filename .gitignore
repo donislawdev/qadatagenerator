@@ -11,6 +11,16 @@ CLAUDE.md
 # this repository.
 tools/
 
+# The developer changelog became internal on 2026-08-02. It was tracked until
+# then, so the history up to that day stays in this repository and only future
+# edits are untracked, exactly as with the documents above.
+#
+# It keeps the writing conventions of the repository even though it has left
+# it, English and the punctuation rules included, because sentences move
+# between it and the public changelog next to it. That exception is named in
+# tools/audyt.py rather than left to memory.
+CHANGELOG-DEV.md
+
 # Local assistant configuration. Machine specific and not part of the product.
 .claude/
 

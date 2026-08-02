@@ -1,7 +1,6 @@
 # Changelog
 
-Everything a user would notice is recorded here. The technical counterpart is
-in CHANGELOG-DEV.md.
+Everything a user would notice is recorded here.
 
 The format follows Keep a Changelog and the versions follow Semantic
 Versioning. A change that breaks a public contract gets a BREAKING section
