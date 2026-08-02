@@ -40,14 +40,17 @@ linters:
     # typo there is a defect in the product rather than in a comment.
     - misspell
 
-  settings:
-    misspell:
-      # No locale is set on purpose, so that only real misspellings are
-      # reported. Asking for one spelling of English turned out to fight the
-      # product: NO_COLOR is a standard environment variable and --no-color is
-      # our own flag, so a rule preferring colour would demand renaming a
-      # public contract to satisfy a dictionary.
-      locale: ""
+  # misspell deliberately has no settings block. Its locale accepts only US or
+  # UK, and choosing either turned out to fight the product: NO_COLOR is a
+  # standard environment variable and --no-color is our own flag, so a rule
+  # preferring colour would demand renaming a public contract to satisfy a
+  # dictionary. Leaving the key out reports real misspellings and stays out of
+  # the argument between two spellings of English.
+  #
+  # Written as a comment rather than as locale with an empty value, because an
+  # empty value is refused by the schema. Measured the hard way: running the
+  # linter locally accepted it and the action refused it, since the action also
+  # runs config verify and a plain run does not.
 
   exclusions:
     rules:
