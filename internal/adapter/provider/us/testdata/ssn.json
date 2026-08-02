@@ -1,0 +1,92 @@
+[
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 0,
+    "field": "national_id",
+    "purpose": "value",
+    "value": "666-16-2140",
+    "corrupted": "000-16-2140"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 1,
+    "field": "national_id",
+    "purpose": "value",
+    "value": "666-86-6674",
+    "corrupted": "000-86-6674"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 2,
+    "field": "national_id",
+    "purpose": "value",
+    "value": "666-72-4928",
+    "corrupted": "000-72-4928"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 7,
+    "field": "national_id",
+    "purpose": "value",
+    "value": "666-26-8974",
+    "corrupted": "000-26-8974"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 42,
+    "field": "national_id",
+    "purpose": "value",
+    "value": "666-65-2366",
+    "corrupted": "000-65-2366"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 999,
+    "field": "national_id",
+    "purpose": "value",
+    "value": "666-77-2800",
+    "corrupted": "000-77-2800"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 1000000,
+    "field": "national_id",
+    "purpose": "value",
+    "value": "666-79-7660",
+    "corrupted": "000-79-7660"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "customer",
+    "row": 0,
+    "field": "national_id",
+    "purpose": "value",
+    "value": "666-80-3146",
+    "corrupted": "000-80-3146"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "customer",
+    "row": 1,
+    "field": "national_id",
+    "purpose": "value",
+    "value": "666-47-5456",
+    "corrupted": "000-47-5456"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 5,
+    "field": "national_id",
+    "purpose": "value",
+    "value": "666-77-3784",
+    "corrupted": "000-77-3784"
+  }
+]

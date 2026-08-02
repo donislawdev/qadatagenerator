@@ -29,6 +29,19 @@ type checked struct{ stub }
 func (checked) CheckDigits(string) ([]int, bool)         { return []int{10}, true }
 func (checked) WithCheckDigits(v string) (string, error) { return v, nil }
 
+// readOnlyRanged implements only the reading half of what
+// identifier.reserved-range implies.
+type readOnlyRanged struct{ stub }
+
+func (readOnlyRanged) InReservedRange(string) bool { return true }
+func (readOnlyRanged) ReservedRanges() []string    { return []string{"a block"} }
+
+// ranged adds the writing half.
+type ranged struct{ readOnlyRanged }
+
+func (ranged) NeverIssuedTargets() []string                    { return []string{"zero_area"} }
+func (ranged) WithNeverIssued(value, _ string) (string, error) { return value, nil }
+
 func findings(t *testing.T, p provider.Provider) string {
 	t.Helper()
 	return strings.Join(provider.Check(p), " | ")
@@ -118,6 +131,36 @@ func TestAWellFormedProviderPasses(t *testing.T) {
 		id:      "PL.nip",
 		claimed: []capability.Name{capability.IdentifierCheckDigit},
 	}}
+	if got := provider.Check(good); len(got) != 0 {
+		t.Fatalf("expected no findings, got %v", got)
+	}
+}
+
+// # The half that was missing until the first provider to declare it arrived
+//
+// A scheme with never issued blocks generates inside one of them, so asking
+// whether a value is reserved returns true for every correct value the tool
+// produces. A corruption aimed at unassigned ranges therefore cannot use that
+// question to decide whether it applies, and it has nothing to build a value
+// with either. Reading alone is not enough to declare this capability, and
+// this is the test that says so.
+func TestAProviderThatCanOnlyReadItsReservedRangesIsRefused(t *testing.T) {
+	got := findings(t, readOnlyRanged{stub{
+		id:      "US.ssn",
+		claimed: []capability.Name{capability.IdentifierReservedRange},
+	}})
+	if !strings.Contains(got, "the interface it implies is not implemented") {
+		t.Fatalf("expected the missing write side to be reported, got %q", got)
+	}
+}
+
+// The shape that passes, so the check above is known to be refusing something
+// rather than everything.
+func TestAProviderWithBothHalvesOfItsReservedRangesPasses(t *testing.T) {
+	good := ranged{readOnlyRanged{stub{
+		id:      "US.ssn",
+		claimed: []capability.Name{capability.IdentifierReservedRange},
+	}}}
 	if got := provider.Check(good); len(got) != 0 {
 		t.Fatalf("expected no findings, got %v", got)
 	}

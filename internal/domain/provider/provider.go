@@ -200,18 +200,41 @@ type GenderEncoder interface {
 
 // RangeAware is required of a provider declaring identifier.reserved-range.
 //
-// It answers in both directions on purpose. Generating inside a reserved range
-// is the ethical default, and telling whether a value already sits in one is
-// what stops a mutator aimed at unassigned ranges from being applicable to a
-// value that is already there.
+// # Two questions, and running them together makes the mutator useless
+//
+// A numbering scheme with never issued blocks usually has more than one, and
+// they are not interchangeable. Generating inside one of them is the ethical
+// default, so every value this tool produces for such a scheme already sits in
+// a never issued block. A mutator aimed at unassigned ranges therefore cannot
+// ask whether a value is in a reserved range and stop when the answer is yes:
+// for generated data the answer is always yes and the mutator would never
+// apply to anything.
+//
+// That is why the write side is here rather than in the engine. The applicable
+// question is not whether the value is reserved but whether it already sits in
+// the particular block the corruption is aimed at, and only the provider knows
+// how many blocks the scheme has or how to write one. Putting that in the
+// engine would make the second country with reserved ranges an edit to the
+// engine instead of a new file.
 type RangeAware interface {
-	// InReservedRange reports whether the value already sits in a range that
-	// is never assigned to a real person.
+	// InReservedRange reports whether the value sits in a range that is never
+	// assigned to a real person. It is the claim this tool makes about its own
+	// output, not a test of whether a corruption applies.
 	InReservedRange(value string) bool
 	// ReservedRanges describes the ranges in words, for the report that has
 	// to tell a user why their safe data is rejected by an application that
 	// checks ranges.
 	ReservedRanges() []string
+	// NeverIssuedTargets names the blocks a value can be moved into, sorted.
+	// These are the names a catalog entry passes as its target parameter.
+	NeverIssuedTargets() []string
+	// WithNeverIssued returns the value moved into the named block.
+	//
+	// It refuses when the value already sits there, and that refusal is the
+	// applicability answer: it is the one case the manifest has to record as
+	// applied false with a reason, rather than as a corruption that changed
+	// nothing and said so to nobody.
+	WithNeverIssued(value, target string) (string, error)
 }
 
 // implied maps a capability to the interface a provider claiming it must

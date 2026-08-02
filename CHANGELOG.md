@@ -17,6 +17,30 @@ and has not happened.
 
 ### Added
 
+- The second country provider, the United States Social Security number. It
+  produces numbers, says whether a number is well formed and why not, and says
+  whether a number is one the Social Security Administration would never have
+  issued.
+- Every number it produces sits in area 666, which the Administration has
+  never assigned and has excluded from assignment, so no generated number can
+  be a real person's. That is a property of the provider rather than a flag to
+  remember. **It has a price worth knowing before you meet it as a bug: an
+  application that validates assignment ranges will reject this tool's correct
+  data as well as its corrupted data.**
+- The rules were read at the Administration rather than recalled, and they
+  draw a line this tool now follows. Group 00 and serial 0000 are called
+  invalid outright. The area numbers are only excluded from assignment, which
+  is a weaker statement, and a number in area 666 therefore looks entirely
+  ordinary to any format check. That gap is what makes generated data safe and
+  still plausible.
+- **A Social Security number has no check digit, and encodes no date and no
+  gender.** Nothing in it verifies anything else in it, so a wrong digit
+  produces another well formed number. The corruptions that break a check
+  digit or move an encoded date do not apply to this identifier and say so
+  rather than appearing to work.
+- Numbers are written 123-45-6789. A number written as nine bare digits is
+  read as the same number, because it is, and a corruption hands back the way
+  of writing it was given rather than reformatting on the way through.
 - A recipe larger than 256 kB is refused before it is read, with the
   configuration exit code and a message naming the limit. Reading a
   deliberately nested document costs time growing with the square of its size,

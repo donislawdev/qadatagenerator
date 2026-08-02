@@ -11,6 +11,47 @@ Versioning.
 
 ### Added
 
+- **The reserved range interface grew a write side, because the first provider
+  to declare it showed the read side was not enough.** The contract gave three
+  of its four capability interfaces a read and write pair. The fourth had only
+  reads, and its own comment said that asking whether a value is in a reserved
+  range is what stops a corruption from applying to a value already there.
+  Applied to the Social Security number that rejects everything: pillar one
+  generates inside area 666, which is a never issued range, so the answer is
+  true for every correct value the tool produces and the corruption would
+  never have run. The whole of layer L3 for this identifier would have been
+  permanently unapplied with every test green.
+  This was the fourth appearance of one class of mistake, after a mutator
+  whose applicability condition could never hold, one that had nothing to do
+  in either supported locale, and capabilities read as coming from a single
+  supplier. The applicable question is not whether a value is reserved but
+  whether it already sits in the block the corruption aims at, and only the
+  provider knows how many blocks a scheme has or how to write one. Putting
+  that in the engine would have made the second country with reserved ranges
+  an edit to the engine rather than a new file.
+  The refusal when nothing would change is the point of the method rather than
+  a guard on it. It is the one case the manifest records as not applied with a
+  reason, instead of as a corruption that changed nothing and told nobody.
+- **Two questions about correctness, kept apart because the source keeps them
+  apart.** The Administration calls group 00 and serial 0000 invalid outright
+  and says the area numbers are only excluded from assignment. So Validate
+  answers for the shape, which is the question an ordinary application asks,
+  and passes area 666. It has to: a validator refusing it would refuse this
+  tool's own output. InReservedRange answers whether the number could ever
+  have been issued. Collapsing the two would leave the corruption with no
+  difference to show.
+- **Every number the generator can reach is walked rather than sampled.** Area
+  666 with groups 01 to 99 and serials 0001 to 9999 is 989 901 numbers, and
+  walking all of them takes about six tenths of a second. Where a domain is
+  countable, exhaustive beats random, which is the same measured answer that
+  settled the property based testing question.
+- **A third layer of oracle for the new provider**, computing the same answers
+  in another language from the transcribed source. The validator inside the
+  repository holds the two quoted sentences as strings and takes them apart,
+  where the provider holds them as numbers, so a sentence misread once is not
+  misread twice. Seven targeted mutations cover the new behaviour, including
+  one that edits the quoted sentence to prove the validator reads it rather
+  than keeping a list of its own.
 - **The hottest path in the product stopped allocating, and got twice as fast
   without moving a byte.** Deriving one value allocated nine times and two
   hundred bytes, which in the streaming mode would have been hundreds of
