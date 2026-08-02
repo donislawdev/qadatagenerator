@@ -40,10 +40,12 @@ Listing this is part of the answer rather than an omission, and the reasoning
 lives with the project's own threat model.
 
 - **A recipe is trusted to the extent that whoever runs the tool trusts it.**
-  It is read as data and never executed, and it is size limited so that a
-  hostile one cannot hang a build for minutes. Beyond that, a recipe with
-  absurd but legal contents is the author's problem, in the same way a build
-  script is.
+  It is read as data and never executed, and it is limited twice over: in size,
+  so that a hostile one cannot hang a build, and in how deeply it may nest, so
+  that one cannot exhaust the machine's memory instead. Both limits are set
+  from measurements rather than from caution. Beyond them, a recipe with absurd
+  but legal contents is the author's problem, in the same way a build script
+  is.
 - **The tool is not a security boundary between the person running it and the
   data they generate.** It generates synthetic data on request. It does not
   decide who may run it.
