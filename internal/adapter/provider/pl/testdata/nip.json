@@ -1,0 +1,58 @@
+[
+  {
+    "seed": "release-2026-08",
+    "entity": "company",
+    "row": 0,
+    "field": "nip",
+    "purpose": "value",
+    "value": "5659396047"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "company",
+    "row": 1,
+    "field": "nip",
+    "purpose": "value",
+    "value": "0772871858"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "company",
+    "row": 2,
+    "field": "nip",
+    "purpose": "value",
+    "value": "1896326032"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "company",
+    "row": 999,
+    "field": "nip",
+    "purpose": "value",
+    "value": "6396605501"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "company",
+    "row": 123456,
+    "field": "nip",
+    "purpose": "value",
+    "value": "7717145890"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "company",
+    "row": 0,
+    "field": "nip",
+    "purpose": "value",
+    "value": "5165727824"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "company",
+    "row": 1,
+    "field": "nip",
+    "purpose": "value",
+    "value": "0815183155"
+  }
+]

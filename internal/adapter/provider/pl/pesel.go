@@ -32,6 +32,14 @@ import (
 // digit is even for women and odd for men, and the last is a check digit over
 // the first ten with the weights 1 3 7 9 1 3 7 9 1 3.
 //
+// A second source confirms all four of those, and it took a day to find. The
+// government page states the rules in words and works no example, so for that
+// day the weights here rested on prose with nothing to check them against. The
+// country sheet the Ministry of Finance publishes on the European TIN Portal,
+// under its own copyright notice, takes one number apart digit by digit. It
+// agrees on the weights, on the century table and on the gender digit, and its
+// example is a test in this package.
+//
 // # Why this one matters more than the others
 //
 // It is the bridge between the two pillars. Pillar one has to make it agree
@@ -441,11 +449,24 @@ func digitsToString(digits []int) string {
 }
 
 func appendPair(digits []int, value int) []int {
-	return append(digits, value/10%10, value%10)
+	return appendFixed(digits, value, 2)
 }
 
 func appendTriple(digits []int, value int) []int {
-	return append(digits, value/100%10, value/10%10, value%10)
+	return appendFixed(digits, value, 3)
+}
+
+// appendFixed writes a value out as a fixed number of digits, most significant
+// first, dropping anything above the width.
+func appendFixed(digits []int, value, width int) []int {
+	divisor := 1
+	for remaining := 1; remaining < width; remaining++ {
+		divisor *= 10
+	}
+	for ; divisor > 0; divisor /= 10 {
+		digits = append(digits, value/divisor%10)
+	}
+	return digits
 }
 
 // parseISODate reads a date written as YYYY-MM-DD.

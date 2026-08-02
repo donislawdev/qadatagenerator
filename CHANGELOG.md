@@ -17,6 +17,17 @@ and has not happened.
 
 ### Added
 
+- **Polish tax numbers can now be generated and checked.** A generated number
+  is ten digits with a correct check digit, and the checker accepts the three
+  ways Poland writes one: bare, and either of the two hyphenated forms. A value
+  handed in with hyphens comes back with them.
+  Two limits are worth knowing before you rely on this. The scheme sets aside
+  no block of numbers for documentation or testing, so a generated tax number
+  could be some real company's, exactly as with the personal number. Mark
+  datasets carrying either as synthetic. And because the scheme divides by
+  eleven, some ten digit values can never be tax numbers whatever check digit
+  is written on the end. Asking for such a value to be made consistent gets a
+  refusal that says so, rather than a number quietly changed somewhere else.
 - **A recipe that nests square brackets more than sixty four deep is refused
   before it is read, with the configuration exit code and a message naming the
   limit.** The size limit alone did not catch this. Memory grows with the

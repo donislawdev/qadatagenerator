@@ -56,6 +56,89 @@ func FuzzValidateAgreesWithTheIndependentValidator(f *testing.F) {
 	})
 }
 
+// nipSeeds are the shapes worth starting the tax number from: correct values in
+// all three accepted spellings, values broken one rule at a time, the body no
+// check digit can complete, and shapes that are not numbers at all.
+var nipSeeds = []string{
+	"1234563218",
+	"123-456-32-18",
+	"123-45-63-218",
+	"2234567895", // the number the source works out by hand
+	"5659396047",
+	"9000000000", // nine hundred million leaves a remainder of ten
+	"9000000005",
+	"",
+	"0",
+	"0000000000",
+	"9999999999",
+	"123456321",   // one short
+	"12345632188", // one long
+	"123456321x",
+	"1-2-3-4-5-6-7-8-9-0",
+	"123 456 32 18",
+	"----------",
+	"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+	"١٢٣٤٥٦٣٢١٨", // digits of another script
+	"123456321é",
+}
+
+// The same differential question as for the personal number, asked about the
+// tax one. Two validators written from one description by one hand agree by
+// construction, so the only useful question is whether anything at all makes
+// them disagree.
+func FuzzTaxValidateAgreesWithTheIndependentValidator(f *testing.F) {
+	for _, value := range nipSeeds {
+		f.Add(value)
+	}
+
+	f.Fuzz(func(t *testing.T, value string) {
+		ours := pl.NIP{}.Validate(value)
+		theirs := oracle.CheckNIP(value)
+
+		if ours.Valid != (len(theirs) == 0) {
+			t.Fatalf("the two validators disagree about %q: ours says valid=%v (%s), the independent one says %v",
+				value, ours.Valid, ours.Reason, theirs)
+		}
+		if !ours.Valid && ours.Reason == "" {
+			t.Fatalf("%q was refused without a reason, which is the silence this tool argues against", value)
+		}
+	})
+}
+
+// A value this build calls valid has to survive being rebuilt with its own
+// check digit, in the shape it arrived in. Anything else means the reader and
+// the writer disagree about the same number, and it is the written shape rather
+// than the digits where that is most likely to go wrong.
+func FuzzTheTaxReadersNeverPanic(f *testing.F) {
+	for _, value := range nipSeeds {
+		f.Add(value)
+	}
+
+	f.Fuzz(func(t *testing.T, value string) {
+		subject := pl.NIP{}
+
+		// The results are deliberately unused: the property under test is that
+		// each call answers rather than fails.
+		_, _ = subject.CheckDigits(value)
+		_, _ = subject.WithCheckDigits(value)
+
+		if !subject.Validate(value).Valid {
+			return
+		}
+		positions, ok := subject.CheckDigits(value)
+		if !ok || len(positions) != 1 || positions[0] != len(value)-1 {
+			t.Fatalf("%q is valid and its check digit was placed at %v", value, positions)
+		}
+		rebuilt, err := subject.WithCheckDigits(value)
+		if err != nil {
+			t.Fatalf("%q is valid and recomputing its own check digit failed: %v", value, err)
+		}
+		if rebuilt != value {
+			t.Fatalf("%q rebuilt with its own check digit became %q", value, rebuilt)
+		}
+	})
+}
+
 // Nothing a person can put in a file may take the process down. A recipe comes
 // from somebody else's repository, so the values it names are untrusted input
 // rather than our own data.

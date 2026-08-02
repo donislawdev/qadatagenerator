@@ -290,14 +290,70 @@ func TestTheGenderCanBeFlippedAndTheNumberStaysWellFormed(t *testing.T) {
 	}
 }
 
-// # Why this test exists rather than a comparison against a published number
+// # The worked example the government description never gave
 //
-// No worked example was found at the primary source, so the weights rest on
-// its prose alone and cannot be checked against somebody else's arithmetic.
-// This asks instead whether the table has the property a check digit table is
-// supposed to have: every single digit error has to change the answer. A
-// weight sharing a factor with ten would silently fail to, and that is the way
-// a mistyped table gets through while looking fine.
+// For a day this file said that no worked example existed at the source, so the
+// weights rested on its prose alone with nothing to compare them against. That
+// was true of the page the rules were read from and false of the world: the
+// country sheet the Ministry of Finance of Poland publishes on the European TIN
+// Portal, under its own copyright notice, takes one number apart digit by digit.
+//
+// It is quoted here in full, because it is the only number in this repository
+// whose arithmetic somebody else did. Every intermediate value the source
+// prints is asserted, not only the final digit: a test checking the answer
+// alone would still pass with two compensating errors in the table, which is
+// the shape a mistyped weight actually takes.
+//
+// The sheet describes the sum its own way, adding only the last digit of each
+// product, so both readings are checked. They agree, which is the point.
+func TestTheWorkedExampleFromTheMinistryIsReproduced(t *testing.T) {
+	const published = "02070803628"
+
+	if findings := oracle.CheckPESEL(published); len(findings) != 0 {
+		t.Fatalf("the number the source works out is refused by the independent validator: %v", findings)
+	}
+	if verdict := (pl.PESEL{}).Validate(published); !verdict.Valid {
+		t.Fatalf("the number the source works out is refused by our validator: %s", verdict.Reason)
+	}
+
+	// The source says: a person born on the 8 of July 1902, sex female.
+	date, ok := pl.PESEL{}.EncodedDate(published)
+	if !ok || date != (provider.Date{Year: 1902, Month: 7, Day: 8}) {
+		t.Errorf("%s reads as %+v, the source says the 8 of July 1902", published, date)
+	}
+	if gender, _ := (pl.PESEL{}).EncodedGender(published); gender != provider.Female {
+		t.Errorf("%s reads as %q, the source says female", published, gender)
+	}
+
+	// 0*1=0, 2*3=6, 0*7=0, 7*9=63, 0*1=0, 8*3=24, 0*7=0, 3*9=27, 6*1=6, 2*3=6
+	products := []int{0, 6, 0, 63, 0, 24, 0, 27, 6, 6}
+	weights := []int{1, 3, 7, 9, 1, 3, 7, 9, 1, 3}
+	lastDigitTotal := 0
+	for position, want := range products {
+		if got := int(published[position]-'0') * weights[position]; got != want {
+			t.Errorf("position %d multiplies out to %d, the source says %d", position+1, got, want)
+		}
+		lastDigitTotal += want % 10
+	}
+	// 0+6+0+3+0+4+0+7+6+6=32, then 10-2=8.
+	if lastDigitTotal != 32 {
+		t.Errorf("the last digits of the products add up to %d, the source says 32", lastDigitTotal)
+	}
+	if got := (10 - lastDigitTotal%10) % 10; got != 8 {
+		t.Errorf("the check digit works out to %d, the source says 8", got)
+	}
+	if published[10] != '8' {
+		t.Errorf("the check digit in the published number is %c, the source says 8", published[10])
+	}
+}
+
+// # Why this test still earns its place
+//
+// The worked example above pins the table to one official answer. This asks a
+// different question, about every number rather than one: whether the table has
+// the property a check digit table is supposed to have, that every single digit
+// error changes the answer. A weight sharing a factor with ten would silently
+// fail to, and one published example would not show it.
 func TestEverySingleDigitErrorChangesTheCheckDigit(t *testing.T) {
 	base := generate(t, 11, map[string]string{provider.RoleBirthDate: "1975-03-08"})
 
