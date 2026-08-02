@@ -1,0 +1,66 @@
+# Fuzzing that actually fuzzes.
+#
+# The ordinary test run executes every fuzz target over its seed corpus and
+# stops, because that is what go test does without -fuzz. That is the right
+# behaviour for a run triggered by a push: it keeps the loop short and it
+# still catches a seed that stopped passing.
+#
+# Finding something new needs time rather than triggers, so it happens on a
+# schedule instead. A push based fuzz run would add minutes to every commit
+# and find nothing, because finding things is what takes the minutes.
+#
+# Measured before this file existed: 16.9 million executions of the identifier
+# validators and 3.5 million of the recipe reader, both without a finding. A
+# thirty second run on every push would have been theatre.
+name: fuzz
+
+on:
+  schedule:
+    # Twice a week, at a time nobody is waiting on a result.
+    - cron: "17 3 * * 1,4"
+  # So that a change to this file can be tried without waiting for the clock.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  GOTOOLCHAIN: local
+  CGO_ENABLED: "0"
+
+jobs:
+  fuzz:
+    name: fuzz ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - package: ./internal/adapter/provider/pl/
+            target: FuzzValidateAgreesWithTheIndependentValidator
+          - package: ./internal/adapter/provider/pl/
+            target: FuzzTheReadersNeverPanic
+          - package: ./internal/adapter/recipeyaml/
+            target: FuzzDecodeNeverPanics
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.5"
+
+      - name: fuzz
+        # -run with a pattern that matches nothing keeps the ordinary tests out
+        # of the way, so the whole budget goes to the target being fuzzed.
+        run: go test ${{ matrix.package }} -run XXX_NOTHING -fuzz ${{ matrix.target }} -fuzztime 10m
+
+      # A finding is written beside the package as a new seed. It has to leave
+      # the runner, or the input that took ten minutes to find dies with the
+      # machine and the next run starts from nothing.
+      - name: keep whatever was found
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: fuzz-finding-${{ matrix.target }}
+          path: internal/**/testdata/fuzz/**
+          if-no-files-found: ignore

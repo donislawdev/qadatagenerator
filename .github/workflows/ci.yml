@@ -124,6 +124,29 @@ jobs:
         with:
           version: v2.12.2
 
+  vulnerabilities:
+    name: known vulnerabilities
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.5"
+
+      # Reports only the vulnerabilities our code can actually reach, rather
+      # than every advisory that mentions a module we happen to require. That
+      # is what keeps it quiet enough to stay switched on, and a check nobody
+      # switches off is the only kind worth having.
+      #
+      # It earns its place here more than in most projects. The tool is aimed
+      # at environments that ask what is inside a binary before they will run
+      # it, and the licence flag already answers half of that question.
+      - uses: golang/govulncheck-action@v1.1.0
+        with:
+          go-version-input: "1.26.5"
+          check-latest: false
+
   cross:
     name: cross build from one machine
     runs-on: ubuntu-latest

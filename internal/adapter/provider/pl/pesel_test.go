@@ -106,6 +106,82 @@ func TestABoundDateAndGenderSurviveIntoTheNumber(t *testing.T) {
 	}
 }
 
+// # Why this walks every date instead of sampling them
+//
+// The five cases above are hand picked, which means they cover the boundaries
+// somebody thought of. This covers all of them, both genders included, and
+// the domain is small enough that there is no reason to sample: the scheme
+// expresses five centuries, and walking the lot costs a fraction of a second.
+//
+// Where a domain is bounded, exhaustive beats random. A property based
+// generator would draw a few thousand of these and call it evidence. This
+// leaves nothing to draw.
+func TestEveryDateTheSchemeCanExpressSurvivesTheRoundTrip(t *testing.T) {
+	subject := pl.PESEL{}
+	checked := 0
+
+	for year := 1800; year <= 2299; year++ {
+		for month := 1; month <= 12; month++ {
+			for day := 1; day <= daysInMonth(year, month); day++ {
+				want := provider.Date{Year: year, Month: month, Day: day}
+				for _, gender := range []provider.Gender{provider.Female, provider.Male} {
+					value, err := subject.Generate(request(1, map[string]string{
+						provider.RoleBirthDate: iso(want),
+						provider.RoleGender:    string(gender),
+					}))
+					if err != nil {
+						t.Fatalf("%s %s: %v", iso(want), gender, err)
+					}
+					if got, ok := subject.EncodedDate(value); !ok || got != want {
+						t.Fatalf("%s became %s, which reads back as %+v", iso(want), value, got)
+					}
+					if got, ok := subject.EncodedGender(value); !ok || got != gender {
+						t.Fatalf("%s %s became %s, which reads back as %q", iso(want), gender, value, got)
+					}
+					if findings := oracle.CheckPESEL(value); len(findings) != 0 {
+						t.Fatalf("%s %s became %s, refused by the independent validator: %v",
+							iso(want), gender, value, findings)
+					}
+					checked++
+				}
+			}
+		}
+	}
+
+	// A count that quietly fell to nothing would leave this passing while
+	// checking no dates at all, which is the way a loop based test retires.
+	if checked < 300000 {
+		t.Fatalf("only %d combinations were walked, so the loop is not covering the scheme", checked)
+	}
+	t.Logf("walked %d date and gender combinations", checked)
+}
+
+func daysInMonth(year, month int) int {
+	switch month {
+	case 4, 6, 9, 11:
+		return 30
+	case 2:
+		if year%400 == 0 || (year%4 == 0 && year%100 != 0) {
+			return 29
+		}
+		return 28
+	default:
+		return 31
+	}
+}
+
+func iso(date provider.Date) string {
+	pad := func(value, width int) string {
+		digits := make([]byte, width)
+		for i := width - 1; i >= 0; i-- {
+			digits[i] = byte('0' + value%10)
+			value /= 10
+		}
+		return string(digits)
+	}
+	return pad(date.Year, 4) + "-" + pad(date.Month, 2) + "-" + pad(date.Day, 2)
+}
+
 // A date the scheme cannot express is refused rather than folded into some
 // other century, which is what makes the boundary a boundary.
 func TestADateOutsideTheSchemeIsRefused(t *testing.T) {

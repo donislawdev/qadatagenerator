@@ -11,6 +11,28 @@ Versioning.
 
 ### Added
 
+- **Every date the Polish identifier can express is walked, both genders
+  included, rather than sampled.** Five hand picked boundaries cover the ones
+  somebody thought of. Three hundred and sixty five thousand combinations in
+  under a second cover the rest, and each is checked against the independent
+  validator on the way through.
+  This is also the answer to whether a property based testing library is worth
+  taking. Where a domain is countable, exhaustive beats random: a generator
+  would have drawn a few thousand of these and called it evidence. The
+  condition for revisiting it is written down rather than left to taste, and it
+  is the first round trip over a structured value, which arrives with the
+  canonical recipe form or the corruption engine.
+- **A vulnerability scanner in CI.** It reports only what our code can actually
+  reach rather than every advisory naming a module in go.mod, which is what
+  keeps it quiet enough to stay switched on. The tool is aimed at places that
+  ask what is inside a binary before running it, and the licence flag answers
+  only half of that.
+- **Fuzzing that actually fuzzes, on a schedule rather than on a push.** An
+  ordinary run walks the seeds and stops, which is right for a commit. Finding
+  something new takes time rather than triggers, and a thirty second run on
+  every push would have been theatre: sixteen point nine million executions
+  found nothing. A finding now leaves the runner as an artifact, because an
+  input that took ten minutes to find must not die with the machine.
 - **The race detector, fuzzing, a linter and a hard limit on the shape of a
   function.** There is no second author and the owner does not read the code,
   so the compiler, the tests and the scripts are the only readers there are. A
