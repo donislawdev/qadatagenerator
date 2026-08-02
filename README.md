@@ -133,3 +133,10 @@ If your legal department needs one sentence: running a GPL tool over your own in
 It does not produce binary artifacts as an end in themselves - images of a given size, deliberately damaged archives, files whose names break the filesystem. That is the scope of a separate tool, **Testing Files Generator**.
 
 The boundary is sharp, and it does not run along the file. Both tools can write a file with a given number of records, so that tells you nothing. **There the artifact is the product. Here the product is a dataset together with a declared expectation of what should happen to it.**
+
+## Reporting a security problem
+
+[SECURITY.md](SECURITY.md) says how to report a vulnerability privately, and
+lists what this tool deliberately does not protect against. The short version
+of the second part: a recipe is read as data and never executed, and generated
+data is meant to be shared rather than kept secret.
