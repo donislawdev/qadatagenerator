@@ -238,9 +238,13 @@ func runReports(out *streams, asked invocation) int {
 // the run has already failed in a way nobody planned for, and a second failure
 // while describing the first has nowhere left to be reported.
 func reportCrash(env Environment, recovered any) int {
+	// The recovered value goes through plain for the same reason every other
+	// line on this channel does. Nothing in this program panics with text that
+	// came from outside today, so this is closing a door rather than a hole,
+	// and it is one word.
 	if env.Stderr != nil {
 		_, _ = fmt.Fprintln(env.Stderr, prefixError+problemCrash)
-		_, _ = fmt.Fprintln(env.Stderr, prefixDetail+fmt.Sprint(recovered))
+		_, _ = fmt.Fprintln(env.Stderr, prefixDetail+plain(fmt.Sprint(recovered)))
 		_, _ = fmt.Fprintln(env.Stderr, prefixDetail+labelTry+problemCrashDo)
 	}
 	return int(codeRuntime)

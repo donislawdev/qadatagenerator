@@ -48,7 +48,7 @@ func runValidate(out *streams, arguments []string, global crossCutting) int {
 	}
 
 	path := arguments[0]
-	data, err := os.ReadFile(path)
+	data, err := readRecipe(path)
 	if err != nil {
 		// Nothing was validated, so there is no report to write in either
 		// shape. A reader that got no document on the data channel and a
@@ -66,6 +66,33 @@ func runValidate(out *streams, arguments []string, global crossCutting) int {
 		return finishFailed(out, runErr)
 	}
 	return finish(out, codeOK)
+}
+
+// readRecipe reads a recipe and stops one byte past the largest one this build
+// accepts.
+//
+// # Why not simply read the file
+//
+// Reading it whole and refusing it afterwards holds exactly the memory the
+// limit exists to refuse. The limit stopped the parser, which is what it was
+// written for, and did nothing about the buffer the bytes arrived in.
+//
+// Measured on 2026-08-02, before this: a 250 MB file cost 258 MB of memory,
+// three runs alike, on its way to being told it was over a 256 kB limit. The
+// message even quoted its size, which it could only know by holding it. In a
+// pipeline that is a build killed by the machine rather than an exit code from
+// the table, and a killed build says nothing about why.
+//
+// The one extra byte is what lets the decoder tell a recipe sitting exactly on
+// the limit from one past it.
+func readRecipe(path string) ([]byte, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = file.Close() }()
+
+	return io.ReadAll(io.LimitReader(file, recipeyaml.MaxSize+1))
 }
 
 // decodeRecipe is the port the use case is given. The conversion holds because

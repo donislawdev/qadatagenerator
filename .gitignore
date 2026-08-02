@@ -120,3 +120,7 @@ desktop.ini
 #               the test that protects the most important invariant.
 # go.sum        Required for reproducible builds.
 # spec/         Public specifications. The whole point of the repository.
+
+# Kopie zapasowe zostawione przez przerwany przebieg mutacji (tools/mutacje.py).
+# Odzyskiwane przy nastepnym uruchomieniu, nigdy commitowane.
+*.mutacja-bak

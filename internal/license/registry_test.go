@@ -99,7 +99,41 @@ func TestEveryListedComponentIsFullyDescribed(t *testing.T) {
 		if component.Source == "" {
 			t.Errorf("%s has no source, so nobody can read its terms", component.Module)
 		}
+		if !isADay(component.Checked) {
+			t.Errorf("%s does not say when its terms were read, so nobody can tell how old that fact is", component.Module)
+		}
 	}
+}
+
+// A license is a property of a version rather than of a project, and projects
+// have moved between permissive and copyleft terms between releases. Without
+// the day, the next session cannot tell a fact that was checked from one that
+// was remembered, and a remembered one reads most convincingly when it has
+// gone stale.
+func TestEveryReferenceCollectionSaysWhenItsTermsWereRead(t *testing.T) {
+	for _, source := range license.Data {
+		if !isADay(source.Checked) {
+			t.Errorf("%s does not say when the terms of %s were read", source.Corpus, source.Project)
+		}
+	}
+}
+
+// isADay accepts YYYY-MM-DD and nothing else. The format is fixed here rather
+// than taken from the machine, for the same reason every other date in this
+// project is.
+func isADay(value string) bool {
+	if len(value) != 10 || value[4] != '-' || value[7] != '-' {
+		return false
+	}
+	for position, symbol := range value {
+		if position == 4 || position == 7 {
+			continue
+		}
+		if symbol < '0' || symbol > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 func TestProjectLicensesAreNamed(t *testing.T) {

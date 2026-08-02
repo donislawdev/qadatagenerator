@@ -147,6 +147,59 @@ jobs:
           go-version-input: "1.26.5"
           check-latest: false
 
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    env:
+      # The floor lives here and in no other file. A threshold repeated in a
+      # document goes stale the first time the real one moves, and then the
+      # document is wrong about the one thing it was written to record.
+      #
+      # It is a ratchet. It may rise and it may not fall. Lowering it to turn a
+      # red run green is the same act as editing a golden value for the same
+      # reason, so it is the owner's decision rather than a way to get
+      # unblocked.
+      COVERAGE_FLOOR: "90"
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.5"
+
+      - name: measure and compare against the floor
+        shell: bash
+        # -coverpkg is the whole reason this job is trustworthy, and it is set
+        # here rather than diagnosed later. Go credits coverage only to the
+        # package being tested, so a project whose guards and validators live
+        # in packages of their own gets a number that describes something other
+        # than what it appears to.
+        #
+        # Measured here on 2026-08-02: 79.4% without the flag and 90.6% with
+        # it. In a neighbouring project of the same owner the same mistake read
+        # 0.0% against a real 43.7%, and the gate stood at zero looking as
+        # though it worked. Both shapes are green on a build page and neither
+        # number is the one anybody meant.
+        run: |
+          go test -count=1 -coverpkg=./internal/...,./cmd/... -coverprofile=coverage.out ./...
+          total=$(go tool cover -func=coverage.out | awk '/^total:/ {print $3}' | tr -d '%')
+          echo "covered ${total}%, floor ${COVERAGE_FLOOR}%"
+          below=$(awk -v have="$total" -v want="$COVERAGE_FLOOR" 'BEGIN { print (have < want) ? "yes" : "no" }')
+          if [ "$below" = "yes" ]
+          then
+            echo "coverage is below the floor"
+            echo "the floor is a ratchet and lowering it is the owner's decision, not a fix"
+            exit 1
+          fi
+
+      - name: report what is least covered
+        shell: bash
+        # Printed on every run, passing or not. A gate that only speaks when it
+        # is angry teaches people to read it only then.
+        run: |
+          echo "the ten least covered functions:"
+          go tool cover -func=coverage.out | sort -k3 -n | head -10
+
   cross:
     name: cross build from one machine
     runs-on: ubuntu-latest

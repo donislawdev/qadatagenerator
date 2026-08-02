@@ -11,6 +11,92 @@ Versioning.
 
 ### Added
 
+- **Two defects found by reading a sister project's documents, and both were
+  confirmed here by measurement rather than taken on trust.** A file holding
+  two recipes was read halfway and reported success, and a recipe saved by
+  Notepad was refused with a message telling the reader to add a line that was
+  already the first line of their file.
+  The interesting half is what did not transfer. Their rule counts documents
+  carrying content rather than raw documents, and the layout that caught them
+  out was a comment before a leading separator. Here that layout is fine and a
+  trailing separator is the one that reads as two. Copying their rule would
+  have refused a file anybody has the right to write, so the six layouts were
+  measured here and the rule was written from that.
+  A third thing they report did not reproduce at all: the YAML library they use
+  in the same pinned version panics on one input, and four shapes of that input
+  end here with a configuration failure and a sensible message. A negative
+  result, checked rather than assumed.
+- **The review ran in two modes and the difference between them is a result.**
+  The first eight questions were hypotheses, things that occurred to me, and
+  three of them landed. Then came a walk through every file of the product, and
+  that walk found a fourth thing no hypothesis of mine contained: a recipe can
+  put escape sequences into our own messages, where a terminal acts on them.
+  Neither colour switch helps, because both answer a different question than
+  the one an attacker asks. It is not whether we write escape sequences. It is
+  whether they pass through us.
+  The walk cost about an hour at two providers and one parser. It is the
+  cheapest it will ever be.
+- **A pass over the real code with security questions, and it found three
+  things.** Two came from the review itself: a recipe read whole into memory in
+  order to be refused for its size, and a report that grew with the hostile
+  input that caused it. The third came from an accident rather than from the
+  review, and that is recorded as such: a test run took most of the machine's
+  memory, and the measurement that followed showed the parser needs memory
+  growing with the square of how deeply square brackets nest.
+  The last one is the one worth carrying forward. The size limit had been set
+  from a measurement of time, and the note beside it said the only lever before
+  parsing was the size of the input. That was wrong, a second lever existed,
+  and it was one pass over bytes. A sentence saying only X is possible is a
+  sentence about impossibility, and those have no guard and get believed.
+  The same accident showed that the test payload built to be expensive was a
+  weapon aimed at whoever mutated the guard standing in front of it, and that
+  a script restoring a file in a deferred block does not restore it when the
+  operating system kills the script. The payload is cheap now, the backup goes
+  to disk before the substitution, and the child process gets a time and a
+  memory limit.
+- **A register of protected behaviours, and the list of mutations is now closed
+  against it in both directions.** The rule that a guard needing to be added by
+  hand is a guard somebody will one day forget was already written down here,
+  and the mutation list was exactly that guard. Nothing compared it with the
+  set of guards that exist, so a new one without an entry was invisible while
+  the run reported that everything was caught.
+  Every guard is now in one of three states: proven by a mutation, proven by a
+  probe where there is no product code to break, or listed as unproven. The
+  third state is the reason it works, because an unproven guard otherwise looks
+  exactly like a proven one. The count of unproven ones is a ratchet.
+  Every test in the guard package is enumerated from the source, so one added
+  there without an entry fails the build. Guards elsewhere are listed by hand
+  and that limit is written into the mechanism rather than left to be found.
+  It earned its keep immediately. It named five guards watching the real tree
+  with no evidence at all that they could go red: the ban on network traffic,
+  the dependency rule, the two that keep test code out of the binary, and the
+  concurrency closure. All five have mutations now and all five are caught. It
+  also found a sixth, a test whose only mutation was the canary, which by
+  design does not compile and therefore proves nothing.
+- **A coverage gate with -coverpkg set in the same step, as a ratchet.** There
+  was no coverage number at all before this, not a low one. Measured: 79.4%
+  without the flag and 90.6% with it, because Go credits coverage only to the
+  package under test and the guards and validators live in packages of their
+  own. The floor lives in one place and may rise but not fall.
+  The neighbouring project met the same trap reading 0.0% against a real 43.7%,
+  with the gate at zero and looking as though it worked. Ours understates by
+  eleven points rather than forty four, which is why the number here is our own
+  rather than theirs.
+- **The licence sieve now has three categories rather than one rigour.** A
+  module linked into the binary takes the full sieve and an entry in the
+  registry. One needed only by the tests takes a pinned version and a read
+  licence but no entry, since the registry answers what is inside the binary.
+  A program run over our source makes nothing of ours a derived work, the same
+  way a compiler does not. That last one is a legal reading rather than a
+  measurement and it is cited as such.
+  This unblocks a question left open when the property based testing library
+  was refused: what the registry means for a test only dependency. Measured:
+  one runtime dependency, no test ones, and three tools of which none appears
+  in go.mod or go.sum.
+- **Every licence entry now carries the day its terms were read.** A licence
+  belongs to a version rather than to a project, and projects have moved
+  between permissive and copyleft between releases, so the sentence naming one
+  reads most convincingly when it has gone stale.
 - **The reserved range interface grew a write side, because the first provider
   to declare it showed the read side was not enough.** The contract gave three
   of its four capability interfaces a read and write pair. The fourth had only

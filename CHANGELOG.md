@@ -17,6 +17,58 @@ and has not happened.
 
 ### Added
 
+- **A recipe that nests square brackets more than sixty four deep is refused
+  before it is read, with the configuration exit code and a message naming the
+  limit.** The size limit alone did not catch this. Memory grows with the
+  square of that nesting, so a sixteen kilobyte recipe, well inside the size
+  limit, cost four hundred megabytes, and one at the limit cost tens of
+  gigabytes. A recipe arrives through a pull request, so that was a build
+  machine killed by the operating system rather than a build that failed and
+  said why. Nothing written by hand nests anywhere near this deep. The
+  format's own deepest use is a list of field names, which is one level.
+- Ordinary indented nesting and flow mappings are unaffected and have no
+  limit, because the same measurement shows both are cheap.
+
+### Fixed
+
+- **A file holding two recipes is refused instead of being read halfway.** A
+  file declaring two entities, separated by the usual `---`, reported one
+  entity, no problems and success. The rest was dropped without a word.
+  Layouts that are still one recipe keep working: a leading separator, a
+  leading comment before one, a trailing separator and a trailing comment.
+- **A recipe saved by Notepad is read.** Notepad writes a byte order mark by
+  default, and the mark used to become part of the first key, so the recipe was
+  refused for not declaring a schema version. The hint told you to add a line
+  that was already the first line of your file, and the message naming the real
+  cause was unreadable because the mark does not render. Only a leading mark is
+  removed. Further into a file it is ordinary text that a value keeps.
+
+- **A recipe can no longer paint its own text into this tool's messages.** A
+  key named with an escape sequence put those bytes straight onto the log
+  channel, where a terminal acts on them: the sequence cleared the line and
+  recoloured the text, so a refusal could be made to read on screen as an
+  approval. Neither `--no-color` nor `NO_COLOR` helped, because both govern the
+  colour this tool adds and neither has anything to do with what a file
+  carries. Control characters on the log channel are now replaced by a visible
+  marker, so a name that had one still looks like a name that had one.
+- **The data channel is deliberately not cleaned, and there is a test saying
+  so.** Corruptions of the lowest layer exist to inject control characters, so
+  cleaning what the tool produces would break what it is for. The machine
+  readable report was already safe, since JSON carries the escape rather than
+  the byte.
+
+- **An oversized recipe is no longer read into memory in order to be refused
+  for being too large.** Reading stops one byte past the limit. Measured
+  before: a 250 MB file cost 258 MB of memory on its way to being told it was
+  over a 256 kB limit. Measured after: 3 to 7 MB. The refusal no longer quotes
+  the file's size, since knowing it would mean holding the file.
+- **An error message no longer grows with the recipe that caused it.** A
+  recipe carrying one long value produced a message the same size as the
+  value, which went into the build log and, with `--json`, onto standard
+  output. Every part of a reported problem is now bounded, and the cut lands
+  on a character boundary rather than a byte, so a report stays valid UTF-8 for
+  every alphabet this tool generates.
+
 - The second country provider, the United States Social Security number. It
   produces numbers, says whether a number is well formed and why not, and says
   whether a number is one the Social Security Administration would never have

@@ -6,10 +6,135 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode/utf8"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 )
+
+// partsOf returns the four pieces of a problem with their names, in a fixed
+// order, so a failure says which piece grew.
+func partsOf(found recipe.Problem) []struct{ name, text string } {
+	return []struct{ name, text string }{
+		{"where", found.Where}, {"what", found.What},
+		{"allowed", found.Allowed}, {"hint", found.Hint},
+	}
+}
+
+// oneRecipe is the smallest usable recipe, used by the layout tests below.
+const oneRecipe = "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y }\n"
+
+// # Why a mark from Notepad is ordinary rather than exotic
+//
+// Notepad on Windows writes a byte order mark by default, and the people this
+// tool is for are testers on Windows. A recipe arriving with one was written
+// normally.
+//
+// Measured before this was stripped: the mark became part of the first key, so
+// the recipe was refused for not declaring a schema version, and the hint told
+// the reader to add a line that was already the first line of their file. The
+// second message, which named the real culprit, was unreadable because the
+// mark does not render.
+func TestARecipeSavedByNotepadIsRead(t *testing.T) {
+	marked := append([]byte{0xEF, 0xBB, 0xBF}, oneRecipe...)
+
+	if result := recipeyaml.Decode(marked); !result.Valid() {
+		t.Fatalf("a recipe carrying a byte order mark was refused: %+v", result.Problems)
+	}
+
+	// Only the leading one. Further into the file it is ordinary text that a
+	// value has every right to carry, and quietly eating it would change
+	// somebody's data.
+	inValue := "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: \"y\uFEFFz\" }\n"
+	if result := recipeyaml.Decode([]byte(inValue)); !result.Valid() {
+		t.Fatalf("a mark inside a value was treated as a problem: %+v", result.Problems)
+	}
+}
+
+// # The silence this closes
+//
+// The decoder takes the first document of a file and drops the rest without a
+// word. Measured before this guard: a file declaring two entities reported one
+// entity, no problems and exit zero. Somebody gets half the recipe they wrote
+// and a run that says everything went well.
+func TestAFileHoldingTwoRecipesIsRefusedRatherThanHalfRead(t *testing.T) {
+	two := oneRecipe + "---\n" + strings.Replace(oneRecipe, "  a:", "  b:", 1)
+
+	result := recipeyaml.Decode([]byte(two))
+	if result.Valid() {
+		t.Fatal("a file holding two recipes was accepted, so half of it was dropped without a word")
+	}
+	if len(result.Problems) != 1 || !strings.Contains(result.Problems[0].What, "holds 2 recipes") {
+		t.Fatalf("expected one problem naming the count, got %+v", result.Problems)
+	}
+}
+
+// The other half of the same rule, and it is the half that is easy to get
+// wrong. Counting raw documents rather than the ones carrying content refuses
+// layouts somebody had every right to write, which was measured here rather
+// than taken from a neighbouring project that hit a different shape of it.
+func TestTheLayoutsThatAreStillOneRecipeKeepWorking(t *testing.T) {
+	layouts := []struct{ name, text string }{
+		{"a bare recipe", oneRecipe},
+		{"a leading separator", "---\n" + oneRecipe},
+		{"a leading comment before a separator", "# header\n---\n" + oneRecipe},
+		{"a trailing separator", oneRecipe + "---\n"},
+		{"a trailing comment", oneRecipe + "# footer\n"},
+	}
+
+	for _, layout := range layouts {
+		t.Run(layout.name, func(t *testing.T) {
+			if result := recipeyaml.Decode([]byte(layout.text)); !result.Valid() {
+				t.Fatalf("refused: %+v", result.Problems)
+			}
+		})
+	}
+}
+
+// # The finding this exists for, found by review rather than by a test
+//
+// A recipe is untrusted input and it has a size limit. The report about it had
+// none. Measured on 2026-08-02: two hundred kilobytes of value in, two hundred
+// kilobytes of message out, and with the machine readable flag that lands on
+// the data channel where somebody's pipeline parses it.
+func TestALongValueDoesNotComeBackAsALongMessage(t *testing.T) {
+	long := strings.Repeat("A", 100_000)
+	result := recipeyaml.Decode([]byte("version: \"" + long + "\"\n"))
+
+	if result.Valid() {
+		t.Fatal("a schema version this build does not speak was accepted")
+	}
+	if len(result.Problems) == 0 {
+		t.Fatal("no problem was reported, so this test is measuring nothing")
+	}
+	for _, found := range result.Problems {
+		for _, part := range partsOf(found) {
+			if size := utf8.RuneCountInString(part.text); size > 260 {
+				t.Errorf("the %s of a problem is %d characters, so the report grows with the input",
+					part.name, size)
+			}
+		}
+	}
+}
+
+// The report is what a pipeline parses, so a message cut in the middle of a
+// character would put invalid UTF-8 into a public contract. Polish names,
+// emoji and every alphabet this tool exists to generate are multi byte.
+func TestShorteningAMessageNeverSplitsACharacter(t *testing.T) {
+	long := strings.Repeat("ł", 100_000)
+	result := recipeyaml.Decode([]byte("version: \"" + long + "\"\n"))
+
+	if len(result.Problems) == 0 {
+		t.Fatal("no problem was reported, so this test is measuring nothing")
+	}
+	for _, found := range result.Problems {
+		for _, part := range partsOf(found) {
+			if !utf8.ValidString(part.text) {
+				t.Errorf("the %s of a problem is not valid UTF-8, so a character was cut in half", part.name)
+			}
+		}
+	}
+}
 
 // The shape the format document describes has to be readable, or the document
 // is describing something this build does not accept.
@@ -487,10 +612,25 @@ func decode(t *testing.T, source string) recipeyaml.Result {
 // time growing with the square of its size, and that cost belongs to the YAML
 // library rather than to anything here, so the only lever is the size of the
 // input before the parser sees it.
+// 🔴 The filler is an ordinary letter and it used to be an open bracket. That
+// change is not tidying, it is the fix for a test that could take the machine
+// down with it.
+//
+// Measured on 2026-08-02: the parser needs memory growing with the SQUARE of
+// how deeply square brackets nest, so this payload cost about ninety gigabytes
+// whenever anything let it reach the parser. Nothing did during an ordinary
+// run, since the size limit refuses it first. The mutation that proves the
+// size limit works removes exactly that refusal, and on the run that followed
+// the operating system killed the process. It killed the owner's session too.
+//
+// The lesson is worth more than the fix: a test payload built to be expensive
+// is a loaded weapon pointed at whoever mutates the guard in front of it. This
+// one proves the limit by the MESSAGE it produces, which needs no expense at
+// all.
 func TestARecipeTooLargeToReadIsRefusedBeforeParsing(t *testing.T) {
 	oversized := make([]byte, recipeyaml.MaxSize+1)
 	for i := range oversized {
-		oversized[i] = '['
+		oversized[i] = 'a'
 	}
 
 	start := time.Now()
@@ -500,7 +640,7 @@ func TestARecipeTooLargeToReadIsRefusedBeforeParsing(t *testing.T) {
 	if result.Valid() {
 		t.Fatal("a recipe past the limit was accepted")
 	}
-	if len(result.Problems) != 1 || !strings.Contains(result.Problems[0].What, "at most") {
+	if len(result.Problems) != 1 || !strings.Contains(result.Problems[0].What, "larger than") {
 		t.Fatalf("expected one problem naming the limit, got %+v", result.Problems)
 	}
 	// The refusal has to be cheap. Taking the slow path and then refusing
@@ -512,6 +652,57 @@ func TestARecipeTooLargeToReadIsRefusedBeforeParsing(t *testing.T) {
 	// One byte under the limit still goes to the parser, or the guard would be
 	// refusing things nobody asked it to.
 	fine := recipeyaml.Decode([]byte("version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y }\n"))
+	if !fine.Valid() {
+		t.Fatalf("an ordinary recipe was refused: %+v", fine.Problems)
+	}
+}
+
+// # The hole this closes, and the size limit did not close it
+//
+// The size limit was set from a measurement of time. Memory was never measured
+// and it behaves worse: it grows with the square of how deeply square brackets
+// nest, on that one shape and no other.
+//
+// Measured on 2026-08-02, before this guard existed:
+//
+//	8 000 brackets    8 kB   101 MB
+//	16 000 brackets  16 kB   406 MB
+//
+// So a sixteen kilobyte recipe, comfortably inside a two hundred and fifty six
+// kilobyte limit, already cost four hundred megabytes, and one at the limit
+// cost tens of gigabytes. A recipe arrives through a pull request. That is the
+// user's build machine killed by the operating system, which is the failure
+// the threat model names first and the one that says least about why.
+//
+// The payload here is deliberately modest. It is seventy eight times over the
+// limit, which proves the guard, and costs a few tens of megabytes if somebody
+// ever mutates the guard away. A test may not be a weapon.
+func TestARecipeNestedTooDeeplyIsRefusedBeforeParsing(t *testing.T) {
+	nested := []byte(strings.Repeat("[", 5000))
+
+	start := time.Now()
+	result := recipeyaml.Decode(nested)
+	elapsed := time.Since(start)
+
+	if result.Valid() {
+		t.Fatal("a recipe nested past the limit was accepted")
+	}
+	if len(result.Problems) != 1 || !strings.Contains(result.Problems[0].What, "nests square brackets") {
+		t.Fatalf("expected one problem naming the nesting, got %+v", result.Problems)
+	}
+	if elapsed > time.Second {
+		t.Errorf("the refusal took %v, so the parser was handed the input after all", elapsed)
+	}
+
+	// Nesting a recipe actually uses has to survive, or the guard is refusing
+	// the format rather than an attack. A consistency rule is one level deep
+	// and a list of values inside one is two.
+	fine := recipeyaml.Decode([]byte(
+		"version: \"0.1\"\nentities:\n  a:\n    fields:\n" +
+			"      pesel: { generator: y }\n" +
+			"      birth_date: { generator: y }\n" +
+			"      gender: { generator: y }\n" +
+			"    consistency:\n      - pesel matches: [birth_date, gender]\n"))
 	if !fine.Valid() {
 		t.Fatalf("an ordinary recipe was refused: %+v", fine.Problems)
 	}

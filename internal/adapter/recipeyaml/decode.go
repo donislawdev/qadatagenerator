@@ -77,6 +77,41 @@ var (
 // breaking change for everybody reading them.
 const MaxSize = 256 * 1024
 
+// MaxNestingDepth is the deepest a recipe may nest a flow sequence, which is
+// the shape written with square brackets.
+//
+// # Why a second limit when there is already one on size
+//
+// The size limit was set from a measurement of time and it holds time down. It
+// did nothing about memory, because memory was never measured, and the note
+// beside it said the only lever available before parsing was the size of the
+// input. That was wrong. There is a second lever, it is cheap, and it is the
+// one that matters.
+//
+// Measured on 2026-08-02, on the shape that turns out to be the whole problem:
+//
+//	8 000 open brackets    8 kB    46 ms    101 MB
+//	16 000 open brackets   16 kB   171 ms   406 MB
+//
+// Memory grows with the square of the depth. A recipe of sixteen kilobytes,
+// comfortably inside the size limit, already costs four hundred megabytes, and
+// one at the size limit costs tens of gigabytes. That is not a slow build, it
+// is a machine killed by the operating system, and a killed build says nothing
+// about why it died.
+//
+// The same measurement clears the other two shapes: flow mappings cost seven
+// megabytes at sixteen kilobytes, and ordinary indented nesting nineteen
+// megabytes at three hundred and fifty. Neither needs a limit, and adding one
+// would be a rule guarding nothing.
+//
+// # Why sixty four
+//
+// It is far above anything written by hand. The format's own deepest use of a
+// square bracket is a list of field names in a consistency rule, which is one
+// level. Sixty four leaves room for a shape nobody has thought of while
+// refusing everything a bomb needs.
+const MaxNestingDepth = 64
+
 // Result is everything reading a recipe produced.
 type Result struct {
 	Recipe    recipe.Recipe
@@ -92,12 +127,11 @@ func (r Result) Valid() bool { return len(r.Problems) == 0 }
 func Decode(data []byte) Result {
 	reader := &reader{}
 
-	// Checked before the parser is handed anything, because the cost this
-	// guards against is the parser's own and cannot be undone afterwards.
-	if len(data) > MaxSize {
-		reader.report("", fmt.Sprintf("the recipe is %d kB and this build reads at most %d kB", len(data)/1024, MaxSize/1024),
-			fmt.Sprintf("a recipe up to %d kB", MaxSize/1024),
-			"split it into several recipes, or check that the file is a recipe and not something else")
+	// The mark Notepad writes is removed before anything else looks at the
+	// bytes, so every check below sees the file the way its author wrote it.
+	data = stripBOM(data)
+
+	if refusedBeforeParsing(reader, data) {
 		return reader.result(recipe.Recipe{})
 	}
 
@@ -129,12 +163,28 @@ type reader struct {
 	unchecked []recipe.Unchecked
 }
 
+// report records one problem.
+//
+// Every part goes through shorten, and this is the only place it has to. The
+// names of entities, fields and keys all come from the recipe and all end up
+// inside one of these sentences, so bounding the sentence here bounds every
+// one of them without anybody having to remember at the dozen places that
+// build one.
 func (r *reader) report(where, what, allowed, hint string) {
-	r.problems = append(r.problems, recipe.Problem{Where: where, What: what, Allowed: allowed, Hint: hint})
+	r.problems = append(r.problems, recipe.Problem{
+		Where:   shorten(where),
+		What:    shorten(what),
+		Allowed: shorten(allowed),
+		Hint:    shorten(hint),
+	})
 }
 
 func (r *reader) note(where, what, reason string) {
-	r.unchecked = append(r.unchecked, recipe.Unchecked{Where: where, What: what, Reason: reason})
+	r.unchecked = append(r.unchecked, recipe.Unchecked{
+		Where:  shorten(where),
+		What:   shorten(what),
+		Reason: shorten(reason),
+	})
 }
 
 func (r *reader) result(built recipe.Recipe) Result {

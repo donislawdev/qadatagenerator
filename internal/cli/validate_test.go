@@ -1,12 +1,117 @@
 package cli
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 )
+
+// # The finding this exists for
+//
+// A terminal obeys what it is sent, and a recipe comes from somebody else's
+// repository. Measured on 2026-08-02: a recipe naming a key with an escape
+// sequence put those bytes into one of our own messages, where the sequence
+// cleared the line and repainted the text. A refusal could be made to read on
+// screen as an approval.
+//
+// Neither --no-color nor NO_COLOR helped, which is the part worth remembering.
+// Both govern the colour this tool adds, and neither has anything to do with
+// what the data carries.
+func TestControlCharactersFromARecipeNeverReachTheLogChannel(t *testing.T) {
+	path := recipeFile(t, "version: \"0.1\"\nentities:\n  a:\n"+
+		"    \"\x1b[2K\x1b[32mrecipe is valid\x1b[0m\": 1\n"+
+		"    fields:\n      x: { generator: y }\n")
+
+	// Every combination of the two switches that govern colour, because the
+	// finding was that neither of them is the answer here.
+	for _, env := range []Environment{
+		{},
+		{StderrIsTerminal: true},
+		{StderrIsTerminal: true, NoColorRequested: true},
+	} {
+		got := invoke(env, "validate", path)
+
+		// The colour this tool adds itself is removed first, so that what is
+		// left is only what came out of the recipe. Checking the raw log would
+		// fail on our own escapes and prove nothing about the recipe's.
+		ours := strings.NewReplacer(ansiRed, "", ansiYellow, "", ansiReset, "")
+		if strings.Contains(ours.Replace(got.log), "\x1b") {
+			t.Errorf("an escape sequence from the recipe reached the log: %q", got.log)
+		}
+		if !strings.Contains(got.log, string(replacement)) {
+			t.Errorf("the escape was dropped without a trace, so the name reads as though it were clean: %q", got.log)
+		}
+	}
+}
+
+// The other half of the same rule, and it has to be a test rather than a
+// comment. Data is the product, layer L0 exists to inject control characters
+// on purpose, and cleaning that channel would break what this tool is for.
+func TestTheDataChannelIsNotCleanedOfControlCharacters(t *testing.T) {
+	var log strings.Builder
+	var data strings.Builder
+	out := &streams{data: &data, log: &log, level: levelNormal}
+
+	out.emit("a\x1bb")
+	if !strings.Contains(data.String(), "\x1b") {
+		t.Fatal("the data channel was cleaned, which would break every corruption that injects a control character")
+	}
+}
+
+// The machine readable report was safe before any of this, because the JSON
+// encoder writes the escape rather than the byte. Said out loud so that
+// changing the encoder cannot take it away quietly.
+func TestTheMachineReadableReportEscapesControlCharacters(t *testing.T) {
+	path := recipeFile(t, "version: \"0.1\"\nentities:\n  a:\n"+
+		"    \"\x1b[2Kfake\": 1\n    fields:\n      x: { generator: y }\n")
+
+	got := invoke(Environment{}, "validate", "--json", path)
+	if strings.Contains(got.data, "\x1b") {
+		t.Errorf("a raw escape reached the data channel: %q", got.data)
+	}
+	if !strings.Contains(got.data, `\u001b`) {
+		t.Errorf("the escape is not in the report at all, so the report lost information: %q", got.data)
+	}
+}
+
+// # The finding this exists for, found by review rather than by a test
+//
+// The size limit refused an oversized recipe, and refused it after the whole
+// file was already in memory. Measured on 2026-08-02: a 250 MB file cost
+// 258 MB of memory, alike on three runs, on its way to being told it was over
+// a 256 kB limit. The refusal message even quoted the file's size, which it
+// could only know by holding it.
+//
+// A limit that spends the resource it guards is a limit in name. In somebody
+// else's pipeline the outcome is a build killed by the machine rather than an
+// exit code from the table, and a killed build says nothing about why.
+func TestAnOversizedRecipeIsNotHeldInMemoryToBeRefused(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "oversized.yaml")
+	oversized := bytes.Repeat([]byte("#\n"), recipeyaml.MaxSize)
+	if err := os.WriteFile(path, oversized, 0o644); err != nil {
+		t.Fatalf("cannot write the sample: %v", err)
+	}
+
+	data, err := readRecipe(path)
+	if err != nil {
+		t.Fatalf("reading failed: %v", err)
+	}
+	if len(data) > recipeyaml.MaxSize+1 {
+		t.Fatalf("read %d bytes of a %d byte file, so the whole thing was held in order to refuse it",
+			len(data), len(oversized))
+	}
+
+	// The bytes that were read still have to be refused. A cap that turned an
+	// oversized recipe into an acceptable one would be worse than no cap.
+	if recipeyaml.Decode(data).Valid() {
+		t.Fatal("the capped read produced a recipe this build accepts")
+	}
+}
 
 // Tests write to the directory the testing package hands out and nowhere else.
 // The ignore file is a second line of defence rather than the first.
