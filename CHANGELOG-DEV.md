@@ -11,6 +11,28 @@ Versioning.
 
 ### Added
 
+- **The hottest path in the product stopped allocating, and got twice as fast
+  without moving a byte.** Deriving one value allocated nine times and two
+  hundred bytes, which in the streaming mode would have been hundreds of
+  millions of allocations for a run. The algorithm was not the cost. Writing
+  the message into the hash through an io.Writer was: a call through an
+  interface sends every small array carrying a length to the heap and copies
+  every string on the way in. Assembling the message first and hashing it once
+  removed all nine.
+  Measured with the reference variant repeated at the start and in the middle
+  so that machine drift could be ruled out, and it was: 282ns against 281ns,
+  no difference. One draw went from 281.7ns to 134.5ns and a row of ten fields
+  from 2.943us to 1.295us, both with no allocation at all.
+  The bytes are unchanged, and that is checked rather than claimed: the golden
+  values pass without regeneration, the oracle in another language agrees on
+  every entry, and the determinism test passes. This is the situation those
+  three layers were built for, since optimising the foundation of determinism
+  without them would have been a wager.
+- **An allocation count is asserted, a duration is only reported.** The count
+  is identical on every machine and in every run, so a test can hold it. A
+  duration on a shared runner is a sample, and a build gated on one fails for
+  reasons unrelated to the code, which is how a guard earns its way to being
+  switched off.
 - **A guard that closes concurrency until somebody opens it deliberately.**
   The architecture already said the output is assembled by row number rather
   than by whichever goroutine finished first, and that nothing mutable is

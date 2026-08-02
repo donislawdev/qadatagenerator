@@ -42,7 +42,6 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
-	"io"
 )
 
 // Size is the length of a derived digest in bytes.
@@ -120,38 +119,46 @@ func (s Source) IntN(c Coordinate, bound int64) int64 {
 	}
 }
 
+// messageRoom is the space set aside on the stack for one message.
+//
+// The fixed part is forty four bytes and the rest is the four names. Typical
+// coordinates are far below this, so the buffer stays where it was declared
+// and the whole derivation allocates nothing. A longer set of names still
+// works: append grows the slice on the heap, which costs one allocation and
+// keeps the same bytes.
+const messageRoom = 256
+
 // derive builds the message described in the package comment and hashes it.
+//
+// # Why the message is assembled rather than streamed into the hash
+//
+// The obvious way is to open a hash and write the parts into it one at a
+// time. Measured on 2026-08-02, that cost nine allocations and two hundred
+// bytes per derived value, which in the streaming mode would be hundreds of
+// millions of allocations for a run. None of them held anything: writing
+// through an io.Writer is a call through an interface, so every small array
+// carrying a length escapes to the heap and every string is copied on the way
+// in.
+//
+// Assembling the message first and hashing it once avoids the interface
+// entirely. The bytes are identical, which is not a claim but a checked fact:
+// the golden values, the independent oracle in another language and the
+// determinism test all compare against what the old code produced.
 func (s Source) derive(c Coordinate, round uint32) [Size]byte {
-	hash := sha256.New()
-	writeFramed(hash, s.seed)
-	writeFramed(hash, c.Entity)
-	writeUint64(hash, uint64(c.Row))
-	writeFramed(hash, c.Field)
-	writeFramed(hash, c.Purpose)
-	writeUint32(hash, round)
+	var room [messageRoom]byte
+	message := appendFramed(room[:0], s.seed)
+	message = appendFramed(message, c.Entity)
+	message = binary.BigEndian.AppendUint64(message, uint64(c.Row))
+	message = appendFramed(message, c.Field)
+	message = appendFramed(message, c.Purpose)
+	message = binary.BigEndian.AppendUint32(message, round)
 
-	var digest [Size]byte
-	hash.Sum(digest[:0])
-	return digest
+	return sha256.Sum256(message)
 }
 
-// The three helpers below ignore the write result. A hash never fails a write
-// and never writes short, which its own documentation states, so there is
-// nothing to report and nothing to recover from.
-
-func writeFramed(w io.Writer, value string) {
-	writeUint64(w, uint64(len(value)))
-	io.WriteString(w, value)
-}
-
-func writeUint64(w io.Writer, value uint64) {
-	var buffer [8]byte
-	binary.BigEndian.PutUint64(buffer[:], value)
-	w.Write(buffer[:])
-}
-
-func writeUint32(w io.Writer, value uint32) {
-	var buffer [4]byte
-	binary.BigEndian.PutUint32(buffer[:], value)
-	w.Write(buffer[:])
+// appendFramed writes the length of a value and then the value, which is what
+// makes the message unambiguous. The reason is in the package comment.
+func appendFramed(dst []byte, value string) []byte {
+	dst = binary.BigEndian.AppendUint64(dst, uint64(len(value)))
+	return append(dst, value...)
 }
