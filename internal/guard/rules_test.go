@@ -164,7 +164,7 @@ func TestHasSeesTheDifferenceBetweenAbsentAndClean(t *testing.T) {
 
 func TestGuardsAreActuallyLoadedFromDisk(t *testing.T) {
 	pkgs := scanRepository(t)
-	for _, expected := range []string{"internal/cli", "internal/fault", "internal/guard"} {
+	for _, expected := range []string{"internal/cli", "internal/fault", "internal/guard", "internal/oracle"} {
 		if !Has(pkgs, expected) {
 			t.Errorf("the scan missed %s, so every rule about it is passing by default", expected)
 		}
@@ -174,5 +174,15 @@ func TestGuardsAreActuallyLoadedFromDisk(t *testing.T) {
 func TestGuardsShipWithNoBinary(t *testing.T) {
 	if findings := TestOnly(scanRepository(t), module, "internal/guard"); len(findings) != 0 {
 		t.Fatalf("the guards are linked into the product:\n%s", strings.Join(findings, "\n"))
+	}
+}
+
+// The independent validators are a second telling of rules the product already
+// implements. Linking them would put both tellings in the binary and invite
+// somebody to call whichever is nearer, at which point the product would be
+// checking itself against itself and the whole point would be gone.
+func TestTheIndependentValidatorsShipWithNoBinary(t *testing.T) {
+	if findings := TestOnly(scanRepository(t), module, "internal/oracle"); len(findings) != 0 {
+		t.Fatalf("the independent validators are linked into the product:\n%s", strings.Join(findings, "\n"))
 	}
 }

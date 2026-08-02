@@ -11,6 +11,34 @@ Versioning.
 
 ### Added
 
+- **`internal/adapter/provider/pl`: the first country provider, and the
+  pattern every later one follows.** The rules of the number were read from the
+  government description before any code was written, because this project has
+  already shipped a catalog entry telling it to break a check digit on an
+  identifier that turns out not to have one. An algorithm arrives with a source
+  or it does not arrive.
+- **`internal/oracle`: validators written from the published description
+  instead of from our generator.** A generator and its test are usually written
+  by one hand in one hour, and when that hand is wrong both are wrong in the
+  same direction and agree with each other. The validator here is shaped around
+  the wording of the source rather than around the arithmetic that suited the
+  provider: it keeps the weights as the quoted string and takes them apart, and
+  it stores the month ranges the description lists rather than the offset the
+  provider adds. It is barred from the product by a test, because two
+  validators in one binary invites calling whichever is nearer.
+- **A third layer outside the repository.** A script recomputes the same
+  answers in another language from the same quoted description. Two
+  implementations in one language share the idioms of that language, and the
+  golden file would otherwise be checked only against the code that wrote it.
+- 🔴 **The weights rest on prose and nothing else.** The source gives the
+  algorithm in words and **carries no worked example**, so there is no external
+  number to check them against, and three agreeing implementations all descend
+  from one reading. What stands in its place is a test asking whether the table
+  has the property such a table must have, that every single digit error
+  changes the result. That test also measured the limit of the same table:
+  neighbouring weights differ by even numbers, so some transpositions of
+  adjacent digits leave the total unchanged. The catalog already carried a
+  transposition mutator, and it now rests on arithmetic rather than on belief.
 - **`internal/domain/capability`: the capability registry, with a supplier
   beside every name.** The architecture said a provider declares the
   capabilities and that a mutator is available when the provider brings them.

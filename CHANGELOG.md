@@ -17,6 +17,21 @@ and has not happened.
 
 ### Added
 
+- The first country provider, the Polish national identification number. It
+  produces numbers that agree with the date of birth and the gender in the
+  same record, reads both back out of a number, and says whether a number is
+  correct and why not.
+- The rules behind it were read from the government description of the number
+  rather than recalled, including the table that encodes the century in the
+  month field. One limitation is worth knowing because it is a property of the
+  scheme and not of this tool: **the check digit does not catch every swap of
+  two neighbouring digits.** Some transpositions produce a different number
+  that is still valid, which is exactly why the corruption catalog carries a
+  transposition entry of its own.
+- Numbers carrying a Polish identifier have no reserved range to be generated
+  in. No block of numbers is set aside for documentation, so a dataset with
+  these has to be treated as synthetic on the strength of where it came from
+  rather than what it looks like.
 - Recipes can declare three things they could not before: which fields form
   the primary key of an entity, that a field is required, and how long a text
   field is allowed to be. All three are optional, so recipes written before

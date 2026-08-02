@@ -1,0 +1,96 @@
+[
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 0,
+    "field": "pesel",
+    "purpose": "value",
+    "value": "59060830733"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 1,
+    "field": "pesel",
+    "purpose": "value",
+    "value": "88061358021"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 999,
+    "field": "pesel",
+    "purpose": "value",
+    "value": "68031572956"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 1,
+    "field": "pesel",
+    "purpose": "value",
+    "birth_date": "1990-04-11",
+    "gender": "female",
+    "value": "90041158028"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 1,
+    "field": "pesel",
+    "purpose": "value",
+    "birth_date": "1990-04-11",
+    "gender": "male",
+    "value": "90041158035"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 2,
+    "field": "pesel",
+    "purpose": "value",
+    "birth_date": "2004-12-31",
+    "gender": "male",
+    "value": "04323142670"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 3,
+    "field": "pesel",
+    "purpose": "value",
+    "birth_date": "1800-01-01",
+    "gender": "female",
+    "value": "00810179668"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 4,
+    "field": "pesel",
+    "purpose": "value",
+    "birth_date": "2299-12-31",
+    "gender": "male",
+    "value": "99723128814"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "customer",
+    "row": 5,
+    "field": "pesel",
+    "purpose": "value",
+    "birth_date": "2000-02-29",
+    "gender": "female",
+    "value": "00222991748"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "customer",
+    "row": 1,
+    "field": "pesel",
+    "purpose": "value",
+    "birth_date": "1990-04-11",
+    "gender": "female",
+    "value": "90041128746"
+  }
+]

@@ -78,7 +78,20 @@ type Request struct {
 	Agrees Agreement
 }
 
-// Agreement is the values a generated value has to be consistent with.
+// The roles a bound value can play.
+//
+// An agreement is keyed by role and not by the name the user gave a column. A
+// provider has to know that it was handed a date of birth. It has no business
+// knowing whether the recipe called it birth_date, dob or data_urodzenia, and
+// resolving one to the other is the work of the use case that reads the
+// consistency rules.
+const (
+	RoleBirthDate = "birth_date"
+	RoleGender    = "gender"
+)
+
+// Agreement is the values a generated value has to be consistent with, keyed
+// by the role each one plays.
 //
 // It is a type rather than a bare map so that reading it cannot depend on map
 // iteration order by accident, and so that a missing binding is answered
