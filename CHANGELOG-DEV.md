@@ -11,6 +11,32 @@ Versioning.
 
 ### Added
 
+- **The race detector, fuzzing, a linter and a hard limit on the shape of a
+  function.** There is no second author and the owner does not read the code,
+  so the compiler, the tests and the scripts are the only readers there are. A
+  written rule with nothing enforcing it would have been a sentence that
+  outlives the decade and changes no line.
+  The first run earned its keep: the linter found a dead constant and five
+  unchecked writes, the shape limit found three functions past the threshold,
+  and the probe written for the new guard broke the guard itself on its first
+  run. All four were fixed rather than excused, and the threshold stayed where
+  it was, because a threshold bent to fit the code stops being one.
+- **The race detector runs with cgo enabled while everything else runs without
+  it.** That looks like a contradiction and is not. The promise that the
+  command line binary builds without a C toolchain is about the product, and
+  the matrix and the cross build keep it. The detector is a test tool that does
+  not work without cgo, so refusing it would give up the only mechanical guard
+  against a data race to protect a promise it does not touch.
+- **Concurrency rules written before the first goroutine exists.** Adding
+  parallelism to code that assumes one thread is a rewrite rather than an
+  optimisation, so the rules and the detector are in place while there is still
+  nothing to catch.
+- **Differential fuzzing between the two identifier validators.** They were
+  written by one hand from one description, so the question worth asking is not
+  whether they agree on the values we produced but whether anything at all
+  makes them disagree. Sixteen point nine million executions found nothing, and
+  the recipe reader took three and a half million without a panic or a silent
+  refusal.
 - **`internal/adapter/provider/pl`: the first country provider, and the
   pattern every later one follows.** The rules of the number were read from the
   government description before any code was written, because this project has

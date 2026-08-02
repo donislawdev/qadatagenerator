@@ -1,0 +1,73 @@
+# The mechanical reviewer.
+#
+# This project has no second author and the owner does not read the code, so
+# the only readers are the compiler, the tests and this. That is why a linter
+# is worth its maintenance here and would not be in a project with review.
+#
+# The set is narrow on purpose. A linter that reports two hundred things gets
+# switched off within a month, and switching it off is worse than never having
+# had it, because the day it goes quiet nobody notices. Every entry below
+# answers a failure this project can actually have.
+
+version: "2"
+
+linters:
+  # Nothing runs unless it is named. The default set moves between releases,
+  # and a guard whose contents change when somebody else cuts a release is a
+  # guard that reports something different every year for no reason of ours.
+  default: none
+
+  enable:
+    # An ignored error is the quietest defect there is. This tool exists to
+    # argue that silence is the enemy, so ignoring its own failures would be
+    # the same mistake one layer down.
+    - errcheck
+    # Wrapping an error with %v throws away the kind it carried. Exit codes
+    # here are a property of the failure travelling from where it happened,
+    # so losing the kind loses the exit code.
+    - errorlint
+    - govet
+    # An assignment nobody reads is either a typo or a leftover. Both are
+    # cheap to fix now and confusing to read in three years.
+    - ineffassign
+    # The broad one: dead branches, impossible conditions, misuse of the
+    # standard library, and simplifications that keep behaviour.
+    - staticcheck
+    # Dead code. This project is written by a model across sessions, and a
+    # helper that lost its last caller two sessions ago has nobody to notice.
+    - unused
+    # Prose reaches the user through help text and failure messages, and a
+    # typo there is a defect in the product rather than in a comment.
+    - misspell
+
+  settings:
+    misspell:
+      # No locale is set on purpose, so that only real misspellings are
+      # reported. Asking for one spelling of English turned out to fight the
+      # product: NO_COLOR is a standard environment variable and --no-color is
+      # our own flag, so a rule preferring colour would demand renaming a
+      # public contract to satisfy a dictionary.
+      locale: ""
+
+  exclusions:
+    rules:
+      # A hash never fails a write and never writes short, which its own
+      # documentation states, so there is nothing to report and nothing to
+      # recover from. The reasoning is written beside the helpers there.
+      - path: internal/domain/seed/seed\.go
+        linters: [errcheck]
+        text: "w\\.Write|io\\.WriteString"
+
+      # Test helpers report through t rather than through a returned error.
+      - path: _test\.go
+        linters: [errcheck]
+
+      # QF1001 rewrites a negated conjunction using De Morgan's law. Both
+      # forms are correct and the negated one matches the sentence in the
+      # comment beside it, so the suggestion trades clarity for a rule.
+      - linters: [staticcheck]
+        text: "QF1001"
+
+formatters:
+  enable:
+    - gofmt

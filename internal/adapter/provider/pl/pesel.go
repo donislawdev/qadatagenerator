@@ -64,9 +64,6 @@ const (
 	length         = 11
 	checkPosition  = 10
 	genderPosition = 9
-	// serialLength is how many digits the ordinal number occupies, the last
-	// of which is the gender digit.
-	serialLength = 4
 )
 
 // weights are applied to the first ten digits. Read from the government

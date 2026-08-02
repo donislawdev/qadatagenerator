@@ -73,22 +73,32 @@ func (s *streams) emit(text string) {
 // must not change what the run is worth. There is also nowhere left to
 // complain about a log that cannot be written to.
 func (s *streams) report(p problem) {
-	fmt.Fprintln(s.log, s.paint(ansiRed, prefixError)+p.what)
+	s.line(s.paint(ansiRed, prefixError) + p.what)
 	if p.why != "" {
-		fmt.Fprintln(s.log, prefixDetail+p.why)
+		s.line(prefixDetail + p.why)
 	}
 	if p.allowed != "" {
-		fmt.Fprintln(s.log, prefixDetail+labelAllowed+p.allowed)
+		s.line(prefixDetail + labelAllowed + p.allowed)
 	}
 	if p.instead != "" {
-		fmt.Fprintln(s.log, prefixDetail+labelTry+p.instead)
+		s.line(prefixDetail + labelTry + p.instead)
 	}
+}
+
+// line writes one line to the log channel and drops the result.
+//
+// The decision to drop it is the one explained above report, and it is made
+// here once rather than at each of the calls that write a log line. A failed
+// write repeated eight times would be eight places to remember the same
+// reasoning, which is how a deliberate choice turns into an oversight.
+func (s *streams) line(text string) {
+	_, _ = fmt.Fprintln(s.log, text)
 }
 
 // warn writes something the user should see even when asked for less output.
 // A warning that --quiet hides is a warning that never happened.
 func (s *streams) warn(text string) {
-	fmt.Fprintln(s.log, s.paint(ansiYellow, prefixWarning)+text)
+	s.line(s.paint(ansiYellow, prefixWarning) + text)
 }
 
 // info writes progress detail. It is silent unless the run asked for it,
@@ -98,7 +108,7 @@ func (s *streams) info(text string) {
 	if s.level != levelVerbose {
 		return
 	}
-	fmt.Fprintln(s.log, prefixInfo+text)
+	s.line(prefixInfo + text)
 }
 
 // note writes something a person asked for, such as the outcome of a check.
@@ -107,7 +117,7 @@ func (s *streams) note(text string) {
 	if s.level == levelQuiet {
 		return
 	}
-	fmt.Fprintln(s.log, text)
+	s.line(text)
 }
 
 // detail writes a line that belongs to whatever was written above it.
@@ -115,5 +125,5 @@ func (s *streams) detail(text string) {
 	if s.level == levelQuiet {
 		return
 	}
-	fmt.Fprintln(s.log, prefixDetail+text)
+	s.line(prefixDetail + text)
 }

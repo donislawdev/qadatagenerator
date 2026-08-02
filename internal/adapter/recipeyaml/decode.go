@@ -318,41 +318,52 @@ func (r *reader) field(name, where string, node any) recipe.Field {
 		if !ok {
 			continue
 		}
-		switch key {
-		case "type":
-			built.Type, _ = r.text(where+".type", item.Value)
-		case "generator":
-			built.Generator, _ = r.text(where+".generator", item.Value)
-		case "expression":
-			built.Expression, _ = r.text(where+".expression", item.Value)
-		case "unique":
-			built.Unique = r.flag(where+".unique", item.Value)
-		case "required":
-			built.Required = r.flag(where+".required", item.Value)
-		case "max_length":
-			built.MaxLength, built.HasMaxLength = r.maxLength(where+".max_length", item.Value)
-		case "counted_in":
-			built.LengthUnit = recipe.LengthUnit(r.oneOf(where+".counted_in", item.Value, lengthUnits))
-		case "empty":
-			built.EmptyShare, built.HasEmptyShare = r.share(where+".empty", item.Value)
-		case "values":
-			built.Values = r.list(where+".values", item.Value)
-		default:
-			// A generator setting, such as the age range of a date of
-			// birth. It is kept rather than refused, because the format
-			// documents this shape, and it is reported rather than
-			// accepted in silence, because a misspelled generic key
-			// would otherwise land here and turn itself off.
-			built.Parameters = append(built.Parameters, recipe.Parameter{
-				Name:  key,
-				Value: fmt.Sprint(item.Value),
-			})
-			r.note(where+"."+key, "the setting "+key,
-				"generator settings are checked by the generator, and generators arrive with the next slice. "+
-					"A misspelling of "+strings.Join(fieldKeys, ", ")+" also lands here")
-		}
+		r.fieldKey(&built, where, key, item.Value)
 	}
 
+	r.checkField(built, where)
+	return built
+}
+
+// fieldKey reads one property of a field.
+func (r *reader) fieldKey(built *recipe.Field, where, key string, value any) {
+	switch key {
+	case "type":
+		built.Type, _ = r.text(where+".type", value)
+	case "generator":
+		built.Generator, _ = r.text(where+".generator", value)
+	case "expression":
+		built.Expression, _ = r.text(where+".expression", value)
+	case "unique":
+		built.Unique = r.flag(where+".unique", value)
+	case "required":
+		built.Required = r.flag(where+".required", value)
+	case "max_length":
+		built.MaxLength, built.HasMaxLength = r.maxLength(where+".max_length", value)
+	case "counted_in":
+		built.LengthUnit = recipe.LengthUnit(r.oneOf(where+".counted_in", value, lengthUnits))
+	case "empty":
+		built.EmptyShare, built.HasEmptyShare = r.share(where+".empty", value)
+	case "values":
+		built.Values = r.list(where+".values", value)
+	default:
+		// A generator setting, such as the age range of a date of birth. It is
+		// kept rather than refused, because the format documents this shape,
+		// and it is reported rather than accepted in silence, because a
+		// misspelled generic key would otherwise land here and turn itself
+		// off.
+		built.Parameters = append(built.Parameters, recipe.Parameter{
+			Name:  key,
+			Value: fmt.Sprint(value),
+		})
+		r.note(where+"."+key, "the setting "+key,
+			"generator settings are checked by the generator, and generators arrive with the next slice. "+
+				"A misspelling of "+strings.Join(fieldKeys, ", ")+" also lands here")
+	}
+}
+
+// checkField asks the questions that need the whole field rather than one key.
+func (r *reader) checkField(built recipe.Field, where string) {
 	// A field that must always carry a value and is also asked to be empty
 	// part of the time. Both halves are legal on their own, so nothing else
 	// would catch this, and whichever half won at generation time would be
@@ -385,7 +396,6 @@ func (r *reader) field(name, where string, node any) recipe.Field {
 		r.report(where, "the field says twice where its value comes from",
 			"exactly one of type, generator, expression", "keep the one you meant")
 	}
-	return built
 }
 
 // consistency returns the rules it could read and, beside them, the place each

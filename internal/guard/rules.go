@@ -91,25 +91,40 @@ func Layers(pkgs []Package, module string) []string {
 	var findings []string
 	for _, pkg := range pkgs {
 		for _, rule := range layerRules {
-			if !within(pkg.Path, rule.pkg) {
-				continue
-			}
-			for _, importPath := range pkg.Imports {
-				target, ok := moduleRelative(importPath, module)
-				if !ok || within(target, rule.pkg) {
-					continue
-				}
-				for _, forbidden := range rule.forbidden {
-					if within(target, forbidden) {
-						findings = append(findings, pkg.Path+" imports "+target+": "+rule.why)
-						break
-					}
-				}
+			if within(pkg.Path, rule.pkg) {
+				findings = append(findings, rule.violatedBy(pkg, module)...)
 			}
 		}
 	}
 	sort.Strings(findings)
 	return findings
+}
+
+// violatedBy returns every import of one package that this rule forbids.
+//
+// An import that stays inside the rule's own subtree is always allowed, which
+// is what lets a package be split into files without the rule noticing.
+func (rule layerRule) violatedBy(pkg Package, module string) []string {
+	var found []string
+	for _, importPath := range pkg.Imports {
+		target, ok := moduleRelative(importPath, module)
+		if !ok || within(target, rule.pkg) {
+			continue
+		}
+		if rule.forbids(target) {
+			found = append(found, pkg.Path+" imports "+target+": "+rule.why)
+		}
+	}
+	return found
+}
+
+func (rule layerRule) forbids(target string) bool {
+	for _, forbidden := range rule.forbidden {
+		if within(target, forbidden) {
+			return true
+		}
+	}
+	return false
 }
 
 // Has reports whether the graph contains a package at path.

@@ -59,19 +59,52 @@ func Run(env Environment) (code int) {
 			code = reportCrash(env, recovered)
 		}
 	}()
+	return dispatch(env)
+}
 
+// invocation is what one command line asked for, after the flags were read.
+type invocation struct {
+	showVersion *bool
+	showLicense *bool
+	help        *bool
+	helpShort   *bool
+	global      crossCutting
+}
+
+func (i invocation) wantsHelp() bool { return *i.help || *i.helpShort }
+
+// reportsAsked counts the reports requested at once. Two of them together are
+// legal and both get printed, which is why this is a count and not a choice.
+func (i invocation) reportsAsked() int {
+	asked := 0
+	for _, requested := range []bool{i.wantsHelp(), *i.showVersion, *i.showLicense} {
+		if requested {
+			asked++
+		}
+	}
+	return asked
+}
+
+// declareFlags builds the flag set for the whole invocation.
+func declareFlags() (*flag.FlagSet, invocation) {
 	set := flag.NewFlagSet("qadg", flag.ContinueOnError)
 	// The flag package prints its own message and its own usage text. Both
 	// would break the four part shape of our failures and the split between
 	// the channels, so we take the error and report it ourselves.
 	set.SetOutput(io.Discard)
 
-	showVersion := set.Bool("version", false, "")
-	showLicense := set.Bool("license", false, "")
-	help := set.Bool("help", false, "")
-	helpShort := set.Bool("h", false, "")
-	global := declareCrossCutting(set)
+	return set, invocation{
+		showVersion: set.Bool("version", false, ""),
+		showLicense: set.Bool("license", false, ""),
+		help:        set.Bool("help", false, ""),
+		helpShort:   set.Bool("h", false, ""),
+		global:      declareCrossCutting(set),
+	}
+}
 
+// dispatch decides what one invocation does, once the crash net is in place.
+func dispatch(env Environment) int {
+	set, asked := declareFlags()
 	parseErr := set.Parse(env.Args)
 
 	out := &streams{
@@ -82,60 +115,65 @@ func Run(env Environment) (code int) {
 	}
 
 	if parseErr != nil {
-		// Unreachable while both help flags are defined above, and kept
-		// because the flag package answers this way for a help flag that
-		// is not. Removing one definition would otherwise turn a request
-		// for help into a failure.
-		if errors.Is(parseErr, flag.ErrHelp) {
-			printHelp(out)
-			return finish(out, codeOK)
-		}
-		return usage(out, problem{
-			what:    parseErr.Error(),
-			why:     problemUnknownFlagWhy,
-			allowed: acceptedFlags(),
-			instead: problemUnknownFlagDo,
-		})
+		return reportParseFailure(out, parseErr)
 	}
-
-	if code, ok := applyVerbosity(out, global); !ok {
+	if code, ok := applyVerbosity(out, asked.global); !ok {
 		return code
 	}
 
-	wantsHelp := *help || *helpShort
-	asked := 0
-	for _, requested := range []bool{wantsHelp, *showVersion, *showLicense} {
-		if requested {
-			asked++
-		}
-	}
-
 	// The flag package stops at the first argument that is not a flag, so
-	// anything after a command belongs to that command and never to this
-	// set. A command asked for together with a report would leave one of the
-	// two unanswered, so both are refused rather than one dropped.
-	command := set.Args()
-	if len(command) > 0 {
-		if asked > 0 {
-			return usage(out, problem{
-				what:    problemCommandAndReport,
-				why:     problemCommandAndReportWhy,
-				allowed: problemCommandAndReportAllowed,
-				instead: problemCommandAndReportDo,
-			})
-		}
-		switch command[0] {
-		case commandValidate:
-			return runValidate(out, command[1:], global)
-		default:
-			return usage(out, problem{
-				what:    "unknown command " + command[0],
-				why:     problemUnknownCommandWhy,
-				allowed: commandValidate,
-				instead: problemUnknownCommandDo,
-			})
-		}
+	// anything after a command belongs to that command and never to this set.
+	if command := set.Args(); len(command) > 0 {
+		return runCommand(out, command, asked)
 	}
+	return runReports(out, asked)
+}
+
+func reportParseFailure(out *streams, parseErr error) int {
+	// Unreachable while both help flags are defined, and kept because the
+	// flag package answers this way for a help flag that is not. Removing one
+	// definition would otherwise turn a request for help into a failure.
+	if errors.Is(parseErr, flag.ErrHelp) {
+		printHelp(out)
+		return finish(out, codeOK)
+	}
+	return usage(out, problem{
+		what:    parseErr.Error(),
+		why:     problemUnknownFlagWhy,
+		allowed: acceptedFlags(),
+		instead: problemUnknownFlagDo,
+	})
+}
+
+// runCommand hands the rest of the line to a verb.
+//
+// A command asked for together with a report would leave one of the two
+// unanswered, so both are refused rather than one quietly dropped.
+func runCommand(out *streams, command []string, asked invocation) int {
+	if asked.reportsAsked() > 0 {
+		return usage(out, problem{
+			what:    problemCommandAndReport,
+			why:     problemCommandAndReportWhy,
+			allowed: problemCommandAndReportAllowed,
+			instead: problemCommandAndReportDo,
+		})
+	}
+	switch command[0] {
+	case commandValidate:
+		return runValidate(out, command[1:], asked.global)
+	default:
+		return usage(out, problem{
+			what:    "unknown command " + command[0],
+			why:     problemUnknownCommandWhy,
+			allowed: commandValidate,
+			instead: problemUnknownCommandDo,
+		})
+	}
+}
+
+// runReports prints everything the invocation asked for, or refuses the run.
+func runReports(out *streams, asked invocation) int {
+	count := asked.reportsAsked()
 
 	// --json is a cross cutting flag with one report behind it so far. A run
 	// that asked for machine readable output and got prose has been quietly
@@ -144,7 +182,7 @@ func Run(env Environment) (code int) {
 	// The test is limited to runs that asked for a report, so that --json on
 	// its own is answered with the reason that is actually true: nothing was
 	// asked for at all.
-	if *global.json && asked > 0 && !(*showVersion && asked == 1) {
+	if *asked.global.json && count > 0 && !(*asked.showVersion && count == 1) {
 		return usage(out, problem{
 			what:    problemJSONUnsupported,
 			why:     problemJSONUnsupportedWhy,
@@ -163,15 +201,15 @@ func Run(env Environment) (code int) {
 		}
 		printed++
 	}
-	if wantsHelp {
+	if asked.wantsHelp() {
 		separate()
 		printHelp(out)
 	}
-	if *showVersion {
+	if *asked.showVersion {
 		separate()
-		printVersion(out, *global.json)
+		printVersion(out, *asked.global.json)
 	}
-	if *showLicense {
+	if *asked.showLicense {
 		separate()
 		printLicense(out)
 	}
@@ -180,8 +218,8 @@ func Run(env Environment) (code int) {
 	}
 
 	// A run with nothing to do ends as a usage failure rather than as
-	// success. A pipeline that called this with an empty variable has to
-	// find out now, not from an empty output file three steps later.
+	// success. A pipeline that called this with an empty variable has to find
+	// out now, not from an empty output file three steps later.
 	return usage(out, problem{
 		what:    problemNoCommand,
 		why:     problemNoCommandWhy,
@@ -196,11 +234,14 @@ func Run(env Environment) (code int) {
 // because whatever stopped the run may have been that type. It stays silent
 // when there is no log channel to write to, which is the only case where
 // silence is the honest answer.
+// The results are dropped for the reason above: this is the path taken when
+// the run has already failed in a way nobody planned for, and a second failure
+// while describing the first has nowhere left to be reported.
 func reportCrash(env Environment, recovered any) int {
 	if env.Stderr != nil {
-		fmt.Fprintln(env.Stderr, prefixError+problemCrash)
-		fmt.Fprintln(env.Stderr, prefixDetail+fmt.Sprint(recovered))
-		fmt.Fprintln(env.Stderr, prefixDetail+labelTry+problemCrashDo)
+		_, _ = fmt.Fprintln(env.Stderr, prefixError+problemCrash)
+		_, _ = fmt.Fprintln(env.Stderr, prefixDetail+fmt.Sprint(recovered))
+		_, _ = fmt.Fprintln(env.Stderr, prefixDetail+labelTry+problemCrashDo)
 	}
 	return int(codeRuntime)
 }

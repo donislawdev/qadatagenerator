@@ -80,6 +80,50 @@ jobs:
         # last time, which is not the question being asked here.
         run: go test -count=1 ./...
 
+  race:
+    name: race detector
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.5"
+
+      - name: test with the race detector
+        # CGO_ENABLED is 1 here and 0 everywhere else in this file, which looks
+        # like a contradiction and is not. The promise that the command line
+        # binary builds without a C toolchain is about the PRODUCT, and it is
+        # kept by the matrix above and by the cross build below. The race
+        # detector is a test tool that needs cgo to work at all, so refusing it
+        # here would mean giving up the only mechanical guard against a data
+        # race in order to protect a promise it does not touch.
+        #
+        # One system is enough. A data race is a property of the code rather
+        # than of the operating system, so running this three times would cost
+        # three times as much and find the same thing.
+        env:
+          CGO_ENABLED: "1"
+        run: go test -count=1 -race ./...
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.5"
+
+      # The nearest thing this project has to a reviewer who reads every line.
+      # The owner does not read the code and there is no second author, so a
+      # mechanical reader earns its keep here more than it would elsewhere.
+      # Pinned rather than floating, for the same reason the toolchain is.
+      - uses: golangci/golangci-lint-action@v9.3.0
+        with:
+          version: v2.12.2
+
   cross:
     name: cross build from one machine
     runs-on: ubuntu-latest
