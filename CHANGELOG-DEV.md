@@ -11,6 +11,24 @@ Versioning.
 
 ### Added
 
+- **A guard that closes concurrency until somebody opens it deliberately.**
+  The architecture already said the output is assembled by row number rather
+  than by whichever goroutine finished first, and that nothing mutable is
+  shared. Nothing enforced either sentence. There is no concurrency in the
+  product today, so the list of files allowed to have it is empty, which makes
+  this the cheapest moment it will ever be: everything the guard will ever
+  report is somebody adding the first goroutine.
+  It reads the syntax tree rather than the text, so the word chan in a comment
+  and the phrase go func in a message are not findings. They both appear in the
+  comments explaining the rule, and a guard that fires on prose is switched off
+  within a week.
+  The race detector and this answer different halves of one question. The
+  detector catches a race a test actually triggers. This catches the code that
+  could have one before any test has to be lucky.
+- **A ceiling on the length of a file, which may only ever be lowered.** A long
+  file of short well named functions is not spaghetti and is ordinary in Go, so
+  the signal is weaker here than for a function and the threshold is set with
+  room rather than at what exists today.
 - **Every date the Polish identifier can express is walked, both genders
   included, rather than sampled.** Five hand picked boundaries cover the ones
   somebody thought of. Three hundred and sixty five thousand combinations in
