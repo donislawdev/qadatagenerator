@@ -16,6 +16,19 @@ and has not happened.
 
 ### Added
 
+- **Polish statistical numbers (REGON) can now be generated and checked.** A
+  generated number is nine digits with a correct check digit, written as bare
+  digits with no separators.
+  Three limits are worth knowing before you rely on this. The fourteen digit
+  number of a local unit is refused, and the refusal says that this build does
+  not check that form rather than calling your value wrong. The scheme sets
+  aside no block of numbers for testing, so a generated one could be some real
+  organisation's, exactly as with the personal and tax numbers, and datasets
+  carrying any of them should be marked synthetic. And this check digit is
+  weaker than the tax number's: it folds two cases onto the same digit, so
+  about 1.8 percent of single digit errors pass it unnoticed. If you are
+  corrupting a REGON on purpose and expecting an application to reject it, that
+  is the share of corruptions no check digit test can catch.
 - **Polish tax numbers can now be generated and checked.** A generated number
   is ten digits with a correct check digit, and the checker accepts the three
   ways Poland writes one: bare, and either of the two hyphenated forms. A value

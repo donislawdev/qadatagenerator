@@ -32,6 +32,8 @@ func goldenPath() string { return filepath.Join("testdata", "pesel.json") }
 
 func taxGoldenPath() string { return filepath.Join("testdata", "nip.json") }
 
+func statisticalGoldenPath() string { return filepath.Join("testdata", "regon.json") }
+
 // writeOrCompare is the whole of what a golden test does, and both providers do
 // it the same way. Keeping one copy means a change to how the file is written
 // cannot reach one identifier and miss the other.
@@ -99,6 +101,40 @@ func TestTheGeneratedTaxNumbersHaveNotMoved(t *testing.T) {
 	}
 
 	writeOrCompare(t, taxGoldenPath(), produced, "tools/wyrocznia_nip.py")
+}
+
+// The statistical numbers are frozen for the same reason as the other two. This
+// one has no bound date or gender to vary, because the regulation forbids its
+// digits from meaning anything about the entity, so the cases vary only the
+// address the value is derived from.
+func TestTheGeneratedStatisticalNumbersHaveNotMoved(t *testing.T) {
+	cases := []struct {
+		seed string
+		row  int64
+	}{
+		{"release-2026-08", 0},
+		{"release-2026-08", 1},
+		{"release-2026-08", 2},
+		{"release-2026-08", 999},
+		{"release-2026-08", 123456},
+		{"another-seed", 0},
+		{"another-seed", 1},
+	}
+
+	produced := make([]sample, 0, len(cases))
+	for _, test := range cases {
+		at := seed.Coordinate{Entity: "company", Row: test.row, Field: "regon", Purpose: "value"}
+		value, err := pl.REGON{}.Generate(provider.Request{Source: seed.New(test.seed), At: at})
+		if err != nil {
+			t.Fatalf("seed %q row %d: %v", test.seed, test.row, err)
+		}
+		produced = append(produced, sample{
+			Seed: test.seed, Entity: at.Entity, Row: at.Row, Field: at.Field,
+			Purpose: at.Purpose, Value: value,
+		})
+	}
+
+	writeOrCompare(t, statisticalGoldenPath(), produced, "tools/wyrocznia_regon.py")
 }
 
 // The values this provider produces are a promise to everybody holding a
