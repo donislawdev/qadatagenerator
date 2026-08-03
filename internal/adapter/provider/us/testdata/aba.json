@@ -1,0 +1,92 @@
+[
+  {
+    "seed": "release-2026-08",
+    "entity": "account",
+    "row": 0,
+    "field": "routing_number",
+    "purpose": "value",
+    "value": "022655226",
+    "corrupted": "132655226"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "account",
+    "row": 1,
+    "field": "routing_number",
+    "purpose": "value",
+    "value": "045802742",
+    "corrupted": "135802746"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "account",
+    "row": 2,
+    "field": "routing_number",
+    "purpose": "value",
+    "value": "053743932",
+    "corrupted": "133743933"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "account",
+    "row": 7,
+    "field": "routing_number",
+    "purpose": "value",
+    "value": "114493587",
+    "corrupted": "134493583"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "account",
+    "row": 42,
+    "field": "routing_number",
+    "purpose": "value",
+    "value": "052181634",
+    "corrupted": "132181635"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "account",
+    "row": 999,
+    "field": "routing_number",
+    "purpose": "value",
+    "value": "048028015",
+    "corrupted": "138028019"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "account",
+    "row": 1000000,
+    "field": "routing_number",
+    "purpose": "value",
+    "value": "081112661",
+    "corrupted": "131112663"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "account",
+    "row": 0,
+    "field": "routing_number",
+    "purpose": "value",
+    "value": "080348203",
+    "corrupted": "130348205"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "account",
+    "row": 1,
+    "field": "routing_number",
+    "purpose": "value",
+    "value": "035151704",
+    "corrupted": "135151701"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "account",
+    "row": 5,
+    "field": "routing_number",
+    "purpose": "value",
+    "value": "041593741",
+    "corrupted": "131593745"
+  }
+]

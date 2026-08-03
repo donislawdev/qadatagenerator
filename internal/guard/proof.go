@@ -203,6 +203,16 @@ var Guards = []Guard{
 	{"a check digit position is answered about a number and not about a length", "TestTheCheckDigitPositionIsRefusedForValuesThatAreNotDigits", "internal/adapter/provider/pl", ByMutation},
 	{"a form this build does not check is not reported as a defect", "TestALocalUnitNumberIsUnsupportedRatherThanInvalid", "internal/adapter/provider/pl", ByMutation},
 	{"a value that is genuinely wrong is not excused as unchecked", "TestABrokenStatisticalNumberIsStillInvalidRatherThanUnsupported", "internal/adapter/provider/pl", ByMutation},
+
+	// --- US.aba, the scheme with no safe harbour ----------------------------
+	{"every generated routing number satisfies an independent validator", "TestEveryGeneratedRoutingNumberSatisfiesTheIndependentValidator", "internal/adapter/provider/us", ByMutation},
+	{"no generated routing number sits in a series the registrar has not handed out", "TestEveryGeneratedRoutingNumberSitsInAnIssuedSeries", "internal/adapter/provider/us", ByMutation},
+	{"a scheme with no harbour does not claim one", "TestTheRoutingNumberClaimsNoSafeHarbour", "internal/adapter/provider/us", ByMutation},
+	{"the source still says spare series are stock rather than sanctuary", "TestTheSpareSeriesAreStockRatherThanSanctuary", "internal/adapter/provider/us", ByMutation},
+	{"a corruption aimed at the allocation table breaks nothing else", "TestMovingIntoASpareSeriesLeavesAWellFormedNumberTheTableRefuses", "internal/adapter/provider/us", ByMutation},
+	{"recomputing a routing check digit never refuses", "TestRecomputingARoutingCheckDigitNeverRefuses", "internal/adapter/provider/us", ByMutation},
+	{"the way a routing number was written survives being rebuilt", "TestBothWaysOfWritingARoutingNumberAreAccepted", "internal/adapter/provider/us", ByMutation},
+	{"the generated routing numbers have not moved since they were frozen", "TestTheGeneratedRoutingNumbersHaveNotMoved", "internal/adapter/provider/us", ByMutation},
 }
 
 // CountByProof returns how many guards are in each state.

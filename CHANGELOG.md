@@ -14,6 +14,22 @@ Nothing has been released yet. The binary reports 0.1.0, which is the version
 being built rather than one anybody can download. Releasing is a separate act
 and has not happened.
 
+### Added
+
+- **United States routing numbers, as `US.aba`.** Nine digits with a check
+  digit, readable and writable both bare and in the four four one grouping that
+  federal regulations print them in. It brings the check digit capability and
+  the blocks a corruption can move a value into.
+- **This is the first identifier with no safe range, and the tool says so.**
+  Every other scheme here has a block nothing is ever issued from, and correct
+  data is generated inside it so that nothing produced could belong to a real
+  subject. The routing number registrar marks several series reserved and adds
+  that their use will be decided by its Board, which makes them stock rather
+  than sanctuary. Correct values are therefore generated in the series issued to
+  banks, and any one of them could belong to a real institution. A dataset
+  carrying them has to be marked as synthetic, and the tool does not claim
+  otherwise anywhere.
+
 ### Fixed
 
 - **A recipe could refuse a machine the memory it needed.** The reader limits

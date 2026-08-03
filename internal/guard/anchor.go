@@ -153,6 +153,30 @@ var Anchors = []Anchor{
 		Detail:   "both sentences are held verbatim in internal/oracle/ssn.go and compared digit by digit",
 	},
 
+	// --- US.aba ------------------------------------------------------------
+	//
+	// The clearest split in the register between a shape that was quoted and an
+	// arithmetic that was measured. Both rows name the same provider and they
+	// are not the same kind of evidence.
+	{
+		Rule:     "the nine digit shape and the allocation of the leading series, including that spare series are stock the Board may hand out",
+		Provider: "US.aba",
+		Source:   "ABA Routing Number Policy & Procedures version 9/20, section IV, published by LexisNexis Risk Solutions as the official routing number registrar",
+		State:    ByQuotedSentence,
+		Detail:   "the structure sentence, the allocation table and the note about the Board are held in internal/oracle/aba.go",
+	},
+	{
+		Rule:     "the check digit weights",
+		Provider: "US.aba",
+		Source:   "no document we can read states the arithmetic. The registrar sends the reader to a publication it sells, the Federal Reserve directory FAQ is silent on it, and the rule is most likely inside the paid ANSI X9 standards",
+		State:    ByMeasurement,
+		Detail: "67 of 67 routing numbers printed in 12 CFR part 229 appendix A close under the weights 3 7 1, " +
+			"measured 2026-08-03. A second sample of 3 from unrelated federal publishers agreed. Walking all 1000 " +
+			"weight vectors over the first sample leaves exactly 10 solutions, the zero vector and the 9 multiples " +
+			"of this one modulo 10, which are the same congruence, so no other solution exists. The numbers were " +
+			"not kept, by decision DEC-109 point 4, so this cannot be recomputed here",
+	},
+
 	// --- PL.regon ----------------------------------------------------------
 	{
 		Rule:     "the nine digit shape and the ban on any digit carrying meaning",
