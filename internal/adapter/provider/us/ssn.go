@@ -234,6 +234,13 @@ func (SSN) ReservedRanges() []string {
 }
 
 // UnassignedTargets names the blocks a corruption can move a value into.
+//
+// Four names and three blocks. TargetDefault is the name the catalog entry
+// carries and it means the same block as TargetZeroArea, which is said here
+// rather than left to be discovered by whoever compares the two lists. The
+// alias is kept on the list because the list is also what the refusal prints
+// when an unknown target arrives, and a name the catalog uses has to appear
+// among the choices offered.
 func (SSN) UnassignedTargets() []string {
 	return []string{TargetDefault, TargetZeroArea, TargetZeroGroup, TargetZeroSerial}
 }

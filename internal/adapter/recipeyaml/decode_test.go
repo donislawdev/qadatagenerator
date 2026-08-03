@@ -500,15 +500,16 @@ entities:
     belongs_to: { p: 0-5 }
     fields:
       v: { generator: g, age: 18-75 }
+      w: { type: date }
     consistency:
-      - v matches: v
+      - v matches: w
 `)
 	var view recipe.SchemaView = result.Recipe
 	if names := view.EntityNames(); strings.Join(names, ",") != "p,c" {
 		t.Fatalf("expected the declared order, got %v", names)
 	}
 	fields := view.FieldsOf("c")
-	if len(fields) != 1 || fields[0].Name != "v" {
+	if len(fields) != 2 || fields[0].Name != "v" || fields[1].Name != "w" {
 		t.Fatalf("unexpected fields: %+v", fields)
 	}
 	parents := view.ParentsOf("c")
@@ -687,7 +688,7 @@ func TestARecipeNestedTooDeeplyIsRefusedBeforeParsing(t *testing.T) {
 	if result.Valid() {
 		t.Fatal("a recipe nested past the limit was accepted")
 	}
-	if len(result.Problems) != 1 || !strings.Contains(result.Problems[0].What, "nests square brackets") {
+	if len(result.Problems) != 1 || !strings.Contains(result.Problems[0].What, "nests brackets") {
 		t.Fatalf("expected one problem naming the nesting, got %+v", result.Problems)
 	}
 	if elapsed > time.Second {

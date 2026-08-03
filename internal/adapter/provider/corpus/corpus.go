@@ -41,22 +41,43 @@ const comment = "#"
 
 // Load returns one list, in the order it is stored.
 //
-// The second result says whether the list exists. There is no fallback to
-// another locale and no empty list standing in for a missing one: a provider
+// The second result says whether a usable list came back. There is no fallback
+// to another locale and no empty list standing in for a missing one: a provider
 // asking for a list this build does not carry is a defect, and answering with
 // silence would turn it into data nobody ordered.
+//
+// A file that exists and carries no entries answers false as well. The caller
+// turns a list into a value by drawing an index inside its length, and a length
+// of nought makes that draw a division by nothing, which stops the run with a
+// panic naming the draw rather than the list. Refusing here names the list.
 func Load(locale, name string) ([]string, bool) {
 	raw, err := files.ReadFile(path.Join(locale, name+".txt"))
 	if err != nil {
 		return nil, false
 	}
-	return parse(string(raw)), true
+	entries := parse(string(raw))
+	if len(entries) == 0 {
+		return nil, false
+	}
+	return entries, true
 }
 
+// parse reads the entries out of a list file.
+//
+// The carriage return is trimmed although every file in this repository is
+// stored with unix line endings, checked in .gitattributes and measured on
+// 2026-08-03. The reason is where these files come from: they are written by a
+// script outside the repository, and a script writing text on Windows produces
+// carriage returns by default. Those bytes reach the binary through embed,
+// which reads the working tree rather than what git holds, so a regenerated
+// list could ship with a return on the end of every name while git showed no
+// change at all. One trim closes that, and the name Anna never becomes Anna
+// followed by an invisible byte in somebody's dataset.
 func parse(content string) []string {
 	lines := strings.Split(content, "\n")
 	entries := make([]string, 0, len(lines))
 	for _, line := range lines {
+		line = strings.TrimSuffix(line, "\r")
 		if line == "" || strings.HasPrefix(line, comment) {
 			continue
 		}
@@ -74,6 +95,7 @@ func Header(locale, name string) ([]string, bool) {
 	}
 	var header []string
 	for _, line := range strings.Split(string(raw), "\n") {
+		line = strings.TrimSuffix(line, "\r")
 		if strings.HasPrefix(line, comment) {
 			header = append(header, line)
 		}

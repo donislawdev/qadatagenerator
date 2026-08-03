@@ -3,12 +3,12 @@ package recipeyaml
 import (
 	"bytes"
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/goccy/go-yaml"
-	"github.com/goccy/go-yaml/parser"
 )
 
 // The hint below is the whole reason text is demanded rather than accepted in
@@ -92,10 +92,20 @@ func (r *reader) sequence(where string, node any) ([]any, bool) {
 // count demands a whole number that is not negative. Zero is allowed on
 // purpose: a recipe that asks for no rows of one entity is odd but legal, and
 // refusing it would be this tool deciding what somebody meant to test.
+// There is deliberately no upper limit here beyond what this build can hold.
+// Whether a count can actually be produced is a question for the engine, which
+// has its own exit code for a recipe that is valid and cannot be satisfied. A
+// number chosen today would become a public contract without a measurement
+// behind it.
 func (r *reader) count(where string, node any) int {
-	number, ok := wholeNumber(node)
-	if !ok {
+	number, fault := wholeNumber(node)
+	switch fault {
+	case numberNotWhole:
 		r.report(where, "the number of rows has to be a whole number", "", "write it without quotes, such as count: 100")
+		return 0
+	case numberOutOfRange:
+		r.report(where, "the number of rows is larger than this build can hold", "a whole number this build can count to",
+			"write a number of rows that a machine could produce")
 		return 0
 	}
 	if number < 0 {
@@ -112,10 +122,15 @@ func (r *reader) count(where string, node any) int {
 // smaller dataset. A maximum length of nothing is a field no value can ever
 // satisfy, so every row would fail a limit the recipe set on itself.
 func (r *reader) maxLength(where string, node any) (int, bool) {
-	number, ok := wholeNumber(node)
-	if !ok {
+	number, fault := wholeNumber(node)
+	switch fault {
+	case numberNotWhole:
 		r.report(where, "the maximum length has to be a whole number", "",
 			"write it without quotes, such as max_length: 30")
+		return 0, false
+	case numberOutOfRange:
+		r.report(where, "the maximum length is larger than this build can hold",
+			"a whole number this build can count to", "write a limit a value could actually reach")
 		return 0, false
 	}
 	if number <= 0 {
@@ -150,6 +165,17 @@ func (r *reader) share(where string, node any) (float64, bool) {
 	share, err := strconv.ParseFloat(strings.TrimSuffix(value, "%"), 64)
 	if err != nil {
 		r.report(where, "the share is not a number", "a share such as 15%", "")
+		return 0, false
+	}
+	// Not a number and infinity are refused before the range is compared, and
+	// the order is the whole point. Every comparison against NaN is false, so
+	// the range test below passes it, and so does the rule a few files away
+	// that refuses a field both required and sometimes empty. One value would
+	// therefore switch off a check written to catch it, which is worse than
+	// being accepted: the recipe reads as though it had been examined.
+	if math.IsNaN(share) || math.IsInf(share, 0) {
+		r.report(where, "the share is not a number that can be counted with", "a share such as 15%",
+			"write a plain number between 0 and 100 followed by a percent sign")
 		return 0, false
 	}
 	if share < 0 || share > 100 {
@@ -187,24 +213,67 @@ func (r *reader) listOrOne(where string, node any) []string {
 	return nil
 }
 
+// numberFault says why a number could not be used.
+//
+// It is three states rather than a boolean so that a value too large to hold
+// is not reported as though it were not a number. The two need different words:
+// one is a mistake in what was written, the other is a limit of this build.
+type numberFault int
+
+const (
+	numberOK numberFault = iota
+	// numberNotWhole means the value is not a whole number at all.
+	numberNotWhole
+	// numberOutOfRange means it is one this build cannot hold.
+	numberOutOfRange
+)
+
+// exactWhole is the largest magnitude at which a float64 still represents every
+// whole number.
+//
+// Above it the gaps between representable values exceed one, so the number that
+// arrives is not the number somebody typed, and accepting it would mean
+// generating a different count than the page asks for.
+const exactWhole = 1 << 53
+
 // wholeNumber accepts the shapes a YAML integer arrives in.
-func wholeNumber(node any) (int, bool) {
+//
+// Every conversion to int is guarded, and that is not defensive habit. Go
+// leaves the result undefined when the source does not fit, so the unguarded
+// form turned a number above the range into a negative one, which was then
+// reported as a count below zero: a message about something the user never
+// wrote.
+func wholeNumber(node any) (int, numberFault) {
 	switch value := node.(type) {
 	case int:
-		return value, true
+		return value, numberOK
 	case int64:
-		return int(value), true
+		if value > math.MaxInt || value < math.MinInt {
+			return 0, numberOutOfRange
+		}
+		return int(value), numberOK
 	case uint64:
-		return int(value), true
+		if value > uint64(math.MaxInt) {
+			return 0, numberOutOfRange
+		}
+		return int(value), numberOK
 	case float64:
 		// A number written with a decimal point is not a count. Saying so
 		// beats rounding it and generating a different number of rows.
-		if value != float64(int(value)) {
-			return 0, false
+		if math.IsNaN(value) || math.IsInf(value, 0) || value != math.Trunc(value) {
+			return 0, numberNotWhole
 		}
-		return int(value), true
+		// Both bounds are compared as floats, because converting first is the
+		// undefined step this guard exists to avoid.
+		if value > exactWhole || value < -exactWhole {
+			return 0, numberOutOfRange
+		}
+		if value > float64(math.MaxInt) || value < float64(math.MinInt) {
+			return 0, numberOutOfRange
+		}
+		return int(value), numberOK
 	default:
-		return 0, false
+		return 0, numberNotWhole
 	}
 }
 
@@ -254,6 +323,14 @@ func firstLine(text string) string {
 // avoid belongs to the parser, and there is no undoing it once it has begun.
 // They are kept together so that the next one lands beside them rather than
 // somewhere a reader has to go looking.
+//
+// # The rule this block has to keep
+//
+// Everything here reads bytes and nothing here parses. A third check used to
+// live below that counted the documents in the file by running the parser over
+// all of it, which spent exactly the cost the other two exist to refuse. It now
+// reads the syntax tree that Decode builds once. Anything added here has to
+// answer from the bytes alone, or it belongs on the other side of the parse.
 func refusedBeforeParsing(r *reader, data []byte) bool {
 	// The size is not quoted back, and that is deliberate rather than terse.
 	// Knowing it would mean holding the whole file, which is the cost this
@@ -266,24 +343,21 @@ func refusedBeforeParsing(r *reader, data []byte) bool {
 		return true
 	}
 
-	// One pass over bytes already in hand, comparing two characters, which is
-	// free next to what it refuses.
-	if depth := deepestNesting(data); depth > MaxNestingDepth {
-		r.report("", fmt.Sprintf("the recipe nests square brackets %d deep and this build reads at most %d", depth, MaxNestingDepth),
-			fmt.Sprintf("nesting up to %d deep", MaxNestingDepth),
-			"nothing written by hand nests anywhere near this deep, so check that the file is a recipe and not something else")
+	// The encoding is answered before the shape, because a file in the wrong
+	// one produces a complaint about its shape that names the wrong culprit.
+	if encoding, wrong := notUTF8(data); wrong {
+		r.report("", "the recipe is saved as "+encoding+" and this build reads UTF-8",
+			"UTF-8, with or without a byte order mark",
+			"save the file again as UTF-8. In the Notepad save dialog that is the entry named UTF-8, not the ones named Unicode")
 		return true
 	}
 
-	// A file holding a second recipe is refused rather than half read. The
-	// decoder takes the first document and drops the rest without a word,
-	// which is the shape of silence this project argues against: the caller
-	// gets some of the entities they asked for and an exit code saying
-	// everything went well.
-	if count, err := recipesIn(data); err == nil && count > 1 {
-		r.report("", fmt.Sprintf("the file holds %d recipes and this build reads one", count),
-			"one recipe per file",
-			"split them into separate files, or remove the --- separator between them")
+	// One pass over bytes already in hand, comparing four characters, which is
+	// free next to what it refuses.
+	if depth := deepestNesting(data); depth > MaxNestingDepth {
+		r.report("", fmt.Sprintf("the recipe nests brackets %d deep and this build reads at most %d", depth, MaxNestingDepth),
+			fmt.Sprintf("nesting up to %d deep, counting square brackets and braces together", MaxNestingDepth),
+			"nothing written by hand nests anywhere near this deep, so check that the file is a recipe and not something else")
 		return true
 	}
 
@@ -292,6 +366,50 @@ func refusedBeforeParsing(r *reader, data []byte) bool {
 
 // mark is the byte order mark Notepad writes at the head of a file by default.
 var mark = []byte{0xEF, 0xBB, 0xBF}
+
+// The byte order marks of the encodings this build does not read.
+//
+// # Why these are named rather than left to the parser
+//
+// The same reason stripBOM exists, met on the other half of the same dialog.
+// Notepad offers UTF-8, UTF-16 LE under the name Unicode, and UTF-16 BE. A
+// recipe saved as either of the last two reaches the parser as text with a nul
+// byte between every letter, and the complaint that comes back is that the
+// recipe has to be a mapping of keys, followed by advice to add a version line
+// which is already the first line of the file.
+//
+// Measured on 2026-08-03, before this: a UTF-16 file beginning with version:
+// was refused with exactly that message. The reader is told to fix something
+// that is not wrong, and nothing anywhere names the encoding.
+//
+// Refused rather than transcoded, on purpose. A recipe is untrusted input and
+// converting encodings is a new surface for no gain: naming the cause removes
+// the whole of the reader's loss, and the fix is one entry of the dialog they
+// already used.
+var (
+	mark16LE = []byte{0xFF, 0xFE}
+	mark16BE = []byte{0xFE, 0xFF}
+	mark32LE = []byte{0xFF, 0xFE, 0x00, 0x00}
+	mark32BE = []byte{0x00, 0x00, 0xFE, 0xFF}
+)
+
+// notUTF8 names the encoding when a file announces one this build cannot read.
+//
+// The four byte marks are tested first, because UTF-32 LE begins with the two
+// bytes of UTF-16 LE and would otherwise be named as the wrong one.
+func notUTF8(data []byte) (string, bool) {
+	switch {
+	case bytes.HasPrefix(data, mark32LE):
+		return "UTF-32 little endian", true
+	case bytes.HasPrefix(data, mark32BE):
+		return "UTF-32 big endian", true
+	case bytes.HasPrefix(data, mark16LE):
+		return "UTF-16 little endian", true
+	case bytes.HasPrefix(data, mark16BE):
+		return "UTF-16 big endian", true
+	}
+	return "", false
+}
 
 // stripBOM removes a leading byte order mark.
 //
@@ -313,39 +431,34 @@ func stripBOM(data []byte) []byte {
 	return bytes.TrimPrefix(data, mark)
 }
 
-// recipesIn counts the documents of a file that carry something.
-//
-// 🔴 Documents carrying content, not raw documents, and the difference was
-// measured here rather than taken from a neighbouring project that hit the
-// same question. On this version of the parser a recipe followed by a trailing
-// separator reads as two raw documents and one carrying one, so counting the
-// raw ones would refuse a file somebody had every right to write. The
-// neighbouring project measured a different shape catching them out, which is
-// the reason for measuring rather than copying.
-//
-// Verified on six layouts: a bare recipe, a leading separator, a leading
-// comment before a separator, a trailing separator, a trailing comment, and
-// two recipes. Only the last counts as two.
-func recipesIn(data []byte) (int, error) {
-	file, err := parser.ParseBytes(data, 0)
-	if err != nil {
-		return 0, err
-	}
-	carrying := 0
-	for _, document := range file.Docs {
-		if document.Body != nil {
-			carrying++
-		}
-	}
-	return carrying, nil
-}
-
-// deepestNesting returns the deepest run of unclosed square brackets.
+// deepestNesting returns the deepest run of unclosed flow brackets, counting
+// square brackets and braces together.
 //
 // It reads bytes rather than a parsed document, and that is the whole point:
 // the cost being guarded against belongs to the parser, so the answer has to
-// arrive before the parser does. One pass, two characters compared, no
+// arrive before the parser does. One pass, four characters compared, no
 // allocation.
+//
+// # Why both kinds, and why one counter
+//
+// This counted square brackets alone until 2026-08-03. The note beside the
+// limit cleared braces on the strength of a single measurement at sixteen
+// kilobytes, which is six percent of the largest recipe this build accepts, and
+// a conclusion drawn at six percent of a range does not hold across it.
+// Measured on the same shape written with braces:
+//
+//	4 000 levels    20 kB    27 MB
+//	8 000 levels    40 kB   194 MB
+//	16 000 levels   80 kB   597 MB
+//
+// The growth is faster than linear, so the size limit alone leaves the same
+// machine killed by the operating system that the square bracket limit exists
+// to prevent. It is the same failure through the other spelling of the same
+// idea.
+//
+// One counter rather than two, because the two nest inside each other. Separate
+// counters would each stay under the limit while the document reached twice it,
+// which is the arithmetic a hostile recipe is written to find.
 //
 // A bracket inside a quoted string counts towards the depth as well. That is
 // deliberate and it errs in the safe direction, because a quoted bracket costs
@@ -357,12 +470,12 @@ func deepestNesting(data []byte) int {
 	depth, deepest := 0, 0
 	for _, symbol := range data {
 		switch symbol {
-		case '[':
+		case '[', '{':
 			depth++
 			if depth > deepest {
 				deepest = depth
 			}
-		case ']':
+		case ']', '}':
 			if depth > 0 {
 				depth--
 			}

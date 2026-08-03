@@ -14,8 +14,56 @@ Nothing has been released yet. The binary reports 0.1.0, which is the version
 being built rather than one anybody can download. Releasing is a separate act
 and has not happened.
 
+### Fixed
+
+- **A recipe could refuse a machine the memory it needed.** The reader limits
+  how deeply a recipe may nest, and the limit counted only the shape written
+  with square brackets. The same shape written with braces was not counted at
+  all, so a file well inside the size limit could cost hundreds of megabytes
+  and, at the size limit, enough to have the run killed by the operating
+  system. A killed build says nothing about why it died. Both shapes now count
+  towards the same depth.
+- **A share written as NaN was accepted, and switched off a check while it was
+  there.** Every comparison against NaN is false, so such a value passed the
+  range test and then passed the rule that refuses a field which is both
+  required and sometimes empty. A recipe carrying a contradiction reported that
+  it could be used.
+- **A recipe saved as UTF-16 now says so.** Notepad offers that encoding under
+  the name Unicode. A recipe saved that way was refused for not being a mapping
+  of keys, with advice to add a version line that was already the first line of
+  the file. The refusal now names the encoding and points at the entry to pick
+  instead.
+- **A number too large to hold is named rather than turned negative.** A count
+  above the range this build can hold wrapped around and was reported as a
+  count below zero, which described something nobody had written.
+- **A consistency rule that means nothing is refused.** A rule with no fields
+  on the right, and a rule naming its own field, both used to be accepted in
+  silence. Neither can be satisfied when data is generated or broken when it is
+  corrupted, so both would have surfaced much later as a corruption that was
+  never applied.
+- **A flag given a value is no longer told it does not exist.** Writing
+  `--no-color=nonsense` answered that this build does not define that flag,
+  while the line below listed it among those accepted. The message now says the
+  flag is a switch and takes no value.
+- **A warning keeps its meaning under `--quiet`.** The warning about
+  declarations this build could not check printed its headline on a channel
+  `--quiet` keeps and its entries on one it silences, leaving a warning that
+  something had been skipped and nothing saying what. The headline now carries
+  the count and says how to see the detail.
+- **A directory given as a recipe is refused in plain words.** The message used
+  to come from the operating system, which said "Incorrect function." on
+  Windows and something else elsewhere, and neither said what to do next.
+- **A repeated `--no-color` is read the way the parser reads it.** The last
+  spelling wins in both, where the colour decision used to take the first.
+
 ### Changed
 
+- **A validator can now say it did not check a value.** A verdict used to have
+  two answers, correct and faulty, and some schemes have a third case: a form
+  the build recognises and does not check, such as the fourteen digit
+  statistical number. Reporting that as faulty means reporting a defect in a
+  value that has none, which matters most when the column came from somebody
+  else's file.
 - **The capability describing reserved ranges is now two capabilities.**
   `identifier.reserved-range` used to mean three things at once: that a scheme
   has a block nothing is ever issued from, that values can be generated inside

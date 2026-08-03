@@ -102,6 +102,12 @@ func (s Source) Uint64(c Coordinate) uint64 {
 //
 // It panics when the bound is not positive. That is a defect in the caller
 // rather than bad input from a user, and it surfaces as a tool failure.
+//
+// The loop has no ceiling on the number of rounds and does not need one. Each
+// round discards the draw with probability below one half, so reaching the end
+// of a uint32 would take four thousand million consecutive discards. Adding a
+// limit would mean adding a branch no test can reach, in the one package where
+// every line is expected to be exercised, to guard an event that cannot occur.
 func (s Source) IntN(c Coordinate, bound int64) int64 {
 	if bound <= 0 {
 		panic(fmt.Sprintf("seed: IntN needs a bound above zero, got %d", bound))

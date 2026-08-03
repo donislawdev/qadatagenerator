@@ -125,7 +125,10 @@ func (p PESEL) Generate(req provider.Request) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	gender := p.genderFor(req)
+	gender, err := p.genderFor(req)
+	if err != nil {
+		return "", err
+	}
 
 	month, err := encodeMonth(date)
 	if err != nil {
@@ -183,8 +186,14 @@ func (PESEL) Validate(value string) provider.Verdict {
 }
 
 // CheckDigits says where the check digit sits.
+//
+// The value is checked for being digits and not only for its length. Length
+// alone answered yes for eleven characters of anything, handing a mutator an
+// offset into a value the scheme does not describe, which is how a corruption
+// lands somewhere nobody chose. The statistical number already asked the
+// stricter question and this is the two agreeing.
 func (PESEL) CheckDigits(value string) ([]int, bool) {
-	if len(value) != length {
+	if digits, ok := parseDigits(value); !ok || len(digits) != length {
 		return nil, false
 	}
 	return []int{checkPosition}, true
@@ -391,17 +400,40 @@ func (PESEL) deriveDate(req provider.Request) provider.Date {
 	return provider.Date{Year: year, Month: month, Day: day}
 }
 
+// acceptedGenders are the spellings a bound gender may take, listed once so
+// that the refusal below names exactly what the switch accepts.
+const acceptedGenders = "female, f, k, male, m"
+
 // genderFor takes the bound gender, or derives one.
-func (PESEL) genderFor(req provider.Request) provider.Gender {
-	if bound, ok := req.Agrees.Value(provider.RoleGender); ok {
-		switch strings.ToLower(strings.TrimSpace(bound)) {
-		case string(provider.Female), "f", "k":
-			return provider.Female
-		case string(provider.Male), "m":
-			return provider.Male
-		}
+//
+// # Why an unreadable value is a failure rather than a draw
+//
+// Nothing bound means draw, and that is right: defaulting would make every
+// unbound record the same sex. A binding this file cannot read is a different
+// thing entirely, and until 2026-08-03 the two returned the same answer.
+//
+// The consequence was the quietest defect in this project. A recipe declaring
+// pesel matches: [birth_date, gender] with a value such as kobieta or other
+// received a number carrying a drawn gender, disagreeing with the column beside
+// it, with nothing said anywhere. The tool sells the ability to produce an
+// identifier that is well formed and contradicts its record as a deliberate
+// corruption, so producing one by accident and reporting nothing is the exact
+// shape of silence the manifest exists to prevent.
+//
+// The date half of the same agreement already failed loudly for an unreadable
+// value. This is the two halves answering alike.
+func (PESEL) genderFor(req provider.Request) (provider.Gender, error) {
+	bound, ok := req.Agrees.Value(provider.RoleGender)
+	if !ok {
+		return provider.Unknown, nil
 	}
-	return provider.Unknown
+	switch strings.ToLower(strings.TrimSpace(bound)) {
+	case string(provider.Female), "f", "k":
+		return provider.Female, nil
+	case string(provider.Male), "m":
+		return provider.Male, nil
+	}
+	return provider.Unknown, fmt.Errorf("pesel: %q is not a gender this scheme can encode, which are %s", bound, acceptedGenders)
 }
 
 // genderDigit picks the tenth digit, carrying the gender.

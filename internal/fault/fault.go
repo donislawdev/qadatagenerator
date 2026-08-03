@@ -134,7 +134,7 @@ func (e *Error) Kind() Kind { return e.kind }
 func KindOf(err error) Kind {
 	var carrier *Error
 	if errors.As(err, &carrier) {
-		return carrier.kind
+		return carrier.Kind()
 	}
 	return Unknown
 }

@@ -80,6 +80,45 @@ jobs:
         # last time, which is not the question being asked here.
         run: go test -count=1 ./...
 
+  dependencies:
+    name: nothing in the binary can reach the network
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.5"
+
+      # There is a guard in internal/guard that asks this question of our own
+      # files, and it cannot answer it for the whole binary. It reads the
+      # imports written in this repository, so a dependency opening a socket
+      # inside itself is invisible to it.
+      #
+      # This is the other half. go list walks the build graph of the shipped
+      # command, everything the modules bring with them included, which is the
+      # scope the promise is actually about: no server, no account, no
+      # telemetry, no update check.
+      #
+      # syscall is deliberately not on this list although the guard refuses it
+      # in our own files. Measured 2026-08-03: it is in the graph already,
+      # pulled in by os, so listing it here would fail every run from the first
+      # one and the job would be switched off within a week. The two lists
+      # differ because they answer two different questions, and a guard nobody
+      # can keep green is worth less than no guard at all.
+      - name: no network package anywhere in the build graph
+        shell: bash
+        run: |
+          found=$(go list -deps ./cmd/qadg | grep -E '(^|/)net($|/)|^os/exec$|^plugin$' || true)
+          if [ -n "$found" ]
+          then
+            echo "the shipped binary reaches packages that can leave this machine:"
+            echo "$found"
+            echo "this breaks the promise of no outgoing connections, which is a decision for the owner and not a change to make quietly"
+            exit 1
+          fi
+          echo "the build graph of the command line binary contains no network package"
+
   race:
     name: race detector
     runs-on: ubuntu-latest

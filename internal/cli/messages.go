@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -163,6 +164,12 @@ const (
 	problemUnknownFlagWhy = "this build does not define that flag"
 	problemUnknownFlagDo  = "qadg --help lists every flag this build accepts"
 
+	// The flag exists and was handed a value. Every flag here is a switch, so
+	// there is nothing a value could mean.
+	problemFlagTakesNoValueWhy     = "that flag is a switch, so it is either given or not given and takes no value"
+	problemFlagTakesNoValueAllowed = "the flag on its own, such as --json"
+	problemFlagTakesNoValueDo      = "remove the equals sign and whatever follows it"
+
 	problemUnknownCommandWhy = "this build does not define that command"
 	problemUnknownCommandDo  = "qadg --help"
 
@@ -193,6 +200,11 @@ const (
 	problemMissingKindAllowed = "every failure inside this tool sets its kind where it happens"
 	problemMissingKindDo      = "report this together with the command that produced it"
 
+	problemRecipeIsDirectory        = "cannot read the recipe at "
+	problemRecipeIsDirectoryWhy     = "that path is a directory and a recipe is a single file"
+	problemRecipeIsDirectoryAllowed = "a path to one recipe file"
+	problemRecipeIsDirectoryDo      = "name the recipe inside that directory, such as qadg validate recipes/customer.yaml"
+
 	problemValidateArguments        = "validate needs exactly one recipe to read"
 	problemValidateArgumentsWhy     = "it checks one file at a time, so that the report says which file it is about"
 	problemValidateArgumentsAllowed = "one path to a recipe"
@@ -201,15 +213,38 @@ const (
 
 // Text of the validate report.
 const (
-	// problemUnchecked introduces what this build could not look at. It is a
+	// The warning introducing what this build could not look at. It is a
 	// warning rather than a quiet note, because a report that hides its own
 	// blind spots invites trust it has not earned.
-	problemUnchecked = "some declarations were not checked"
+	//
+	// It carries the count rather than the word some, and names the way to see
+	// the entries when they are being suppressed. The entries print on a
+	// channel --quiet silences, so without this the warning survived and its
+	// whole content did not.
+	problemUncheckedOne  = " declaration was not checked"
+	problemUncheckedMany = " declarations were not checked"
+	problemUncheckedHow  = ". Run without --quiet to see which."
 
 	summaryValid    = " can be used. Understood "
 	summaryEntities = " entities and "
 	summaryFields   = " fields."
 )
+
+// uncheckedHeadline builds the warning about what was not looked at.
+//
+// It takes whether the detail is hidden rather than reading the level itself,
+// so that the decision stays where the channels are and this only writes the
+// sentence.
+func uncheckedHeadline(count int, detailHidden bool) string {
+	headline := strconv.Itoa(count) + problemUncheckedMany
+	if count == 1 {
+		headline = strconv.Itoa(count) + problemUncheckedOne
+	}
+	if detailHidden {
+		headline += problemUncheckedHow
+	}
+	return headline
+}
 
 // Log prefixes. They stay stable because people grep CI logs for them.
 const (

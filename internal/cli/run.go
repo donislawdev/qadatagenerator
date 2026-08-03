@@ -138,12 +138,44 @@ func reportParseFailure(out *streams, parseErr error) int {
 		printHelp(out)
 		return finish(out, codeOK)
 	}
-	return usage(out, problem{
-		what:    parseErr.Error(),
+	return usage(out, flagFailure(parseErr))
+}
+
+// flagFailure turns a refusal from the flag package into our four parts.
+//
+// # Why the reason is chosen rather than fixed
+//
+// It used to be one reason for every parse failure, and that reason said the
+// flag was not defined. For a flag given a value it was untrue, and untrue in
+// the most confusing way available: the line naming what would be accepted
+// listed the flag two rows further down, so the message contradicted itself and
+// sent the reader looking for a typo in a name that was spelled correctly.
+//
+// The two classes are told apart by the wording the flag package uses, which is
+// the only signal it offers. An unrecognised wording falls through to the
+// original reason, which is the right answer for a flag nobody knows.
+func flagFailure(err error) problem {
+	if strings.Contains(err.Error(), "invalid boolean value") {
+		return problem{
+			what:    firstLine(err.Error()),
+			why:     problemFlagTakesNoValueWhy,
+			allowed: problemFlagTakesNoValueAllowed,
+			instead: problemFlagTakesNoValueDo,
+		}
+	}
+	return problem{
+		what:    firstLine(err.Error()),
 		why:     problemUnknownFlagWhy,
 		allowed: acceptedFlags(),
 		instead: problemUnknownFlagDo,
-	})
+	}
+}
+
+// firstLine keeps a message from the flag package to one line, so that a
+// failure stays four lines however the library chooses to word itself.
+func firstLine(text string) string {
+	line, _, _ := strings.Cut(text, "\n")
+	return strings.TrimSpace(line)
 }
 
 // runCommand hands the rest of the line to a verb.
@@ -390,24 +422,30 @@ func (c crossCutting) merge(other crossCutting) crossCutting {
 // leaves every flag at its default. Reading the parsed value would therefore
 // put escape sequences into the output of every invocation that also had a
 // typo in it, which is the one case where nobody is watching a terminal.
+// The last spelling wins, which is what the flag package does with a flag given
+// twice. Taking the first would make this and the parser disagree about the
+// same command line, and the disagreement would only show in colour, which is
+// the hardest kind of difference to notice in a log.
 func colorTurnedOff(args []string) bool {
+	off := false
 	for _, arg := range args {
 		if arg == "--" {
 			// Everything after this is an argument, not a flag.
-			return false
+			return off
 		}
 		name, value, hasValue := strings.Cut(arg, "=")
 		if name != "-no-color" && name != "--no-color" {
 			continue
 		}
 		if !hasValue {
-			return true
+			off = true
+			continue
 		}
-		if off, err := strconv.ParseBool(value); err == nil {
-			return off
+		if parsed, err := strconv.ParseBool(value); err == nil {
+			off = parsed
 		}
 	}
-	return false
+	return off
 }
 
 // applyVerbosity turns the two switches into one level, or refuses the pair.

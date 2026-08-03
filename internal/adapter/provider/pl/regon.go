@@ -141,17 +141,19 @@ func (r REGON) Generate(req provider.Request) (string, error) {
 // happens to produce. Checking a generator with its own arithmetic would make
 // one mistake twice and let the two halves agree with each other.
 //
-// A well formed local unit number is refused, and the reason says that this
-// build does not check that form rather than claiming the value is wrong. The
-// distinction matters: reporting a defect in a value that has none is the
-// failure mode the tax number provider was written to avoid.
+// A well formed local unit number is answered as unsupported rather than
+// invalid, and the difference is not a nicety. Reporting a defect in a value
+// that has none is the failure mode the tax number provider was written to
+// avoid, and it is exactly what this did while the verdict had only two states:
+// the reason said the form was not checked and every caller reading the boolean
+// saw a broken number.
 func (REGON) Validate(value string) provider.Verdict {
 	digits, ok := parseDigits(value)
 	if !ok {
 		return provider.Invalid("a REGON is written as bare digits with no separators")
 	}
 	if len(digits) == regonLocalUnitLength {
-		return provider.Invalid("this is the fourteen digit number of a local unit, and this build checks only the nine digit form")
+		return provider.Unsupported("this is the fourteen digit number of a local unit, and this build checks only the nine digit form")
 	}
 	if len(digits) != regonLength {
 		return provider.Invalid("a REGON of an entity is nine digits")

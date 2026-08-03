@@ -22,6 +22,8 @@ import (
 	"strings"
 
 	"github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml/ast"
+	"github.com/goccy/go-yaml/parser"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/version"
@@ -77,8 +79,9 @@ var (
 // breaking change for everybody reading them.
 const MaxSize = 256 * 1024
 
-// MaxNestingDepth is the deepest a recipe may nest a flow sequence, which is
-// the shape written with square brackets.
+// MaxNestingDepth is the deepest a recipe may nest the bracketed shapes, which
+// are the flow sequence written with square brackets and the flow mapping
+// written with braces. Both count towards the same depth.
 //
 // # Why a second limit when there is already one on size
 //
@@ -88,28 +91,45 @@ const MaxSize = 256 * 1024
 // input. That was wrong. There is a second lever, it is cheap, and it is the
 // one that matters.
 //
-// Measured on 2026-08-02, on the shape that turns out to be the whole problem:
+// Measured on 2026-08-02, on square brackets:
 //
 //	8 000 open brackets    8 kB    46 ms    101 MB
 //	16 000 open brackets   16 kB   171 ms   406 MB
 //
-// Memory grows with the square of the depth. A recipe of sixteen kilobytes,
+// Memory grows faster than the input. A recipe of sixteen kilobytes,
 // comfortably inside the size limit, already costs four hundred megabytes, and
 // one at the size limit costs tens of gigabytes. That is not a slow build, it
 // is a machine killed by the operating system, and a killed build says nothing
 // about why it died.
 //
-// The same measurement clears the other two shapes: flow mappings cost seven
-// megabytes at sixteen kilobytes, and ordinary indented nesting nineteen
-// megabytes at three hundred and fifty. Neither needs a limit, and adding one
-// would be a rule guarding nothing.
+// # Why braces are here too, which they were not until 2026-08-03
+//
+// The note above used to clear them, on one measurement reading seven megabytes
+// at sixteen kilobytes. That measurement is not wrong and the conclusion drawn
+// from it was: sixteen kilobytes is six percent of the largest recipe this
+// build accepts, and a shape cleared at six percent of a range was never
+// cleared across it. Measured again, on braces, at three sizes rather than one:
+//
+//	4 000 levels    20 kB    27 MB
+//	8 000 levels    40 kB   194 MB
+//	16 000 levels   80 kB   597 MB
+//
+// Six hundred megabytes at eighty kilobytes, with the limit at two hundred and
+// fifty six, is the same machine killed by the operating system through the
+// other spelling of the same idea. The measurement was deliberately not taken
+// at the size limit itself, because a payload built to be expensive is a weapon
+// aimed at whoever runs it.
+//
+// Ordinary indented nesting stays cleared, at nineteen megabytes for three
+// hundred and fifty kilobytes, which is past the size limit already.
 //
 // # Why sixty four
 //
 // It is far above anything written by hand. The format's own deepest use of a
-// square bracket is a list of field names in a consistency rule, which is one
-// level. Sixty four leaves room for a shape nobody has thought of while
-// refusing everything a bomb needs.
+// bracket is a list of field names in a consistency rule, which is one level,
+// and a field written inline as a mapping, which is another. Sixty four leaves
+// room for a shape nobody has thought of while refusing everything a bomb
+// needs.
 const MaxNestingDepth = 64
 
 // Result is everything reading a recipe produced.
@@ -124,6 +144,17 @@ func (r Result) Valid() bool { return len(r.Problems) == 0 }
 
 // Decode turns the bytes of a recipe into a model, a list of problems and a
 // list of what could not be checked.
+//
+// # One parse, where there used to be two
+//
+// Counting the documents in the file needs the parser, and until 2026-08-03 it
+// ran its own, inside the block whose whole stated purpose was to answer before
+// the parser was handed anything. So every recipe was parsed twice and the
+// block promised a protection its third check was busy spending.
+//
+// The count now comes from the same syntax tree the model is built from. What
+// still runs before any parsing are the two checks that read bytes alone, the
+// size and the nesting depth, and those are what actually hold the cost down.
 func Decode(data []byte) Result {
 	reader := &reader{}
 
@@ -135,8 +166,20 @@ func Decode(data []byte) Result {
 		return reader.result(recipe.Recipe{})
 	}
 
+	file, err := parser.ParseBytes(data, 0)
+	if err != nil {
+		reader.report("", "the file is not valid YAML: "+firstLine(err.Error()), "",
+			"check the indentation and that every key ends with a colon")
+		return reader.result(recipe.Recipe{})
+	}
+
+	body, ok := reader.singleDocument(file)
+	if !ok {
+		return reader.result(recipe.Recipe{})
+	}
+
 	var root any
-	if err := yaml.UnmarshalWithOptions(data, &root, yaml.UseOrderedMap()); err != nil {
+	if err := yaml.NodeToValue(body, &root, yaml.UseOrderedMap()); err != nil {
 		reader.report("", "the file is not valid YAML: "+firstLine(err.Error()), "",
 			"check the indentation and that every key ends with a colon")
 		return reader.result(recipe.Recipe{})
@@ -156,6 +199,48 @@ func Decode(data []byte) Result {
 
 	built := reader.recipe(top)
 	return reader.result(built)
+}
+
+// singleDocument returns the one document carrying content, or refuses the
+// file and reports why.
+//
+// # Documents carrying content, not raw documents
+//
+// The difference was measured here rather than taken from a neighbouring
+// project that hit the same question. On this version of the parser a recipe
+// followed by a trailing separator reads as two raw documents and one carrying
+// content, so counting the raw ones would refuse a file somebody had every
+// right to write. The neighbouring project measured a different shape catching
+// them out, which is the reason for measuring rather than copying.
+//
+// Verified on six layouts: a bare recipe, a leading separator, a leading
+// comment before a separator, a trailing separator, a trailing comment, and two
+// recipes. Only the last counts as two.
+//
+// A file holding a second recipe is refused rather than half read. Taking the
+// first and dropping the rest without a word is the shape of silence this
+// project argues against: the caller gets some of the entities they asked for
+// and an exit code saying everything went well.
+func (r *reader) singleDocument(file *ast.File) (ast.Node, bool) {
+	var carrying []ast.Node
+	for _, document := range file.Docs {
+		if document.Body != nil {
+			carrying = append(carrying, document.Body)
+		}
+	}
+
+	switch {
+	case len(carrying) > 1:
+		r.report("", fmt.Sprintf("the file holds %d recipes and this build reads one", len(carrying)),
+			"one recipe per file",
+			"split them into separate files, or remove the --- separator between them")
+		return nil, false
+	case len(carrying) == 0:
+		r.report("", "the recipe is empty", "",
+			"a recipe needs at least a version and one entity")
+		return nil, false
+	}
+	return carrying[0], true
 }
 
 type reader struct {
@@ -326,53 +411,6 @@ func (r *reader) entity(name, where string, node any) recipe.Entity {
 	return built
 }
 
-// checkPrimaryKey asks whether the key names fields that exist and names each
-// of them once.
-//
-// A key naming a field twice is worth reporting rather than tidying away. It
-// usually means somebody meant two different fields, and silently collapsing
-// it would leave a one column key where the recipe asked for two.
-func (r *reader) checkPrimaryKey(entity recipe.Entity, where string) {
-	if len(entity.PrimaryKey) == 0 {
-		return
-	}
-	fields := map[string]bool{}
-	for _, field := range entity.Fields {
-		fields[field.Name] = true
-	}
-	seen := map[string]bool{}
-	for _, name := range entity.PrimaryKey {
-		at := where + ".primary_key"
-		if !fields[name] {
-			r.report(at, "the entity has no field "+name,
-				strings.Join(entity.FieldNames(), ", "), "check the spelling")
-			continue
-		}
-		if seen[name] {
-			r.report(at, "the key names "+name+" twice", "",
-				"name each field once, or name the second field you meant")
-		}
-		seen[name] = true
-	}
-}
-
-// checkRules asks whether every field a rule names exists in the entity.
-func (r *reader) checkRules(entity recipe.Entity, wheres []string) {
-	fields := map[string]bool{}
-	for _, field := range entity.Fields {
-		fields[field.Name] = true
-	}
-	for index, rule := range entity.Consistency {
-		at := wheres[index]
-		for _, name := range append([]string{rule.Field}, rule.With...) {
-			if !fields[name] {
-				r.report(at, "the entity has no field "+name,
-					strings.Join(entity.FieldNames(), ", "), "check the spelling")
-			}
-		}
-	}
-}
-
 func (r *reader) fields(where string, node any) []recipe.Field {
 	items, ok := r.mapping(where, node)
 	if !ok {
@@ -451,42 +489,6 @@ func (r *reader) fieldKey(built *recipe.Field, where, key string, value any) {
 	}
 }
 
-// checkField asks the questions that need the whole field rather than one key.
-func (r *reader) checkField(built recipe.Field, where string) {
-	// A field that must always carry a value and is also asked to be empty
-	// part of the time. Both halves are legal on their own, so nothing else
-	// would catch this, and whichever half won at generation time would be
-	// the tool deciding which one the user meant.
-	if built.Required && built.HasEmptyShare && built.EmptyShare > 0 {
-		r.report(where, "the field is required and is also asked to be empty in some rows",
-			"either required: true or a share under empty, not both",
-			"drop required if some rows should be empty, or drop empty if none should be")
-	}
-
-	// A unit with nothing to count. It reads as though a limit was set, which
-	// is exactly why it is worth a line rather than being ignored.
-	if built.LengthUnit != "" && !built.HasMaxLength {
-		r.report(where+".counted_in", "the field says how to count a length it does not declare",
-			"", "add max_length, or remove counted_in")
-	}
-
-	sources := 0
-	for _, source := range []string{built.Type, built.Generator, built.Expression} {
-		if source != "" {
-			sources++
-		}
-	}
-	switch sources {
-	case 0:
-		r.report(where, "the field does not say where its value comes from",
-			"type, generator, expression", "give the field one of them")
-	case 1:
-	default:
-		r.report(where, "the field says twice where its value comes from",
-			"exactly one of type, generator, expression", "keep the one you meant")
-	}
-}
-
 // consistency returns the rules it could read and, beside them, the place each
 // one was written. The two travel together because a rule that could not be
 // read leaves no entry, and counting positions afterwards would then name a
@@ -527,10 +529,15 @@ func (r *reader) consistency(where string, node any) ([]recipe.Rule, []string) {
 				string(recipe.Matches)+", "+string(recipe.DerivedFrom), "")
 			continue
 		}
+		reportedBefore := len(r.problems)
+		with := r.listOrOne(at, items[0].Value)
+		if !r.ruleSaysSomething(at, parts[0], with, reportedBefore) {
+			continue
+		}
 		rules = append(rules, recipe.Rule{
 			Field: parts[0],
 			Kind:  kind,
-			With:  r.listOrOne(at, items[0].Value),
+			With:  with,
 		})
 		wheres = append(wheres, at)
 	}
@@ -601,64 +608,4 @@ func (r *reader) output(node any) recipe.Output {
 	return built
 }
 
-// checkReferences answers the questions that need the whole recipe: whether
-// every name a rule or an expression mentions is a field that exists.
-func (r *reader) checkReferences(built recipe.Recipe) {
-	declared := map[string]bool{}
-	for _, entity := range built.Entities {
-		declared[entity.Name] = true
-	}
-
-	for _, entity := range built.Entities {
-		where := "entities." + entity.Name
-		fields := map[string]bool{}
-		for _, field := range entity.Fields {
-			fields[field.Name] = true
-		}
-		parents := map[string]bool{}
-		for _, parent := range entity.Parents {
-			parents[parent.Entity] = true
-			if !declared[parent.Entity] {
-				r.report(where+".belongs_to."+parent.Entity, "the recipe has no such entity",
-					strings.Join(built.EntityNames(), ", "), "check the spelling or declare it")
-			}
-		}
-
-		for _, field := range entity.Fields {
-			if field.Expression == "" {
-				continue
-			}
-			at := where + ".fields." + field.Name + ".expression"
-			for _, reference := range referencesIn(field.Expression) {
-				owner, name, isParent := strings.Cut(reference, ".")
-				switch {
-				case isParent && !parents[owner]:
-					r.report(at, entity.Name+" does not belong to "+owner,
-						"", "declare the relation under belongs_to or use a field of this entity")
-				case isParent:
-					r.checkParentField(built, at, owner, name)
-				case fields[reference]:
-				default:
-					// It may be a value the tool supplies, such as a
-					// random domain. Those arrive with the generators,
-					// so a name that is not a field cannot be told from
-					// a typo yet.
-					r.note(at, "the reference to "+reference,
-						"it is not a field of this entity, so it is either a value the tool supplies or a misspelling, "+
-							"and telling those apart needs the generators")
-				}
-			}
-		}
-	}
-}
-
-func (r *reader) checkParentField(built recipe.Recipe, at, parent, field string) {
-	owner, ok := built.Entity(parent)
-	if !ok {
-		return
-	}
-	if _, ok := owner.Field(field); !ok {
-		r.report(at, parent+" has no field "+field,
-			strings.Join(owner.FieldNames(), ", "), "check the spelling")
-	}
-}
+// The checks that need more than one key are in checks.go, beside each other.

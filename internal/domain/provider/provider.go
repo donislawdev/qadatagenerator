@@ -130,8 +130,34 @@ func (a Agreement) Fields() []string {
 // A bare boolean would be cheaper and worse. The reason is what lets a report
 // say why a value was rejected, and a validator that only says no is one
 // nobody can act on.
+//
+// # Three answers, because two of them were being spelled the same way
+//
+// There is a third thing a validator can mean, and until 2026-08-03 it had
+// nowhere to live. A scheme can have a form this build recognises and does not
+// check: the statistical number has a fourteen digit form for a local unit, and
+// only the nine digit form is implemented. Answering that with Valid false put
+// a correct value and a broken value in the same bucket, and the difference was
+// carried only by prose in Reason, which nothing reads programmatically.
+//
+// That matters most in the mode where the column arrives from somebody else's
+// file. Reporting a defect in a value that has none is the failure this project
+// avoided carefully when it taught the tax number three ways of being written,
+// and then reintroduced one file away.
+//
+// Valid stays false for the third answer, so nothing that already branches on
+// it changes behaviour. What it gains is the ability to ask the other question.
 type Verdict struct {
+	// Valid says the value satisfies every rule this provider checks.
 	Valid bool
+	// Unsupported says the value is a form of this scheme that this build
+	// recognises and does not check, so it is neither approved nor faulted.
+	//
+	// A caller deciding whether to report a defect has to ask this before
+	// trusting Valid. A caller deciding whether it may corrupt the value has
+	// to treat it as a refusal, because corrupting what we cannot check would
+	// produce a manifest claiming something nobody verified.
+	Unsupported bool
 	// Reason is why the value is not valid, empty when it is. It names the
 	// rule that failed, such as a wrong check digit or a length the scheme
 	// does not allow.
@@ -143,6 +169,11 @@ func Valid() Verdict { return Verdict{Valid: true} }
 
 // Invalid is the verdict for a value that breaks a rule of the scheme.
 func Invalid(reason string) Verdict { return Verdict{Reason: reason} }
+
+// Unsupported is the verdict for a value this build recognises as a form of
+// the scheme and does not check. The reason has to name the form, so that a
+// report can tell a user their data was passed over rather than approved.
+func Unsupported(reason string) Verdict { return Verdict{Unsupported: true, Reason: reason} }
 
 // Provider produces and checks the values of one identifier or one kind of
 // locale bound value.

@@ -179,8 +179,16 @@ func (s *streams) note(text string) {
 
 // detail writes a line that belongs to whatever was written above it.
 func (s *streams) detail(text string) {
-	if s.level == levelQuiet {
+	if s.hidesDetail() {
 		return
 	}
 	s.line(prefixDetail + plain(text))
 }
+
+// hidesDetail reports whether the lines belonging under a headline are being
+// suppressed.
+//
+// A caller writing a headline needs to know, because a headline whose detail
+// never arrives has to say enough on its own. Asking this beats comparing the
+// level at the call site, which would put the meaning of --quiet in two places.
+func (s *streams) hidesDetail() bool { return s.level == levelQuiet }

@@ -11,23 +11,67 @@ var networkAllowed = map[string]bool{
 	"net/url": true,
 }
 
+// reachesOut are the packages outside the net tree that can leave this machine
+// or bring in code from elsewhere.
+//
+// syscall is here because it can do anything the operating system can, sockets
+// included, so importing it directly would route around every other name on
+// this list. It arrives in the build graph anyway through os, which is why this
+// answers about what our own files import and not about what the graph
+// contains. Those are two different questions and the second one is asked in
+// CI, where a shell can run go list.
+var reachesOut = map[string]bool{
+	"os/exec": true,
+	"syscall": true,
+	"plugin":  true,
+}
+
 // OpensTheWorld reports whether an import can reach outside this machine or
 // start another program.
 //
 // The tool has no server, no account, no telemetry and no update check. That
 // is a selling point in every bank, and it is worth nothing as a promise, so
 // it is a check instead.
+//
+// # Why a segment rather than a prefix
+//
+// This tested strings.HasPrefix(importPath, "net/") until 2026-08-03, which
+// answers for the standard library and for nothing else. golang.org/x/net/http2
+// does not begin with net/ and would have passed, so the guard covered the one
+// source of network code this project is least likely to add by accident and
+// missed the one it is most likely to add on purpose.
+//
+// Matching a whole path segment named net catches both spellings and cannot be
+// fooled by a name that merely starts the same way, so netlink and networkd
+// stay clean.
 func OpensTheWorld(importPath string) bool {
-	if importPath == "os/exec" {
+	if networkAllowed[importPath] {
+		return false
+	}
+	if reachesOut[importPath] {
 		return true
 	}
-	if importPath == "net" {
-		return true
+	for _, segment := range strings.Split(importPath, "/") {
+		if segment == "net" {
+			return true
+		}
 	}
-	return strings.HasPrefix(importPath, "net/") && !networkAllowed[importPath]
+	return false
 }
 
 // Network reports every package that imports something able to reach outside.
+//
+// # What this cannot see, said out loud
+//
+// It reads the imports written in our own files. A dependency that opens a
+// socket somewhere inside itself is invisible here, because the scan never
+// leaves this repository, and the promise being kept is about the whole binary
+// rather than about our half of it.
+//
+// The other half is checked in CI, where go list can walk the build graph
+// including everything the modules pull in. Two mechanisms because they need
+// two different tools, and naming the split here is what stops the next reader
+// from believing this function answers the whole question.
 func Network(pkgs []Package) []string {
 	var findings []string
 	for _, pkg := range pkgs {

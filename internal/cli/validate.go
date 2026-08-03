@@ -2,6 +2,7 @@ package cli
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"io"
 	"os"
@@ -25,12 +26,7 @@ func runValidate(out *streams, arguments []string, global crossCutting) int {
 	set.SetOutput(io.Discard)
 	local := declareCrossCutting(set)
 	if err := set.Parse(arguments); err != nil {
-		return usage(out, problem{
-			what:    err.Error(),
-			why:     problemUnknownFlagWhy,
-			allowed: acceptedFlags(),
-			instead: problemUnknownFlagDo,
-		})
+		return usage(out, flagFailure(err))
 	}
 	flags := global.merge(local)
 	if code, ok := applyVerbosity(out, flags); !ok {
@@ -50,6 +46,19 @@ func runValidate(out *streams, arguments []string, global crossCutting) int {
 	path := arguments[0]
 	data, err := readRecipe(path)
 	if err != nil {
+		// A directory is answered in our own words rather than the operating
+		// system's. Left to the system it read "Incorrect function." on Windows
+		// and "is a directory" elsewhere, so the same mistake produced two
+		// messages and neither said what to do next.
+		if errors.Is(err, errIsDirectory) {
+			out.report(problem{
+				what:    problemRecipeIsDirectory + path,
+				why:     problemRecipeIsDirectoryWhy,
+				allowed: problemRecipeIsDirectoryAllowed,
+				instead: problemRecipeIsDirectoryDo,
+			})
+			return int(codeIO)
+		}
 		// Nothing was validated, so there is no report to write in either
 		// shape. A reader that got no document on the data channel and a
 		// read failure on the log channel has the whole story.
@@ -92,8 +101,23 @@ func readRecipe(path string) ([]byte, error) {
 	}
 	defer func() { _ = file.Close() }()
 
+	// Opening a directory succeeds on both systems this runs on and only the
+	// read fails, with a message from the operating system rather than from
+	// here. Asking first is what lets the refusal be ours.
+	info, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if info.IsDir() {
+		return nil, errIsDirectory
+	}
+
 	return io.ReadAll(io.LimitReader(file, recipeyaml.MaxSize+1))
 }
+
+// errIsDirectory marks the one read failure this command can describe better
+// than the operating system does.
+var errIsDirectory = errors.New("the path is a directory")
 
 // decodeRecipe is the port the use case is given. The conversion holds because
 // both structures carry the same three things, and writing it out here keeps
@@ -119,8 +143,16 @@ func writeReport(out *streams, report validate.Report) {
 		out.report(problem{what: what, allowed: found.Allowed, instead: found.Hint})
 	}
 
+	// The headline carries the count and, when the detail below it is being
+	// suppressed, says how to see it.
+	//
+	// It used to be a fixed sentence with the entries underneath it on a
+	// channel that --quiet silences. That left the one combination worth
+	// avoiding: a warning saying something was skipped, with nothing anywhere
+	// saying what. A warning has to be complete on its own, because the line
+	// beneath it is not guaranteed to arrive.
 	if len(report.Unchecked) > 0 {
-		out.warn(problemUnchecked)
+		out.warn(uncheckedHeadline(len(report.Unchecked), out.hidesDetail()))
 		for _, skipped := range report.Unchecked {
 			out.detail(skipped.Where + ": " + skipped.What + " - " + skipped.Reason)
 		}

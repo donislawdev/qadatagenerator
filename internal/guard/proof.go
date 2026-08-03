@@ -76,6 +76,10 @@ var Guards = []Guard{
 	{"no package can reach outside this machine", "TestRepositoryOpensNothing", "internal/guard", ByMutation},
 	{"the scanner sees an import that reaches outside", "TestNetworkCatchesAnImportThatReachesOutside", "internal/guard", ByProbe},
 	{"parsing an address is not talking to one", "TestNetworkAllowsAddressParsing", "internal/guard", ByProbe},
+	{"network code outside the standard library is caught too", "TestTheNetworkGuardSeesNetworkPackagesOutsideTheStandardLibrary", "internal/guard", ByProbe},
+	{"a name that merely looks like a network package is not a finding", "TestTheNetworkGuardDoesNotFireOnNamesThatMerelyLookAlike", "internal/guard", ByProbe},
+	{"the scanner reports a dependency that reaches outside", "TestNetworkReportsADependencyThatReachesOutside", "internal/guard", ByProbe},
+	{"the limit of the import scan is stated where it runs", "TestTheNetworkGuardOnlySeesImportsWrittenHere", "internal/guard", ByProbe},
 	{"the dependency rule holds across the whole tree", "TestRepositoryRespectsTheLayers", "internal/guard", ByMutation},
 	{"the scanner sees the domain reaching upwards", "TestLayersCatchesTheDomainReachingUpwards", "internal/guard", ByMutation},
 	{"the scanner sees a use case reaching an adapter", "TestLayersCatchesAUseCaseReachingAnAdapter", "internal/guard", ByMutation},
@@ -129,6 +133,13 @@ var Guards = []Guard{
 	{"the layouts that are still one recipe keep working", "TestTheLayoutsThatAreStillOneRecipeKeepWorking", "internal/adapter/recipeyaml", ByMutation},
 	{"a long value does not come back as a long message", "TestALongValueDoesNotComeBackAsALongMessage", "internal/adapter/recipeyaml", ByMutation},
 	{"shortening a message never splits a character", "TestShorteningAMessageNeverSplitsACharacter", "internal/adapter/recipeyaml", ByMutation},
+	{"a value that is not a number cannot switch off the checks that compare it", "TestAShareThatIsNotANumberIsRefused", "internal/adapter/recipeyaml", ByMutation},
+	{"the nesting limit covers braces as well as square brackets", "TestARecipeNestedInBracesIsRefusedBeforeParsing", "internal/adapter/recipeyaml", ByMutation},
+	{"nesting is counted across both kinds of bracket together", "TestNestingIsCountedAcrossBothKindsOfBracket", "internal/adapter/recipeyaml", ByMutation},
+	{"a recipe in an encoding this build cannot read is told which one it is in", "TestARecipeInTheWrongEncodingIsNamedRatherThanPuzzledOver", "internal/adapter/recipeyaml", ByMutation},
+	{"a number too large to hold is named rather than wrapped into a negative one", "TestANumberTooLargeToHoldIsNamedRatherThanWrapped", "internal/adapter/recipeyaml", ByMutation},
+	{"a consistency rule that means nothing is refused rather than carried", "TestARuleThatSaysNothingIsRefused", "internal/adapter/recipeyaml", ByMutation},
+	{"a consistency rule cannot name its own field", "TestARuleNamingItsOwnFieldIsRefused", "internal/adapter/recipeyaml", ByMutation},
 	{"a recipe that cannot be used ends with the configuration code", "TestAnUnusableRecipeIsAConfigurationFailure", "internal/app/validate", ByMutation},
 
 	// --- the command line, which enters somebody else's pipeline ------------
@@ -143,6 +154,10 @@ var Guards = []Guard{
 	{"a word nothing like a command is not offered as a near miss", "TestAWordNothingLikeACommandIsRefusedWithoutASuggestion", "internal/cli", ByMutation},
 	{"a refusal keeps its four parts whether or not it suggests", "TestBothShapesOfTheUnknownCommandRefusalKeepFourParts", "internal/cli", ByMutation},
 	{"every flag the help promises is one the parser accepts", "TestEveryDocumentedFlagIsAcceptedByTheParser", "internal/cli", ByMutation},
+	{"a warning keeps its meaning when the detail under it is suppressed", "TestTheUncheckedWarningSurvivesQuietWithItsMeaningIntact", "internal/cli", ByMutation},
+	{"a flag that exists is never reported as one that does not", "TestAFlagGivenAValueIsToldItIsASwitch", "internal/cli", ByMutation},
+	{"a directory given as a recipe is refused in our own words", "TestADirectoryGivenAsARecipeIsRefusedInOurOwnWords", "internal/cli", ByMutation},
+	{"the parser and the colour scan agree about a repeated flag", "TestTheLastSpellingOfNoColourWins", "internal/cli", ByMutation},
 
 	// --- capabilities and the provider contract -----------------------------
 	{"a missing capability is reported in a stable order", "TestMissingReportsWhatIsAbsent", "internal/domain/capability", ByMutation},
@@ -155,6 +170,12 @@ var Guards = []Guard{
 	// --- reference data and its attribution ---------------------------------
 	{"every corpus is attributed and every attribution has a corpus", "TestEveryListIsAttributedAndEveryAttributionHasAList", "internal/adapter/provider/corpus", ByMutation},
 	{"the notice at the top of a corpus never becomes data", "TestTheHeaderDoesNotLeakIntoTheEntries", "internal/adapter/provider/corpus", ByMutation},
+	// These two read the embedded files rather than exercising a branch, so
+	// breaking the code they defend leaves them green: every list carried today
+	// is free of carriage returns and none of them is empty. They are probes,
+	// and calling them mutation proven would be the register flattering itself.
+	{"no entry of a word list carries an invisible line ending", "TestNoEntryCarriesAnInvisibleLineEnding", "internal/adapter/provider/corpus", ByProbe},
+	{"a list with no entries is refused rather than handed over to be drawn from", "TestAListWithNoEntriesIsRefusedLikeAMissingOne", "internal/adapter/provider/corpus", ByProbe},
 
 	// --- the identifiers, where a wrong rule reaches a real person ----------
 	{"every generated Polish number satisfies an independent validator", "TestEveryGeneratedValueSatisfiesTheIndependentValidator", "internal/adapter/provider/pl", ByMutation},
@@ -175,6 +196,11 @@ var Guards = []Guard{
 	{"recomputing a statistical check digit never refuses", "TestRecomputingTheCheckDigitNeverRefuses", "internal/adapter/provider/pl", ByMutation},
 	{"a local unit number is refused by name rather than called malformed", "TestALocalUnitNumberIsRefusedByNameRatherThanAsMalformed", "internal/adapter/provider/pl", ByMutation},
 	{"the one weakness of the folded check digit is exactly where it is claimed", "TestASingleDigitErrorSurvivesExactlyWhenTheResidueFoldsOntoNought", "internal/adapter/provider/pl", ByMutation},
+	{"a bound gender the scheme cannot read is refused rather than quietly drawn", "TestAGenderThisSchemeCannotReadIsRefusedRatherThanDrawn", "internal/adapter/provider/pl", ByMutation},
+	{"the gender spellings the scheme does read keep working", "TestTheGenderSpellingsTheSchemeReadsStillWork", "internal/adapter/provider/pl", ByMutation},
+	{"a check digit position is answered about a number and not about a length", "TestTheCheckDigitPositionIsRefusedForValuesThatAreNotDigits", "internal/adapter/provider/pl", ByMutation},
+	{"a form this build does not check is not reported as a defect", "TestALocalUnitNumberIsUnsupportedRatherThanInvalid", "internal/adapter/provider/pl", ByMutation},
+	{"a value that is genuinely wrong is not excused as unchecked", "TestABrokenStatisticalNumberIsStillInvalidRatherThanUnsupported", "internal/adapter/provider/pl", ByMutation},
 }
 
 // CountByProof returns how many guards are in each state.
