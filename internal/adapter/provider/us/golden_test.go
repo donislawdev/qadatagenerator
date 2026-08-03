@@ -60,7 +60,7 @@ func TestTheGeneratedNumbersHaveNotMoved(t *testing.T) {
 		if err != nil {
 			t.Fatalf("seed %q row %d: %v", test.seed, test.row, err)
 		}
-		corrupted, err := us.SSN{}.WithNeverIssued(value, us.TargetDefault)
+		corrupted, err := us.SSN{}.WithUnassigned(value, us.TargetDefault)
 		if err != nil {
 			t.Fatalf("seed %q row %d: corrupting %s failed: %v", test.seed, test.row, value, err)
 		}

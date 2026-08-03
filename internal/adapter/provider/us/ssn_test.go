@@ -2,10 +2,12 @@ package us_test
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/provider/us"
+	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
 	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
 	"github.com/donislawdev/qadatagenerator/internal/oracle"
@@ -44,8 +46,12 @@ func TestTheProviderMeetsItsContract(t *testing.T) {
 func TestTheProviderClaimsNothingTheSchemeDoesNotHave(t *testing.T) {
 	subject := us.SSN{}
 
-	if got := len(subject.Capabilities()); got != 1 {
-		t.Fatalf("expected one capability, got %v", subject.Capabilities())
+	wanted := []capability.Name{
+		capability.IdentifierReservedRange,
+		capability.IdentifierUnassignedTarget,
+	}
+	if got := subject.Capabilities(); !reflect.DeepEqual(got, wanted) {
+		t.Fatalf("expected exactly %v, got %v", wanted, got)
 	}
 	if _, ok := interface{}(subject).(provider.CheckDigited); ok {
 		t.Error("the provider offers check digits, and an SSN has none")
@@ -233,9 +239,9 @@ func TestTheCorruptionTargetsADifferentBlockFromTheGeneratedValue(t *testing.T) 
 		t.Fatalf("%s is not in a reserved range, so this test no longer guards anything", base)
 	}
 
-	for _, target := range subject.NeverIssuedTargets() {
+	for _, target := range subject.UnassignedTargets() {
 		t.Run(target, func(t *testing.T) {
-			moved, err := subject.WithNeverIssued(base, target)
+			moved, err := subject.WithUnassigned(base, target)
 			if err != nil {
 				t.Fatalf("moving %s into %s failed: %v", base, target, err)
 			}
@@ -261,7 +267,7 @@ func TestTheCatalogExampleIsReproduced(t *testing.T) {
 		before = "666-12-3456"
 		after  = "000-12-3456"
 	)
-	got, err := us.SSN{}.WithNeverIssued(before, us.TargetDefault)
+	got, err := us.SSN{}.WithUnassigned(before, us.TargetDefault)
 	if err != nil {
 		t.Fatalf("the catalog example failed: %v", err)
 	}
@@ -281,7 +287,7 @@ func TestMovingAValueIntoTheBlockItAlreadyOccupiesIsRefused(t *testing.T) {
 	}
 
 	for value, target := range cases {
-		_, err := us.SSN{}.WithNeverIssued(value, target)
+		_, err := us.SSN{}.WithUnassigned(value, target)
 		if err == nil {
 			t.Errorf("%s was moved into %s, where it already sits", value, target)
 			continue
@@ -296,11 +302,11 @@ func TestMovingAValueIntoTheBlockItAlreadyOccupiesIsRefused(t *testing.T) {
 // than falling back to some default. A corruption that quietly does something
 // other than what it was asked is worse than one that does not run.
 func TestAnUnknownTargetIsRefusedWithTheChoices(t *testing.T) {
-	_, err := us.SSN{}.WithNeverIssued("666-12-3456", "zero_everything")
+	_, err := us.SSN{}.WithUnassigned("666-12-3456", "zero_everything")
 	if err == nil {
 		t.Fatal("an unknown block was accepted")
 	}
-	for _, target := range (us.SSN{}).NeverIssuedTargets() {
+	for _, target := range (us.SSN{}).UnassignedTargets() {
 		if !strings.Contains(err.Error(), target) {
 			t.Errorf("the refusal does not name the choice %q: %v", target, err)
 		}
@@ -319,7 +325,7 @@ func TestBothWaysOfWritingTheNumberSurviveTheCorruption(t *testing.T) {
 		if verdict := (us.SSN{}).Validate(before); !verdict.Valid {
 			t.Errorf("%s was refused: %s", before, verdict.Reason)
 		}
-		got, err := us.SSN{}.WithNeverIssued(before, us.TargetZeroArea)
+		got, err := us.SSN{}.WithUnassigned(before, us.TargetZeroArea)
 		if err != nil {
 			t.Errorf("%s: %v", before, err)
 			continue

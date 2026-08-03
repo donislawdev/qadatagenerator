@@ -282,6 +282,7 @@ Every entry here is `soft` on purpose. Business rules belong to the system under
 | `REV.name.null_surname` | acceptance | hard |
 | `REV.name.cjk` | acceptance | hard |
 | `REV.amount.negative_legal` | acceptance | soft |
+| `REV.identifier.reserved_range` | acceptance | soft |
 
 `REV.amount.negative_legal` is the first entry in this module that is not a piece of text about a person. Until it was added, `REV` covered email addresses, names and addresses and nothing else, while the documented cases of valid data being refused included a market price below zero and a national identifier that no longer carries a check digit. A module named for valid data that gets refused has no reason to stop at text.
 

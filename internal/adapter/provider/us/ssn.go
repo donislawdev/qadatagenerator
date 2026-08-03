@@ -67,8 +67,9 @@ type SSN struct{}
 // Contract checks, so that a mismatch between what this provider claims and
 // what it implements fails to compile rather than at run time.
 var (
-	_ provider.Provider   = SSN{}
-	_ provider.RangeAware = SSN{}
+	_ provider.Provider           = SSN{}
+	_ provider.RangeAware         = SSN{}
+	_ provider.UnassignedWritable = SSN{}
 )
 
 // The two sentences this file rests on, read on the Administration's own page
@@ -133,8 +134,16 @@ func (SSN) ID() string { return "US.ssn" }
 // no check digit, no date and no gender, so claiming any of those would be a
 // promise it cannot keep and would hand a mutator a capability that turns out
 // to be empty while it is corrupting.
+// Both range capabilities are declared, and they are two claims rather than
+// one. The Administration names areas nothing is ever issued from, so this
+// scheme has a harbour and pillar one generates inside it. It also knows the
+// blocks a corruption can move a value into. A scheme with no harbour would
+// declare only the second.
 func (SSN) Capabilities() []capability.Name {
-	return []capability.Name{capability.IdentifierReservedRange}
+	return []capability.Name{
+		capability.IdentifierReservedRange,
+		capability.IdentifierUnassignedTarget,
+	}
 }
 
 // Generate produces one number for the place described by the request.
@@ -224,19 +233,19 @@ func (SSN) ReservedRanges() []string {
 	}
 }
 
-// NeverIssuedTargets names the blocks a corruption can move a value into.
-func (SSN) NeverIssuedTargets() []string {
+// UnassignedTargets names the blocks a corruption can move a value into.
+func (SSN) UnassignedTargets() []string {
 	return []string{TargetDefault, TargetZeroArea, TargetZeroGroup, TargetZeroSerial}
 }
 
-// WithNeverIssued returns the value moved into the named block.
+// WithUnassigned returns the value moved into the named block.
 //
 // The refusal when nothing would change is the point of the method rather than
 // a guard on it. Pillar one already generates inside a never issued block, so
 // a corruption aimed at the same block would produce the value it was given
 // and report success, which is the quiet kind of nothing this tool exists to
 // argue against.
-func (SSN) WithNeverIssued(value, target string) (string, error) {
+func (SSN) WithUnassigned(value, target string) (string, error) {
 	parsed, ok := parse(value)
 	if !ok {
 		return "", fmt.Errorf("ssn: %q is not nine digits", value)
@@ -252,7 +261,7 @@ func (SSN) WithNeverIssued(value, target string) (string, error) {
 		moved.serial = 0
 	default:
 		return "", fmt.Errorf("ssn: %q is not a block this scheme has, the choices are %s",
-			target, strings.Join(SSN{}.NeverIssuedTargets(), ", "))
+			target, strings.Join(SSN{}.UnassignedTargets(), ", "))
 	}
 
 	if moved == parsed {

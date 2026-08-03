@@ -96,10 +96,10 @@ func FuzzTheReadersNeverPanic(f *testing.F) {
 		// than fail. The results are deliberately unused: the property under
 		// test is that the call returns at all.
 		_ = subject.InReservedRange(value)
-		for _, target := range subject.NeverIssuedTargets() {
-			_, _ = subject.WithNeverIssued(value, target)
+		for _, target := range subject.UnassignedTargets() {
+			_, _ = subject.WithUnassigned(value, target)
 		}
-		_, _ = subject.WithNeverIssued(value, value)
+		_, _ = subject.WithUnassigned(value, value)
 
 		// A value this build calls well formed has to survive being moved into
 		// every block and come back refused. Anything else would mean the
@@ -108,8 +108,8 @@ func FuzzTheReadersNeverPanic(f *testing.F) {
 		if !subject.Validate(value).Valid {
 			return
 		}
-		for _, target := range subject.NeverIssuedTargets() {
-			moved, err := subject.WithNeverIssued(value, target)
+		for _, target := range subject.UnassignedTargets() {
+			moved, err := subject.WithUnassigned(value, target)
 			if err != nil {
 				t.Fatalf("%q is well formed and moving it into %s failed: %v", value, target, err)
 			}

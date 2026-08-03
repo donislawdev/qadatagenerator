@@ -75,14 +75,15 @@ const (
 	KeyPrimary           Name = "key.primary"
 	KeyUnique            Name = "key.unique"
 
-	IdentifierCheckDigit    Name = "identifier.check-digit"
-	IdentifierEncodesDate   Name = "identifier.encodes-date"
-	IdentifierEncodesGender Name = "identifier.encodes-gender"
-	IdentifierReservedRange Name = "identifier.reserved-range"
-	ReferencePostalToPlace  Name = "reference.postal-to-place"
-	ProviderEmail           Name = "provider.email"
-	CurrencyMinorUnits      Name = "currency.minor-units"
-	DateArithmetic          Name = "date.arithmetic"
+	IdentifierCheckDigit       Name = "identifier.check-digit"
+	IdentifierEncodesDate      Name = "identifier.encodes-date"
+	IdentifierEncodesGender    Name = "identifier.encodes-gender"
+	IdentifierReservedRange    Name = "identifier.reserved-range"
+	IdentifierUnassignedTarget Name = "identifier.unassigned-target"
+	ReferencePostalToPlace     Name = "reference.postal-to-place"
+	ProviderEmail              Name = "provider.email"
+	CurrencyMinorUnits         Name = "currency.minor-units"
+	DateArithmetic             Name = "date.arithmetic"
 
 	CorpusUnicode            Name = "corpus.unicode"
 	CorpusCoercibleValues    Name = "corpus.coercible-values"
@@ -111,14 +112,15 @@ var suppliers = map[Name]Supplier{
 	KeyPrimary:           Schema,
 	KeyUnique:            Schema,
 
-	IdentifierCheckDigit:    Provider,
-	IdentifierEncodesDate:   Provider,
-	IdentifierEncodesGender: Provider,
-	IdentifierReservedRange: Provider,
-	ReferencePostalToPlace:  Provider,
-	ProviderEmail:           Provider,
-	CurrencyMinorUnits:      Provider,
-	DateArithmetic:          Provider,
+	IdentifierCheckDigit:       Provider,
+	IdentifierEncodesDate:      Provider,
+	IdentifierEncodesGender:    Provider,
+	IdentifierReservedRange:    Provider,
+	IdentifierUnassignedTarget: Provider,
+	ReferencePostalToPlace:     Provider,
+	ProviderEmail:              Provider,
+	CurrencyMinorUnits:         Provider,
+	DateArithmetic:             Provider,
 
 	CorpusUnicode:            Corpus,
 	CorpusCoercibleValues:    Corpus,

@@ -697,7 +697,7 @@ mutators:
     confidence: soft
     reversible: true
     requires:
-      - identifier.reserved-range
+      - identifier.unassigned-target
     example:
       before: "666-12-3456"
       after: "000-12-3456"
@@ -1378,6 +1378,39 @@ mutators:
         refuses it. This entry pairs with REV.name.single_letter, which is the
         same defect approached from the other end.
 
+  - id: REV.identifier.reserved_range
+    layer: REV
+    summary: >-
+      Supplies a correct identifier taken from a block the issuing authority
+      never assigns, which is where this tool generates on purpose.
+    applies_to:
+      field_types: [identifier]
+      formats: [any]
+      providers:
+        - US.ssn
+    parameters: []
+    expectation: acceptance
+    confidence: soft
+    reversible: true
+    requires:
+      - identifier.reserved-range
+    example:
+      before: "123-45-6789"
+      after: "666-12-3456"
+      note: >-
+        This entry is the one place where a rule of this tool meets a rule of
+        a real application head on. Generating inside a never assigned block
+        is the ethical default, because a number with a correct shape outside
+        one could belong to somebody. An application that checks assignment
+        ranges will therefore refuse data this tool calls correct, and a team
+        meeting that for the first time cannot tell a defect from a design
+        choice. Confidence is soft because refusing such a number is
+        reasonable in a system that knows the ranges, and accepting it is
+        reasonable everywhere else. What the entry makes testable is which of
+        the two an application does. Not to be confused with
+        L3.range.unassigned, which moves a value into a different unassigned
+        block and expects rejection.
+
   - id: REV.amount.negative_legal
     layer: REV
     summary: >-
@@ -1525,8 +1558,20 @@ capabilities:
   identifier.reserved-range:
     supplied_by: provider
     description: >-
-      Know the reserved or unassigned ranges of an identifier, both to generate
-      inside them by default and to tell whether a value already sits in one.
+      Know that a scheme has a block nothing is ever issued from, generate
+      inside it by default, and tell whether a value sits in one. This is the
+      claim that generated values could not belong to a real subject, so a
+      scheme whose registrar may still issue from its spare blocks does not
+      have it.
+
+  identifier.unassigned-target:
+    supplied_by: provider
+    description: >-
+      Name the blocks a value can be moved into so that the result is not
+      assigned to anybody, and move it there. Separate from the range above
+      because a scheme with no permanent block still supports the corruption,
+      and asking the other question would refuse it every time for a scheme
+      that generates inside a reserved range.
 
   reference.postal-to-place:
     supplied_by: provider

@@ -36,11 +36,19 @@ type readOnlyRanged struct{ stub }
 func (readOnlyRanged) InReservedRange(string) bool { return true }
 func (readOnlyRanged) ReservedRanges() []string    { return []string{"a block"} }
 
-// ranged adds the writing half.
+// ranged has a harbour and can write into unassigned blocks, which is the
+// shape of a scheme like the Social Security number.
 type ranged struct{ readOnlyRanged }
 
-func (ranged) NeverIssuedTargets() []string                    { return []string{"zero_area"} }
-func (ranged) WithNeverIssued(value, _ string) (string, error) { return value, nil }
+func (ranged) UnassignedTargets() []string                    { return []string{"zero_area"} }
+func (ranged) WithUnassigned(value, _ string) (string, error) { return value, nil }
+
+// harbourless can write into unassigned blocks and claims no harbour, which is
+// the shape of a scheme whose registrar may still issue from its spare blocks.
+type harbourless struct{ stub }
+
+func (harbourless) UnassignedTargets() []string                    { return []string{"spare_prefix"} }
+func (harbourless) WithUnassigned(value, _ string) (string, error) { return value, nil }
 
 func findings(t *testing.T, p provider.Provider) string {
 	t.Helper()
@@ -142,12 +150,13 @@ func TestAWellFormedProviderPasses(t *testing.T) {
 // whether a value is reserved returns true for every correct value the tool
 // produces. A corruption aimed at unassigned ranges therefore cannot use that
 // question to decide whether it applies, and it has nothing to build a value
-// with either. Reading alone is not enough to declare this capability, and
-// this is the test that says so.
-func TestAProviderThatCanOnlyReadItsReservedRangesIsRefused(t *testing.T) {
+// with either. The write side is what it calls, so claiming that capability
+// without implementing it hands the mutator something empty while it is
+// corrupting, and this is the test that says so.
+func TestClaimingUnassignedTargetsWithoutTheWriteSideIsRefused(t *testing.T) {
 	got := findings(t, readOnlyRanged{stub{
 		id:      "US.ssn",
-		claimed: []capability.Name{capability.IdentifierReservedRange},
+		claimed: []capability.Name{capability.IdentifierUnassignedTarget},
 	}})
 	if !strings.Contains(got, "the interface it implies is not implemented") {
 		t.Fatalf("expected the missing write side to be reported, got %q", got)
@@ -156,13 +165,39 @@ func TestAProviderThatCanOnlyReadItsReservedRangesIsRefused(t *testing.T) {
 
 // The shape that passes, so the check above is known to be refusing something
 // rather than everything.
-func TestAProviderWithBothHalvesOfItsReservedRangesPasses(t *testing.T) {
+func TestAProviderWithBothRangeCapabilitiesPasses(t *testing.T) {
 	good := ranged{readOnlyRanged{stub{
-		id:      "US.ssn",
-		claimed: []capability.Name{capability.IdentifierReservedRange},
+		id: "US.ssn",
+		claimed: []capability.Name{
+			capability.IdentifierReservedRange,
+			capability.IdentifierUnassignedTarget,
+		},
 	}}}
 	if got := provider.Check(good); len(got) != 0 {
 		t.Fatalf("expected no findings, got %v", got)
+	}
+}
+
+// The reason those two capabilities are separate, kept as a test so that
+// merging them back fails here rather than in somebody's manifest.
+//
+// A scheme whose registrar names spare blocks it may still issue from has no
+// harbour, so it cannot claim its own output could not belong to anybody. It
+// can still say which blocks a corruption may move a value into, and that has
+// to be enough to pass the contract. While the two were one capability this
+// shape was inexpressible: such a provider had to claim a harbour it does not
+// have, and a manifest reader would have believed it.
+func TestAProviderWithNoHarbourCanStillOfferUnassignedTargets(t *testing.T) {
+	subject := harbourless{stub{
+		id:      "US.aba",
+		claimed: []capability.Name{capability.IdentifierUnassignedTarget},
+	}}
+
+	if got := provider.Check(subject); len(got) != 0 {
+		t.Fatalf("a provider offering only the write side was refused: %v", got)
+	}
+	if _, ok := interface{}(subject).(provider.RangeAware); ok {
+		t.Error("the fixture claims a harbour, so this test no longer describes a scheme without one")
 	}
 }
 

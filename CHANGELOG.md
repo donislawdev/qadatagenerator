@@ -16,6 +16,15 @@ and has not happened.
 
 ### Changed
 
+- **The capability describing reserved ranges is now two capabilities.**
+  `identifier.reserved-range` used to mean three things at once: that a scheme
+  has a block nothing is ever issued from, that values can be generated inside
+  it, and that a value can be moved into an unassigned block. Some numbering
+  schemes have the last of those and not the first, because their registrar
+  names spare blocks it may still issue from. Writing them as one capability
+  forced such a scheme to claim a safe range it does not have. The write side
+  is now `identifier.unassigned-target`, and `L3.range.unassigned` requires
+  that one, which is what it always needed.
 - **A mistyped command now tells you which one you meant.** `qadg vlaidate`
   answers that `validate` is one small edit away and gives you the line to run.
   A word that is nothing like a command still gets the plain refusal and the
@@ -26,6 +35,16 @@ and has not happened.
 
 ### Added
 
+- **A new reverse mutator, `REV.identifier.reserved_range`.** It supplies a
+  correct identifier taken from the block this tool generates inside on
+  purpose, and expects the application to accept it. This is the one entry
+  where a rule of this tool meets a rule of a real application head on:
+  generating inside a never assigned block is what keeps a generated number
+  from resembling somebody's real one, and an application that checks
+  assignment ranges will refuse such a number anyway. The entry makes that
+  collision testable, so a team finds out which side its application is on
+  rather than reading a red test as a defect. Confidence is soft, because both
+  answers are reasonable depending on what the application knows.
 - **Polish statistical numbers (REGON) can now be generated and checked.** A
   generated number is nine digits with a correct check digit, written as bare
   digits with no separators.

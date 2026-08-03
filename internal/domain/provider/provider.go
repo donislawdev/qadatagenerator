@@ -202,13 +202,13 @@ type GenderEncoder interface {
 //
 // # Two questions, and running them together makes the mutator useless
 //
-// A numbering scheme with never issued blocks usually has more than one, and
-// they are not interchangeable. Generating inside one of them is the ethical
-// default, so every value this tool produces for such a scheme already sits in
-// a never issued block. A mutator aimed at unassigned ranges therefore cannot
-// ask whether a value is in a reserved range and stop when the answer is yes:
-// for generated data the answer is always yes and the mutator would never
-// apply to anything.
+// A numbering scheme with unassigned blocks usually has more than one, and
+// they are not interchangeable. Where the scheme has a block that is never
+// issued, generating inside it is the ethical default, so every value this
+// tool produces for that scheme already sits in an unassigned block. A mutator
+// aimed at unassigned ranges therefore cannot ask whether a value is in a
+// reserved range and stop when the answer is yes: for such a scheme the answer
+// is always yes and the mutator would never apply to anything.
 //
 // That is why the write side is here rather than in the engine. The applicable
 // question is not whether the value is reserved but whether it already sits in
@@ -216,25 +216,63 @@ type GenderEncoder interface {
 // how many blocks the scheme has or how to write one. Putting that in the
 // engine would make the second country with reserved ranges an edit to the
 // engine instead of a new file.
+//
+// # Why this is two interfaces and not one
+//
+// The read and the write side answer questions that different schemes answer
+// differently, and bundling them made one of them a lie.
+//
+// A harbour is a block a registrar says nothing will ever be issued from.
+// Where a scheme has one, generating inside it is the ethical default, and the
+// tool can say its own output could not belong to anybody. Some schemes have
+// no harbour at all: their registrar names blocks it has merely not issued yet
+// and says out loud it may issue them later. Generating there would be the
+// mistake of picking a range because it looks free.
+//
+// Moving a value into an unassigned block is a different question with a
+// different answer. It is safe for both kinds, because a value there cannot
+// belong to anybody today, which is all a corruption needs.
+//
+// So a scheme without a harbour still supports the corruption, and a provider
+// has to be able to say that. One interface would have forced it to claim a
+// harbour it does not have, and a manifest reader would have believed it.
 type RangeAware interface {
-	// InReservedRange reports whether the value sits in a range that is never
-	// assigned to a real person. It is the claim this tool makes about its own
-	// output, not a test of whether a corruption applies.
+	// InReservedRange reports whether the value sits in a range that is not
+	// assigned to a real subject. It is the claim this tool makes about its
+	// own output, not a test of whether a corruption applies.
 	InReservedRange(value string) bool
 	// ReservedRanges describes the ranges in words, for the report that has
 	// to tell a user why their safe data is rejected by an application that
 	// checks ranges.
 	ReservedRanges() []string
-	// NeverIssuedTargets names the blocks a value can be moved into, sorted.
+}
+
+// UnassignedWritable is required of a provider declaring
+// identifier.unassigned-target.
+//
+// # Why the write side is here rather than in the engine
+//
+// The applicable question is not whether a value is reserved but whether it
+// already sits in the particular block the corruption is aimed at, and only
+// the provider knows how many blocks the scheme has or how to write one.
+// Putting that in the engine would make the second country with unassigned
+// ranges an edit to the engine instead of a new file.
+//
+// Asking the other question instead would break the mutator outright. Where a
+// scheme has a harbour, every value this tool generates already sits in an
+// unassigned block, so a mutator that stopped when the value was reserved
+// would never apply to anything.
+type UnassignedWritable interface {
+	// UnassignedTargets names the blocks a value can be moved into, sorted.
 	// These are the names a catalog entry passes as its target parameter.
-	NeverIssuedTargets() []string
-	// WithNeverIssued returns the value moved into the named block.
+	UnassignedTargets() []string
+	// WithUnassigned returns the value moved into the named block.
 	//
 	// It refuses when the value already sits there, and that refusal is the
 	// applicability answer: it is the one case the manifest has to record as
 	// applied false with a reason, rather than as a corruption that changed
 	// nothing and said so to nobody.
-	WithNeverIssued(value, target string) (string, error)
+	WithUnassigned(value, target string) (string, error)
 }
 
 // implied maps a capability to the interface a provider claiming it must
@@ -254,6 +292,10 @@ var implied = map[capability.Name]func(Provider) bool{
 	},
 	capability.IdentifierEncodesGender: func(p Provider) bool {
 		_, ok := p.(GenderEncoder)
+		return ok
+	},
+	capability.IdentifierUnassignedTarget: func(p Provider) bool {
+		_, ok := p.(UnassignedWritable)
 		return ok
 	},
 	capability.IdentifierReservedRange: func(p Provider) bool {
