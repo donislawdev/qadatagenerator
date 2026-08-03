@@ -24,7 +24,10 @@ import (
 // The date half of the same agreement already failed loudly for a value it
 // could not read. This is the two halves answering alike.
 func TestAGenderThisSchemeCannotReadIsRefusedRatherThanDrawn(t *testing.T) {
-	unreadable := []string{"kobieta", "mężczyzna", "other", "1", "F.", "", " "}
+	// The two digits are ISO 5218 codes for not known and not applicable. They
+	// are refused on purpose while 1 and 2 are accepted: they say the value is
+	// unknown, and a number encoding a sex cannot be made to agree with unknown.
+	unreadable := []string{"other", "F.", "", " ", "xyz", "0", "9", "nieznana", "N/A", "true"}
 
 	for _, written := range unreadable {
 		t.Run(written, func(t *testing.T) {
@@ -47,13 +50,26 @@ func TestAGenderThisSchemeCannotReadIsRefusedRatherThanDrawn(t *testing.T) {
 // The spellings the scheme does read have to keep working, or the refusal above
 // is rejecting the format rather than a mistake.
 func TestTheGenderSpellingsTheSchemeReadsStillWork(t *testing.T) {
+	// The list is wide on purpose, decided by the owner on 2026-08-03: the
+	// column comes from somebody else's file and there is no answer to what a
+	// Polish tester writes. English or Polish, a word or a letter, all likely.
+	// The digits are ISO 5218, which is how many databases store this.
 	cases := map[string]provider.Gender{
-		"female": provider.Female,
-		"FEMALE": provider.Female,
-		" f ":    provider.Female,
-		"k":      provider.Female,
-		"male":   provider.Male,
-		"M":      provider.Male,
+		"female":    provider.Female,
+		"FEMALE":    provider.Female,
+		" f ":       provider.Female,
+		"k":         provider.Female,
+		"Kobieta":   provider.Female,
+		"KOBIETA":   provider.Female,
+		"woman":     provider.Female,
+		"2":         provider.Female,
+		"male":      provider.Male,
+		"M":         provider.Male,
+		"mężczyzna": provider.Male,
+		"MĘŻCZYZNA": provider.Male,
+		"mezczyzna": provider.Male,
+		"man":       provider.Male,
+		"1":         provider.Male,
 	}
 	for written, want := range cases {
 		t.Run(written, func(t *testing.T) {

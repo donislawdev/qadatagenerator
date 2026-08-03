@@ -9,6 +9,7 @@ package pl
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
@@ -400,9 +401,51 @@ func (PESEL) deriveDate(req provider.Request) provider.Date {
 	return provider.Date{Year: year, Month: month, Day: day}
 }
 
-// acceptedGenders are the spellings a bound gender may take, listed once so
-// that the refusal below names exactly what the switch accepts.
-const acceptedGenders = "female, f, k, male, m"
+// genderSpellings maps every way a bound gender may be written onto what the
+// scheme encodes.
+//
+// # Why the list is this wide, decided by the owner on 2026-08-03
+//
+// The column comes from somebody else's recipe or somebody else's file, and the
+// question "what will a Polish tester write" has no answer: English or Polish,
+// a full word or a single letter, all of them are likely. Guessing narrowly
+// would refuse ordinary data, and the alternative to a wide list is not a
+// narrow list, it is the silent draw this used to do.
+//
+// The digits are the codes of ISO 5218, which is how a great many databases
+// store this. A tester exporting a column from one gets 1 and 2 rather than
+// words, and refusing those would be refusing the most machine like input there
+// is. The standard's 0 and 9, meaning not known and not applicable, are
+// deliberately absent: they say the value is unknown, which is not something a
+// number encoding a sex can be made to agree with.
+//
+// Everything is compared after trimming and lowercasing, so Kobieta, KOBIETA
+// and " k " are the same entry.
+var genderSpellings = map[string]provider.Gender{
+	"female":    provider.Female,
+	"f":         provider.Female,
+	"woman":     provider.Female,
+	"k":         provider.Female,
+	"kobieta":   provider.Female,
+	"2":         provider.Female,
+	"male":      provider.Male,
+	"m":         provider.Male,
+	"man":       provider.Male,
+	"mężczyzna": provider.Male,
+	"mezczyzna": provider.Male,
+	"1":         provider.Male,
+}
+
+// acceptedGenders lists the spellings for the refusal, sorted so that two runs
+// word it the same way. Go randomises map iteration on purpose.
+func acceptedGenders() string {
+	spellings := make([]string, 0, len(genderSpellings))
+	for spelling := range genderSpellings {
+		spellings = append(spellings, spelling)
+	}
+	sort.Strings(spellings)
+	return strings.Join(spellings, ", ")
+}
 
 // genderFor takes the bound gender, or derives one.
 //
@@ -427,13 +470,10 @@ func (PESEL) genderFor(req provider.Request) (provider.Gender, error) {
 	if !ok {
 		return provider.Unknown, nil
 	}
-	switch strings.ToLower(strings.TrimSpace(bound)) {
-	case string(provider.Female), "f", "k":
-		return provider.Female, nil
-	case string(provider.Male), "m":
-		return provider.Male, nil
+	if gender, known := genderSpellings[strings.ToLower(strings.TrimSpace(bound))]; known {
+		return gender, nil
 	}
-	return provider.Unknown, fmt.Errorf("pesel: %q is not a gender this scheme can encode, which are %s", bound, acceptedGenders)
+	return provider.Unknown, fmt.Errorf("pesel: %q is not a gender this scheme can encode, which are %s", bound, acceptedGenders())
 }
 
 // genderDigit picks the tenth digit, carrying the gender.

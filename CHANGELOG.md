@@ -33,6 +33,13 @@ and has not happened.
   of keys, with advice to add a version line that was already the first line of
   the file. The refusal now names the encoding and points at the entry to pick
   instead.
+- **A recipe saved in a single byte encoding is refused rather than quietly
+  damaged.** On a Polish Windows the ANSI entry of a save dialog means
+  Windows-1250, and older editors and spreadsheet exports still default to it.
+  Such a file used to be accepted as usable while every accented name in it
+  arrived broken, so an entity named zażółć would have become the heading of a
+  generated column as za followed by four replacement characters. Nothing said
+  so, because the report announced that the recipe could be used.
 - **A number too large to hold is named rather than turned negative.** A count
   above the range this build can hold wrapped around and was reported as a
   count below zero, which described something nobody had written.
@@ -58,6 +65,17 @@ and has not happened.
 
 ### Changed
 
+- **A bound gender accepts far more spellings.** The column saying whether a
+  person is a woman or a man comes from your recipe or from your own file, and
+  there is no telling whether it says female, kobieta, f, k or the digits a
+  database exports. All of those are read now, in either language, in any
+  letter case. The codes 1 and 2 of ISO 5218 are read as well, because that is
+  what a column exported from a database usually holds. The codes 0 and 9 of
+  the same standard are refused on purpose: they mean not known and not
+  applicable, and a number that encodes a sex cannot be made to agree with
+  either. A value none of this recognises is now an error naming what would
+  have been accepted, where it used to be a silently drawn gender that
+  contradicted the rest of the row.
 - **A validator can now say it did not check a value.** A verdict used to have
   two answers, correct and faulty, and some schemes have a third case: a form
   the build recognises and does not check, such as the fourteen digit

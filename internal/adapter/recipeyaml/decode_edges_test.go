@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode/utf8"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 )
@@ -139,6 +140,51 @@ func TestARecipeInTheWrongEncodingIsNamedRatherThanPuzzledOver(t *testing.T) {
 		if len(result.Problems) != 1 || !strings.Contains(result.Problems[0].What, name) {
 			t.Errorf("a file in %s was refused without naming the encoding: %+v", name, result.Problems)
 		}
+	}
+}
+
+// # The encoding that announces nothing
+//
+// A single byte encoding carries no mark, so it is caught by the bytes failing
+// to be UTF-8. This is the one the people this tool is for are most likely to
+// produce: on a Polish Windows the ANSI entry of a save dialog means
+// Windows-1250, and older editors and spreadsheet exports still default to it.
+//
+// Measured 2026-08-03, before this check: the recipe below was accepted as
+// usable, and the entity named zażółć reached the model as za followed by four
+// replacement characters. Nobody was told, and that damaged name is what a
+// generated column would have been headed with.
+func TestARecipeInASingleByteEncodingIsRefused(t *testing.T) {
+	// The same recipe as below, written in Windows-1250. The Polish letters are
+	// single bytes above 0x7f, which is what makes the whole file invalid UTF-8.
+	polish1250 := []byte("version: \"0.1\"\nentities:\n  za\xbf\xf3\xb3\xe6:\n    fields:\n      g\xea\x9cl\xb9: { type: string }\n")
+
+	if utf8.Valid(polish1250) {
+		t.Fatal("the fixture is meant to be invalid UTF-8, so this test would prove nothing")
+	}
+
+	result := recipeyaml.Decode(polish1250)
+	if result.Valid() {
+		t.Fatal("a recipe in a single byte encoding was accepted, so its names are already damaged")
+	}
+	if len(result.Problems) != 1 || !strings.Contains(result.Problems[0].What, "not valid UTF-8") {
+		t.Fatalf("expected one problem naming the encoding, got %+v", result.Problems)
+	}
+	if !strings.Contains(result.Problems[0].Hint, "ANSI") {
+		t.Fatalf("the hint has to name what a Polish Windows calls it, got %q", result.Problems[0].Hint)
+	}
+}
+
+// The same recipe in UTF-8 is read, with its Polish names intact. Without this
+// the check above could be refusing every accented letter.
+func TestTheSameRecipeInUTF8KeepsItsAccentedNames(t *testing.T) {
+	result := decode(t, "version: \"0.1\"\nentities:\n  zażółć:\n    fields:\n      gęślą: { type: string }\n")
+
+	if name := result.Recipe.Entities[0].Name; name != "zażółć" {
+		t.Fatalf("the entity name did not survive: %q", name)
+	}
+	if field := result.Recipe.Entities[0].Fields[0].Name; field != "gęślą" {
+		t.Fatalf("the field name did not survive: %q", field)
 	}
 }
 

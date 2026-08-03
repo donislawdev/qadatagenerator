@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/goccy/go-yaml"
 )
@@ -349,6 +350,32 @@ func refusedBeforeParsing(r *reader, data []byte) bool {
 		r.report("", "the recipe is saved as "+encoding+" and this build reads UTF-8",
 			"UTF-8, with or without a byte order mark",
 			"save the file again as UTF-8. In the Notepad save dialog that is the entry named UTF-8, not the ones named Unicode")
+		return true
+	}
+
+	// A single byte encoding announces nothing, so it is caught by the bytes
+	// failing to be UTF-8 rather than by a mark.
+	//
+	// # Why this is not the same check as the one above
+	//
+	// The marks above are a declaration. This is a measurement, and it is the
+	// one that catches the encoding the people this tool is for are most likely
+	// to produce: on a Polish Windows the ANSI entry of a save dialog means
+	// Windows-1250, and older editors and spreadsheet exports still default to
+	// it. Nothing in such a file says so.
+	//
+	// Measured 2026-08-03, before this: a recipe written in Windows-1250 was
+	// accepted as usable, and the entity named zażółć reached the model as
+	// za followed by four replacement characters. The report said the recipe
+	// could be used, so nobody was told, and the damaged name is what a
+	// generated column would have been headed with.
+	//
+	// YAML itself requires UTF-8, UTF-16 or UTF-32, so refusing anything else
+	// follows the format rather than adding a rule of ours.
+	if !utf8.Valid(data) {
+		r.report("", "the recipe is not valid UTF-8, so it was saved in some other encoding",
+			"UTF-8, with or without a byte order mark",
+			"save the file again as UTF-8. A Polish Windows writes Windows-1250 when the save dialog says ANSI")
 		return true
 	}
 
