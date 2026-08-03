@@ -101,11 +101,15 @@ The GUI is translated. Adding a language means adding a translation file, not to
 6. **Open formats.** The manifest and the recipe are public specifications that other tools can read.
 7. **Synthetic data must look synthetic.** Reserved ranges wherever they exist, `.test` domains, official test card numbers only, SPECIMEN watermarks on generated documents.
 
-### One limitation this creates, stated up front
+### Two limitations this creates, stated up front
 
 Generating inside reserved ranges is what keeps a synthetic identifier from belonging to a real person, and it is not optional here. **The cost is that an application which validates identifier ranges will reject the generated valid data too, not only the deliberately corrupted rows.** This applies to every identifier that has a reserved range, the US social security number among them.
 
 You will meet this as an unexpected rejection on data that should have passed. It is a consequence of the ethics rule rather than a defect, and the tool says so where it applies.
+
+**The second limitation is the mirror image, and it applies where no such range exists.** Some numbering schemes have nothing set aside. The Polish national, tax and statistical numbers have no spare block, and the US routing number registrar marks series as reserved while saying its board may still hand them out, which is stock rather than sanctuary. Taking a range because it looks free would be worse than taking none.
+
+So for those schemes the generated values sit in the space that is actually issued, and **any one of them could belong to a real person or a real institution**. Nothing in the number itself will say otherwise. A dataset carrying them has to be labelled as synthetic where it is stored and where it is sent, and that duty sits with you rather than with the number.
 
 ---
 
