@@ -144,3 +144,18 @@ func TestProjectLicensesAreNamed(t *testing.T) {
 		t.Fatal("the notice about generated data is the sentence that removes a real barrier to adoption")
 	}
 }
+
+// The notice saying every value is synthetic has to say the three things it
+// exists to say. Several schemes here have no block that is never issued, so a
+// correct value cannot be shown not to be somebody's, and this sentence is the
+// whole of the defence.
+func TestTheSyntheticNoticeSaysWhatItHasTo(t *testing.T) {
+	for _, needed := range []string{"synthetic", "coincidence", "not"} {
+		if !strings.Contains(strings.ToLower(license.SyntheticDataNotice), needed) {
+			t.Errorf("the synthetic data notice no longer says %q, and that word is the claim", needed)
+		}
+	}
+	if license.ExampleDataNotice == "" {
+		t.Fatal("values written into this repository need the same notice as values it produces")
+	}
+}

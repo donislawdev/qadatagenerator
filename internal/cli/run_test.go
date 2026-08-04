@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/fault"
+	"github.com/donislawdev/qadatagenerator/internal/license"
 	"github.com/donislawdev/qadatagenerator/internal/version"
 )
 
@@ -85,6 +86,22 @@ func TestLicenseNamesBothLicensesAndFreesTheOutput(t *testing.T) {
 		if !strings.Contains(got.data, wanted) {
 			t.Errorf("the license report leaves out %q", wanted)
 		}
+	}
+}
+
+// The flag has to say that everything produced here is synthetic.
+//
+// Not because a licence requires it, but because several of these schemes have
+// no block that is never issued, so a correct value cannot be shown not to
+// belong to somebody. A README does not travel with a file of data and this
+// does, which is the whole reason the sentence lives in the binary.
+func TestLicenseSaysEveryValueIsSynthetic(t *testing.T) {
+	got := run("--license")
+	if got.code != 0 {
+		t.Fatalf("ended with %d", got.code)
+	}
+	if !strings.Contains(got.data, license.SyntheticDataNotice) {
+		t.Error("the license report no longer says that every value is synthetic")
 	}
 }
 

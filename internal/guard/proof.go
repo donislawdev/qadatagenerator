@@ -227,6 +227,15 @@ var Guards = []Guard{
 	{"the generated postal codes have not moved since they were frozen", "TestTheGeneratedPostalCodesHaveNotMoved", "internal/adapter/provider/us", ByMutation},
 	{"every code in the registry answers with the place beside it", "TestEveryCodeInTheRegistryResolvesToItsPlace", "internal/adapter/provider/us", ByProbe},
 	{"one seed gives one mismatched pair, every time", "TestADifferentPlaceIsTheSameAnswerEveryTime", "internal/adapter/provider/us", ByProbe},
+
+	// --- what the tool says its own output is -------------------------------
+	//
+	// Not a licence obligation. Several of these schemes have no block that is
+	// never issued, so a correct value cannot be shown not to belong to
+	// somebody, and saying so is the whole of the defence. A README does not
+	// travel with a file of data.
+	{"the tool says every value it produces is synthetic", "TestLicenseSaysEveryValueIsSynthetic", "internal/cli", ByMutation},
+	{"that notice still says what to make of a resemblance", "TestTheSyntheticNoticeSaysWhatItHasTo", "internal/license", ByMutation},
 }
 
 // CountByProof returns how many guards are in each state.

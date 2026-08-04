@@ -163,7 +163,12 @@ var Anchors = []Anchor{
 	{
 		Rule:     "the check digit weights",
 		Provider: "PL.nip",
-		Source:   "country sheet for Poland on the European TIN Portal, worked example 1234563218",
+		// The number itself is deliberately not repeated here. It lives in the
+		// test this entry names, and an identifier written down twice is an
+		// identifier published twice. The earlier wording also named the wrong
+		// one: it quoted an ascending run this repository uses to check the
+		// three accepted spellings, not the number the source works out.
+		Source:   "country sheet for Poland on the European TIN Portal, which takes one number apart and prints every intermediate result",
 		State:    ByWorkedExample,
 		Detail:   "TestTheWorkedExampleFromTheSourceIsReproduced",
 	},

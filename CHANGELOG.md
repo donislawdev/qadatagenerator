@@ -16,6 +16,15 @@ and has not happened.
 
 ### Added
 
+- **The tool now states, from the binary, that every value it produces is
+  synthetic.** `--license` prints it beside the licence report. Names,
+  addresses, identifiers and account numbers describe nobody, and where one
+  resembles a real person, company or institution that is a coincidence of
+  arithmetic rather than a record of anything. This is printed rather than only
+  written in the README, because a README does not travel with a file of data,
+  and because several of these numbering schemes have no block that is never
+  issued: a value with a correct check digit cannot be shown not to be
+  somebody's, which is exactly why it has to be labelled.
 - **United States postal codes paired with their places, as `US.postal`.** A
   registry of 28 658 codes built from two files of the United States census.
   It answers which place a code belongs to and which codes a place holds, and

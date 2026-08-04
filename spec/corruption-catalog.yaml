@@ -11,6 +11,14 @@
 # implementation must produce examples from the real algorithms and reference
 # data, and must not copy these values into generated output.
 #
+# Every value here is synthetic and describes nobody. Some of them satisfy the
+# arithmetic of the scheme they illustrate, because an entry about a pair being
+# wrong has to show two values that are each right on their own. Several of
+# these schemes have no block that is never issued, so a value that satisfies
+# the arithmetic cannot be shown not to belong to somebody. Where one resembles
+# a real person, company or institution, that is a coincidence of arithmetic
+# rather than a record of anything, and it must not be treated as one.
+#
 # Ethics, applied to every example here: email addresses use reserved
 # documentation domains, payment card numbers are absent, and no value is meant
 # to resemble a real person.

@@ -31,6 +31,37 @@ const SpecScope = "Applies to spec/ and to the corruption catalog entries built 
 // copyleft too.
 const GeneratedDataNotice = "Data generated with this tool belongs to you. It is not a derived work, and the license of this tool does not cover it."
 
+// SyntheticDataNotice says what everything this tool produces is, and what it
+// is not.
+//
+// # Why this ships in the binary rather than only in the README
+//
+// A national identifier or a bank routing number with a correct check digit is
+// indistinguishable from a real one, because that is the whole point of
+// producing it. Several of the schemes here have no block that is never issued,
+// so a correct value cannot be shown not to be somebody's. The defence this
+// project chose is not avoidance, which is impossible, but saying so plainly
+// wherever somebody might look.
+//
+// A README does not travel with a file of data. A flag on the binary does, and
+// so does the notice a dataset carries in its own metadata. This constant is the
+// one sentence all of those say.
+const SyntheticDataNotice = "Every value this tool produces is synthetic and is generated for testing. " +
+	"Names, addresses, identifiers and account numbers do not describe anybody. " +
+	"Where a value resembles a real person, company or institution, that is a coincidence " +
+	"of arithmetic rather than a record of anything, and it must not be treated as one."
+
+// ExampleDataNotice covers the values written into this repository rather than
+// produced by it: the examples in the corruption catalog and the values in
+// tests.
+//
+// They are held to the same rule for the same reason, and to one extra rule that
+// only applies to a repository. A file in a public repository is published, so
+// the fewest possible correct identifiers are written into one, and those that
+// are have a reason recorded beside them.
+const ExampleDataNotice = "Example values in the catalog and in the tests are illustrative and synthetic. " +
+	"They are chosen to show the shape of a defect, not to describe any real subject."
+
 // DataSource is one collection of reference data compiled into this binary.
 //
 // It is kept apart from Component because the two bind for different reasons.

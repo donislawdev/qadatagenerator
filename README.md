@@ -132,6 +132,20 @@ If your legal department needs one sentence: running a GPL tool over your own in
 
 ---
 
+## Every value is synthetic
+
+**Everything this tool produces is made up, and it is made up for testing.** Names, addresses, national identifiers, tax numbers, bank routing numbers, postal codes: none of them describe a person, a company or an institution. Nothing here is drawn from a register of real subjects, and no list of real identifiers was used to build it.
+
+**Where a value looks real, that is arithmetic rather than a record.** An identifier with a correct check digit is meant to be indistinguishable from a real one, because a test that only ever sees obviously fake data proves nothing about the day real data arrives. Several of the schemes here have no block that is never issued, which means a correct value cannot be shown not to be somebody's. **If you recognise one, it is a coincidence, and it is not a statement about you.**
+
+The same holds for the values written into this repository: the examples in the catalog and the values in tests are illustrative. They are chosen to show the shape of a defect.
+
+**What follows from this for you.** A dataset generated here is safe to put in a test environment and is not safe to present as a record of anybody. Mark it as synthetic wherever it travels, and do not load it anywhere that treats identifiers as belonging to real subjects. The tool states this itself: `--license` prints the same notice, because a README does not travel with a file of data.
+
+For how the reserved and never issued ranges are chosen per scheme, and which schemes have none, see [SECURITY.md](SECURITY.md) and the provider documentation.
+
+---
+
 ## What this tool does not do
 
 It does not produce binary artifacts as an end in themselves - images of a given size, deliberately damaged archives, files whose names break the filesystem. That is the scope of a separate tool, **Testing Files Generator**.

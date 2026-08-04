@@ -570,6 +570,8 @@ func printLicense(out *streams) {
 
 	out.emit("")
 	out.emit(license.GeneratedDataNotice)
+	out.emit("")
+	out.emit(license.SyntheticDataNotice)
 }
 
 // takenFrom is one project and everything read from it. The registry keeps a
