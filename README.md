@@ -142,7 +142,7 @@ The same holds for the values written into this repository: the examples in the 
 
 **What follows from this for you.** A dataset generated here is safe to put in a test environment and is not safe to present as a record of anybody. Mark it as synthetic wherever it travels, and do not load it anywhere that treats identifiers as belonging to real subjects. The tool states this itself: `--license` prints the same notice, because a README does not travel with a file of data.
 
-For how the reserved and never issued ranges are chosen per scheme, and which schemes have none, see [SECURITY.md](SECURITY.md) and the provider documentation.
+**Which schemes have a block that is never issued, and which have none, is listed in [SECURITY.md](SECURITY.md).** It matters there rather than here: for a scheme with none, a resemblance is a property of the numbering scheme and not something to report as a defect.
 
 ---
 

@@ -31,8 +31,33 @@ most of the usual categories do not apply. These do:
 - Executing anything named in a recipe, or interpreting part of one as code.
 - Any outbound network connection. There should be none at all.
 - A crash or a hang that a recipe can cause and a person cannot see coming.
-- Generated identifiers that could belong to a real person, where the scheme
-  has a range set aside and the tool used a different one.
+- Generated identifiers that could belong to a real subject, **where the scheme
+  has a block that is never issued and the tool generated outside it**. See the
+  next section for which schemes have such a block, because not all of them do.
+
+### Which numbering schemes have a safe block, and which have none
+
+This decides whether a generated identifier resembling a real one is a defect or
+a documented property, so it is stated here rather than left to be inferred.
+
+A **safe block** is a range a registrar says nothing will ever be issued from.
+Where one exists, correct values are generated inside it by default, and the tool
+can say its own output could not belong to anybody.
+
+| Scheme | Safe block | What that means |
+|---|---|---|
+| `US.ssn` | yes, the area the administration never assigns | a value outside it would be a defect worth reporting |
+| `PL.pesel`, `PL.nip`, `PL.regon`, `US.aba` | **none** | the registrar issues, or reserves the right to issue, across the whole space |
+
+For the schemes with none, a correct value **cannot be shown not to belong to
+somebody**, and that is a property of the numbering scheme rather than a flaw in
+this tool. Picking a range that merely looks free would be worse, not better:
+one such range in another scheme turned out to be the space of a real taxpayer
+identifier. The defence is that every value is labelled synthetic, which
+`--license` states from the binary.
+
+**So a resemblance in one of those schemes is not a vulnerability report.** A
+value generated outside the safe block of a scheme that has one is.
 
 ### What is deliberately not protected
 
