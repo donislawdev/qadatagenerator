@@ -1,0 +1,92 @@
+[
+  {
+    "seed": "release-2026-08",
+    "entity": "account",
+    "row": 0,
+    "field": "iban",
+    "purpose": "value",
+    "value": "PL13531891942415407427339421",
+    "broken": "PL14531891942415407427339421"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "account",
+    "row": 1,
+    "field": "iban",
+    "purpose": "value",
+    "value": "PL68454411546881819491982916",
+    "broken": "PL69454411546881819491982916"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "account",
+    "row": 2,
+    "field": "iban",
+    "purpose": "value",
+    "value": "PL03058549723346223073908378",
+    "broken": "PL04058549723346223073908378"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "account",
+    "row": 7,
+    "field": "iban",
+    "purpose": "value",
+    "value": "PL03891182189073449126304965",
+    "broken": "PL04891182189073449126304965"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "account",
+    "row": 42,
+    "field": "iban",
+    "purpose": "value",
+    "value": "PL13618251271429228739334517",
+    "broken": "PL14618251271429228739334517"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "account",
+    "row": 999,
+    "field": "iban",
+    "purpose": "value",
+    "value": "PL91567942039619839769115540",
+    "broken": "PL92567942039619839769115540"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "account",
+    "row": 1000000,
+    "field": "iban",
+    "purpose": "value",
+    "value": "PL67035941243284305867996399",
+    "broken": "PL68035941243284305867996399"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "account",
+    "row": 0,
+    "field": "iban",
+    "purpose": "value",
+    "value": "PL74795830199376880242756166",
+    "broken": "PL75795830199376880242756166"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "account",
+    "row": 1,
+    "field": "iban",
+    "purpose": "value",
+    "value": "PL59690699361514849981370015",
+    "broken": "PL50690699361514849981370015"
+  },
+  {
+    "seed": "release-2026-08",
+    "entity": "account",
+    "row": 5,
+    "field": "iban",
+    "purpose": "value",
+    "value": "PL75983017883465571579446176",
+    "broken": "PL76983017883465571579446176"
+  }
+]

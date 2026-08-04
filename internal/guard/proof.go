@@ -228,6 +228,28 @@ var Guards = []Guard{
 	{"every code in the registry answers with the place beside it", "TestEveryCodeInTheRegistryResolvesToItsPlace", "internal/adapter/provider/us", ByProbe},
 	{"one seed gives one mismatched pair, every time", "TestADifferentPlaceIsTheSameAnswerEveryTime", "internal/adapter/provider/us", ByProbe},
 
+	// --- iban, where the arithmetic is quoted and only its reach is measured ---
+	//
+	// The reverse of every other identifier here. The three constants of the
+	// arithmetic are guarded against a normative act rather than against a
+	// measurement, so a guard going red means the code stopped matching a
+	// sentence somebody can go and read.
+	{"every generated account number satisfies an independent validator", "TestEveryGeneratedAccountNumberSatisfiesTheIndependentValidator", "internal/adapter/provider/intl", ByMutation},
+	{"pillar one only produces values whose correctness can be checked in full", "TestEveryGeneratedAccountNumberIsOneThisBuildChecksInFull", "internal/adapter/provider/intl", ByMutation},
+	{"every generated settlement number is one the central bank could have assigned", "TestEveryGeneratedSettlementNumberClosesUnderTheActInForce", "internal/adapter/provider/intl", ByMutation},
+	{"the weight table the act published is reproduced, and it forces the modulus", "TestTheWeightTableThePolishActPublishesIsReproduced", "internal/adapter/provider/intl", ByMutation},
+	{"the quoted act still fixes the rotation and the accepted remainder", "TestTheSourceStillFixesTheRotationAndTheAcceptedRemainder", "internal/adapter/provider/intl", ByMutation},
+	{"the act's own wrong name for its letter values is kept and contradicted rather than corrected", "TestTheActsOwnNameForItsLetterValuesIsWrongAndTheNumbersAreRight", "internal/adapter/provider/intl", ByMutation},
+	{"check digits no calculation reaches are refused at both ends of the range", "TestCheckDigitsNoCalculationCanReachAreRefused", "internal/adapter/provider/intl", ByMutation},
+	{"a country whose length was never read is answered as unchecked rather than approved", "TestAnAccountNumberFromAnotherCountryIsUnsupportedRatherThanApproved", "internal/adapter/provider/intl", ByMutation},
+	{"a value that is genuinely wrong is not excused as unchecked", "TestABrokenAccountNumberFromAnotherCountryIsStillInvalid", "internal/adapter/provider/intl", ByMutation},
+	{"a settlement number that could not have been assigned is named rather than reported as arithmetic", "TestASettlementNumberTheBankCouldNotHaveAssignedIsNamedSeparately", "internal/adapter/provider/intl", ByMutation},
+	{"a Polish value of the wrong length is told about its length", "TestAPolishAccountNumberOfTheWrongLengthIsToldAboutItsLength", "internal/adapter/provider/intl", ByMutation},
+	{"the spacing a value arrived in survives being rebuilt", "TestTheSpacingOfAnAccountNumberSurvivesBeingRebuilt", "internal/adapter/provider/intl", ByMutation},
+	{"the check digit offsets follow the spacing rather than assuming there is none", "TestTheCheckDigitPositionsFollowTheSpacing", "internal/adapter/provider/intl", ByMutation},
+	{"a scheme with no harbour and no spare block claims neither", "TestTheAccountNumberClaimsNoSafeHarbour", "internal/adapter/provider/intl", ByMutation},
+	{"the generated account numbers have not moved since they were frozen", "TestTheGeneratedAccountNumbersHaveNotMoved", "internal/adapter/provider/intl", ByMutation},
+
 	// --- what the tool says its own output is -------------------------------
 	//
 	// Not a licence obligation. Several of these schemes have no block that is

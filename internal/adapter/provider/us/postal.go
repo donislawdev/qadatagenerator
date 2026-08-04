@@ -62,7 +62,7 @@ var (
 const (
 	// postalCodeLength is the digits of the code itself, and postalPlusFourLength is the
 	// longer written form, five digits, a hyphen and four more.
-	postalCodeLength         = 5
+	postalCodeLength     = 5
 	postalPlusFourLength = postalCodeLength + 1 + 4
 	// postalFields is how many fields a registry line carries: code, place,
 	// region.

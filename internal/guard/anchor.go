@@ -168,9 +168,9 @@ var Anchors = []Anchor{
 		// identifier published twice. The earlier wording also named the wrong
 		// one: it quoted an ascending run this repository uses to check the
 		// three accepted spellings, not the number the source works out.
-		Source:   "country sheet for Poland on the European TIN Portal, which takes one number apart and prints every intermediate result",
-		State:    ByWorkedExample,
-		Detail:   "TestTheWorkedExampleFromTheSourceIsReproduced",
+		Source: "country sheet for Poland on the European TIN Portal, which takes one number apart and prints every intermediate result",
+		State:  ByWorkedExample,
+		Detail: "TestTheWorkedExampleFromTheSourceIsReproduced",
 	},
 
 	// --- US.ssn ------------------------------------------------------------
@@ -221,7 +221,7 @@ var Anchors = []Anchor{
 		Provider: "US.postal",
 		Source:   "U.S. Census Bureau guidance on ZIP Code Tabulation Areas, and the gazetteer record layout calling the identifier a five digit code",
 		State:    ByQuotedSentence,
-		Detail:   "both sentences are held verbatim in internal/oracle/zip.go, and the one saying not every valid code is represented is what stops Validate from faulting a code the registry lacks",
+		Detail:   "both sentences are held verbatim in internal/oracle/postal.go, and the one saying not every valid code is represented is what stops Validate from faulting a code the registry lacks",
 	},
 	{
 		Rule:     "the term the census appends to a place name, which the registry removes to leave a bare name",
@@ -236,6 +236,40 @@ var Anchors = []Anchor{
 		Source:   "consulted the 2020 ZCTA to Place relationship file of the U.S. Census Bureau, which lists every intersection, up to seventy seven for one code, and does not rank them or name a principal place. No census document answers this, because the question is not one the census asks",
 		State:    ByConstruction,
 		Detail:   "the place sharing the largest land area wins, and a tie goes to the lower place identifier so the answer cannot depend on the order of rows. Stated in the header of the shipped file and in the provider comment, because a reader of either has to know it was computed here",
+	},
+
+	// --- iban ---------------------------------------------------------------
+	//
+	// The only provider here whose arithmetic is anchored better than its
+	// generalisation, which is the reverse of every other row in this register.
+	// The rule itself was found stated in words in a normative act after the
+	// standards holding it turned out to be sold rather than published. What
+	// rests on a measurement is not the rule but its reach: the act names the
+	// values of two letters and this scheme uses twenty six.
+	{
+		Rule:     "the twenty eight character shape, the split into check number, settlement number and account, and the settlement number's own check digit",
+		Provider: "iban",
+		Source:   "regulation 7/2017 of the President of the National Bank of Poland, in force, Dz. Urz. NBP 2017 item 3, consolidated at 2019 item 9, sections 13 and 14 and annex 2",
+		State:    ByQuotedSentence,
+		Detail:   "the wording is held in internal/oracle/iban.go in the original Polish, with an English rendering beside it, and the length is pulled out of the quoted sentence rather than typed twice",
+	},
+	{
+		Rule:     "the modulus, the rotation of four characters, the accepted remainder of one and the check number being ninety eight less that remainder",
+		Provider: "iban",
+		Source:   "regulation 5/2002 of the President of the National Bank of Poland, repealed, Dz. Urz. NBP 2002 no. 8 item 26, annexes 1 and 2, which state the whole calculation in words and print a table of thirty weights they worked out",
+		State:    ByWorkedExample,
+		Detail:   "TestTheWeightTableThePolishActPublishesIsReproduced",
+	},
+	{
+		Rule:     "that the same arithmetic holds for every country, with letter values running from ten for A to thirty five for Z",
+		Provider: "iban",
+		Source:   "no document we can use states this. The act names the values of P and L only, and the standards that state the general rule, ISO 7064 and ISO 13616, are sold rather than published. The register of national formats is published under terms that forbid onward licensing of the kind this project's licence requires",
+		State:    ByMeasurement,
+		Detail: "89 example account numbers from 89 countries, taken from the ISO 13616 register and " +
+			"not kept, measured 2026-08-04. Searching three axes at once leaves exactly 1 triple: " +
+			"modulus 97, rotation 4, letter offset 10. The modulus is forced beyond the search range " +
+			"as well, because the greatest common divisor of every value less one is 97 itself, whose " +
+			"only divisor above one is 97",
 	},
 
 	// --- PL.regon ----------------------------------------------------------
