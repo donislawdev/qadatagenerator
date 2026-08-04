@@ -19,7 +19,10 @@ import (
 // official routing number registrar, gives nine digits in three parts: a four
 // digit Federal Reserve Routing Symbol, a four digit ABA Institution
 // Identifier and a check digit. The same section allocates the leading two
-// digit series, and that table is quoted in the independent validator.
+// digit series, and which range covers what is held in the independent
+// validator. The ranges are facts and are stated there in our own words. Two
+// short sentences of that policy are quoted, attributed, because the ethics of
+// this provider turns on their exact wording rather than on their sense.
 //
 // The arithmetic was not read anywhere. The registrar sends the reader to a
 // publication it sells, the Federal Reserve directory FAQ is silent on the
