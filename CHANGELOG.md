@@ -16,6 +16,27 @@ and has not happened.
 
 ### Added
 
+- **`qadg generate` turns a recipe into files.** It reads a recipe, produces the
+  records it describes and writes them as CSV or as JSON. This is the first
+  pillar of the tool working on its own: correct data, useful without anything
+  being broken on purpose.
+- **Related entities come out related.** A recipe saying orders belong to
+  customers produces orders that name the customer they belong to, and the tool
+  keeps the number of rows the recipe asked for while respecting how many
+  children one parent may have. A count the relation cannot reach is refused
+  with the arithmetic shown rather than quietly trimmed.
+- **A note travels beside the data.** Every run writes a file recording the four
+  versions, the seed, the locale, how many rows each table holds, what the run
+  did not do, and which settings came from the command line rather than from the
+  recipe. It also states that every value is synthetic, because a README does not
+  travel with a folder of records.
+- **A file that already exists stops the run.** The tool will not overwrite a
+  dataset somebody has on disk without being told to. `--overwrite` allows it.
+- **`--dry-run` says what would be produced and touches nothing.** It is the same
+  arithmetic the real run does rather than a separate estimate.
+- **Identifiers agree with the columns they were bound to.** A recipe saying the
+  national number matches the date of birth and the gender produces numbers that
+  actually encode them, so the record is coherent rather than merely well formed.
 - **International bank account numbers, as `iban`.** It produces a correct
   Polish account number and checks the check digits of an account number from
   any country.

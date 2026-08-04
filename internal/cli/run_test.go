@@ -395,8 +395,13 @@ func TestACommandOneEditAwayIsSuggested(t *testing.T) {
 // The threshold has to be mean, and this is the half of the pair that keeps it
 // mean. Suggesting a command for any vaguely similar word turns a clear
 // refusal into a misleading one.
+// 🔴 The words here have to be ones this tool will never have as a verb. It
+// used to say generate, which was a plausible absent command until the day it
+// stopped being absent, and then this test failed for a reason that had nothing
+// to do with what it protects. A fixture naming something the product might
+// grow into is a fixture with a fuse in it.
 func TestAWordNothingLikeACommandIsRefusedWithoutASuggestion(t *testing.T) {
-	for _, typed := range []string{"frobnicate", "generate", "list", "rm"} {
+	for _, typed := range []string{"frobnicate", "elephant", "list", "rm"} {
 		got := run(typed, "recipe.yaml")
 		if got.code != 2 {
 			t.Errorf("%q ended with %d", typed, got.code)

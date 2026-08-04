@@ -55,6 +55,31 @@ const (
 	// first release, because it goes into other people's pipelines.
 	commandValidate = "validate"
 
+	// commandGenerate is the name as typed, and a public contract from the
+	// first release for the same reason as the one above it.
+	commandGenerate = "generate"
+
+	// The names of the two shapes this build writes. They are the values of the
+	// format key of a recipe as well as of the flag, so they are one pair of
+	// constants rather than two.
+	formatCSV  = "csv"
+	formatJSON = "json"
+
+	// runNoteName is the file that travels beside the data.
+	//
+	// 🔴 Deliberately not called a manifest. That word belongs to the public
+	// contract of the second pillar, and a name taken in passing is a name that
+	// stays for years.
+	runNoteName = "run-note.json"
+
+	problemGenerateArguments        = "generate takes one recipe"
+	problemGenerateArgumentsWhy     = "it reads a recipe and writes the dataset that recipe describes"
+	problemGenerateArgumentsAllowed = "one path to a recipe file"
+	problemGenerateArgumentsDo      = "qadg generate recipe.yaml"
+
+	summaryTables = " tables, "
+	summaryRows   = " rows written"
+
 	flagsHeading = "Flags:"
 
 	// channelsBlock is in the help because a script that redirects standard

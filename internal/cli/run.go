@@ -194,6 +194,8 @@ func runCommand(out *streams, command []string, asked invocation) int {
 	switch command[0] {
 	case commandValidate:
 		return runValidate(out, command[1:], asked.global)
+	case commandGenerate:
+		return runGenerate(out, command[1:], asked.global)
 	default:
 		return usage(out, unknownCommand(command[0]))
 	}
@@ -225,7 +227,7 @@ func unknownCommand(typed string) problem {
 // list reaches the user and two runs must not disagree about it. Go randomises
 // map iteration on purpose and this is the same rule applied to a slice.
 func knownCommands() []string {
-	commands := []string{commandValidate}
+	commands := []string{commandValidate, commandGenerate}
 	sort.Strings(commands)
 	return commands
 }

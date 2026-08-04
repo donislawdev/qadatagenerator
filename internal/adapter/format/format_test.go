@@ -309,3 +309,79 @@ func names(files *held) []string {
 	}
 	return made
 }
+
+// A field asked to be unique gets values no earlier row took. It is the first
+// promise a recipe can make that costs the engine something to keep.
+func TestAUniqueFieldNeverRepeatsAValue(t *testing.T) {
+	rec := sample(t, true, 0)
+	rec.Entities[0].Count = 40
+	rec.Entities[0].Fields = append(rec.Entities[0].Fields,
+		recipe.Field{Name: "account", Generator: "iban", Unique: true})
+
+	lines := strings.Split(strings.TrimSuffix(
+		run(t, rec, asCSV).written["customer.csv"].String(), "\n"), "\n")
+	seen := map[string]bool{}
+	for _, line := range lines[1:] {
+		value := strings.Split(line, ",")[4]
+		if seen[value] {
+			t.Fatalf("%q came up twice in a column asked to be unique", value)
+		}
+		seen[value] = true
+	}
+	if len(seen) != 40 {
+		t.Errorf("forty rows produced %d distinct values", len(seen))
+	}
+}
+
+// A field with fewer possible values than rows cannot be unique, and the run
+// says so with the arithmetic rather than looping for the impossible.
+func TestAUniqueFieldWithTooFewValuesIsRefusedWithTheArithmetic(t *testing.T) {
+	rec := sample(t, true, 0)
+	rec.Entities[0].Count = 500
+	rec.Entities[0].Fields = append(rec.Entities[0].Fields,
+		recipe.Field{Name: "sex", Generator: "gender", Unique: true})
+
+	source := values.New(rec.Locale, rec.Seed)
+	plan, err := generate.Prepare(rec, source)
+	if err != nil {
+		t.Fatalf("the plan was refused: %v", err)
+	}
+	writer, err := format.NewCSV(newHeld(), rec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = generate.Run(plan, rec, source, writer)
+	if err == nil {
+		t.Fatal("five hundred rows of a field with two possible values were accepted")
+	}
+	for _, part := range []string{"sex", "unique", "500"} {
+		if !strings.Contains(err.Error(), part) {
+			t.Errorf("the refusal does not carry %q: %v", part, err)
+		}
+	}
+}
+
+// The flat form of the object output puts one file beside each table, which is
+// what the setting in the recipe asks for.
+func TestTheFlatObjectFormWritesOneFilePerTable(t *testing.T) {
+	rec := sample(t, true, 3)
+	files := run(t, rec, asJSON)
+
+	for _, name := range []string{"customer.json", "order.json"} {
+		written, made := files.written[name]
+		if !made {
+			t.Fatalf("no %s, only %v", name, names(files))
+		}
+		text := written.String()
+		if !strings.HasPrefix(text, "[") || !strings.HasSuffix(text, "]\n") {
+			t.Errorf("%s is not an array of records: %q", name, text)
+		}
+	}
+	orders := files.written["order.json"].String()
+	if !strings.Contains(orders, `"customer": "`) {
+		t.Error("a child in the flat form does not name the parent it belongs to")
+	}
+	if strings.Contains(files.written["customer.json"].String(), `"order"`) {
+		t.Error("the flat form nested a child inside its parent")
+	}
+}
