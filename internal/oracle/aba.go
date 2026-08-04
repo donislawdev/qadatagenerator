@@ -11,7 +11,10 @@ import "strings"
 // pretending otherwise would be the defect this whole package exists to catch.
 //
 // The shape is a quotation. The registrar publishes the structure and the
-// allocation of the leading series, and the sentences are held below verbatim.
+// allocation of the leading series, and two short sentences are held below
+// verbatim, attributed, for the purpose of checking a value against them. The
+// table of series beside them is the facts of that allocation written in our
+// own words, which is a deliberate difference and is explained where it sits.
 //
 // The arithmetic is not. The registrar sends the reader to a paid publication
 // for it, so the weights rest on a measurement over real numbers published in
@@ -46,29 +49,69 @@ const (
 	abaReservedPhrase = "Reserved for future use"
 )
 
-// abaAllocation is the table of leading two digit series from section IV, kept
-// as the source words them.
+// abaAllocation is which leading two digit series is used for what.
 //
 // It is data rather than a set of conditions because the question asked of it
 // changes: pillar one needs the series that are issued, a corruption needs the
 // series that are not, and a report needs to name what a series is for.
+//
+// # The numbers are read from the source and the words are ours
+//
+// Which range covers what is a fact, and a fact belongs to nobody. The
+// descriptions are written here rather than copied, because the registrar's
+// policy is published by a commercial publisher and reproducing the wording and
+// arrangement of somebody's table is a different act from quoting a sentence to
+// analyse it. This repository is going to be public, so the distinction is worth
+// the two minutes it costs.
+//
+// One phrase stays verbatim and only one. The wording marking a series as spare
+// carries the whole ethical argument of this provider, which is that the
+// registrar reserves the right to hand those numbers out, so paraphrasing it
+// would be paraphrasing the evidence. Four words, attributed, for the purpose of
+// analysing them. That is a quotation in anybody's law.
+// # Meaning is a value, description is prose, and they are two columns
+//
+// The kind is what every question here is answered from. The description is for
+// a human reading a report and nothing branches on it.
+//
+// They were one column until 2026-08-04, when the descriptions were reworded and
+// two predicates changed their answers, because they were matching fragments of
+// the prose. That is the same defect this project keeps meeting: a machine
+// reading text that was written for a person. Rewording a sentence must not be
+// able to move a number from the issued series into the spare ones.
+type abaSeriesKind int
+
+const (
+	// abaSeriesOther is any use that is neither the base for generated values
+	// nor a spare block.
+	abaSeriesOther abaSeriesKind = iota
+	// abaSeriesIssuedToInstitutions is where correct values are generated,
+	// because this scheme offers nothing safer.
+	abaSeriesIssuedToInstitutions
+	// abaSeriesReserved is a block the registrar has not handed out and says it
+	// may still hand out. Never a place to generate, always a place to corrupt
+	// into.
+	abaSeriesReserved
+)
+
 var abaAllocation = []struct {
 	low, high int
+	kind      abaSeriesKind
 	use       string
 }{
-	{0, 0, "United States Government checks and drafts, and those of its agencies"},
-	{1, 12, "all checks and electronic transactions of banks, Federal Reserve Banks and state entities"},
-	{13, 20, abaReservedPhrase},
-	{21, 32, "thrift institutions, no longer assigned since 1985"},
-	{33, 39, abaReservedPhrase},
-	{40, 49, abaReservedPhrase},
-	{50, 59, "Reserved for internal process control purposes by banks, Federal Reserve Banks, and other entities"},
-	{60, 60, abaReservedPhrase},
-	{61, 72, "Electronic Transaction Identifiers"},
-	{73, 79, abaReservedPhrase},
-	{80, 80, "travellers cheques"},
-	{81, 92, abaReservedPhrase},
-	{93, 99, abaReservedPhrase},
+	{0, 0, abaSeriesOther, "federal government payments"},
+	{1, 12, abaSeriesIssuedToInstitutions, "banks, reserve banks and state entities, for cheques and electronic transactions alike"},
+	{13, 20, abaSeriesReserved, abaReservedPhrase},
+	{21, 32, abaSeriesOther, "savings institutions, closed to new assignment since 1985"},
+	{33, 39, abaSeriesReserved, abaReservedPhrase},
+	{40, 49, abaSeriesReserved, abaReservedPhrase},
+	{50, 59, abaSeriesOther, "in use inside banks and reserve banks for their own processing, so not spare"},
+	{60, 60, abaSeriesReserved, abaReservedPhrase},
+	{61, 72, abaSeriesOther, "identifiers for electronic transactions"},
+	{73, 79, abaSeriesReserved, abaReservedPhrase},
+	{80, 80, abaSeriesOther, "travellers cheques"},
+	{81, 92, abaSeriesReserved, abaReservedPhrase},
+	{93, 99, abaSeriesReserved, abaReservedPhrase},
 }
 
 // abaWeights is a measurement, not a quotation, and the distinction is the
@@ -119,35 +162,49 @@ func CheckABA(value string) []ABAFinding {
 // ABASeriesUse returns what the registrar says the leading series of a value is
 // for, and whether the value could be read at all.
 func ABASeriesUse(value string) (string, bool) {
-	digits, ok := abaDigits(value)
+	entry, ok := abaSeriesOf(value)
 	if !ok {
 		return "", false
+	}
+	return entry.use, true
+}
+
+// abaSeriesOf finds the row covering the leading series of a value.
+//
+// Every question about a series goes through here, so a value whose series no
+// row covers is answered as unknown in one place rather than defaulting to
+// something plausible in several.
+func abaSeriesOf(value string) (struct {
+	low, high int
+	kind      abaSeriesKind
+	use       string
+}, bool) {
+	digits, ok := abaDigits(value)
+	if !ok {
+		return abaAllocation[0], false
 	}
 	series := int(digits[0]-'0')*10 + int(digits[1]-'0')
 	for _, entry := range abaAllocation {
 		if series >= entry.low && series <= entry.high {
-			return entry.use, true
+			return entry, true
 		}
 	}
-	return "", false
+	return abaAllocation[0], false
 }
 
 // ABAInReservedSeries reports whether a value sits in a series the registrar
 // has marked as spare.
-//
-// It compares against the source's own phrase rather than against a list of
-// numbers restated here, so the table and the answer cannot drift apart.
 func ABAInReservedSeries(value string) bool {
-	use, ok := ABASeriesUse(value)
-	return ok && use == abaReservedPhrase
+	entry, ok := abaSeriesOf(value)
+	return ok && entry.kind == abaSeriesReserved
 }
 
-// ABAIssuedToInstitutions reports whether a value sits in the series the policy
-// describes as carrying the transactions of banks, which is where correct
-// generated data has to sit because this scheme has no harbour.
+// ABAIssuedToInstitutions reports whether a value sits in the series carrying
+// the transactions of banks, which is where correct generated data has to sit
+// because this scheme has no harbour.
 func ABAIssuedToInstitutions(value string) bool {
-	use, ok := ABASeriesUse(value)
-	return ok && strings.Contains(use, "all checks and electronic transactions")
+	entry, ok := abaSeriesOf(value)
+	return ok && entry.kind == abaSeriesIssuedToInstitutions
 }
 
 // ABAStructureSaysNineDigits pulls the length out of the quoted sentence rather
