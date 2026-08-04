@@ -32,6 +32,17 @@ and has not happened.
   travel with a folder of records.
 - **A file that already exists stops the run.** The tool will not overwrite a
   dataset somebody has on disk without being told to. `--overwrite` allows it.
+- **Stopping a run leaves nothing behind.** Pressing Ctrl+C ends the run with
+  exit code 130 and removes the files it had started, so the output directory is
+  left as it was found. Nothing ever appears under its real name before the whole
+  run has succeeded, so a stopped run cannot leave half a dataset looking like a
+  whole one. Pressing the key a second time ends the process immediately, which
+  matters when a run is stuck writing to a full disk.
+- **What a stopped run does not cover, stated rather than left to be found.** A
+  run ended by the system rather than by a person, which is what `docker stop`
+  and a cancelled CI job send, is not caught: the process ends at once, the shell
+  reports 143, and the temporary files stay. Catching it needs a change this
+  project has not decided on yet.
 - **`--dry-run` says what would be produced and touches nothing.** It is the same
   arithmetic the real run does rather than a separate estimate.
 - **Identifiers agree with the columns they were bound to.** A recipe saying the
@@ -101,6 +112,10 @@ and has not happened.
 
 ### Fixed
 
+- **The help now says that the tool generates data.** It stated that no command
+  in this build produces any, which stopped being true the day `qadg generate`
+  arrived, and it listed one of the two commands. A run with no arguments named
+  one of them as well. Both now come from the list the tool itself reads.
 - **A recipe could refuse a machine the memory it needed.** The reader limits
   how deeply a recipe may nest, and the limit counted only the shape written
   with square brackets. The same shape written with braces was not counted at

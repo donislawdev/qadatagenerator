@@ -456,3 +456,29 @@ func TestEveryDocumentedFlagIsAcceptedByTheParser(t *testing.T) {
 		}
 	}
 }
+
+// 🔴 Every surface that lists what this tool accepts has to list all of it.
+//
+// This guard exists because two of them were wrong at once on 2026-08-04, and
+// both had been wrong since the day the second verb arrived. The help said no
+// command generates data in this build, while the command that does was already
+// released, and the refusal shown to somebody who runs qadg with nothing named
+// one verb out of two. Neither is reachable by a compiler and neither was
+// covered by a test: they are prose about the code, sitting inside the code.
+func TestEverySurfaceListingCommandsNamesAllOfThem(t *testing.T) {
+	help := run("--help").data
+	commands, _, found := strings.Cut(strings.SplitN(help, "Commands:", 2)[1], "Flags:")
+	if !found {
+		t.Fatalf("the help no longer has a block of commands followed by one of flags:\n%s", help)
+	}
+
+	empty := invoke(Environment{}).log
+	for _, command := range knownCommands() {
+		if !strings.Contains(commands, command) {
+			t.Errorf("the help does not list the command %q:\n%s", command, commands)
+		}
+		if !strings.Contains(empty, command) {
+			t.Errorf("a run with no arguments does not mention the command %q:\n%s", command, empty)
+		}
+	}
+}

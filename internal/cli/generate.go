@@ -103,7 +103,12 @@ func generateFrom(out *streams, path string, own *generateFlags, flags crossCutt
 		writePlan(out, plan, applied, flags)
 		return finish(out, codeOK)
 	}
-	if err := produce(built, plan, source, own); err != nil {
+
+	// The watch starts here rather than at the top of the run, because up to
+	// this line nothing has been written and there is nothing to take back.
+	watcher := watchSignals()
+	defer watcher.release()
+	if err := produce(built, plan, source, own, watcher); err != nil {
 		return fail(out, err)
 	}
 	writePlan(out, plan, applied, flags)
@@ -175,8 +180,13 @@ func overrides(built *recipe.Recipe, own *generateFlags) []override {
 }
 
 // produce writes the dataset and the note beside it, or leaves nothing behind.
+//
+// The halt comes in as a parameter rather than being started here, so that this
+// path can be exercised with a stop somebody triggers on purpose. A run stopped
+// part way is one of the two endings this function has, and an ending that only
+// a real signal can reach is an ending nothing checks.
 func produce(built recipe.Recipe, plan generate.Plan, source values.Source,
-	own *generateFlags) error {
+	own *generateFlags, stop generate.Halt) error {
 	dir := built.Output.Dir
 	if dir == "" {
 		dir = "."
@@ -196,12 +206,16 @@ func produce(built recipe.Recipe, plan generate.Plan, source values.Source,
 	if err != nil {
 		return err
 	}
-	if err := generate.Run(plan, built, source, writer); err != nil {
+	if err := generate.Run(plan, built, source, writer, stop); err != nil {
 		return err
 	}
 	if err := writeRunNote(files, built, plan); err != nil {
 		return err
 	}
+	// Nothing is asked about a signal from here on. Everything is written and
+	// what remains is giving the files their real names, and a rename stopped
+	// half way through the set would leave exactly the half finished dataset
+	// this whole arrangement exists to prevent.
 	if err := files.Commit(); err != nil {
 		return err
 	}

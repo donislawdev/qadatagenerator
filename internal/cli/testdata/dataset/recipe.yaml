@@ -1,0 +1,38 @@
+# The recipe behind the frozen dataset beside this file.
+#
+# It is deliberately small and deliberately covers one of each thing that can
+# move a byte: a word list drawn straight, a word list chosen by the gender of
+# the row, a date built from three separate draws, an identifier that has to
+# agree with two other columns, and a relation whose row count is exact while
+# the cardinality bounds how it is spread.
+#
+# Nothing here uses a maximum length, an empty share or a unique field. Those
+# change how a value is drawn, and the oracle that recomputes this dataset says
+# so about itself rather than pretending to cover them.
+version: "0.1"
+seed: "dataset-oracle-2026-08"
+locale: pl-PL
+entities:
+  customer:
+    count: 5
+    primary_key: [pesel]
+    fields:
+      first_name: { generator: first_name }
+      last_name:  { generator: last_name }
+      gender:     { generator: gender }
+      birth_date: { generator: birth_date }
+      pesel:      { generator: pesel }
+    consistency:
+      - pesel matches: [birth_date, gender]
+      - first_name matches: [gender]
+      - last_name matches: [gender]
+  order:
+    count: 9
+    belongs_to: { customer: 0-4 }
+    fields:
+      placed_at: { generator: birth_date }
+      city:      { generator: city }
+output:
+  format: csv
+  dir: .
+  file_per_entity: true

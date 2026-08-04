@@ -78,7 +78,7 @@ func run(t *testing.T, rec recipe.Recipe, make func(*held, recipe.Recipe) (gener
 	if err != nil {
 		t.Fatalf("the writer was refused: %v", err)
 	}
-	if err := generate.Run(plan, rec, source, writer); err != nil {
+	if err := generate.Run(plan, rec, source, writer, generate.NeverStops{}); err != nil {
 		t.Fatalf("the run failed: %v", err)
 	}
 	return files
@@ -315,8 +315,14 @@ func names(files *held) []string {
 func TestAUniqueFieldNeverRepeatsAValue(t *testing.T) {
 	rec := sample(t, true, 0)
 	rec.Entities[0].Count = 40
+	// 🔴 The field was an account number until 2026-08-04, and that made this
+	// test pass against a build with no uniqueness at all: sixteen digits drawn
+	// forty times never collide by accident, so nothing here needed the
+	// mechanism to work. A name drawn from a word list of a few hundred entries
+	// collides almost every time, which is what makes the guard a guard. Found
+	// by mutation, which reported the removal of the check as unnoticed.
 	rec.Entities[0].Fields = append(rec.Entities[0].Fields,
-		recipe.Field{Name: "account", Generator: "iban", Unique: true})
+		recipe.Field{Name: "nickname", Generator: "first_name", Unique: true})
 
 	lines := strings.Split(strings.TrimSuffix(
 		run(t, rec, asCSV).written["customer.csv"].String(), "\n"), "\n")
@@ -350,7 +356,7 @@ func TestAUniqueFieldWithTooFewValuesIsRefusedWithTheArithmetic(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = generate.Run(plan, rec, source, writer)
+	err = generate.Run(plan, rec, source, writer, generate.NeverStops{})
 	if err == nil {
 		t.Fatal("five hundred rows of a field with two possible values were accepted")
 	}

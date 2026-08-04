@@ -1,0 +1,33 @@
+{
+  "tool_version": "0.1.0",
+  "catalog_version": "0.1",
+  "manifest_version": "0.1",
+  "recipe_schema_version": "0.1",
+  "seed": "dataset-oracle-2026-08",
+  "locale": "pl-PL",
+  "tables": [
+    {
+      "entity": "customer",
+      "rows": 5,
+      "columns": [
+        "first_name",
+        "last_name",
+        "gender",
+        "birth_date",
+        "pesel"
+      ]
+    },
+    {
+      "entity": "order",
+      "rows": 9,
+      "columns": [
+        "placed_at",
+        "city"
+      ],
+      "parent": "customer"
+    }
+  ],
+  "not_done": [],
+  "overrides": [],
+  "synthetic_data": "Every value this tool produces is synthetic and is generated for testing. Names, addresses, identifiers and account numbers do not describe anybody. Where a value resembles a real person, company or institution, that is a coincidence of arithmetic rather than a record of anything, and it must not be treated as one."
+}

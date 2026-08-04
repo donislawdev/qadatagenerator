@@ -3,6 +3,7 @@ package values_test
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
@@ -141,14 +142,32 @@ func TestAFixedWidthValueTooLongForItsFieldIsRefused(t *testing.T) {
 // Bytes and characters disagree on exactly the values this tool produces, which
 // is the whole reason the unit is carried rather than assumed.
 func TestBytesAndCharactersAreCountedDifferently(t *testing.T) {
-	inBytes := ask(values.FirstName, "first_name", 3)
-	inBytes.MaxLength, inBytes.HasMaxLength, inBytes.Unit = 6, true, "bytes"
-	drawn, err := values.New("pl-PL", "units").Produce(inBytes)
-	if err != nil {
-		t.Fatalf("a name of six bytes was refused: %v", err)
+	// 🔴 One draw was the whole of this test until 2026-08-04, and one draw
+	// cannot tell the two units apart: the name that came up happened to be
+	// short in both, so a build counting characters everywhere passed. Found by
+	// mutation, which reported the collapse of the two units as unnoticed.
+	source := values.New("pl-PL", "units")
+	multibyte := 0
+
+	for row := int64(0); row < 200; row++ {
+		inBytes := ask(values.FirstName, "first_name", row)
+		inBytes.MaxLength, inBytes.HasMaxLength, inBytes.Unit = 6, true, "bytes"
+		drawn, err := source.Produce(inBytes)
+		if err != nil {
+			t.Fatalf("row %d: a name of six bytes was refused: %v", row, err)
+		}
+		if len(drawn) > 6 {
+			t.Fatalf("row %d gave %q, which is %d bytes and the field accepts six",
+				row, drawn, len(drawn))
+		}
+		if len(drawn) != len([]rune(drawn)) {
+			multibyte++
+		}
 	}
-	if len(drawn) > 6 {
-		t.Errorf("%q is %d bytes and the field accepts six", drawn, len(drawn))
+
+	if multibyte == 0 {
+		t.Error("no drawn name carried a letter costing more than one byte in two hundred draws, " +
+			"so this test would pass against a build that counts the two units alike")
 	}
 }
 
@@ -202,6 +221,14 @@ func TestEveryDrawnDateIsARealDay(t *testing.T) {
 		}
 		if len(drawn) != 10 || drawn[4] != '-' || drawn[7] != '-' {
 			t.Fatalf("row %d gave %q, which is not a date written the one stable way", row, drawn)
+		}
+		// 🔴 The shape above was the whole of this test until 2026-08-04, and it
+		// is not what the name promises: a thirtieth of February is written the
+		// same stable way as any other day. Found by asking what mutation would
+		// make this go red and finding that breaking the length of a month made
+		// no test anywhere fail.
+		if _, err := time.Parse("2006-01-02", drawn); err != nil {
+			t.Fatalf("row %d gave %q, which is not a day that exists: %v", row, drawn, err)
 		}
 		seen[drawn[5:7]] = true
 	}

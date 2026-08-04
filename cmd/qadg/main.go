@@ -12,11 +12,11 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/cli"
 )
 
-// There is no signal handler yet, and that is deliberate rather than
-// forgotten. The codes 130 and 143 are already in the table, and a shell
-// reports them on its own for a process that does not catch the signal. A
-// handler earns its place with the first command that writes a file, because
-// then there is a temporary file to remove before leaving.
+// The signal handler is not here either, and that is the same decision as the
+// rest of this file. A run that is stopped ends through the ordinary path with
+// the kind of failure it had, so the codes 130 and 143 come out of the same
+// table as every other one and nothing about ending a run early is unreachable
+// from a test.
 func main() {
 	os.Exit(cli.Run(cli.FromProcess(os.Args[1:], os.Stdout, os.Stderr)))
 }

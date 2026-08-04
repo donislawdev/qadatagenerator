@@ -31,15 +31,26 @@ const uniqueTries = 20
 // The two phases answer different questions and only the second one touches the
 // world. Keeping them apart is what makes a dry run the same arithmetic as a
 // real run rather than an estimate that can drift away from it.
-func Run(plan Plan, rec recipe.Recipe, values Values, writer Writer) error {
+//
+// # Where it can be stopped
+//
+// Between tables and between rows, and nowhere else. Those are the two places
+// where the work is divisible, and a run that stops at one of them has produced
+// nothing that anybody has seen: the bytes are still under a temporary name and
+// the caller throws them away. Asking more often would cost a check inside the
+// arithmetic of a single value and buy nothing, because there is no half a row.
+func Run(plan Plan, rec recipe.Recipe, values Values, writer Writer, stop Halt) error {
 	source := seed.New(rec.Seed)
 	for _, planned := range plan.Entities {
+		if ended := stop.Stopped(); ended != nil {
+			return ended
+		}
 		entity, known := rec.Entity(planned.Entity)
 		if !known {
 			return fault.New(fault.Runtime, "the plan names an entity the recipe does not have: "+
 				planned.Entity)
 		}
-		if err := writeTable(planned, entity, values, writer, source); err != nil {
+		if err := writeTable(planned, entity, values, writer, source, stop); err != nil {
 			return err
 		}
 	}
@@ -48,12 +59,18 @@ func Run(plan Plan, rec recipe.Recipe, values Values, writer Writer) error {
 
 // writeTable produces one table.
 func writeTable(planned Planned, entity recipe.Entity, values Values, writer Writer,
-	source seed.Source) error {
+	source seed.Source, stop Halt) error {
 	if err := writer.Begin(planned); err != nil {
 		return err
 	}
 	taken := newUniqueSet(entity)
 	for row := 0; row < planned.Rows; row++ {
+		// A table left without its End is not a problem here: what a stopped run
+		// wrote never gets its real name, so an unfinished table is thrown away
+		// rather than shipped as a complete one.
+		if ended := stop.Stopped(); ended != nil {
+			return ended
+		}
 		built, err := buildRow(entity, row, values, source, taken)
 		if err != nil {
 			return err

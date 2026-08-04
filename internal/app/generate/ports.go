@@ -69,6 +69,41 @@ type Values interface {
 	Produce(req Request) (string, error)
 }
 
+// Halt is how a run learns that something outside it wants it to stop.
+//
+// # Why a port rather than a context
+//
+// The answer carries the kind of the failure, so the run ends through the same
+// path as every other failure and the exit code comes from the kind rather than
+// from a second decision made at the top. A context would carry cancellation but
+// not which of the two signals arrived, and the two have different codes that
+// somebody else's pipeline reads.
+//
+// # Why it answers instead of blocking
+//
+// A use case that waits on something is a use case with a schedule in it. This
+// one is asked between rows, answers immediately, and the whole question of what
+// a signal is stays in the adapter that owns the process.
+type Halt interface {
+	// Stopped returns the failure that ends the run, or nil to carry on.
+	//
+	// It gives the same answer every time it is asked after the first stop. A
+	// port that consumed the stop would let a second caller carry on, which is
+	// the quiet half of a run that was told to end.
+	Stopped() error
+}
+
+// NeverStops is a Halt for a caller with nothing that could interrupt it.
+//
+// It exists so that such a caller passes something rather than nil. A nil
+// interface here would be a panic at the first row instead of a run that
+// finishes, and the difference would show up in production rather than in a
+// test.
+type NeverStops struct{}
+
+// Stopped always answers that the run may carry on.
+func (NeverStops) Stopped() error { return nil }
+
 // Record is one row on its way to a writer.
 type Record struct {
 	// Values are the fields in the order the recipe wrote them.

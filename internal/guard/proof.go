@@ -250,6 +250,60 @@ var Guards = []Guard{
 	{"a scheme with no harbour and no spare block claims neither", "TestTheAccountNumberClaimsNoSafeHarbour", "internal/adapter/provider/intl", ByMutation},
 	{"the generated account numbers have not moved since they were frozen", "TestTheGeneratedAccountNumbersHaveNotMoved", "internal/adapter/provider/intl", ByMutation},
 
+	// --- the first pillar end to end: plan, engine, writers, disk -----------
+	//
+	// Everything below stood green and unproven until 2026-08-04. These are the
+	// promises a recipe makes to whoever runs it, and the two at the top are the
+	// ones the whole product rests on: the same seed gives the same bytes, and
+	// an identifier agrees with the columns it was bound to.
+	{"the same seed gives the same bytes, from the platform's line endings to the order of the columns", "TestTheSameSeedGivesTheSameBytes", "internal/adapter/format", ByMutation},
+	{"an identifier agrees with the columns the recipe bound it to", "TestTheIdentifierAgreesWithTheColumnsItWasBoundTo", "internal/adapter/format", ByMutation},
+	{"a child names a parent that exists in the table it points at", "TestARecipeBecomesFilesWithTheRelationFollowable", "internal/adapter/format", ByMutation},
+	{"adding a field leaves the columns that were already there where they were", "TestAddingAFieldLeavesTheOtherColumnsWhereTheyWere", "internal/adapter/format", ByMutation},
+	{"the count a child states is exact and the cardinality bounds how it is spread", "TestTheChildCountIsExactAndTheParentsShareIt", "internal/adapter/format", ByMutation},
+	{"a count the bounds cannot reach is refused with the arithmetic rather than trimmed", "TestACountTheBoundsCannotReachIsRefusedWithTheArithmetic", "internal/adapter/format", ByMutation},
+	{"the nested form puts children inside the parent they belong to", "TestTheNestedFormPutsChildrenInsideTheirParent", "internal/adapter/format", ByMutation},
+	{"one file per table means one file per table", "TestTheFlatObjectFormWritesOneFilePerTable", "internal/adapter/format", ByMutation},
+	{"a value carrying a delimiter or a quote survives being written", "TestAValueCarryingTheDelimiterOrAQuoteSurvives", "internal/adapter/format", ByMutation},
+	{"a field asked to be unique never repeats a value", "TestAUniqueFieldNeverRepeatsAValue", "internal/adapter/format", ByMutation},
+	{"a uniqueness nothing can satisfy is refused with the number of rows that made it impossible", "TestAUniqueFieldWithTooFewValuesIsRefusedWithTheArithmetic", "internal/adapter/format", ByMutation},
+
+	// --- where a value comes from -------------------------------------------
+	{"a Polish surname never reaches a woman in the masculine form", "TestAPolishSurnameNeverGivesAWomanTheMasculineForm", "internal/adapter/values", ByMutation},
+	{"a locale with no register of postal codes says so rather than inventing one", "TestAPostalCodeIsRefusedWhereThereIsNoRegister", "internal/adapter/values", ByMutation},
+	{"a maximum length is honoured by choosing an entry that fits", "TestALimitIsHonouredByChoosingRatherThanCutting", "internal/adapter/values", ByMutation},
+	{"a fixed width value too long for its field is refused rather than cut", "TestAFixedWidthValueTooLongForItsFieldIsRefused", "internal/adapter/values", ByMutation},
+	{"bytes and characters are counted apart, which is why the unit is carried", "TestBytesAndCharactersAreCountedDifferently", "internal/adapter/values", ByMutation},
+	{"a generator this build lacks is refused by name and the known ones can be listed", "TestAnUnknownGeneratorIsRefusedAndTheKnownOnesCanBeListed", "internal/adapter/values", ByMutation},
+	{"the role a field plays comes from its generator and not from the name of the column", "TestTheRoleComesFromTheGeneratorAndOnlyTwoPlayOne", "internal/adapter/values", ByMutation},
+	{"every drawn date is a day that exists", "TestEveryDrawnDateIsARealDay", "internal/adapter/values", ByMutation},
+
+	// --- the disk, where a mistake costs somebody else's files ---------------
+	{"nothing appears under its real name before the whole run has succeeded", "TestNothingAppearsUnderItsRealNameBeforeTheRunSucceeds", "internal/adapter/store", ByMutation},
+	{"a run that ends early takes its temporary files with it", "TestADiscardedRunLeavesNothingBehind", "internal/adapter/store", ByMutation},
+	{"an existing file stops the run unless overwriting was asked for", "TestAnExistingFileStopsTheRunUnlessOverwritingIsAllowed", "internal/adapter/store", ByMutation},
+	{"a name the file system would not keep is refused rather than repaired", "TestANameTheFileSystemWouldNotKeepIsRefusedRatherThanRepaired", "internal/adapter/store", ByMutation},
+
+	// --- the verb, as somebody's pipeline meets it ---------------------------
+	{"a second run into the same directory is refused rather than overwriting", "TestASecondRunIntoTheSameDirectoryIsRefused", "internal/cli", ByMutation},
+	{"a dataset carrying identifiers says about itself that it describes nobody", "TestTheNoteSaysTheValuesAreSynthetic", "internal/cli", ByMutation},
+	{"a dry run answers the same arithmetic and touches no disk", "TestADryRunAnswersWithoutWritingAnything", "internal/cli", ByMutation},
+	{"a setting the command line moved is recorded with both sides", "TestAFlagThatOverridesTheRecipeSaysSo", "internal/cli", ByMutation},
+	{"every surface that lists what this tool accepts lists all of it", "TestEverySurfaceListingCommandsNamesAllOfThem", "internal/cli", ByMutation},
+
+	// --- being stopped from outside -----------------------------------------
+	//
+	// There is a fourth test beside these three, TestARealSignalReachesTheWatch,
+	// and it is deliberately absent. It is the only one that proves the runtime
+	// delivers the signal we ask for, and it cannot run on Windows, where the
+	// mutation runner runs. An entry claiming it was proven by mutation would be
+	// a sentence nobody has checked, which is the one thing this register exists
+	// to prevent.
+	{"a run stopped part way leaves neither an output file nor a temporary one", "TestARunStoppedPartWayLeavesNothingBehind", "internal/cli", ByMutation},
+	{"an interrupted run ends with the code a shell would have reported", "TestTheWatchEndsTheRunAsAnInterruptedOne", "internal/cli", ByMutation},
+	{"a run told to stop stays told, however many times it asks", "TestTheWatchGivesTheSameAnswerEveryTimeItIsAsked", "internal/cli", ByMutation},
+	{"a run nobody interrupted is never reported as interrupted", "TestAWatchReleasedBeforeAnySignalStopsNothing", "internal/cli", ByMutation},
+
 	// --- what the tool says its own output is -------------------------------
 	//
 	// Not a licence obligation. Several of these schemes have no block that is

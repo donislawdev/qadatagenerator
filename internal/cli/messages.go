@@ -33,12 +33,12 @@ const (
 	// first time wants a line they can paste, and every widely used command
 	// line tool leads with one.
 	examplesBlock = `Examples:
-  qadg validate recipe.yaml
-      Read a recipe and report every problem it has, all of them at once.
+  qadg generate recipe.yaml
+      Produce the dataset the recipe describes and write it beside a note
+      saying what the run made.
 
-  qadg validate --json recipe.yaml
-      The same check as one JSON document, for a pipeline that decides on its
-      own what is blocking.`
+  qadg validate recipe.yaml
+      Read a recipe and report every problem it has, all of them at once.`
 
 	usageBlock = `Usage:
   qadg <command> [arguments]
@@ -46,10 +46,12 @@ const (
   qadg --license`
 
 	commandsBlock = `Commands:
+  generate <recipe>   Produce the dataset a recipe describes.
   validate <recipe>   Read a recipe and report every problem it has.
 
-  A recipe that passes says what will be generated. It does not say the data
-  will be produced, because no command generates data in this build yet.`
+  A run writes nothing until it has succeeded, so a run that fails or is
+  stopped leaves the output directory as it found it, and an existing file
+  stops the run rather than being overwritten.`
 
 	// commandValidate is the name as typed. It is a public contract from the
 	// first release, because it goes into other people's pipelines.
@@ -76,6 +78,12 @@ const (
 	problemGenerateArgumentsWhy     = "it reads a recipe and writes the dataset that recipe describes"
 	problemGenerateArgumentsAllowed = "one path to a recipe file"
 	problemGenerateArgumentsDo      = "qadg generate recipe.yaml"
+
+	// How a run ends when the person running it stops it. It says what is on
+	// the disk afterwards, because that is the only thing the reader has to act
+	// on: a directory holding half a dataset would need cleaning by hand and
+	// this one does not.
+	stoppedByUser = "stopped before the dataset was complete. No output file was left behind and the temporary files this run made are gone"
 
 	summaryTables = " tables, "
 	summaryRows   = " rows written"
@@ -129,7 +137,7 @@ type flagDoc struct {
 var flagDocs = []flagDoc{
 	{"--version", []string{"--version"}, "Print the four version numbers this build speaks."},
 	{"--license", []string{"--license"}, "Print the licenses of this tool and of everything inside it."},
-	{"--json", []string{"--json"}, "Print machine readable output. Supported by --version and validate."},
+	{"--json", []string{"--json"}, "Print machine readable output. Supported by --version, validate and generate."},
 	{"--no-color", []string{"--no-color"}, "Turn color off even when the output is a terminal."},
 	{"--quiet", []string{"--quiet"}, "Print failures only on the log channel."},
 	{"--verbose", []string{"--verbose"}, "Print progress detail on the log channel."},
@@ -164,8 +172,13 @@ func acceptedFlags() string {
 
 // acceptedInvocations lists the commands as well, for the moment nothing at
 // all was given and naming only the flags would hide half the answer.
+//
+// The commands come from the same list the dispatcher switches on. This named
+// one of them by hand until 2026-08-04 and had been wrong since the day the
+// second verb arrived: somebody who ran qadg with nothing was told about
+// validate and never learned that generate exists.
 func acceptedInvocations() string {
-	return commandValidate + ", " + acceptedFlags()
+	return strings.Join(knownCommands(), ", ") + ", " + acceptedFlags()
 }
 
 // Failure text.

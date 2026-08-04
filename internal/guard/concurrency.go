@@ -15,11 +15,23 @@ import (
 // ConcurrencyAllowed lists the files permitted to start or coordinate
 // concurrent work.
 //
-// It is empty, and that is the point. There is no concurrency in this product
-// today, so the guard costs nothing to satisfy and everything it reports is
-// somebody adding the first goroutine. The day that happens, adding the file
-// here is a deliberate act with a reviewer attached, rather than a line that
-// slipped in.
+// It stood empty until the first command that writes files existed, which is
+// what this guard was installed to make visible. The day it happened, putting
+// the file here was a deliberate act rather than a line that slipped in, and
+// the reason is written below rather than left to whoever finds the entry.
+//
+// # Why the one entry is here
+//
+// A signal is delivered to a program on a goroutine the runtime owns, so
+// noticing one cannot be done without concurrency. The file listed keeps every
+// concurrent thing about that in one place: it turns a signal into an answer to
+// a question, and the run itself decides where to stop and removes its own
+// temporary files on its own goroutine. Nothing else in the product knows a
+// signal exists.
+//
+// One entry is a number worth keeping. A second one deserves the same
+// paragraph, and if the paragraph is hard to write the concurrency is probably
+// in the wrong place.
 //
 // # Why a guard rather than a rule in a document
 //
@@ -37,7 +49,9 @@ import (
 // Adding a file here says a person thought about it. It does not say they were
 // right. The rules the architecture states, that the output is ordered by row
 // and that nothing mutable is shared, are still on whoever writes the code.
-var ConcurrencyAllowed = map[string]bool{}
+var ConcurrencyAllowed = map[string]bool{
+	"internal/cli/signals.go": true,
+}
 
 // concurrencyPackages are imports whose whole purpose is coordinating work
 // between goroutines.
@@ -45,9 +59,16 @@ var ConcurrencyAllowed = map[string]bool{}
 // context is deliberately absent. Cancellation travels through it, but a
 // context on its own starts nothing and shares nothing, and refusing it would
 // push somebody towards a worse way of passing deadlines around.
+//
+// os/signal is here for a reason found while writing the first entry in the
+// list above. It hands a program values from a goroutine of its own, and one of
+// its functions builds the whole arrangement without the caller writing go,
+// chan or select anywhere. Concurrency would then enter through a file that
+// looks entirely ordinary, which is the one thing this guard exists to stop.
 var concurrencyPackages = map[string]bool{
 	"sync":        true,
 	"sync/atomic": true,
+	"os/signal":   true,
 }
 
 // Concurrency reports every place that starts or coordinates concurrent work
