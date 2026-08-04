@@ -28,6 +28,16 @@ type Recipe struct {
 type Entity struct {
 	Name  string
 	Count int
+	// HasCount separates a count of nought from no count at all.
+	//
+	// The two mean different things and only one of them is legal for every
+	// entity. A root entity with no count has nothing to produce, while a
+	// child with no count takes its number from its parents and the
+	// cardinality of the relation. Deriving one from the other would make a
+	// recipe asking for zero orders indistinguishable from one asking for as
+	// many as the relation gives, and the first is a perfectly ordinary thing
+	// to ask for while a test is being written.
+	HasCount bool
 	// PrimaryKey names the fields that identify a record.
 	//
 	// It sits at the entity rather than at the field because a key is often

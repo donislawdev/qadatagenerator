@@ -386,6 +386,7 @@ func (r *reader) entity(name, where string, node any) recipe.Entity {
 		switch key {
 		case "count":
 			built.Count = r.count(where+".count", item.Value)
+			built.HasCount = true
 		case "primary_key":
 			built.PrimaryKey = r.listOrOne(where+".primary_key", item.Value)
 		case "fields":
