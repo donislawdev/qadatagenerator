@@ -45,10 +45,17 @@ type DataSource struct {
 	Corpus string
 	// Project is where it was read from.
 	Project string
-	// Version is the exact tag it was read at, so the snapshot can be
-	// reproduced and so nobody has to guess which release it matches.
+	// Version is the exact tag or vintage it was read at, so the snapshot can
+	// be reproduced and so nobody has to guess which release it matches.
 	Version string
-	// License is the SPDX identifier of that project.
+	// License is the SPDX identifier of that project, or a plain statement of
+	// the terms where no SPDX identifier fits.
+	//
+	// The second case is not a loophole. A work of the United States Government
+	// carries no copyright at all by statute, and there is no SPDX identifier
+	// that says so without also claiming a grant somebody made. Writing one of
+	// those in would be inventing a licence the source never issued, which is
+	// the opposite of what this field is for.
 	License string
 	// Source is where the terms and the original can be read.
 	Source string
@@ -70,6 +77,14 @@ type DataSource struct {
 // directions, so a list added without its attribution fails the build and an
 // attribution left behind after a list was dropped fails it too.
 var Data = []DataSource{
+	// The postal registry is the one collection here that is not a word list
+	// from a fake data project, and it is the largest by an order of magnitude.
+	// The terms are the reason it could be taken whole: a work of the United
+	// States Government has no copyright, and the United States has no database
+	// right for a compilation of facts to fall under. Both halves had to be true,
+	// because a licence granted by whoever republishes a collection answers
+	// nothing about a collection they did not make.
+	{"en-US/postal-places", "U.S. Census Bureau", "2020 vintage", "Public domain, 17 U.S.C. 105", "https://www.census.gov/geographies/reference-files/time-series/geo/relationship-files.html", "2026-08-04"},
 	{"en-US/first-names-female", "joke2k/faker", "v40.36.0", "MIT", "https://github.com/joke2k/faker", "2026-08-02"},
 	{"en-US/first-names-male", "joke2k/faker", "v40.36.0", "MIT", "https://github.com/joke2k/faker", "2026-08-02"},
 	{"en-US/last-names", "joke2k/faker", "v40.36.0", "MIT", "https://github.com/joke2k/faker", "2026-08-02"},

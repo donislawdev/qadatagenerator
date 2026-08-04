@@ -7,13 +7,28 @@
 //
 // # Where they came from, and why that is stated rather than assumed
 //
-// The lists were read out of open source projects for fake data and written
-// here under their terms. Reading somebody's list and keeping it is taking a
+// Most were read out of open source projects for fake data and written here
+// under their terms. Reading somebody's list and keeping it is taking a
 // substantial part of their collection, whether it arrived through a function
 // or through a file, so the licences require their notice to travel with it.
 // Each file names its source in a header, the registry beside the licences
 // repeats it, and --license prints it from the binary, because that is where
 // the data actually ships.
+//
+// One of them came from somewhere else and the difference is worth knowing.
+// The postal registry was built from two files of the United States census,
+// which carry no copyright at all, so the notice it ships is a courtesy rather
+// than a condition. It is shipped anyway, because a reader cannot tell the two
+// cases apart by looking, and a registry that lists only the collections it was
+// forced to list teaches the next reader the wrong rule.
+//
+// # Not every list is a list of words
+//
+// A postal registry is a table, and its lines carry fields separated by a pipe
+// rather than one value each. Nothing here parses them: a caller that needs the
+// fields splits them itself, because a loader that knew about columns would have
+// to know which file has which, and that is the sort of knowledge that goes out
+// of date silently.
 //
 // # Order is part of the contract
 //

@@ -177,6 +177,36 @@ var Anchors = []Anchor{
 			"not kept, by decision DEC-109 point 4, so this cannot be recomputed here",
 	},
 
+	// --- US.zip ------------------------------------------------------------
+	//
+	// The only entry here for a scheme with no arithmetic in it, which changes
+	// what an anchor can even be. Nothing is computed, so there is no worked
+	// example to reproduce and no weights to force by measurement. What can be
+	// read wrongly is what the data is and what was removed from it, so those
+	// are the two rules, and both are quoted.
+	//
+	// 🔴 A third rule is deliberately absent and its absence is not an omission.
+	// Which of several places a code belongs to is chosen here, by largest shared
+	// land area, because the source lists every intersection and ranks none. That
+	// rule cannot have an outside anchor, because it did not come from outside.
+	// It is recorded in the file header, the provider comment and the decision
+	// register instead. Entering it here as unanchored would raise a ceiling that
+	// may only fall, to admit something the register was never measuring.
+	{
+		Rule:     "the five digit shape, and that a tabulation area is an approximation of the postal scheme rather than a register of it",
+		Provider: "US.zip",
+		Source:   "U.S. Census Bureau guidance on ZIP Code Tabulation Areas, and the gazetteer record layout calling the identifier a five digit code",
+		State:    ByQuotedSentence,
+		Detail:   "both sentences are held verbatim in internal/oracle/zip.go, and the one saying not every valid code is represented is what stops Validate from faulting a code the registry lacks",
+	},
+	{
+		Rule:     "the term the census appends to a place name, which the registry removes to leave a bare name",
+		Provider: "US.zip",
+		Source:   "U.S. Census Bureau list of legal and statistical area description codes, where each of these terms is marked a suffix",
+		State:    ByQuotedSentence,
+		Detail:   "the fifteen terms are held in internal/oracle/zip.PlaceTerms, a test asserts no shipped name still ends in one, and the extraction refuses any place whose name does not end in the term its code selects",
+	},
+
 	// --- PL.regon ----------------------------------------------------------
 	{
 		Rule:     "the nine digit shape and the ban on any digit carrying meaning",

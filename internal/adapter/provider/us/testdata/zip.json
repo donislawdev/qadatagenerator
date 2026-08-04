@@ -1,0 +1,82 @@
+[
+  {
+    "seed": "release-2026-08",
+    "row": 0,
+    "value": "48755",
+    "place": "Pigeon",
+    "region": "MI",
+    "foreign": "48756"
+  },
+  {
+    "seed": "release-2026-08",
+    "row": 1,
+    "value": "79908",
+    "place": "Fort Bliss",
+    "region": "TX",
+    "foreign": "79911"
+  },
+  {
+    "seed": "release-2026-08",
+    "row": 2,
+    "value": "50105",
+    "place": "Gilbert",
+    "region": "IA",
+    "foreign": "50106"
+  },
+  {
+    "seed": "release-2026-08",
+    "row": 7,
+    "value": "84095",
+    "place": "South Jordan",
+    "region": "UT",
+    "foreign": "84096"
+  },
+  {
+    "seed": "release-2026-08",
+    "row": 42,
+    "value": "53090",
+    "place": "West Bend",
+    "region": "WI",
+    "foreign": "53091"
+  },
+  {
+    "seed": "release-2026-08",
+    "row": 999,
+    "value": "59520",
+    "place": "Big Sandy",
+    "region": "MT",
+    "foreign": "59521"
+  },
+  {
+    "seed": "release-2026-08",
+    "row": 1000000,
+    "value": "10029",
+    "place": "New York",
+    "region": "NY",
+    "foreign": "10502"
+  },
+  {
+    "seed": "another-seed",
+    "row": 0,
+    "value": "54433",
+    "place": "Gilman",
+    "region": "WI",
+    "foreign": "54436"
+  },
+  {
+    "seed": "another-seed",
+    "row": 1,
+    "value": "86429",
+    "place": "Bullhead City",
+    "region": "AZ",
+    "foreign": "86431"
+  },
+  {
+    "seed": "release-2026-08",
+    "row": 5,
+    "value": "61243",
+    "place": "Deer Grove",
+    "region": "IL",
+    "foreign": "61244"
+  }
+]

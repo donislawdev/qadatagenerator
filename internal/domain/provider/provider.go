@@ -53,6 +53,24 @@ const (
 	Unknown Gender = "unknown"
 )
 
+// Place is a settlement a postal code belongs to.
+//
+// The region is here rather than left out because a place name alone does not
+// identify a place. The United States registry carries more than two hundred
+// codes reading New York and a hundred reading Springfield across different
+// states, so a pair built from the name alone would be true of some code and
+// false of the one in hand. Naming the region is what lets the reverse direction
+// mean anything.
+//
+// Region is the word the corpus already uses for the tier below a country, and
+// it is deliberately not called state: it is a voivodeship in Poland and a state
+// in the United States, and a provider contract that took sides would need a
+// second name the day a third country arrived.
+type Place struct {
+	Name   string
+	Region string
+}
+
 // Date is a calendar date without a clock, a zone or a format.
 //
 // The domain is not allowed to read the clock, and a date type carrying one
@@ -306,6 +324,45 @@ type UnassignedWritable interface {
 	WithUnassigned(value, target string) (string, error)
 }
 
+// PostalLinked is required of a provider declaring reference.postal-to-place.
+//
+// # Both directions, because the capability promises both
+//
+// The registry answers which place a code belongs to and which codes a place
+// holds. Pillar one needs the first to put a coherent pair in a record. A report
+// explaining why a value was rejected needs the second, and so does anybody
+// generating a record from the place inwards.
+//
+// # Why there is a write side
+//
+// The corruption aimed at this capability puts a real code next to a place it
+// does not belong to, so it has to build a value rather than merely ask about
+// one. Leaving that to the engine would put the registry of one country inside
+// the engine, which is the mistake the unassigned range interface already made
+// once and had corrected.
+//
+// The applicable question is therefore not whether the code has a place. It is
+// whether a different real code exists whose place differs, which is the block
+// the corruption aims at. Asking the first would be true of every value this
+// tool generates and would never refuse anything.
+type PostalLinked interface {
+	// PlaceFor returns the place a code belongs to, and whether the registry
+	// carries the code at all. A code it does not carry is answered rather
+	// than guessed, because a guessed pair is the defect this tool sells.
+	PlaceFor(code string) (Place, bool)
+	// CodesFor returns the codes belonging to a place, sorted. It is empty for
+	// a place the registry does not carry.
+	CodesFor(place Place) []string
+	// WithDifferentPlace returns a real code belonging to some other place.
+	//
+	// It refuses when the code is not in the registry, and that refusal is the
+	// applicability answer the manifest has to record as applied false with a
+	// reason. The same input always gives the same output: a corruption that
+	// varied between two runs of one seed would break the promise the whole
+	// project rests on.
+	WithDifferentPlace(code string) (string, error)
+}
+
 // implied maps a capability to the interface a provider claiming it must
 // implement.
 //
@@ -331,6 +388,10 @@ var implied = map[capability.Name]func(Provider) bool{
 	},
 	capability.IdentifierReservedRange: func(p Provider) bool {
 		_, ok := p.(RangeAware)
+		return ok
+	},
+	capability.ReferencePostalToPlace: func(p Provider) bool {
+		_, ok := p.(PostalLinked)
 		return ok
 	},
 }

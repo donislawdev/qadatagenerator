@@ -213,6 +213,19 @@ var Guards = []Guard{
 	{"recomputing a routing check digit never refuses", "TestRecomputingARoutingCheckDigitNeverRefuses", "internal/adapter/provider/us", ByMutation},
 	{"the way a routing number was written survives being rebuilt", "TestBothWaysOfWritingARoutingNumberAreAccepted", "internal/adapter/provider/us", ByMutation},
 	{"the generated routing numbers have not moved since they were frozen", "TestTheGeneratedRoutingNumbersHaveNotMoved", "internal/adapter/provider/us", ByMutation},
+
+	// --- US.zip, where the reference data is the product --------------------
+	//
+	// The only provider here whose guards mostly stand in front of a file rather
+	// than in front of arithmetic. One of the mutations below breaks the data
+	// instead of the code, because that is where a fault would actually live.
+	{"a mismatched pair is genuinely mismatched rather than agreeing", "TestADifferentPlaceIsRealAndActuallyDifferent", "internal/adapter/provider/us", ByMutation},
+	{"a code the registry cannot place is refused rather than paired with an invention", "TestACodeTheRegistryDoesNotCarryIsRefusedRatherThanInvented", "internal/adapter/provider/us", ByMutation},
+	{"a real code missing from the registry is not reported as a defect", "TestValidationAnswersAboutShapeAndNotAboutMembership", "internal/adapter/provider/us", ByMutation},
+	{"no place name ships carrying the term the census appends to it", "TestNoPlaceNameStillCarriesTheTermTheCensusAppends", "internal/adapter/provider/us", ByMutation},
+	{"the generated postal codes have not moved since they were frozen", "TestTheGeneratedPostalCodesHaveNotMoved", "internal/adapter/provider/us", ByMutation},
+	{"every code in the registry answers with the place beside it", "TestEveryCodeInTheRegistryResolvesToItsPlace", "internal/adapter/provider/us", ByProbe},
+	{"one seed gives one mismatched pair, every time", "TestADifferentPlaceIsTheSameAnswerEveryTime", "internal/adapter/provider/us", ByProbe},
 }
 
 // CountByProof returns how many guards are in each state.

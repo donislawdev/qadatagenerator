@@ -16,6 +16,21 @@ and has not happened.
 
 ### Added
 
+- **United States postal codes paired with their places, as `US.zip`.** A
+  registry of 28 658 codes built from two files of the United States census.
+  It answers which place a code belongs to and which codes a place holds, and
+  it can produce a real code belonging to a different place, which is what the
+  corruption that breaks a postal and city pair needs.
+- **The registry is an approximation of the postal scheme and the tool says
+  so.** The census publishes tabulation areas rather than postal codes, and
+  states that not every valid code is represented by one. So a code the
+  registry does not carry is not reported as wrong: it may be a real code the
+  census does not cover, and faulting it would report a defect in data that has
+  none. The check answers about the shape of a code and nothing else.
+- **Which place a code belongs to is computed, not quoted.** The census lists
+  every place a code overlaps, sometimes dozens, and ranks none of them. The
+  registry keeps the one sharing the largest land area. Codes falling outside
+  every place are not in the registry at all.
 - **United States routing numbers, as `US.aba`.** Nine digits with a check
   digit, readable and writable both bare and in the four four one grouping that
   federal regulations print them in. It brings the check digit capability and
