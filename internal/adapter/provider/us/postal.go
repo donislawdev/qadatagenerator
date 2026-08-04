@@ -50,23 +50,23 @@ import (
 // and pillar two can break it on purpose. Unlike a personal number a postal code
 // identifies an area rather than a person, so there is no harbour to generate
 // inside and nothing here can be traced to anybody.
-type ZIP struct{}
+type Postal struct{}
 
 // Contract checks, so that a mismatch between what this provider claims and
 // what it implements fails to compile rather than at run time.
 var (
-	_ provider.Provider     = ZIP{}
-	_ provider.PostalLinked = ZIP{}
+	_ provider.Provider     = Postal{}
+	_ provider.PostalLinked = Postal{}
 )
 
 const (
-	// zipLength is the digits of the code itself, and zipPlusFourLength is the
+	// postalCodeLength is the digits of the code itself, and postalPlusFourLength is the
 	// longer written form, five digits, a hyphen and four more.
-	zipLength         = 5
-	zipPlusFourLength = zipLength + 1 + 4
-	// zipFields is how many fields a registry line carries: code, place,
+	postalCodeLength         = 5
+	postalPlusFourLength = postalCodeLength + 1 + 4
+	// postalFields is how many fields a registry line carries: code, place,
 	// region.
-	zipFields = 3
+	postalFields = 3
 )
 
 const (
@@ -106,7 +106,7 @@ func loadPostalRegistry() []postalEntry {
 	entries := make([]postalEntry, 0, len(lines))
 	for _, line := range lines {
 		parts := strings.Split(line, "|")
-		if len(parts) != zipFields {
+		if len(parts) != postalFields {
 			panic("us: the postal registry has a line that is not code, place and region: " + line)
 		}
 		entries = append(entries, postalEntry{
@@ -127,14 +127,14 @@ func indexPostalByCode(entries []postalEntry) map[string]provider.Place {
 
 // ID names this provider. The country prefix is ISO 3166-1 alpha-2, because a
 // provider belongs to a country rather than to a language.
-func (ZIP) ID() string { return "US.zip" }
+func (Postal) ID() string { return "US.postal" }
 
 // Capabilities are what this provider brings.
 //
 // One. It carries no check digit, encodes neither a date nor a gender, and has
 // no block that is never assigned, so declaring anything else would be claiming
 // a question this scheme cannot answer.
-func (ZIP) Capabilities() []capability.Name {
+func (Postal) Capabilities() []capability.Name {
 	return []capability.Name{capability.ReferencePostalToPlace}
 }
 
@@ -146,7 +146,7 @@ func (ZIP) Capabilities() []capability.Name {
 // and asks PlaceFor for the place that goes with it. Doing it the other way
 // would need the place to be drawn first by somebody who does not have the
 // registry.
-func (z ZIP) Generate(req provider.Request) (string, error) {
+func (p Postal) Generate(req provider.Request) (string, error) {
 	index := req.Source.IntN(seed.Coordinate{
 		Entity:  req.At.Entity,
 		Row:     req.At.Row,
@@ -162,7 +162,7 @@ func (z ZIP) Generate(req provider.Request) (string, error) {
 // than lazy. See the type comment: the registry approximates the postal scheme,
 // so a code it does not carry may still be a real one, and calling that invalid
 // would fault data that is correct.
-func (ZIP) Validate(value string) provider.Verdict {
+func (Postal) Validate(value string) provider.Verdict {
 	if _, ok := parsePostalCode(value); !ok {
 		return provider.Invalid("a postal code is five digits, written 12345 or 12345-6789")
 	}
@@ -174,7 +174,7 @@ func (ZIP) Validate(value string) provider.Verdict {
 // The longer written form is accepted and only its first five digits are looked
 // up, because the four that follow narrow a delivery route within the same
 // place and change nothing about which place it is.
-func (ZIP) PlaceFor(code string) (provider.Place, bool) {
+func (Postal) PlaceFor(code string) (provider.Place, bool) {
 	parsed, ok := parsePostalCode(code)
 	if !ok {
 		return provider.Place{}, false
@@ -188,7 +188,7 @@ func (ZIP) PlaceFor(code string) (provider.Place, bool) {
 // Sorted because the answer reaches a manifest and a report, and Go randomises
 // map iteration on purpose. The registry is already held in code order, so this
 // walk produces that order without sorting again.
-func (ZIP) CodesFor(place provider.Place) []string {
+func (Postal) CodesFor(place provider.Place) []string {
 	var codes []string
 	for _, entry := range postalRegistry {
 		if entry.place == place {
@@ -209,16 +209,16 @@ func (ZIP) CodesFor(place provider.Place) []string {
 // It refuses a code the registry does not carry. That refusal is the
 // applicability answer, and the caller has to record it in the manifest rather
 // than pass the value through unchanged and silently.
-func (z ZIP) WithDifferentPlace(code string) (string, error) {
+func (p Postal) WithDifferentPlace(code string) (string, error) {
 	parsed, ok := parsePostalCode(code)
 	if !ok {
-		return "", fmt.Errorf("zip: the value is not a postal code")
+		return "", fmt.Errorf("postal: the value is not a postal code")
 	}
 	start := sort.Search(len(postalRegistry), func(i int) bool {
 		return postalRegistry[i].code >= parsed
 	})
 	if start == len(postalRegistry) || postalRegistry[start].code != parsed {
-		return "", fmt.Errorf("zip: the postal registry does not carry this code")
+		return "", fmt.Errorf("postal: the postal registry does not carry this code")
 	}
 
 	here := postalRegistry[start].place
@@ -230,7 +230,7 @@ func (z ZIP) WithDifferentPlace(code string) (string, error) {
 	}
 	// Only reachable if every code in the registry shares one place, which
 	// would mean the extraction produced something nobody intended.
-	return "", fmt.Errorf("zip: the postal registry holds only one place")
+	return "", fmt.Errorf("postal: the postal registry holds only one place")
 }
 
 // parsePostalCode accepts the two written forms and returns the five digits.
@@ -240,15 +240,15 @@ func (z ZIP) WithDifferentPlace(code string) (string, error) {
 // would hide that from the very report this tool exists to produce.
 func parsePostalCode(value string) (string, bool) {
 	switch len(value) {
-	case zipLength:
-	case zipPlusFourLength:
-		if value[zipLength] != '-' || !allDigits(value[zipLength+1:]) {
+	case postalCodeLength:
+	case postalPlusFourLength:
+		if value[postalCodeLength] != '-' || !allDigits(value[postalCodeLength+1:]) {
 			return "", false
 		}
 	default:
 		return "", false
 	}
-	head := value[:zipLength]
+	head := value[:postalCodeLength]
 	if !allDigits(head) {
 		return "", false
 	}

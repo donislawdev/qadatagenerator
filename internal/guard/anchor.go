@@ -70,8 +70,32 @@ const (
 	// still counts, and Detail has to carry enough for somebody to run the
 	// measurement again instead of believing this line.
 	ByMeasurement AnchorState = "measurement"
+	// ByConstruction means the rule was made here and no source could ever
+	// support it, because it answers a question no source is asking.
+	//
+	// # Why this is not a softer word for unanchored
+	//
+	// Unanchored means we looked and found nothing, and it carries a ratchet
+	// because looking harder is always possible. This means there is nothing to
+	// look for. A registry pairing a postal code with one of the several places
+	// it overlaps has to pick one, and the source that lists the overlaps ranks
+	// none of them and was never trying to.
+	//
+	// Leaving such a rule out of the register entirely was the alternative, and
+	// it is worse. The register enumerates providers from the tree, not rules,
+	// so a rule nobody entered is invisible to both halves of the check. A
+	// provider would show two anchored rules while a third decided its output.
+	//
+	// # The thing that stops this becoming a way out
+	//
+	// Detail has to name which source was consulted and what it did not answer.
+	// Without that sentence this state would be available to anybody who did not
+	// feel like searching, which is exactly what Unanchored is for. It is checked
+	// rather than trusted, the same way a measurement has to say how many and
+	// when.
+	ByConstruction AnchorState = "construction"
 	// Unanchored means nothing outside our own reading supports this rule.
-	// Said out loud so that it does not look like the three above. This list
+	// Said out loud so that it does not look like the four above. This list
 	// may only shrink.
 	Unanchored AnchorState = "unanchored"
 )
@@ -177,7 +201,7 @@ var Anchors = []Anchor{
 			"not kept, by decision DEC-109 point 4, so this cannot be recomputed here",
 	},
 
-	// --- US.zip ------------------------------------------------------------
+	// --- US.postal ------------------------------------------------------------
 	//
 	// The only entry here for a scheme with no arithmetic in it, which changes
 	// what an anchor can even be. Nothing is computed, so there is no worked
@@ -185,26 +209,28 @@ var Anchors = []Anchor{
 	// read wrongly is what the data is and what was removed from it, so those
 	// are the two rules, and both are quoted.
 	//
-	// 🔴 A third rule is deliberately absent and its absence is not an omission.
-	// Which of several places a code belongs to is chosen here, by largest shared
-	// land area, because the source lists every intersection and ranks none. That
-	// rule cannot have an outside anchor, because it did not come from outside.
-	// It is recorded in the file header, the provider comment and the decision
-	// register instead. Entering it here as unanchored would raise a ceiling that
-	// may only fall, to admit something the register was never measuring.
+	// The third rule is the one that made this register grow a fifth state. It
+	// decides the output and no source will ever support it.
 	{
 		Rule:     "the five digit shape, and that a tabulation area is an approximation of the postal scheme rather than a register of it",
-		Provider: "US.zip",
+		Provider: "US.postal",
 		Source:   "U.S. Census Bureau guidance on ZIP Code Tabulation Areas, and the gazetteer record layout calling the identifier a five digit code",
 		State:    ByQuotedSentence,
 		Detail:   "both sentences are held verbatim in internal/oracle/zip.go, and the one saying not every valid code is represented is what stops Validate from faulting a code the registry lacks",
 	},
 	{
 		Rule:     "the term the census appends to a place name, which the registry removes to leave a bare name",
-		Provider: "US.zip",
+		Provider: "US.postal",
 		Source:   "U.S. Census Bureau list of legal and statistical area description codes, where each of these terms is marked a suffix",
 		State:    ByQuotedSentence,
-		Detail:   "the fifteen terms are held in internal/oracle/zip.PlaceTerms, a test asserts no shipped name still ends in one, and the extraction refuses any place whose name does not end in the term its code selects",
+		Detail:   "the fifteen terms are held in internal/oracle.PlaceTerms, a test asserts no shipped name still ends in one, and the extraction refuses any place whose name does not end in the term its code selects",
+	},
+	{
+		Rule:     "which of the several places a code overlaps is the place of that code",
+		Provider: "US.postal",
+		Source:   "consulted the 2020 ZCTA to Place relationship file of the U.S. Census Bureau, which lists every intersection, up to seventy seven for one code, and does not rank them or name a principal place. No census document answers this, because the question is not one the census asks",
+		State:    ByConstruction,
+		Detail:   "the place sharing the largest land area wins, and a tie goes to the lower place identifier so the answer cannot depend on the order of rows. Stated in the header of the shipped file and in the provider comment, because a reader of either has to know it was computed here",
 	},
 
 	// --- PL.regon ----------------------------------------------------------
@@ -296,8 +322,40 @@ func IncompleteAnchors(anchors []Anchor) []string {
 			faults = append(faults, anchor.Provider+": "+anchor.Rule+
 				" was measured and the detail does not say how many values or when")
 		}
+		if anchor.State == ByConstruction && !sourceSaysWhatItDoesNotAnswer(anchor.Source) {
+			faults = append(faults, anchor.Provider+": "+anchor.Rule+
+				" is called ours by construction and the source field does not say what was consulted and left unanswered")
+		}
 	}
 	return faults
+}
+
+// unanswered are the ways of writing that a source was asked and did not
+// answer.
+//
+// # This check is weak on purpose and saying so is part of it
+//
+// It cannot judge whether a sentence is true, only whether one was written. A
+// rule taken from a source and mislabelled as ours would pass it by adding a
+// denial that is simply false. What it does stop is the cheaper failure, which
+// is the one that actually happens: reaching for this state because nothing was
+// found yet, and leaving the field saying nothing at all. That belongs in
+// Unanchored, which carries a ratchet precisely so it cannot be settled for.
+var unanswered = []string{
+	"does not", "do not", "did not", "no document", "no source", "is not one", "nothing",
+}
+
+// sourceSaysWhatItDoesNotAnswer reports whether the source field of a rule made
+// here names something that was consulted and states that it left the question
+// open.
+func sourceSaysWhatItDoesNotAnswer(source string) bool {
+	lowered := strings.ToLower(source)
+	for _, phrase := range unanswered {
+		if strings.Contains(lowered, phrase) {
+			return true
+		}
+	}
+	return false
 }
 
 // measuredOn matches the date a measurement was taken.

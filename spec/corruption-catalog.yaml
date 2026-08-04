@@ -819,7 +819,7 @@ mutators:
       formats: [any]
       providers:
         - PL.postal
-        - US.zip
+        - US.postal
     parameters: []
     expectation: rejection
     confidence: soft

@@ -243,11 +243,45 @@ func TestTheUnanchoredListOnlyShrinks(t *testing.T) {
 			"Anchor one instead of raising the ceiling, which is what the ceiling is for.",
 			counts[Unanchored], UnanchoredCeiling)
 	}
-	total := counts[ByWorkedExample] + counts[ByQuotedSentence] + counts[ByMeasurement] + counts[Unanchored]
+	// ByConstruction is counted here and deliberately not held to the ceiling.
+	// The ceiling exists because looking harder can always turn an unanchored
+	// rule into an anchored one. A rule answering a question no source asks
+	// cannot be moved by looking harder, so a ceiling over it would be a target
+	// nobody could ever hit, and a target like that gets raised instead of met.
+	total := counts[ByWorkedExample] + counts[ByQuotedSentence] + counts[ByMeasurement] +
+		counts[ByConstruction] + counts[Unanchored]
 	if total != len(Anchors) {
 		t.Fatalf("%d entries carry a state this check knows and the register holds %d, "+
 			"so some entry has a state nobody counts", total, len(Anchors))
 	}
-	t.Logf("worked example %d, quoted sentence %d, measured once %d, unanchored %d",
-		counts[ByWorkedExample], counts[ByQuotedSentence], counts[ByMeasurement], counts[Unanchored])
+	t.Logf("worked example %d, quoted sentence %d, measured once %d, ours by construction %d, unanchored %d",
+		counts[ByWorkedExample], counts[ByQuotedSentence], counts[ByMeasurement],
+		counts[ByConstruction], counts[Unanchored])
+}
+
+// A rule called ours by construction has to say what was consulted and left
+// unanswered, or the state becomes the easy way out of searching.
+func TestARuleCalledOursHasToSayWhatItAsked(t *testing.T) {
+	cases := []struct {
+		name   string
+		source string
+		faulty bool
+	}{
+		{"names what it asked and what it left open", "consulted the relationship file, which does not rank them", false},
+		{"denies in another wording", "no document answers this", false},
+		{"names a source and claims nothing about it", "the census relationship file", true},
+		{"says nothing at all", "internal decision", true},
+	}
+
+	for _, one := range cases {
+		t.Run(one.name, func(t *testing.T) {
+			anchors := []Anchor{{
+				Rule: "which place", Provider: "US.postal", Source: one.source,
+				State: ByConstruction, Detail: "largest shared land area",
+			}}
+			if faulty := len(IncompleteAnchors(anchors)) > 0; faulty != one.faulty {
+				t.Fatalf("source %q wanted faulty=%v", one.source, one.faulty)
+			}
+		})
+	}
 }

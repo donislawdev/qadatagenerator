@@ -15,11 +15,11 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/oracle"
 )
 
-// zip is the provider under test. It is a package level value because a
+// postal is the provider under test. It is a package level value because a
 // composite literal cannot stand in the init clause of an if without
 // parentheses, and scattering those through every check reads worse than
 // naming the thing once.
-var zip = us.ZIP{}
+var postal = us.Postal{}
 
 // The registry is the product here, more than the code around it. These walk
 // all of it rather than sampling, because it is finite and cheap: the project
@@ -76,7 +76,7 @@ func TestEveryCodeInTheRegistryResolvesToItsPlace(t *testing.T) {
 	lines, _ := corpus.Load("en-US", "postal-places")
 	for _, line := range lines {
 		parts := strings.Split(line, "|")
-		place, ok := zip.PlaceFor(parts[0])
+		place, ok := postal.PlaceFor(parts[0])
 		if !ok {
 			t.Fatalf("%q is in the registry and did not resolve", parts[0])
 		}
@@ -92,7 +92,7 @@ func TestAPlaceAnswersWithTheCodesItHolds(t *testing.T) {
 	first := strings.Split(lines[0], "|")
 	place := provider.Place{Name: first[1], Region: first[2]}
 
-	codes := zip.CodesFor(place)
+	codes := postal.CodesFor(place)
 	if len(codes) == 0 {
 		t.Fatalf("%v holds no codes, and its own line says otherwise", place)
 	}
@@ -101,14 +101,14 @@ func TestAPlaceAnswersWithTheCodesItHolds(t *testing.T) {
 		if code == first[0] {
 			found = true
 		}
-		if back, ok := zip.PlaceFor(code); !ok || back != place {
+		if back, ok := postal.PlaceFor(code); !ok || back != place {
 			t.Errorf("%q came back for %v and resolves to %v", code, place, back)
 		}
 	}
 	if !found {
 		t.Errorf("%v does not list its own code %q", place, first[0])
 	}
-	if zip.CodesFor(provider.Place{Name: "Nowhere", Region: "ZZ"}) != nil {
+	if postal.CodesFor(provider.Place{Name: "Nowhere", Region: "ZZ"}) != nil {
 		t.Error("a place that is not in the registry answered with codes")
 	}
 }
@@ -124,12 +124,12 @@ func TestADifferentPlaceIsRealAndActuallyDifferent(t *testing.T) {
 	for _, line := range lines {
 		parts := strings.Split(line, "|")
 		code := parts[0]
-		other, err := zip.WithDifferentPlace(code)
+		other, err := postal.WithDifferentPlace(code)
 		if err != nil {
 			t.Fatalf("%q: %v", code, err)
 		}
 		here := provider.Place{Name: parts[1], Region: parts[2]}
-		there, ok := zip.PlaceFor(other)
+		there, ok := postal.PlaceFor(other)
 		if !ok {
 			t.Fatalf("%q produced %q, which is not in the registry", code, other)
 		}
@@ -143,12 +143,12 @@ func TestADifferentPlaceIsRealAndActuallyDifferent(t *testing.T) {
 // project rests on, and a corruption is the easiest place to break it.
 func TestADifferentPlaceIsTheSameAnswerEveryTime(t *testing.T) {
 	for _, code := range []string{"01001", "10001", "90210", "99929"} {
-		first, err := zip.WithDifferentPlace(code)
+		first, err := postal.WithDifferentPlace(code)
 		if err != nil {
 			t.Fatalf("%q: %v", code, err)
 		}
 		for i := 0; i < 5; i++ {
-			again, err := zip.WithDifferentPlace(code)
+			again, err := postal.WithDifferentPlace(code)
 			if err != nil || again != first {
 				t.Fatalf("%q gave %q then %q", code, first, again)
 			}
@@ -161,7 +161,7 @@ func TestADifferentPlaceIsTheSameAnswerEveryTime(t *testing.T) {
 // corruption that happened.
 func TestACodeTheRegistryDoesNotCarryIsRefusedRatherThanInvented(t *testing.T) {
 	for _, code := range []string{"00000", "99999", "abcde", "", "1234", "123456"} {
-		if _, err := zip.WithDifferentPlace(code); err == nil {
+		if _, err := postal.WithDifferentPlace(code); err == nil {
 			t.Errorf("%q was corrupted although the registry cannot place it", code)
 		}
 	}
@@ -172,10 +172,10 @@ func TestACodeTheRegistryDoesNotCarryIsRefusedRatherThanInvented(t *testing.T) {
 // that the registry does not cover the scheme.
 func TestValidationAnswersAboutShapeAndNotAboutMembership(t *testing.T) {
 	unlisted := "99999"
-	if _, ok := zip.PlaceFor(unlisted); ok {
+	if _, ok := postal.PlaceFor(unlisted); ok {
 		t.Fatalf("%s was chosen as an unlisted code and the registry carries it", unlisted)
 	}
-	if verdict := zip.Validate(unlisted); !verdict.Valid {
+	if verdict := postal.Validate(unlisted); !verdict.Valid {
 		t.Errorf("a well formed code outside the registry was faulted: %s", verdict.Reason)
 	}
 	if !strings.Contains(oracle.RegistryIsNotThePostalRegister(), "Not all valid ZIP Codes") {
@@ -186,7 +186,7 @@ func TestValidationAnswersAboutShapeAndNotAboutMembership(t *testing.T) {
 	}
 
 	for _, bad := range []string{"", "1234", "123456", "12345-", "12345-123", "1234a", "12345 6789"} {
-		if verdict := zip.Validate(bad); verdict.Valid {
+		if verdict := postal.Validate(bad); verdict.Valid {
 			t.Errorf("%q passed validation", bad)
 		}
 		if findings := oracle.CheckPostalCode(bad); len(findings) == 0 {
@@ -194,7 +194,7 @@ func TestValidationAnswersAboutShapeAndNotAboutMembership(t *testing.T) {
 		}
 	}
 	for _, good := range []string{"01001", "12345-6789"} {
-		if verdict := zip.Validate(good); !verdict.Valid {
+		if verdict := postal.Validate(good); !verdict.Valid {
 			t.Errorf("%q was faulted: %s", good, verdict.Reason)
 		}
 	}
@@ -205,8 +205,8 @@ func TestValidationAnswersAboutShapeAndNotAboutMembership(t *testing.T) {
 func TestTheLongerWrittenFormResolvesToTheSamePlace(t *testing.T) {
 	lines, _ := corpus.Load("en-US", "postal-places")
 	parts := strings.Split(lines[0], "|")
-	short, _ := zip.PlaceFor(parts[0])
-	long, ok := zip.PlaceFor(parts[0] + "-6789")
+	short, _ := postal.PlaceFor(parts[0])
+	long, ok := postal.PlaceFor(parts[0] + "-6789")
 	if !ok || short != long {
 		t.Errorf("%s resolved to %v and %s-6789 to %v", parts[0], short, parts[0], long)
 	}
@@ -218,14 +218,14 @@ func TestEveryGeneratedCodeIsOneTheRegistryCanPlace(t *testing.T) {
 	source := seed.New("release-2026-08")
 	for row := int64(0); row < 2000; row++ {
 		at := seed.Coordinate{Entity: "customer", Row: row, Field: "postal_code", Purpose: "value"}
-		value, err := zip.Generate(provider.Request{Source: source, At: at})
+		value, err := postal.Generate(provider.Request{Source: source, At: at})
 		if err != nil {
 			t.Fatalf("row %d: %v", row, err)
 		}
-		if _, ok := zip.PlaceFor(value); !ok {
+		if _, ok := postal.PlaceFor(value); !ok {
 			t.Fatalf("row %d produced %q, which the registry cannot place", row, value)
 		}
-		if verdict := zip.Validate(value); !verdict.Valid {
+		if verdict := postal.Validate(value); !verdict.Valid {
 			t.Fatalf("row %d produced %q, which fails our own validator: %s", row, value, verdict.Reason)
 		}
 	}
@@ -235,12 +235,12 @@ func TestEveryGeneratedCodeIsOneTheRegistryCanPlace(t *testing.T) {
 // missing, or an interface nobody declared, is caught here rather than at run
 // time by a mutator that never applies.
 func TestTheProviderMeetsItsOwnDeclaration(t *testing.T) {
-	if findings := provider.Check(zip); len(findings) != 0 {
-		t.Errorf("US.zip breaks its contract: %v", findings)
+	if findings := provider.Check(postal); len(findings) != 0 {
+		t.Errorf("US.postal breaks its contract: %v", findings)
 	}
-	declared := zip.Capabilities()
+	declared := postal.Capabilities()
 	if len(declared) != 1 || declared[0] != capability.ReferencePostalToPlace {
-		t.Errorf("US.zip declares %v, and it brings exactly the postal registry", declared)
+		t.Errorf("US.postal declares %v, and it brings exactly the postal registry", declared)
 	}
 }
 
@@ -284,15 +284,15 @@ func TestTheGeneratedPostalCodesHaveNotMoved(t *testing.T) {
 	produced := make([]postalSample, 0, len(rows))
 	for _, test := range rows {
 		at := seed.Coordinate{Entity: "customer", Row: test.row, Field: "postal_code", Purpose: "value"}
-		value, err := zip.Generate(provider.Request{Source: seed.New(test.seed), At: at})
+		value, err := postal.Generate(provider.Request{Source: seed.New(test.seed), At: at})
 		if err != nil {
 			t.Fatalf("seed %q row %d: %v", test.seed, test.row, err)
 		}
-		place, ok := zip.PlaceFor(value)
+		place, ok := postal.PlaceFor(value)
 		if !ok {
 			t.Fatalf("seed %q row %d: %q has no place", test.seed, test.row, value)
 		}
-		foreign, err := zip.WithDifferentPlace(value)
+		foreign, err := postal.WithDifferentPlace(value)
 		if err != nil {
 			t.Fatalf("seed %q row %d: %v", test.seed, test.row, err)
 		}
@@ -306,13 +306,13 @@ func TestTheGeneratedPostalCodesHaveNotMoved(t *testing.T) {
 	if err != nil {
 		t.Fatalf("cannot encode: %v", err)
 	}
-	path := filepath.Join("testdata", "zip.json")
+	path := filepath.Join("testdata", "postal.json")
 
 	if *update {
 		if err := os.WriteFile(path, append(encoded, '\n'), 0o644); err != nil {
 			t.Fatalf("cannot write the golden file: %v", err)
 		}
-		t.Log("golden file rewritten. Run tools/wyrocznia_zip.py before trusting it.")
+		t.Log("golden file rewritten. Run tools/wyrocznia_kodow_pocztowych.py before trusting it.")
 		return
 	}
 
@@ -325,6 +325,6 @@ func TestTheGeneratedPostalCodesHaveNotMoved(t *testing.T) {
 			"Every dataset made with these seeds now differs from the one somebody has on disk.\n" +
 			"If that was not meant, this is a defect. If it was meant, it is a major version and a\n" +
 			"changelog entry, and the file is rewritten with -update and checked by\n" +
-			"tools/wyrocznia_zip.py.")
+			"tools/wyrocznia_kodow_pocztowych.py.")
 	}
 }

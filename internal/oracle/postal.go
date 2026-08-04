@@ -31,7 +31,7 @@ const (
 	// call an unlisted code invalid rests on it.
 	zctaSentence = "ZIP Code Tabulation Areas or ZCTAs are a geographic product of the " +
 		"U.S. Census Bureau created to allow mapping, display, and geographic analyses " +
-		"of the United States Postal Service (USPS) Zone Improvement Plan (ZIP) Codes dataset."
+		"of the United States Postal Service (USPS) Zone Improvement Plan (Postal) Codes dataset."
 	// zctaGapSentence is the stronger of the two and the one that decides the
 	// question. It says the registry is not complete over the postal scheme, so
 	// absence from it proves nothing about a value.

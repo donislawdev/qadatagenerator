@@ -111,6 +111,7 @@ var Guards = []Guard{
 	{"claiming the source worked the example requires the test that reproduces it", "TestEveryWorkedExampleAnchorNamesATestThatExists", "internal/guard", ByMutation},
 	{"a rule measured once says how many values and when, so it can be measured again", "TestEveryMeasurementAnchorCanBeRepeated", "internal/guard", ByMutation},
 	{"the scanner sees a measurement nobody could repeat", "TestAnchorScannerSeesAMeasurementNobodyCouldRepeat", "internal/guard", ByProbe},
+	{"a rule called ours by construction says which source was asked and left it open", "TestARuleCalledOursHasToSayWhatItAsked", "internal/guard", ByProbe},
 	{"the count of rules resting on nothing but our own reading can only fall", "TestTheUnanchoredListOnlyShrinks", "internal/guard", ByMutation},
 
 	// --- determinism, the foundation everything else stands on --------------
@@ -214,7 +215,7 @@ var Guards = []Guard{
 	{"the way a routing number was written survives being rebuilt", "TestBothWaysOfWritingARoutingNumberAreAccepted", "internal/adapter/provider/us", ByMutation},
 	{"the generated routing numbers have not moved since they were frozen", "TestTheGeneratedRoutingNumbersHaveNotMoved", "internal/adapter/provider/us", ByMutation},
 
-	// --- US.zip, where the reference data is the product --------------------
+	// --- US.postal, where the reference data is the product --------------------
 	//
 	// The only provider here whose guards mostly stand in front of a file rather
 	// than in front of arithmetic. One of the mutations below breaks the data

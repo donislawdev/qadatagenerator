@@ -16,7 +16,7 @@ and has not happened.
 
 ### Added
 
-- **United States postal codes paired with their places, as `US.zip`.** A
+- **United States postal codes paired with their places, as `US.postal`.** A
   registry of 28 658 codes built from two files of the United States census.
   It answers which place a code belongs to and which codes a place holds, and
   it can produce a real code belonging to a different place, which is what the
