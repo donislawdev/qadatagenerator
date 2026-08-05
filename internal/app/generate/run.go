@@ -3,6 +3,7 @@ package generate
 import (
 	"fmt"
 
+	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
@@ -58,7 +59,7 @@ func Run(plan Plan, rec recipe.Recipe, values Values, writer Writer, stop Halt) 
 }
 
 // writeTable produces one table.
-func writeTable(planned Planned, entity recipe.Entity, values Values, writer Writer,
+func writeTable(planned dataset.Table, entity recipe.Entity, values Values, writer Writer,
 	source seed.Source, stop Halt) error {
 	if err := writer.Begin(planned); err != nil {
 		return err
@@ -75,7 +76,7 @@ func writeTable(planned Planned, entity recipe.Entity, values Values, writer Wri
 		if err != nil {
 			return err
 		}
-		record := Record{Values: built, Parent: NoParent}
+		record := dataset.Record{Values: built, Parent: dataset.NoParent}
 		if planned.Parent != "" {
 			record.Parent = planned.ParentOf[row]
 		}

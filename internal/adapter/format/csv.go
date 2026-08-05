@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
+	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
@@ -32,7 +33,7 @@ var _ generate.Writer = (*CSV)(nil)
 // csvTable is the file being written.
 type csvTable struct {
 	entity   recipe.Entity
-	planned  generate.Planned
+	planned  dataset.Table
 	file     WriteCloser
 	buffered *bufio.Writer
 	rows     int
@@ -61,7 +62,7 @@ func NewCSV(files Files, rec recipe.Recipe) (*CSV, error) {
 }
 
 // Begin opens the file of one table and writes its header.
-func (w *CSV) Begin(planned generate.Planned) error {
+func (w *CSV) Begin(planned dataset.Table) error {
 	entity, known := w.rec.Entity(planned.Entity)
 	if !known {
 		return fault.New(fault.Runtime, "no entity called "+planned.Entity)
@@ -85,7 +86,7 @@ func (w *CSV) Begin(planned generate.Planned) error {
 }
 
 // Write puts one record on its line.
-func (w *CSV) Write(record generate.Record) error {
+func (w *CSV) Write(record dataset.Record) error {
 	line := record.Values
 	if w.current.column != "" {
 		line = append(append([]string{}, line...),
@@ -98,7 +99,7 @@ func (w *CSV) Write(record generate.Record) error {
 }
 
 // End flushes and closes the file of one table.
-func (w *CSV) End(generate.Planned) error {
+func (w *CSV) End(dataset.Table) error {
 	if err := w.current.buffered.Flush(); err != nil {
 		return fault.Wrap(fault.IO, err, "cannot write the dataset")
 	}

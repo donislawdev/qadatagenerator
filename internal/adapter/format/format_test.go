@@ -7,6 +7,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
+	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 )
 
@@ -272,12 +273,12 @@ func TestAValueCarryingTheDelimiterOrAQuoteSurvives(t *testing.T) {
 	if err != nil {
 		t.Fatalf("the writer was refused: %v", err)
 	}
-	planned := generate.Planned{Entity: "t", Columns: []string{"a"}, Rows: 1}
+	planned := dataset.Table{Entity: "t", Columns: []string{"a"}, Rows: 1}
 	if err := writer.Begin(planned); err != nil {
 		t.Fatal(err)
 	}
-	if err := writer.Write(generate.Record{Values: []string{`a,b "c"
-d`}, Parent: generate.NoParent}); err != nil {
+	if err := writer.Write(dataset.Record{Values: []string{`a,b "c"
+d`}, Parent: dataset.NoParent}); err != nil {
 		t.Fatal(err)
 	}
 	if err := writer.End(planned); err != nil {

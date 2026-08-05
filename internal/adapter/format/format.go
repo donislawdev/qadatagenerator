@@ -20,7 +20,7 @@ package format
 import (
 	"strconv"
 
-	"github.com/donislawdev/qadatagenerator/internal/app/generate"
+	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
@@ -63,7 +63,7 @@ func (k keys) of(entity string, row int) string {
 
 // identify returns what names one row: the primary key of the entity when it
 // has one, and the row number otherwise.
-func identify(entity recipe.Entity, planned generate.Planned, values []string, row int) string {
+func identify(entity recipe.Entity, planned dataset.Table, values []string, row int) string {
 	if len(entity.PrimaryKey) == 0 {
 		return strconv.Itoa(row)
 	}
@@ -90,7 +90,7 @@ func identify(entity recipe.Entity, planned generate.Planned, values []string, r
 // reader would have to learn. A collision with a field of the same name is
 // refused rather than resolved, since resolving it would put two different
 // things in one column.
-func parentColumn(entity recipe.Entity, planned generate.Planned) (string, error) {
+func parentColumn(entity recipe.Entity, planned dataset.Table) (string, error) {
 	if planned.Parent == "" {
 		return "", nil
 	}

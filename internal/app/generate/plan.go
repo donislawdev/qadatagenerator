@@ -5,28 +5,11 @@ import (
 	"sort"
 	"strconv"
 
+	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
-
-// Planned is one table this run will produce.
-type Planned struct {
-	// Entity is the name from the recipe. The file it goes to is derived from
-	// it by whoever writes, not here.
-	Entity string
-	// Columns are the field names, in the order the recipe wrote them.
-	Columns []string
-	// Rows is how many records this table will hold.
-	Rows int
-	// Parent is the entity this one belongs to, empty when it belongs to
-	// nobody.
-	Parent string
-	// ParentOf maps each row of this table onto the row of its parent. It is
-	// empty when there is no parent, and it is what lets a nested writer put a
-	// record where it belongs without holding the whole dataset to work it out.
-	ParentOf []int
-}
 
 // Note is something this run did not do, together with why.
 //
@@ -46,7 +29,7 @@ type Note struct {
 type Plan struct {
 	// Entities are the tables in the order they have to be produced, parents
 	// before children.
-	Entities []Planned
+	Entities []dataset.Table
 	// Notes are the things this run will not do.
 	Notes []Note
 	// Seed, Locale and Tag are carried so that the run note can state what the
@@ -78,7 +61,7 @@ func Prepare(rec recipe.Recipe, values Values) (Plan, error) {
 
 	plan := Plan{Seed: rec.Seed, Locale: rec.Locale, Tag: rec.Tag}
 	source := seed.New(rec.Seed)
-	produced := make(map[string]Planned, len(ordered))
+	produced := make(map[string]dataset.Table, len(ordered))
 
 	for _, entity := range ordered {
 		if err := checkGenerators(entity, values, &plan); err != nil {
@@ -97,8 +80,8 @@ func Prepare(rec recipe.Recipe, values Values) (Plan, error) {
 
 // planEntity works out the row count of one entity and, when it has a parent,
 // which parent each of its rows belongs to.
-func planEntity(entity recipe.Entity, done map[string]Planned, source seed.Source) (Planned, error) {
-	planned := Planned{
+func planEntity(entity recipe.Entity, done map[string]dataset.Table, source seed.Source) (dataset.Table, error) {
+	planned := dataset.Table{
 		Entity:  entity.Name,
 		Columns: entity.FieldNames(),
 		Rows:    entity.Count,
@@ -110,13 +93,13 @@ func planEntity(entity recipe.Entity, done map[string]Planned, source seed.Sourc
 	parent := entity.Parents[0]
 	owner, known := done[parent.Entity]
 	if !known {
-		return Planned{}, fault.New(fault.Config, entity.Name+" belongs to "+parent.Entity+
+		return dataset.Table{}, fault.New(fault.Config, entity.Name+" belongs to "+parent.Entity+
 			", which this run does not produce")
 	}
 
 	shares, err := shareOut(entity, parent, owner.Rows, source)
 	if err != nil {
-		return Planned{}, err
+		return dataset.Table{}, err
 	}
 	planned.Parent = parent.Entity
 	planned.ParentOf = expand(shares)

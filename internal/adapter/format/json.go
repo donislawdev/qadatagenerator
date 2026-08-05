@@ -5,6 +5,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
+	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
@@ -41,9 +42,9 @@ var _ generate.Writer = (*JSON)(nil)
 // jsonTable is one table held until the shape is known.
 type jsonTable struct {
 	entity  recipe.Entity
-	planned generate.Planned
+	planned dataset.Table
 	column  string
-	rows    []generate.Record
+	rows    []dataset.Record
 }
 
 // NewJSON returns a writer for the object form.
@@ -55,7 +56,7 @@ func NewJSON(files Files, rec recipe.Recipe) (*JSON, error) {
 }
 
 // Begin starts a table.
-func (w *JSON) Begin(planned generate.Planned) error {
+func (w *JSON) Begin(planned dataset.Table) error {
 	entity, known := w.rec.Entity(planned.Entity)
 	if !known {
 		return fault.New(fault.Runtime, "no entity called "+planned.Entity)
@@ -75,7 +76,7 @@ func (w *JSON) Begin(planned generate.Planned) error {
 // has arrived, so this writer is the one place in the first pillar that does
 // not stream. The flat shape could, and does not, because two code paths for
 // one format is how the two drift apart.
-func (w *JSON) Write(record generate.Record) error {
+func (w *JSON) Write(record dataset.Record) error {
 	table := w.tables[len(w.tables)-1]
 	w.keys.record(table.planned.Entity,
 		identify(table.entity, table.planned, record.Values, len(table.rows)))
@@ -84,7 +85,7 @@ func (w *JSON) Write(record generate.Record) error {
 }
 
 // End finishes a table and writes it when each one goes to its own file.
-func (w *JSON) End(planned generate.Planned) error {
+func (w *JSON) End(planned dataset.Table) error {
 	if !w.rec.Output.FilePerEntity {
 		return nil
 	}
@@ -165,14 +166,14 @@ func (w *JSON) writeNested(into *strings.Builder, table *jsonTable, indent strin
 type nested struct {
 	entity string
 	table  *jsonTable
-	rows   []generate.Record
+	rows   []dataset.Record
 }
 
 // gather collects the children of one parent row.
 func (w *JSON) gather(children []*jsonTable, parent int) []nested {
 	gathered := make([]nested, 0, len(children))
 	for _, child := range children {
-		rows := make([]generate.Record, 0)
+		rows := make([]dataset.Record, 0)
 		for _, record := range child.rows {
 			if record.Parent == parent {
 				rows = append(rows, record)
@@ -195,7 +196,7 @@ func (w *JSON) childrenOf(entity string) []*jsonTable {
 }
 
 // writeRecord writes one object.
-func (w *JSON) writeRecord(into *strings.Builder, table *jsonTable, record generate.Record,
+func (w *JSON) writeRecord(into *strings.Builder, table *jsonTable, record dataset.Record,
 	indent string, children []nested) {
 	into.WriteString("{")
 	for index, column := range table.planned.Columns {
@@ -219,7 +220,7 @@ func (w *JSON) writeRecord(into *strings.Builder, table *jsonTable, record gener
 	into.WriteString("\n" + indent + "}")
 }
 
-func valueAt(record generate.Record, index int) string {
+func valueAt(record dataset.Record, index int) string {
 	if index >= len(record.Values) {
 		return ""
 	}

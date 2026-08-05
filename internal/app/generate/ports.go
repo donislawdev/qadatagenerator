@@ -17,6 +17,7 @@
 package generate
 
 import (
+	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
 )
@@ -104,21 +105,6 @@ type NeverStops struct{}
 // Stopped always answers that the run may carry on.
 func (NeverStops) Stopped() error { return nil }
 
-// Record is one row on its way to a writer.
-type Record struct {
-	// Values are the fields in the order the recipe wrote them.
-	Values []string
-	// Parent is the row index of the parent record, or NoParent.
-	//
-	// It travels with the row rather than being looked up later, because the
-	// nested form of the output needs it and a writer that had to ask for it
-	// would need the whole dataset in memory to answer.
-	Parent int
-}
-
-// NoParent is the parent index of a record that belongs to nobody.
-const NoParent = -1
-
 // Writer is where the bytes go.
 //
 // It takes one record at a time rather than a slice, because the streaming mode
@@ -127,11 +113,11 @@ const NoParent = -1
 // then the cost is its own rather than everybody's.
 type Writer interface {
 	// Begin announces a table and its columns.
-	Begin(entity Planned) error
+	Begin(entity dataset.Table) error
 	// Write takes one record.
-	Write(record Record) error
+	Write(record dataset.Record) error
 	// End closes a table.
-	End(entity Planned) error
+	End(entity dataset.Table) error
 	// Finish is called once, after every table.
 	//
 	// It exists for the shape that cannot be written until the last record has
