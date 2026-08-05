@@ -375,6 +375,16 @@ var Guards = []Guard{
 	{"damage is filed under the identifier it implements", "TestEveryMutatorIsFiledUnderItsOwnIdentifier", "internal/adapter/mutators", ByMutation},
 	{"damage that would change nothing is refused rather than reported as done", "TestDamageThatWouldChangeNothingIsRefusedWithAReason", "internal/adapter/mutators", ByMutation},
 	{"a mutator meant for a whole file cannot be aimed at a column", "TestTheEntrySaysWhichFieldsItSuits", "internal/domain/catalog", ByMutation},
+
+	// --- the engine: one ordered damage, exactly one entry ------------------
+	//
+	// The failure this has to make impossible is not damage going wrong but
+	// damage going missing. A dataset where twenty seven of forty ordered
+	// defects happened looks exactly like a complete one.
+	{"damage that did not happen comes back saying why", "TestEveryWayDamageCanFailStillProducesAnEntry", "internal/app/corrupt", ByMutation},
+	{"damage that cannot be undone offers no way back", "TestIrreversibleDamageDoesNotCarryTheOriginal", "internal/app/corrupt", ByMutation},
+	{"damage lands only on the fields its entry covers", "TestDamageAimedAtAFieldItDoesNotCoverIsRefusedWithBothSides", "internal/app/corrupt", ByMutation},
+	{"nothing the engine produces is unrecordable", "TestNoEntryThisEngineProducesIsOneTheManifestWouldRefuse", "internal/app/corrupt", ByMutation},
 }
 
 // CountByProof returns how many guards are in each state.
