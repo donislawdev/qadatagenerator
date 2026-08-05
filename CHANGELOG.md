@@ -32,6 +32,11 @@ and has not happened.
   travel with a folder of records.
 - **A file that already exists stops the run.** The tool will not overwrite a
   dataset somebody has on disk without being told to. `--overwrite` allows it.
+- **`qadg help`, and help for a single command.** `qadg help generate` and
+  `qadg generate --help` print the same thing: what the command does, its most
+  important limit, a line to paste, the flags of that command and the flags of
+  the tool that work beside it. Until now `qadg help` was an unknown command,
+  and the five flags of `generate` were documented nowhere a user could reach.
 - **Stopping a run leaves nothing behind.** Pressing Ctrl+C ends the run with
   exit code 130 and removes the files it had started, so the output directory is
   left as it was found. Nothing ever appears under its real name before the whole
@@ -112,6 +117,12 @@ and has not happened.
 
 ### Fixed
 
+- **A refusal after a command no longer offers flags that command cannot take.**
+  Typing an unknown flag after `generate` or `validate` listed `--version` and
+  `--license` among the accepted ones. Neither has ever worked there, so the
+  message sent the reader looking for a mistake of their own. The list is now
+  the list that command actually accepts, and the suggestion points at the help
+  of that command.
 - **The help now says that the tool generates data.** It stated that no command
   in this build produces any, which stopped being true the day `qadg generate`
   arrived, and it listed one of the two commands. A run with no arguments named

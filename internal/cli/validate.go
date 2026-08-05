@@ -25,8 +25,12 @@ func runValidate(out *streams, arguments []string, global crossCutting) int {
 	set := flag.NewFlagSet(commandValidate, flag.ContinueOnError)
 	set.SetOutput(io.Discard)
 	local := declareCrossCutting(set)
+	askedForHelp := declareVerbHelp(set)
 	if err := set.Parse(arguments); err != nil {
-		return usage(out, flagFailure(err))
+		return usage(out, flagFailure(err, acceptedFlagsOf(commandValidate), problemHelpSubjectDo+" "+commandValidate))
+	}
+	if askedForHelp() {
+		return printCommandHelp(out, commandValidate)
 	}
 	flags := global.merge(local)
 	if code, ok := applyVerbosity(out, flags); !ok {
@@ -42,8 +46,15 @@ func runValidate(out *streams, arguments []string, global crossCutting) int {
 			instead: problemValidateArgumentsDo,
 		})
 	}
+	return validateRecipeAt(out, arguments[0], flags)
+}
 
-	path := arguments[0]
+// validateRecipeAt reads one recipe and reports what is wrong with it.
+//
+// Split from the line above it rather than nested inside, so that reading the
+// command line and doing what it asked stay two things. It is the same shape
+// the other verb already has, where generateFrom carries the work.
+func validateRecipeAt(out *streams, path string, flags crossCutting) int {
 	data, err := readRecipe(path)
 	if err != nil {
 		// A directory is answered in our own words rather than the operating

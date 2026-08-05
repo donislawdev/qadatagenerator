@@ -480,5 +480,56 @@ func TestEverySurfaceListingCommandsNamesAllOfThem(t *testing.T) {
 		if !strings.Contains(empty, command) {
 			t.Errorf("a run with no arguments does not mention the command %q:\n%s", command, empty)
 		}
+		// The other direction of the same promise. A command the help offers and
+		// the dispatcher does not know would be worse than one nobody mentions.
+		if got := run(command); strings.Contains(got.log, "unknown command") {
+			t.Errorf("the help offers %q and the dispatcher refuses it:\n%s", command, got.log)
+		}
+	}
+}
+
+// 🔴 What the guard above does not cover, said out loud rather than left to be
+// assumed: a verb the dispatcher accepts and the register does not carry is
+// invisible to it, because both of its lists are read from that register.
+// Closing that would mean reading the switch itself, which is a check against
+// the syntax tree rather than against behaviour. It is written down in the
+// backlog instead of being quietly counted as covered.
+
+// 🔴 A flag named in the help of a command has to be one that command takes.
+//
+// The reverse of the guard above and the same failure mode. When the help of a
+// single command was written, the list of shared flags it showed included
+// --version and --license, which no verb has ever accepted: the parser of a verb
+// refuses them, and asking for a report together with a command is refused
+// before that. The help would have sent somebody to type a flag that cannot work
+// where they were standing.
+func TestEveryFlagAVerbDocumentsIsOneItAccepts(t *testing.T) {
+	for _, doc := range commandDocs {
+		if doc.name == commandHelp {
+			// The help verb takes a command name rather than flags, and the
+			// dispatcher answers it before any flag set exists.
+			continue
+		}
+		help := run(doc.name, "--help").data
+		for _, flag := range append(append([]flagDoc{}, doc.flags...), crossCuttingFlagDocs...) {
+			// Listed rather than merely mentioned. The description of one flag
+			// names another, so searching the whole text would answer yes about
+			// a flag that is only being talked about.
+			if !strings.Contains(help, "\n  "+flag.shown) {
+				t.Errorf("the help of %s does not list %s", doc.name, flag.shown)
+			}
+			for _, spelling := range flag.names {
+				if got := run(doc.name, spelling); strings.Contains(got.log, "not defined") {
+					t.Errorf("the help of %s shows %s and the parser refuses it:\n%s",
+						doc.name, spelling, got.log)
+				}
+			}
+		}
+		for _, refused := range reportFlagDocs {
+			if strings.Contains(help, "\n  "+refused.shown) {
+				t.Errorf("the help of %s offers %s, which no command accepts",
+					doc.name, refused.shown)
+			}
+		}
 	}
 }

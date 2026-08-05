@@ -45,11 +45,9 @@ const (
   qadg --version
   qadg --license`
 
-	commandsBlock = `Commands:
-  generate <recipe>   Produce the dataset a recipe describes.
-  validate <recipe>   Read a recipe and report every problem it has.
-
-  A run writes nothing until it has succeeded, so a run that fails or is
+	// commandsNote follows the list of commands. It says the one thing somebody
+	// choosing between them has to know before running either.
+	commandsNote = `  A run writes nothing until it has succeeded, so a run that fails or is
   stopped leaves the output directory as it found it, and an existing file
   stops the run rather than being overwritten.`
 
@@ -60,6 +58,14 @@ const (
 	// commandGenerate is the name as typed, and a public contract from the
 	// first release for the same reason as the one above it.
 	commandGenerate = "generate"
+
+	// commandHelp is the name as typed, and a public contract for the same
+	// reason as the two above it.
+	//
+	// It exists because it was the most common thing a person types and the one
+	// answer this tool did not have. Until 2026-08-05 it ended with the code for
+	// a wrong invocation, while --help worked.
+	commandHelp = "help"
 
 	// The names of the two shapes this build writes. They are the values of the
 	// format key of a recipe as well as of the flag, so they are one pair of
@@ -89,6 +95,20 @@ const (
 	summaryRows   = " rows written"
 
 	flagsHeading = "Flags:"
+
+	// The headings of the help of a single command.
+	commandsHeading    = "Commands:"
+	usageHeading       = "Usage:"
+	exampleHeading     = "Example:"
+	flagsOfHeading     = "Flags of "
+	flagsSharedHeading = "Flags of the tool, accepted before or after the command:"
+
+	problemHelpSubject        = "no command called "
+	problemHelpSubjectWhy     = "help describes a command this build has"
+	problemHelpSubjectDo      = "qadg help"
+	problemHelpArguments      = "help describes one command at a time"
+	problemHelpArgumentsWhy   = "each command has its own flags and its own answer"
+	problemHelpArgumentsAllow = "one command name, or nothing at all"
 
 	// channelsBlock is in the help because a script that redirects standard
 	// output depends on it and has no other way to learn it.
@@ -134,9 +154,92 @@ type flagDoc struct {
 	what string
 }
 
-var flagDocs = []flagDoc{
+// commandDoc is everything one verb says about itself.
+//
+// # Why the verbs describe themselves in one place
+//
+// The list of commands in the help, the help of a single command, the names the
+// dispatcher accepts and the refusal that names what would have worked all
+// answer the same question. Until 2026-08-05 three of them were written by
+// hand, and two were wrong from the day the second verb was released. A reader
+// cannot tell prose about the code from the code, so the prose has to be the
+// code.
+type commandDoc struct {
+	// name is the verb as typed. It is a frozen contract from the first release.
+	name string
+	// summary is the one line in the list of commands.
+	summary string
+	// arguments is what follows the verb in the usage pattern, or empty.
+	arguments string
+	// what says what the command does and then its most important limit. Two
+	// sentences at most, because a third is never read.
+	what string
+	// example is a line somebody can paste.
+	example string
+	// flags are the flags of this verb alone. The flags of the tool are shown
+	// beside them and come from the list below.
+	flags []flagDoc
+}
+
+// commandDocs is the register of verbs. Adding one here is what makes it
+// appear in the help, in the refusals and in the near miss suggestion.
+var commandDocs = []commandDoc{
+	{
+		name:      commandGenerate,
+		summary:   "Produce the dataset a recipe describes.",
+		arguments: "<recipe>",
+		what: "Reads a recipe, produces the records it describes and writes them as CSV or as JSON,\n" +
+			"beside a note saying what the run made. Nothing appears under its real name until the\n" +
+			"whole run has succeeded, so a run that fails or is stopped leaves nothing behind.",
+		example: "qadg generate --out ./data recipe.yaml",
+		flags: []flagDoc{
+			{"--out <dir>", []string{"--out"}, "Write the dataset here rather than where the recipe says."},
+			{"--seed <text>", []string{"--seed"}, "Draw from this seed rather than the one in the recipe. The same seed gives the same data."},
+			{"--format <name>", []string{"--format"}, "Write csv or json rather than the format the recipe asks for."},
+			{"--overwrite", []string{"--overwrite"}, "Write over files that are already there. Without it an existing file stops the run."},
+			{"--dry-run", []string{"--dry-run"}, "Say what would be produced and write nothing."},
+		},
+	},
+	{
+		name:      commandValidate,
+		summary:   "Read a recipe and report every problem it has.",
+		arguments: "<recipe>",
+		what: "Reports every problem at once rather than stopping at the first, and lists separately\n" +
+			"what it did not check. A recipe that passes says what would be generated, not that the\n" +
+			"data exists.",
+		example: "qadg validate --json recipe.yaml",
+	},
+	{
+		name:      commandHelp,
+		summary:   "Print this text, or the help of one command.",
+		arguments: "[command]",
+		what: "Answers the same as --help. A command named after it is described on its own, with the\n" +
+			"flags it takes.",
+		example: "qadg help generate",
+	},
+}
+
+// commandDocFor returns what a verb says about itself.
+func commandDocFor(name string) (commandDoc, bool) {
+	for _, doc := range commandDocs {
+		if doc.name == name {
+			return doc, true
+		}
+	}
+	return commandDoc{}, false
+}
+
+// reportFlagDocs are the flags that make the tool report about itself instead
+// of doing anything. A command never takes them: asking for a report and for a
+// command at once would leave one of the two unanswered, so both are refused.
+var reportFlagDocs = []flagDoc{
 	{"--version", []string{"--version"}, "Print the four version numbers this build speaks."},
 	{"--license", []string{"--license"}, "Print the licenses of this tool and of everything inside it."},
+}
+
+// crossCuttingFlagDocs are the flags every command accepts, on either side of
+// the verb.
+var crossCuttingFlagDocs = []flagDoc{
 	{"--json", []string{"--json"}, "Print machine readable output. Supported by --version, validate and generate."},
 	{"--no-color", []string{"--no-color"}, "Turn color off even when the output is a terminal."},
 	{"--quiet", []string{"--quiet"}, "Print failures only on the log channel."},
@@ -144,26 +247,104 @@ var flagDocs = []flagDoc{
 	{"-h, --help", []string{"-h", "--help"}, "Print this text."},
 }
 
-// renderFlags formats the list for the help text.
-func renderFlags() string {
+// flagDocs is every flag of the tool, for the main help and for the refusal
+// that names what would have been accepted there.
+//
+// 🔴 The split above is not tidiness. This was one list until 2026-08-05, and
+// the refusal shown for a bad flag after a verb listed --version and --license
+// among the accepted ones, which that parser has never taken. A message naming
+// something that does not work sends the reader to look for their own mistake.
+var flagDocs = append(append([]flagDoc{}, reportFlagDocs...), crossCuttingFlagDocs...)
+
+// renderFlags formats the flags of the tool for the help text.
+func renderFlags() string { return renderFlagList(flagsHeading, flagDocs) }
+
+// renderFlagList formats one heading and the flags under it, aligned.
+func renderFlagList(heading string, docs []flagDoc) string {
 	width := 0
-	for _, doc := range flagDocs {
+	for _, doc := range docs {
 		if len(doc.shown) > width {
 			width = len(doc.shown)
 		}
 	}
 	var b strings.Builder
-	b.WriteString(flagsHeading)
-	for _, doc := range flagDocs {
+	b.WriteString(heading)
+	for _, doc := range docs {
 		fmt.Fprintf(&b, "\n  %-*s   %s", width, doc.shown, doc.what)
 	}
 	return b.String()
 }
 
+// renderCommands formats the list of verbs for the main help.
+//
+// It is built from the register rather than written out, so that a verb cannot
+// exist and go unmentioned. That is not a hypothetical: the list said no command
+// generates data for as long as the command that does had been released.
+func renderCommands() string {
+	width := 0
+	for _, doc := range commandDocs {
+		if len(doc.name+" "+doc.arguments) > width {
+			width = len(doc.name + " " + doc.arguments)
+		}
+	}
+	var b strings.Builder
+	b.WriteString(commandsHeading)
+	for _, doc := range commandDocs {
+		fmt.Fprintf(&b, "\n  %-*s   %s", width, doc.name+" "+doc.arguments, doc.summary)
+	}
+	b.WriteString("\n\n" + commandsNote)
+	return b.String()
+}
+
+// renderCommandHelp is the help of one verb.
+//
+// The flags of the verb and the flags of the tool are both shown, under headings
+// that say which is which. Both are accepted here, so leaving either out would
+// send somebody to the source to find out what they may write.
+func renderCommandHelp(doc commandDoc) string {
+	blocks := []string{
+		doc.summary,
+		doc.what,
+		usageHeading + "\n  qadg " + usageLine(doc),
+		exampleHeading + "\n  " + doc.example,
+	}
+	if len(doc.flags) > 0 {
+		blocks = append(blocks, renderFlagList(flagsOfHeading+doc.name+":", doc.flags))
+	}
+	return strings.Join(append(blocks, renderFlagList(flagsSharedHeading, crossCuttingFlagDocs)), "\n\n")
+}
+
+// usageLine builds the pattern of one command, leaving out the parts it has
+// none of rather than printing a gap where they would go.
+func usageLine(doc commandDoc) string {
+	parts := []string{doc.name}
+	if len(doc.flags) > 0 {
+		parts = append(parts, "[flags]")
+	}
+	if doc.arguments != "" {
+		parts = append(parts, doc.arguments)
+	}
+	return strings.Join(parts, " ")
+}
+
 // acceptedFlags lists every spelling, for the moment something else was given.
-func acceptedFlags() string {
+func acceptedFlags() string { return spellingsOf(flagDocs) }
+
+// acceptedFlagsOf lists what one command takes, which is its own flags and the
+// ones every command shares. It is not the list of what the tool takes: the
+// reports are refused after a verb, so naming them here would send the reader
+// after a flag that cannot work where they are standing.
+func acceptedFlagsOf(command string) string {
+	docs := append([]flagDoc{}, crossCuttingFlagDocs...)
+	if doc, found := commandDocFor(command); found {
+		docs = append(docs, doc.flags...)
+	}
+	return spellingsOf(docs)
+}
+
+func spellingsOf(docs []flagDoc) string {
 	var names []string
-	for _, doc := range flagDocs {
+	for _, doc := range docs {
 		names = append(names, doc.names...)
 	}
 	sort.Strings(names)

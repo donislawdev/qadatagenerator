@@ -64,8 +64,12 @@ func runGenerate(out *streams, arguments []string, global crossCutting) int {
 	set.SetOutput(io.Discard)
 	local := declareCrossCutting(set)
 	own := declareGenerate(set)
+	askedForHelp := declareVerbHelp(set)
 	if err := set.Parse(arguments); err != nil {
-		return usage(out, flagFailure(err))
+		return usage(out, flagFailure(err, acceptedFlagsOf(commandGenerate), problemHelpSubjectDo+" "+commandGenerate))
+	}
+	if askedForHelp() {
+		return printCommandHelp(out, commandGenerate)
 	}
 	own.note(set)
 	flags := global.merge(local)

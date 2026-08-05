@@ -138,7 +138,7 @@ func reportParseFailure(out *streams, parseErr error) int {
 		printHelp(out)
 		return finish(out, codeOK)
 	}
-	return usage(out, flagFailure(parseErr))
+	return usage(out, flagFailure(parseErr, acceptedFlags(), problemUnknownFlagDo))
 }
 
 // flagFailure turns a refusal from the flag package into our four parts.
@@ -154,7 +154,7 @@ func reportParseFailure(out *streams, parseErr error) int {
 // The two classes are told apart by the wording the flag package uses, which is
 // the only signal it offers. An unrecognised wording falls through to the
 // original reason, which is the right answer for a flag nobody knows.
-func flagFailure(err error) problem {
+func flagFailure(err error, allowed, instead string) problem {
 	if strings.Contains(err.Error(), "invalid boolean value") {
 		return problem{
 			what:    firstLine(err.Error()),
@@ -166,8 +166,8 @@ func flagFailure(err error) problem {
 	return problem{
 		what:    firstLine(err.Error()),
 		why:     problemUnknownFlagWhy,
-		allowed: acceptedFlags(),
-		instead: problemUnknownFlagDo,
+		allowed: allowed,
+		instead: instead,
 	}
 }
 
@@ -196,9 +196,67 @@ func runCommand(out *streams, command []string, asked invocation) int {
 		return runValidate(out, command[1:], asked.global)
 	case commandGenerate:
 		return runGenerate(out, command[1:], asked.global)
+	case commandHelp:
+		return runHelp(out, command[1:])
 	default:
 		return usage(out, unknownCommand(command[0]))
 	}
+}
+
+// runHelp answers the most common thing somebody types.
+//
+// With nothing after it, it is --help. With a command after it, it is the help
+// of that command, which is the same text that command prints for --help. One
+// renderer rather than two, because two would answer the same question
+// differently the first time somebody edited one of them.
+func runHelp(out *streams, arguments []string) int {
+	switch {
+	case len(arguments) == 0:
+		printHelp(out)
+		return finish(out, codeOK)
+	case len(arguments) > 1:
+		return usage(out, problem{
+			what:    problemHelpArguments,
+			why:     problemHelpArgumentsWhy,
+			allowed: problemHelpArgumentsAllow,
+			instead: problemHelpSubjectDo + " " + arguments[0],
+		})
+	}
+
+	doc, found := commandDocFor(arguments[0])
+	if !found {
+		refusal := unknownCommand(arguments[0])
+		refusal.what = problemHelpSubject + arguments[0]
+		refusal.why = problemHelpSubjectWhy
+		return usage(out, refusal)
+	}
+	out.emit(renderCommandHelp(doc))
+	return finish(out, codeOK)
+}
+
+// declareVerbHelp gives a command the two spellings of the help flag and
+// returns the question of whether either was given.
+//
+// A verb has to declare them itself. The parser of the tool stops at the first
+// argument that is not a flag, so anything after the verb belongs to the verb,
+// and without this qadg generate --help would be refused as an unknown flag.
+func declareVerbHelp(set *flag.FlagSet) func() bool {
+	long := set.Bool("help", false, "")
+	short := set.Bool("h", false, "")
+	return func() bool { return *long || *short }
+}
+
+// printCommandHelp prints what one verb says about itself.
+func printCommandHelp(out *streams, name string) int {
+	doc, found := commandDocFor(name)
+	if !found {
+		// Unreachable while every verb the dispatcher accepts is in the
+		// register, which a test asserts. Answering rather than printing
+		// nothing keeps a future verb from failing silently.
+		return fail(out, fault.New(fault.Runtime, "no help for the command "+name))
+	}
+	out.emit(renderCommandHelp(doc))
+	return finish(out, codeOK)
 }
 
 // unknownCommand builds the refusal for a verb this build does not have, and
@@ -227,7 +285,10 @@ func unknownCommand(typed string) problem {
 // list reaches the user and two runs must not disagree about it. Go randomises
 // map iteration on purpose and this is the same rule applied to a slice.
 func knownCommands() []string {
-	commands := []string{commandValidate, commandGenerate}
+	commands := make([]string, 0, len(commandDocs))
+	for _, doc := range commandDocs {
+		commands = append(commands, doc.name)
+	}
 	sort.Strings(commands)
 	return commands
 }
@@ -614,7 +675,7 @@ func printHelp(out *streams) {
 		summaryLine,
 		examplesBlock,
 		usageBlock,
-		commandsBlock,
+		renderCommands(),
 		renderFlags(),
 		channelsBlock,
 		exitCodesHeading + "\n" + renderExitCodes(),
