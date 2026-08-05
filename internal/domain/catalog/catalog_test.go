@@ -177,6 +177,38 @@ func TestIdentifiersComeBackSortedAndDetached(t *testing.T) {
 	}
 }
 
+// Whether a mutator suits a field is the entry's answer, so that no mutator
+// carries a second copy of a published field.
+//
+// The two reserved words are the whole of it. Reading none as "everywhere" is
+// the mistake that would let damage meant for a whole file be aimed at a
+// column, and it is the reading somebody arrives at by treating an unmatched
+// list as no restriction.
+func TestTheEntrySaysWhichFieldsItSuits(t *testing.T) {
+	cases := []struct {
+		what      string
+		declared  []string
+		fieldType string
+		suits     bool
+	}{
+		{"a type it names", []string{"integer", "decimal"}, "integer", true},
+		{"a type it does not name", []string{"integer", "decimal"}, "string", false},
+		{"any means every type", []string{catalog.Any}, "whatever", true},
+		{"none means no field at all", []string{catalog.None}, "integer", false},
+		{"none is not a way of saying everywhere", []string{catalog.None}, "string", false},
+		{"an empty declaration suits nothing", nil, "integer", false},
+	}
+	for _, one := range cases {
+		t.Run(one.what, func(t *testing.T) {
+			entry := usable()
+			entry.AppliesTo.FieldTypes = one.declared
+			if got := entry.CoversFieldType(one.fieldType); got != one.suits {
+				t.Errorf("declared %v against %q gave %v", one.declared, one.fieldType, got)
+			}
+		})
+	}
+}
+
 func TestLookupSaysWhenItDoesNotKnow(t *testing.T) {
 	built, _ := catalog.New("0.1", "draft", []catalog.Entry{usable()})
 	if _, ok := built.Lookup("L3.checksum.invented"); ok {

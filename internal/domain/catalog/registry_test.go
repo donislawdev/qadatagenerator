@@ -59,18 +59,16 @@ func TestAnEntryWithNoImplementationIsReported(t *testing.T) {
 	}
 }
 
-// This build implements nothing, and the surfaces should say so rather than
-// implying a mutator can be run. The assertion is written the way it is so that
-// it turns into a real statement the day the first mutator lands, instead of
-// having to be remembered.
-func TestThisBuildImplementsNothingYetAndSaysSo(t *testing.T) {
-	implemented := catalog.Implemented()
-	if len(implemented) != 0 {
-		t.Logf("this build implements %d mutators: %v", len(implemented), implemented)
-	}
-
+// Nothing implemented is a legal state and has to stay expressible, because it
+// is what the build was in on the day these functions were written and what a
+// stripped down build could be in again.
+func TestNothingImplementedIsAnAnswerRatherThanAFailure(t *testing.T) {
 	built := twoEntries(t)
-	if got := catalog.Undescribed(built, implemented); len(got) != 0 {
-		t.Errorf("these have behaviour and no entry describing them: %v", got)
+	if got := catalog.Undescribed(built, nil); len(got) != 0 {
+		t.Errorf("with nothing implemented, %v were reported as undescribed", got)
+	}
+	if got := catalog.Unregistered(built, nil); len(got) != built.Len() {
+		t.Errorf("with nothing implemented, %d of %d entries were counted as covered",
+			built.Len()-len(got), built.Len())
 	}
 }

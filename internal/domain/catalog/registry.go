@@ -1,33 +1,17 @@
 package catalog
 
-// implemented lists every mutator whose behaviour exists in this build.
+// The closure between the two halves of a mutator, as functions over the
+// identifiers rather than over a list kept here.
 //
-// # Why it is empty, and why that is written down rather than left to be found
+// # Where the list of implemented identifiers lives, and why it moved
 //
-// The corruption engine does not exist yet. Until it does there is no behaviour
-// to register, so this list is empty and the catalog is metadata with nothing
-// behind it. That is the honest state of this build and the surfaces say so
-// rather than implying a mutator can be run.
-//
-// # Why the list is identifiers and not implementations
-//
-// A mutator interface written before the engine would be a guess about what the
-// engine needs. This project has already paid for one of those: an interface
-// for reserved ranges was designed a day ahead of its first use, and the first
-// use showed it had only a reading side, so the mutator that needed it could
-// neither build a value nor tell whether it applied. The behaviour half of this
-// registry lands with the engine that calls it, and until then this holds the
-// one thing that is certain, which is which identifiers are covered.
-var implemented = []ID{}
-
-// Implemented returns the identifiers that have behaviour in this build,
-// sorted.
-func Implemented() []ID {
-	ids := make([]ID, len(implemented))
-	copy(ids, implemented)
-	sortIDs(ids)
-	return ids
-}
+// It was here for a day. While there were no implementations, an identifier was
+// the only certain thing about one, and a list in the domain was the honest
+// shape. The implementations now exist in an adapter, so a list here would be a
+// second copy of that registry's keys, and two lists part company. It moved,
+// and nothing in this file had to change: these take the identifiers as an
+// argument, which is what made them testable against a build with nothing
+// implemented in the first place.
 
 // Unregistered returns the catalog entries that no implementation covers,
 // sorted.

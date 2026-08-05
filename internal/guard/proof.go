@@ -364,6 +364,17 @@ var Guards = []Guard{
 	{"an entry that did not happen describes no change", "TestAnEntryThatDidNotHappenCannotCarryValues", "internal/domain/manifest", ByMutation},
 	{"the summary cannot disagree with the entries under it", "TestTheCountsComeFromTheEntriesAndNotFromWhoeverBuiltThem", "internal/domain/manifest", ByMutation},
 	{"a set integrity defect names every record it spans", "TestALocationHasToSayEnoughForItsLayer", "internal/domain/manifest", ByMutation},
+
+	// --- the two halves of a mutator, and the seam between them -------------
+	//
+	// The catalog says what damage is and what a test should conclude from it.
+	// The implementations say what it does. These hold the seam: an
+	// implementation with no entry has no declared expectation, and one filed
+	// under somebody else's identifier would be handed the wrong entry.
+	{"damage that runs has an entry declaring what to expect of it", "TestEveryImplementedMutatorHasACatalogEntry", "internal/adapter/mutators", ByMutation},
+	{"damage is filed under the identifier it implements", "TestEveryMutatorIsFiledUnderItsOwnIdentifier", "internal/adapter/mutators", ByMutation},
+	{"damage that would change nothing is refused rather than reported as done", "TestDamageThatWouldChangeNothingIsRefusedWithAReason", "internal/adapter/mutators", ByMutation},
+	{"a mutator meant for a whole file cannot be aimed at a column", "TestTheEntrySaysWhichFieldsItSuits", "internal/domain/catalog", ByMutation},
 }
 
 // CountByProof returns how many guards are in each state.

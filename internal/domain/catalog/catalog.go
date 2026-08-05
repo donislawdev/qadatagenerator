@@ -226,6 +226,36 @@ func (c Catalog) Entries() []Entry {
 	return entries
 }
 
+// CoversFieldType reports whether this mutator is meaningful for a field of
+// this type.
+//
+// # Why this is here and not in each mutator
+//
+// The entry already declares it. A mutator that carried its own list of the
+// types it understands would be a second copy of a published field, and the two
+// would part company the first time somebody widened one of them. Asking the
+// entry means the answer is the same one the catalog gives a reader, and it is
+// one rule rather than one per mutator.
+//
+// The two reserved words are what make this readable. Any means the dimension
+// puts no limit on where the mutator applies. None means the mutator does not
+// damage a field at all, so no field type can match it and the answer is always
+// no. Treating None as "everything" is the reading that would quietly let a
+// mutator that rewrites a whole file be aimed at a column.
+func (e Entry) CoversFieldType(fieldType string) bool {
+	for _, declared := range e.AppliesTo.FieldTypes {
+		switch declared {
+		case None:
+			return false
+		case Any:
+			return true
+		case fieldType:
+			return true
+		}
+	}
+	return false
+}
+
 // InLayer returns the entries of one layer, in identifier order.
 func (c Catalog) InLayer(layer Layer) []Entry {
 	var entries []Entry
