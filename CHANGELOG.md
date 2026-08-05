@@ -117,6 +117,17 @@ and has not happened.
 
 ### Fixed
 
+- **The catalog specification no longer says its examples are unverified.** That
+  sentence was written when it was true and stopped being true the same day the
+  examples became tests, and only the data file was corrected. It now says which
+  examples are checked against a scheme and which are illustrative, which is the
+  distinction an implementer needs.
+- **The manifest specification says when it stops changing.** Everything in it is
+  mutable until the first public release, and that trigger is now written down
+  rather than left to be recognised afterwards. The moment a format freezes is
+  otherwise only ever visible in hindsight, by which time somebody already
+  depends on it.
+
 - **The published examples now carry identifiers a validator would accept.**
   Three catalog entries showed a national identifier that no implementation of
   the scheme would take, and two of them contradicted their own note: one

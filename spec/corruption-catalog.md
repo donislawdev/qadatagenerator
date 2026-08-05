@@ -10,11 +10,13 @@ A mutator is a named, parameterised way of damaging data. It is not the damage i
 
 ## Status
 
-**Draft. No tool implements this yet.** Until the first public release, identifiers in this document can still change. After that release they are permanent, because they end up in manifests that live for years inside other people's test repositories.
+**Draft.** The reference implementation reads this catalog and carries out a small and growing part of it. Until the first public release, identifiers in this document can still change. After that release they are permanent, because they end up in manifests that live for years inside other people's test repositories.
 
-This is a documented, versioned format open to implementation. It is not a standard. A format that one tool emits is that tool's format until somebody else adopts it.
+This is a documented, versioned format open to implementation. It is not a standard. A format that one tool emits is that tool's format until somebody else adopts it, and one implementation is not two.
 
-**The examples in the entries are illustrative.** Their check digits, postal codes and identifier ranges have not been verified against an official source. They show the shape of the damage, not a correct value. An implementation produces them from the real algorithms and reference data.
+**The examples are checked where they can be, and illustrative where they cannot.** Where a value belongs to an identifier scheme the reference implementation carries, a test compares it against that implementation, so its check digits and its ranges are as sound as the scheme itself. Everywhere else, including postal codes and schemes nobody has implemented, the values have not been verified against any source. An implementation produces its own from the real algorithms and reference data rather than copying these.
+
+⚠️ That check found three entries carrying wrong values the first time it ran, two of them contradicting their own note, which is why the distinction above is spelled out rather than left as a promise.
 
 ---
 

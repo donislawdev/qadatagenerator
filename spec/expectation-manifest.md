@@ -10,7 +10,15 @@ Without that last part corrupted data is useless in an automated test, because t
 
 ## Status
 
-**Draft. No tool implements this yet.** It is a documented, versioned format open to implementation. It is not a standard. A format that one tool emits is that tool's format until somebody else adopts it.
+**Draft. No tool emits this yet.** It is a documented, versioned format open to implementation. It is not a standard. A format that one tool emits is that tool's format until somebody else adopts it, and one implementation is not two.
+
+### This format is still changing, and here is when it stops
+
+**Everything in it is mutable until the first public release of the reference implementation.** From that release the rules under Versioning apply and every change to an existing field is a breaking one.
+
+That sentence is here because the moment a format freezes is a decision nobody makes on purpose. What happens instead is that one day somebody already depends on it, and from that day every change breaks something without anybody having announced it. The transition is only ever visible in hindsight, so the trigger is named in advance rather than recognised afterwards.
+
+Until then, do not treat silence as stability. If you implement this now, pin the version you implemented and expect to move.
 
 ---
 
