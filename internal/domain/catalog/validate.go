@@ -26,6 +26,21 @@ var knownExpectations = map[Expectation]bool{
 
 var knownConfidences = map[Confidence]bool{Hard: true, Soft: true}
 
+// KnownLayer, KnownExpectation and KnownConfidence answer whether a value
+// belongs to the vocabulary at all.
+//
+// They are exported because the manifest carries these three copied from an
+// entry, and a manifest holding a layer this build has never heard of is as
+// wrong as an entry holding one. A second list over there would be a second
+// list to forget, so the vocabularies stay defined once.
+func KnownLayer(layer Layer) bool { return knownLayers[layer] }
+
+// KnownExpectation reports whether an expectation is one of the three.
+func KnownExpectation(expectation Expectation) bool { return knownExpectations[expectation] }
+
+// KnownConfidence reports whether a confidence is either of the two.
+func KnownConfidence(confidence Confidence) bool { return knownConfidences[confidence] }
+
 // New builds a catalog out of entries and reports everything wrong with them.
 //
 // It returns every problem rather than the first one. Whoever is fixing a

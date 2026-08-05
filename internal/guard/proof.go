@@ -353,6 +353,17 @@ var Guards = []Guard{
 	{"an entry of a scheme we can compute cannot go unexamined", "TestNoEntryOfAKnownSchemeGoesUnclaimed", "internal/adapter/catalogyaml", ByMutation},
 	{"a parameter reaches the model with the name the file gave it", "TestAParameterWithNoNameIsRefused", "internal/adapter/catalogyaml", ByMutation},
 	{"the published manifest example carries identifiers a validator would accept", "TestTheIdentifiersInThePublishedManifestExampleAreSound", "internal/adapter/catalogyaml", ByMutation},
+
+	// --- the expectation manifest -------------------------------------------
+	//
+	// The first two are the rule the product rests on. Damage that could not be
+	// applied is still an entry and still says why, because a dataset where
+	// twenty seven of forty ordered defects happened looks exactly like a
+	// complete one and will be trusted as one.
+	{"damage that did not happen still says why", "TestAnEntryThatDidNotHappenHasToSayWhy", "internal/domain/manifest", ByMutation},
+	{"an entry that did not happen describes no change", "TestAnEntryThatDidNotHappenCannotCarryValues", "internal/domain/manifest", ByMutation},
+	{"the summary cannot disagree with the entries under it", "TestTheCountsComeFromTheEntriesAndNotFromWhoeverBuiltThem", "internal/domain/manifest", ByMutation},
+	{"a set integrity defect names every record it spans", "TestALocationHasToSayEnoughForItsLayer", "internal/domain/manifest", ByMutation},
 }
 
 // CountByProof returns how many guards are in each state.
