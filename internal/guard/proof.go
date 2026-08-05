@@ -305,6 +305,8 @@ var Guards = []Guard{
 	{"a setting the command line moved is recorded with both sides", "TestAFlagThatOverridesTheRecipeSaysSo", "internal/cli", ByMutation},
 	{"every surface that lists what this tool accepts lists all of it", "TestEverySurfaceListingCommandsNamesAllOfThem", "internal/cli", ByMutation},
 	{"a flag named in the help of a command is one that command accepts", "TestEveryFlagAVerbDocumentsIsOneItAccepts", "internal/cli", ByMutation},
+	{"validate refuses exactly what generate would refuse", "TestValidateRefusesARecipeGenerateWouldRefuse", "internal/cli", ByMutation},
+	{"a refusal says what to do next whichever layer it came from", "TestAFailureFromBelowStillSaysWhatToDo", "internal/cli", ByMutation},
 
 	// --- being stopped from outside -----------------------------------------
 	//

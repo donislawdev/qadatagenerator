@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
@@ -76,7 +77,10 @@ func validateRecipeAt(out *streams, path string, flags crossCutting) int {
 		return fail(out, fault.Wrap(fault.IO, err, "cannot read "+path))
 	}
 
-	report, runErr := validate.Run(decodeRecipe, validate.Source{Name: path, Data: data})
+	// The registry travels in as a port, so that this verb answers the same
+	// question generate would about the same file.
+	report, runErr := validate.Run(decodeRecipe, validate.Source{Name: path, Data: data},
+		values.New("", ""))
 	if *flags.json {
 		writeJSONReport(out, report)
 	} else {

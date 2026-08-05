@@ -203,62 +203,6 @@ func runCommand(out *streams, command []string, asked invocation) int {
 	}
 }
 
-// runHelp answers the most common thing somebody types.
-//
-// With nothing after it, it is --help. With a command after it, it is the help
-// of that command, which is the same text that command prints for --help. One
-// renderer rather than two, because two would answer the same question
-// differently the first time somebody edited one of them.
-func runHelp(out *streams, arguments []string) int {
-	switch {
-	case len(arguments) == 0:
-		printHelp(out)
-		return finish(out, codeOK)
-	case len(arguments) > 1:
-		return usage(out, problem{
-			what:    problemHelpArguments,
-			why:     problemHelpArgumentsWhy,
-			allowed: problemHelpArgumentsAllow,
-			instead: problemHelpSubjectDo + " " + arguments[0],
-		})
-	}
-
-	doc, found := commandDocFor(arguments[0])
-	if !found {
-		refusal := unknownCommand(arguments[0])
-		refusal.what = problemHelpSubject + arguments[0]
-		refusal.why = problemHelpSubjectWhy
-		return usage(out, refusal)
-	}
-	out.emit(renderCommandHelp(doc))
-	return finish(out, codeOK)
-}
-
-// declareVerbHelp gives a command the two spellings of the help flag and
-// returns the question of whether either was given.
-//
-// A verb has to declare them itself. The parser of the tool stops at the first
-// argument that is not a flag, so anything after the verb belongs to the verb,
-// and without this qadg generate --help would be refused as an unknown flag.
-func declareVerbHelp(set *flag.FlagSet) func() bool {
-	long := set.Bool("help", false, "")
-	short := set.Bool("h", false, "")
-	return func() bool { return *long || *short }
-}
-
-// printCommandHelp prints what one verb says about itself.
-func printCommandHelp(out *streams, name string) int {
-	doc, found := commandDocFor(name)
-	if !found {
-		// Unreachable while every verb the dispatcher accepts is in the
-		// register, which a test asserts. Answering rather than printing
-		// nothing keeps a future verb from failing silently.
-		return fail(out, fault.New(fault.Runtime, "no help for the command "+name))
-	}
-	out.emit(renderCommandHelp(doc))
-	return finish(out, codeOK)
-}
-
 // unknownCommand builds the refusal for a verb this build does not have, and
 // finishes the attempt when it can.
 //
@@ -576,8 +520,38 @@ func fail(out *streams, err error) int {
 		})
 		return int(code)
 	}
-	out.report(problem{what: err.Error()})
+	out.report(problem{what: err.Error(), instead: whatToDoAbout(kind)})
 	return int(code)
+}
+
+// whatToDoAbout returns the fourth part of a refusal, chosen by the kind the
+// failure carried.
+//
+// # Why by kind rather than by message
+//
+// The message already says what went wrong, and often what would have been
+// accepted. What it never said is the next move, and the kind is exactly the
+// thing that decides it: a path that cannot be written needs different action
+// from a recipe that cannot be satisfied. One sentence per kind is also the
+// only version that cannot drift, because a sentence per message would be
+// written by whoever adds the message and forgotten by whoever adds the next.
+//
+// 🔴 What this does not do: it does not add the other two parts. Where the
+// message carries them it would repeat itself, and where it does not, a
+// sentence invented here would be guessing at a failure it cannot see.
+func whatToDoAbout(kind fault.Kind) string {
+	switch kind {
+	case fault.IO:
+		return doAboutIO
+	case fault.Config:
+		return doAboutConfig
+	case fault.Data:
+		return doAboutData
+	case fault.Interrupted, fault.Terminated:
+		return doAboutStopped
+	default:
+		return doAboutRuntime
+	}
 }
 
 func printVersion(out *streams, machineReadable bool) {
@@ -668,17 +642,4 @@ func groupData(sources []license.DataSource) []takenFrom {
 		grouped[at].lists = append(grouped[at].lists, entry.Corpus)
 	}
 	return grouped
-}
-
-func printHelp(out *streams) {
-	blocks := []string{
-		summaryLine,
-		examplesBlock,
-		usageBlock,
-		renderCommands(),
-		renderFlags(),
-		channelsBlock,
-		exitCodesHeading + "\n" + renderExitCodes(),
-	}
-	out.emit(strings.Join(blocks, "\n\n"))
 }

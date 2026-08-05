@@ -108,6 +108,22 @@ const (
 	flagsOfHeading     = "Flags of "
 	flagsSharedHeading = "Flags of the tool, accepted before or after the command:"
 
+	// The fourth part of a refusal that came from below the command line.
+	//
+	// 🔴 These exist because until 2026-08-05 every failure carrying a kind
+	// reached the user as one line: what happened, and nothing about what to do.
+	// The rule says four parts and the command line kept it only where a
+	// refusal was written out by hand. Found by running the binary rather than
+	// by reading the code, because every test was green.
+	//
+	// One sentence per kind rather than per message. What went wrong is already
+	// in the message, and the kind is exactly what decides the next move.
+	doAboutIO      = "check the path exists and that this account may write there"
+	doAboutConfig  = "qadg validate <recipe> reports every problem the recipe has at once"
+	doAboutData    = "the recipe is valid and cannot be satisfied, so change what it asks for"
+	doAboutStopped = "nothing was left behind, so the same command can simply be run again"
+	doAboutRuntime = "this is a defect in the tool rather than in the recipe. Report it with the command that caused it"
+
 	problemHelpSubject        = "no command called "
 	problemHelpSubjectWhy     = "help describes a command this build has"
 	problemHelpSubjectDo      = "qadg help"

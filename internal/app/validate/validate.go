@@ -8,6 +8,7 @@ package validate
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
@@ -26,6 +27,24 @@ type Decoded struct {
 // nothing to keep between calls. The point of the port is the direction of the
 // dependency, not the ceremony.
 type Decoder func(data []byte) Decoded
+
+// Generators is the registry of names a recipe may draw from.
+//
+// # Why this port exists, and why it did not until 2026-08-05
+//
+// Without it this use case answered `can be used` about a recipe that generate
+// then refused, because the registry lives in an adapter and validate could not
+// see it. That is the worst answer a validator can give: it is not a gap, it is
+// the opposite of the truth, and the whole point of the verb is that sentence.
+//
+// Found by running the binary, not by reading the code. Every test was green,
+// because both halves were right about their own half.
+type Generators interface {
+	// Known reports whether this build has a generator of that name.
+	Known(generator string) bool
+	// Names returns every generator this build has, sorted, for the refusal.
+	Names() []string
+}
 
 // Source is a recipe as it arrived, with the name to put in messages.
 type Source struct {
@@ -57,7 +76,7 @@ func (r Report) Usable() bool { return len(r.Problems) == 0 }
 // not have to work out which ending this was. A recipe that cannot be used is
 // a configuration failure and never a tool failure, which matters because the
 // two mean different days of work for whoever reads the exit code.
-func Run(decode Decoder, source Source) (Report, error) {
+func Run(decode Decoder, source Source, generators Generators) (Report, error) {
 	decoded := decode(source.Data)
 
 	report := Report{
@@ -69,11 +88,38 @@ func Run(decode Decoder, source Source) (Report, error) {
 	for _, entity := range decoded.Recipe.Entities {
 		report.Fields += len(entity.Fields)
 	}
+	report.Problems = append(report.Problems, unknownGenerators(decoded.Recipe, generators)...)
 
 	if !report.Usable() {
 		return report, fault.New(fault.Config, plural(len(report.Problems), "problem")+" in "+source.Name)
 	}
 	return report, nil
+}
+
+// unknownGenerators reports every field asking for a name this build lacks.
+//
+// The answer is a problem rather than a note, because generate refuses such a
+// recipe outright. A note would leave the two verbs disagreeing about the same
+// file, which is the thing this check exists to end.
+func unknownGenerators(rec recipe.Recipe, generators Generators) []recipe.Problem {
+	if generators == nil {
+		return nil
+	}
+	var found []recipe.Problem
+	for _, entity := range rec.Entities {
+		for _, field := range entity.Fields {
+			if field.Generator == "" || generators.Known(field.Generator) {
+				continue
+			}
+			found = append(found, recipe.Problem{
+				Where:   "entities." + entity.Name + ".fields." + field.Name,
+				What:    "this build has no generator called " + strconv.Quote(field.Generator),
+				Allowed: strings.Join(generators.Names(), ", "),
+				Hint:    "pick one of the names above, or drop the generator and give the field a type",
+			})
+		}
+	}
+	return found
 }
 
 func plural(count int, word string) string {

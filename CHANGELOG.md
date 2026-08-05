@@ -117,6 +117,17 @@ and has not happened.
 
 ### Fixed
 
+- **`qadg validate` no longer approves a recipe `qadg generate` refuses.** A
+  recipe naming a generator this build does not have passed validation with the
+  words "can be used" and no warning at all, while generating from the same file
+  failed. Validation now reports it as a problem, names the generator and lists
+  the ones that exist, so both commands answer the same question the same way.
+- **Every refusal says what to do next.** Failures coming from inside the tool
+  reached you as a single line saying what went wrong. They now carry the same
+  fourth part the command line refusals always had: a write failure points at
+  the path and the permissions, an unusable recipe points at `qadg validate`, an
+  impossible one points at what to change, and a stopped run says nothing was
+  left behind.
 - **A refusal after a command no longer offers flags that command cannot take.**
   Typing an unknown flag after `generate` or `validate` listed `--version` and
   `--license` among the accepted ones. Neither has ever worked there, so the

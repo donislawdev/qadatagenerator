@@ -306,3 +306,64 @@ func TestQuietKeepsTheProblemsAndDropsTheSummary(t *testing.T) {
 		t.Errorf("--quiet hid a failure: %q", loud.log)
 	}
 }
+
+// 🔴 The two verbs have to answer the same question the same way.
+//
+// Until 2026-08-05 a recipe naming a generator this build lacks passed
+// validation with the words "can be used" and no warning of any kind, while
+// generate refused the same file. That is worse than a gap: the verb whose whole
+// purpose is the sentence "this recipe will work" was answering it wrongly.
+// Found by running the binary, with every test green.
+func TestValidateRefusesARecipeGenerateWouldRefuse(t *testing.T) {
+	dir := t.TempDir()
+	body := `version: "0.1"
+seed: "s"
+entities:
+  customer:
+    count: 3
+    fields:
+      imie: { generator: nosuchthing }
+`
+	path := recipeIn(t, dir, body)
+
+	checked := run(commandValidate, path)
+	produced := run(commandGenerate, path)
+
+	if checked.code != int(codeConfig) {
+		t.Errorf("validate ended with %d and a recipe that cannot be used is %d: %s",
+			checked.code, codeConfig, checked.log)
+	}
+	if checked.code != produced.code {
+		t.Errorf("validate says %d and generate says %d about the same file",
+			checked.code, produced.code)
+	}
+	if !strings.Contains(checked.log, "nosuchthing") {
+		t.Errorf("the refusal does not name the generator: %s", checked.log)
+	}
+	if !strings.Contains(checked.log, "first_name") {
+		t.Errorf("the refusal does not list what this build does have: %s", checked.log)
+	}
+}
+
+// 🔴 Every refusal says what to do next, whichever layer it came from.
+//
+// The rule has always said four parts. The command line kept it where a refusal
+// was written out by hand and lost it everywhere a failure arrived carrying a
+// kind, which is most of them.
+func TestAFailureFromBelowStillSaysWhatToDo(t *testing.T) {
+	dir := t.TempDir()
+	for _, sample := range []struct {
+		name string
+		args []string
+	}{
+		{"a recipe that is not there", []string{commandValidate, filepath.Join(dir, "no.yaml")}},
+		{"a recipe that cannot be used", []string{commandGenerate, recipeIn(t, dir, "version: \"0.1\"\nseed: \"s\"\nentities:\n  c:\n    count: 1\n    fields:\n      f: { generator: nope }\n")}},
+	} {
+		t.Run(sample.name, func(t *testing.T) {
+			got := run(sample.args...)
+			if !strings.Contains(got.log, "try: ") {
+				t.Errorf("the refusal does not say what to do instead:\n%s", got.log)
+			}
+		})
+	}
+}
