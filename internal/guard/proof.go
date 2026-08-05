@@ -329,6 +329,30 @@ var Guards = []Guard{
 	// travel with a file of data.
 	{"the tool says every value it produces is synthetic", "TestLicenseSaysEveryValueIsSynthetic", "internal/cli", ByMutation},
 	{"that notice still says what to make of a resemblance", "TestTheSyntheticNoticeSaysWhatItHasTo", "internal/license", ByMutation},
+
+	// --- the corruption catalog ---------------------------------------------
+	//
+	// The catalog is data with one seam to the code, and the seam is an
+	// identifier. These cover the two ways that arrangement fails: the shipped
+	// copy of the data drifting away from the published one, and an entry
+	// arriving in a state nothing downstream can use.
+	//
+	// The first of them protects a file rather than a function, which is the
+	// same shape the postal registry needed. A copy of the catalog is only
+	// allowed to exist because something compares it with the original.
+	{"the catalog in the binary is the published one", "TestTheEmbeddedCatalogIsThePublishedOneByteForByte", "internal/adapter/catalogyaml", ByMutation},
+	{"a broken entry stops the whole catalog rather than going missing from it", "TestOneBrokenEntryRefusesTheWholeCatalog", "internal/domain/catalog", ByMutation},
+	{"a published example still satisfies the scheme it belongs to", "TestTheExamplesSatisfyWhatTheirEntriesClaim", "internal/adapter/catalogyaml", ByMutation},
+	{"a parameter default arrives as the catalog wrote it, null included", "TestParameterDefaultsSurviveIncludingTheOneWrittenAsNull", "internal/adapter/catalogyaml", ByMutation},
+	{"a mutator with behaviour and no entry is named", "TestAnImplementationWithNoEntryIsNamed", "internal/domain/catalog", ByMutation},
+	//
+	// The other direction of that closure, an entry with no behaviour, is not
+	// here. It cannot fail in this build: nothing is implemented, so every
+	// entry is uncovered and a guard asserting equality would pass against a
+	// build with no engine at all. It lands with the first mutator.
+	{"an entry of a scheme we can compute cannot go unexamined", "TestNoEntryOfAKnownSchemeGoesUnclaimed", "internal/adapter/catalogyaml", ByMutation},
+	{"a parameter reaches the model with the name the file gave it", "TestAParameterWithNoNameIsRefused", "internal/adapter/catalogyaml", ByMutation},
+	{"the published manifest example carries identifiers a validator would accept", "TestTheIdentifiersInThePublishedManifestExampleAreSound", "internal/adapter/catalogyaml", ByMutation},
 }
 
 // CountByProof returns how many guards are in each state.

@@ -117,6 +117,16 @@ and has not happened.
 
 ### Fixed
 
+- **The published examples now carry identifiers a validator would accept.**
+  Three catalog entries showed a national identifier that no implementation of
+  the scheme would take, and two of them contradicted their own note: one
+  promised a recomputed check digit and did not have one, so the value failed
+  on the checksum rather than on the thing the entry is about, and one showed
+  two values encoding the same gender in an entry about gender disagreeing. The
+  same wrong values appeared in the manifest specification. Every value is now
+  computed from the arithmetic, and tests recompute them, so an example you
+  implement against behaves the way its entry says it does.
+
 - **`qadg validate` no longer approves a recipe `qadg generate` refuses.** A
   recipe naming a generator this build does not have passed validation with the
   words "can be used" and no warning at all, while generating from the same file

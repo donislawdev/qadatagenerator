@@ -5,11 +5,21 @@
 # the shape of an entry and the rules. It does not repeat the entries.
 #
 # READ THIS BEFORE USING THE EXAMPLES.
-# Every "before" and "after" pair below is illustrative. Check digits, postal
-# codes and identifier ranges in them have NOT been verified against any
-# official source. They show the shape of the damage, not a correct value. An
-# implementation must produce examples from the real algorithms and reference
-# data, and must not copy these values into generated output.
+# A "before" and "after" pair shows the shape of the damage. Some pairs are now
+# checked and some are not, and the difference matters more than it looks.
+#
+# Where a value belongs to an identifier scheme the reference implementation
+# carries, the pair is checked against that implementation by a test, so its
+# check digits and its ranges are as sound as the scheme itself. Everywhere
+# else, including postal codes and the schemes nobody has implemented yet, the
+# values are illustrative and have not been verified against any source.
+#
+# That check found three entries whose values were wrong when it was first run
+# on 2026-08-05, two of them contradicting their own note, which is why the
+# distinction is spelled out here rather than left as a promise.
+#
+# An implementation must produce its own examples from the real algorithms and
+# reference data, and must not copy these values into generated output.
 #
 # Every value here is synthetic and describes nobody. Some of them satisfy the
 # arithmetic of the scheme they illustrate, because an entry about a pair being
@@ -627,7 +637,7 @@ mutators:
       - date.arithmetic
     example:
       before: "85011412345"
-      after: "85023112345"
+      after: "85023112343"
       note: >-
         Named after the property, not the country. Any national identifier that
         encodes a birth date can carry this defect. The check digit is
@@ -787,7 +797,7 @@ mutators:
       - identifier.check-digit
       - identifier.encodes-date
     example:
-      before: "08282298765"
+      before: "08282298762"
       after: "85011412345"
       note: >-
         Both values are correct on their own. Only the pair is wrong, which is
@@ -813,7 +823,7 @@ mutators:
       - identifier.encodes-gender
     example:
       before: "85011412345"
-      after: "85011412367"
+      after: "85011412352"
       note: >-
         Only meaningful where the identifier encodes gender at all and where
         the record carries a gender field whose value set maps onto it.

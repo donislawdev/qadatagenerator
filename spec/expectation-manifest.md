@@ -118,6 +118,16 @@ A side effect worth having: **the profile becomes a readable record of how the s
 
 ## Example
 
+The identifiers below are synthetic and describe nobody. Several of them
+satisfy the arithmetic of their scheme, because an entry about a pair being
+wrong has to show two values that are each right on their own, and a national
+identifier has no block that is never issued, so a value that satisfies the
+arithmetic cannot be shown not to belong to somebody. Where one resembles a
+real person that is a coincidence of arithmetic rather than a record of
+anything. The values are computed rather than invented, and a test recomputes
+them, so an implementation reading this example gets a pair that behaves the
+way the entry says it does.
+
 ```json
 {
   "spec_version": "0.1",
@@ -153,8 +163,8 @@ A side effect worth having: **the profile becomes a readable record of how the s
       "mutator": "L4.coherence.national_id_vs_birthdate",
       "layer": "L4",
       "applied": true,
-      "value_before": "08282298765",
-      "value_after": "85011467890",
+      "value_before": "08280298771",
+      "value_after": "85011467895",
       "expectation": "rejection",
       "confidence": "soft",
       "rationale": "The identifier is valid on its own but encodes 1985 while the birth date says 2008."
