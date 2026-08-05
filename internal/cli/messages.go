@@ -85,11 +85,16 @@ const (
 	problemGenerateArgumentsAllowed = "one path to a recipe file"
 	problemGenerateArgumentsDo      = "qadg generate recipe.yaml"
 
-	// How a run ends when the person running it stops it. It says what is on
-	// the disk afterwards, because that is the only thing the reader has to act
-	// on: a directory holding half a dataset would need cleaning by hand and
-	// this one does not.
-	stoppedByUser = "stopped before the dataset was complete. No output file was left behind and the temporary files this run made are gone"
+	// The two ways a run ends because something outside it said so. Both say
+	// what is on the disk afterwards, because that is the only thing the reader
+	// has to act on: a directory holding half a dataset would need cleaning by
+	// hand and neither of these does.
+	//
+	// They are worded apart on purpose. The second one is read by somebody
+	// looking at a log after the fact, with no memory of pressing anything, so
+	// it has to say who stopped the run.
+	stoppedByUser   = "stopped before the dataset was complete. No output file was left behind and the temporary files this run made are gone"
+	stoppedBySystem = "stopped by the system before the dataset was complete. No output file was left behind and the temporary files this run made are gone"
 
 	summaryTables = " tables, "
 	summaryRows   = " rows written"

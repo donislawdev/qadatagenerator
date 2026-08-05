@@ -72,10 +72,20 @@ func OpensTheWorld(importPath string) bool {
 // including everything the modules pull in. Two mechanisms because they need
 // two different tools, and naming the split here is what stops the next reader
 // from believing this function answers the whole question.
+// # The one exception, and where the rest of it lives
+//
+// A package holding a file named in guard.SyscallAllowed may import syscall.
+// That is coarser than the allowance itself, which is a file and a list of
+// identifiers, so this half is deliberately not the whole check: SyscallUse
+// answers whether the file took only what it may. Neither is enough alone, and
+// splitting them this way is what keeps this function answering one question.
 func Network(pkgs []Package) []string {
 	var findings []string
 	for _, pkg := range pkgs {
 		for _, importPath := range pkg.Imports {
+			if importPath == syscallPackage && packageMayNameSyscall(pkg.Path) {
+				continue
+			}
 			if OpensTheWorld(importPath) {
 				findings = append(findings, pkg.Path+" imports "+importPath+", which can reach outside this machine")
 			}

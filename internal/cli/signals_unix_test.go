@@ -27,19 +27,30 @@ import (
 // A test may name syscall where the product may not, because the guard behind
 // the promise of no outbound traffic reads the imports of the product only.
 func TestARealSignalReachesTheWatch(t *testing.T) {
-	watcher := watchSignals()
-	defer watcher.release()
+	for _, sample := range []struct {
+		name string
+		sent syscall.Signal
+		kind fault.Kind
+	}{
+		{"a person pressing the key", syscall.SIGINT, fault.Interrupted},
+		{"the system taking the process down", syscall.SIGTERM, fault.Terminated},
+	} {
+		t.Run(sample.name, func(t *testing.T) {
+			watcher := watchSignals()
+			defer watcher.release()
 
-	if err := syscall.Kill(syscall.Getpid(), syscall.SIGINT); err != nil {
-		t.Fatalf("cannot send the signal to this process: %v", err)
-	}
-	select {
-	case <-watcher.stopping:
-	case <-time.After(5 * time.Second):
-		t.Fatal("a signal was sent to this process and the watch never saw it")
-	}
+			if err := syscall.Kill(syscall.Getpid(), sample.sent); err != nil {
+				t.Fatalf("cannot send the signal to this process: %v", err)
+			}
+			select {
+			case <-watcher.stopping:
+			case <-time.After(5 * time.Second):
+				t.Fatal("a signal was sent to this process and the watch never saw it")
+			}
 
-	if kind := fault.KindOf(watcher.Stopped()); kind != fault.Interrupted {
-		t.Errorf("an interrupt arrived and the run ended as %v", kind)
+			if kind := fault.KindOf(watcher.Stopped()); kind != sample.kind {
+				t.Errorf("the run ended as %v rather than as %v", kind, sample.kind)
+			}
+		})
 	}
 }

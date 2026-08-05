@@ -3,6 +3,7 @@ package cli
 import (
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
@@ -27,16 +28,22 @@ import (
 // instant end their shell would have given them anyway. The watch covers the
 // part of the run that writes, which is the part with something to take back.
 //
-// # One signal, and the missing one is a decision rather than an oversight
+// # Two signals, and the second one is why this file may write syscall
 //
-// This catches the interrupt a person sends and not the termination a system
-// sends. The reason is not the code: it is that naming SIGTERM means importing
-// syscall, and the guard behind the promise of no outbound traffic refuses that
-// import everywhere, because syscall can do whatever the operating system can
-// and would route around every other name on its list. Buying the second signal
-// costs a hole in that guard, so it is a question for the owner rather than a
-// line added here. A run stopped by the system still ends with 143 from the
-// shell, and it still leaves its temporary files behind.
+// The interrupt a person sends is os.Interrupt and needs nothing special. The
+// termination a system sends has no name outside package syscall, and that
+// package is refused everywhere else, because it can do whatever the operating
+// system can and would route around every other name the network guard lists.
+//
+// The exception is therefore not for this package and not for this file as a
+// whole. It is for one name. guard.SyscallAllowed says which file may write
+// syscall and which identifiers it may take from it, a scanner reads the syntax
+// tree and reports anything else, and both directions are closed: an entry
+// naming a file that has stopped importing syscall is a finding too.
+//
+// This matters for runs nobody is watching. A container stopped with docker
+// stop and a cancelled CI job both send the termination signal, and those are
+// exactly the runs where a leftover temporary file goes unnoticed.
 
 // halt watches for the signal that ends a run from outside it.
 //
@@ -53,11 +60,11 @@ type halt struct {
 	// stopping is closed once a signal has arrived. Closing rather than sending
 	// is what makes the answer repeatable: a send can be taken once, and a
 	// second reader would then be told the run may carry on.
-	//
-	// Which signal arrived is deliberately not kept. Only one is asked for, so
-	// a field holding it would answer a question nobody can ask yet. It comes
-	// back on the day a second signal does.
 	stopping chan struct{}
+	// received is written before stopping is closed and read only after that
+	// close has been seen. The close is what orders the two, which is why this
+	// needs no lock and why it must not be read any other way.
+	received os.Signal
 }
 
 // watchSignals starts watching and returns what a run asks between rows.
@@ -66,7 +73,7 @@ func watchSignals() *halt {
 		signals:  make(chan os.Signal, 1),
 		stopping: make(chan struct{}),
 	}
-	signal.Notify(watcher.signals, os.Interrupt)
+	signal.Notify(watcher.signals, os.Interrupt, syscall.SIGTERM)
 	go watcher.wait()
 	return watcher
 }
@@ -76,7 +83,8 @@ func watchSignals() *halt {
 // It reads the channel once and ends, either because a signal arrived or
 // because the run finished and released the watch.
 func (h *halt) wait() {
-	if _, arrived := <-h.signals; !arrived {
+	received, arrived := <-h.signals
+	if !arrived {
 		// The run ended on its own and released the watch.
 		return
 	}
@@ -85,24 +93,30 @@ func (h *halt) wait() {
 	// which matters because the run only stops where it checks: somebody whose
 	// run is stuck in a write on a full disk has to be able to get out.
 	signal.Stop(h.signals)
+	h.received = received
 	close(h.stopping)
 }
 
 // Stopped returns the failure that ends the run, or nil to carry on.
 //
-// The kind is the one the exit code table already carries, so an interrupted
-// run ends with the number a shell would have reported for a process that never
-// caught the signal at all.
+// The two kinds are the two the exit code table already carries, so a run
+// stopped from outside ends with the number a shell would have reported for a
+// process that never caught the signal at all. They stay apart because a
+// pipeline reads them apart: one says a person was there and one says nobody
+// was.
 func (h *halt) Stopped() error {
 	select {
 	case <-h.stopping:
+		if h.received == syscall.SIGTERM {
+			return fault.New(fault.Terminated, stoppedBySystem)
+		}
 		return fault.New(fault.Interrupted, stoppedByUser)
 	default:
 		return nil
 	}
 }
 
-// release ends the watch, and after it the signal means again what it meant
+// release ends the watch, and after it the signals mean again what they meant
 // before the run started.
 //
 // Closing the channel is what lets the goroutine end. It is safe in this order

@@ -43,11 +43,11 @@ and has not happened.
   run has succeeded, so a stopped run cannot leave half a dataset looking like a
   whole one. Pressing the key a second time ends the process immediately, which
   matters when a run is stuck writing to a full disk.
-- **What a stopped run does not cover, stated rather than left to be found.** A
-  run ended by the system rather than by a person, which is what `docker stop`
-  and a cancelled CI job send, is not caught: the process ends at once, the shell
-  reports 143, and the temporary files stay. Catching it needs a change this
-  project has not decided on yet.
+- **A run the system stops is caught too.** `docker stop`, `kill` and a cancelled
+  CI job end the run with exit code 143 and the same clean directory. Those are
+  the runs nobody is watching, which is exactly where a leftover file would sit
+  unnoticed. The two codes stay apart because they mean different things: 130
+  says a person stopped it, 143 says nothing was there to press anything.
 - **`--dry-run` says what would be produced and touches nothing.** It is the same
   arithmetic the real run does rather than a separate estimate.
 - **Identifiers agree with the columns they were bound to.** A recipe saying the

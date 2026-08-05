@@ -234,3 +234,84 @@ func temporaries(t *testing.T, dir string) []string {
 	}
 	return left
 }
+
+// The paths a recipe can fail on before a single row is produced. Each of them
+// ends the run with a different code, and a pipeline branches on the code rather
+// than on the message.
+//
+// These were the least covered lines of the verb until 2026-08-05, which is a
+// weak reason to write a test and not the reason here: every one of them is a
+// way somebody's build stops, and until now none of them had ever run.
+func TestARecipeThatCannotBeUsedEndsWithTheCodeThatSaysWhy(t *testing.T) {
+	dir := t.TempDir()
+	out := filepath.Join(dir, "data")
+
+	for _, sample := range []struct {
+		name string
+		body string
+		path string
+		code exitCode
+		says string
+	}{
+		{
+			name: "a directory where a recipe was expected",
+			path: dir,
+			code: codeIO,
+			says: "directory",
+		},
+		{
+			name: "a recipe that is not there at all",
+			path: filepath.Join(dir, "nothing.yaml"),
+			code: codeIO,
+			says: "cannot read",
+		},
+		{
+			name: "a format this build does not write",
+			body: strings.Replace(smallRecipe(out), "format: csv", "format: parquet", 1),
+			code: codeConfig,
+			says: "parquet",
+		},
+	} {
+		t.Run(sample.name, func(t *testing.T) {
+			path := sample.path
+			if path == "" {
+				path = recipeIn(t, t.TempDir(), sample.body)
+			}
+			got := run(commandGenerate, path)
+			if got.code != int(sample.code) {
+				t.Errorf("ended with %d and the table says %d: %s", got.code, sample.code, got.log)
+			}
+			if !strings.Contains(got.log, sample.says) {
+				t.Errorf("the refusal does not say %q: %s", sample.says, got.log)
+			}
+		})
+	}
+}
+
+// A field left empty on purpose is empty in the file, and the share is drawn at
+// its own address so that changing what a field draws from does not move which
+// rows are blank.
+func TestAFieldWithAShareOfEmptyValuesLeavesSomeRowsBlank(t *testing.T) {
+	dir := t.TempDir()
+	out := filepath.Join(dir, "data")
+	body := strings.Replace(smallRecipe(out),
+		"first_name: { generator: first_name }",
+		`first_name: { generator: first_name, empty: "50%" }`, 1)
+
+	if got := run(commandGenerate, recipeIn(t, dir, body)); got.code != 0 {
+		t.Fatalf("the run ended with %d: %s", got.code, got.log)
+	}
+	written, err := os.ReadFile(filepath.Join(out, "customer.csv"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	blank := 0
+	for _, line := range strings.Split(strings.TrimSuffix(string(written), "\n"), "\n")[1:] {
+		if strings.HasPrefix(line, ",") {
+			blank++
+		}
+	}
+	if blank == 0 {
+		t.Errorf("no row was left blank although half of them were asked to be:\n%s", written)
+	}
+}

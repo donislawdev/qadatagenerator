@@ -98,6 +98,20 @@ var Guards = []Guard{
 	{"a file on the allow list is exempt and nothing else is", "TestConcurrencyRespectsTheAllowList", "internal/guard", ByProbe},
 	{"the concurrency scan actually reached the product", "TestTheConcurrencyScanReachesTheProduct", "internal/guard", ByProbe},
 
+	// --- the one exception to the ban on reaching the operating system -------
+	//
+	// The termination signal has no name outside package syscall, and that
+	// package is refused everywhere because it can do whatever the system can.
+	// The allowance is therefore a file and a list of identifiers rather than a
+	// package, and these guards close it from both ends.
+	{"the operating system is not reachable outside the one name that is allowed", "TestTheProductNamesSyscallOnlyWhereItIsAllowed", "internal/guard", ByMutation},
+	{"the exception covers one package in the network rule and no more", "TestTheNetworkRuleStillRefusesSyscallOutsideTheAllowedPackage", "internal/guard", ByMutation},
+	{"the scanner sees a file nobody allowed", "TestSyscallScannerSeesAFileNobodyAllowed", "internal/guard", ByProbe},
+	{"the scanner sees a name outside what the allowance covers", "TestSyscallScannerSeesANameOutsideTheAllowance", "internal/guard", ByProbe},
+	{"an allowance for a file that stopped using it is reported rather than left open", "TestSyscallAllowanceNeverNamesAFileThatDoesNotUseIt", "internal/guard", ByProbe},
+	{"a test may reach the system where the product may not", "TestSyscallScannerIgnoresTests", "internal/guard", ByProbe},
+	{"the scan actually reached the product", "TestTheSyscallScanReachesTheProduct", "internal/guard", ByProbe},
+
 	// --- the register guarding the register ---------------------------------
 	{"a guard added here cannot stay out of the register", "TestEveryGuardInThisPackageIsRegistered", "internal/guard", ByMutation},
 	{"the register never names a test that is gone", "TestEveryRegisteredTestExistsAndIsNamedOnce", "internal/guard", ByMutation},
