@@ -8,6 +8,8 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/mutators"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
@@ -77,10 +79,17 @@ func validateRecipeAt(out *streams, path string, flags crossCutting) int {
 		return fail(out, fault.Wrap(fault.IO, err, "cannot read "+path))
 	}
 
-	// The registry travels in as a port, so that this verb answers the same
-	// question generate would about the same file.
+	// Both registries travel in as ports, so that this verb answers the same
+	// questions generate and corrupt would about the same file. The catalog
+	// arrives beside the generators rather than later, because a validator
+	// that could see only one of them is how the two verbs came to disagree
+	// once already.
+	described, catalogErr := catalogyaml.Load()
+	if catalogErr != nil {
+		return fail(out, catalogErr)
+	}
 	report, runErr := validate.Run(decodeRecipe, validate.Source{Name: path, Data: data},
-		values.New("", ""))
+		values.New("", ""), mutators.Coverage{Described: described})
 	if *flags.json {
 		writeJSONReport(out, report)
 	} else {

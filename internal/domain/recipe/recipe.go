@@ -22,7 +22,46 @@ type Recipe struct {
 	Tag      string
 	Entities []Entity
 	Output   Output
+	// Policy is what to damage, empty when the recipe asks for correct data
+	// only. The first pillar is useful on its own, so a recipe with no policy
+	// is an ordinary recipe rather than an incomplete one.
+	Policy Policy
 }
+
+// Policy is what a run should break.
+//
+// # Why it names layers rather than mutators
+//
+// A layer is a line of defence, and a person deciding what to test thinks in
+// those terms: the bytes, the container, the shape of a field, the meaning of a
+// value, the rules of the business, the integrity of the set. Naming individual
+// mutators would tie a recipe living in somebody's repository to the catalog
+// this build happens to carry, so a recipe would stop working when the catalog
+// grew. Naming layers lets the catalog grow underneath it.
+type Policy struct {
+	// Layers are the lines of defence to attack. Empty means no damage was
+	// asked for.
+	Layers []string
+	// Rows is the share of rows to damage, as written, for example 5%.
+	//
+	// It is kept as text rather than a number because the recipe format says
+	// a share can also be given as particular rows, and turning one of those
+	// two into the other here would decide something this model does not own.
+	Rows string
+	// PerRow is how many defects one row may carry.
+	PerRow string
+	// ExcludeFields are the columns to leave alone, whatever the layers say.
+	ExcludeFields []string
+	// OnlyWhen is the condition a row has to meet before it is damaged.
+	//
+	// It is carried and not evaluated. Expressions are not implemented, and a
+	// run that quietly ignored this would damage rows the recipe excluded, so
+	// a recipe carrying one is told plainly that it was not applied.
+	OnlyWhen string
+}
+
+// Asks reports whether this policy orders any damage at all.
+func (p Policy) Asks() bool { return len(p.Layers) > 0 }
 
 // Entity is a set of records of one kind.
 type Entity struct {

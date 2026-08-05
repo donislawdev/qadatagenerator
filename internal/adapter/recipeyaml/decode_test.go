@@ -708,3 +708,88 @@ func TestARecipeNestedTooDeeplyIsRefusedBeforeParsing(t *testing.T) {
 		t.Fatalf("an ordinary recipe was refused: %+v", fine.Problems)
 	}
 }
+
+// The policy is the second pillar's half of a recipe, and every key of it has
+// to survive the read or the run does something other than what was asked.
+func TestThePolicySurvivesTheRead(t *testing.T) {
+	decoded := recipeyaml.Decode([]byte(`
+version: "0.1"
+seed: "s"
+entities:
+  customer:
+    count: 2
+    fields:
+      name: { generator: first_name }
+policy:
+  layers: [L2, L3]
+  rows: 5%
+  per_row: exactly_one
+  exclude_fields: [id]
+  only_when: "country == 'PL'"
+`))
+	if len(decoded.Problems) > 0 {
+		t.Fatalf("a recipe with a policy was refused: %v", decoded.Problems)
+	}
+	policy := decoded.Recipe.Policy
+	if !policy.Asks() {
+		t.Fatal("the policy orders no damage")
+	}
+	if len(policy.Layers) != 2 || policy.Layers[0] != "L2" || policy.Layers[1] != "L3" {
+		t.Errorf("layers came back as %v", policy.Layers)
+	}
+	if policy.Rows != "5%" || policy.PerRow != "exactly_one" || policy.OnlyWhen != "country == 'PL'" {
+		t.Errorf("policy came back as %+v", policy)
+	}
+	if len(policy.ExcludeFields) != 1 || policy.ExcludeFields[0] != "id" {
+		t.Errorf("exclude_fields came back as %v", policy.ExcludeFields)
+	}
+}
+
+// A recipe asking for correct data only is the whole of the first pillar, so no
+// policy is an ordinary recipe rather than an incomplete one.
+func TestARecipeWithNoPolicyIsUsable(t *testing.T) {
+	decoded := recipeyaml.Decode([]byte(`
+version: "0.1"
+seed: "s"
+entities:
+  customer:
+    count: 2
+    fields:
+      name: { generator: first_name }
+`))
+	if len(decoded.Problems) > 0 {
+		t.Fatalf("a recipe with no policy was refused: %v", decoded.Problems)
+	}
+	if decoded.Recipe.Policy.Asks() {
+		t.Error("a recipe with no policy claims to order damage")
+	}
+}
+
+// A policy section that names no layers orders nothing, and a run doing nothing
+// while the recipe appears to ask for damage is the silence this tool exists to
+// find elsewhere.
+func TestAPolicyThatOrdersNothingIsRefused(t *testing.T) {
+	decoded := recipeyaml.Decode([]byte(`
+version: "0.1"
+seed: "s"
+entities:
+  customer:
+    count: 2
+    fields:
+      name: { generator: first_name }
+policy:
+  rows: 5%
+`))
+	if len(decoded.Problems) == 0 {
+		t.Fatal("a policy naming no layers was accepted")
+	}
+	found := false
+	for _, problem := range decoded.Problems {
+		if problem.Where == "policy.layers" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("nothing points at the missing layers: %v", decoded.Problems)
+	}
+}

@@ -1,6 +1,7 @@
 package validate_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
@@ -16,7 +17,7 @@ func TestAUsableRecipeReportsWhatWasUnderstood(t *testing.T) {
 		}}}
 	}
 
-	report, err := validate.Run(decoder, validate.Source{Name: "recipe.yaml"}, wszystkieZnane{})
+	report, err := validate.Run(decoder, validate.Source{Name: "recipe.yaml"}, everyNameKnown{}, nil)
 	if err != nil {
 		t.Fatalf("a usable recipe is not a failure: %v", err)
 	}
@@ -39,7 +40,7 @@ func TestAnUnusableRecipeIsAConfigurationFailure(t *testing.T) {
 		}}
 	}
 
-	report, err := validate.Run(decoder, validate.Source{Name: "recipe.yaml"}, wszystkieZnane{})
+	report, err := validate.Run(decoder, validate.Source{Name: "recipe.yaml"}, everyNameKnown{}, nil)
 	if err == nil {
 		t.Fatal("expected a failure")
 	}
@@ -59,7 +60,7 @@ func TestOneProblemIsCountedInTheSingular(t *testing.T) {
 	decoder := func([]byte) validate.Decoded {
 		return validate.Decoded{Problems: []recipe.Problem{{Where: "version", What: "missing"}}}
 	}
-	_, err := validate.Run(decoder, validate.Source{Name: "r.yaml"}, wszystkieZnane{})
+	_, err := validate.Run(decoder, validate.Source{Name: "r.yaml"}, everyNameKnown{}, nil)
 	if err == nil || err.Error() != "1 problem in r.yaml" {
 		t.Fatalf("unexpected message: %v", err)
 	}
@@ -74,7 +75,7 @@ func TestWhatWasNotCheckedSurvivesASuccessfulRun(t *testing.T) {
 			Unchecked: []recipe.Unchecked{{Where: "a.b", What: "a setting", Reason: "no generators yet"}},
 		}
 	}
-	report, err := validate.Run(decoder, validate.Source{Name: "r.yaml"}, wszystkieZnane{})
+	report, err := validate.Run(decoder, validate.Source{Name: "r.yaml"}, everyNameKnown{}, nil)
 	if err != nil {
 		t.Fatalf("unexpected failure: %v", err)
 	}
@@ -83,10 +84,101 @@ func TestWhatWasNotCheckedSurvivesASuccessfulRun(t *testing.T) {
 	}
 }
 
-// wszystkieZnane is a registry that has every name. The point of these tests is
+// everyNameKnown is a registry that has every name. The point of these tests is
 // the shape of the report, and a registry refusing names would make each of them
 // fail for a second reason.
-type wszystkieZnane struct{}
+type everyNameKnown struct{}
 
-func (wszystkieZnane) Known(string) bool { return true }
-func (wszystkieZnane) Names() []string   { return []string{"first_name"} }
+func (everyNameKnown) Known(string) bool { return true }
+func (everyNameKnown) Names() []string   { return []string{"first_name"} }
+
+// someLayers is a catalog carrying damage in two layers, one of which has
+// nothing implemented behind it yet.
+type someLayers struct{}
+
+func (someLayers) Layers() []string { return []string{"L2", "L3"} }
+
+func (someLayers) Unimplemented(layer string) int {
+	if layer == "L3" {
+		return 7
+	}
+	return 0
+}
+
+// A policy naming a layer this build has no damage in orders a run that
+// produces nothing while looking as though it produced everything. Validate has
+// to say so, because corrupt would.
+func TestAPolicyNamingALayerWithNoDamageIsRefused(t *testing.T) {
+	decoder := func([]byte) validate.Decoded {
+		return validate.Decoded{Recipe: recipe.Recipe{
+			Policy: recipe.Policy{Layers: []string{"L2", "SEC"}},
+		}}
+	}
+	report, err := validate.Run(decoder, validate.Source{Name: "r.yaml"}, everyNameKnown{}, someLayers{})
+	if err == nil {
+		t.Fatal("a policy naming a layer with no damage was accepted")
+	}
+	joined := problemText(report)
+	if !strings.Contains(joined, `no damage in "SEC"`) {
+		t.Errorf("the refusal does not name the layer: %s", joined)
+	}
+	if !strings.Contains(joined, "L2, L3") {
+		t.Errorf("the refusal does not list what this build does carry: %s", joined)
+	}
+	if strings.Contains(joined, `"L2"`) {
+		t.Errorf("a layer this build carries was refused as well: %s", joined)
+	}
+}
+
+// A layer waiting for its implementations is the ordinary state of a catalog
+// that grows faster than the engine. It must not be a refusal, and it must not
+// be a surprise either.
+func TestAPolicyIsToldWhatThisBuildWillNotDoYet(t *testing.T) {
+	decoder := func([]byte) validate.Decoded {
+		return validate.Decoded{Recipe: recipe.Recipe{
+			Policy: recipe.Policy{Layers: []string{"L2", "L3"}, OnlyWhen: "country == 'PL'"},
+		}}
+	}
+	report, err := validate.Run(decoder, validate.Source{Name: "r.yaml"}, everyNameKnown{}, someLayers{})
+	if err != nil {
+		t.Fatalf("a usable policy was refused: %v", err)
+	}
+
+	var said []string
+	for _, note := range report.Unchecked {
+		said = append(said, note.Where+" "+note.What+" "+note.Reason)
+	}
+	joined := strings.Join(said, "\n")
+	if !strings.Contains(joined, "7 kinds of damage in L3") {
+		t.Errorf("nothing says what this build cannot do yet: %s", joined)
+	}
+	if strings.Contains(joined, "in L2") {
+		t.Errorf("a layer this build implements was reported as waiting: %s", joined)
+	}
+	if !strings.Contains(joined, "expressions are not evaluated") {
+		t.Errorf("nothing says the condition is ignored: %s", joined)
+	}
+}
+
+// A recipe with no policy asks for correct data only, which is the whole of the
+// first pillar and a perfectly ordinary thing to want.
+func TestARecipeWithNoPolicyIsNotToldAnythingAboutDamage(t *testing.T) {
+	decoder := func([]byte) validate.Decoded { return validate.Decoded{} }
+	report, err := validate.Run(decoder, validate.Source{Name: "r.yaml"}, everyNameKnown{}, someLayers{})
+	if err != nil {
+		t.Fatalf("a recipe with no policy was refused: %v", err)
+	}
+	for _, note := range report.Unchecked {
+		if strings.Contains(note.Where, "policy") {
+			t.Errorf("a recipe asking for no damage was told about damage: %+v", note)
+		}
+	}
+}
+
+func problemText(report validate.Report) string {
+	var said []string
+	for _, problem := range report.Problems {
+		said = append(said, problem.Where+" "+problem.What+" "+problem.Allowed)
+	}
+	return strings.Join(said, "\n")
+}

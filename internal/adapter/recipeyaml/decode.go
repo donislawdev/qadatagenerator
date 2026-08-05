@@ -31,10 +31,16 @@ import (
 
 // Known keys, listed once so that the messages and the walk cannot disagree.
 var (
-	topLevelKeys = []string{"version", "seed", "locale", "name", "tag", "entities", "output"}
-	entityKeys   = []string{"count", "primary_key", "fields", "consistency", "belongs_to"}
-	fieldKeys    = []string{"type", "generator", "expression", "unique", "required", "max_length", "counted_in", "empty", "values"}
-	outputKeys   = []string{"format", "dir", "file_per_entity", "encoding", "delimiter"}
+	topLevelKeys = []string{"version", "seed", "locale", "name", "tag", "entities", "output", "policy"}
+	policyKeys   = []string{"layers", "rows", "per_row", "exclude_fields", "only_when"}
+
+	// How many defects one row may carry. The two are what the format
+	// promises: exactly one isolates a cause, several at once tests how
+	// failures cascade.
+	perRowChoices = []string{"exactly_one", "any"}
+	entityKeys    = []string{"count", "primary_key", "fields", "consistency", "belongs_to"}
+	fieldKeys     = []string{"type", "generator", "expression", "unique", "required", "max_length", "counted_in", "empty", "values"}
+	outputKeys    = []string{"format", "dir", "file_per_entity", "encoding", "delimiter"}
 
 	// How a maximum length can be counted, taken from the model so that the
 	// list a user is shown cannot drift from the list the model accepts.
@@ -309,6 +315,8 @@ func (r *reader) recipe(top yaml.MapSlice) recipe.Recipe {
 			built.Entities = r.entities(item.Value)
 		case "output":
 			built.Output = r.output(item.Value)
+		case "policy":
+			built.Policy = r.policy(item.Value)
 		default:
 			r.report(key, "the recipe has no such key", strings.Join(topLevelKeys, ", "),
 				"remove the line or check the spelling")
@@ -576,6 +584,49 @@ func (r *reader) parents(where string, node any) []recipe.Parent {
 		parents = append(parents, recipe.Parent{Entity: name, Min: low, Max: high})
 	}
 	return parents
+}
+
+// policy reads what a run should break.
+//
+// Nothing here checks that a layer has damage behind it in this build. That
+// question belongs to whoever holds the catalog, and this package holds only
+// the file. Asking it here would put a copy of the catalog's vocabulary in the
+// reader, and the reader would then answer differently from the verb that runs
+// the damage.
+func (r *reader) policy(node any) recipe.Policy {
+	var built recipe.Policy
+	items, ok := r.mapping("policy", node)
+	if !ok {
+		return built
+	}
+	for _, item := range items {
+		key, ok := r.key("policy", item)
+		if !ok {
+			continue
+		}
+		where := "policy." + key
+		switch key {
+		case "layers":
+			built.Layers = r.listOrOne(where, item.Value)
+		case "rows":
+			built.Rows, _ = r.text(where, item.Value)
+		case "per_row":
+			built.PerRow = r.oneOf(where, item.Value, perRowChoices)
+		case "exclude_fields":
+			built.ExcludeFields = r.listOrOne(where, item.Value)
+		case "only_when":
+			built.OnlyWhen, _ = r.text(where, item.Value)
+		default:
+			r.report(where, "the policy section has no such key", strings.Join(policyKeys, ", "),
+				"remove the line or check the spelling")
+		}
+	}
+	if len(built.Layers) == 0 {
+		r.report("policy.layers", "the policy names no layers, so it orders no damage",
+			"one or more of L0, L1, L2, L3, L4, L5, SEC, UNI, REV",
+			"name the lines of defence to attack, or remove the policy section")
+	}
+	return built
 }
 
 func (r *reader) output(node any) recipe.Output {

@@ -7,6 +7,7 @@
 package validate
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -46,6 +47,26 @@ type Generators interface {
 	Names() []string
 }
 
+// Catalog is the damage this build knows about, for checking a corruption
+// policy.
+//
+// # Why this port exists
+//
+// A policy names layers, and whether a layer has damage behind it is a fact
+// about the catalog, which lives in an adapter. Without this port validate would
+// approve a policy that corrupt then does nothing about, which is the same
+// defect the generator registry caused: not a gap in a check but the opposite of
+// the truth, from the one verb whose entire purpose is that sentence. It landed
+// with the policy key rather than after it, so that the two verbs have never
+// disagreed about a policy.
+type Catalog interface {
+	// Layers returns every layer this build carries damage in, sorted.
+	Layers() []string
+	// Unimplemented is how much damage in a layer is described and cannot yet
+	// be done.
+	Unimplemented(layer string) int
+}
+
 // Source is a recipe as it arrived, with the name to put in messages.
 type Source struct {
 	Name string
@@ -76,7 +97,7 @@ func (r Report) Usable() bool { return len(r.Problems) == 0 }
 // not have to work out which ending this was. A recipe that cannot be used is
 // a configuration failure and never a tool failure, which matters because the
 // two mean different days of work for whoever reads the exit code.
-func Run(decode Decoder, source Source, generators Generators) (Report, error) {
+func Run(decode Decoder, source Source, generators Generators, described Catalog) (Report, error) {
 	decoded := decode(source.Data)
 
 	report := Report{
@@ -89,6 +110,8 @@ func Run(decode Decoder, source Source, generators Generators) (Report, error) {
 		report.Fields += len(entity.Fields)
 	}
 	report.Problems = append(report.Problems, unknownGenerators(decoded.Recipe, generators)...)
+	report.Problems = append(report.Problems, unusableLayers(decoded.Recipe, described)...)
+	report.Unchecked = append(report.Unchecked, whatThePolicyWillNotDo(decoded.Recipe, described)...)
 
 	if !report.Usable() {
 		return report, fault.New(fault.Config, plural(len(report.Problems), "problem")+" in "+source.Name)
@@ -120,6 +143,81 @@ func unknownGenerators(rec recipe.Recipe, generators Generators) []recipe.Proble
 		}
 	}
 	return found
+}
+
+// unusableLayers reports every layer a policy names that this build has no
+// damage in.
+//
+// A problem rather than a note, because damage nobody described can never
+// happen, so a policy naming only such layers orders a run that produces
+// nothing while looking as though it produced everything.
+func unusableLayers(rec recipe.Recipe, described Catalog) []recipe.Problem {
+	if described == nil || !rec.Policy.Asks() {
+		return nil
+	}
+	carries := map[string]bool{}
+	for _, layer := range described.Layers() {
+		carries[layer] = true
+	}
+	var found []recipe.Problem
+	for _, named := range rec.Policy.Layers {
+		if carries[named] {
+			continue
+		}
+		found = append(found, recipe.Problem{
+			Where:   "policy.layers",
+			What:    "this build describes no damage in " + strconv.Quote(named),
+			Allowed: strings.Join(described.Layers(), ", "),
+			Hint:    "name a layer from the list above, or remove it from the policy",
+		})
+	}
+	return found
+}
+
+// whatThePolicyWillNotDo names the damage this build describes and cannot yet
+// carry out, and the condition it will not evaluate.
+//
+// Both are reported as unchecked rather than refused. A layer waiting for its
+// implementations is the ordinary state of a catalog that grows faster than the
+// engine, and a condition nobody evaluates does not stop a run. Silence about
+// either would leave somebody believing their policy did more than it did.
+func whatThePolicyWillNotDo(rec recipe.Recipe, described Catalog) []recipe.Unchecked {
+	if !rec.Policy.Asks() {
+		return nil
+	}
+	var notes []recipe.Unchecked
+	if described != nil {
+		for _, named := range rec.Policy.Layers {
+			if waiting := described.Unimplemented(named); waiting > 0 {
+				notes = append(notes, recipe.Unchecked{
+					Where:  "policy.layers",
+					What:   fmt.Sprintf("%s in %s", kindsOfDamage(waiting), named),
+					Reason: "described in the catalog and not implemented in this build yet, so the manifest will record every one as not applied",
+				})
+			}
+		}
+	}
+	if strings.TrimSpace(rec.Policy.OnlyWhen) != "" {
+		notes = append(notes, recipe.Unchecked{
+			Where:  "policy.only_when",
+			What:   "the condition on which rows to damage",
+			Reason: "expressions are not evaluated in this build, so every row is eligible",
+		})
+	}
+	return notes
+}
+
+// kindsOfDamage counts damage in words.
+//
+// It is written out rather than handed to the general pluraliser beside it,
+// which appends to the end of what it is given and would say "kind of damages".
+// The message is read by somebody deciding whether their policy will do what
+// they asked, and prose that stumbles there costs more than the four lines.
+func kindsOfDamage(count int) string {
+	if count == 1 {
+		return "one kind of damage"
+	}
+	return fmt.Sprintf("%d kinds of damage", count)
 }
 
 func plural(count int, word string) string {

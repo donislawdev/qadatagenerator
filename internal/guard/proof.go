@@ -385,6 +385,15 @@ var Guards = []Guard{
 	{"damage that cannot be undone offers no way back", "TestIrreversibleDamageDoesNotCarryTheOriginal", "internal/app/corrupt", ByMutation},
 	{"damage lands only on the fields its entry covers", "TestDamageAimedAtAFieldItDoesNotCoverIsRefusedWithBothSides", "internal/app/corrupt", ByMutation},
 	{"nothing the engine produces is unrecordable", "TestNoEntryThisEngineProducesIsOneTheManifestWouldRefuse", "internal/app/corrupt", ByMutation},
+
+	// --- the corruption policy ----------------------------------------------
+	//
+	// The catalog reached validate in the same commit as the policy key, so the
+	// two verbs have never disagreed about a policy. That is the lesson of the
+	// generator registry applied before it could be paid for a second time.
+	{"validate refuses a policy corrupt would do nothing about", "TestAPolicyNamingALayerWithNoDamageIsRefused", "internal/app/validate", ByMutation},
+	{"a policy is told which of its damage this build cannot do yet", "TestAPolicyIsToldWhatThisBuildWillNotDoYet", "internal/app/validate", ByMutation},
+	{"a policy section that orders nothing is refused", "TestAPolicyThatOrdersNothingIsRefused", "internal/adapter/recipeyaml", ByMutation},
 }
 
 // CountByProof returns how many guards are in each state.
