@@ -138,7 +138,7 @@ If your legal department needs one sentence: running a GPL tool over your own in
 
 **Where a value looks real, that is arithmetic rather than a record.** An identifier with a correct check digit is meant to be indistinguishable from a real one, because a test that only ever sees obviously fake data proves nothing about the day real data arrives. Several of the schemes here have no block that is never issued, which means a correct value cannot be shown not to be somebody's. **If you recognise one, it is a coincidence, and it is not a statement about you.**
 
-The same holds for the values written into this repository: the examples in the catalog and the values in tests are illustrative. They are chosen to show the shape of a defect.
+The same holds for the values written into this repository. Some of the catalog examples are checked against the schemes this build implements, so their arithmetic is real, and the rest are illustrative and show the shape of a defect rather than a correct value. Either way they describe nobody, and an implementation produces its own from the real algorithms rather than copying these.
 
 **What follows from this for you.** A dataset generated here is safe to put in a test environment and is not safe to present as a record of anybody. Mark it as synthetic wherever it travels, and do not load it anywhere that treats identifiers as belonging to real subjects. The tool states this itself: `--license` prints the same notice, because a README does not travel with a file of data.
 
