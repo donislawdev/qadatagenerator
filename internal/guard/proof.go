@@ -330,6 +330,15 @@ var Guards = []Guard{
 	{"the tool says every value it produces is synthetic", "TestLicenseSaysEveryValueIsSynthetic", "internal/cli", ByMutation},
 	{"that notice still says what to make of a resemblance", "TestTheSyntheticNoticeSaysWhatItHasTo", "internal/license", ByMutation},
 
+	// The machine readable form of the licence report (DEC-146).
+	//
+	// The reader is a compliance scanner, and the failure it cannot survive is
+	// a registry row that reaches the printed form and not the document. Prose
+	// reads complete whether or not a dependency is missing from it, so the
+	// count is the only thing that can tell.
+	{"the licence document carries every registry row", "TestTheMachineReadableLicenseCarriesWhatTheReadableOneDoes", "internal/cli", ByMutation},
+	{"both forms of the licence report name the same projects", "TestBothLicenseFormsNameTheSameProjects", "internal/cli", ByMutation},
+
 	// --- the corruption catalog ---------------------------------------------
 	//
 	// The catalog is data with one seam to the code, and the seam is an

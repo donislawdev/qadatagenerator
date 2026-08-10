@@ -261,7 +261,7 @@ var reportFlagDocs = []flagDoc{
 // crossCuttingFlagDocs are the flags every command accepts, on either side of
 // the verb.
 var crossCuttingFlagDocs = []flagDoc{
-	{"--json", []string{"--json"}, "Print machine readable output. Supported by --version, validate and generate."},
+	{"--json", []string{"--json"}, "Print machine readable output. Supported by --version, --license, validate and generate. One report at a time."},
 	{"--no-color", []string{"--no-color"}, "Turn color off even when the output is a terminal."},
 	{"--quiet", []string{"--quiet"}, "Print failures only on the log channel."},
 	{"--verbose", []string{"--verbose"}, "Print progress detail on the log channel."},
@@ -424,9 +424,20 @@ const (
 	problemQuietAndVerboseDo      = "drop the flag you did not mean"
 
 	problemJSONUnsupported        = "--json was given, but the requested output has no machine readable form"
-	problemJSONUnsupportedWhy     = "only --version prints machine readable output, and mixing it with another report would put JSON and prose on the same channel"
-	problemJSONUnsupportedAllowed = "--json with --version alone"
+	problemJSONUnsupportedWhy     = "--version and --license print machine readable output, and the other reports are prose"
+	problemJSONUnsupportedAllowed = "--json with --version, or --json with --license"
 	problemJSONUnsupportedDo      = "drop --json to get the readable form"
+
+	// problemJSONTwoReports refuses two machine readable reports in one run.
+	//
+	// Both of them speak JSON, so this is not about one lacking the form. It is
+	// about the channel: two documents printed one after the other are not a
+	// document, and a parser reading the output stops after the first without
+	// ever learning that a second was there.
+	problemJSONTwoReports        = "--json was given with more than one report"
+	problemJSONTwoReportsWhy     = "each report is its own document, and printing two of them on one channel gives a reader that stops after the first"
+	problemJSONTwoReportsAllowed = "one report at a time: --json with --version, or --json with --license"
+	problemJSONTwoReportsDo      = "run the tool twice, once for each report"
 
 	// problemCrash reports that this program stopped in a way it does not
 	// understand. It is worded so that a bug report can quote it.

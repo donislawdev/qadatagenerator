@@ -105,6 +105,111 @@ func TestLicenseSaysEveryValueIsSynthetic(t *testing.T) {
 	}
 }
 
+// The machine readable form has to carry everything the printed one does.
+//
+// # Why this is checked field by field rather than against a fixture
+//
+// A fixture would freeze the whole document and fail on every addition, which
+// is the opposite of what DEC-146 promised: the shape grows by adding fields.
+// What must not change is that a compliance scanner finds the answer it came
+// for, so the test asks for exactly those answers and says nothing about the
+// rest.
+func TestTheMachineReadableLicenseCarriesWhatTheReadableOneDoes(t *testing.T) {
+	got := run("--license", "--json")
+	if got.code != 0 {
+		t.Fatalf("ended with %d, log %q", got.code, got.log)
+	}
+
+	var report license.Report
+	if err := json.Unmarshal([]byte(got.data), &report); err != nil {
+		t.Fatalf("the license report is not a JSON document: %v", err)
+	}
+	if report.Code.License != license.Code {
+		t.Errorf("the code license is %q, expected %q", report.Code.License, license.Code)
+	}
+	if report.Spec.License != license.Spec || report.Spec.Scope == "" {
+		t.Error("the specification license or its scope is missing, and the two names read as a contradiction without the scope")
+	}
+	if report.Tool == "" {
+		t.Error("the report does not say which build it describes")
+	}
+	if report.Notices.SyntheticData != license.SyntheticDataNotice {
+		t.Error("the machine readable report drops the notice that every value is synthetic")
+	}
+
+	// Every row of both registries has to be there. A scanner that sees one of
+	// two dependencies reports compliance it cannot claim, and the failure is
+	// invisible on the printed form because prose reads complete either way.
+	if len(report.Components) != len(license.ThirdParty) {
+		t.Errorf("the report carries %d components, the registry has %d",
+			len(report.Components), len(license.ThirdParty))
+	}
+	if len(report.Data) != len(license.Data) {
+		t.Errorf("the report carries %d data sources, the registry has %d",
+			len(report.Data), len(license.Data))
+	}
+	for _, source := range report.Data {
+		if source.Checked == "" {
+			t.Errorf("%s carries no date on which its terms were read, so nobody can tell a checked fact from a remembered one", source.Corpus)
+		}
+	}
+}
+
+// The two forms have to answer with the same facts.
+//
+// They are built by different code, and the printed one groups the lists under
+// their project while this one does not. A difference in arrangement is fine, a
+// difference in what is named is not, and only one of the two is read by the
+// person who can block adoption.
+//
+// # Why this walks the registry and not the report
+//
+// The first version of this test iterated over the document and asked whether
+// each row appeared in the printed form. A mutation emptying the document made
+// it iterate over nothing, so it passed against a build with no mechanism at
+// all: the exact shape that left three guards green in point 5. Walking the
+// registry means an empty document fails on the first row, because the registry
+// is what both forms are supposed to be showing.
+func TestBothLicenseFormsNameTheSameProjects(t *testing.T) {
+	printed := run("--license")
+	machine := run("--license", "--json")
+
+	var report license.Report
+	if err := json.Unmarshal([]byte(machine.data), &report); err != nil {
+		t.Fatalf("the license report is not a JSON document: %v", err)
+	}
+	inDocument := func(name string) bool {
+		for _, component := range report.Components {
+			if component.Module == name {
+				return true
+			}
+		}
+		for _, source := range report.Data {
+			if source.Project == name {
+				return true
+			}
+		}
+		return false
+	}
+
+	for _, component := range license.ThirdParty {
+		if !strings.Contains(printed.data, component.Module) {
+			t.Errorf("%s is in the registry and not in the printed form", component.Module)
+		}
+		if !inDocument(component.Module) {
+			t.Errorf("%s is in the registry and not in the document", component.Module)
+		}
+	}
+	for _, source := range license.Data {
+		if !strings.Contains(printed.data, source.Project) {
+			t.Errorf("%s is in the registry and not in the printed form", source.Project)
+		}
+		if !inDocument(source.Project) {
+			t.Errorf("%s is in the registry and not in the document", source.Project)
+		}
+	}
+}
+
 // Asking for two reports and getting one is the smallest possible silence, and
 // silence is the thing this product argues against.
 func TestBothReportsPrintWhenBothAreAsked(t *testing.T) {
@@ -119,11 +224,18 @@ func TestBothReportsPrintWhenBothAreAsked(t *testing.T) {
 
 func TestFailingRunsWriteNothingToTheDataChannel(t *testing.T) {
 	cases := map[string][]string{
-		"no arguments":       {},
-		"unknown flag":       {"--nope"},
-		"unknown command":    {"frobnicate"},
-		"quiet and verbose":  {"--quiet", "--verbose"},
-		"json without a use": {"--json", "--license"},
+		"no arguments":      {},
+		"unknown flag":      {"--nope"},
+		"unknown command":   {"frobnicate"},
+		"quiet and verbose": {"--quiet", "--verbose"},
+		// A report that is prose, asked for as a document. The case used to be
+		// --json --license, which stopped being a refusal when the license
+		// report gained a machine readable form in DEC-146.
+		"json over a report that is prose": {"--json", "--help"},
+		// Both of these speak JSON, and that is exactly why they are refused
+		// together: two documents on one channel give a reader that stops after
+		// the first and never learns the second was there.
+		"json over two documents at once": {"--json", "--version", "--license"},
 	}
 	for name, args := range cases {
 		got := run(args...)

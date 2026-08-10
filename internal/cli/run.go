@@ -310,24 +310,53 @@ func minimumOf(first, second, third int) int {
 	return smallest
 }
 
-// runReports prints everything the invocation asked for, or refuses the run.
-func runReports(out *streams, asked invocation) int {
+// unusableJSON reports what is wrong with --json in this invocation, and
+// whether anything is.
+//
+// # Why the two refusals are separate
+//
+// --json is a cross cutting flag, and two reports answer to it since DEC-146:
+// --version and --license. A run that asked for machine readable output and got
+// prose has been quietly ignored, which is worse than refusing.
+//
+// 🔴 Two reports at once are refused as well, even though both now speak JSON,
+// and that reason changed rather than went away. Printing them together would
+// put two documents on one channel, and two JSON documents in a row are not a
+// JSON document: the parser on the other side stops after the first and never
+// learns that a second was there. That is the silence this tool argues against,
+// one layer up from the data.
+//
+// Both tests are limited to runs that asked for a report, so that --json on its
+// own is answered with the reason that is actually true: nothing was asked for
+// at all.
+func unusableJSON(asked invocation) (problem, bool) {
+	if !*asked.global.json {
+		return problem{}, false
+	}
 	count := asked.reportsAsked()
-
-	// --json is a cross cutting flag with one report behind it so far. A run
-	// that asked for machine readable output and got prose has been quietly
-	// ignored, and asking for two reports at once with --json would put JSON
-	// and prose on the same channel. Both are worse than refusing.
-	// The test is limited to runs that asked for a report, so that --json on
-	// its own is answered with the reason that is actually true: nothing was
-	// asked for at all.
-	if *asked.global.json && count > 0 && !(*asked.showVersion && count == 1) {
-		return usage(out, problem{
+	if count > 1 {
+		return problem{
+			what:    problemJSONTwoReports,
+			why:     problemJSONTwoReportsWhy,
+			allowed: problemJSONTwoReportsAllowed,
+			instead: problemJSONTwoReportsDo,
+		}, true
+	}
+	if count > 0 && !*asked.showVersion && !*asked.showLicense {
+		return problem{
 			what:    problemJSONUnsupported,
 			why:     problemJSONUnsupportedWhy,
 			allowed: problemJSONUnsupportedAllowed,
 			instead: problemJSONUnsupportedDo,
-		})
+		}, true
+	}
+	return problem{}, false
+}
+
+// runReports prints everything the invocation asked for, or refuses the run.
+func runReports(out *streams, asked invocation) int {
+	if refusal, unusable := unusableJSON(asked); unusable {
+		return usage(out, refusal)
 	}
 
 	// Every report that was asked for gets printed, in a fixed order. A
@@ -350,7 +379,7 @@ func runReports(out *streams, asked invocation) int {
 	}
 	if *asked.showLicense {
 		separate()
-		printLicense(out)
+		printLicense(out, *asked.global.json)
 	}
 	if printed > 0 {
 		return finish(out, codeOK)
@@ -573,7 +602,26 @@ func printVersion(out *streams, machineReadable bool) {
 	out.emit(versionLabelRecipe + " " + current.Recipe)
 }
 
-func printLicense(out *streams) {
+// printLicense says what is inside this binary and under what terms.
+//
+// The machine readable form is not a convenience. The reader named in DEC-30 is
+// a legal department, and the tool it runs is a compliance scanner, which reads
+// documents rather than paragraphs. Left without one it would parse the text
+// below, and text written for a person changes wording without changing meaning.
+func printLicense(out *streams, machineReadable bool) {
+	if machineReadable {
+		encoded, err := json.Marshal(license.Current())
+		if err != nil {
+			// Nothing in the report is unencodable, so this cannot fire. It is
+			// reported rather than dropped for the same reason as in the
+			// version report: a silent empty line is the one output nobody can
+			// act on.
+			out.dataErr = err
+			return
+		}
+		out.emit(string(encoded))
+		return
+	}
 	out.emit(versionLabelTool + " " + version.Tool)
 	out.emit("")
 	out.emit(licenseHeadingCode + " " + license.Code)

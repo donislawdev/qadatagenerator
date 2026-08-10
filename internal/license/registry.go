@@ -7,6 +7,8 @@
 // reads neither. It will run a flag if somebody shows it one.
 package license
 
+import "github.com/donislawdev/qadatagenerator/internal/version"
+
 // Code is the license of everything this project compiles.
 //
 // Only version 3, without the usual "or any later version" clause. The clause
@@ -71,14 +73,17 @@ const ExampleDataNotice = "Example values in the catalog and in the tests are il
 // and keeping it takes a substantial part of a collection whether it arrived
 // through a function call or through a file, and neither route makes the data
 // this project's own work.
+// The JSON names on this type and on Component are read by compliance
+// scanners, so they are a public surface and follow the same rule as the
+// manifest: fields may be added, an existing name never changes meaning.
 type DataSource struct {
 	// Corpus is the list it produced, as locale and name.
-	Corpus string
+	Corpus string `json:"corpus"`
 	// Project is where it was read from.
-	Project string
+	Project string `json:"project"`
 	// Version is the exact tag or vintage it was read at, so the snapshot can
 	// be reproduced and so nobody has to guess which release it matches.
-	Version string
+	Version string `json:"version"`
 	// License is the SPDX identifier of that project, or a plain statement of
 	// the terms where no SPDX identifier fits.
 	//
@@ -87,9 +92,9 @@ type DataSource struct {
 	// that says so without also claiming a grant somebody made. Writing one of
 	// those in would be inventing a licence the source never issued, which is
 	// the opposite of what this field is for.
-	License string
+	License string `json:"license"`
 	// Source is where the terms and the original can be read.
-	Source string
+	Source string `json:"source"`
 	// Checked is the day somebody read those terms at that address, written
 	// as YYYY-MM-DD.
 	//
@@ -99,7 +104,11 @@ type DataSource struct {
 	// kind of sentence that reads most convincingly exactly when it has gone
 	// out of date, so the entry carries the day it was true rather than
 	// leaving the next session to guess how fresh it is.
-	Checked string
+	//
+	// The JSON name says what was checked rather than repeating the field name,
+	// because a bare "checked" in a compliance document invites the reading
+	// that somebody checked the data.
+	Checked string `json:"license_checked"`
 }
 
 // Data lists every reference collection inside this build.
@@ -141,16 +150,16 @@ var Data = []DataSource{
 // answers one question: what is inside this binary.
 type Component struct {
 	// Module is the import path, which is what go.mod calls it.
-	Module string
+	Module string `json:"module"`
 	// Version is the exact version linked, not a range.
-	Version string
+	Version string `json:"version"`
 	// License is the SPDX identifier.
-	License string
+	License string `json:"license"`
 	// Source is where the module and its license text live.
-	Source string
+	Source string `json:"source"`
 	// Checked is the day the license file of this exact version was read, as
 	// YYYY-MM-DD. See the note on the same field of DataSource.
-	Checked string
+	Checked string `json:"license_checked"`
 }
 
 // ThirdParty lists every external module inside this build.
@@ -167,4 +176,84 @@ var ThirdParty = []Component{
 		Source:  "https://github.com/goccy/go-yaml",
 		Checked: "2026-08-01",
 	},
+}
+
+// Report is the whole answer to what is inside this binary, in the shape a
+// machine reads it.
+//
+// # Why a machine readable form exists at all
+//
+// The reader this flag was built for is a compliance scanner, and the person
+// who runs it is the one who can block adoption. Without this shape they parse
+// the form written for a human, which this project has already been bitten by
+// once: an oracle recognised a class of routing number with strings.Contains
+// over a fragment of a description, so rewording a sentence silently moved a
+// number from one class to another.
+//
+// # What is deliberately different from the printed form
+//
+// The printed form groups the reference lists under the project they came from,
+// because a person wants the project named once. This one keeps a row per list,
+// unflattened, because that is what the registry holds and what a gate compares
+// against the embedded files. Grouping is a decision about presentation, and
+// making a parser undo it would be a second place where the same fact is
+// arranged.
+//
+// # This shape is a public surface and grows the way the manifest does
+//
+// Fields may be added. The meaning of an existing field never changes, and a
+// consumer is expected to ignore what it does not know. Without that rule the
+// flag could not have been built before the registry settled, which is what let
+// it exist now rather than after the release.
+type Report struct {
+	Tool       string       `json:"tool_version"`
+	Code       Terms        `json:"code"`
+	Spec       Terms        `json:"spec"`
+	Components []Component  `json:"components"`
+	Data       []DataSource `json:"data"`
+	Notices    Notices      `json:"notices"`
+}
+
+// Terms is one license and what it covers.
+type Terms struct {
+	License string `json:"license"`
+	// Scope is empty where the license covers everything this binary compiles,
+	// and filled where it does not.
+	Scope string `json:"scope,omitempty"`
+}
+
+// Notices are the sentences that answer the questions asked most often about a
+// generator under copyleft.
+type Notices struct {
+	GeneratedData string `json:"generated_data"`
+	SyntheticData string `json:"synthetic_data"`
+	ExampleData   string `json:"example_data"`
+}
+
+// Current returns what this build carries.
+//
+// The slices are copied rather than handed out, so that a caller writing the
+// report cannot change the registry that a gate is holding to the embedded
+// files.
+func Current() Report {
+	components := make([]Component, len(ThirdParty))
+	copy(components, ThirdParty)
+	data := make([]DataSource, len(Data))
+	copy(data, Data)
+	return Report{
+		// The version is here because a compliance answer is about one build,
+		// not about a project. Reading this package is allowed to reach the
+		// version numbers: they are written to be read by every layer and know
+		// none of them.
+		Tool:       version.Tool,
+		Code:       Terms{License: Code},
+		Spec:       Terms{License: Spec, Scope: SpecScope},
+		Components: components,
+		Data:       data,
+		Notices: Notices{
+			GeneratedData: GeneratedDataNotice,
+			SyntheticData: SyntheticDataNotice,
+			ExampleData:   ExampleDataNotice,
+		},
+	}
 }

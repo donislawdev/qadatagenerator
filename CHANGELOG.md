@@ -16,6 +16,13 @@ and has not happened.
 
 ### Added
 
+- **`--license` now prints a machine readable document too.** Run
+  `qadg --license --json` and the licenses, the third party modules and the
+  reference data come out as JSON, each entry carrying the day its terms were
+  read. It is meant for a compliance scanner: without it, a scanner has to parse
+  text written for a person, and text written for a person gets reworded.
+  Asking for two reports at once with `--json` is refused, because two documents
+  printed one after another are not a document.
 - **`qadg generate` turns a recipe into files.** It reads a recipe, produces the
   records it describes and writes them as CSV or as JSON. This is the first
   pillar of the tool working on its own: correct data, useful without anything
