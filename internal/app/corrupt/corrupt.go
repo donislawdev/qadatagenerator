@@ -63,6 +63,15 @@ type Order struct {
 	// ID is what this entry will be called in the manifest, so that a test
 	// can refer to the case.
 	ID string
+	// Partner is the other row a set level defect spans, one based, or zero
+	// when the damage involves one record.
+	//
+	// Set integrity is never about a single row. A duplicated key involves two
+	// of them and naming one is useless to whoever has to go and look, which is
+	// why the manifest refuses an L5 entry that names only one place. The
+	// engine cannot work the partner out, because it sees one value at a time,
+	// so whoever chooses where damage lands chooses this too.
+	Partner int
 }
 
 // Engine turns ordered damage into damage done and said.
@@ -184,7 +193,11 @@ func refused(e catalog.Entry, order Order, why string) manifest.Defect {
 }
 
 func locationOf(order Order) manifest.Location {
-	return manifest.Location{Entity: order.Entity, Row: order.Row, Field: order.Field}
+	where := manifest.Location{Entity: order.Entity, Row: order.Row, Field: order.Field}
+	if order.Partner > 0 {
+		where.Related = []manifest.Location{{Entity: order.Entity, Row: order.Partner}}
+	}
+	return where
 }
 
 // parametersOf takes the defaults the catalog declares.

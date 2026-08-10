@@ -5,6 +5,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
 )
 
 // This file holds every piece of text the command line shows a person. It is
@@ -70,8 +72,12 @@ const (
 	// The names of the two shapes this build writes. They are the values of the
 	// format key of a recipe as well as of the flag, so they are one pair of
 	// constants rather than two.
-	formatCSV  = "csv"
-	formatJSON = "json"
+	//
+	// Taken from the package that implements the writers rather than spelled
+	// again here. A name is how a user asks for one of them, and two copies of
+	// it part company the first time a format is added.
+	formatCSV  = format.NameCSV
+	formatJSON = format.NameJSON
 
 	// runNoteName is the file that travels beside the data.
 	//

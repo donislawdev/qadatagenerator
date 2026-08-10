@@ -6,6 +6,7 @@ import (
 	"flag"
 	"io"
 	"strconv"
+	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
@@ -105,6 +106,9 @@ func generateFrom(out *streams, path string, own *generateFlags, flags crossCutt
 
 	if *own.dryRun {
 		writePlan(out, plan, applied, flags)
+		for _, line := range plannedDamage(built) {
+			out.note(line)
+		}
 		return finish(out, codeOK)
 	}
 
@@ -112,10 +116,16 @@ func generateFrom(out *streams, path string, own *generateFlags, flags crossCutt
 	// this line nothing has been written and there is nothing to take back.
 	watcher := watchSignals()
 	defer watcher.release()
-	if err := produce(built, plan, source, own, watcher); err != nil {
+	told, err := produce(built, plan, source, own, watcher)
+	if err != nil {
 		return fail(out, err)
 	}
 	writePlan(out, plan, applied, flags)
+	// What the damage did goes after the counts of what was produced, because
+	// it is a statement about the same files and reads as one continuous answer.
+	for _, line := range told {
+		out.note(line)
+	}
 	return finish(out, codeOK)
 }
 
@@ -190,7 +200,7 @@ func overrides(built *recipe.Recipe, own *generateFlags) []override {
 // part way is one of the two endings this function has, and an ending that only
 // a real signal can reach is an ending nothing checks.
 func produce(built recipe.Recipe, plan generate.Plan, source values.Source,
-	own *generateFlags, stop generate.Halt) error {
+	own *generateFlags, stop generate.Halt) ([]string, error) {
 	dir := built.Output.Dir
 	if dir == "" {
 		dir = "."
@@ -208,23 +218,37 @@ func produce(built recipe.Recipe, plan generate.Plan, source values.Source,
 
 	writer, err := writerFor(built, files)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	// A recipe with a policy has its damage done on the way to the disk, and
+	// the manifest joins this same set of files. The first pillar is untouched
+	// by this: a recipe without a policy gets the writer it always got.
+	writer, broken, err := withDamage(built, source, writer, files)
+	if err != nil {
+		return nil, err
 	}
 	if err := generate.Run(plan, built, source, writer, stop); err != nil {
-		return err
+		return nil, err
+	}
+	var told []string
+	if broken != nil {
+		if err := broken.finish(built, plan, time.Now()); err != nil {
+			return nil, err
+		}
+		told = broken.summary()
 	}
 	if err := writeRunNote(files, built, plan); err != nil {
-		return err
+		return nil, err
 	}
 	// Nothing is asked about a signal from here on. Everything is written and
 	// what remains is giving the files their real names, and a rename stopped
 	// half way through the set would leave exactly the half finished dataset
 	// this whole arrangement exists to prevent.
 	if err := files.Commit(); err != nil {
-		return err
+		return nil, err
 	}
 	committed = true
-	return nil
+	return told, nil
 }
 
 // writerFor chooses the writer the recipe asked for.

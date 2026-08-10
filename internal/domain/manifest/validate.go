@@ -7,14 +7,19 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 )
 
-// problems reports what is missing from the envelope.
+// Problems reports what is missing from the envelope.
+//
+// It is exported because a manifest written entry by entry cannot be held
+// against the model at the end: by then the entries are already on a disk. A
+// streaming writer asks this before it writes anything, so a document the model
+// would refuse never reaches somebody who would read it as a promise.
 //
 // Every one of these is a field somebody reading the manifest a year later
 // needs in order to know what they are looking at. A manifest without a seed
 // cannot be reproduced, and one without a locale cannot explain why a mutator
 // is absent, because availability at L3 and L4 follows from the provider the
 // locale chose.
-func (r Run) problems() []string {
+func (r Run) Problems() []string {
 	required := []struct {
 		name  string
 		value string
@@ -57,13 +62,16 @@ func defectProblems(defects []Defect) []string {
 			problems = append(problems, fmt.Sprintf("%s: two entries carry this identifier", name))
 		}
 		seen[name] = true
-		problems = append(problems, defect.problems()...)
+		problems = append(problems, defect.Problems()...)
 	}
 	return problems
 }
 
-// problems reports everything wrong with one entry.
-func (d Defect) problems() []string {
+// Problems reports everything wrong with one entry.
+//
+// Exported for the same reason as the one on the envelope: an entry is written
+// as soon as it happens, so it has to be checkable one at a time.
+func (d Defect) Problems() []string {
 	var problems []string
 	problems = append(problems, d.vocabularyProblems()...)
 	problems = append(problems, d.outcomeProblems()...)

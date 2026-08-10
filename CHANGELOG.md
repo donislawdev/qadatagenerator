@@ -16,6 +16,19 @@ and has not happened.
 
 ### Added
 
+- **A recipe can now order damage, and the run writes down what it did.** Give a
+  recipe a `policy` section and `qadg generate` produces the dataset, breaks it
+  where the policy says, and leaves an `expectation-manifest.json` beside the
+  data. Every ordered defect gets exactly one entry: applied, with the value
+  before and after, or not applied, with the reason.
+- **Nothing ordered can go missing.** A defect this build has no implementation
+  for still gets its entry, saying so. That is deliberate: a dataset where most
+  of the ordered damage silently never happened looks exactly like a complete
+  one, and would be trusted as one.
+- **The run says what it did to the data.** How many defects were ordered, how
+  many were applied, and where the manifest is. `--dry-run` says what the policy
+  will draw on and how much of it this build implements, without writing
+  anything.
 - **A field described only by a type now gets a value.** Write
   `quantity: { type: integer }` or `amount: { type: decimal }` and the column
   arrives filled instead of empty. A number never overruns the width its field

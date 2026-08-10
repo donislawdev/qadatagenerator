@@ -1,0 +1,37 @@
+# A recipe that orders damage, used to run the whole path from a recipe to a
+# manifest on disk.
+#
+# It names every layer the catalog carries entries in, and damages every row, so
+# that each of the described kinds of damage gets an order. That is not a
+# realistic policy and is not meant to be: the point is that every entry of the
+# catalog can be located and recorded, including the ones this build has no
+# implementation for.
+#
+# SEC is absent because the catalog carries no entries in it. Naming it would be
+# refused, which is itself worth knowing.
+version: "0.1"
+seed: "policy-walkthrough"
+locale: pl-PL
+name: "policy walkthrough"
+entities:
+  customer:
+    count: 60
+    primary_key: [pesel]
+    fields:
+      first_name: { generator: first_name }
+      last_name:  { generator: last_name }
+      gender:     { generator: gender }
+      birth_date: { generator: birth_date }
+      pesel:      { generator: pesel }
+      quantity:   { type: integer, max_length: 4 }
+    consistency:
+      - pesel matches: [birth_date, gender]
+policy:
+  layers: [L0, L1, L2, L3, L4, L5, UNI, REV]
+  rows: 100%
+  per_row: exactly_one
+  exclude_fields: [first_name]
+output:
+  format: csv
+  dir: .
+  file_per_entity: true

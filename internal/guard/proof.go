@@ -419,6 +419,27 @@ var Guards = []Guard{
 	{"a number stays inside the column it sits in", "TestANumberHonoursTheLengthOfItsColumn", "internal/adapter/values", ByMutation},
 	{"a decimal carries the same places on every row", "TestADecimalAlwaysCarriesTwoPlaces", "internal/adapter/values", ByMutation},
 	{"a column this build will leave empty is named", "TestAColumnThisBuildWillLeaveEmptyIsNamed", "internal/app/generate", ByMutation},
+
+	// --- choosing what damage lands where -----------------------------------
+	//
+	// Three separate choices with three different mechanisms, and each of them
+	// can go wrong on its own. Taking the mutator in order is what makes a
+	// policy cover a line of defence rather than sample it, and drawing the row
+	// from the seed is determinism applied to damage rather than to values.
+	{"every kind of damage is ordered before any repeats", "TestEveryKindOfDamageIsOrderedBeforeAnyRepeats", "internal/app/corrupt", ByMutation},
+	{"which rows are damaged follows from the seed", "TestAShareOfRowsDamagesAboutThatShare", "internal/app/corrupt", ByMutation},
+	{"a column the policy excluded is never damaged", "TestAnExcludedColumnIsNeverAimedAt", "internal/app/corrupt", ByMutation},
+	{"a policy that excludes everything is refused rather than silent", "TestAPolicyThatExcludesEverythingIsRefused", "internal/app/corrupt", ByMutation},
+
+	// --- the manifest on disk ------------------------------------------------
+	//
+	// 🔴 The entries are written as they happen, so the model cannot be asked
+	// about the whole document at the end: by then it is on a disk. The check
+	// moved to the last moment where refusing still means something, and the
+	// first run of the binary proved it was needed.
+	{"an entry the model refuses never reaches the file", "TestAnEntryTheModelWouldRefuseNeverReachesTheFile", "internal/adapter/manifestjson", ByMutation},
+	{"a value emptied on purpose is written rather than dropped", "TestAValueThatIsEmptyOnPurposeIsWrittenRatherThanDropped", "internal/adapter/manifestjson", ByMutation},
+	{"a run with no entries is still a document", "TestARunWithNoEntriesIsStillADocument", "internal/adapter/manifestjson", ByMutation},
 }
 
 // CountByProof returns how many guards are in each state.

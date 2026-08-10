@@ -209,7 +209,7 @@ func (m Manifest) Unapplied() []Defect {
 // at all when there is one. A manifest that is partly wrong is worse than none,
 // because it will be read as a promise.
 func New(specVersion string, run Run, defects []Defect) (Manifest, []string) {
-	problems := run.problems()
+	problems := run.Problems()
 	problems = append(problems, defectProblems(defects)...)
 	if strings.TrimSpace(specVersion) == "" {
 		problems = append(problems, "the manifest carries no format version, so nobody can tell how to read it")

@@ -181,11 +181,11 @@ func (s Source) Produce(req generate.Request) (string, error) {
 	if req.Generator == "" {
 		return s.fromType(req)
 	}
-	produce, found := producers[req.Generator]
+	known, found := producers[req.Generator]
 	if !found {
 		return "", fault.New(fault.Config, "no generator called "+req.Generator)
 	}
-	value, err := produce(s, req)
+	value, err := known.produce(s, req)
 	if err != nil {
 		return "", err
 	}
@@ -262,22 +262,41 @@ func (s Source) wholeNumber(req generate.Request, digits int) int64 {
 // producer is one way of making a value.
 type producer func(Source, generate.Request) (string, error)
 
+// generator is one name a recipe can use, together with what stands behind it.
+//
+// # Why what stands behind it is recorded rather than looked up twice
+//
+// The capabilities a run has depend on which providers and which word lists
+// take part in it, and that is a second question about the same registry. A
+// separate list answering it would be a copy, and copies part company. Keeping
+// the provider beside the function means one entry answers both, and adding a
+// generator cannot leave the second answer behind.
+type generator struct {
+	// produce makes the value.
+	produce producer
+	// behind is the identifier provider this draws on, when there is one. A
+	// generator drawing from a word list or from arithmetic leaves it nil.
+	behind provider.Provider
+	// list is the corpus this draws from, empty when it draws from nothing.
+	list string
+}
+
 // producers is the registry. It is a map rather than a switch so that the list
 // of names and the list of implementations cannot drift apart.
-var producers = map[string]producer{
-	FirstName:  Source.firstName,
-	LastName:   Source.lastName,
-	Gender:     Source.gender,
-	BirthDate:  Source.birthDate,
-	City:       fromList("cities"),
-	Region:     fromList("regions"),
-	PostalCode: Source.postalCode,
-	Pesel:      fromProvider(pl.PESEL{}),
-	Nip:        fromProvider(pl.NIP{}),
-	Regon:      fromProvider(pl.REGON{}),
-	SSN:        fromProvider(us.SSN{}),
-	ABA:        fromProvider(us.ABA{}),
-	IBAN:       fromProvider(intl.IBAN{}),
+var producers = map[string]generator{
+	FirstName:  {produce: Source.firstName, list: "first-names"},
+	LastName:   {produce: Source.lastName, list: "last-names"},
+	Gender:     {produce: Source.gender},
+	BirthDate:  {produce: Source.birthDate},
+	City:       {produce: fromList("cities"), list: "cities"},
+	Region:     {produce: fromList("regions"), list: "regions"},
+	PostalCode: {produce: Source.postalCode, behind: us.Postal{}},
+	Pesel:      {produce: fromProvider(pl.PESEL{}), behind: pl.PESEL{}},
+	Nip:        {produce: fromProvider(pl.NIP{}), behind: pl.NIP{}},
+	Regon:      {produce: fromProvider(pl.REGON{}), behind: pl.REGON{}},
+	SSN:        {produce: fromProvider(us.SSN{}), behind: us.SSN{}},
+	ABA:        {produce: fromProvider(us.ABA{}), behind: us.ABA{}},
+	IBAN:       {produce: fromProvider(intl.IBAN{}), behind: intl.IBAN{}},
 }
 
 // fromProvider adapts an identifier provider to this registry.
