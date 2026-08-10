@@ -26,6 +26,10 @@ import (
 type Request struct {
 	// Generator is the name the recipe used, such as first_name.
 	Generator string
+	// Type is what the recipe declared instead of a generator, such as
+	// integer. Exactly one of the two is set, because a recipe field names one
+	// source of its value and the parser refuses a field that names two.
+	Type string
 	// At is the address of the value. Randomness is derived from it, so the
 	// same address always gives the same value.
 	At seed.Coordinate
@@ -59,6 +63,22 @@ type Values interface {
 	// Names returns every generator this build has, sorted, for the message
 	// that refuses an unknown one.
 	Names() []string
+	// TypeOf returns the kind of value a generator produces, and whether the
+	// generator is known at all.
+	//
+	// It is here rather than beside the recipe because the answer belongs to
+	// whoever implements the generator. The schema view the corruption engine
+	// reads is built from it, so damage aimed at a column of dates reaches a
+	// column of dates rather than nothing.
+	TypeOf(generator string) (string, bool)
+	// ProducesType reports whether this build can fill a field described by
+	// that type alone.
+	//
+	// The plan asks before the run does, so a column this build will leave
+	// empty is named while there is still time to change the recipe. Answering
+	// this from the run instead would mean either a failure late or a quiet
+	// blank column, and the blank column is what this project calls silence.
+	ProducesType(kind string) bool
 	// RoleOf returns the role a generator plays in a consistency rule, and
 	// whether it plays one at all.
 	//

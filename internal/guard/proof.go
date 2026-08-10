@@ -403,6 +403,22 @@ var Guards = []Guard{
 	{"validate refuses a policy corrupt would do nothing about", "TestAPolicyNamingALayerWithNoDamageIsRefused", "internal/app/validate", ByMutation},
 	{"a policy is told which of its damage this build cannot do yet", "TestAPolicyIsToldWhatThisBuildWillNotDoYet", "internal/app/validate", ByMutation},
 	{"a policy section that orders nothing is refused", "TestAPolicyThatOrdersNothingIsRefused", "internal/adapter/recipeyaml", ByMutation},
+
+	// --- the seam between what a recipe declares and what the catalog aims at -
+	//
+	// 🔴 The catalog aims damage at field types and a recipe declares
+	// generators, and until 2026-08-10 nothing joined the two. A field with a
+	// generator carried no type, an empty type matches no entry except the two
+	// using the reserved word any, so an ordinary recipe left fifty of the fifty
+	// two entries inapplicable for a reason nobody had chosen. Two halves, each
+	// correct about its own half, which is the shape of the quiet mismatch the
+	// audit found in PL.pesel.
+	{"the type of a field follows from its generator", "TestAFieldWithAGeneratorGetsTheTypeThatGeneratorProduces", "internal/adapter/values", ByMutation},
+
+	// --- values for a field described by type alone --------------------------
+	{"a number stays inside the column it sits in", "TestANumberHonoursTheLengthOfItsColumn", "internal/adapter/values", ByMutation},
+	{"a decimal carries the same places on every row", "TestADecimalAlwaysCarriesTwoPlaces", "internal/adapter/values", ByMutation},
+	{"a column this build will leave empty is named", "TestAColumnThisBuildWillLeaveEmptyIsNamed", "internal/app/generate", ByMutation},
 }
 
 // CountByProof returns how many guards are in each state.

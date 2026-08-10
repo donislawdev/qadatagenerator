@@ -17,6 +17,7 @@ package values
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 
@@ -58,6 +59,55 @@ var roles = map[string]string{
 	Gender:    provider.RoleGender,
 }
 
+// The field types the catalog uses in applies_to. They are constants here
+// because the corruption engine matches on them, so a typo would silently make
+// every mutator inapplicable to a column rather than fail to build.
+const (
+	TypeString     = "string"
+	TypeIdentifier = "identifier"
+	TypeDate       = "date"
+	TypePostalCode = "postal_code"
+	TypeInteger    = "integer"
+	TypeDecimal    = "decimal"
+)
+
+// types says what kind of value each generator produces.
+//
+// # Why this exists, and it is a measurement rather than tidiness
+//
+// The catalog aims damage at field types and a recipe declares generators, and
+// until 2026-08-10 nothing joined the two. A field with a generator carried no
+// type at all, because a recipe field names exactly one of type, generator or
+// expression. The engine asks the entry whether it covers the field type, an
+// empty type matches nothing except the reserved word any, and only two of the
+// fifty two entries carry that. So a recipe written the ordinary way, with
+// generators, left fifty of the fifty two entries inapplicable for a reason
+// nobody had chosen. That is the same shape as the quiet mismatch the audit
+// found in PL.pesel: two halves, each correct about its own half.
+//
+// # Why gender is a string rather than an enum
+//
+// It draws from two values and looks like the enumeration the catalog means.
+// But the entry that puts a value outside a set also requires the set itself,
+// and a set is something a recipe declares on the field. Calling this an enum
+// would hand a mutator a capability nothing supplies, which is the failure
+// DEC-98 already paid for once.
+var types = map[string]string{
+	FirstName:  TypeString,
+	LastName:   TypeString,
+	City:       TypeString,
+	Region:     TypeString,
+	Gender:     TypeString,
+	BirthDate:  TypeDate,
+	PostalCode: TypePostalCode,
+	Pesel:      TypeIdentifier,
+	Nip:        TypeIdentifier,
+	Regon:      TypeIdentifier,
+	SSN:        TypeIdentifier,
+	ABA:        TypeIdentifier,
+	IBAN:       TypeIdentifier,
+}
+
 // Source produces values for one locale.
 type Source struct {
 	locale string
@@ -97,8 +147,40 @@ func (s Source) RoleOf(generator string) (string, bool) {
 	return role, plays
 }
 
+// TypeOf says what kind of value a generator produces, and whether this build
+// knows the generator at all.
+//
+// The second result is not decoration. An unknown name answering with an empty
+// type would be indistinguishable from a generator that genuinely produces
+// something untyped, and the engine would then aim damage at a column on the
+// strength of a guess.
+func (s Source) TypeOf(generator string) (string, bool) {
+	kind, known := types[generator]
+	return kind, known
+}
+
+// ProducesType reports whether this build can fill a field described by that
+// type alone.
+//
+// The list is short on purpose and is not the whole catalog vocabulary. Each
+// remaining type is a decision about shape that belongs with the generator
+// owning it, and inventing an email or a money format here would put an unowned
+// format into somebody's data.
+func (s Source) ProducesType(kind string) bool {
+	return kind == TypeInteger || kind == TypeDecimal
+}
+
 // Produce returns one value.
+//
+// A request with no generator is a field the recipe described by type alone.
+// Such a field produced nothing until 2026-08-10 and the plan said nothing
+// about it either, so a declared column arrived empty and no part of the run
+// mentioned it. That is silence in the first pillar, found while planning the
+// second.
 func (s Source) Produce(req generate.Request) (string, error) {
+	if req.Generator == "" {
+		return s.fromType(req)
+	}
 	produce, found := producers[req.Generator]
 	if !found {
 		return "", fault.New(fault.Config, "no generator called "+req.Generator)
@@ -113,6 +195,68 @@ func (s Source) Produce(req generate.Request) (string, error) {
 	return "", fault.New(fault.Data, fmt.Sprintf(
 		"%s produced a value of %d %s for %s, which accepts %d. Raise the limit or change the generator",
 		req.Generator, measure(value, req.Unit), req.Unit, req.At.Field, req.MaxLength))
+}
+
+// Digits a number gets when the field declares no maximum length.
+//
+// # Why six, and what it is not
+//
+// It is a default, not a measurement, and the difference matters because this
+// project treats a number that pretends to be a measurement as a defect. Six
+// digits keeps a value readable, stays far inside every integer type a database
+// offers, and is wide enough that a column of them does not look like a counter.
+// A recipe that needs a particular range has nowhere to say so yet: field
+// parameters are carried and unread, which the plan reports rather than hides.
+const defaultDigits = 6
+
+// fromType produces a value for a field described by type alone.
+//
+// Only the two numeric types are built. The rest of the catalog vocabulary,
+// such as email or money, would each be a decision about shape that belongs
+// with the generator that owns it rather than with a fallback, and inventing
+// one here would put an unowned format into people's data.
+func (s Source) fromType(req generate.Request) (string, error) {
+	digits := defaultDigits
+	if req.HasMaxLength && req.MaxLength < digits {
+		// A number longer than the column is a value that fits by our
+		// arithmetic and is rejected on arrival, which is the failure the unit
+		// on max_length exists to prevent.
+		digits = req.MaxLength
+	}
+	switch req.Type {
+	case TypeInteger:
+		return strconv.FormatInt(s.wholeNumber(req, digits), 10), nil
+	case TypeDecimal:
+		// Two places, because that is what money and every rate in a business
+		// system carry, and because a decimal with a varying number of places
+		// is a different value on every row for reasons the reader cannot see.
+		const places = 2
+		if digits <= places {
+			return "", fault.New(fault.Data, fmt.Sprintf(
+				"%s accepts %d %s, and a decimal needs room for a point and two places",
+				req.At.Field, req.MaxLength, req.Unit))
+		}
+		whole := s.wholeNumber(req, digits-places-1)
+		fraction := s.seed.IntN(coordinate(req, ":fraction"), 100)
+		return fmt.Sprintf("%d.%02d", whole, fraction), nil
+	default:
+		return "", fault.New(fault.Config, fmt.Sprintf(
+			"%s is declared as %s, and this build produces values for %s and %s only. "+
+				"Give the field a generator, or change the type",
+			req.At.Field, req.Type, TypeInteger, TypeDecimal))
+	}
+}
+
+// wholeNumber draws a number of at most the given number of digits.
+func (s Source) wholeNumber(req generate.Request, digits int) int64 {
+	if digits < 1 {
+		return 0
+	}
+	limit := int64(1)
+	for i := 0; i < digits; i++ {
+		limit *= 10
+	}
+	return s.seed.IntN(coordinate(req, ":number"), limit)
 }
 
 // producer is one way of making a value.

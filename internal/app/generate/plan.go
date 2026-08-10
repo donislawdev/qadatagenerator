@@ -221,6 +221,16 @@ func checkGenerators(entity recipe.Entity, values Values, plan *Plan) error {
 		case field.Expression != "":
 			plan.Notes = append(plan.Notes, Note{where,
 				"expressions are not evaluated by this build, so the column will be empty"})
+		case field.Generator == "" && !values.ProducesType(field.Type):
+			// A type this build cannot fill. Until 2026-08-10 this case said
+			// nothing at all, so a declared column arrived empty and no part of
+			// the run mentioned it. The expression above has been reported
+			// since the first day and this one had not, which is why it was
+			// invisible: the two look alike in the recipe and only one of them
+			// spoke.
+			plan.Notes = append(plan.Notes, Note{where,
+				"this build produces no value for a field declared only as " +
+					strconv.Quote(field.Type) + ", so the column will be empty"})
 		case field.Generator == "":
 			continue
 		case !values.Known(field.Generator):

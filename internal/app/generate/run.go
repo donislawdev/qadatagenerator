@@ -162,16 +162,14 @@ func oneValue(entity recipe.Entity, field recipe.Field, row int, values Values,
 	if leftEmpty(field, at, source) {
 		return "", nil
 	}
-	if field.Generator == "" {
-		// A field built from a type or an expression rather than a generator.
-		// Expressions are reported in the plan as not evaluated, and a bare
-		// type has nothing to draw from yet, so both leave the column empty
-		// rather than inventing something.
+	if field.Generator == "" && !values.ProducesType(field.Type) {
+		// An expression, or a type this build cannot fill. Both are named in
+		// the plan, so the empty column is stated rather than silent.
 		return "", nil
 	}
 
 	request := Request{
-		Generator: field.Generator, At: at, Agrees: agrees,
+		Generator: field.Generator, Type: field.Type, At: at, Agrees: agrees,
 		MaxLength: field.MaxLength, HasMaxLength: field.HasMaxLength,
 		Unit: string(field.Unit()),
 	}

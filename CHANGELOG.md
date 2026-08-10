@@ -16,6 +16,23 @@ and has not happened.
 
 ### Added
 
+- **A field described only by a type now gets a value.** Write
+  `quantity: { type: integer }` or `amount: { type: decimal }` and the column
+  arrives filled instead of empty. A number never overruns the width its field
+  declares, and a decimal carries two places on every row.
+- **A column this build cannot fill says so before it is written.** A field
+  declared as a type this build has no values for, such as `money`, still comes
+  out empty, but the run names it and says why. It used to arrive blank with
+  nothing anywhere mentioning it.
+
+### Changed
+
+- **Damage aimed at a kind of field now reaches fields described by a
+  generator.** The corruption catalog aims at field types and a recipe usually
+  declares generators, so the type of a field is worked out from its generator:
+  a column drawing `pesel` is a column of identifiers, one drawing `birth_date`
+  is a column of dates. A type written in the recipe is used as written.
+
 - **`--license` now prints a machine readable document too.** Run
   `qadg --license --json` and the licenses, the third party modules and the
   reference data come out as JSON, each entry carrying the day its terms were
