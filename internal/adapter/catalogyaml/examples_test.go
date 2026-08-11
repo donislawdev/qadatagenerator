@@ -18,10 +18,15 @@ import (
 //
 // Every entry carries a before and after pair, and the architecture turns those
 // pairs into tests so that the specification cannot drift away from the
-// behaviour. The engine does not exist yet, so the pairs cannot be produced and
-// compared. What can be done today is the half that needs only the providers:
-// where an example is an identifier of a scheme this build can compute, the
-// values are checked against that scheme.
+// behaviour. Most of them cannot be produced and compared, because this build
+// implements two of the fifty two kinds of damage described. What can be done
+// for the rest is the half that needs only the providers: where an example is an
+// identifier of a scheme this build can compute, the values are checked against
+// that scheme.
+//
+// Where there is an implementation, the whole pair runs instead, beside the
+// mutator rather than here. L3.checksum.off_by_one is the first of those, and
+// its test produces the after value from the before one.
 //
 // The first run of this file found three entries with bad values, and two of
 // them contradicted their own note. That is worth more than the values it

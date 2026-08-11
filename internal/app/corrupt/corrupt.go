@@ -13,15 +13,16 @@
 //
 // # Where the refusals come from
 //
-// Five of them, and only the last belongs to a mutator:
+// Six of them, and only the last belongs to a mutator:
 //
 //   - the catalog does not describe this damage at all
 //   - this build has no implementation for it
 //   - the run cannot do what the entry requires
 //   - the entry does not cover this kind of field
+//   - the entry does not cover this numbering scheme
 //   - the mutator itself declined, for a reason only it could know
 //
-// The middle three are answered from data rather than from code. The entry
+// The middle four are answered from data rather than from code. The entry
 // declares what it requires and what it applies to, so those questions are
 // asked once here rather than once per mutator, and a mutator that never has to
 // ask them cannot answer them inconsistently.
@@ -130,6 +131,11 @@ func (e Engine) refuse(entry catalog.Entry, field recipe.FieldInfo) (bool, strin
 			"the field is %s and this damage applies to %s",
 			describeType(field.Type), strings.Join(entry.AppliesTo.FieldTypes, " or "))
 	}
+	if !entry.CoversProvider(field.Provider) {
+		return true, fmt.Sprintf(
+			"the field holds %s and this damage applies to %s",
+			describeProvider(field.Provider), strings.Join(entry.AppliesTo.Providers, " or "))
+	}
 	return false, ""
 }
 
@@ -228,6 +234,20 @@ func describeType(fieldType string) string {
 		return "of no declared type"
 	}
 	return fieldType
+}
+
+// describeProvider says which numbering scheme a field follows, in words.
+//
+// A column following none is the ordinary case rather than a fault, so the
+// sentence has to read as a statement about the data. Whoever reads it is
+// deciding whether their recipe asked for the wrong thing, and "the field holds
+// values of no numbering scheme" tells them that, while an empty name in the
+// middle of a sentence tells them nothing.
+func describeProvider(id string) string {
+	if strings.TrimSpace(id) == "" {
+		return "values of no numbering scheme"
+	}
+	return id + " values"
 }
 
 // list joins capability names for a sentence a person reads.

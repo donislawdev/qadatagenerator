@@ -16,6 +16,17 @@ and has not happened.
 
 ### Added
 
+- **A national identifier can now be broken at its check digit.** Ask for layer
+  L3 and the run changes the last digit of a personal number, a tax number, a
+  statistical number, a routing number or an international account number, so
+  the value keeps its shape and stops adding up. The manifest carries the value
+  before and after, and says a correct application should reject it.
+- **Damage meant for one numbering scheme is no longer aimed at another.** A
+  dataset holding both a personal number and a social security number has two
+  columns of the same type, and only one of them carries a check digit. Damage
+  aimed at a check digit now lands on the column that has one, and where no such
+  column exists the manifest says which scheme the damage was for and which the
+  column follows.
 - **A recipe can now order damage, and the run writes down what it did.** Give a
   recipe a `policy` section and `qadg generate` produces the dataset, breaks it
   where the policy says, and leaves an `expectation-manifest.json` beside the

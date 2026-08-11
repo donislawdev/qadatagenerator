@@ -256,6 +256,40 @@ func (e Entry) CoversFieldType(fieldType string) bool {
 	return false
 }
 
+// CoversProvider reports whether this mutator is meaningful for a value of this
+// numbering scheme.
+//
+// # Why the engine has to ask this and not only the field type
+//
+// Every national identifier in a dataset is a field of type identifier, and the
+// schemes disagree about what they carry. Damage aimed at a check digit is
+// meaningless for a scheme that has none: the social security number has no
+// check digit at all, so changing one of its digits leaves a value the issuer
+// would still call well formed. Asked only about the field type, the engine
+// would aim such damage at that column and record a hard expectation of
+// rejection for a value nothing rejects. That is the quiet disagreement this
+// project has already paid for once, when a national identifier generated a
+// correct value that contradicted its own row and said nothing.
+//
+// The entry already names the schemes it covers, so this reads a published
+// field rather than a second list. Eight of the fifty two entries name schemes
+// and the rest say any, which is what makes this a question about eight entries
+// rather than a gate in front of all of them.
+//
+// A field belonging to no scheme answers no to every entry that names one,
+// which is the same answer as naming the wrong scheme and is correct for the
+// same reason: nothing has said this column follows the rules the damage needs.
+// The reserved word none needs no branch here, because an entry that covers no
+// scheme matches nothing and falls through to the same answer.
+func (e Entry) CoversProvider(id string) bool {
+	for _, declared := range e.AppliesTo.Providers {
+		if declared == Any || declared == id {
+			return true
+		}
+	}
+	return false
+}
+
 // InLayer returns the entries of one layer, in identifier order.
 func (c Catalog) InLayer(layer Layer) []Entry {
 	var entries []Entry

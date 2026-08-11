@@ -385,6 +385,21 @@ var Guards = []Guard{
 	{"damage that would change nothing is refused rather than reported as done", "TestDamageThatWouldChangeNothingIsRefusedWithAReason", "internal/adapter/mutators", ByMutation},
 	{"a mutator meant for a whole file cannot be aimed at a column", "TestTheEntrySaysWhichFieldsItSuits", "internal/domain/catalog", ByMutation},
 
+	// --- damage to a check digit, and the dimension it forced ---------------
+	//
+	// 🔴 Every national identifier is a field of type identifier and they
+	// disagree about what they carry. Damage aimed at a check digit is
+	// meaningless for a scheme that has none, and applied there it would write
+	// a hard expectation of rejection over a value nothing rejects. The type
+	// cannot answer that, so the entry is asked which schemes it covers and the
+	// schema says which one a column follows.
+	{"a value damaged at its check digit is one its own scheme refuses", "TestEverySchemeThisDamageCoversStopsAcceptingTheDamagedValue", "internal/adapter/mutators", ByMutation},
+	{"the published example is what this build produces", "TestTheCatalogExampleIsWhatThisMutatorProduces", "internal/adapter/mutators", ByMutation},
+	{"damage refuses a position where the expectation it declares is not certain", "TestChecksumDamageThatCannotBeDoneIsRefusedWithAReason", "internal/adapter/mutators", ByMutation},
+	{"damage meant for named schemes cannot be aimed at another", "TestTheEntrySaysWhichSchemesItSuits", "internal/domain/catalog", ByMutation},
+	{"a column says which numbering scheme it follows", "TestAFieldDrawnFromASchemeSaysWhichOne", "internal/adapter/values", ByMutation},
+	{"this build does not quietly stop carrying out damage it used to", "TestThisBuildHasNotLostAMutator", "internal/adapter/mutators", ByMutation},
+
 	// --- the engine: one ordered damage, exactly one entry ------------------
 	//
 	// The failure this has to make impossible is not damage going wrong but
@@ -393,6 +408,7 @@ var Guards = []Guard{
 	{"damage that did not happen comes back saying why", "TestEveryWayDamageCanFailStillProducesAnEntry", "internal/app/corrupt", ByMutation},
 	{"damage that cannot be undone offers no way back", "TestIrreversibleDamageDoesNotCarryTheOriginal", "internal/app/corrupt", ByMutation},
 	{"damage lands only on the fields its entry covers", "TestDamageAimedAtAFieldItDoesNotCoverIsRefusedWithBothSides", "internal/app/corrupt", ByMutation},
+	{"damage lands only on the numbering schemes its entry covers", "TestDamageAimedAtASchemeItDoesNotCoverIsRefusedWithBothSides", "internal/app/corrupt", ByMutation},
 	{"nothing the engine produces is unrecordable", "TestNoEntryThisEngineProducesIsOneTheManifestWouldRefuse", "internal/app/corrupt", ByMutation},
 
 	// --- the corruption policy ----------------------------------------------
@@ -429,6 +445,7 @@ var Guards = []Guard{
 	{"every kind of damage is ordered before any repeats", "TestEveryKindOfDamageIsOrderedBeforeAnyRepeats", "internal/app/corrupt", ByMutation},
 	{"which rows are damaged follows from the seed", "TestAShareOfRowsDamagesAboutThatShare", "internal/app/corrupt", ByMutation},
 	{"a column the policy excluded is never damaged", "TestAnExcludedColumnIsNeverAimedAt", "internal/app/corrupt", ByMutation},
+	{"damage is aimed at a column of the scheme it covers when the dataset has one", "TestDamageMeantForOneSchemeLandsOnThatScheme", "internal/app/corrupt", ByMutation},
 	{"a policy that excludes everything is refused rather than silent", "TestAPolicyThatExcludesEverythingIsRefused", "internal/app/corrupt", ByMutation},
 
 	// --- the manifest on disk ------------------------------------------------

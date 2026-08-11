@@ -140,6 +140,84 @@ func TestAnExcludedColumnIsNeverAimedAt(t *testing.T) {
 	}
 }
 
+// schemeCatalog builds one entry aimed at identifiers of named schemes, which
+// is how the eight entries naming schemes are written in the catalog.
+func schemeCatalog(t *testing.T, id catalog.ID, schemes ...string) catalog.Catalog {
+	t.Helper()
+	built, problems := catalog.New("0.1", "draft", []catalog.Entry{{
+		ID: id, Layer: catalog.Layer(strings.SplitN(string(id), ".", 2)[0]), Summary: "damage",
+		AppliesTo: catalog.AppliesTo{
+			FieldTypes: []string{"identifier"}, Formats: []string{catalog.Any}, Providers: schemes,
+		},
+		Expectation: catalog.Rejection, Confidence: catalog.Hard,
+		Example: catalog.Example{Before: "before", After: "after"},
+	}})
+	if len(problems) > 0 {
+		t.Fatalf("the catalog for this test is not usable: %v", problems)
+	}
+	return built
+}
+
+// identifiersView is a schema with a text column and two identifier columns of
+// different schemes, which is the shape that tells the three tiers apart.
+func identifiersView() recipe.SchemaView {
+	return schemeView{}
+}
+
+// The rest of the view is written out rather than embedded, for the same reason
+// the real one is: adding a method to the interface should fail to compile here
+// instead of silently inheriting an answer nobody thought about.
+type schemeView struct{}
+
+func (schemeView) EntityNames() []string { return []string{"customer"} }
+
+func (schemeView) FieldsOf(string) []recipe.FieldInfo {
+	return []recipe.FieldInfo{
+		{Name: "name", Type: "string"},
+		{Name: "ssn", Type: "identifier", Provider: "US.ssn"},
+		{Name: "pesel", Type: "identifier", Provider: "PL.pesel"},
+	}
+}
+
+func (schemeView) ParentsOf(string) []recipe.ParentInfo { return nil }
+func (schemeView) RulesOf(string) []recipe.Rule         { return nil }
+func (schemeView) PrimaryKeyOf(string) []string         { return nil }
+
+// Damage meant for one scheme lands on the column that follows it, when the
+// dataset carries columns of several.
+func TestDamageMeantForOneSchemeLandsOnThatScheme(t *testing.T) {
+	selector := selectorFor(t, recipe.Policy{Layers: []string{"L3"}, Rows: "100%"},
+		schemeCatalog(t, "L3.checksum.off_by_one", "PL.pesel"), identifiersView())
+
+	for row := 0; row < 20; row++ {
+		for _, order := range selector.Orders("customer", row, 20) {
+			if order.Field != "pesel" {
+				t.Fatalf("row %d aimed check digit damage at %q", row, order.Field)
+			}
+		}
+	}
+}
+
+// 🔴 When no column follows the scheme, the order points at one of the right
+// type anyway, so that the refusal names the difference that is real.
+//
+// Pointing at the text column instead would have the manifest say the type is
+// wrong, in a dataset that carries a column of exactly the right type. That
+// sentence would send whoever reads it looking for the wrong thing.
+func TestWithNoColumnOfThatSchemeTheOrderStillNamesAnIdentifier(t *testing.T) {
+	selector := selectorFor(t, recipe.Policy{Layers: []string{"L3"}, Rows: "100%"},
+		schemeCatalog(t, "L3.checksum.off_by_one", "iban"), identifiersView())
+
+	orders := selector.Orders("customer", 0, 20)
+	if len(orders) == 0 {
+		t.Fatal("no order was produced at all, which would be damage going missing")
+	}
+	if orders[0].Field != "ssn" && orders[0].Field != "pesel" {
+		t.Errorf("the order names %q, which is not a column of the type this damage covers",
+			orders[0].Field)
+	}
+}
+
 // Excluding every column is refused at the start rather than producing orders
 // that can never land. A name matching everything and one matching nothing look
 // alike in a recipe, and only the arithmetic tells them apart.

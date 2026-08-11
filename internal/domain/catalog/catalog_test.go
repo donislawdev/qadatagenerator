@@ -209,6 +209,38 @@ func TestTheEntrySaysWhichFieldsItSuits(t *testing.T) {
 	}
 }
 
+// Which numbering schemes a mutator suits is the entry's answer too, and being
+// an identifier is not enough to be one of them.
+//
+// The case that matters is the last two. A column following no published scheme
+// answers no to an entry that names schemes, because nothing has said its values
+// obey the rules the damage needs, and yes to one that says any, because that
+// entry put no limit on the dimension in the first place.
+func TestTheEntrySaysWhichSchemesItSuits(t *testing.T) {
+	cases := []struct {
+		what     string
+		declared []string
+		scheme   string
+		suits    bool
+	}{
+		{"a scheme it names", []string{"PL.pesel", "PL.nip"}, "PL.nip", true},
+		{"a scheme it does not name", []string{"PL.pesel", "PL.nip"}, "US.ssn", false},
+		{"any means every scheme", []string{catalog.Any}, "US.ssn", true},
+		{"a column following no scheme, against named ones", []string{"PL.pesel"}, "", false},
+		{"a column following no scheme, against any", []string{catalog.Any}, "", true},
+		{"an empty declaration suits nothing", nil, "PL.pesel", false},
+	}
+	for _, one := range cases {
+		t.Run(one.what, func(t *testing.T) {
+			entry := usable()
+			entry.AppliesTo.Providers = one.declared
+			if got := entry.CoversProvider(one.scheme); got != one.suits {
+				t.Errorf("declared %v against %q gave %v", one.declared, one.scheme, got)
+			}
+		})
+	}
+}
+
 func TestLookupSaysWhenItDoesNotKnow(t *testing.T) {
 	built, _ := catalog.New("0.1", "draft", []catalog.Entry{usable()})
 	if _, ok := built.Lookup("L3.checksum.invented"); ok {

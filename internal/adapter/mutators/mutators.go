@@ -28,7 +28,8 @@ import (
 // instead of a value quietly filed in the wrong place. A test holds the two to
 // each other.
 var registry = map[catalog.ID]mutator.Mutator{
-	stringInNumericID: stringInNumeric{},
+	stringInNumericID:  stringInNumeric{},
+	checksumOffByOneID: checksumOffByOne{},
 }
 
 // Lookup returns the mutator for an identifier and whether this build has one.

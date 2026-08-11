@@ -3,7 +3,7 @@ package values
 import "github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 
 // Schema is a recipe seen as a shape of data, with the type of every field
-// filled in.
+// filled in and the numbering scheme named wherever there is one.
 //
 // # Why this is not a decorator over the schema view
 //
@@ -33,8 +33,9 @@ func SchemaOf(rec recipe.Recipe, source Source) Schema {
 	return Schema{rec: rec, source: source}
 }
 
-// FieldsOf returns the fields of one entity, with the type filled in from the
-// generator wherever the recipe declared one instead of a type.
+// FieldsOf returns the fields of one entity, with the type and the numbering
+// scheme filled in from the generator wherever the recipe declared one instead
+// of a type.
 //
 // A recipe field names exactly one of type, generator or expression, so a field
 // with a generator carries no type at all. Left that way, the engine asks each
@@ -66,6 +67,13 @@ func (s Schema) FieldsOf(entity string) []recipe.FieldInfo {
 		// and a mutation that can fail.
 		if kind, produces := s.source.TypeOf(field.Generator); produces {
 			fields[i].Type = kind
+		}
+		// Which scheme the column follows, for the same reason as the type and
+		// from the same place. A generator drawing on a word list or on
+		// arithmetic leaves this empty, which is the truthful answer: nothing
+		// has said those values obey any published numbering rules.
+		if scheme, draws := s.source.ProviderOf(field.Generator); draws {
+			fields[i].Provider = scheme
 		}
 	}
 	return fields

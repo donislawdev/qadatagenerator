@@ -159,6 +159,21 @@ func (s Source) TypeOf(generator string) (string, bool) {
 	return kind, known
 }
 
+// ProviderOf says which numbering scheme a generator draws on, and whether it
+// draws on one at all.
+//
+// The answer comes from the registry rather than from a table beside it, for
+// the same reason the capabilities do: a second list is a place for the two to
+// disagree, and a generator added without its scheme would then be a column the
+// engine believes belongs to nothing.
+func (s Source) ProviderOf(generator string) (string, bool) {
+	known, found := producers[generator]
+	if !found || known.behind == nil {
+		return "", false
+	}
+	return known.behind.ID(), true
+}
+
 // ProducesType reports whether this build can fill a field described by that
 // type alone.
 //

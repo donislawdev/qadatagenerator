@@ -263,6 +263,22 @@ type FieldInfo struct {
 	// the field is not one. A mutator that puts a value outside the set has
 	// to know the set.
 	Values []string
+	// Provider is the numbering scheme the column follows, such as PL.pesel,
+	// empty when it follows none.
+	//
+	// It is not the generator under another name, and the difference is what
+	// makes it belong here. A generator is how a value came to exist, which
+	// is the first pillar's business and none of the engine's. A scheme is
+	// what the value has to satisfy, which is a property of the data itself:
+	// in the mode that reads somebody else's file there is no generator at
+	// all, and the column still holds tax numbers or it does not.
+	//
+	// The engine needs it because the field type cannot answer for it. Every
+	// identifier is of type identifier, and they differ on whether they
+	// carry a check digit, encode a date or have a range nobody is issued
+	// from. A catalog entry names the schemes it covers precisely because
+	// that difference exists.
+	Provider string
 }
 
 // ParentInfo is what the engine is allowed to know about a relation.

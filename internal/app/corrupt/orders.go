@@ -192,37 +192,60 @@ func (s *Selector) fieldFor(entry catalog.Entry, entity string) string {
 	if !aimsAtAField(entry) {
 		return ""
 	}
-	var suitable, available []string
+	covered, typed, available := s.candidates(entry, entity)
+	if len(covered) > 0 {
+		// Drawn rather than taken in order, so that two entries aimed at the
+		// same kind of field do not always land on the same column.
+		at := seed.Coordinate{Entity: entity, Field: string(entry.ID), Purpose: "corrupt:field"}
+		return covered[s.source.IntN(at, int64(len(covered)))]
+	}
+	// 🔴 No column this entry covers, and the order still has to name one.
+	//
+	// The obvious answer, leaving the location without a field, produces an
+	// entry the manifest model refuses: a defect in a value carries an entity, a
+	// row and a field. Found by running this, not by reading it.
+	//
+	// So the order points at a column it could have damaged and the engine
+	// refuses it there, in a sentence naming what differs. The nearest miss goes
+	// first, because that sentence is only useful when it names the real
+	// difference: a dataset holding one national identifier and damage meant for
+	// another has a column of exactly the right type, and pointing somewhere
+	// else would have the manifest say the type is wrong when it is not.
+	// Dropping the order instead would be the silence this product exists to
+	// find.
+	for _, nearest := range [][]string{typed, available} {
+		if len(nearest) > 0 {
+			return nearest[0]
+		}
+	}
+	return ""
+}
+
+// candidates sorts the columns of an entity by how well they suit an entry:
+// those it covers outright, those of the right type following the wrong scheme,
+// and the rest. Columns the policy excluded are in none of them.
+//
+// Both halves of what the entry covers are asked, because either alone picks
+// wrongly. A dataset carrying a national identifier and a social security number
+// has two columns of type identifier, and damage aimed at a check digit is
+// meaningful in one of them: asked about the type only, this would draw between
+// them and refuse half the time while a column it could have damaged sat beside
+// it.
+func (s *Selector) candidates(entry catalog.Entry, entity string) (covered, typed, available []string) {
 	for _, field := range s.view.FieldsOf(entity) {
 		if s.excluded(field.Name) {
 			continue
 		}
 		available = append(available, field.Name)
-		if entry.CoversFieldType(field.Type) {
-			suitable = append(suitable, field.Name)
+		if !entry.CoversFieldType(field.Type) {
+			continue
+		}
+		typed = append(typed, field.Name)
+		if entry.CoversProvider(field.Provider) {
+			covered = append(covered, field.Name)
 		}
 	}
-	if len(suitable) == 0 {
-		// 🔴 No column of the right kind, and the order still has to name one.
-		//
-		// The obvious answer, leaving the location without a field, produces an
-		// entry the manifest model refuses: a defect in a value carries an
-		// entity, a row and a field. Found by running this, not by reading it.
-		//
-		// So the order points at the first column it could have damaged and the
-		// engine refuses it there, saying the field is of one kind and the
-		// damage is for another. That sentence is true and useful: it tells the
-		// reader this dataset has no column of that kind at all. Dropping the
-		// order instead would be the silence this product exists to find.
-		if len(available) == 0 {
-			return ""
-		}
-		return available[0]
-	}
-	// Drawn rather than taken in order, so that two entries aimed at the same
-	// kind of field do not always land on the same column.
-	at := seed.Coordinate{Entity: entity, Field: string(entry.ID), Purpose: "corrupt:field"}
-	return suitable[s.source.IntN(at, int64(len(suitable)))]
+	return covered, typed, available
 }
 
 // excluded reports whether the policy told this column to be left alone.

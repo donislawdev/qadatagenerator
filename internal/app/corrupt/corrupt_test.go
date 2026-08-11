@@ -175,6 +175,59 @@ func TestDamageAimedAtAFieldItDoesNotCoverIsRefusedWithBothSides(t *testing.T) {
 	}
 }
 
+// identifierEntry is damage meant for two numbering schemes and not for others,
+// which is how the eight entries naming schemes are written in the catalog.
+func identifierEntry() catalog.Entry {
+	scheme := entry()
+	scheme.AppliesTo.FieldTypes = []string{"identifier"}
+	scheme.AppliesTo.Providers = []string{"PL.pesel", "PL.nip"}
+	return scheme
+}
+
+// 🔴 The entry declares the schemes it covers, and being an identifier is not
+// enough to be one of them.
+//
+// Every national identifier in a dataset is a field of type identifier, and they
+// disagree about what they carry: the social security number has no check digit
+// at all. Damage aimed at a check digit that landed there would change a digit,
+// leave a value the issuer still calls well formed, and write a hard expectation
+// of rejection beside it. Nothing would reject it, so the test reading that
+// manifest would report a failure that is ours rather than theirs.
+func TestDamageAimedAtASchemeItDoesNotCoverIsRefusedWithBothSides(t *testing.T) {
+	engine := corrupt.New(described(t, identifierEntry()),
+		registry{damageID: stated{damageID, mutator.Done("666123457")}}, able())
+
+	_, defect := engine.Apply(order(),
+		recipe.FieldInfo{Name: "ssn", Type: "identifier", Provider: "US.ssn"},
+		"666123456", seed.Coordinate{})
+	if defect.Applied {
+		t.Fatal("a check digit was broken in a scheme that has none")
+	}
+	for _, want := range []string{"the field holds US.ssn values", "PL.pesel or PL.nip"} {
+		if !strings.Contains(defect.FailureReason, want) {
+			t.Errorf("the reason does not say %q: %s", want, defect.FailureReason)
+		}
+	}
+}
+
+// A column of the right type following no published scheme is the ordinary case
+// in the take and corrupt mode, where nothing has said what the values obey. The
+// refusal has to read as a sentence about the data rather than naming an empty
+// string.
+func TestAFieldFollowingNoSchemeIsRefusedInWords(t *testing.T) {
+	engine := corrupt.New(described(t, identifierEntry()),
+		registry{damageID: stated{damageID, mutator.Done("x")}}, able())
+
+	_, defect := engine.Apply(order(),
+		recipe.FieldInfo{Name: "reference", Type: "identifier"}, "1234563218", seed.Coordinate{})
+	if defect.Applied {
+		t.Fatal("damage meant for two schemes was applied to a column following neither")
+	}
+	if !strings.Contains(defect.FailureReason, "values of no numbering scheme") {
+		t.Errorf("the reason reads badly for a column with no scheme: %s", defect.FailureReason)
+	}
+}
+
 // A field with no declared type is what the take and corrupt mode will hand in
 // before anything has worked one out, so the refusal has to read sensibly
 // rather than naming an empty string.
