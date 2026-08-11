@@ -796,6 +796,7 @@ mutators:
     requires:
       - identifier.check-digit
       - identifier.encodes-date
+      - schema.field-relations
     example:
       before: "08282298762"
       after: "85011412345"
@@ -821,6 +822,7 @@ mutators:
     requires:
       - identifier.check-digit
       - identifier.encodes-gender
+      - schema.field-relations
     example:
       before: "85011412345"
       after: "85011412352"

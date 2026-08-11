@@ -16,6 +16,13 @@ and has not happened.
 
 ### Added
 
+- **A row can now carry a correct identifier that contradicts the row itself.**
+  Ask for layer L4 and the run rebuilds a personal number so it encodes the
+  other gender than the gender column beside it. Nothing is malformed: the
+  number passes its own validator and the column holds a legal value, and only
+  the pair is wrong. This is the defect applications almost never catch, and the
+  manifest marks the expectation as soft because whether to reject such a row is
+  the application's own decision.
 - **A national identifier can now be broken at its check digit.** Ask for layer
   L3 and the run changes the last digit of a personal number, a tax number, a
   statistical number, a routing number or an international account number, so

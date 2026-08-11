@@ -19,6 +19,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/domain/mutator"
+	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
@@ -141,7 +142,8 @@ func withDamage(built recipe.Recipe, source values.Source, writer generate.Write
 		return nil, nil, err
 	}
 	entries := manifestjson.New(file, version.Manifest)
-	engine := corrupt.New(described, mutatorRegistry{}, canDo(built, source, schema))
+	engine := corrupt.New(described, mutatorRegistry{}, schemeRegistry{source},
+		canDo(built, source, schema))
 	wrapped := corrupted.New(writer, engine, &selector, entries, schema)
 	return wrapped, &damage{writer: wrapped, entries: entries, selector: &selector}, nil
 }
@@ -173,6 +175,18 @@ type mutatorRegistry struct{}
 
 func (mutatorRegistry) Lookup(id catalog.ID) (mutator.Mutator, bool) {
 	return mutators.Lookup(id)
+}
+
+// schemeRegistry adapts the registry of generators to the port the engine takes
+// for numbering schemes.
+//
+// It is the same registry the values come from, which is the point: a column
+// filled by the national identifier generator is damaged by the national
+// identifier provider, and there is no second list where the two could disagree.
+type schemeRegistry struct{ source values.Source }
+
+func (r schemeRegistry) Of(scheme string) (provider.Provider, bool) {
+	return r.source.ProviderNamed(scheme)
 }
 
 // finishManifest closes the document with the envelope.

@@ -36,6 +36,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/domain/mutator"
+	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
 )
@@ -50,6 +51,20 @@ type Mutators interface {
 	// Lookup returns the mutator for an identifier and whether this build
 	// has one.
 	Lookup(id catalog.ID) (mutator.Mutator, bool)
+}
+
+// Providers is where numbering schemes come from.
+//
+// A second port beside the mutators, and for the same reason: a use case may not
+// know where implementations live. It answers by the identifier the catalog and
+// the schema both use, so nothing here has to know that a scheme is a Go type in
+// an adapter.
+type Providers interface {
+	// Of returns the provider behind a scheme identifier and whether this
+	// build has one. A build without it is not a fault: the catalog names
+	// schemes nobody has implemented yet, and a mutator handed nothing
+	// refuses in a sentence rather than guessing.
+	Of(scheme string) (provider.Provider, bool)
 }
 
 // Order is one damage a policy asked for, in one place.
@@ -77,16 +92,18 @@ type Order struct {
 
 // Engine turns ordered damage into damage done and said.
 type Engine struct {
-	catalog  catalog.Catalog
-	mutators Mutators
+	catalog   catalog.Catalog
+	mutators  Mutators
+	providers Providers
 	// can is what this run is able to do, gathered from the writer, the
 	// schema, the providers and the corpus taking part in it.
 	can capability.Set
 }
 
 // New assembles an engine.
-func New(described catalog.Catalog, implementations Mutators, can capability.Set) Engine {
-	return Engine{catalog: described, mutators: implementations, can: can}
+func New(described catalog.Catalog, implementations Mutators, schemes Providers,
+	can capability.Set) Engine {
+	return Engine{catalog: described, mutators: implementations, providers: schemes, can: can}
 }
 
 // Apply carries out one ordered damage and returns the entry describing it.
@@ -106,15 +123,33 @@ func (e Engine) Apply(order Order, field recipe.FieldInfo, value string, at seed
 
 	damage, _ := e.mutators.Lookup(order.Mutator)
 	outcome := damage.Damage(mutator.Target{
-		Value:  value,
-		Field:  field,
-		At:     at,
-		Params: parametersOf(entry),
+		Value:    value,
+		Field:    field,
+		At:       at,
+		Params:   parametersOf(entry),
+		Provider: e.schemeOf(field),
 	})
 	if !outcome.Applied() {
 		return value, refused(entry, order, outcome.Reason())
 	}
 	return outcome.Value(), applied(entry, order, value, outcome.Value())
+}
+
+// schemeOf returns the provider behind a column, or nothing.
+//
+// Nothing is answered rather than refused, because a mutator that does not need
+// a scheme is the ordinary case and most of the catalog is that. The one that
+// needs it says so by asking, and refuses in its own words when the answer is
+// empty.
+func (e Engine) schemeOf(field recipe.FieldInfo) provider.Provider {
+	if e.providers == nil || field.Provider == "" {
+		return nil
+	}
+	found, has := e.providers.Of(field.Provider)
+	if !has {
+		return nil
+	}
+	return found
 }
 
 // refuse asks the three questions that are answered from the entry rather than

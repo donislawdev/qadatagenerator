@@ -400,6 +400,19 @@ var Guards = []Guard{
 	{"a column says which numbering scheme it follows", "TestAFieldDrawnFromASchemeSaysWhichOne", "internal/adapter/values", ByMutation},
 	{"this build does not quietly stop carrying out damage it used to", "TestThisBuildHasNotLostAMutator", "internal/adapter/mutators", ByMutation},
 
+	// --- damage that has to build a value rather than rewrite one -----------
+	//
+	// 🔴 Layer four damage leaves a value that is correct on its own and wrong
+	// only beside the column next to it, which is the defect applications
+	// almost never catch and the reason the second pillar exists. Producing one
+	// means rebuilding the identifier around a different answer, check digit
+	// included, so the scheme itself has to do the writing and has to reach the
+	// mutator to do it.
+	{"the scheme behind a column reaches the mutator that damages it", "TestTheSchemeBehindAColumnReachesTheMutator", "internal/app/corrupt", ByMutation},
+	{"an identifier left disagreeing with its row is still correct on its own", "TestTheGenderFlippedIdentifierIsStillCorrectOnItsOwn", "internal/adapter/mutators", ByMutation},
+	{"a value that did not move is never recorded as damaged", "TestASchemeThatRebuildsNothingIsRefused", "internal/adapter/mutators", ByMutation},
+	{"damage about two fields disagreeing needs both of them to exist", "TestGenderCoherenceDamageRequiresARelationToDisagreeWith", "internal/adapter/mutators", ByMutation},
+
 	// --- the engine: one ordered damage, exactly one entry ------------------
 	//
 	// The failure this has to make impossible is not damage going wrong but

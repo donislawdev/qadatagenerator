@@ -31,6 +31,7 @@ package mutator
 
 import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
+	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
 )
@@ -49,6 +50,29 @@ type Target struct {
 	// mutator that chooses between variants chooses the same one every time
 	// for one seed.
 	At seed.Coordinate
+	// Provider is the numbering scheme behind the column, nil when the column
+	// follows none or when this build has no implementation of the one it
+	// names.
+	//
+	// # Why the whole provider and not the one method a mutator wants
+	//
+	// The schemes differ in what they can be asked. One encodes a date, another
+	// a gender, another has blocks nobody is issued from, and the contract
+	// carries a separate interface for each of those. A mutator asks for the
+	// one it needs with a type assertion, which is the same question the
+	// provider contract already answers in both directions when a provider is
+	// checked.
+	//
+	// That assertion also settles the nil case without a second check: a column
+	// following no scheme fails it exactly as a scheme that cannot do what was
+	// asked, and both are the same refusal to whoever reads the manifest.
+	//
+	// # Why the engine resolves it rather than the mutator
+	//
+	// A mutator may not know where implementations live. The same rule put the
+	// registry of damage behind a port, and this is the second one through the
+	// same door.
+	Provider provider.Provider
 	// Params are the knobs, with the catalog's defaults already applied and
 	// the policy's overrides on top.
 	Params Parameters

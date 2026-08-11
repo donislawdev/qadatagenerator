@@ -174,6 +174,21 @@ func (s Source) ProviderOf(generator string) (string, bool) {
 	return known.behind.ID(), true
 }
 
+// ProviderNamed returns the scheme with that identifier and whether this build
+// carries it.
+//
+// It walks the registry rather than holding a second map keyed by identifier.
+// The registry is small, this is asked once per damaged value, and a second map
+// is a second place for a scheme to be missing from.
+func (s Source) ProviderNamed(scheme string) (provider.Provider, bool) {
+	for _, known := range producers {
+		if known.behind != nil && known.behind.ID() == scheme {
+			return known.behind, true
+		}
+	}
+	return nil, false
+}
+
 // ProducesType reports whether this build can fill a field described by that
 // type alone.
 //

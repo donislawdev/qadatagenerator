@@ -9,6 +9,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/domain/mutator"
+	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
 )
@@ -29,6 +30,29 @@ func (r registry) Lookup(id catalog.ID) (mutator.Mutator, bool) {
 	found, ok := r[id]
 	return found, ok
 }
+
+// noSchemes is a build carrying no numbering scheme, which is what most of the
+// catalog needs and what the take and corrupt mode starts from.
+type noSchemes struct{}
+
+func (noSchemes) Of(string) (provider.Provider, bool) { return nil, false }
+
+// schemes is a build that carries the named ones.
+type schemes map[string]provider.Provider
+
+func (s schemes) Of(scheme string) (provider.Provider, bool) {
+	found, ok := s[scheme]
+	return found, ok
+}
+
+// aScheme is a provider that does nothing but be recognisable, so that a test
+// can ask whether the right one arrived rather than whether any did.
+type aScheme struct{ id string }
+
+func (a aScheme) ID() string                              { return a.id }
+func (aScheme) Capabilities() []capability.Name           { return nil }
+func (aScheme) Generate(provider.Request) (string, error) { return "", nil }
+func (aScheme) Validate(string) provider.Verdict          { return provider.Valid() }
 
 const damageID catalog.ID = "L2.type.string_in_numeric"
 
@@ -69,7 +93,7 @@ func able() capability.Set { return capability.NewSet(capability.SchemaFieldType
 
 func TestDamageThatHappenedIsRecordedWithBothValues(t *testing.T) {
 	engine := corrupt.New(described(t, entry()),
-		registry{damageID: stated{damageID, mutator.Done("n/a")}}, able())
+		registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able())
 
 	value, defect := engine.Apply(order(), numeric(), "1250", seed.Coordinate{})
 	if value != "n/a" {
@@ -98,7 +122,7 @@ func TestIrreversibleDamageDoesNotCarryTheOriginal(t *testing.T) {
 	oneWay := entry()
 	oneWay.Reversible = false
 	engine := corrupt.New(described(t, oneWay),
-		registry{damageID: stated{damageID, mutator.Done("n/a")}}, able())
+		registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able())
 
 	_, defect := engine.Apply(order(), numeric(), "1250", seed.Coordinate{})
 	if defect.HasValueBefore || defect.ValueBefore != "" {
@@ -118,16 +142,16 @@ func TestEveryWayDamageCanFailStillProducesAnEntry(t *testing.T) {
 		says   string
 	}{
 		{"the catalog does not describe it",
-			corrupt.New(described(t, entry()), registry{}, able()), "no entry in the corruption catalog"},
+			corrupt.New(described(t, entry()), registry{}, noSchemes{}, able()), "no entry in the corruption catalog"},
 		{"this build has no implementation",
-			corrupt.New(described(t, entry()), registry{}, able()), "carries no implementation"},
+			corrupt.New(described(t, entry()), registry{}, noSchemes{}, able()), "carries no implementation"},
 		{"the run cannot do what it needs",
 			corrupt.New(described(t, entry()),
-				registry{damageID: stated{damageID, mutator.Done("n/a")}}, capability.NewSet()),
+				registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, capability.NewSet()),
 			"this run cannot schema.field-type"},
 		{"the mutator declined",
 			corrupt.New(described(t, entry()),
-				registry{damageID: stated{damageID, mutator.Skipped("the value is already n/a")}}, able()),
+				registry{damageID: stated{damageID, mutator.Skipped("the value is already n/a")}}, noSchemes{}, able()),
 			"the value is already n/a"},
 	}
 
@@ -162,7 +186,7 @@ func TestEveryWayDamageCanFailStillProducesAnEntry(t *testing.T) {
 // aimed at a name is refused here rather than inside every mutator.
 func TestDamageAimedAtAFieldItDoesNotCoverIsRefusedWithBothSides(t *testing.T) {
 	engine := corrupt.New(described(t, entry()),
-		registry{damageID: stated{damageID, mutator.Done("n/a")}}, able())
+		registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able())
 
 	_, defect := engine.Apply(order(), recipe.FieldInfo{Name: "surname", Type: "string"}, "Nowak", seed.Coordinate{})
 	if defect.Applied {
@@ -195,7 +219,7 @@ func identifierEntry() catalog.Entry {
 // manifest would report a failure that is ours rather than theirs.
 func TestDamageAimedAtASchemeItDoesNotCoverIsRefusedWithBothSides(t *testing.T) {
 	engine := corrupt.New(described(t, identifierEntry()),
-		registry{damageID: stated{damageID, mutator.Done("666123457")}}, able())
+		registry{damageID: stated{damageID, mutator.Done("666123457")}}, noSchemes{}, able())
 
 	_, defect := engine.Apply(order(),
 		recipe.FieldInfo{Name: "ssn", Type: "identifier", Provider: "US.ssn"},
@@ -216,7 +240,7 @@ func TestDamageAimedAtASchemeItDoesNotCoverIsRefusedWithBothSides(t *testing.T) 
 // string.
 func TestAFieldFollowingNoSchemeIsRefusedInWords(t *testing.T) {
 	engine := corrupt.New(described(t, identifierEntry()),
-		registry{damageID: stated{damageID, mutator.Done("x")}}, able())
+		registry{damageID: stated{damageID, mutator.Done("x")}}, noSchemes{}, able())
 
 	_, defect := engine.Apply(order(),
 		recipe.FieldInfo{Name: "reference", Type: "identifier"}, "1234563218", seed.Coordinate{})
@@ -233,7 +257,7 @@ func TestAFieldFollowingNoSchemeIsRefusedInWords(t *testing.T) {
 // rather than naming an empty string.
 func TestAFieldWithNoDeclaredTypeIsRefusedInWords(t *testing.T) {
 	engine := corrupt.New(described(t, entry()),
-		registry{damageID: stated{damageID, mutator.Done("n/a")}}, able())
+		registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able())
 
 	_, defect := engine.Apply(order(), recipe.FieldInfo{Name: "amount"}, "1250", seed.Coordinate{})
 	if !strings.Contains(defect.FailureReason, "of no declared type") {
@@ -247,10 +271,10 @@ func TestAFieldWithNoDeclaredTypeIsRefusedInWords(t *testing.T) {
 func TestNoEntryThisEngineProducesIsOneTheManifestWouldRefuse(t *testing.T) {
 	engines := map[string]corrupt.Engine{
 		"applied": corrupt.New(described(t, entry()),
-			registry{damageID: stated{damageID, mutator.Done("n/a")}}, able()),
+			registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able()),
 		"declined": corrupt.New(described(t, entry()),
-			registry{damageID: stated{damageID, mutator.Skipped("nothing to do here")}}, able()),
-		"unimplemented": corrupt.New(described(t, entry()), registry{}, able()),
+			registry{damageID: stated{damageID, mutator.Skipped("nothing to do here")}}, noSchemes{}, able()),
+		"unimplemented": corrupt.New(described(t, entry()), registry{}, noSchemes{}, able()),
 	}
 
 	for what, engine := range engines {
@@ -271,7 +295,7 @@ func TestNoEntryThisEngineProducesIsOneTheManifestWouldRefuse(t *testing.T) {
 // because the manifest refuses an entry without one and the identifier carries
 // it in front.
 func TestDamageNobodyDescribedStillCarriesAReadableLayer(t *testing.T) {
-	engine := corrupt.New(described(t, entry()), registry{}, able())
+	engine := corrupt.New(described(t, entry()), registry{}, noSchemes{}, able())
 	asked := order()
 	asked.Mutator = "L4.invented.by_nobody"
 
@@ -290,7 +314,7 @@ func TestTheCatalogsDefaultsReachTheMutator(t *testing.T) {
 	}
 	var seen mutator.Parameters
 	engine := corrupt.New(described(t, withKnob),
-		registry{damageID: watching{damageID, &seen}}, able())
+		registry{damageID: watching{damageID, &seen}}, noSchemes{}, able())
 
 	engine.Apply(order(), numeric(), "1250", seed.Coordinate{})
 	if written, ok := seen.Text("value"); !ok || written != "n/a" {
@@ -309,4 +333,59 @@ func (w watching) ID() catalog.ID { return w.id }
 func (w watching) Damage(target mutator.Target) mutator.Outcome {
 	*w.seen = target.Params
 	return mutator.Done("n/a")
+}
+
+// 🔴 The scheme behind a column reaches the mutator that damages it.
+//
+// Damage that has to build a value rather than only rewrite one cannot do it
+// without the scheme: flipping the gender a national identifier encodes means
+// recomputing its check digit, and only the provider knows how. A build where
+// this arrived empty would leave every such mutator refusing for a reason that
+// looks like the recipe's fault and is ours.
+func TestTheSchemeBehindAColumnReachesTheMutator(t *testing.T) {
+	var seen provider.Provider
+	engine := corrupt.New(described(t, identifierEntry()),
+		registry{damageID: peeking{damageID, &seen}},
+		schemes{"PL.pesel": aScheme{"PL.pesel"}}, able())
+
+	engine.Apply(order(), recipe.FieldInfo{
+		Name: "pesel", Type: "identifier", Provider: "PL.pesel",
+	}, "85011412345", seed.Coordinate{})
+
+	if seen == nil {
+		t.Fatal("the mutator was handed no scheme for a column that follows one")
+	}
+	if seen.ID() != "PL.pesel" {
+		t.Errorf("the mutator was handed %s", seen.ID())
+	}
+}
+
+// A column following a scheme this build does not carry hands the mutator
+// nothing, rather than something that cannot answer. The mutator refuses in its
+// own words, which is one refusal instead of two ways of saying it.
+func TestAColumnWhoseSchemeThisBuildLacksHandsTheMutatorNothing(t *testing.T) {
+	var seen provider.Provider
+	engine := corrupt.New(described(t, identifierEntry()),
+		registry{damageID: peeking{damageID, &seen}}, schemes{}, able())
+
+	engine.Apply(order(), recipe.FieldInfo{
+		Name: "pesel", Type: "identifier", Provider: "PL.pesel",
+	}, "85011412345", seed.Coordinate{})
+
+	if seen != nil {
+		t.Errorf("a scheme arrived from a build that carries none: %s", seen.ID())
+	}
+}
+
+// peeking records the scheme it was handed.
+type peeking struct {
+	id   catalog.ID
+	seen *provider.Provider
+}
+
+func (p peeking) ID() catalog.ID { return p.id }
+
+func (p peeking) Damage(target mutator.Target) mutator.Outcome {
+	*p.seen = target.Provider
+	return mutator.Done("85011412352")
 }
