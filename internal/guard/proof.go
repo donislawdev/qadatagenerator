@@ -437,7 +437,9 @@ var Guards = []Guard{
 	// one more than it should, so a value two past is refused by the broken
 	// check as surely as by a correct one and the defect stays hidden.
 	{"a lengthened value ends up past the limit its column declares", "TestTheValueEndsUpPastTheDeclaredLimit", "internal/adapter/mutators", ByMutation},
-	{"a column with no declared limit is not given damage about one", "TestLengthDamageThatCannotBeDoneIsRefusedWithAReason", "internal/adapter/mutators", ByMutation},
+	{"a knob missing or malformed is refused rather than guessed at", "TestLengthDamageThatCannotBeDoneIsRefusedWithAReason", "internal/adapter/mutators", ByMutation},
+	{"a capability belonging to a column is asked of the column", "TestACapabilityThatBelongsToAColumnIsAskedOfTheColumn", "internal/app/corrupt", ByMutation},
+	{"damage needing something of a column lands where it is", "TestDamageNeedingSomethingOfTheColumnLandsWhereItIs", "internal/app/corrupt", ByMutation},
 	{"a value that cannot land on the mark is refused rather than left past it", "TestAValueThatCannotLandOnTheMarkIsRefusedRatherThanOvershot", "internal/adapter/mutators", ByMutation},
 	{"a value that is already empty is never recorded as emptied", "TestAValueThatIsAlreadyEmptyIsRefusedWithAReason", "internal/adapter/mutators", ByMutation},
 

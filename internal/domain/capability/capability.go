@@ -55,6 +55,35 @@ const (
 	Engine Supplier = "engine"
 )
 
+// Scope says what a capability is a property of, which is a different question
+// from who supplies it.
+//
+// # Why this had to be written down, measured three times
+//
+// A run carries a capability when anything in it supplies one. That is the
+// right answer for most of them and the wrong answer for a handful: a maximum
+// length belongs to one column, and a run carrying the capability says only
+// that SOME column declares a limit. Damage aimed at a column with no limit was
+// therefore let through by a check that was true of the recipe and false of the
+// place the damage landed.
+//
+// The same shape appeared three times in one day and was fixed twice by other
+// means: a numbering scheme is answered by what the catalog entry covers, and a
+// relation between fields belongs to the entity. This is the third, and it is
+// the one that needed the model to say which is which, because nothing else can
+// tell a property of a column from a property of a run.
+type Scope string
+
+const (
+	// Run means the capability belongs to the run as a whole, so asking any
+	// one column about it would be meaningless.
+	Run Scope = "run"
+	// Field means the capability is a property of one column. A run can
+	// carry it while the column damage lands on does not, and only the
+	// column can answer.
+	Field Scope = "field"
+)
+
 // The capability names. They are constants rather than bare strings so that a
 // typo fails to compile instead of quietly making a mutator inapplicable at
 // run time, which is a failure nobody would see.
@@ -128,6 +157,61 @@ var suppliers = map[Name]Supplier{
 	CorpusNamesInternational: Corpus,
 
 	UnicodeNormalization: Engine,
+}
+
+// fieldScoped is every capability that is a property of one column rather than
+// of a run. Everything absent from here belongs to the run.
+//
+// # Why the list is short, and why the identifier family is not in it
+//
+// A scheme brings its capabilities to whichever column it fills, so those look
+// field scoped too. They are answered already, and by a mechanism that says
+// more: a catalog entry names the schemes it covers, so damage aimed at a check
+// digit is refused for a scheme that has none whether or not that scheme is in
+// this run at all. Adding a second mechanism for one question is what this
+// project refuses everywhere else, and the two would part company the first
+// time somebody edited one of them.
+//
+// What is left is what only a column can answer and nothing else does: what it
+// holds, how long it may be, which values it may take, and whether it has to be
+// unique.
+// The type of a column is deliberately absent for the same reason as the
+// identifier family: applies_to.field_types answers it already, per column, and
+// it is a published field. Two mechanisms for one question part company the
+// first time somebody widens one of them.
+var fieldScoped = map[Name]bool{
+	SchemaMaxLength:      true,
+	SchemaEnumValues:     true,
+	SchemaRequiredFields: true,
+	KeyUnique:            true,
+}
+
+// ScopeOf says what a capability is a property of, and whether it is known.
+//
+// A relation between fields is deliberately of the run rather than of a column:
+// it is declared at the entity and binds two columns, so no single column can
+// answer for it. That one is gated by what the entry requires of the run, which
+// is where DEC-150 put it.
+func ScopeOf(name Name) (Scope, bool) {
+	if !Known(name) {
+		return "", false
+	}
+	if fieldScoped[name] {
+		return Field, true
+	}
+	return Run, true
+}
+
+// FieldScoped returns the ones a column has to answer for, out of the names
+// given. It is what lets a caller ask a column only what a column can know.
+func FieldScoped(names []Name) []Name {
+	var scoped []Name
+	for _, name := range names {
+		if fieldScoped[name] {
+			scoped = append(scoped, name)
+		}
+	}
+	return scoped
 }
 
 // SupplierOf says who brings a capability, and whether it is known at all.

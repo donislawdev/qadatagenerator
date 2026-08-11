@@ -110,10 +110,6 @@ func TestLengthDamageThatCannotBeDoneIsRefusedWithAReason(t *testing.T) {
 		target mutator.Target
 		says   string
 	}{
-		{"the column declares no limit", mutator.Target{
-			Value: "Nowak", Field: recipe.FieldInfo{Name: "last_name", Type: "string"},
-			Params: defaultsOf(entry)},
-			"declares no maximum length"},
 		{"the overshoot is not a whole number", mutator.Target{
 			Value: "Nowak", Field: limited(9, recipe.Characters),
 			Params: mutator.Parameters{"overshoot": 1.5, "unit": "characters"}},

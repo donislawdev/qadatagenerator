@@ -166,6 +166,20 @@ func (e Engine) refuse(entry catalog.Entry, field recipe.FieldInfo) (manifest.Fa
 		return manifest.RunLacksCapability,
 			fmt.Sprintf("this run cannot %s, which this damage needs", list(missing))
 	}
+	// 🔴 The same question asked of the column, because for a handful of
+	// capabilities the run is the wrong thing to ask.
+	//
+	// A run carries schema.max-length when ANY column declares a limit. Damage
+	// that goes past a limit, landing on a column that has none, would then
+	// pass a check that is true of the recipe and false of the place it landed.
+	// Measured on the walkthrough: damage that empties a value went to a column
+	// that is not required, under a run that carries the capability because
+	// another column is.
+	if missing := columnCannot(entry.Requires, field); len(missing) > 0 {
+		return manifest.RunLacksCapability, fmt.Sprintf(
+			"the column %s does not supply %s, which this damage needs of the column it "+
+				"lands on rather than of the run", field.Name, list(missing))
+	}
 	if !entry.CoversFieldType(field.Type) {
 		return manifest.FieldTypeNotCovered, fmt.Sprintf(
 			"the field is %s and this damage applies to %s",
@@ -177,6 +191,21 @@ func (e Engine) refuse(entry catalog.Entry, field recipe.FieldInfo) (manifest.Fa
 			describeProvider(field.Provider), strings.Join(entry.AppliesTo.Providers, " or "))
 	}
 	return "", ""
+}
+
+// columnCannot returns the field scoped capabilities this column does not
+// supply, out of what an entry requires.
+//
+// Which of them are a column's business comes from the registry rather than
+// from a list here. A list here would be a second copy of a classification the
+// model already holds, and the two would part company the first time a
+// capability was added.
+func columnCannot(required []capability.Name, field recipe.FieldInfo) []capability.Name {
+	wanted := capability.FieldScoped(required)
+	if len(wanted) == 0 {
+		return nil
+	}
+	return capability.NewSet(recipe.CapabilitiesOfField(field)...).Missing(wanted)
 }
 
 // undescribed is the entry for damage the catalog does not know.

@@ -45,6 +45,24 @@ func CapabilitiesOf(view SchemaView) []capability.Name {
 	return names
 }
 
+// CapabilitiesOfField is what ONE column brings, which is a different question
+// from what a run brings.
+//
+// A run carries a capability when anything in it supplies one, and for a
+// handful of them that is the wrong question: a maximum length belongs to a
+// column, so a run carrying schema.max-length says only that some column
+// declares a limit. Damage aimed at a column without one has to be refused
+// there, and this is what lets the engine ask.
+func CapabilitiesOfField(field FieldInfo) []capability.Name {
+	found := map[capability.Name]bool{}
+	gatherField(field, found)
+	names := make([]capability.Name, 0, len(found))
+	for name := range found {
+		names = append(names, name)
+	}
+	return names
+}
+
 // gatherField records what one field supplies.
 func gatherField(field FieldInfo, found map[capability.Name]bool) {
 	if field.Type != "" {

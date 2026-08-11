@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
+	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
@@ -142,16 +143,21 @@ func TestAnExcludedColumnIsNeverAimedAt(t *testing.T) {
 
 // schemeCatalog builds one entry aimed at identifiers of named schemes, which
 // is how the eight entries naming schemes are written in the catalog.
-func schemeCatalog(t *testing.T, id catalog.ID, schemes ...string) catalog.Catalog {
+func schemeCatalog(t *testing.T, scheme string, ids ...catalog.ID) catalog.Catalog {
 	t.Helper()
-	built, problems := catalog.New("0.1", "draft", []catalog.Entry{{
-		ID: id, Layer: catalog.Layer(strings.SplitN(string(id), ".", 2)[0]), Summary: "damage",
-		AppliesTo: catalog.AppliesTo{
-			FieldTypes: []string{"identifier"}, Formats: []string{catalog.Any}, Providers: schemes,
-		},
-		Expectation: catalog.Rejection, Confidence: catalog.Hard,
-		Example: catalog.Example{Before: "before", After: "after"},
-	}})
+	entries := make([]catalog.Entry, 0, len(ids))
+	for _, id := range ids {
+		entries = append(entries, catalog.Entry{
+			ID: id, Layer: catalog.Layer(strings.SplitN(string(id), ".", 2)[0]), Summary: "damage",
+			AppliesTo: catalog.AppliesTo{
+				FieldTypes: []string{"identifier"}, Formats: []string{catalog.Any},
+				Providers: []string{scheme},
+			},
+			Expectation: catalog.Rejection, Confidence: catalog.Hard,
+			Example: catalog.Example{Before: "before", After: "after"},
+		})
+	}
+	built, problems := catalog.New("0.1", "draft", entries)
 	if len(problems) > 0 {
 		t.Fatalf("the catalog for this test is not usable: %v", problems)
 	}
@@ -171,12 +177,23 @@ type schemeView struct{}
 
 func (schemeView) EntityNames() []string { return []string{"customer"} }
 
+// 🔴 Two identifiers and five columns that are neither, and the count is not
+// decoration.
+//
+// Which column damage lands on is one draw per entry. With three columns a
+// build that ignored the scheme would still land on the right one often enough
+// to look correct, and a mutation removing the check came back PRZEOCZONA for
+// exactly that reason. With seven, being right by luck is not a plausible
+// reading of a green test.
 func (schemeView) FieldsOf(string) []recipe.FieldInfo {
-	return []recipe.FieldInfo{
-		{Name: "name", Type: "string"},
+	fields := []recipe.FieldInfo{
 		{Name: "ssn", Type: "identifier", Provider: "US.ssn"},
 		{Name: "pesel", Type: "identifier", Provider: "PL.pesel"},
 	}
+	for _, name := range []string{"name", "city", "region", "note", "title"} {
+		fields = append(fields, recipe.FieldInfo{Name: name, Type: "string"})
+	}
+	return fields
 }
 
 func (schemeView) ParentsOf(string) []recipe.ParentInfo { return nil }
@@ -185,16 +202,33 @@ func (schemeView) PrimaryKeyOf(string) []string         { return nil }
 
 // Damage meant for one scheme lands on the column that follows it, when the
 // dataset carries columns of several.
+//
+// 🔴 Four entries rather than one, and that is what makes this test worth
+// having. Which column an entry lands on is ONE draw, keyed by the entry, so a
+// single entry checked against a build that ignores the scheme is right or
+// wrong by luck and stays that way for every row. A mutation removing the check
+// came back as missed twice for exactly that reason. Four entries are four
+// independent draws over seven columns, and all four landing correctly by
+// chance is not a reading anybody has to entertain.
 func TestDamageMeantForOneSchemeLandsOnThatScheme(t *testing.T) {
+	described := schemeCatalog(t, "PL.pesel",
+		"L3.checksum.off_by_one", "L3.checksum.transposed_digits",
+		"L3.national_id.impossible_date", "L3.range.unassigned")
 	selector := selectorFor(t, recipe.Policy{Layers: []string{"L3"}, Rows: "100%"},
-		schemeCatalog(t, "L3.checksum.off_by_one", "PL.pesel"), identifiersView())
+		described, identifiersView())
 
+	seen := 0
 	for row := 0; row < 20; row++ {
 		for _, order := range selector.Orders("customer", row, 20) {
+			seen++
 			if order.Field != "pesel" {
-				t.Fatalf("row %d aimed check digit damage at %q", row, order.Field)
+				t.Fatalf("%s was aimed at %q, and only pesel follows the scheme it covers",
+					order.Mutator, order.Field)
 			}
 		}
+	}
+	if seen < 4 {
+		t.Fatalf("only %d orders were produced, so not every entry had its turn", seen)
 	}
 }
 
@@ -206,7 +240,7 @@ func TestDamageMeantForOneSchemeLandsOnThatScheme(t *testing.T) {
 // sentence would send whoever reads it looking for the wrong thing.
 func TestWithNoColumnOfThatSchemeTheOrderStillNamesAnIdentifier(t *testing.T) {
 	selector := selectorFor(t, recipe.Policy{Layers: []string{"L3"}, Rows: "100%"},
-		schemeCatalog(t, "L3.checksum.off_by_one", "iban"), identifiersView())
+		schemeCatalog(t, "iban", "L3.checksum.off_by_one"), identifiersView())
 
 	orders := selector.Orders("customer", 0, 20)
 	if len(orders) == 0 {
@@ -215,6 +249,63 @@ func TestWithNoColumnOfThatSchemeTheOrderStillNamesAnIdentifier(t *testing.T) {
 	if orders[0].Field != "ssn" && orders[0].Field != "pesel" {
 		t.Errorf("the order names %q, which is not a column of the type this damage covers",
 			orders[0].Field)
+	}
+}
+
+// limitedView is a schema with two text columns, one of which declares a
+// maximum length. It is the shape that tells a capability of the run from a
+// capability of a column.
+type limitedView struct{}
+
+func (limitedView) EntityNames() []string { return []string{"customer"} }
+
+// Five columns without a limit and one with it. The count is not decoration:
+// which column damage lands on is one draw per entry, so with two candidates a
+// build that ignored the limit would still have an even chance of looking
+// right. With six, being right by luck is not a plausible reading.
+func (limitedView) FieldsOf(string) []recipe.FieldInfo {
+	fields := []recipe.FieldInfo{
+		{Name: "last_name", Type: "string", MaxLength: 20, HasMaxLength: true},
+	}
+	for _, name := range []string{"nickname", "note", "city", "region", "title"} {
+		fields = append(fields, recipe.FieldInfo{Name: name, Type: "string"})
+	}
+	return fields
+}
+
+func (limitedView) ParentsOf(string) []recipe.ParentInfo { return nil }
+func (limitedView) RulesOf(string) []recipe.Rule         { return nil }
+func (limitedView) PrimaryKeyOf(string) []string         { return nil }
+
+// 🔴 Damage needing something of the column lands on a column that has it.
+//
+// The run carries schema.max-length because one column declares a limit. Aimed
+// by type alone this would draw between the two and refuse half the time, on a
+// column that could never carry the damage, while the one that could sat beside
+// it.
+func TestDamageNeedingSomethingOfTheColumnLandsWhereItIs(t *testing.T) {
+	needsLimit, problems := catalog.New("0.1", "draft", []catalog.Entry{{
+		ID: "L2.string.exceeds_maxlength", Layer: catalog.FieldShape, Summary: "damage",
+		AppliesTo: catalog.AppliesTo{
+			FieldTypes: []string{"string"}, Formats: []string{catalog.Any},
+			Providers: []string{catalog.Any},
+		},
+		Expectation: catalog.Rejection, Confidence: catalog.Hard,
+		Requires: []capability.Name{capability.SchemaMaxLength},
+		Example:  catalog.Example{Before: "Nowak", After: "Nowakkkkkk"},
+	}})
+	if len(problems) > 0 {
+		t.Fatalf("the catalog for this test is not usable: %v", problems)
+	}
+	selector := selectorFor(t, recipe.Policy{Layers: []string{"L2"}, Rows: "100%"},
+		needsLimit, limitedView{})
+
+	for row := 0; row < 20; row++ {
+		for _, order := range selector.Orders("customer", row, 20) {
+			if order.Field != "last_name" {
+				t.Fatalf("row %d aimed damage about a maximum length at %q", row, order.Field)
+			}
+		}
 	}
 }
 

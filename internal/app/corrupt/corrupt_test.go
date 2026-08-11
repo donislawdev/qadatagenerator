@@ -252,6 +252,45 @@ func TestAFieldFollowingNoSchemeIsRefusedInWords(t *testing.T) {
 	}
 }
 
+// 🔴 A capability that belongs to a column is asked of the column, not of the
+// run.
+//
+// A run carries schema.max-length when ANY column declares a limit. Damage that
+// goes past a limit, landing on a column that has none, would otherwise pass a
+// check that is true of the recipe and false of the place it landed. Measured
+// on the walkthrough before this existed: damage that empties a value went to a
+// column that is not required, in a run whose capability came from another
+// column entirely.
+func TestACapabilityThatBelongsToAColumnIsAskedOfTheColumn(t *testing.T) {
+	needsLimit := entry()
+	needsLimit.AppliesTo.FieldTypes = []string{"string"}
+	needsLimit.Requires = []capability.Name{capability.SchemaMaxLength}
+	engine := corrupt.New(described(t, needsLimit),
+		registry{damageID: stated{damageID, mutator.Done("Nowakkkkkk")}}, noSchemes{},
+		capability.NewSet(capability.SchemaMaxLength))
+
+	// The run can do it, because some other column declares a limit. This one
+	// does not.
+	_, defect := engine.Apply(order(),
+		recipe.FieldInfo{Name: "surname", Type: "string"}, "Nowak", seed.Coordinate{})
+	if defect.Applied {
+		t.Fatal("damage about a maximum length was applied to a column that declares none")
+	}
+	for _, want := range []string{"the column surname does not supply", "schema.max-length"} {
+		if !strings.Contains(defect.FailureReason, want) {
+			t.Errorf("the reason does not say %q: %s", want, defect.FailureReason)
+		}
+	}
+
+	// The same damage on a column that does declare one goes ahead.
+	_, done := engine.Apply(order(), recipe.FieldInfo{
+		Name: "surname", Type: "string", MaxLength: 9, HasMaxLength: true,
+	}, "Nowak", seed.Coordinate{})
+	if !done.Applied {
+		t.Errorf("a column declaring a limit was refused anyway: %s", done.FailureReason)
+	}
+}
+
 // A field with no declared type is what the take and corrupt mode will hand in
 // before anything has worked one out, so the refusal has to read sensibly
 // rather than naming an empty string.

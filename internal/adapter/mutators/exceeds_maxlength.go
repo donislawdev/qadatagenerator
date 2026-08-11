@@ -108,13 +108,12 @@ func knobsOf(params mutator.Parameters) (int, string) {
 // unusable returns why this column and value cannot carry the damage, or
 // nothing when they can.
 func unusable(target mutator.Target) string {
-	// 🔴 The run supplies schema.max-length when ANY column declares one, and
-	// this is about the column in hand. A run can carry the capability and this
-	// field carry no limit, which is a sentence that is true of the recipe and
-	// false here, so it is asked again where the answer differs.
-	if !target.Field.HasMaxLength {
-		return "this column declares no maximum length, so there is none to go past"
-	}
+	// Whether the column declares a limit at all is not asked here. The entry
+	// requires schema.max-length, that capability is a property of a column
+	// rather than of a run, and the engine checks it against the column this
+	// landed on before calling. Asking again would put a second copy of a
+	// published field in this file, which is the rule the type check already
+	// follows.
 	declared := target.Field.Unit()
 	if unit, _ := target.Params.Text(unitParameter); unit != string(declared) {
 		// Counting the overshoot in one unit against a limit declared in another
