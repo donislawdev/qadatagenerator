@@ -3,6 +3,7 @@ package mutators_test
 import (
 	"strings"
 	"testing"
+	"time"
 	"unicode/utf8"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
@@ -21,6 +22,50 @@ func limited(max int, unit recipe.LengthUnit) recipe.FieldInfo {
 	return recipe.FieldInfo{
 		Name: "last_name", Type: "string", MaxLength: max, HasMaxLength: true, LengthUnit: unit,
 	}
+}
+
+// Reaching a large declared limit costs time in proportion to the limit, and
+// not to its square.
+//
+// 🔴 This is a test about COST, and it exists because no test about the answer
+// could take its place: the quadratic version produced exactly the same value,
+// so every assertion on the output stayed green while a recipe could stop the
+// run for hours. Measured before the change, at the default unit: 10 000
+// characters took 14,7 ms, 20 000 took 59,9 ms, 40 000 took 242,2 ms and 80 000
+// took 939,6 ms, which is a multiplier of four for every doubling.
+//
+// 🔴 DEC-96 gates allocations and only reports time, and this test goes the
+// other way on purpose. The cost being guarded here is counting the same
+// characters over and over, which allocates nothing, so the measure that
+// decision prefers cannot see it. The allowance is therefore set with a margin
+// wide enough that a slow machine cannot reach it: measured after the change, a
+// limit of half a million lands near 2 ms, and the quadratic version needs
+// about 37 s for the same limit. A machine would have to be seven times faster
+// than this one before the quadratic version slipped under the allowance, and
+// two thousand times slower before the linear one exceeded it.
+func TestReachingALargeLimitCostsTimeInProportionToIt(t *testing.T) {
+	const limit = 500_000
+	const allowed = 5 * time.Second
+
+	started := time.Now()
+	outcome := damage(t, exceedsMaxLength, mutator.Target{
+		Value:  "Nowak",
+		Field:  limited(limit, recipe.Characters),
+		Params: mutator.Parameters{"overshoot": 1, "unit": string(recipe.Characters)},
+	})
+	took := time.Since(started)
+
+	if !outcome.Applied() {
+		t.Fatalf("nothing happened: %s", outcome.Reason())
+	}
+	if got := utf8.RuneCountInString(outcome.Value()); got != limit+1 {
+		t.Errorf("the value is %d characters, want %d", got, limit+1)
+	}
+	if took > allowed {
+		t.Errorf("reaching a limit of %d took %s, and the allowance is %s. "+
+			"That is the shape of counting the whole value on every pass", limit, took, allowed)
+	}
+	t.Logf("a limit of %d took %s", limit, took)
 }
 
 // 🔴 The value has to end up past the DECLARED limit, not merely longer than it

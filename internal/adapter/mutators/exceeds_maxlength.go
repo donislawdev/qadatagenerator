@@ -153,12 +153,29 @@ func lengthIn(value string, unit recipe.LengthUnit) int {
 // like the data it came from. A name that overruns its column by turning into
 // Nowakkkkkk is recognisable in a report, and one that turns into Nowak plus a
 // run of x characters reads as though the tool wrote it.
+//
+// # Why the count is worked out before the loop rather than inside it
+//
+// 🔴 Asking how long the value is now, on every pass, means counting characters
+// over the whole of it on every pass, and that is quadratic in a length the
+// recipe chooses. Measured before this was changed: doubling the limit
+// multiplied the time by four, so eighty thousand characters took 939 ms and a
+// limit of eight million would have taken about two and a half hours with
+// nothing written and nothing said. A recipe is untrusted input, and the unit
+// that pays this cost is the default one.
+//
+// The count is exact rather than approximate. The caller has already refused a
+// gap the last character does not divide, so the division below has no
+// remainder to lose.
 func padTo(value string, wanted int, unit recipe.LengthUnit) string {
 	last, _ := utf8.DecodeLastRuneInString(value)
+	filler := string(last)
+	times := (wanted - lengthIn(value, unit)) / lengthIn(filler, unit)
 	var built strings.Builder
+	built.Grow(len(value) + times*len(filler))
 	built.WriteString(value)
-	for lengthIn(built.String(), unit) < wanted {
-		built.WriteRune(last)
+	for i := 0; i < times; i++ {
+		built.WriteString(filler)
 	}
 	return built.String()
 }

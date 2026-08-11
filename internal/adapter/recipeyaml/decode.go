@@ -138,6 +138,30 @@ const MaxSize = 256 * 1024
 // needs.
 const MaxNestingDepth = 64
 
+// MaxDeclarableLength is the largest maximum length a field may declare.
+//
+// # Why there is a ceiling on a number that only describes a column
+//
+// The number is not only described, it is built. Damage that goes past a
+// declared limit produces a value of that length plus the overshoot, so a limit
+// is an instruction to put that many characters in one cell of one row of the
+// output. Until this ceiling existed the format accepted any number the machine
+// could hold, and a recipe is untrusted input that arrives in a pull request.
+//
+// # Why a million
+//
+// Measured on this project rather than reasoned about. The largest limit
+// declared anywhere in this repository is sixty four, so a million leaves room
+// for a column fifteen thousand times wider than anything here has needed.
+// Producing one such value costs 3,8 ms and about a megabyte, so the ceiling is
+// not defending against the cost of one value: it is defending against a
+// dataset where every row carries one, which at a thousand rows is a gigabyte
+// of output nobody asked a test dataset for.
+//
+// The refusal carries the configuration exit code, for the same reason the size
+// limit above does.
+const MaxDeclarableLength = 1_000_000
+
 // Result is everything reading a recipe produced.
 type Result struct {
 	Recipe    recipe.Recipe

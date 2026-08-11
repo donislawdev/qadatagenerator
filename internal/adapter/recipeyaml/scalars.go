@@ -10,6 +10,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/goccy/go-yaml"
+
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
 // The hint below is the whole reason text is demanded rather than accepted in
@@ -137,6 +139,16 @@ func (r *reader) maxLength(where string, node any) (int, bool) {
 	if number <= 0 {
 		r.report(where, "the maximum length is not above zero", "one or more",
 			"remove the limit instead, because no value can be shorter than nothing")
+		return 0, false
+	}
+	// A limit is not only described, it is built: damage that goes past a limit
+	// puts that many characters in a cell. The reasoning behind the number is
+	// with the constant.
+	if number > MaxDeclarableLength {
+		r.report(where, "the maximum length is larger than this build will build a value to reach",
+			"a whole number up to "+strconv.Itoa(MaxDeclarableLength),
+			"a column this wide is more than a test dataset can carry, so write the limit the "+
+				"system under test actually declares")
 		return 0, false
 	}
 	return number, true
@@ -511,39 +523,11 @@ func deepestNesting(data []byte) int {
 	return deepest
 }
 
-// shortest is how much of any one part of a message survives, in characters.
-//
-// Characters rather than bytes, and the unit is named because for the text
-// this tool handles the two are different numbers. It is set well above every
-// message this package writes, so it only ever cuts something a recipe put
-// there.
-const shortest = 200
-
 // shorten trims one part of a message to something a report can carry.
 //
-// # Why this exists, found by review rather than by a test
-//
-// A recipe is untrusted input and it has a size limit. The report about it had
-// none. Measured on 2026-08-02: a recipe carrying one two hundred kilobyte
-// value produced a two hundred kilobyte error message, so hostile input came
-// back amplified into somebody's build log, and with the machine readable flag
-// onto the data channel where a pipeline parses it.
-//
-// It is applied where a problem is recorded rather than at the dozen places
-// that build one. Names of entities, fields and keys all come from the recipe
-// and all end up inside a sentence, so bounding the sentence bounds every one
-// of them, including the ones somebody writes next year.
-//
-// The cut lands on a character boundary. Cutting on a byte would split a
-// multi byte character and put invalid UTF-8 into that same machine readable
-// report.
-func shorten(text string) string {
-	count := 0
-	for index := range text {
-		count++
-		if count > shortest {
-			return text[:index] + "... (shortened)"
-		}
-	}
-	return text
-}
+// The rule and the reasoning moved to the fault package on 2026-08-11, when a
+// second reader of untrusted input turned out to need the same bound and a copy
+// beside each user would have been the guard somebody does not write. This name
+// stays because every problem in this package is recorded through it, which is
+// the one place that bounds all of them at once.
+func shorten(text string) string { return fault.Shorten(text) }

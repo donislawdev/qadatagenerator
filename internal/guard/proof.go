@@ -437,6 +437,11 @@ var Guards = []Guard{
 	// one more than it should, so a value two past is refused by the broken
 	// check as surely as by a correct one and the defect stays hidden.
 	{"a lengthened value ends up past the limit its column declares", "TestTheValueEndsUpPastTheDeclaredLimit", "internal/adapter/mutators", ByMutation},
+	// 🔴 A guard about cost rather than about an answer, because the quadratic
+	// version produced the very same value. The limit comes from the recipe,
+	// which is untrusted input, and counting the whole value on every pass made
+	// eighty thousand characters take 939 ms.
+	{"reaching a declared limit costs time in proportion to it", "TestReachingALargeLimitCostsTimeInProportionToIt", "internal/adapter/mutators", ByMutation},
 	{"a knob missing or malformed is refused rather than guessed at", "TestLengthDamageThatCannotBeDoneIsRefusedWithAReason", "internal/adapter/mutators", ByMutation},
 	{"a capability belonging to a column is asked of the column", "TestACapabilityThatBelongsToAColumnIsAskedOfTheColumn", "internal/app/corrupt", ByMutation},
 	{"damage needing something of a column lands where it is", "TestDamageNeedingSomethingOfTheColumnLandsWhereItIs", "internal/app/corrupt", ByMutation},
@@ -502,6 +507,14 @@ var Guards = []Guard{
 	{"a column the policy excluded is never damaged", "TestAnExcludedColumnIsNeverAimedAt", "internal/app/corrupt", ByMutation},
 	{"damage is aimed at a column of the scheme it covers when the dataset has one", "TestDamageMeantForOneSchemeLandsOnThatScheme", "internal/app/corrupt", ByMutation},
 	{"a policy that excludes everything is refused rather than silent", "TestAPolicyThatExcludesEverythingIsRefused", "internal/app/corrupt", ByMutation},
+	// 🔴 The same statement as the recipe reader's entry above, in the second
+	// place that reads a share, and it is here because the first one did not
+	// travel. That package has carried the rule, the reasoning, a named guard
+	// and a mutation since it learned to read a percentage. This one was written
+	// six days later without any of them, and a share of NaN passed both range
+	// tests and then chose no row at all. Measured on the binary: a policy that
+	// ordered sixty defects ordered none and the run ended with success.
+	{"a share that is not a number is refused rather than damaging nothing", "TestAPolicyShareThatIsNotANumberIsRefused", "internal/app/corrupt", ByMutation},
 
 	// --- the manifest on disk ------------------------------------------------
 	//
@@ -537,6 +550,16 @@ var Guards = []Guard{
 	{"the row count is known before the first record", "TestTheRowCountIsKnownBeforeTheFirstRecord", "internal/adapter/sourcecsv", ByMutation},
 	{"a ragged row is refused rather than shifted into place", "TestARaggedRowIsRefused", "internal/adapter/sourcecsv", ByMutation},
 	{"the sample is capped and the count is not", "TestTheSampleIsCappedAndTheCountIsNot", "internal/adapter/sourcecsv", ByMutation},
+	// 🔴 The third road to the channel for the same class of failure. The first
+	// was the recipe reader and is bounded, the second is the errors of the
+	// numbering schemes and is still open. This one is the worst placed: a
+	// recipe has a hard size limit and a data file deliberately has none.
+	{"a hostile column name does not come back amplified", "TestALongColumnNameDoesNotComeBackAsALongMessage", "internal/adapter/sourcecsv", ByMutation},
+	// 🔴 One test and three mutations, because the reconciliation has three
+	// halves that fail differently: the columns, a file that shrank and a file
+	// that grew. It closes the loud half of reading twice and not the race
+	// itself, which is said where the refusal is built.
+	{"a file replaced between the two readings is refused", "TestAFileReplacedBetweenTheTwoReadingsIsRefused", "internal/adapter/sourcecsv", ByMutation},
 
 	// The walk and the writer of a dataset that was read.
 	{"a run reading a file can be stopped between rows", "TestARunStoppedBetweenRowsLeavesTheTableUnfinished", "internal/app/corrupt", ByMutation},

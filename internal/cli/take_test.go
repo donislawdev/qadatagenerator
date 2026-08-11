@@ -282,6 +282,11 @@ func TestEveryRefusalOfThisVerbIsCompleteAndMentionsNoRecipe(t *testing.T) {
 		{"no layers", []string{commandCorrupt, source}},
 		{"a layer nobody describes", []string{commandCorrupt, "--layers", "L9", source}},
 		{"a share nobody can read", []string{commandCorrupt, "--layers", "L3", "--rows", "banana", source}},
+		// A share that is shaped like a percentage and is not a number. It
+		// reached the engine until this line existed, where it chose no row at
+		// all and the run ended with success.
+		{"a share that is not a number",
+			[]string{commandCorrupt, "--layers", "L3", "--rows", "NaN%", source}},
 		{"a per row setting nobody knows", []string{commandCorrupt, "--layers", "L3", "--per-row", "two", source}},
 		{"a delimiter of two characters", []string{commandCorrupt, "--layers", "L3", "--delimiter", "||", source}},
 		{"no file at all", []string{commandCorrupt, "--layers", "L3"}},

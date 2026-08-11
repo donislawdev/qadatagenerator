@@ -2,6 +2,7 @@ package corrupt
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -107,6 +108,22 @@ func shareOf(written string) (share, error) {
 	if err != nil {
 		return share{}, fault.New(fault.Config, fmt.Sprintf(
 			"policy.rows says %q, which is not a number followed by a percent sign", written))
+	}
+	// 🔴 Not a number and infinity are refused before the range is compared, and
+	// the order is the whole point. Every comparison against NaN is false, so the
+	// range test below lets it through, and so does the draw that decides which
+	// rows are damaged: a share of NaN chooses no row at all. Measured before
+	// this line existed: a policy that ordered sixty defects ordered none, and
+	// the run ended with success.
+	//
+	// The recipe parser has refused this since it learned to read a share, and
+	// this file did not, because reading a percentage got written twice. The
+	// header of this file promises the rules live in one place, so the two are
+	// answered the same way here rather than argued about again.
+	if math.IsNaN(value) || math.IsInf(value, 0) {
+		return share{}, fault.New(fault.Config, fmt.Sprintf(
+			"policy.rows says %q, which is not a number this build can count rows with. "+
+				"Write a plain number between 0 and 100 followed by a percent sign", written))
 	}
 	if value < 0 || value > 100 {
 		return share{}, fault.New(fault.Config, fmt.Sprintf(

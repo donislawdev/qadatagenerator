@@ -114,13 +114,61 @@ func (f *File) Next() (dataset.Record, bool, error) {
 	}
 	fields, err := f.rows.Read()
 	if errors.Is(err, io.EOF) {
+		if f.row < f.table.Rows {
+			return dataset.Record{}, false, f.changedUnderneath(
+				"it held " + strconv.Itoa(f.table.Rows) + " records when it was surveyed and " +
+					strconv.Itoa(f.row) + " when it was read")
+		}
 		return dataset.Record{}, false, f.Close()
 	}
 	if err != nil {
+		// The handle goes before the refusal travels. A walk that ends in a
+		// failure ends here, and leaving it open holds the file against whoever
+		// tries to clean up after the run.
+		_ = f.Close()
 		return dataset.Record{}, false, f.readFailure(err)
 	}
 	f.row++
+	// Caught here rather than at the end, because a record past the count is a
+	// record the writer would already have written.
+	if f.row > f.table.Rows {
+		return dataset.Record{}, false, f.changedUnderneath(
+			"it held " + strconv.Itoa(f.table.Rows) + " records when it was surveyed and has " +
+				"more than that now")
+	}
 	return dataset.Record{Values: fields, Parent: dataset.NoParent}, true, nil
+}
+
+// changedUnderneath is the refusal for a file that is not the one that was
+// surveyed.
+//
+// # Why this exists and what it does not buy
+//
+// 🔴 Reading twice is stated in DEC-155 as a cost, and until this refusal
+// existed it was also a hole. Nothing compared the second reading with the
+// first, so a file replaced in between produced a manifest describing the rows
+// of one file with the columns and the count of another, an output file whose
+// rows did not match its own header, and an exit code of zero. Measured on
+// 2026-08-11: a survey of two columns and three records, then a replacement,
+// then one record of three values handed over without a word.
+//
+// The window is not narrow. It runs from the survey to the first record, which
+// is the whole of working out what the columns hold and planning what to damage.
+//
+// 🔴 What this does NOT do, said here so that nobody reads it as more: it does
+// not close the race. A file whose header and record count are unchanged and
+// whose values are different passes every check here, because nothing short of
+// holding the file open across both passes could see that, and holding it open
+// is a different design with its own costs. This closes the loud half.
+func (f *File) changedUnderneath(what string) error {
+	// The handle goes first. This refusal ends the walk, and a file left open
+	// cannot be removed on Windows, which turns one failure into two.
+	_ = f.Close()
+	return fault.New(fault.Data, f.path+" changed while it was being read: "+what+
+		". This mode reads the file twice, because the number of records and what the columns "+
+		"hold have to be known before the first record can be damaged, so a file that is still "+
+		"being written cannot be a source. Nothing was written. Run this again once whatever "+
+		"produces that file has finished")
 }
 
 // Close releases the handle of the second pass. It is safe to call more than
@@ -192,13 +240,37 @@ func (f *File) gather(fields []string) {
 }
 
 // startReading opens the file for the second pass and steps over the header.
+//
+// The header of the second reading is compared with the first rather than
+// discarded. Discarding it was the hole described at changedUnderneath: the
+// columns a manifest names come from the first reading and the values come from
+// the second, so two different headers mean the two describe different files.
 func (f *File) startReading() error {
-	handle, reader, _, err := f.openAndReadHeader()
+	handle, reader, header, err := f.openAndReadHeader()
 	if err != nil {
 		return err
 	}
+	if !sameColumns(header, f.table.Columns) {
+		_ = handle.Close()
+		return f.changedUnderneath("its columns were " + strings.Join(f.table.Columns, ", ") +
+			" when it was surveyed and are " + fault.Shorten(strings.Join(header, ", ")) + " now")
+	}
 	f.reading, f.rows, f.row = handle, reader, 0
 	return nil
+}
+
+// sameColumns reports whether two headers name the same columns in the same
+// order.
+func sameColumns(left, right []string) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for at := range left {
+		if left[at] != right[at] {
+			return false
+		}
+	}
+	return true
 }
 
 // openAndReadHeader opens the file and takes its first record as the column
@@ -247,6 +319,14 @@ func (f *File) openAndReadHeader() (*os.File, *csv.Reader, []string, error) {
 // columns with one name would make every location ambiguous. Both are refused
 // rather than repaired, because repairing them invents a name that is not in
 // the file the reader is looking at.
+//
+// 🔴 The name goes into the sentence through Shorten, because it is untrusted
+// text of unbounded length. A file has no size limit here and cannot have one,
+// since this mode exists for large ones, so a column name may be as long as the
+// file. Measured on 2026-08-11 before this: a name of sixty four kilobytes came
+// back as a refusal of sixty five thousand nine hundred and twenty seven bytes,
+// straight into somebody's build log. Same class as the report that grew with a
+// hostile recipe, reached by the third road.
 func usableHeader(header []string, path string) error {
 	seen := make(map[string]bool, len(header))
 	for at, name := range header {
@@ -257,7 +337,7 @@ func usableHeader(header []string, path string) error {
 				"column each defect landed in. Add a header name and run this again")
 		}
 		if seen[clean] {
-			return fault.New(fault.Data, path+" has two columns called "+clean+
+			return fault.New(fault.Data, path+" has two columns called "+fault.Shorten(clean)+
 				". Names have to differ, because a manifest naming that column would point at "+
 				"either of them. Rename one of them and run this again")
 		}

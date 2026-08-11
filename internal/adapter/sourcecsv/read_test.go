@@ -301,3 +301,131 @@ func TestTheRecordsAreNamedAfterTheFileWithoutItsExtension(t *testing.T) {
 		}
 	}
 }
+
+// A hostile column name does not come back amplified into somebody's log.
+//
+// 🔴 This is the third road to the same channel, and the first two are worth
+// naming because the note left with the first one asked how many there were.
+// The recipe reader was bounded on 2026-08-02 after a two hundred kilobyte
+// value produced a two hundred kilobyte message. The errors of the numbering
+// schemes are the second road and are still open. This is the third, and it is
+// the worst placed of them: a recipe has a hard limit of 256 kB, while a data
+// file deliberately has none, so a column name here can be as large as the file.
+//
+// Measured before the bound existed: a name of sixty four kilobytes produced a
+// refusal of 65 927 bytes.
+func TestALongColumnNameDoesNotComeBackAsALongMessage(t *testing.T) {
+	const nameLength = 64 * 1024
+	huge := strings.Repeat("k", nameLength)
+	path := written(t, "wide.csv", huge+","+huge+"\n1,2\n")
+
+	_, err := sourcecsv.Open(path, ',')
+	if err == nil {
+		t.Fatal("two columns of one name were accepted, so no manifest location could name either")
+	}
+	// Generous against the sentence and strict against the name: the four parts
+	// of a refusal are allowed to grow, the untrusted part is not.
+	if len(err.Error()) > 2000 {
+		t.Errorf("the refusal is %d bytes for a column name of %d, so it grows with the input",
+			len(err.Error()), nameLength)
+	}
+	if strings.Contains(err.Error(), huge) {
+		t.Error("the refusal carries the whole column name")
+	}
+}
+
+// A file replaced between the two readings is refused rather than damaged as
+// though it were the one that was surveyed.
+//
+// 🔴 Both halves are here because they fail differently. A changed header means
+// the manifest would name columns that are not the ones the values came from. A
+// changed record count means the envelope promises a number of rows the output
+// does not have, and the writer does not check the width of what it is handed,
+// so the output file ends up ragged under its own header.
+//
+// Measured on 2026-08-11 before either check existed: a survey of two columns
+// and three records, a replacement, and then one record of three values handed
+// over with no error and an exit code of zero.
+func TestAFileReplacedBetweenTheTwoReadingsIsRefused(t *testing.T) {
+	for _, given := range []struct {
+		what        string
+		first, then string
+		says        string
+	}{
+		{
+			what:  "different columns",
+			first: "a,b\n1,2\n3,4\n",
+			then:  "x,y\n1,2\n3,4\n",
+			says:  "columns",
+		},
+		{
+			what:  "fewer records",
+			first: "a,b\n1,2\n3,4\n5,6\n",
+			then:  "a,b\n1,2\n",
+			says:  "records",
+		},
+		{
+			what:  "more records",
+			first: "a,b\n1,2\n",
+			then:  "a,b\n1,2\n3,4\n5,6\n",
+			says:  "records",
+		},
+	} {
+		t.Run(given.what, func(t *testing.T) {
+			path := written(t, "moving.csv", given.first)
+			file, err := sourcecsv.Open(path, ',')
+			if err != nil {
+				t.Fatalf("the first reading refused a good file: %v", err)
+			}
+			if err := os.WriteFile(path, []byte(given.then), 0o600); err != nil {
+				t.Fatal(err)
+			}
+
+			var refusal error
+			for {
+				_, more, err := file.Next()
+				if err != nil {
+					refusal = err
+					break
+				}
+				if !more {
+					break
+				}
+			}
+			if refusal == nil {
+				t.Fatal("the replaced file was read to the end without a word")
+			}
+			if !strings.Contains(refusal.Error(), "changed while it was being read") {
+				t.Errorf("the refusal does not say the file changed: %v", refusal)
+			}
+			if !strings.Contains(refusal.Error(), given.says) {
+				t.Errorf("the refusal does not say what differed, wanted %q: %v",
+					given.says, refusal)
+			}
+		})
+	}
+}
+
+// A file that did not change is still read to the end, so that the refusal
+// above did not buy itself by refusing everything.
+func TestAFileThatDidNotChangeIsReadToTheEnd(t *testing.T) {
+	path := written(t, "still.csv", "a,b\n1,2\n3,4\n5,6\n")
+	file, err := sourcecsv.Open(path, ',')
+	if err != nil {
+		t.Fatal(err)
+	}
+	seen := 0
+	for {
+		_, more, err := file.Next()
+		if err != nil {
+			t.Fatalf("an unchanged file was refused after %d records: %v", seen, err)
+		}
+		if !more {
+			break
+		}
+		seen++
+	}
+	if seen != 3 {
+		t.Errorf("read %d records, want 3", seen)
+	}
+}

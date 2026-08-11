@@ -42,12 +42,40 @@ repository once they are released.
 - **The manifest specification said no tool emitted it yet.** One does, since
   2026-08-11. What has not changed is the part that matters, which is that one
   implementation is not two.
+- **A source file changed while it was being read produced a manifest that
+  disagreed with the data beside it.** This mode reads a file twice, and nothing
+  compared the second reading with the first, so a file replaced in between gave
+  an output whose rows did not match its own header and a manifest promising a
+  number of rows that were not there, all of it ending with a success code. The
+  run is now refused and says what differed. A file whose columns and record
+  count are unchanged but whose values are not still gets through, and the
+  refusal says so rather than claiming more.
+- **`--rows NaN%` was accepted and quietly damaged nothing.** Every comparison
+  against a value that is not a number is false, so it passed the check for a
+  share between nought and a hundred and then matched no row, and the run
+  reported success with an empty manifest. It is refused now, as it always was
+  in a recipe.
+- **A refusal naming a column of your file grew as large as the name.** A column
+  named with sixty four kilobytes produced a refusal of about the same size, on
+  its way into whatever collects your build log. Names are trimmed now, as they
+  already were when they came from a recipe.
 
 ### Changed
 
 - A run that could not apply damage for want of something in the data now says
   where the answer is rather than pointing at a recipe, which the mode above
   does not have.
+- **Damage that overruns a declared maximum length no longer slows down as the
+  limit grows.** The cost used to rise with the square of the limit, so a field
+  declaring a very large maximum could hold a run for hours with nothing written
+  and nothing said. It rises in step with the limit now: a million characters
+  takes about four milliseconds.
+- **BREAKING for recipes, before any release: `max_length` may not exceed
+  1000000.** A limit is not only described, it is built, because damage that
+  goes past it puts that many characters into one cell of every row it lands on.
+  The largest limit this project has ever needed is sixty four. A recipe above
+  the ceiling is refused by `qadg validate`, so it fails before the run rather
+  than during it.
 
 
 Nothing has been released yet. The binary reports 0.1.0, which is the version

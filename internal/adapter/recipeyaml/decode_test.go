@@ -371,6 +371,15 @@ func TestProblems(t *testing.T) {
 			what:  "not above zero",
 		},
 		{
+			// 🔴 A limit is not only described, it is built. Damage that goes
+			// past it puts that many characters in one cell, and until the
+			// ceiling existed the format took any number the machine could hold.
+			name:  "a maximum length larger than a value could be built to reach",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y, max_length: 1000001 }\n",
+			where: "entities.a.fields.x.max_length",
+			what:  "larger than this build will build a value to reach",
+		},
+		{
 			name:  "a unit for a length that was never declared",
 			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y, counted_in: bytes }\n",
 			where: "entities.a.fields.x.counted_in",
