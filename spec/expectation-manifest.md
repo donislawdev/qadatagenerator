@@ -10,7 +10,7 @@ Without that last part corrupted data is useless in an automated test, because t
 
 ## Status
 
-**Draft. No tool emits this yet.** It is a documented, versioned format open to implementation. It is not a standard. A format that one tool emits is that tool's format until somebody else adopts it, and one implementation is not two.
+**Draft. One tool emits this, and one implementation is not two.** The reference implementation has written this document since 2026-08-11, so the sentence that used to stand here, saying nothing emitted it yet, is no longer true. What has not changed is the part that matters: a format that one tool emits is that tool's format until somebody else adopts it. It is a documented, versioned format open to implementation, and it is not a standard.
 
 ### This format is still changing, and here is when it stops
 

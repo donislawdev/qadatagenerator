@@ -29,6 +29,20 @@ repository once they are released.
   `--layers` is required, because damaging the bytes of a file and damaging a
   value in it are different requests and there is no safe default.
 
+### Fixed
+
+- **The README said the second pillar was a specification rather than a feature.**
+  It has been one since the verb above landed, so the status paragraph now names
+  all four verbs and says plainly that this build implements a small part of the
+  corruption catalog.
+- **The README promised manifest exports in the present tense.** JSON is written,
+  and CSV, Markdown and the Gherkin table are specified rather than built. The
+  paragraph now says which is which, because a README describing the plan in the
+  present tense is where a project starts overstating itself.
+- **The manifest specification said no tool emitted it yet.** One does, since
+  2026-08-11. What has not changed is the part that matters, which is that one
+  implementation is not two.
+
 ### Changed
 
 - A run that could not apply damage for want of something in the data now says

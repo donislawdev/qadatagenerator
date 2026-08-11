@@ -4,7 +4,7 @@ A **QA test data generator** with a CLI and a GUI. Cross-platform, fully offline
 
 > A test data generator that understands **what the data means**, and can corrupt it on purpose while telling you exactly what it broke, at which layer, and how your application is supposed to respond.
 
-**Status: early development.** The specifications below are drafts. The first pillar works today: `qadg generate` turns a recipe into files, `qadg validate` reports every problem a recipe has, and `qadg help` explains either. Nothing corrupts data on purpose yet, so the second pillar is still a specification rather than a feature. Nothing has been released.
+**Status: early development.** The specifications below are drafts. Both pillars work today. `qadg generate` turns a recipe into files, `qadg validate` reports every problem a recipe has, `qadg corrupt` damages a file this tool did not make and writes an expectation manifest beside it, and `qadg help` explains any of them. This build implements a small part of the corruption catalog, and a run says so: every ordered defect gets a manifest entry whether or not it happened. Nothing has been released.
 
 ---
 
@@ -39,7 +39,7 @@ Every corrupted dataset ships with a second file. It records where each defect i
 
 Without it, corrupted data is useless to an automated test, because the test has no way to know what to expect. This is why lists of hostile strings never made it into anyone's CI pipeline. They supply the input and leave out the answer.
 
-The manifest exports as JSON, CSV, Markdown and as a Gherkin `Examples` table, so an existing scenario can consume it without hand-written assertions.
+The manifest is written as JSON. It is meant to export as CSV, Markdown and as a Gherkin `Examples` table as well, so that an existing scenario can consume it without hand-written assertions, and those three are specified rather than built. This paragraph says which is which on purpose: a README that describes the plan in the present tense is the first place a project starts overstating itself.
 
 ### Reverse mutators
 
