@@ -16,6 +16,17 @@ and has not happened.
 
 ### Added
 
+- **A text value can now be pushed one character past the limit its column
+  declares.** Layer L2 builds a value of exactly the declared maximum plus the
+  overshoot, which is the boundary a length check written with an off by one
+  error gets wrong. Byte limits are overrun in bytes and character limits in
+  characters, because the two differ for accented and non Latin text, and a
+  value that cannot land exactly on the mark is refused with the reason rather
+  than left somewhere past it.
+- **A text value can now be emptied.** Layer L2 replaces it with an empty
+  string, which is the difference between empty and absent that schemas, forms
+  and databases confuse most often. The expectation is soft, because whether an
+  empty string is allowed where a value is expected is your decision.
 - **A birth date can now be moved without breaking the number that carries it.**
   Layer L4 rebuilds a personal number around a birth date five years from the
   one in the column beside it. The number stays correct and the day, the month

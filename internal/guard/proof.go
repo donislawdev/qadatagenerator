@@ -429,6 +429,18 @@ var Guards = []Guard{
 	{"a scheme refusing to move a value is never recorded as damage done", "TestRangeDamageThatCannotBeDoneIsRefusedWithAReason", "internal/adapter/mutators", ByMutation},
 	{"the published example of the range damage is what this build produces", "TestTheCatalogExampleIsWhatTheRangeMutatorProduces", "internal/adapter/mutators", ByMutation},
 
+	// --- going past a declared limit, and landing on it ----------------------
+	//
+	// 🔴 The value has to end up past the limit the COLUMN declares rather than
+	// merely longer than it was, and it has to land on the mark rather than step
+	// over it. A length check written with an off by one error accepts exactly
+	// one more than it should, so a value two past is refused by the broken
+	// check as surely as by a correct one and the defect stays hidden.
+	{"a lengthened value ends up past the limit its column declares", "TestTheValueEndsUpPastTheDeclaredLimit", "internal/adapter/mutators", ByMutation},
+	{"a column with no declared limit is not given damage about one", "TestLengthDamageThatCannotBeDoneIsRefusedWithAReason", "internal/adapter/mutators", ByMutation},
+	{"a value that cannot land on the mark is refused rather than left past it", "TestAValueThatCannotLandOnTheMarkIsRefusedRatherThanOvershot", "internal/adapter/mutators", ByMutation},
+	{"a value that is already empty is never recorded as emptied", "TestAValueThatIsAlreadyEmptyIsRefusedWithAReason", "internal/adapter/mutators", ByMutation},
+
 	// --- the engine: one ordered damage, exactly one entry ------------------
 	//
 	// The failure this has to make impossible is not damage going wrong but

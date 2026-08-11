@@ -19,7 +19,10 @@ entities:
     primary_key: [pesel]
     fields:
       first_name: { generator: first_name }
-      last_name:  { generator: last_name }
+      # Declared as required and with a limit, so that the damage about empty
+      # values and the damage about going past a maximum both have a column
+      # that carries what they need. Neither is expressible without it.
+      last_name:  { generator: last_name, required: true, max_length: 20 }
       gender:     { generator: gender }
       birth_date: { generator: birth_date }
       pesel:      { generator: pesel }

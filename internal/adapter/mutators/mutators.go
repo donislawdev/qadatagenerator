@@ -33,6 +33,8 @@ var registry = map[catalog.ID]mutator.Mutator{
 	nationalIDVsGenderID:    nationalIDVsGender{},
 	nationalIDVsBirthdateID: nationalIDVsBirthdate{},
 	rangeUnassignedID:       rangeUnassigned{},
+	exceedsMaxLengthID:      exceedsMaxLength{},
+	stringEmptyID:           stringEmpty{},
 }
 
 // Lookup returns the mutator for an identifier and whether this build has one.

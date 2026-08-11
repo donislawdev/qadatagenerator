@@ -281,6 +281,20 @@ type FieldInfo struct {
 	Provider string
 }
 
+// Unit returns how the maximum length of this field is counted, defaulting to
+// characters.
+//
+// The same answer as the one a recipe field gives, because it is the same
+// question and the default has to live in one place. A view built by looking at
+// somebody else's file may leave the unit unset, and reading it raw there would
+// make a mutator measure in nothing at all.
+func (f FieldInfo) Unit() LengthUnit {
+	if f.LengthUnit == "" {
+		return Characters
+	}
+	return f.LengthUnit
+}
+
 // ParentInfo is what the engine is allowed to know about a relation.
 type ParentInfo struct {
 	Entity string
