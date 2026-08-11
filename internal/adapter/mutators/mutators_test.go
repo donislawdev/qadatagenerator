@@ -44,7 +44,7 @@ func TestEveryImplementedMutatorHasACatalogEntry(t *testing.T) {
 // stopped being carried out would leave every other test green: the engine
 // answers for what nobody implemented with an entry saying so, which is correct
 // behaviour and indistinguishable from a build that lost a mutator.
-const implementedFloor = 3
+const implementedFloor = 5
 
 func TestThisBuildHasNotLostAMutator(t *testing.T) {
 	if got := len(mutators.IDs()); got < implementedFloor {

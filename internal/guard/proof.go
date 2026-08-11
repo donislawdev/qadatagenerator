@@ -412,6 +412,22 @@ var Guards = []Guard{
 	{"an identifier left disagreeing with its row is still correct on its own", "TestTheGenderFlippedIdentifierIsStillCorrectOnItsOwn", "internal/adapter/mutators", ByMutation},
 	{"a value that did not move is never recorded as damaged", "TestASchemeThatRebuildsNothingIsRefused", "internal/adapter/mutators", ByMutation},
 	{"damage about two fields disagreeing needs both of them to exist", "TestGenderCoherenceDamageRequiresARelationToDisagreeWith", "internal/adapter/mutators", ByMutation},
+	{"a birth date moved by years moves its year and nothing else", "TestTheDateDriftedIdentifierIsStillCorrectOnItsOwn", "internal/adapter/mutators", ByMutation},
+	{"the published example of the date damage is what this build produces", "TestTheCatalogExampleIsWhatTheDateMutatorProduces", "internal/adapter/mutators", ByMutation},
+	{"a birth date with nowhere to land is refused rather than moved elsewhere", "TestABirthDateWithNowhereToLandIsRefusedWithTheDateNamed", "internal/adapter/mutators", ByMutation},
+	{"a knob that is not a whole number is refused rather than read as nought", "TestDateDamageThatCannotBeDoneIsRefusedWithAReason", "internal/adapter/mutators", ByMutation},
+	{"damage about a date disagreeing needs the date column to exist", "TestDateCoherenceDamageRequiresARelationToDisagreeWith", "internal/adapter/mutators", ByMutation},
+
+	// --- moving a value into a block nobody is issued from ------------------
+	//
+	// 🔴 Pillar one already generates inside a never issued block wherever a
+	// scheme has one, so the question that means anything is not whether the
+	// value is reserved but whether it already sits in the block this damage
+	// aims at. Those are two different lines of defence, and telling them apart
+	// is what makes the mutator applicable at all rather than never.
+	{"a value moved into a spare block leaves the one it was generated in", "TestTheMovedValueLeavesTheBlockThisToolGeneratesIn", "internal/adapter/mutators", ByMutation},
+	{"a scheme refusing to move a value is never recorded as damage done", "TestRangeDamageThatCannotBeDoneIsRefusedWithAReason", "internal/adapter/mutators", ByMutation},
+	{"the published example of the range damage is what this build produces", "TestTheCatalogExampleIsWhatTheRangeMutatorProduces", "internal/adapter/mutators", ByMutation},
 
 	// --- the engine: one ordered damage, exactly one entry ------------------
 	//

@@ -23,6 +23,13 @@ entities:
       gender:     { generator: gender }
       birth_date: { generator: birth_date }
       pesel:      { generator: pesel }
+      # A second identifier, of another scheme, on purpose. The two are both of
+      # type identifier and differ in what they carry: one has a check digit and
+      # encodes a date and a gender, the other has none of those and has blocks
+      # its issuer never gives out. Damage aimed at either has to land on the
+      # right column, and one dataset holding both is the only way to see that
+      # happen rather than take it on trust.
+      ssn:        { generator: ssn }
       quantity:   { type: integer, max_length: 4 }
     consistency:
       - pesel matches: [birth_date, gender]

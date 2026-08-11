@@ -95,6 +95,34 @@ func (p Parameters) Text(name string) (string, bool) {
 	return written, ok
 }
 
+// Whole reads a parameter as a whole number and says whether it was there and
+// was one.
+//
+// # Why three types and not one
+//
+// Measured on 2026-08-11: the catalog reader hands whole numbers over as
+// uint64, which is what the YAML library produces for an unsigned literal. A
+// negative one would arrive as int64, and a parameter built in a test is
+// written as a plain int. All three mean the same thing to a mutator, and a
+// reader that knew only the one the catalog happens to use today would refuse a
+// value somebody wrote by hand and look like a defect in their policy.
+//
+// A fraction is deliberately not one of them. Truncating 2.5 to 2 would be this
+// tool deciding how much damage to do, and the catalog carries fractions for
+// other parameters, so the two kinds have to stay apart.
+func (p Parameters) Whole(name string) (int, bool) {
+	switch value := p[name].(type) {
+	case int:
+		return value, true
+	case int64:
+		return int(value), true
+	case uint64:
+		return int(value), true
+	default:
+		return 0, false
+	}
+}
+
 // Outcome is what a mutator did. It is built by one of two constructors, so
 // the combination that says both things at once cannot be written down.
 type Outcome struct {

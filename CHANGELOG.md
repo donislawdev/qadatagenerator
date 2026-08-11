@@ -16,6 +16,17 @@ and has not happened.
 
 ### Added
 
+- **A birth date can now be moved without breaking the number that carries it.**
+  Layer L4 rebuilds a personal number around a birth date five years from the
+  one in the column beside it. The number stays correct and the day, the month
+  and the gender stay where they were, so a report has one difference to explain
+  rather than several. A date with nowhere to land, such as the twenty ninth of
+  February, is refused with the day named instead of being moved somewhere else.
+- **An identifier can now be moved into a block its issuer never gives out.**
+  Layer L3 rewrites a social security or routing number into a range any
+  competent validator refuses. This is a different range from the one the
+  correct data already sits in, which is what makes it a corruption rather than
+  a no-op, and a value already sitting there is refused with the reason.
 - **A row can now carry a correct identifier that contradicts the row itself.**
   Ask for layer L4 and the run rebuilds a personal number so it encodes the
   other gender than the gender column beside it. Nothing is malformed: the
