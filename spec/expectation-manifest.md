@@ -41,6 +41,8 @@ A manifest has three top level members: `spec_version`, an **envelope** under `r
 | `recipe` | no | reference to the recipe, with its version |
 | `policy` | no | reference to the corruption policy |
 | `tag` | no | run tag, used later to clean up exactly what this run inserted |
+| `source` | no | the file this run read and damaged, absent when the data was produced rather than read |
+| `schema_inference` | no | what the run worked out about a dataset nobody described, and what it worked it out from |
 | `rows_total` | yes | rows in the dataset |
 | `rows_mutated` | yes | rows carrying at least one defect |
 | `defects_requested` | yes | how many defects the policy asked for |
@@ -49,6 +51,41 @@ A manifest has three top level members: `spec_version`, an **envelope** under `r
 **`defects_requested` and `defects_applied` are always both present.** A dataset where twenty seven of forty requested defects were applied looks exactly like a complete one, and it will be trusted as a complete one.
 
 **`locale` is required even though it may look redundant.** Without it nobody can reconstruct why certain mutators are absent, because availability at layers `L3` and `L4` depends on the provider. See the [corruption catalog](corruption-catalog.md).
+
+### `schema_inference`, when the tool had to work the shape out
+
+A run that damages a file it did not produce has nothing declaring what the columns hold. It works that out by looking at the values, and this member carries both the conclusion and the evidence for it. It is absent from a run driven by a recipe, where nothing was guessed.
+
+```
+"schema_inference": {
+  "method": "values-validated",
+  "columns": [
+    { "field": "pesel", "type": "identifier", "numbering_scheme": "PL.pesel",
+      "basis": "every one of 40 values of this column was accepted by the PL.pesel validator, and by no other scheme carrying a check digit" },
+    { "field": "note", "type": "string",
+      "basis": "no numbering scheme this build carries accepted 40 values of this column" }
+  ],
+  "not_inferred": [
+    "maximum length, because the longest value in a file is not a declared limit"
+  ]
+}
+```
+
+| Field | Required | Meaning |
+|---|---|---|
+| `method` | yes | how the shape was worked out, so that one way of looking is telling apart from another |
+| `columns` | yes | one entry per column of the dataset, in column order |
+| `columns[].field` | yes | the column |
+| `columns[].type` | yes | what it was taken to hold |
+| `columns[].numbering_scheme` | no | the scheme it was taken to follow, absent when none was confirmed |
+| `columns[].basis` | yes | the evidence, as a sentence a person reads |
+| `not_inferred` | yes | the properties this way of looking never reads out of a file |
+
+**Every column gets an entry, including the ones nothing was concluded about.** A column with no entry would leave a reader unable to tell one that was examined from one that was overlooked, and the columns nothing was recognised in are exactly the ones where ordered damage had nothing to work with.
+
+**`basis` is a sentence rather than a pair of counts.** Its reader is a person deciding whether the tool guessed right about their data. A reader handed `{"tested": 40, "passed": 40}` has to already know how much forty is worth.
+
+🔴 **`not_inferred` is required, and a producer that omits it is not writing this format.** A report listing what it recognised and stopping reads as a complete account of the file. The whole point of this member is that a guess about somebody else's data must be arguable by the person whose data it is, and they cannot argue with a limit nobody stated.
 
 ### Defect entry
 

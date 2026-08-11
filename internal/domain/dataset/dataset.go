@@ -24,6 +24,11 @@
 // question with two different answers depending on whether a recipe said so or
 // whether it was worked out by looking, and neither of them belongs in the
 // shape both use.
+//
+// A sample is here for the same reason the table is, and it is the same kind of
+// thing: what looking at a column showed, before anybody decided what it means.
+// Whoever reads a file produces one and whoever works out a schema consumes
+// one, and having it here is what stops those two from depending on each other.
 package dataset
 
 // Table is one table of a dataset.
@@ -58,3 +63,28 @@ type Record struct {
 
 // NoParent is the parent index of a record that belongs to nobody.
 const NoParent = -1
+
+// Sample is what one column of a read dataset held, as text.
+//
+// # Why the counts are separate from the values
+//
+// Values is capped, because running a validator over every cell of a file
+// somebody else chose the size of is a cost with no ceiling. The counts are
+// not capped, because they are cheap and because the difference between them
+// is what lets a report say "the first 1000 of 40000 values" rather than
+// leaving the reader to assume every value was looked at.
+type Sample struct {
+	// Field is the column this describes.
+	Field string
+	// Values are the non-empty values that were kept, in the order they
+	// appeared.
+	Values []string
+	// NonEmpty and Empty count the whole column rather than the sample.
+	//
+	// An empty cell is counted apart rather than kept, because it is evidence
+	// of nothing: a column of national identifiers with gaps in it is still a
+	// column of national identifiers, and a blank neither confirms that nor
+	// denies it.
+	NonEmpty int
+	Empty    int
+}

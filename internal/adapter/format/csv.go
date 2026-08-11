@@ -32,12 +32,12 @@ var _ generate.Writer = (*CSV)(nil)
 
 // csvTable is the file being written.
 type csvTable struct {
-	entity   recipe.Entity
-	planned  dataset.Table
-	file     WriteCloser
-	buffered *bufio.Writer
-	rows     int
-	column   string
+	entity  recipe.Entity
+	planned dataset.Table
+	file    WriteCloser
+	lines   lines
+	rows    int
+	column  string
 }
 
 // NewCSV returns a writer for the comma separated form.
@@ -47,13 +47,9 @@ type csvTable struct {
 // falls over, and the same difference on the other side of the product is a
 // mutator.
 func NewCSV(files Files, rec recipe.Recipe) (*CSV, error) {
-	delimiter := rec.Output.Delimiter
-	if delimiter == "" {
-		delimiter = ","
-	}
-	if len([]rune(delimiter)) != 1 {
-		return nil, fault.New(fault.Config, "the delimiter has to be one character and "+
-			"the recipe gives "+delimiter)
+	delimiter, err := usableDelimiter(rec.Output.Delimiter, "the recipe gives ")
+	if err != nil {
+		return nil, err
 	}
 	if err := usableEncoding(rec.Output.Encoding); err != nil {
 		return nil, err
@@ -77,12 +73,12 @@ func (w *CSV) Begin(planned dataset.Table) error {
 	}
 
 	w.current = &csvTable{entity: entity, planned: planned, file: file,
-		buffered: bufio.NewWriter(file), column: column}
+		lines: newLines(file, w.delimiter), column: column}
 	header := planned.Columns
 	if column != "" {
 		header = append(append([]string{}, header...), column)
 	}
-	return w.writeLine(header)
+	return w.current.lines.write(header)
 }
 
 // Write puts one record on its line.
@@ -95,13 +91,13 @@ func (w *CSV) Write(record dataset.Record) error {
 	w.keys.record(w.current.planned.Entity,
 		identify(w.current.entity, w.current.planned, record.Values, w.current.rows))
 	w.current.rows++
-	return w.writeLine(line)
+	return w.current.lines.write(line)
 }
 
 // End flushes and closes the file of one table.
 func (w *CSV) End(dataset.Table) error {
-	if err := w.current.buffered.Flush(); err != nil {
-		return fault.Wrap(fault.IO, err, "cannot write the dataset")
+	if err := w.current.lines.flush(); err != nil {
+		return err
 	}
 	w.current = nil
 	return nil
@@ -111,31 +107,70 @@ func (w *CSV) End(dataset.Table) error {
 // complete when it ended.
 func (w *CSV) Finish() error { return nil }
 
-// writeLine writes one row, quoting the fields that need it.
-func (w *CSV) writeLine(fields []string) error {
+// lines writes rows of one file with the quoting and the line ending this
+// project promises.
+//
+// # Why this is a type of its own
+//
+// Two writers produce comma separated bytes: the one above, which lays out a
+// dataset a recipe described, and the one beside it, which writes back a table
+// that was read from somebody else's file. What they share is exactly the part
+// that is a promise rather than an arrangement, and a second copy of the
+// quoting rules is a second answer to a question the format has one answer to.
+type lines struct {
+	buffered  *bufio.Writer
+	delimiter string
+}
+
+func newLines(to WriteCloser, delimiter string) lines {
+	return lines{buffered: bufio.NewWriter(to), delimiter: delimiter}
+}
+
+// write puts one row down, quoting the fields that need it.
+func (l lines) write(fields []string) error {
 	var line strings.Builder
 	for index, field := range fields {
 		if index > 0 {
-			line.WriteString(w.delimiter)
+			line.WriteString(l.delimiter)
 		}
-		line.WriteString(w.quote(field))
+		line.WriteString(l.quote(field))
 	}
 	// A single newline, always, whatever the system. The mixed endings this
 	// tool produces on purpose belong to a mutator and arrive as data rather
 	// than from the platform.
 	line.WriteByte('\n')
-	if _, err := w.current.buffered.WriteString(line.String()); err != nil {
+	if _, err := l.buffered.WriteString(line.String()); err != nil {
 		return fault.Wrap(fault.IO, err, "cannot write the dataset")
 	}
 	return nil
 }
 
 // quote wraps a field when it carries something that would end it early.
-func (w *CSV) quote(field string) string {
-	if !strings.ContainsAny(field, w.delimiter+"\"\r\n") {
+func (l lines) quote(field string) string {
+	if !strings.ContainsAny(field, l.delimiter+"\"\r\n") {
 		return field
 	}
 	return `"` + strings.ReplaceAll(field, `"`, `""`) + `"`
+}
+
+func (l lines) flush() error {
+	if err := l.buffered.Flush(); err != nil {
+		return fault.Wrap(fault.IO, err, "cannot write the dataset")
+	}
+	return nil
+}
+
+// usableDelimiter refuses one that is not a single character, and defaults to a
+// comma.
+func usableDelimiter(given, from string) (string, error) {
+	if given == "" {
+		return ",", nil
+	}
+	if len([]rune(given)) != 1 {
+		return "", fault.New(fault.Config, "the delimiter has to be one character and "+
+			from+given)
+	}
+	return given, nil
 }
 
 // usableEncoding refuses an encoding this build does not write.

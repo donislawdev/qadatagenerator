@@ -150,8 +150,13 @@ func (w *Writer) Finish() error { return w.next.Finish() }
 // happened to one defect and this says what happened to a run.
 func (w *Writer) ByKind() []string {
 	said := map[manifest.FailureKind]string{
-		manifest.Unimplemented:       "this build has no implementation of them yet",
-		manifest.RunLacksCapability:  "this run cannot do what they need, which follows from the recipe",
+		manifest.Unimplemented: "this build has no implementation of them yet",
+		// 🔴 This said "which follows from the recipe" until 2026-08-11, and it
+		// was true of every run that existed when it was written. The verb that
+		// damages somebody else's file has no recipe, so the clause became a
+		// sentence pointing at a thing the reader does not have. What replaced
+		// it is true in both modes and points at where the answer is either way.
+		manifest.RunLacksCapability:  "this run cannot do what they need, and the manifest names the missing capability for each one",
 		manifest.FieldTypeNotCovered: "the dataset has no column of the kind they apply to",
 		manifest.SchemeNotCovered:    "no column follows a numbering scheme they apply to",
 		manifest.DeclinedByMutator:   "the values in those rows did not suit them",

@@ -43,6 +43,51 @@ func (r Run) Problems() []string {
 		problems = append(problems, fmt.Sprintf(
 			"the envelope says %d of %d rows were mutated", r.RowsMutated, r.RowsTotal))
 	}
+	return append(problems, r.Inference.problems()...)
+}
+
+// problems reports what would make an inference unreadable to whoever has to
+// judge it.
+//
+// # Why an inference with no stated limits is refused outright
+//
+// The other three rules here are ordinary: a guess about no column, or one with
+// no evidence, tells nobody anything. The fourth is the one worth defending. An
+// inference that lists what it recognised and stops reads as a complete account
+// of the file, so a reader learns nothing about the columns where the damage
+// they ordered quietly had nothing to work with. Making the model refuse it is
+// the same move as making a defect that did not happen still be an entry, one
+// level up: the silence that costs the most is the one that looks like an
+// answer.
+func (i *Inference) problems() []string {
+	if i == nil {
+		return nil
+	}
+	var problems []string
+	if strings.TrimSpace(i.Method) == "" {
+		problems = append(problems, "the envelope infers a schema without saying how, so nobody "+
+			"reading it can tell one way of looking from another")
+	}
+	if len(i.Columns) == 0 {
+		problems = append(problems, "the envelope infers a schema and names no column it decided "+
+			"anything about")
+	}
+	for _, column := range i.Columns {
+		if strings.TrimSpace(column.Field) == "" {
+			problems = append(problems, "an inferred column has no name, so nothing says which "+
+				"column was looked at")
+			continue
+		}
+		if strings.TrimSpace(column.Basis) == "" {
+			problems = append(problems, fmt.Sprintf(
+				"the inference about %s carries no basis, so it is a conclusion nobody can "+
+					"argue with", column.Field))
+		}
+	}
+	if len(i.NotInferred) == 0 {
+		problems = append(problems, "the envelope infers a schema without saying what it does "+
+			"not infer, which would read as a complete account of the file")
+	}
 	return problems
 }
 

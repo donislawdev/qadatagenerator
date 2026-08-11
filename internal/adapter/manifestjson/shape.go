@@ -35,6 +35,24 @@ type locationDocument struct {
 	Related    []locationDocument `json:"related,omitempty"`
 }
 
+// inferenceDocument is the evidence for a schema nobody declared.
+//
+// The lists are never left out once the member is present, so a reader always
+// finds both of them. An absent not_inferred would be the difference between a
+// report and an advertisement, and the model refuses one anyway.
+type inferenceDocument struct {
+	Method      string                   `json:"method"`
+	Columns     []inferredColumnDocument `json:"columns"`
+	NotInferred []string                 `json:"not_inferred"`
+}
+
+type inferredColumnDocument struct {
+	Field  string `json:"field"`
+	Type   string `json:"type"`
+	Scheme string `json:"numbering_scheme,omitempty"`
+	Basis  string `json:"basis"`
+}
+
 type profileDocument struct {
 	Code       string `json:"code,omitempty"`
 	HTTPStatus int    `json:"http_status,omitempty"`
@@ -42,17 +60,22 @@ type profileDocument struct {
 }
 
 type runDocument struct {
-	GeneratedAt      string `json:"generated_at"`
-	Seed             string `json:"seed"`
-	Locale           string `json:"locale"`
-	CatalogVersion   string `json:"catalog_version"`
-	Recipe           string `json:"recipe,omitempty"`
-	Policy           string `json:"policy,omitempty"`
-	Tag              string `json:"tag,omitempty"`
-	RowsTotal        int    `json:"rows_total"`
-	RowsMutated      int    `json:"rows_mutated"`
-	DefectsRequested int    `json:"defects_requested"`
-	DefectsApplied   int    `json:"defects_applied"`
+	GeneratedAt    string `json:"generated_at"`
+	Seed           string `json:"seed"`
+	Locale         string `json:"locale"`
+	CatalogVersion string `json:"catalog_version"`
+	Recipe         string `json:"recipe,omitempty"`
+	Policy         string `json:"policy,omitempty"`
+	Tag            string `json:"tag,omitempty"`
+	// Source and SchemaInference appear only in the mode that reads somebody
+	// else's file. Both are omitted otherwise, so a manifest from a recipe is
+	// byte for byte what it was before either existed.
+	Source           string             `json:"source,omitempty"`
+	Inference        *inferenceDocument `json:"schema_inference,omitempty"`
+	RowsTotal        int                `json:"rows_total"`
+	RowsMutated      int                `json:"rows_mutated"`
+	DefectsRequested int                `json:"defects_requested"`
+	DefectsApplied   int                `json:"defects_applied"`
 }
 
 // defectOf turns one entry into the document shape.
@@ -113,8 +136,34 @@ func runOf(run manifest.Run, requested, applied int) runDocument {
 	return runDocument{
 		GeneratedAt: run.GeneratedAt, Seed: run.Seed, Locale: run.Locale,
 		CatalogVersion: run.CatalogVersion, Recipe: run.Recipe,
-		Policy: run.Policy, Tag: run.Tag,
+		Policy: run.Policy, Tag: run.Tag, Source: run.Source,
+		Inference: inferenceOf(run.Inference),
 		RowsTotal: run.RowsTotal, RowsMutated: run.RowsMutated,
 		DefectsRequested: requested, DefectsApplied: applied,
 	}
+}
+
+// inferenceOf carries the evidence for a guessed schema into the document, or
+// leaves the member out when nothing was guessed.
+//
+// A run from a recipe has to produce a document without the member rather than
+// one with an empty object in it. An empty object would say that this run
+// inferred a schema and concluded nothing about any column, which is a
+// different statement from the true one, that nothing needed inferring.
+func inferenceOf(inferred *manifest.Inference) *inferenceDocument {
+	if inferred == nil {
+		return nil
+	}
+	document := &inferenceDocument{
+		Method:      inferred.Method,
+		Columns:     make([]inferredColumnDocument, 0, len(inferred.Columns)),
+		NotInferred: append([]string{}, inferred.NotInferred...),
+	}
+	for _, column := range inferred.Columns {
+		document.Columns = append(document.Columns, inferredColumnDocument{
+			Field: column.Field, Type: column.Type,
+			Scheme: column.Scheme, Basis: column.Basis,
+		})
+	}
+	return document
 }

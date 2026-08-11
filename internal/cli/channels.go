@@ -20,6 +20,17 @@ type streams struct {
 	color bool
 	level verbosity
 
+	// verb is which command is running, empty before one is chosen.
+	//
+	// 🔴 It is here because the last part of a refusal, what to do instead,
+	// stopped being answerable from the kind of the failure alone. One sentence
+	// per kind was right while every verb worked from a recipe. The verb that
+	// damages somebody else's file has none, and the sentence sending its user
+	// to run validate on their recipe was a true sentence about the callers
+	// that existed when it was written. Measured by running the binary, with
+	// every test green.
+	verb string
+
 	// dataErr keeps the first failed write to the data channel. A run whose
 	// output went nowhere must not end with success, and a broken pipe is
 	// the ordinary way that happens.

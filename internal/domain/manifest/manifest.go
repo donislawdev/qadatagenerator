@@ -210,9 +210,63 @@ type Run struct {
 	Recipe string
 	Policy string
 	Tag    string
+	// Source is the file this run took and damaged, empty when the data was
+	// produced from a recipe rather than read.
+	//
+	// It is not the recipe under another name. A recipe says what the data was
+	// meant to be, and this says whose data it was, which is the question
+	// somebody holding two similar files an hour later actually has.
+	Source string
+	// Inference is what the run worked out about a dataset nobody described,
+	// and what it worked it out from. It is absent for a run from a recipe,
+	// where nothing was guessed.
+	Inference *Inference
 	// RowsTotal and RowsMutated describe the dataset.
 	RowsTotal   int
 	RowsMutated int
+}
+
+// Inference is what a run decided about the shape of somebody else's data.
+//
+// # Why the evidence is part of the promise rather than a note beside it
+//
+// Everything else in a manifest is something this tool did. This is something
+// it guessed, about data it did not produce, and the person who can tell
+// whether the guess was right is the one reading it. A conclusion published
+// without its evidence is a conclusion they cannot argue with, and damage aimed
+// at a column wrongly taken for a national identifier would have them chasing a
+// rejection that was never going to happen.
+type Inference struct {
+	// Method names how the shape was worked out, so that a later run using a
+	// different way of looking is telling apart from this one.
+	Method string
+	// Columns is what was decided about each column, in column order.
+	Columns []InferredColumn
+	// NotInferred names the properties this way of looking never reads.
+	//
+	// It is required rather than optional, and the model refuses an inference
+	// without it. A report saying only what it recognised invites the reader to
+	// conclude that the rest was not there, and the rest is precisely where the
+	// damage they asked for did not happen.
+	NotInferred []string
+}
+
+// InferredColumn is one column and the evidence behind what it was taken for.
+type InferredColumn struct {
+	// Field is the column.
+	Field string
+	// Type is what it was taken to hold.
+	Type string
+	// Scheme is the numbering scheme it was taken to follow, empty when none
+	// was confirmed.
+	Scheme string
+	// Basis is the evidence, as a sentence a person reads.
+	//
+	// Required for every column, including the ones nothing was concluded
+	// about. "Nothing recognised these values" is an answer, and a column with
+	// no entry at all would leave the reader unable to tell a column that was
+	// examined from one that was overlooked.
+	Basis string
 }
 
 // Manifest is one run's promise about one dataset.

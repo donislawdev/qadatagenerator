@@ -10,6 +10,32 @@ repository once they are released.
 
 ## [Unreleased]
 
+### Added
+
+- **`qadg corrupt` damages a file this tool did not make.** Point it at a comma
+  separated file, name the layers to attack, and it writes the same records with
+  damage in them beside a manifest saying what a system reading them should do
+  about each one. No recipe is needed and none is written.
+- **The manifest says what the tool worked out about your columns, and what it
+  worked it out from.** A column is only called a national identifier or a
+  routing number when every value in it is accepted by that scheme's own check
+  digit. Anything less certain is left as text and the manifest says why.
+- **The manifest also lists what this mode never reads out of a file.** Maximum
+  length, required columns, uniqueness and relations between columns are things
+  a file does not carry, so damage needing any of them is recorded as not
+  applied with the reason rather than quietly skipped.
+- Flags for this verb: `--layers`, `--rows`, `--out`, `--seed`, `--delimiter`,
+  `--per-row`, `--exclude-fields`, `--locale`, `--overwrite` and `--dry-run`.
+  `--layers` is required, because damaging the bytes of a file and damaging a
+  value in it are different requests and there is no safe default.
+
+### Changed
+
+- A run that could not apply damage for want of something in the data now says
+  where the answer is rather than pointing at a recipe, which the mode above
+  does not have.
+
+
 Nothing has been released yet. The binary reports 0.1.0, which is the version
 being built rather than one anybody can download. Releasing is a separate act
 and has not happened.

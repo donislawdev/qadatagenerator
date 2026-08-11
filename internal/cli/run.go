@@ -191,11 +191,17 @@ func runCommand(out *streams, command []string, asked invocation) int {
 			instead: problemCommandAndReportDo,
 		})
 	}
+	// Which verb is running decides the last part of a refusal, so it is
+	// recorded before the verb can fail. Setting it inside each verb would
+	// leave the one that forgot answering with the sentence of another.
+	out.verb = command[0]
 	switch command[0] {
 	case commandValidate:
 		return runValidate(out, command[1:], asked.global)
 	case commandGenerate:
 		return runGenerate(out, command[1:], asked.global)
+	case commandCorrupt:
+		return runCorrupt(out, command[1:], asked.global)
 	case commandHelp:
 		return runHelp(out, command[1:])
 	default:
@@ -549,7 +555,7 @@ func fail(out *streams, err error) int {
 		})
 		return int(code)
 	}
-	out.report(problem{what: err.Error(), instead: whatToDoAbout(kind)})
+	out.report(problem{what: err.Error(), instead: whatToDoAbout(kind, out.verb)})
 	return int(code)
 }
 
@@ -568,13 +574,34 @@ func fail(out *streams, err error) int {
 // 🔴 What this does not do: it does not add the other two parts. Where the
 // message carries them it would repeat itself, and where it does not, a
 // sentence invented here would be guessing at a failure it cannot see.
-func whatToDoAbout(kind fault.Kind) string {
+//
+// # Why the verb is a second key, since 2026-08-11
+//
+// Two of these sentences send the reader to their recipe, which was the right
+// next move while every verb had one. The verb that damages somebody else's
+// file does not, so both sentences became untrue for it on the day it arrived,
+// and untrue in the worst available way: they name a file the reader does not
+// have and a command that cannot help them. Found by running the binary rather
+// than by reading it, with every test green.
+//
+// The pair rather than a sentence per message. What went wrong is in the
+// message already, and what to do next is decided by exactly these two things:
+// the kind of the failure, and whether this run was told what the data should
+// look like.
+func whatToDoAbout(kind fault.Kind, verb string) string {
+	fromAFile := verb == commandCorrupt
 	switch kind {
 	case fault.IO:
 		return doAboutIO
 	case fault.Config:
+		if fromAFile {
+			return doAboutConfigCorrupt
+		}
 		return doAboutConfig
 	case fault.Data:
+		if fromAFile {
+			return doAboutDataCorrupt
+		}
 		return doAboutData
 	case fault.Interrupted, fault.Terminated:
 		return doAboutStopped

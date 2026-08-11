@@ -512,6 +512,50 @@ var Guards = []Guard{
 	{"an entry the model refuses never reaches the file", "TestAnEntryTheModelWouldRefuseNeverReachesTheFile", "internal/adapter/manifestjson", ByMutation},
 	{"a value emptied on purpose is written rather than dropped", "TestAValueThatIsEmptyOnPurposeIsWrittenRatherThanDropped", "internal/adapter/manifestjson", ByMutation},
 	{"a run with no entries is still a document", "TestARunWithNoEntriesIsStillADocument", "internal/adapter/manifestjson", ByMutation},
+
+	// --- reading somebody else's file ----------------------------------------
+	//
+	// 🔴 Everything here defends one sentence: a column is only said to hold
+	// something when the values prove it. The expensive half is the refusal to
+	// name a column from a validator that answers about shape, because that
+	// refusal costs a real mutator on a real column of social security numbers
+	// and buys the promise that a hard expectation is never published on a guess.
+	{"a scheme with no check digit never names a column", "TestAColumnOfRealSocialSecurityNumbersIsStillNotRecognised", "internal/adapter/infer", ByMutation},
+	{"too few values tell a scheme from a coincidence", "TestTooFewValuesLeaveAColumnUnrecognised", "internal/adapter/infer", ByMutation},
+	{"every value has to fit before a column is named", "TestOneValueThatDoesNotFitRefusesTheColumn", "internal/adapter/infer", ByMutation},
+	{"two schemes fitting equally well name neither", "TestTwoSchemesAcceptingEverythingLeaveTheColumnUnrecognised", "internal/adapter/infer", ByMutation},
+	{"what this way of looking never reads is said out loud", "TestTheLimitsOfThisWayOfLookingAreStated", "internal/adapter/infer", ByMutation},
+	{"a column of national identifiers is recognised from its values", "TestAColumnOfNationalIdentifiersIsRecognisedFromItsValues", "internal/adapter/infer", ByMutation},
+	{"nothing a file cannot declare is claimed about a column", "TestNothingBeyondTypeAndSchemeIsClaimed", "internal/adapter/infer", ByMutation},
+
+	// The reader. A value quietly mangled on the way in is damage nobody
+	// ordered and the manifest does not describe, which is the failure this
+	// whole product exists to find in other people's tools.
+	{"a file with a header and no records is refused", "TestAHeaderWithNoRecordsIsRefused", "internal/adapter/sourcecsv", ByMutation},
+	{"a header that cannot name a column is refused", "TestAHeaderThatCannotNameAColumnIsRefused", "internal/adapter/sourcecsv", ByMutation},
+	{"broken quoting is refused rather than salvaged", "TestBrokenQuotingIsRefusedRatherThanSalvaged", "internal/adapter/sourcecsv", ByMutation},
+	{"the row count is known before the first record", "TestTheRowCountIsKnownBeforeTheFirstRecord", "internal/adapter/sourcecsv", ByMutation},
+	{"a ragged row is refused rather than shifted into place", "TestARaggedRowIsRefused", "internal/adapter/sourcecsv", ByMutation},
+	{"the sample is capped and the count is not", "TestTheSampleIsCappedAndTheCountIsNot", "internal/adapter/sourcecsv", ByMutation},
+
+	// The walk and the writer of a dataset that was read.
+	{"a run reading a file can be stopped between rows", "TestARunStoppedBetweenRowsLeavesTheTableUnfinished", "internal/app/corrupt", ByMutation},
+	{"a writer for a read dataset takes one table", "TestASecondTableIsRefused", "internal/adapter/format", ByMutation},
+	{"a failure reading ends the run rather than the file", "TestAFailureReadingEndsTheRun", "internal/app/corrupt", ByMutation},
+
+	// The manifest of a run that had to guess.
+	{"an inference that hides its limits is refused", "TestAnInferenceThatDoesNotSayWhatItMissesIsRefused", "internal/domain/manifest", ByMutation},
+	{"a conclusion about a column carries its evidence", "TestAColumnWithNoBasisIsRefused", "internal/domain/manifest", ByMutation},
+
+	// The verb, run as a user runs it.
+	//
+	// 🔴 The last two guard the only irreversible thing this tool does and the
+	// only sentence that became untrue when a second kind of run arrived. Both
+	// were found by running the binary rather than by reading it.
+	{"every refusal of corrupt is complete and names no recipe", "TestEveryRefusalOfThisVerbIsCompleteAndMentionsNoRecipe", "internal/cli", ByMutation},
+	{"damaging a file where it sits leaves the source alone", "TestDamagingAFileInItsOwnDirectoryLeavesTheSourceAlone", "internal/cli", ByMutation},
+	{"the evidence for every column reaches the manifest", "TestTheManifestCarriesTheEvidenceForEveryColumn", "internal/cli", ByMutation},
+	{"the same file and seed give the same damage", "TestTheSameFileAndSeedGiveTheSameDamage", "internal/cli", ByMutation},
 }
 
 // CountByProof returns how many guards are in each state.

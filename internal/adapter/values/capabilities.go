@@ -35,6 +35,44 @@ func CapabilitiesOf(rec recipe.Recipe, source Source) []capability.Name {
 	return names
 }
 
+// CapabilitiesOfView is the same question asked of a dataset nobody described.
+//
+// # Why it cannot be the function above
+//
+// That one walks the generators a recipe named, and in the mode that reads
+// somebody else's file there are no generators: nothing produced those values,
+// they were already there. What a column follows was worked out by offering its
+// values to every scheme, and the answer is on the column rather than on a
+// generator.
+//
+// The capabilities themselves come from the same place in both cases, which is
+// the provider itself. So the two functions differ in how they find the schemes
+// present in a run and agree on everything after that, and a run that recognised
+// a column of national identifiers can break a check digit whether a recipe said
+// so or whether the values did.
+func CapabilitiesOfView(view recipe.SchemaView, source Source) []capability.Name {
+	found := map[capability.Name]bool{}
+	for _, entity := range view.EntityNames() {
+		for _, field := range view.FieldsOf(entity) {
+			if field.Provider == "" {
+				continue
+			}
+			scheme, carried := source.ProviderNamed(field.Provider)
+			if !carried {
+				continue
+			}
+			for _, name := range scheme.Capabilities() {
+				found[name] = true
+			}
+		}
+	}
+	names := make([]capability.Name, 0, len(found))
+	for name := range found {
+		names = append(names, name)
+	}
+	return names
+}
+
 // capabilitiesOfGenerator asks what stands behind a generator what it brings.
 //
 // The answer comes from the provider itself rather than from a table here,

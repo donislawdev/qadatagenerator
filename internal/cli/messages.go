@@ -40,7 +40,11 @@ const (
       saying what the run made.
 
   qadg validate recipe.yaml
-      Read a recipe and report every problem it has, all of them at once.`
+      Read a recipe and report every problem it has, all of them at once.
+
+  qadg corrupt --layers L2,L3 contacts.csv
+      Damage a file this tool did not make, and say beside it what should
+      happen to every defect.`
 
 	usageBlock = `Usage:
   qadg <command> [arguments]
@@ -60,6 +64,46 @@ const (
 	// commandGenerate is the name as typed, and a public contract from the
 	// first release for the same reason as the one above it.
 	commandGenerate = "generate"
+
+	// commandCorrupt is the name as typed, and a public contract for the same
+	// reason as the two above it.
+	//
+	// It is the verb of the second pillar working on its own: a file this tool
+	// never produced goes in, and the same records with damage in them come out
+	// beside a manifest saying what the damage was and what should happen to it.
+	commandCorrupt = "corrupt"
+
+	// corruptedSuffix is what tells the damaged file from the one it came from.
+	//
+	// 🔴 It exists because this is the only verb that reads and writes in one
+	// run, so it is the only one that could destroy what it was given. The
+	// suffix makes that collision impossible by construction rather than by the
+	// caller remembering to point the output somewhere else.
+	corruptedSuffix = ".corrupted.csv"
+
+	// defaultCorruptSeed is what the draws come from when nobody said.
+	//
+	// A recipe carries its seed and a file does not, so this mode needs one of
+	// its own. It is a fixed word rather than a clock reading, because two runs
+	// of one command have to damage the same rows: a seed taken from the time
+	// would make this the one verb whose output nobody can reproduce.
+	defaultCorruptSeed = "0"
+
+	// defaultCorruptLocale is what the envelope records when nobody said.
+	//
+	// It matches what the source of values defaults to, so the two cannot
+	// disagree. In this mode it decides less than it looks: which numbering
+	// scheme a column follows is worked out from the values and not from the
+	// locale, and the manifest says so in its own section.
+	defaultCorruptLocale = "en-US"
+
+	// inferenceMethod names how a schema was worked out, for the manifest.
+	//
+	// It is a name rather than a sentence because a reader comparing two
+	// manifests needs to tell one way of looking from another at a glance. What
+	// the way of looking actually is belongs in the basis of each column, which
+	// is where a person reads it.
+	inferenceMethod = "values-validated"
 
 	// commandHelp is the name as typed, and a public contract for the same
 	// reason as the two above it.
@@ -90,6 +134,68 @@ const (
 	problemGenerateArgumentsWhy     = "it reads a recipe and writes the dataset that recipe describes"
 	problemGenerateArgumentsAllowed = "one path to a recipe file"
 	problemGenerateArgumentsDo      = "qadg generate recipe.yaml"
+
+	problemCorruptArguments        = "corrupt takes one file"
+	problemCorruptArgumentsWhy     = "it reads a file of records and writes those records back with damage in them"
+	problemCorruptArgumentsAllowed = "one path to a comma separated file"
+	problemCorruptArgumentsDo      = "qadg corrupt --layers L2,L3 records.csv"
+
+	// The refusal for a run that named no layers.
+	//
+	// 🔴 There is no default on purpose. Choosing the layers is choosing what
+	// damaging somebody's file means, and the cheapest default to defend, all of
+	// them, takes apart the bytes and the container of a file whose owner wanted
+	// to test an import. Adding a default later breaks nothing, because every
+	// invocation without one is refused today.
+	problemCorruptNoLayers    = "corrupt was not told which layers to damage"
+	problemCorruptNoLayersWhy = "the layers decide what kind of damage this does, and there is no default because damaging the bytes of a file and damaging a value in it are different requests"
+	problemCorruptNoLayersDo  = "qadg corrupt --layers L2,L3 records.csv"
+
+	problemCorruptUnknownLayer    = "this build describes no damage in the layer "
+	problemCorruptUnknownLayerWhy = "a layer with nothing described in it would order a run that produced nothing while looking as though it had"
+
+	problemCorruptRows        = "the share of rows to damage cannot be read from "
+	problemCorruptRowsWhy     = "it decides how much of the file is damaged, and a value nobody can read would leave that to a default the run never mentioned"
+	problemCorruptRowsAllowed = "a percentage, such as 5% or 100%"
+	problemCorruptRowsDo      = "qadg corrupt --rows 5% --layers L2,L3 records.csv"
+
+	// 🔴 An unknown per row value used to pass. The engine reads anything that
+	// is not the word for several as one defect per row, so a misspelling
+	// quietly halved the damage and the run ended successfully.
+	problemCorruptPerRow    = "no such setting for how many defects one row carries, "
+	problemCorruptPerRowWhy = "anything else would be read as one defect per row, so a misspelling would quietly reduce the damage and the run would still succeed"
+	problemCorruptPerRowDo  = "qadg corrupt --per-row any --layers L2,L3 records.csv"
+
+	problemCorruptDelimiter        = "the delimiter has to be one character and this run was given "
+	problemCorruptDelimiterWhy     = "it is the character that separates the fields of one line, both when this reads the file and when it writes it back"
+	problemCorruptDelimiterAllowed = "one character, such as a comma or a semicolon"
+	// The semicolon here is the VALUE of a flag rather than punctuation in a
+	// sentence, and it is the one every European spreadsheet writes, so an
+	// example using anything else would be an example nobody needs.
+	problemCorruptDelimiterDo = "qadg corrupt --delimiter ; --layers L2,L3 records.csv" // punctuation: test data
+
+	// The refusal that stands in front of the only irreversible thing this tool
+	// does. It cannot fire while the output name carries its suffix, and it
+	// stays because the day somebody changes how that name is built is the day
+	// it is the only thing between that change and somebody losing their file.
+	problemCorruptWouldOverwrite        = "this run would write over the file it is reading, "
+	problemCorruptWouldOverwriteWhy     = "the damaged records would replace the records they were made from, and nothing could bring the file back"
+	problemCorruptWouldOverwriteAllowed = "an output directory that is not where the source file is"
+	problemCorruptWouldOverwriteDo      = "qadg corrupt --out ./damaged --layers L2,L3 records.csv"
+
+	// What a run says about the guesses it had to make. They go on the log
+	// channel for the person watching, and into the manifest for good.
+	noteNotInferred = "maximum length, required columns, uniqueness and relations between columns are not read from a file, so damage needing any of them is recorded as not applied with the reason. The manifest lists all of them"
+	// 🔴 Everything a run changes without being asked to belongs here rather
+	// than in the manifest, where every entry is something somebody ordered.
+	// The blank line half was measured while writing the test: a line with
+	// nothing on it is not a record for a comma separated file, so it is
+	// stepped over and never written back.
+	noteRewritten        = "the output is written as UTF-8 with newline line endings and this tool's quoting, whatever the source used, and a line with nothing on it is not a record so it does not come back"
+	noteByteOrderMark    = "the source begins with a byte order mark and the output does not. That is a consequence of writing rather than damage that was ordered, so it is not in the manifest"
+	noteDryRunPolicy     = "the policy draws on "
+	noteDryRunWrites     = "a real run would write "
+	noteDryRunEveryOrder = "A real run writes one manifest entry per ordered defect, applied or not"
 
 	// The two ways a run ends because something outside it said so. Both say
 	// what is on the disk afterwards, because that is the only thing the reader
@@ -129,6 +235,12 @@ const (
 	doAboutData    = "the recipe is valid and cannot be satisfied, so change what it asks for"
 	doAboutStopped = "nothing was left behind, so the same command can simply be run again"
 	doAboutRuntime = "this is a defect in the tool rather than in the recipe. Report it with the command that caused it"
+
+	// The same two, for the verb that has no recipe. A reader damaging a file
+	// somebody sent them has nothing to validate and nothing to rewrite, so the
+	// next move is in the flags they typed or in the file they were given.
+	doAboutConfigCorrupt = "check the flags of this command. qadg help corrupt lists them with what each one takes"
+	doAboutDataCorrupt   = "the file cannot be used as it stands, so change the file or the flags describing it"
 
 	problemHelpSubject        = "no command called "
 	problemHelpSubjectWhy     = "help describes a command this build has"
@@ -225,6 +337,27 @@ var commandDocs = []commandDoc{
 			{"--format <name>", []string{"--format"}, "Write csv or json rather than the format the recipe asks for."},
 			{"--overwrite", []string{"--overwrite"}, "Write over files that are already there. Without it an existing file stops the run."},
 			{"--dry-run", []string{"--dry-run"}, "Say what would be produced and write nothing."},
+		},
+	},
+	{
+		name:      commandCorrupt,
+		summary:   "Damage a file this tool did not make.",
+		arguments: "<file>",
+		what: "Reads a comma separated file, works out what its columns hold by looking at the values,\n" +
+			"and writes them back with damage in them beside a manifest saying what should happen to\n" +
+			"each one. What could not be worked out is listed rather than guessed.",
+		example: "qadg corrupt --layers L2,L3 --rows 5% contacts.csv",
+		flags: []flagDoc{
+			{"--layers <list>", []string{"--layers"}, "Which lines of defence to attack, such as L2,L3. Required, because there is no safe default."},
+			{"--rows <share>", []string{"--rows"}, "The share of rows to damage, such as 5%. Defaults to 5%."},
+			{"--out <dir>", []string{"--out"}, "Write the damaged file and the manifest here. Defaults to the current directory."},
+			{"--seed <text>", []string{"--seed"}, "Draw from this seed. The same seed and the same file give the same damage."},
+			{"--delimiter <char>", []string{"--delimiter"}, "The character between fields, for reading and for writing back. Defaults to a comma."},
+			{"--per-row <how>", []string{"--per-row"}, "exactly_one or any, for how many defects one damaged row carries."},
+			{"--exclude-fields <list>", []string{"--exclude-fields"}, "Columns to leave alone, whatever the layers say."},
+			{"--locale <name>", []string{"--locale"}, "Which locale's damage is available. It does not decide what the columns hold, the values do."},
+			{"--overwrite", []string{"--overwrite"}, "Write over files that are already there. Without it an existing file stops the run."},
+			{"--dry-run", []string{"--dry-run"}, "Say what was worked out and what would be damaged, and write nothing."},
 		},
 	},
 	{

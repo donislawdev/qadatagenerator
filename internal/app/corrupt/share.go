@@ -25,6 +25,46 @@ const (
 	perRowAny        = "any"
 )
 
+// UsableShare and UsablePerRow report whether a policy taken from somewhere
+// other than a recipe can be used, without building anything.
+//
+// # Why a caller needs to ask before it has a schema
+//
+// A selector is built from a policy and a schema view, and a schema view of
+// somebody else's file costs a whole pass over that file. A share that cannot
+// be read is therefore found after the reading rather than before it, which
+// makes a typo in a flag cost a scan of a file the user chose the size of.
+//
+// The rules stay where they are and only the question is exported, so there is
+// no second place where a share means something slightly different. The wording
+// of the refusal belongs to whoever took the value, because only they know
+// whether it came from a line of a recipe or from a flag.
+func UsableShare(written string) error {
+	_, err := shareOf(written)
+	return err
+}
+
+// UsablePerRow reports whether a per row setting is one this engine knows.
+//
+// 🔴 An unknown value has to be refused rather than treated as the safer of the
+// two. The engine reads anything that is not the word for several as one defect
+// per row, so a misspelling would quietly halve the damage somebody asked for
+// and the run would end successfully. The recipe format refuses it on the way
+// in, and a policy arriving by flag had no such gate.
+func UsablePerRow(written string) error {
+	switch written {
+	case "", perRowExactlyOne, perRowAny:
+		return nil
+	default:
+		return fault.New(fault.Config, fmt.Sprintf(
+			"per_row says %q, and this engine knows %s and %s",
+			written, perRowExactlyOne, perRowAny))
+	}
+}
+
+// PerRowChoices are the values per row accepts, for a message that lists them.
+func PerRowChoices() []string { return []string{perRowExactlyOne, perRowAny} }
+
 // share is how much of the data a policy asks to damage.
 type share struct {
 	// percent is the portion of rows, from zero to one hundred.

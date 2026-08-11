@@ -189,6 +189,41 @@ func (s Source) ProviderNamed(scheme string) (provider.Provider, bool) {
 	return nil, false
 }
 
+// Schemes returns every numbering scheme this build carries, sorted by
+// identifier and each one once.
+//
+// # Why the whole list, when everything else here is asked by name
+//
+// The mode that reads somebody else's file has no name to ask by. Nothing
+// declared what a column holds, so the only way to find out is to offer a value
+// to every scheme and see which one recognises it. That is a different question
+// from the one the rest of this file answers, which is always what a named
+// generator produces.
+//
+// Sorted rather than in registry order, because whoever asks compares one
+// answer against another and Go randomises map iteration on purpose. A scheme
+// reached by two generators appears once, since the answer is about schemes and
+// not about the ways of producing them.
+func (s Source) Schemes() []provider.Provider {
+	seen := make(map[string]provider.Provider, len(producers))
+	for _, known := range producers {
+		if known.behind == nil {
+			continue
+		}
+		seen[known.behind.ID()] = known.behind
+	}
+	ids := make([]string, 0, len(seen))
+	for id := range seen {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	schemes := make([]provider.Provider, 0, len(ids))
+	for _, id := range ids {
+		schemes = append(schemes, seen[id])
+	}
+	return schemes
+}
+
 // ProducesType reports whether this build can fill a field described by that
 // type alone.
 //
