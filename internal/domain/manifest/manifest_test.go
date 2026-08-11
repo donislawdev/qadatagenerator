@@ -50,6 +50,7 @@ func refused() manifest.Defect {
 		Confidence:    catalog.Hard,
 		Rationale:     "The identifier carries no check digit, so there is none to break.",
 		FailureReason: "US.ssn has no check digit",
+		FailureKind:   manifest.SchemeNotCovered,
 	}
 }
 
@@ -246,6 +247,42 @@ func TestTheEntriesCannotBeChangedThroughWhatTheCallerIsHanded(t *testing.T) {
 	if built.Defects()[0].Rationale == "something else entirely" {
 		t.Error("a caller can rewrite the manifest through the slice it was handed")
 	}
+}
+
+// 🔴 The same silence, in the dimension a machine reads.
+//
+// An entry saying it did not happen and giving only the sentence leaves anything
+// downstream matching on English prose to tell one kind of failure from another.
+// That prose is written for a person and is free to be reworded, and this
+// project has a measured defect from exactly that pattern: a validator
+// recognised a series of routing numbers by searching inside a description
+// written for a human.
+func TestAnEntryThatDidNotHappenHasToSayOfWhatKind(t *testing.T) {
+	cases := []struct {
+		what string
+		kind manifest.FailureKind
+		says string
+	}{
+		{"no kind at all", "", "nothing but the prose says what happened"},
+		{"a kind this format does not define", "because_reasons", "not a failure kind this format defines"},
+	}
+	for _, one := range cases {
+		t.Run(one.what, func(t *testing.T) {
+			entry := refused()
+			entry.FailureKind = one.kind
+			_, problems := manifest.New("0.1", run(), []manifest.Defect{entry})
+			requireSays(t, problems, one.says)
+		})
+	}
+}
+
+// An entry that happened carries neither half, for the same reason it carries
+// no reason: it would be saying both things at once.
+func TestAnEntryThatHappenedCarriesNoFailureKind(t *testing.T) {
+	both := applied()
+	both.FailureKind = manifest.Unimplemented
+	_, problems := manifest.New("0.1", run(), []manifest.Defect{both})
+	requireSays(t, problems, "says both things at once")
 }
 
 func TestAManifestWithAnyProblemIsNotHandedBack(t *testing.T) {

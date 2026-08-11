@@ -117,8 +117,8 @@ func (e Engine) Apply(order Order, field recipe.FieldInfo, value string, at seed
 		return value, undescribed(order)
 	}
 
-	if refusal, why := e.refuse(entry, field); refusal {
-		return value, refused(entry, order, why)
+	if kind, why := e.refuse(entry, field); kind != "" {
+		return value, refused(entry, order, kind, why)
 	}
 
 	damage, _ := e.mutators.Lookup(order.Mutator)
@@ -130,7 +130,7 @@ func (e Engine) Apply(order Order, field recipe.FieldInfo, value string, at seed
 		Provider: e.schemeOf(field),
 	})
 	if !outcome.Applied() {
-		return value, refused(entry, order, outcome.Reason())
+		return value, refused(entry, order, manifest.DeclinedByMutator, outcome.Reason())
 	}
 	return outcome.Value(), applied(entry, order, value, outcome.Value())
 }
@@ -152,26 +152,31 @@ func (e Engine) schemeOf(field recipe.FieldInfo) provider.Provider {
 	return found
 }
 
-// refuse asks the three questions that are answered from the entry rather than
-// from the mutator, and returns the sentence for the manifest.
-func (e Engine) refuse(entry catalog.Entry, field recipe.FieldInfo) (bool, string) {
+// refuse asks the four questions that are answered from the entry rather than
+// from the mutator, and returns the kind and the sentence for the manifest.
+//
+// An empty kind means nothing here refuses, which is the one answer that lets
+// the caller go on to the mutator.
+func (e Engine) refuse(entry catalog.Entry, field recipe.FieldInfo) (manifest.FailureKind, string) {
 	if _, implemented := e.mutators.Lookup(entry.ID); !implemented {
-		return true, "this build carries no implementation of this damage, only its description"
+		return manifest.Unimplemented,
+			"this build carries no implementation of this damage, only its description"
 	}
 	if missing := e.can.Missing(entry.Requires); len(missing) > 0 {
-		return true, fmt.Sprintf("this run cannot %s, which this damage needs", list(missing))
+		return manifest.RunLacksCapability,
+			fmt.Sprintf("this run cannot %s, which this damage needs", list(missing))
 	}
 	if !entry.CoversFieldType(field.Type) {
-		return true, fmt.Sprintf(
+		return manifest.FieldTypeNotCovered, fmt.Sprintf(
 			"the field is %s and this damage applies to %s",
 			describeType(field.Type), strings.Join(entry.AppliesTo.FieldTypes, " or "))
 	}
 	if !entry.CoversProvider(field.Provider) {
-		return true, fmt.Sprintf(
+		return manifest.SchemeNotCovered, fmt.Sprintf(
 			"the field holds %s and this damage applies to %s",
 			describeProvider(field.Provider), strings.Join(entry.AppliesTo.Providers, " or "))
 	}
-	return false, ""
+	return "", ""
 }
 
 // undescribed is the entry for damage the catalog does not know.
@@ -190,6 +195,7 @@ func undescribed(order Order) manifest.Defect {
 		Confidence:    catalog.Soft,
 		Rationale:     "Damage this build cannot describe was ordered.",
 		FailureReason: "no entry in the corruption catalog carries this identifier",
+		FailureKind:   manifest.Undescribed,
 	}
 }
 
@@ -218,8 +224,9 @@ func applied(e catalog.Entry, order Order, before, after string) manifest.Defect
 	return entry
 }
 
-// refused is the entry for damage that did not happen, with the reason.
-func refused(e catalog.Entry, order Order, why string) manifest.Defect {
+// refused is the entry for damage that did not happen, with the kind and the
+// reason.
+func refused(e catalog.Entry, order Order, kind manifest.FailureKind, why string) manifest.Defect {
 	return manifest.Defect{
 		ID:            order.ID,
 		Location:      locationOf(order),
@@ -230,6 +237,7 @@ func refused(e catalog.Entry, order Order, why string) manifest.Defect {
 		Confidence:    e.Confidence,
 		Rationale:     e.Summary,
 		FailureReason: why,
+		FailureKind:   kind,
 	}
 }
 

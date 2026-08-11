@@ -441,6 +441,18 @@ var Guards = []Guard{
 	{"a value that cannot land on the mark is refused rather than left past it", "TestAValueThatCannotLandOnTheMarkIsRefusedRatherThanOvershot", "internal/adapter/mutators", ByMutation},
 	{"a value that is already empty is never recorded as emptied", "TestAValueThatIsAlreadyEmptyIsRefusedWithAReason", "internal/adapter/mutators", ByMutation},
 
+	// --- saying why, in a form a machine can act on -------------------------
+	//
+	// 🔴 The sentence beside an unapplied defect is written for a person and is
+	// free to be reworded whenever a reword makes it clearer. Anything
+	// downstream telling "this build cannot do it yet" from "your recipe does
+	// not carry what it needs" would otherwise be matching on English prose,
+	// which is the pattern that already gave this project a real defect in the
+	// routing number oracle. The kind travels beside the reason and neither
+	// replaces the other.
+	{"damage that did not happen says of what kind, not only in prose", "TestAnEntryThatDidNotHappenHasToSayOfWhatKind", "internal/domain/manifest", ByMutation},
+	{"two different reasons to refuse are told apart", "TestEveryRefusalCarriesTheKindThatMatches", "internal/app/corrupt", ByMutation},
+
 	// --- the engine: one ordered damage, exactly one entry ------------------
 	//
 	// The failure this has to make impossible is not damage going wrong but

@@ -64,8 +64,29 @@ A manifest has three top level members: `spec_version`, an **envelope** under `r
 | `expectation` | yes | `rejection`, `acceptance` or `warning` |
 | `confidence` | yes | `hard` or `soft` |
 | `rationale` | yes | one sentence in plain language, written to be pasted into a test report |
-| `failure_reason` | no | required when `applied` is false |
+| `failure_reason` | no | required when `applied` is false. Prose, written for a person, and free to be reworded |
+| `failure_kind` | no | required when `applied` is false. One of the values below, and stable |
 | `profile` | no | expected reaction of one specific application, see below |
+
+### `failure_kind`
+
+Ordered damage that did not happen carries both a sentence and a kind, and
+neither replaces the other. The sentence names the column, the capability or the
+value, and it is written to be read. The kind is a closed vocabulary, so that a
+pipeline deciding what to do about a run never has to match on English prose.
+
+| Value | Meaning |
+|---|---|
+| `undescribed` | no catalog entry carries the identifier that was ordered. This one means a fault in the tool that wrote the manifest, because whatever ordered it should have been refused earlier |
+| `unimplemented` | the catalog describes this damage and the build carries no implementation of it. The ordinary state of a catalog that grows faster than an engine |
+| `run_lacks_capability` | the entry requires something this run cannot do. Usually the kind a person can act on, because what a run can do follows from what the recipe declares |
+| `field_type_not_covered` | the dataset has no column of a kind this damage applies to |
+| `scheme_not_covered` | the column follows a numbering scheme this damage is not meaningful for. Being an identifier is not enough, because the schemes disagree about what they carry |
+| `declined_by_mutator` | the damage itself refused, for a reason only it could know. Often the correct outcome rather than a shortfall |
+
+A reader may collapse these into fewer categories of its own. It may not assume
+the list is complete: this format grows by adding, so treat an unknown kind as
+one you do not handle rather than as an error.
 
 ---
 

@@ -23,6 +23,9 @@
 package corrupted
 
 import (
+	"fmt"
+	"sort"
+
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
 	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
@@ -49,6 +52,11 @@ type Writer struct {
 	requested   int
 	applied     int
 	rowsMutated int
+	// refusals counts why ordered damage did not happen, by kind. It is
+	// counted here for the same reason the totals are: the entries are on a
+	// disk by the time anybody could read them back, and reading them back to
+	// count would be this tool parsing its own output.
+	refusals map[manifest.FailureKind]int
 }
 
 // Contract check.
@@ -87,6 +95,11 @@ func (w *Writer) Write(record dataset.Record) error {
 		if entry.Applied {
 			w.applied++
 			damaged = true
+		} else {
+			if w.refusals == nil {
+				w.refusals = map[manifest.FailureKind]int{}
+			}
+			w.refusals[entry.FailureKind]++
 		}
 	}
 	if damaged {
@@ -128,6 +141,42 @@ func (w *Writer) Finish() error { return w.next.Finish() }
 // They are counted here rather than gathered from the manifest afterwards,
 // because the entries are already on disk by then and reading them back to
 // count would be this tool parsing its own output.
+// ByKind says how much of the ordered damage did not happen, one line per kind,
+// in a fixed order.
+//
+// Sorted rather than left to map iteration, because these lines reach a person
+// and two runs of one seed have to read the same way. The sentences are written
+// here rather than taken from the manifest, because the manifest says what
+// happened to one defect and this says what happened to a run.
+func (w *Writer) ByKind() []string {
+	said := map[manifest.FailureKind]string{
+		manifest.Unimplemented:       "this build has no implementation of them yet",
+		manifest.RunLacksCapability:  "this run cannot do what they need, which follows from the recipe",
+		manifest.FieldTypeNotCovered: "the dataset has no column of the kind they apply to",
+		manifest.SchemeNotCovered:    "no column follows a numbering scheme they apply to",
+		manifest.DeclinedByMutator:   "the values in those rows did not suit them",
+		manifest.Undescribed:         "nothing in the catalog describes them, which is a fault in this tool",
+	}
+	kinds := make([]manifest.FailureKind, 0, len(w.refusals))
+	for kind := range w.refusals {
+		kinds = append(kinds, kind)
+	}
+	sort.Slice(kinds, func(i, j int) bool { return kinds[i] < kinds[j] })
+
+	lines := make([]string, 0, len(kinds))
+	for _, kind := range kinds {
+		explained, known := said[kind]
+		if !known {
+			// A kind nobody wrote a sentence for is still counted rather than
+			// dropped. Saying less than the truth here would be the silence
+			// this whole package exists to prevent, one level up.
+			explained = string(kind)
+		}
+		lines = append(lines, fmt.Sprintf("  %d because %s", w.refusals[kind], explained))
+	}
+	return lines
+}
+
 func (w *Writer) Requested() int   { return w.requested }
 func (w *Writer) Applied() int     { return w.applied }
 func (w *Writer) RowsMutated() int { return w.rowsMutated }

@@ -115,9 +115,81 @@ type Defect struct {
 	// FailureReason is required when Applied is false, and says why the
 	// damage could not be done.
 	FailureReason string
+	// FailureKind is the same answer in a form a machine can act on, and is
+	// required exactly when FailureReason is.
+	//
+	// # Why both, when one of them is already a sentence
+	//
+	// The sentence is written for a person reading a report and cannot be
+	// anything else: it names columns, schemes and values, and it will be
+	// reworded whenever a reword makes it clearer. Anything downstream that
+	// had to tell "this build cannot do it yet" from "your recipe does not
+	// carry what it needs" would therefore be matching on English prose that
+	// is free to change under it. This project has already paid for that once,
+	// where a validator recognised a series of routing numbers by searching
+	// inside a description written for a human, and rewording the description
+	// quietly moved the number into another series.
+	//
+	// So the two travel together and neither replaces the other. The kind is
+	// closed, small and stable. The reason is open and says what the kind
+	// cannot: which column, which capability, which value.
+	FailureKind FailureKind
 	// Profile is optional and comes from the team's own file.
 	Profile *Profile
 }
+
+// FailureKind is the closed set of ways ordered damage can fail to happen.
+//
+// # Why these six and not three
+//
+// The exit codes of this tool are split by the repair they force, because a
+// pipeline can only act on the answer as a whole. A manifest is read by
+// something that can act on any part of it, and a reader can always collapse
+// six answers into three while nobody can recover six from three. So the
+// vocabulary follows what the engine genuinely distinguishes rather than what a
+// caller is expected to do about it.
+//
+// The order below is the order the engine asks the questions in, which is also
+// roughly the order from "our fault" to "nothing is wrong here".
+type FailureKind string
+
+const (
+	// Undescribed means no catalog entry carries the identifier that was
+	// ordered. It is the only kind that indicates a defect in this tool
+	// rather than a property of the run: whatever ordered it should have
+	// been refused earlier.
+	Undescribed FailureKind = "undescribed"
+	// Unimplemented means the catalog describes this damage and this build
+	// carries no implementation of it. It is the ordinary state of a project
+	// whose catalog grows faster than its engine, and it is nobody's fault.
+	Unimplemented FailureKind = "unimplemented"
+	// RunLacksCapability means the entry requires something this run cannot
+	// do. It is the kind a person can usually act on, because what a run can
+	// do follows from what the recipe declares.
+	RunLacksCapability FailureKind = "run_lacks_capability"
+	// FieldTypeNotCovered means the dataset has no column of a kind this
+	// damage applies to.
+	FieldTypeNotCovered FailureKind = "field_type_not_covered"
+	// SchemeNotCovered means the column follows a numbering scheme this
+	// damage is not meaningful for. Being an identifier is not enough: the
+	// schemes disagree about what they carry.
+	SchemeNotCovered FailureKind = "scheme_not_covered"
+	// DeclinedByMutator means the damage itself refused, for a reason only it
+	// could know. It is often the correct outcome rather than a shortfall: a
+	// value already sitting in the block a corruption aims at is the example
+	// the catalog itself gives.
+	DeclinedByMutator FailureKind = "declined_by_mutator"
+)
+
+// failureKinds is every kind, which is what lets a reader be held to the closed
+// set rather than to whatever a caller happened to write.
+var failureKinds = map[FailureKind]bool{
+	Undescribed: true, Unimplemented: true, RunLacksCapability: true,
+	FieldTypeNotCovered: true, SchemeNotCovered: true, DeclinedByMutator: true,
+}
+
+// Known reports whether this is one of the kinds the format defines.
+func (k FailureKind) Known() bool { return failureKinds[k] }
 
 // Run is the envelope: what this run was, and how much of it happened.
 type Run struct {

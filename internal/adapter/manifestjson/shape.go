@@ -22,6 +22,7 @@ type defectDocument struct {
 	Confidence    string           `json:"confidence"`
 	Rationale     string           `json:"rationale"`
 	FailureReason string           `json:"failure_reason,omitempty"`
+	FailureKind   string           `json:"failure_kind,omitempty"`
 	Profile       *profileDocument `json:"profile,omitempty"`
 }
 
@@ -72,6 +73,7 @@ func defectOf(defect manifest.Defect) defectDocument {
 		Confidence:    string(defect.Confidence),
 		Rationale:     defect.Rationale,
 		FailureReason: defect.FailureReason,
+		FailureKind:   string(defect.FailureKind),
 	}
 	if defect.HasValueBefore {
 		before := defect.ValueBefore

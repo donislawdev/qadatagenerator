@@ -16,6 +16,23 @@ and has not happened.
 
 ### Added
 
+- **The manifest now says why a defect did not happen in a form a script can
+  read.** Every entry with `applied: false` carries a `failure_kind` beside the
+  sentence: one of `undescribed`, `unimplemented`, `run_lacks_capability`,
+  `field_type_not_covered`, `scheme_not_covered` or `declined_by_mutator`. The
+  sentence is written for a person and may be reworded between versions. The
+  kind is a closed vocabulary, so a pipeline never has to match on prose to tell
+  "this build cannot do it yet" from "your recipe does not carry what it needs".
+- **A run that could not apply everything says why, in one line per reason.**
+  A bare count of defects that did not happen reads like a shortfall, and most
+  of it usually is not one. `qadg generate` now breaks that count down, so a
+  handful of entries you can act on is not buried under fifty that nobody can.
+- **A run with defects that did not happen still exits 0.** That is deliberate
+  and now settled: damage nobody implemented yet, and damage a recipe does not
+  carry what for, are the ordinary state of this tool rather than a failure. A
+  non-zero code there would fire on nearly every run and teach everybody to
+  ignore it. If you want a run to fail on that, the manifest carries what you
+  need to decide it yourself.
 - **A text value can now be pushed one character past the limit its column
   declares.** Layer L2 builds a value of exactly the declared maximum plus the
   overshoot, which is the boundary a length check written with an off by one

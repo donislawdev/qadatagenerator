@@ -49,6 +49,13 @@ func (d *damage) summary() []string {
 		lines = append(lines, fmt.Sprintf(
 			"%s could not be applied, and the manifest carries the reason for each one",
 			counted(missing, "defect")))
+		// 🔴 The breakdown, because the bare count reads like a shortfall and
+		// most of it usually is not one. A build whose catalog is ahead of its
+		// engine leaves most of what was ordered unimplemented, which is nobody
+		// fault and nothing to act on, while a handful of entries saying the
+		// run lacks something is a recipe somebody can fix. Those two look
+		// identical in a single number.
+		lines = append(lines, d.writer.ByKind()...)
 	}
 	if unpartnered := d.selector.Unpartnered(); unpartnered > 0 {
 		lines = append(lines, fmt.Sprintf(

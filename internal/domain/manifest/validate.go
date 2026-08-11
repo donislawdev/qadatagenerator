@@ -120,12 +120,27 @@ func (d Defect) outcomeProblems() []string {
 			return []string{fmt.Sprintf(
 				"%s: applied and carrying a failure reason, so the entry says both things at once", d.ID)}
 		}
+		if d.FailureKind != "" {
+			return []string{fmt.Sprintf(
+				"%s: applied and carrying a failure kind, so the entry says both things at once", d.ID)}
+		}
 		return nil
 	}
 	var problems []string
 	if strings.TrimSpace(d.FailureReason) == "" {
 		problems = append(problems, fmt.Sprintf(
 			"%s: not applied and no reason given, which is the silence this format exists to prevent", d.ID))
+	}
+	// The same rule in the dimension a machine reads. An entry carrying only
+	// the sentence would leave anything downstream matching on prose to tell one
+	// kind of failure from another, which is the pattern this project has a
+	// measured defect from.
+	if d.FailureKind == "" {
+		problems = append(problems, fmt.Sprintf(
+			"%s: not applied and no failure kind given, so nothing but the prose says what happened", d.ID))
+	} else if !d.FailureKind.Known() {
+		problems = append(problems, fmt.Sprintf(
+			"%s: %q is not a failure kind this format defines", d.ID, d.FailureKind))
 	}
 	if d.HasValueBefore || d.HasValueAfter {
 		problems = append(problems, fmt.Sprintf(

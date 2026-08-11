@@ -265,6 +265,69 @@ func TestAFieldWithNoDeclaredTypeIsRefusedInWords(t *testing.T) {
 	}
 }
 
+// 🔴 Every way damage can fail carries a kind a machine can act on, and the
+// kinds are told apart.
+//
+// The sentence beside it is written for a person and will be reworded whenever
+// a reword makes it clearer. Anything downstream that had to tell "this build
+// cannot do it yet" from "your recipe does not carry what it needs" would
+// otherwise be matching on English prose, which is the pattern that already
+// gave this project a real defect in the routing number oracle.
+func TestEveryRefusalCarriesTheKindThatMatches(t *testing.T) {
+	scheme := identifierEntry()
+	cases := []struct {
+		what   string
+		engine corrupt.Engine
+		field  recipe.FieldInfo
+		want   manifest.FailureKind
+	}{
+		{"the catalog does not describe it",
+			corrupt.New(described(t, entry()), registry{}, noSchemes{}, able()),
+			numeric(), manifest.Undescribed},
+		{"this build has no implementation",
+			corrupt.New(described(t, entry()), registry{}, noSchemes{}, able()),
+			numeric(), manifest.Unimplemented},
+		{"the run cannot do what it needs",
+			corrupt.New(described(t, entry()),
+				registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, capability.NewSet()),
+			numeric(), manifest.RunLacksCapability},
+		{"the entry does not cover this field type",
+			corrupt.New(described(t, entry()),
+				registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able()),
+			recipe.FieldInfo{Name: "surname", Type: "string"}, manifest.FieldTypeNotCovered},
+		{"the entry does not cover this scheme",
+			corrupt.New(described(t, scheme),
+				registry{damageID: stated{damageID, mutator.Done("x")}}, noSchemes{}, able()),
+			recipe.FieldInfo{Name: "ssn", Type: "identifier", Provider: "US.ssn"}, manifest.SchemeNotCovered},
+		{"the mutator declined",
+			corrupt.New(described(t, entry()),
+				registry{damageID: stated{damageID, mutator.Skipped("nothing to do here")}}, noSchemes{}, able()),
+			numeric(), manifest.DeclinedByMutator},
+	}
+
+	seen := map[manifest.FailureKind]bool{}
+	for _, one := range cases {
+		t.Run(one.what, func(t *testing.T) {
+			asked := order()
+			if strings.HasPrefix(one.what, "the catalog") {
+				asked.Mutator = "L9.invented.by_nobody"
+			}
+			_, defect := one.engine.Apply(asked, one.field, "1250", seed.Coordinate{})
+			if defect.FailureKind != one.want {
+				t.Errorf("the kind came back as %q, want %q: %s",
+					defect.FailureKind, one.want, defect.FailureReason)
+			}
+			seen[defect.FailureKind] = true
+		})
+	}
+	// Six ways in and six kinds out. A build that answered two of them with one
+	// kind would look right in every case above taken on its own.
+	if len(seen) != len(cases) {
+		t.Errorf("%d ways of failing produced %d kinds, so some of them are indistinguishable",
+			len(cases), len(seen))
+	}
+}
+
 // The engine and the manifest are held together here. An entry this package can
 // produce and the manifest cannot record would be damage that happened and
 // could not be written down.
