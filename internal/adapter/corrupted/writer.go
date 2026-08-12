@@ -26,7 +26,6 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
 	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
@@ -35,13 +34,42 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
 )
 
+// Entries is where the record of every ordered damage goes.
+//
+// It is a port rather than the JSON writer itself, and the reason is the
+// exports. A run may write the same entries in more than one form, and the
+// forms are peers: each is fed as the entries happen, so none of them is
+// another's input. A writer holding one concrete sink could only be given a
+// second by growing a second field, and the third form would grow a third.
+//
+// Only Add is here. Closing a document belongs to whoever opened it, which is
+// the surface that created the files, and a port that could also finish would
+// invite this writer to finish something it did not begin.
+type Entries interface {
+	Add(defect manifest.Defect)
+}
+
+// Tee sends every entry to each sink in turn, in the order given.
+//
+// The order is kept rather than left to a map, because two documents describing
+// one run have to be comparable line by line, and that is the same rule the
+// rest of this project follows about iteration order.
+type Tee []Entries
+
+// Add hands the entry to every sink.
+func (t Tee) Add(defect manifest.Defect) {
+	for _, sink := range t {
+		sink.Add(defect)
+	}
+}
+
 // Writer damages records on their way to the real writer and records every
 // order in the manifest.
 type Writer struct {
 	next     generate.Writer
 	engine   corrupt.Engine
 	selector *corrupt.Selector
-	entries  *manifestjson.Writer
+	entries  Entries
 	view     recipe.SchemaView
 
 	table   dataset.Table
@@ -65,7 +93,7 @@ var _ generate.Writer = (*Writer)(nil)
 // New wraps a writer so that what passes through it is damaged as the policy
 // asks.
 func New(next generate.Writer, engine corrupt.Engine, selector *corrupt.Selector,
-	entries *manifestjson.Writer, view recipe.SchemaView) *Writer {
+	entries Entries, view recipe.SchemaView) *Writer {
 	return &Writer{next: next, engine: engine, selector: selector, entries: entries, view: view}
 }
 

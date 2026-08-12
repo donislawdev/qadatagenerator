@@ -287,6 +287,10 @@ func TestEveryRefusalOfThisVerbIsCompleteAndMentionsNoRecipe(t *testing.T) {
 		// all and the run ended with success.
 		{"a share that is not a number",
 			[]string{commandCorrupt, "--layers", "L3", "--rows", "NaN%", source}},
+		// Asked before the file is opened, so that a typo in the form costs a
+		// refusal rather than a pass over a file the user chose the size of.
+		{"a manifest form this build does not write",
+			[]string{commandCorrupt, "--layers", "L3", "--manifest", "markdown", source}},
 		{"a per row setting nobody knows", []string{commandCorrupt, "--layers", "L3", "--per-row", "two", source}},
 		{"a delimiter of two characters", []string{commandCorrupt, "--layers", "L3", "--delimiter", "||", source}},
 		{"no file at all", []string{commandCorrupt, "--layers", "L3"}},

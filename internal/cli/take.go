@@ -11,6 +11,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/corrupted"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/infer"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestexport"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/mutators"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/sourcecsv"
@@ -51,7 +52,14 @@ type takeFlags struct {
 	locale    *string
 	overwrite *bool
 	dryRun    *bool
-	given     map[string]bool
+	// manifest is the extra form the manifest is exported in, empty for none.
+	//
+	// 🔴 There is no default and that is a decision rather than an omission.
+	// Adding a default later changes no call that exists today, because nobody
+	// is passing the flag yet, while changing a default later changes every one
+	// of them silently. The safer of the two therefore goes first.
+	manifest *string
+	given    map[string]bool
 }
 
 func declareCorrupt(set *flag.FlagSet) *takeFlags {
@@ -66,6 +74,7 @@ func declareCorrupt(set *flag.FlagSet) *takeFlags {
 		locale:    set.String("locale", defaultCorruptLocale, ""),
 		overwrite: set.Bool("overwrite", false, ""),
 		dryRun:    set.Bool("dry-run", false, ""),
+		manifest:  set.String("manifest", "", ""),
 		given:     map[string]bool{},
 	}
 }
@@ -220,11 +229,24 @@ func buildDamage(ask damageRequest, files *store.Set) (*takenDamage, error) {
 		return nil, err
 	}
 	entries := manifestjson.New(file, version.Manifest)
+	// The export is a peer of the canonical manifest rather than a rendering of
+	// it afterwards, so it is opened here and fed the same entries at the same
+	// moment. Nothing reads what this run just wrote.
+	sinks := corrupted.Tee{entries}
+	var exported *manifestexport.Gherkin
+	if *ask.own.manifest == manifestexport.FormGherkin {
+		file, err := files.Create(manifestexport.GherkinName)
+		if err != nil {
+			return nil, err
+		}
+		exported = manifestexport.NewGherkin(file, ask.described, ask.source.Table().Rows)
+		sinks = append(sinks, exported)
+	}
 	engine := corrupt.New(ask.described, mutatorRegistry{}, schemeRegistry{ask.from},
 		canDoWithoutRecipe(ask.shape, ask.from))
-	wrapped := corrupted.New(writer, engine, &selector, entries, ask.shape)
+	wrapped := corrupted.New(writer, engine, &selector, sinks, ask.shape)
 	return &takenDamage{
-		told:  damage{writer: wrapped, entries: entries, selector: &selector},
+		told:  damage{writer: wrapped, entries: entries, selector: &selector, exported: exported},
 		shape: ask.shape,
 	}, nil
 }
@@ -266,7 +288,15 @@ func (d *takenDamage) closeManifest(ask damageRequest, at time.Time) error {
 	if problems := run.Problems(); len(problems) > 0 {
 		return fault.New(fault.Runtime, "the manifest envelope is not usable: "+problems[0])
 	}
-	return d.told.entries.Finish(run, d.told.writer.Requested(), d.told.writer.Applied())
+	if err := d.told.entries.Finish(run, d.told.writer.Requested(),
+		d.told.writer.Applied()); err != nil {
+		return err
+	}
+	// The canonical manifest goes first, so that a failure to close the export
+	// is reported after the document everything else is compared against.
+	// Either failure ends the run, and a run that ends leaves nothing behind,
+	// so neither file is ever shipped half written.
+	return d.told.closeExport()
 }
 
 // inferenceRecord turns what was worked out into what the manifest carries.
@@ -321,6 +351,20 @@ func namesIn(written string) []string {
 // it is refused today. Changing a default later breaks every pipeline that
 // relied on it, so the direction that keeps the door open is the one taken.
 func unusablePolicyFlags(own *takeFlags, described catalog.Catalog) (problem, bool) {
+	if refusal, unusable := unusableLayers(own, described); unusable {
+		return refusal, true
+	}
+	return unusableFlagValues(own)
+}
+
+// unusableLayers refuses a run that named no layer, or named one this build
+// carries no damage in.
+//
+// It is separate from the values below because it asks a different kind of
+// question. A layer is answered against the catalog, and the answer changes as
+// the catalog grows. The values below are answered against this build's own
+// vocabulary and do not.
+func unusableLayers(own *takeFlags, described catalog.Catalog) (problem, bool) {
 	// The same answer validate gives about a recipe, from the same place. Two
 	// lists of which layers carry damage would tell somebody their policy is
 	// fine while the verb that runs it did nothing.
@@ -348,6 +392,16 @@ func unusablePolicyFlags(own *takeFlags, described catalog.Catalog) (problem, bo
 			}, true
 		}
 	}
+	return problem{}, false
+}
+
+// unusableFlagValues refuses a value this build cannot read, one flag at a
+// time.
+//
+// 🔴 Every one of these is asked here rather than where the value is used, and
+// the reason is the same for all four: the file is opened after this, and a
+// pass over a file the user chose the size of must not be the price of a typo.
+func unusableFlagValues(own *takeFlags) (problem, bool) {
 	if len([]rune(*own.delimiter)) != 1 {
 		return problem{
 			what:    problemCorruptDelimiter + *own.delimiter,
@@ -356,9 +410,14 @@ func unusablePolicyFlags(own *takeFlags, described catalog.Catalog) (problem, bo
 			instead: problemCorruptDelimiterDo,
 		}, true
 	}
-	// Both are asked here rather than where the selector is built, because the
-	// selector needs a schema and a schema of somebody else's file costs a whole
-	// pass over it. A typo in a flag must not cost that.
+	if !manifestexport.Usable(*own.manifest) {
+		return problem{
+			what:    problemCorruptManifest + *own.manifest,
+			why:     problemCorruptManifestWhy,
+			allowed: strings.Join(manifestexport.Forms(), ", "),
+			instead: problemCorruptManifestDo,
+		}, true
+	}
 	if err := corrupt.UsableShare(*own.rows); err != nil {
 		return problem{
 			what:    problemCorruptRows + *own.rows,

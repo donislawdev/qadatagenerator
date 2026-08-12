@@ -174,6 +174,11 @@ const (
 	// example using anything else would be an example nobody needs.
 	problemCorruptDelimiterDo = "qadg corrupt --delimiter ; --layers L2,L3 records.csv" // punctuation: test data
 
+	problemCorruptManifest    = "this build does not write a manifest in the form "
+	problemCorruptManifestWhy = "the manifest is always written as JSON, and this flag asks for an extra form of it beside that one"
+	problemCorruptManifestDo  = "qadg corrupt --manifest gherkin --layers L2,L3 records.csv"
+	problemGenerateManifestDo = "qadg generate --manifest gherkin recipe.yaml"
+
 	// The refusal that stands in front of the only irreversible thing this tool
 	// does. It cannot fire while the output name carries its suffix, and it
 	// stays because the day somebody changes how that name is built is the day

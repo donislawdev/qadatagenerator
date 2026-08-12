@@ -555,6 +555,21 @@ var Guards = []Guard{
 	// numbering schemes and is still open. This one is the worst placed: a
 	// recipe has a hard size limit and a data file deliberately has none.
 	{"a hostile column name does not come back amplified", "TestALongColumnNameDoesNotComeBackAsALongMessage", "internal/adapter/sourcecsv", ByMutation},
+	// --- exporting the manifest -----------------------------------------------
+	//
+	// 🔴 An export is a peer of the canonical manifest rather than a rendering
+	// of it afterwards, so these guard the same promise from another side: a row
+	// in an export is an instruction to a test, and a wrong one is worse than a
+	// missing one.
+	{"only damage that happened becomes a row a test can send", "TestOnlyAppliedDamageBecomesARowAndTheRestIsCounted", "internal/adapter/manifestexport", ByMutation},
+	{"the exported table carries the keyword that makes it pasteable", "TestTheTableCarriesTheKeywordThatMakesItPasteable", "internal/adapter/manifestexport", ByMutation},
+	{"a table character in somebody's column name does not break the table", "TestAValueCarryingATableCharacterDoesNotBreakTheTable", "internal/adapter/manifestexport", ByMutation},
+	// 🔴 A guard on a decision rather than on a behaviour. Padding the one
+	// unbounded column to its widest value would multiply a hostile column name
+	// by the number of rows, which is the amplification class arriving in a
+	// place nobody would look for it.
+	{"one enormous column name does not pad every other row", "TestOneEnormousColumnNameDoesNotPadEveryOtherRow", "internal/adapter/manifestexport", ByMutation},
+
 	// 🔴 The second road of the same class, and the one that needed a guard
 	// rather than a repair. Thirteen messages across four schemes wrote a value
 	// in with the quoting verb, so a fourteenth scheme would have written a

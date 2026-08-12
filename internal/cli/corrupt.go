@@ -9,6 +9,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/corrupted"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestexport"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/mutators"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/store"
@@ -32,6 +33,21 @@ type damage struct {
 	writer   *corrupted.Writer
 	entries  *manifestjson.Writer
 	selector *corrupt.Selector
+	// exported is the extra form the manifest was asked for, or nothing.
+	//
+	// It is held so that it can be closed. The canonical manifest and an export
+	// are peers while entries arrive, and they stay peers at the end: each one
+	// has a last line of its own, and an export left unclosed would be a file
+	// that stops mid table without saying so.
+	exported *manifestexport.Gherkin
+}
+
+// closeExport writes the last line of the export, if there is one.
+func (d *damage) closeExport() error {
+	if d.exported == nil {
+		return nil
+	}
+	return d.exported.Finish()
 }
 
 // summary is what a person is told about the damage, on the log channel.
@@ -130,7 +146,7 @@ func kindsOfDamage(count int) string {
 // neither a dataset nor a manifest, rather than a manifest describing records
 // nobody will find.
 func withDamage(built recipe.Recipe, source values.Source, writer generate.Writer,
-	files *store.Set) (generate.Writer, *damage, error) {
+	files *store.Set, exportForm string) (generate.Writer, *damage, error) {
 	if !built.Policy.Asks() {
 		return writer, nil, nil
 	}
@@ -149,10 +165,35 @@ func withDamage(built recipe.Recipe, source values.Source, writer generate.Write
 		return nil, nil, err
 	}
 	entries := manifestjson.New(file, version.Manifest)
+	sinks := corrupted.Tee{entries}
+	var exported *manifestexport.Gherkin
+	if exportForm == manifestexport.FormGherkin {
+		file, err := files.Create(manifestexport.GherkinName)
+		if err != nil {
+			return nil, nil, err
+		}
+		exported = manifestexport.NewGherkin(file, described, widestCount(built))
+		sinks = append(sinks, exported)
+	}
 	engine := corrupt.New(described, mutatorRegistry{}, schemeRegistry{source},
 		canDo(built, source, schema))
-	wrapped := corrupted.New(writer, engine, &selector, entries, schema)
-	return wrapped, &damage{writer: wrapped, entries: entries, selector: &selector}, nil
+	wrapped := corrupted.New(writer, engine, &selector, sinks, schema)
+	return wrapped, &damage{
+		writer: wrapped, entries: entries, selector: &selector, exported: exported,
+	}, nil
+}
+
+// widestCount is the largest number of rows any one entity will have.
+//
+// It sizes the row column of an export and nothing else. A recipe can describe
+// several entities and the manifest numbers rows within each, so the widest of
+// them is the widest number that can appear.
+func widestCount(built recipe.Recipe) int {
+	widest := 1
+	for _, entity := range built.Entities {
+		widest = max(widest, entity.Count)
+	}
+	return widest
 }
 
 // canDo gathers what this run is able to do, from every supplier taking part.
@@ -216,5 +257,11 @@ func (d *damage) finish(built recipe.Recipe, plan generate.Plan, at time.Time) e
 	if problems := run.Problems(); len(problems) > 0 {
 		return fault.New(fault.Runtime, "the manifest envelope is not usable: "+problems[0])
 	}
-	return d.entries.Finish(run, d.writer.Requested(), d.writer.Applied())
+	if err := d.entries.Finish(run, d.writer.Requested(), d.writer.Applied()); err != nil {
+		return err
+	}
+	// The canonical manifest first, then the export, for the same reason the
+	// other verb does it in that order: a failure to close either ends the run,
+	// and a run that ends leaves nothing behind.
+	return d.closeExport()
 }

@@ -6,9 +6,11 @@ import (
 	"flag"
 	"io"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestexport"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/store"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
@@ -35,7 +37,11 @@ type generateFlags struct {
 	format    *string
 	overwrite *bool
 	dryRun    *bool
-	given     map[string]bool
+	// manifest is the extra form the manifest is exported in, empty for none.
+	// It is the same flag the damaging verb carries, because an export is a
+	// property of a run rather than of one way of starting one.
+	manifest *string
+	given    map[string]bool
 }
 
 func declareGenerate(set *flag.FlagSet) *generateFlags {
@@ -45,6 +51,7 @@ func declareGenerate(set *flag.FlagSet) *generateFlags {
 		format:    set.String("format", "", ""),
 		overwrite: set.Bool("overwrite", false, ""),
 		dryRun:    set.Bool("dry-run", false, ""),
+		manifest:  set.String("manifest", "", ""),
 		given:     map[string]bool{},
 	}
 }
@@ -85,6 +92,16 @@ func runGenerate(out *streams, arguments []string, global crossCutting) int {
 			why:     problemGenerateArgumentsWhy,
 			allowed: problemGenerateArgumentsAllowed,
 			instead: problemGenerateArgumentsDo,
+		})
+	}
+	// Asked before the recipe is read, because a form nobody writes is a typo
+	// and a typo must not cost a pass over somebody's file.
+	if !manifestexport.Usable(*own.manifest) {
+		return usage(out, problem{
+			what:    problemCorruptManifest + *own.manifest,
+			why:     problemCorruptManifestWhy,
+			allowed: strings.Join(manifestexport.Forms(), ", "),
+			instead: problemGenerateManifestDo,
 		})
 	}
 	return generateFrom(out, rest[0], own, flags)
@@ -223,7 +240,7 @@ func produce(built recipe.Recipe, plan generate.Plan, source values.Source,
 	// A recipe with a policy has its damage done on the way to the disk, and
 	// the manifest joins this same set of files. The first pillar is untouched
 	// by this: a recipe without a policy gets the writer it always got.
-	writer, broken, err := withDamage(built, source, writer, files)
+	writer, broken, err := withDamage(built, source, writer, files, *own.manifest)
 	if err != nil {
 		return nil, err
 	}

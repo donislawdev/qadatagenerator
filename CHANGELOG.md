@@ -12,6 +12,19 @@ repository once they are released.
 
 ### Added
 
+- **`--manifest gherkin` writes the manifest as an Examples table you paste
+  into a scenario.** Both `qadg generate` and `qadg corrupt` take it, and both
+  still write the canonical JSON beside it. One row per defect that was
+  applied, with the row number, the column, the mutator and what to expect, so
+  a scenario outline gets its cases without anybody writing assertions by hand.
+- Damage that was ordered and could not be applied has **no row** in that
+  table, because there is nothing in the dataset for a test to send. The file
+  says so in words and counts what it left out, and the JSON beside it carries
+  every one of those entries with its reason.
+- The flag has **no default**. Without it you get the JSON manifest and nothing
+  else. Only `gherkin` is written today, and a form this build does not write
+  is refused before your file is read rather than after.
+
 - **`qadg corrupt` damages a file this tool did not make.** Point it at a comma
   separated file, name the layers to attack, and it writes the same records with
   damage in them beside a manifest saying what a system reading them should do
