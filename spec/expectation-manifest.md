@@ -344,15 +344,20 @@ The columns are those of the Gherkin form. The table carries a rule row under it
 
 ## Verification
 
-A tool reading a manifest compares each entry against what the application actually did. Three kinds of mismatch must be reported separately, because they mean different things.
+A tool reading a manifest compares each entry against what the application actually did. What the application did is written in the shape given by [the application response record](application-response.md). Four kinds of mismatch must be reported separately, because they mean different things.
 
 - **Accepted although it should have been rejected.** A hole in validation.
 - **Rejected although it should have been accepted.** Overzealous validation blocking legitimate users. This is what the `REV` module exists to find, and almost nobody tests for it.
+- **Expected a mark, got silence.** The application took the value and said nothing where the entry expected it to complain. This is what an expectation of `warning` fails as.
 - **The dataset arrived incomplete.** The number of rows the application took does not match `rows_total`. The row was neither accepted nor rejected, it disappeared on the way.
 
-The first two assume the application reacted to the row somehow. The third is the case where it did not react at all, because it never saw the row. A receiver with a hard row limit that silently drops everything past it produces exactly this, and no per-row check finds it.
+The first three assume the application reacted to the row somehow. The fourth is the case where it did not react at all, because it never saw the row. A receiver with a hard row limit that silently drops everything past it produces exactly this, and no per-row check finds it.
 
-All three are failures. Which one it was belongs in the report rather than in the exit status, because continuous integration needs one bit and a human needs the detail.
+Which kind it was belongs in the report rather than in the exit status, because continuous integration needs one bit and a human needs the detail.
+
+🔴 **A mismatch on an entry whose confidence is `soft` is reported and does not, on its own, make the run fail.** Soft means the correct reaction depends on rules belonging to the application rather than to the data, so a failing status on one would be the tool asserting something it was never entitled to assert. The first run at any site would be red for a reason nobody can act on, and a red nobody can act on teaches people to ignore the result.
+
+A question the response record does not carry the evidence to answer is neither a pass nor a failure. An entry expecting a mark cannot be settled by a record that never says whether anything was marked, and a report that counted it either way would be inventing the answer. Those entries are listed as unsettled, with what is missing.
 
 ---
 
