@@ -10,12 +10,20 @@
 // system temporary area, because a rename across volumes is a copy and a copy
 // is not atomic.
 //
-// # A file that already exists stops the run
+// # A file that already exists stops the run, including one another run is
+// writing right now
 //
 // Overwriting somebody's reference dataset without saying so is the same class
 // of failure as a corruption that vanished from the manifest. This tool goes
 // into other people's pipelines, where the destination is often a working
 // directory with something else in it.
+//
+// That promise used to hold only for a file already sitting on the disk. A
+// destination name is now taken at the moment a file is created rather than
+// asked about, so two runs started against one directory no longer both find
+// the name free, work for minutes and let the second silently replace the
+// first. What that costs, and why the obvious alternative is not available
+// here, is written at claim below.
 package store
 
 import (
@@ -34,12 +42,18 @@ type Set struct {
 	dir       string
 	overwrite bool
 	pending   map[string]string
+	reserved  map[string]bool
 	open      []*os.File
 }
 
 // New returns a set of files to be written into a directory.
 func New(dir string, overwrite bool) *Set {
-	return &Set{dir: dir, overwrite: overwrite, pending: make(map[string]string)}
+	return &Set{
+		dir:       dir,
+		overwrite: overwrite,
+		pending:   make(map[string]string),
+		reserved:  make(map[string]bool),
+	}
 }
 
 // Create opens a file under a temporary name and records where it belongs.
@@ -52,15 +66,18 @@ func (s *Set) Create(name string) (*os.File, error) {
 		return nil, err
 	}
 	final := filepath.Join(s.dir, name)
-	if err := s.refuseExisting(final); err != nil {
-		return nil, err
-	}
 	if err := os.MkdirAll(s.dir, 0o755); err != nil {
 		return nil, fault.Wrap(fault.IO, err, "cannot make the output directory "+s.dir)
+	}
+	if err := s.claim(name, final); err != nil {
+		return nil, err
 	}
 
 	temporary, err := os.CreateTemp(s.dir, "."+name+".*.part")
 	if err != nil {
+		// The claim has to go back, or a run that failed to open its own
+		// temporary file would leave a marker blocking every later run.
+		s.release(s.marker(name))
 		return nil, fault.Wrap(fault.IO, err, "cannot open a temporary file in "+s.dir)
 	}
 	s.pending[temporary.Name()] = final
@@ -68,8 +85,46 @@ func (s *Set) Create(name string) (*os.File, error) {
 	return temporary, nil
 }
 
-// refuseExisting stops the run rather than overwriting, unless told otherwise.
-func (s *Set) refuseExisting(final string) error {
+// marker is the hidden file that says a run holds this name.
+func (s *Set) marker(name string) string {
+	return filepath.Join(s.dir, "."+name+".claim")
+}
+
+// claim answers both ways a destination can be taken: a file already sitting
+// there, and another run on its way to putting one there.
+//
+// # Why a marker beside the name rather than the name itself
+//
+// Asking whether a file exists and renaming onto it are two separate moments,
+// and between them lies the whole run. Two runs against one directory both saw
+// a free name, both worked for minutes, and the second rename replaced the
+// first result without a word, because replacing on rename is what every
+// supported system does.
+//
+// The obvious fix is to create the destination name itself with O_EXCL, so that
+// the check and the taking are one operation. It was written that way first and
+// an existing test caught it within a minute: it makes the destination name
+// appear, empty, before the run has succeeded. That breaks a promise worth more
+// than the one being fixed, because an empty file under the name somebody
+// expects results at reads as an answer, while a leftover temporary reads as
+// rubbish.
+//
+// So the atomic creation happens on a hidden marker beside the name. The
+// destination stays absent until Commit, and a second run finds the marker and
+// stops before doing any work.
+//
+// # What this does and does not cover, stated rather than implied
+//
+// It covers two runs of this tool, which is what the backlog entry was about.
+// It does not cover somebody else creating the destination during our run, and
+// it is not meant to: whoever can write to the output directory is outside the
+// threat model in docs/15, and a rename that refuses to replace would need
+// package syscall, which the architecture guard refuses outside one named file.
+//
+// A marker left behind by a run that was killed outright will stop the next
+// run. That is deliberate and the message says which file to delete, because
+// the alternative is a lock that expires and stops meaning anything.
+func (s *Set) claim(name, final string) error {
 	if s.overwrite {
 		return nil
 	}
@@ -77,7 +132,31 @@ func (s *Set) refuseExisting(final string) error {
 		return fault.New(fault.IO, final+" already exists. Delete it, choose another directory, "+
 			"or pass the flag that allows overwriting. Nothing has been written")
 	}
+
+	marker := s.marker(name)
+	holder, err := os.OpenFile(marker, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)
+	if err != nil {
+		if os.IsExist(err) {
+			return fault.New(fault.IO, "another run is writing "+final+" right now, or one was "+
+				"stopped before it could tidy up. Wait for it to finish, or delete "+marker+
+				" if nothing is running. Nothing has been written")
+		}
+		return fault.Wrap(fault.IO, err, "cannot take the name "+final)
+	}
+	if err := holder.Close(); err != nil {
+		return fault.Wrap(fault.IO, err, "cannot close "+marker)
+	}
+	s.reserved[marker] = true
 	return nil
+}
+
+// release gives a claimed name back. It reports nothing, because it runs on a
+// path that is already failing for another reason.
+func (s *Set) release(marker string) {
+	if s.reserved[marker] {
+		_ = os.Remove(marker)
+		delete(s.reserved, marker)
+	}
 }
 
 // Commit closes every file and gives each its real name.
@@ -94,10 +173,16 @@ func (s *Set) Commit() error {
 	s.open = nil
 
 	for _, temporary := range sortedKeys(s.pending) {
-		if err := os.Rename(temporary, s.pending[temporary]); err != nil {
-			return fault.Wrap(fault.IO, err, "cannot put "+s.pending[temporary]+" in place")
+		final := s.pending[temporary]
+		if err := os.Rename(temporary, final); err != nil {
+			return fault.Wrap(fault.IO, err, "cannot put "+final+" in place")
 		}
 		delete(s.pending, temporary)
+		// Once the real file is in place it is the thing that stops the next
+		// run, so the marker has done its job and goes. Leaving it would block
+		// every later run against a directory that now legitimately holds a
+		// result.
+		s.release(filepath.Join(filepath.Dir(final), "."+filepath.Base(final)+".claim"))
 	}
 	return nil
 }
@@ -113,6 +198,13 @@ func (s *Set) Discard() {
 	for temporary := range s.pending {
 		_ = os.Remove(temporary)
 		delete(s.pending, temporary)
+	}
+	// The markers go too. A marker left behind stops every later run against
+	// this directory, and a run that has just been told to throw its work away
+	// is exactly the one that must not leave that behind.
+	for marker := range s.reserved {
+		_ = os.Remove(marker)
+		delete(s.reserved, marker)
 	}
 }
 

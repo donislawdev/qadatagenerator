@@ -10,6 +10,14 @@ repository once they are released.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Two runs writing into the same directory no longer overwrite each other.**
+  Starting a second run against a directory a first one is still writing now
+  stops immediately and tells you so, instead of both finishing and one result
+  quietly replacing the other. If a run is killed outright, the next one against
+  that directory will name the leftover file to delete.
+
 ### Added
 
 - **There is a window now, and it opens on the About screen.** `qadg-gui` shows

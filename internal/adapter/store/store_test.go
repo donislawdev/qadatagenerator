@@ -126,3 +126,112 @@ func TestANameTheFileSystemWouldNotKeepIsRefusedRatherThanRepaired(t *testing.T)
 		set.Discard()
 	}
 }
+
+// Two runs writing into one directory cannot both take the same name.
+//
+// # What this is about, since it is not about an attacker
+//
+// The package promises at the top that a file which already exists stops the
+// run. That promise used to hold only for a file sitting on the disk when the
+// run started: asking whether a name is free and renaming onto it are two
+// moments with a whole run in between, so two runs both found the name free,
+// both worked, and the second replaced the first result without a word.
+//
+// Whoever can write to the output directory is outside the threat model. Two
+// runs of this tool are not, and the promise was ours to keep.
+func TestASecondRunCannotTakeANameTheFirstIsWriting(t *testing.T) {
+	dir := t.TempDir()
+	first := store.New(dir, false)
+	second := store.New(dir, false)
+
+	if _, err := first.Create("customer.csv"); err != nil {
+		t.Fatalf("the first run could not start: %v", err)
+	}
+
+	_, err := second.Create("customer.csv")
+	if err == nil {
+		t.Fatal("the second run took a name the first one is writing, so one result would replace the other")
+	}
+	if kind := fault.KindOf(err); kind != fault.IO {
+		t.Errorf("the refusal is of kind %v rather than an input output failure", kind)
+	}
+	// The message has to name the file to delete, or somebody meeting this
+	// after a killed run has no way forward.
+	if !strings.Contains(err.Error(), ".claim") {
+		t.Errorf("the refusal does not say which file is holding the name: %s", err)
+	}
+
+	// A different name is still free, because the claim is per file rather
+	// than per directory.
+	if _, err := second.Create("order.csv"); err != nil {
+		t.Errorf("the second run cannot write a different file: %v", err)
+	}
+	first.Discard()
+	second.Discard()
+}
+
+// The marker exists only while a run needs it. Left behind it would stop every
+// later run against a directory that now legitimately holds a result.
+func TestTheMarkerIsGoneOnceTheResultIsInPlace(t *testing.T) {
+	dir := t.TempDir()
+	set := store.New(dir, false)
+
+	file, err := set.Create("customer.csv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	marker := filepath.Join(dir, ".customer.csv.claim")
+	if _, err := os.Stat(marker); err != nil {
+		t.Fatalf("no marker was taken while the run was going: %v", err)
+	}
+	if _, err := file.WriteString("id\n1\n"); err != nil {
+		t.Fatal(err)
+	}
+	if err := set.Commit(); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := os.Stat(marker); !os.IsNotExist(err) {
+		t.Error("the marker outlived the run and would block the next one")
+	}
+	// And a later run refuses for the ordinary reason instead.
+	if _, err := store.New(dir, false).Create("customer.csv"); err == nil {
+		t.Error("a run after a finished one overwrote the result")
+	}
+}
+
+func TestADiscardedRunLeavesNoMarkerBehind(t *testing.T) {
+	dir := t.TempDir()
+	set := store.New(dir, false)
+	if _, err := set.Create("customer.csv"); err != nil {
+		t.Fatal(err)
+	}
+	set.Discard()
+
+	if _, err := os.Stat(filepath.Join(dir, ".customer.csv.claim")); !os.IsNotExist(err) {
+		t.Fatal("a discarded run left a marker that stops every later run")
+	}
+	// The whole point: the next run can proceed.
+	next := store.New(dir, false)
+	if _, err := next.Create("customer.csv"); err != nil {
+		t.Errorf("the next run is blocked by leftovers of a discarded one: %v", err)
+	}
+	// And it has to be discarded rather than left open, or the temporary file
+	// stays locked and the directory cannot be removed. Windows reports that
+	// as a cleanup failure with no connection to what this test is about.
+	next.Discard()
+}
+
+// Overwriting is a deliberate act, and it takes no marker because it is not
+// promising anybody that the name was free.
+func TestOverwritingTakesNoMarker(t *testing.T) {
+	dir := t.TempDir()
+	set := store.New(dir, true)
+	if _, err := set.Create("customer.csv"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, ".customer.csv.claim")); !os.IsNotExist(err) {
+		t.Error("a run allowed to overwrite still took a marker")
+	}
+	set.Discard()
+}

@@ -116,6 +116,15 @@ var Guards = []Guard{
 	{"a test may reach the system where the product may not", "TestSyscallScannerIgnoresTests", "internal/guard", ByProbe},
 	{"the scan actually reached the product", "TestTheSyscallScanReachesTheProduct", "internal/guard", ByProbe},
 
+	// --- two runs into one directory ----------------------------------------
+	//
+	// The package promises that a file which already exists stops the run. It
+	// used to hold only for a file present when the run started, because
+	// asking and renaming are two moments with a whole run in between.
+	{"a second run cannot take a name the first one is writing", "TestASecondRunCannotTakeANameTheFirstIsWriting", "internal/adapter/store", ByMutation},
+	{"the marker does not outlive the run that took it", "TestTheMarkerIsGoneOnceTheResultIsInPlace", "internal/adapter/store", ByMutation},
+	{"a discarded run leaves nothing that blocks the next one", "TestADiscardedRunLeavesNoMarkerBehind", "internal/adapter/store", ByMutation},
+
 	// --- the window, whose values may only live in one package --------------
 	//
 	// These stand before the first screen rather than after it. Written
