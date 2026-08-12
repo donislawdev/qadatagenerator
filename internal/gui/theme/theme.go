@@ -126,6 +126,115 @@ var Palette = []Color{
 	{"row.selected", 0x38, 0x50, 0x6B, RoleAuxiliary, "the selected row"},
 }
 
+// The names a view refers to its values by.
+//
+// They exist so that a screen never types a name as a bare string, where a
+// typo becomes a colour that silently resolves to nothing. Every one of these
+// is checked against the palette from both sides by a test, so a constant
+// without an entry and an entry without a constant are both failures.
+const (
+	NameSurface      = "surface"
+	NameText         = "text"
+	NameTextSubdued  = "text.subdued"
+	NameRejection    = "expect.rejection"
+	NameAcceptance   = "expect.acceptance"
+	NameWarning      = "expect.warning"
+	NameNotApplied   = "expect.not-applied"
+	NameCorrupted    = "corrupted"
+	NameFocus        = "focus"
+	NameBorderActive = "border.active"
+	NameRowDivider   = "row.divider"
+	NameRowHover     = "row.hover"
+	NameRowSelected  = "row.selected"
+	NameStepHairline = "hairline"
+	NameStepTight    = "tight"
+	NameStepRelated  = "related"
+	NameStepGroup    = "group"
+	NameStepSection  = "section"
+	NameStepMajor    = "major"
+)
+
+// ColorNames is every colour constant above, so a test can close the register
+// from the side the constants are on.
+var ColorNames = []string{
+	NameSurface, NameText, NameTextSubdued, NameRejection, NameAcceptance,
+	NameWarning, NameNotApplied, NameCorrupted, NameFocus, NameBorderActive,
+	NameRowDivider, NameRowHover, NameRowSelected,
+}
+
+// StepNames is every spacing constant above, for the same reason.
+var StepNames = []string{
+	NameStepHairline, NameStepTight, NameStepRelated,
+	NameStepGroup, NameStepSection, NameStepMajor,
+}
+
+var colorsByName = func() map[string]Color {
+	byName := make(map[string]Color, len(Palette)+1)
+	for _, entry := range Palette {
+		byName[entry.Name] = entry
+	}
+	byName[Background.Name] = Background
+	return byName
+}()
+
+var stepsByName = func() map[string]Space {
+	byName := make(map[string]Space, len(Scale))
+	for _, step := range Scale {
+		byName[step.Name] = step
+	}
+	return byName
+}()
+
+// Named is the colour a view asks for by name.
+//
+// A name with no entry returns the foreground text colour rather than an empty
+// value, because a zero colour is transparent black and would render as a hole
+// nobody can see. Loud is not available here, since a view cannot stop, so the
+// wrong answer is at least a visible one. The pair of tests that close the
+// register in both directions is what keeps this branch unreachable.
+func Named(name string) Color {
+	if entry, ok := colorsByName[name]; ok {
+		return entry
+	}
+	return colorsByName[NameText]
+}
+
+// StepOf is the distance a view asks for by name. The same reasoning as Named
+// applies to the fallback.
+func StepOf(name string) float32 {
+	if step, ok := stepsByName[name]; ok {
+		return step.Step
+	}
+	return stepsByName[NameStepTight].Step
+}
+
+// StartWidth and StartHeight are the size a window opens at.
+//
+// # Why this is here rather than in the screen that opens the window
+//
+// It is a value of the view, and the guard refuses a bare number anywhere in
+// the window outside this package. That refusal is what produced this entry:
+// the first screen opened 128 pixels tall, showing one heading and nothing
+// else, because a scrolling container asks for almost no height of its own and
+// a window with no size of its own shrinks to what its content demands. Every
+// test was green, since they read the content rather than how much of it is
+// visible.
+//
+// # Why these two numbers
+//
+// They are a choice with a reason rather than a measurement, and are written
+// as such. The width fits the longest line the About screen has, which is a
+// module path beside its version, without wrapping it. The height shows two
+// sections at once, so that the first thing a person sees is that the screen
+// continues rather than a single heading that looks like the whole window.
+//
+// What would change them: the first screen whose natural content is wider, or
+// a measurement on a display where this is too large to open comfortably.
+const (
+	StartWidth  float32 = 900
+	StartHeight float32 = 700
+)
+
 // Space is one step of the spacing scale.
 type Space struct {
 	// Name is the key shared with the table in docs/17.

@@ -132,6 +132,28 @@ var Guards = []Guard{
 	{"the scale never gives one distance two names", "TestEveryStepOfTheScaleIsUsedOnce", "internal/gui/theme", ByMutation},
 	{"a colour of the palette is never translucent, so its measured contrast is about what is shown", "TestEveryColourIsFullyOpaque", "internal/gui/theme", ByMutation},
 	{"the background is the reference of the measurement and never one of its subjects", "TestEveryNameInThePaletteIsUsedOnce", "internal/gui/theme", ByMutation},
+	{"a colour constant and a palette entry answer to each other", "TestEveryColourNameAndEntryAnswerToEachOther", "internal/gui/theme", ByMutation},
+
+	// --- the window never asks the toolkit to leave this machine ------------
+	//
+	// The import scan answers about our own packages. The toolkit is one
+	// import carrying net/http inside it, so that scan cannot see this. The
+	// owner settled on 2026-08-12 that the unbreakable rule is about what the
+	// product does rather than about what its closure contains, and a promise
+	// about behaviour needs a guard about behaviour.
+	{"nothing we wrote asks the toolkit to leave this machine", "TestNothingInTheWindowAsksTheToolkitToLeaveThisMachine", "internal/guard", ByMutation},
+	{"the scanner sees a call that leaves the machine", "TestTheToolkitGuardSeesACallThatLeavesTheMachine", "internal/guard", ByProbe},
+	{"a window that is gone is reported rather than read as clean", "TestTheToolkitGuardIsLoudWhenTheWindowIsGone", "internal/guard", ByProbe},
+	{"every banned call records why it is banned", "TestEveryBannedToolkitCallSaysWhyItIsBanned", "internal/guard", ByProbe},
+
+	// --- what the window says, and in which language -------------------------
+	{"the About screen carries every fact the licence flag prints", "TestTheScreenCarriesEveryFactTheLicenceFlagPrints", "internal/gui/about", ByMutation},
+	{"the About screen carries all four versions", "TestTheScreenCarriesAllFourVersions", "internal/gui/about", ByMutation},
+	{"no label renders as its own translation key", "TestNoLabelRendersAsItsOwnKey", "internal/gui/about", ByMutation},
+	{"a translation key and a catalogue entry answer to each other", "TestEveryKeyAndEveryEntryAnswerToEachOther", "internal/adapter/i18n", ByMutation},
+	{"interface text keeps the punctuation this repository uses", "TestNoEntryUsesPunctuationThisRepositoryRefuses", "internal/adapter/i18n", ByMutation},
+	{"every colour the window shows comes from the measured palette", "TestEveryColourAnsweredHereComesFromTheMeasuredPalette", "internal/gui/fynetheme", ByMutation},
+	{"a colour nobody claimed is visible rather than a hole", "TestAnUnclaimedColourFallsThroughAndIsNeverInvisible", "internal/gui/fynetheme", ByMutation},
 
 	// --- the register guarding the register ---------------------------------
 	{"a guard added here cannot stay out of the register", "TestEveryGuardInThisPackageIsRegistered", "internal/guard", ByMutation},

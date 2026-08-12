@@ -162,19 +162,311 @@ type Component struct {
 	Checked string `json:"license_checked"`
 }
 
-// ThirdParty lists every external module inside this build.
+// ThirdParty lists every external module inside this build, reached directly
+// or through another one.
 //
-// A test compares this list against the direct requirements in go.mod, so a
-// dependency that nobody described here fails the build instead of shipping
-// unlisted. Every entry was read from the module itself rather than from
+// A test compares this list against go.mod in both directions, so a dependency
+// nobody described fails the build instead of shipping unlisted, and an entry
+// for a module this build no longer uses fails it too. Every entry was read
+// from the module's own licence file at the pinned version rather than from
 // anybody's memory of what it is licensed under.
+//
+// # Why the indirect ones are here as well
+//
+// A module pulled in through another sits in the binary just the same, and the
+// licence of code inside a binary binds whoever received the binary. Listing
+// one module too many costs a line. Listing one too few is a claim about
+// somebody else's terms that nobody checked.
+//
+// # How this list is kept, since it stopped being hand sized on 2026-08-12
+//
+// tools/licencje.py reads the licence file of every module from the module
+// cache, where go.sum has already checked that the bytes are the ones the
+// author released under that version. One dependency was a hand written line.
+// Forty is forty chances to mistype one, and a register of licences with a
+// typo in it is worse than none because it reads as though somebody checked.
+//
+// The generator rewrites the whole list, so anything worth keeping is written
+// here rather than beside an entry. A note between the braces below survives
+// exactly until the next regeneration.
+//
+// # The one entry that deserves a note, and it is fyne.io/fyne/v2
+//
+// It is the only module here that reaches one of the two binaries rather than
+// both. The command line binary never imports it, which a guard checks
+// transitively, because that import would pull in the C toolchain and stop it
+// cross compiling from one machine.
+//
+// Measured on 2026-08-12: a window built on it closes over 328 packages
+// against 152 for the command line binary, and its root package imports
+// net/http directly to serve resources over it. The rule about outgoing
+// connections is about what the product does, so a separate guard checks that
+// nothing this project wrote asks it to.
+//
+// Adding it also brought three vulnerabilities in golang.org/x/image that the
+// scanner traced into our own call paths, fixed by pinning that module forward
+// rather than by waiting for the toolkit to do it. A dependency arrives with
+// its own dependencies and their history, which is what sieve question (c) is
+// about.
 var ThirdParty = []Component{
+	{
+		Module:  "fyne.io/fyne/v2",
+		Version: "v2.8.0",
+		License: "BSD-3-Clause",
+		Source:  "https://fyne.io/fyne/v2",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "fyne.io/systray",
+		Version: "v1.12.2",
+		License: "Apache-2.0",
+		Source:  "https://fyne.io/systray",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/BurntSushi/toml",
+		Version: "v1.6.0",
+		License: "MIT",
+		Source:  "https://github.com/BurntSushi/toml",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/anthonynsimon/bild",
+		Version: "v0.14.0",
+		License: "MIT",
+		Source:  "https://github.com/anthonynsimon/bild",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/clipperhouse/uax29/v2",
+		Version: "v2.2.0",
+		License: "MIT",
+		Source:  "https://github.com/clipperhouse/uax29/v2",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/davecgh/go-spew",
+		Version: "v1.1.1",
+		License: "ISC",
+		Source:  "https://github.com/davecgh/go-spew",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/fredbi/uri",
+		Version: "v1.1.1",
+		License: "MIT",
+		Source:  "https://github.com/fredbi/uri",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/fsnotify/fsnotify",
+		Version: "v1.9.0",
+		License: "BSD-3-Clause",
+		Source:  "https://github.com/fsnotify/fsnotify",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/fyne-io/gl-js",
+		Version: "v0.2.1-0.20260315212741-029c47fd27e8",
+		License: "BSD-3-Clause",
+		Source:  "https://github.com/fyne-io/gl-js",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/fyne-io/glfw-js",
+		Version: "v0.4.0",
+		License: "MIT",
+		Source:  "https://github.com/fyne-io/glfw-js",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/fyne-io/image",
+		Version: "v0.1.1",
+		License: "BSD-3-Clause",
+		Source:  "https://github.com/fyne-io/image",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/fyne-io/oksvg",
+		Version: "v0.2.0",
+		License: "BSD-3-Clause",
+		Source:  "https://github.com/fyne-io/oksvg",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/go-gl/gl",
+		Version: "v0.0.0-20260331235117-4566fea9a276",
+		License: "MIT",
+		Source:  "https://github.com/go-gl/gl",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/go-gl/glfw/v3.4/glfw",
+		Version: "v0.1.0-pre.1.0.20260707082822-2a407d02d01a",
+		License: "BSD-3-Clause",
+		Source:  "https://github.com/go-gl/glfw/v3.4/glfw",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/go-text/render",
+		Version: "v0.2.1",
+		License: "BSD-3-Clause",
+		Source:  "https://github.com/go-text/render",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/go-text/typesetting",
+		Version: "v0.3.4",
+		License: "BSD-3-Clause",
+		Source:  "https://github.com/go-text/typesetting",
+		Checked: "2026-08-12",
+	},
 	{
 		Module:  "github.com/goccy/go-yaml",
 		Version: "v1.19.2",
 		License: "MIT",
 		Source:  "https://github.com/goccy/go-yaml",
 		Checked: "2026-08-01",
+	},
+	{
+		Module:  "github.com/godbus/dbus/v5",
+		Version: "v5.2.2",
+		License: "BSD-2-Clause",
+		Source:  "https://github.com/godbus/dbus/v5",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/hack-pad/go-indexeddb",
+		Version: "v0.3.2",
+		License: "Apache-2.0",
+		Source:  "https://github.com/hack-pad/go-indexeddb",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/hack-pad/safejs",
+		Version: "v0.1.0",
+		License: "Apache-2.0",
+		Source:  "https://github.com/hack-pad/safejs",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/jeandeaual/go-locale",
+		Version: "v0.0.0-20250612000132-0ef82f21eade",
+		License: "MIT",
+		Source:  "https://github.com/jeandeaual/go-locale",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/jsummers/gobmp",
+		Version: "v0.0.0-20230614200233-a9de23ed2e25",
+		License: "MIT",
+		Source:  "https://github.com/jsummers/gobmp",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/kr/text",
+		Version: "v0.2.0",
+		License: "MIT",
+		Source:  "https://github.com/kr/text",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/mattn/go-runewidth",
+		Version: "v0.0.24",
+		License: "MIT",
+		Source:  "https://github.com/mattn/go-runewidth",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/nfnt/resize",
+		Version: "v0.0.0-20180221191011-83c6a9932646",
+		License: "ISC",
+		Source:  "https://github.com/nfnt/resize",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/nicksnyder/go-i18n/v2",
+		Version: "v2.5.1",
+		License: "MIT",
+		Source:  "https://github.com/nicksnyder/go-i18n/v2",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/pmezard/go-difflib",
+		Version: "v1.0.0",
+		License: "BSD-2-Clause",
+		Source:  "https://github.com/pmezard/go-difflib",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/rymdport/portal",
+		Version: "v0.4.2",
+		License: "Apache-2.0",
+		Source:  "https://github.com/rymdport/portal",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/srwiley/oksvg",
+		Version: "v0.0.0-20221011165216-be6e8873101c",
+		License: "BSD-3-Clause",
+		Source:  "https://github.com/srwiley/oksvg",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/srwiley/rasterx",
+		Version: "v0.0.0-20220730225603-2ab79fcdd4ef",
+		License: "BSD-3-Clause",
+		Source:  "https://github.com/srwiley/rasterx",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/stretchr/testify",
+		Version: "v1.11.1",
+		License: "MIT",
+		Source:  "https://github.com/stretchr/testify",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "github.com/yuin/goldmark",
+		Version: "v1.8.2",
+		License: "MIT",
+		Source:  "https://github.com/yuin/goldmark",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "golang.org/x/image",
+		Version: "v0.43.0",
+		License: "BSD-3-Clause",
+		Source:  "https://golang.org/x/image",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "golang.org/x/net",
+		Version: "v0.35.0",
+		License: "BSD-3-Clause",
+		Source:  "https://golang.org/x/net",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "golang.org/x/sys",
+		Version: "v0.30.0",
+		License: "BSD-3-Clause",
+		Source:  "https://golang.org/x/sys",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "golang.org/x/text",
+		Version: "v0.38.0",
+		License: "BSD-3-Clause",
+		Source:  "https://golang.org/x/text",
+		Checked: "2026-08-12",
+	},
+	{
+		Module:  "gopkg.in/yaml.v3",
+		Version: "v3.0.1",
+		License: "Apache-2.0",
+		Source:  "https://gopkg.in/yaml.v3",
+		Checked: "2026-08-12",
 	},
 }
 

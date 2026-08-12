@@ -136,6 +136,72 @@ func TestThePaletteAndTheScaleAreNotEmpty(t *testing.T) {
 	}
 }
 
+// The register of names has to close from both sides.
+//
+// One direction alone answers half the question, which this project learned
+// the session before when a flag lived in the parser and not in the help. A
+// constant with no entry resolves to the fallback and a view shows the wrong
+// colour. An entry with no constant is a colour no screen can ask for without
+// typing a bare string, which is what the constants exist to prevent.
+func TestEveryColourNameAndEntryAnswerToEachOther(t *testing.T) {
+	entries := map[string]bool{}
+	for _, entry := range Palette {
+		entries[entry.Name] = true
+	}
+	constants := map[string]bool{}
+	for _, name := range ColorNames {
+		constants[name] = true
+		if !entries[name] {
+			t.Errorf("the constant for %q has no entry in the palette, so a view asking for it gets the fallback", name)
+		}
+	}
+	for name := range entries {
+		if !constants[name] {
+			t.Errorf("the palette carries %q and no constant names it, so a view can only ask by typing it", name)
+		}
+	}
+}
+
+func TestEveryStepNameAndEntryAnswerToEachOther(t *testing.T) {
+	entries := map[string]bool{}
+	for _, step := range Scale {
+		entries[step.Name] = true
+	}
+	constants := map[string]bool{}
+	for _, name := range StepNames {
+		constants[name] = true
+		if !entries[name] {
+			t.Errorf("the constant for %q has no step in the scale", name)
+		}
+	}
+	for name := range entries {
+		if !constants[name] {
+			t.Errorf("the scale carries %q and no constant names it", name)
+		}
+	}
+}
+
+// The lookup has to find what is there and has to stay visible when it does
+// not, because a view cannot stop to report a missing colour.
+func TestLookupFindsWhatIsThereAndStaysVisibleWhenItDoesNot(t *testing.T) {
+	if got := Named(NameRejection); got.Name != NameRejection {
+		t.Errorf("looking up %q found %q", NameRejection, got.Name)
+	}
+	if got := Named(Background.Name); got.Name != Background.Name {
+		t.Error("the background is not reachable by name, and a window needs it")
+	}
+	missing := Named("no.such.colour")
+	if missing.NRGBA().A != 0xFF {
+		t.Error("an unknown name resolved to something transparent, which renders as a hole nobody can see")
+	}
+	if got := StepOf(NameStepSection); got != StepOf(NameStepSection) || got == 0 {
+		t.Error("a known step did not resolve to a distance")
+	}
+	if StepOf("no.such.step") == 0 {
+		t.Error("an unknown step resolved to nothing, which collapses a layout silently")
+	}
+}
+
 func ExampleColor_Hex() {
 	fmt.Println(Palette[1].Name, Palette[1].Hex())
 	// Output: text #E8E8E8

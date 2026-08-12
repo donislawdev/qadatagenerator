@@ -12,6 +12,19 @@ repository once they are released.
 
 ### Added
 
+- **There is a window now, and it opens on the About screen.** `qadg-gui` shows
+  the four versions this build carries, both licenses and what each one covers,
+  every third party module with the day its license was read, and the notice
+  that data you generate belongs to you. It answers the same questions as
+  `--license` and `--version`, for people who would rather look than type.
+- **The window is a separate program from the command line tool.** The command
+  line binary is unchanged and still builds without a C compiler, so nothing
+  about your pipeline changes. The window needs a C toolchain and OpenGL,
+  because the toolkit it draws with does.
+- **One dark theme, with every colour measured against the contrast standard
+  rather than chosen by eye.** Colour is never the only thing carrying a
+  meaning, which matters if you do not distinguish some of them.
+
 - **`qadg verify` compares a manifest against what your application actually
   did.** Give it the manifest a run wrote and a record of how your system
   reacted, and it reports where the two disagree. It is the only command that

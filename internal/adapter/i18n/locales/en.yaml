@@ -1,0 +1,30 @@
+# The English catalogue of everything the window says.
+#
+# A new language is a new file beside this one and no change in Go, which is
+# the whole reason the window asks for text by key. The keys are declared as
+# constants in Go so that a typo is a compile error rather than a label that
+# renders as its own key, and a test closes this file against those constants
+# in both directions.
+#
+# The rules for this text are the ones in the project handbook: say what the
+# thing does, name what is on screen, no filler, and no em dash or semicolon.
+
+about.window.title: About QA Data Generator
+about.heading.versions: Versions
+about.heading.licenses: Licenses
+about.heading.components: Third party components
+about.heading.data: Reference data
+about.heading.notices: What this means for your data
+
+about.version.tool: Tool
+about.version.catalog: Corruption catalog
+about.version.manifest: Manifest format
+about.version.recipe: Recipe schema
+
+about.license.code: Code
+about.license.spec: Specification
+
+about.column.checked: License read on
+
+about.empty.components: This build links no third party module.
+about.empty.data: This build carries no reference data.
