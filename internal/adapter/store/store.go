@@ -145,8 +145,17 @@ var devices = map[string]bool{
 // without anybody being told, which is exactly the silence being avoided one
 // layer up.
 func usableName(name string) error {
+	// 🔴 The FIRST dot, not the last, and the difference is the whole of this
+	// line. Windows reserves a device name by the part before the first dot, so
+	// CON.corrupted.csv is the console just as CON.csv is. Cutting at the last
+	// dot refused the one and let the other through, measured on 2026-08-11.
+	//
+	// It went unnoticed because it was unreachable: a name from a recipe entity
+	// carries one dot. The verb that damages somebody else's file always
+	// produces two, so that verb made an old hole reachable without touching
+	// this file.
 	base := name
-	if dot := strings.LastIndex(base, "."); dot > 0 {
+	if dot := strings.Index(base, "."); dot > 0 {
 		base = base[:dot]
 	}
 	switch {

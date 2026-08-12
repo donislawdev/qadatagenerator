@@ -555,6 +555,12 @@ var Guards = []Guard{
 	// numbering schemes and is still open. This one is the worst placed: a
 	// recipe has a hard size limit and a data file deliberately has none.
 	{"a hostile column name does not come back amplified", "TestALongColumnNameDoesNotComeBackAsALongMessage", "internal/adapter/sourcecsv", ByMutation},
+	// 🔴 The second road of the same class, and the one that needed a guard
+	// rather than a repair. Thirteen messages across four schemes wrote a value
+	// in with the quoting verb, so a fourteenth scheme would have written a
+	// fourteenth. The guard is what makes the fourteenth impossible.
+	{"no numbering scheme writes an unbounded value into a message", "TestNoSchemeWritesAValueIntoAMessageUnbounded", "internal/guard", ByMutation},
+	{"the guard for that fires on code and stays quiet about prose", "TestTheQuotingGuardFiresOnCodeAndNotOnProse", "internal/guard", ByMutation},
 	// 🔴 One test and three mutations, because the reconciliation has three
 	// halves that fail differently: the columns, a file that shrank and a file
 	// that grew. It closes the loud half of reading twice and not the race

@@ -242,7 +242,7 @@ func (ABA) CheckDigits(value string) ([]int, bool) {
 func (ABA) WithCheckDigits(value string) (string, error) {
 	parsed, ok := parseABA(value)
 	if !ok {
-		return "", fmt.Errorf("aba: %q is not nine digits", value)
+		return "", fmt.Errorf("aba: %s is not nine digits", provider.Show(value))
 	}
 	parsed.digits[abaCheckPosition] = abaCheckDigit(parsed.digits[:abaCheckPosition])
 	return parsed.String(), nil
@@ -270,12 +270,12 @@ func (ABA) UnassignedTargets() []string {
 func (ABA) WithUnassigned(value, target string) (string, error) {
 	parsed, ok := parseABA(value)
 	if !ok {
-		return "", fmt.Errorf("aba: %q is not nine digits", value)
+		return "", fmt.Errorf("aba: %s is not nine digits", provider.Show(value))
 	}
 	series, known := abaSpareSeries[target]
 	if !known {
-		return "", fmt.Errorf("aba: %q is not a block this scheme has, the choices are %s",
-			target, strings.Join(ABA{}.UnassignedTargets(), ", "))
+		return "", fmt.Errorf("aba: %s is not a block this scheme has, the choices are %s",
+			provider.Show(target), strings.Join(ABA{}.UnassignedTargets(), ", "))
 	}
 
 	moved := parsed

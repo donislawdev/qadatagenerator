@@ -177,12 +177,12 @@ func (NIP) CheckDigits(value string) ([]int, bool) {
 func (NIP) WithCheckDigits(value string) (string, error) {
 	parsed, ok := parseNIP(value)
 	if !ok {
-		return "", fmt.Errorf("nip: %q is not ten digits", value)
+		return "", fmt.Errorf("nip: %s is not ten digits", provider.Show(value))
 	}
 	check, ok := nipCheckDigit(parsed.digits[:nipCheckPosition])
 	if !ok {
-		return "", fmt.Errorf("nip: the first nine digits of %q leave a remainder of %d, and %d is not a digit, so no check digit makes this a NIP",
-			value, nipNoCheckDigit, nipNoCheckDigit)
+		return "", fmt.Errorf("nip: the first nine digits of %s leave a remainder of %d, and %d is not a digit, so no check digit makes this a NIP",
+			provider.Show(value), nipNoCheckDigit, nipNoCheckDigit)
 	}
 	parsed.digits[nipCheckPosition] = check
 	return parsed.String(), nil

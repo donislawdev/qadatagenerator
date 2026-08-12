@@ -59,6 +59,15 @@ repository once they are released.
   named with sixty four kilobytes produced a refusal of about the same size, on
   its way into whatever collects your build log. Names are trimmed now, as they
   already were when they came from a recipe.
+- **The same was true of a value a numbering scheme refused.** Thirteen messages
+  across four schemes wrote the value straight into the sentence, so a long
+  value produced a long message. They are trimmed now, and nothing stops a
+  fourteenth scheme from doing it again by hand, which is why the repair is a
+  check over the schemes rather than thirteen edits.
+- **A file called `CON.corrupted.csv` was accepted on Windows.** A name reserved
+  for a device is reserved by the part before the first dot, and this build cut
+  at the last one, so it refused `CON.csv` and let the two dotted form through.
+  The verb that damages a file you already have always produces two dots.
 
 ### Changed
 

@@ -91,6 +91,12 @@ func TestANameTheFileSystemWouldNotKeepIsRefusedRatherThanRepaired(t *testing.T)
 	refused := []string{
 		"", "a/b.csv", "..", ".", "a<b.csv", "a|b.csv", "CON.csv", "con.json",
 		"NUL", "trailing.csv" + ".", "trailing.csv" + " ",
+		// 🔴 Two dots, which is what the verb that damages somebody else's file
+		// always produces. Windows reserves the name by the part before the
+		// FIRST dot, so these are the console and the printer as surely as
+		// CON.csv is. Measured on 2026-08-11: both were accepted until the cut
+		// moved from the last dot to the first.
+		"CON.corrupted.csv", "PRN.corrupted.csv", "lpt1.corrupted.csv",
 	}
 	for _, name := range refused {
 		set := store.New(t.TempDir(), false)
@@ -107,7 +113,12 @@ func TestANameTheFileSystemWouldNotKeepIsRefusedRatherThanRepaired(t *testing.T)
 	// Windows trims trailing dots and spaces from the end of a name, not from
 	// the middle of one, so refusing it would be this build inventing a rule the
 	// file system does not have.
-	for _, name := range []string{"customer.csv", "zamówienia.csv", "a.b.c.json", "name .csv"} {
+	// The last two are the other side of moving the cut to the first dot, and
+	// without them that move would be a refusal nobody measured the cost of.
+	// The name the damaging verb always produces has to keep working, and a
+	// device name that is not the first part is an ordinary name.
+	for _, name := range []string{"customer.csv", "zamówienia.csv", "a.b.c.json", "name .csv",
+		"customer.corrupted.csv", "data.CON.csv"} {
 		set := store.New(t.TempDir(), false)
 		if _, err := set.Create(name); err != nil {
 			t.Errorf("%q is a usable name and was refused: %v", name, err)

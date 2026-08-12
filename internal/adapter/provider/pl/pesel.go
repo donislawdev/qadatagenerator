@@ -204,7 +204,7 @@ func (PESEL) CheckDigits(value string) ([]int, bool) {
 func (PESEL) WithCheckDigits(value string) (string, error) {
 	digits, ok := parseDigits(value)
 	if !ok || len(digits) != length {
-		return "", fmt.Errorf("pesel: %q is not eleven digits", value)
+		return "", fmt.Errorf("pesel: %s is not eleven digits", provider.Show(value))
 	}
 	digits[checkPosition] = checkDigit(digits[:checkPosition])
 	return digitsToString(digits), nil
@@ -232,7 +232,7 @@ func (PESEL) EncodedDate(value string) (provider.Date, bool) {
 func (p PESEL) WithDate(value string, date provider.Date) (string, error) {
 	digits, ok := parseDigits(value)
 	if !ok || len(digits) != length {
-		return "", fmt.Errorf("pesel: %q is not eleven digits", value)
+		return "", fmt.Errorf("pesel: %s is not eleven digits", provider.Show(value))
 	}
 	month, err := encodeMonth(date)
 	if err != nil {
@@ -271,7 +271,7 @@ func (PESEL) EncodedGender(value string) (provider.Gender, bool) {
 func (PESEL) WithGender(value string, gender provider.Gender) (string, error) {
 	digits, ok := parseDigits(value)
 	if !ok || len(digits) != length {
-		return "", fmt.Errorf("pesel: %q is not eleven digits", value)
+		return "", fmt.Errorf("pesel: %s is not eleven digits", provider.Show(value))
 	}
 	switch gender {
 	case provider.Female:
@@ -279,7 +279,7 @@ func (PESEL) WithGender(value string, gender provider.Gender) (string, error) {
 	case provider.Male:
 		digits[genderPosition] |= 1
 	default:
-		return "", fmt.Errorf("pesel: the scheme encodes female and male, not %q", gender)
+		return "", fmt.Errorf("pesel: the scheme encodes female and male, not %s", provider.Show(string(gender)))
 	}
 	digits[checkPosition] = checkDigit(digits[:checkPosition])
 	return digitsToString(digits), nil
@@ -373,7 +373,7 @@ func (p PESEL) dateFor(req provider.Request) (provider.Date, error) {
 	if bound, ok := req.Agrees.Value(provider.RoleBirthDate); ok {
 		date, ok := parseISODate(bound)
 		if !ok {
-			return provider.Date{}, fmt.Errorf("pesel: %q is not a date written as YYYY-MM-DD", bound)
+			return provider.Date{}, fmt.Errorf("pesel: %s is not a date written as YYYY-MM-DD", provider.Show(bound))
 		}
 		return date, nil
 	}
@@ -473,7 +473,7 @@ func (PESEL) genderFor(req provider.Request) (provider.Gender, error) {
 	if gender, known := genderSpellings[strings.ToLower(strings.TrimSpace(bound))]; known {
 		return gender, nil
 	}
-	return provider.Unknown, fmt.Errorf("pesel: %q is not a gender this scheme can encode, which are %s", bound, acceptedGenders())
+	return provider.Unknown, fmt.Errorf("pesel: %s is not a gender this scheme can encode, which are %s", provider.Show(bound), acceptedGenders())
 }
 
 // genderDigit picks the tenth digit, carrying the gender.

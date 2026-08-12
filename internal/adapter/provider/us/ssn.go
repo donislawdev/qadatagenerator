@@ -255,7 +255,7 @@ func (SSN) UnassignedTargets() []string {
 func (SSN) WithUnassigned(value, target string) (string, error) {
 	parsed, ok := parse(value)
 	if !ok {
-		return "", fmt.Errorf("ssn: %q is not nine digits", value)
+		return "", fmt.Errorf("ssn: %s is not nine digits", provider.Show(value))
 	}
 
 	moved := parsed
@@ -267,8 +267,8 @@ func (SSN) WithUnassigned(value, target string) (string, error) {
 	case TargetZeroSerial:
 		moved.serial = 0
 	default:
-		return "", fmt.Errorf("ssn: %q is not a block this scheme has, the choices are %s",
-			target, strings.Join(SSN{}.UnassignedTargets(), ", "))
+		return "", fmt.Errorf("ssn: %s is not a block this scheme has, the choices are %s",
+			provider.Show(target), strings.Join(SSN{}.UnassignedTargets(), ", "))
 	}
 
 	if moved == parsed {
