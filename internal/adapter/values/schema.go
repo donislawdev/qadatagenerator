@@ -73,7 +73,7 @@ func (s Schema) FieldsOf(entity string) []recipe.FieldInfo {
 		// arithmetic leaves this empty, which is the truthful answer: nothing
 		// has said those values obey any published numbering rules.
 		if scheme, draws := s.source.ProviderOf(field.Generator); draws {
-			fields[i].Provider = scheme
+			fields[i].Scheme = scheme
 		}
 	}
 	return fields

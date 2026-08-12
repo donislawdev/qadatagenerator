@@ -142,10 +142,10 @@ func (e Engine) Apply(order Order, field recipe.FieldInfo, value string, at seed
 // needs it says so by asking, and refuses in its own words when the answer is
 // empty.
 func (e Engine) schemeOf(field recipe.FieldInfo) provider.Provider {
-	if e.providers == nil || field.Provider == "" {
+	if e.providers == nil || field.Scheme == "" {
 		return nil
 	}
-	found, has := e.providers.Of(field.Provider)
+	found, has := e.providers.Of(field.Scheme)
 	if !has {
 		return nil
 	}
@@ -185,10 +185,10 @@ func (e Engine) refuse(entry catalog.Entry, field recipe.FieldInfo) (manifest.Fa
 			"the field is %s and this damage applies to %s",
 			describeType(field.Type), strings.Join(entry.AppliesTo.FieldTypes, " or "))
 	}
-	if !entry.CoversProvider(field.Provider) {
+	if !entry.CoversProvider(field.Scheme) {
 		return manifest.SchemeNotCovered, fmt.Sprintf(
 			"the field holds %s and this damage applies to %s",
-			describeProvider(field.Provider), strings.Join(entry.AppliesTo.Providers, " or "))
+			describeProvider(field.Scheme), strings.Join(entry.AppliesTo.Providers, " or "))
 	}
 	return "", ""
 }

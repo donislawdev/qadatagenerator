@@ -245,7 +245,7 @@ func (s *Selector) candidates(entry catalog.Entry, entity string) (covered, type
 		// numbering scheme, and what it declares about itself. The third is
 		// what stops damage about a maximum length landing on a column that
 		// declares none while another column in the same recipe does.
-		if entry.CoversProvider(field.Provider) && len(columnCannot(entry.Requires, field)) == 0 {
+		if entry.CoversProvider(field.Scheme) && len(columnCannot(entry.Requires, field)) == 0 {
 			covered = append(covered, field.Name)
 		}
 	}

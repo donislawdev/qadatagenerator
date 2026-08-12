@@ -89,7 +89,7 @@ func schemeOfField(t *testing.T, view recipe.SchemaView, entity, field string) s
 	t.Helper()
 	for _, info := range view.FieldsOf(entity) {
 		if info.Name == field {
-			return info.Provider
+			return info.Scheme
 		}
 	}
 	t.Fatalf("no field called %s", field)

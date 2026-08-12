@@ -263,7 +263,7 @@ type FieldInfo struct {
 	// the field is not one. A mutator that puts a value outside the set has
 	// to know the set.
 	Values []string
-	// Provider is the numbering scheme the column follows, such as PL.pesel,
+	// Scheme is the numbering scheme the column follows, such as PL.pesel,
 	// empty when it follows none.
 	//
 	// It is not the generator under another name, and the difference is what
@@ -278,7 +278,19 @@ type FieldInfo struct {
 	// carry a check digit, encode a date or have a range nobody is issued
 	// from. A catalog entry names the schemes it covers precisely because
 	// that difference exists.
-	Provider string
+	//
+	// 🔴 It was called Provider until 2026-08-11 and the rename is the point
+	// of this field's name rather than tidying. A provider is the Go type
+	// that implements a scheme, and this column has no provider: in the mode
+	// that reads somebody else's file nothing implements anything, and the
+	// column still either holds tax numbers or does not. The binding name in
+	// the glossary is numbering scheme, and this field carried the name of
+	// the implementation into the one mode where no implementation exists.
+	//
+	// The catalog key applies_to.providers keeps its name on purpose. That
+	// one is a published contract, and changing it belongs to the pass over
+	// identifiers before the repository becomes public.
+	Scheme string
 }
 
 // Unit returns how the maximum length of this field is counted, defaulting to

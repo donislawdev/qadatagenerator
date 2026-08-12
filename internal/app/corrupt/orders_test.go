@@ -187,8 +187,8 @@ func (schemeView) EntityNames() []string { return []string{"customer"} }
 // reading of a green test.
 func (schemeView) FieldsOf(string) []recipe.FieldInfo {
 	fields := []recipe.FieldInfo{
-		{Name: "ssn", Type: "identifier", Provider: "US.ssn"},
-		{Name: "pesel", Type: "identifier", Provider: "PL.pesel"},
+		{Name: "ssn", Type: "identifier", Scheme: "US.ssn"},
+		{Name: "pesel", Type: "identifier", Scheme: "PL.pesel"},
 	}
 	for _, name := range []string{"name", "city", "region", "note", "title"} {
 		fields = append(fields, recipe.FieldInfo{Name: name, Type: "string"})

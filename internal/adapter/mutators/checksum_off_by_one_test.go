@@ -271,7 +271,7 @@ func produce(t *testing.T, scheme provider.Provider, row int64) string {
 
 // identifierField is the column such a value sits in, as the engine sees it.
 func identifierField(scheme string) recipe.FieldInfo {
-	return recipe.FieldInfo{Name: "identifier", Type: "identifier", Provider: scheme}
+	return recipe.FieldInfo{Name: "identifier", Type: "identifier", Scheme: scheme}
 }
 
 // schemeNames returns the schemes in a fixed order, because Go randomises map

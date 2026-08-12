@@ -54,10 +54,10 @@ func CapabilitiesOfView(view recipe.SchemaView, source Source) []capability.Name
 	found := map[capability.Name]bool{}
 	for _, entity := range view.EntityNames() {
 		for _, field := range view.FieldsOf(entity) {
-			if field.Provider == "" {
+			if field.Scheme == "" {
 				continue
 			}
-			scheme, carried := source.ProviderNamed(field.Provider)
+			scheme, carried := source.ProviderNamed(field.Scheme)
 			if !carried {
 				continue
 			}

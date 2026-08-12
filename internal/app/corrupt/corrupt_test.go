@@ -222,7 +222,7 @@ func TestDamageAimedAtASchemeItDoesNotCoverIsRefusedWithBothSides(t *testing.T) 
 		registry{damageID: stated{damageID, mutator.Done("666123457")}}, noSchemes{}, able())
 
 	_, defect := engine.Apply(order(),
-		recipe.FieldInfo{Name: "ssn", Type: "identifier", Provider: "US.ssn"},
+		recipe.FieldInfo{Name: "ssn", Type: "identifier", Scheme: "US.ssn"},
 		"666123456", seed.Coordinate{})
 	if defect.Applied {
 		t.Fatal("a check digit was broken in a scheme that has none")
@@ -337,7 +337,7 @@ func TestEveryRefusalCarriesTheKindThatMatches(t *testing.T) {
 		{"the entry does not cover this scheme",
 			corrupt.New(described(t, scheme),
 				registry{damageID: stated{damageID, mutator.Done("x")}}, noSchemes{}, able()),
-			recipe.FieldInfo{Name: "ssn", Type: "identifier", Provider: "US.ssn"}, manifest.SchemeNotCovered},
+			recipe.FieldInfo{Name: "ssn", Type: "identifier", Scheme: "US.ssn"}, manifest.SchemeNotCovered},
 		{"the mutator declined",
 			corrupt.New(described(t, entry()),
 				registry{damageID: stated{damageID, mutator.Skipped("nothing to do here")}}, noSchemes{}, able()),
@@ -451,7 +451,7 @@ func TestTheSchemeBehindAColumnReachesTheMutator(t *testing.T) {
 		schemes{"PL.pesel": aScheme{"PL.pesel"}}, able())
 
 	engine.Apply(order(), recipe.FieldInfo{
-		Name: "pesel", Type: "identifier", Provider: "PL.pesel",
+		Name: "pesel", Type: "identifier", Scheme: "PL.pesel",
 	}, "85011412345", seed.Coordinate{})
 
 	if seen == nil {
@@ -471,7 +471,7 @@ func TestAColumnWhoseSchemeThisBuildLacksHandsTheMutatorNothing(t *testing.T) {
 		registry{damageID: peeking{damageID, &seen}}, schemes{}, able())
 
 	engine.Apply(order(), recipe.FieldInfo{
-		Name: "pesel", Type: "identifier", Provider: "PL.pesel",
+		Name: "pesel", Type: "identifier", Scheme: "PL.pesel",
 	}, "85011412345", seed.Coordinate{})
 
 	if seen != nil {

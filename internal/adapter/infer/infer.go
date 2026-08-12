@@ -102,7 +102,7 @@ func From(table dataset.Table, samples []dataset.Sample, schemes []provider.Prov
 		finding.Field = column
 		built.findings = append(built.findings, finding)
 		built.fields = append(built.fields, recipe.FieldInfo{
-			Name: column, Type: finding.Type, Provider: finding.Scheme,
+			Name: column, Type: finding.Type, Scheme: finding.Scheme,
 		})
 	}
 	return built
