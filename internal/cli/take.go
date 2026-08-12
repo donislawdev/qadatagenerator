@@ -234,13 +234,14 @@ func buildDamage(ask damageRequest, files *store.Set) (*takenDamage, error) {
 	// it afterwards, so it is opened here and fed the same entries at the same
 	// moment. Nothing reads what this run just wrote.
 	sinks := corrupted.Tee{entries}
-	var exported *manifestexport.Gherkin
-	if *ask.own.manifest == manifestexport.FormGherkin {
-		file, err := files.Create(manifestexport.GherkinName)
+	var exported manifestexport.Export
+	if name := manifestexport.FileFor(*ask.own.manifest); name != "" {
+		file, err := files.Create(name)
 		if err != nil {
 			return nil, err
 		}
-		exported = manifestexport.NewGherkin(file, ask.described, ask.source.Table().Rows)
+		exported = manifestexport.New(*ask.own.manifest, file, ask.described,
+			ask.source.Table().Rows)
 		sinks = append(sinks, exported)
 	}
 	engine := corrupt.New(ask.described, mutatorRegistry{}, schemeRegistry{ask.from},

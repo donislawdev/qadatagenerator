@@ -12,18 +12,31 @@ repository once they are released.
 
 ### Added
 
-- **`--manifest gherkin` writes the manifest as an Examples table you paste
-  into a scenario.** Both `qadg generate` and `qadg corrupt` take it, and both
-  still write the canonical JSON beside it. One row per defect that was
-  applied, with the row number, the column, the mutator and what to expect, so
-  a scenario outline gets its cases without anybody writing assertions by hand.
-- Damage that was ordered and could not be applied has **no row** in that
-  table, because there is nothing in the dataset for a test to send. The file
-  says so in words and counts what it left out, and the JSON beside it carries
-  every one of those entries with its reason.
+- **`--manifest` writes the manifest in a form you can use directly.** Both
+  `qadg generate` and `qadg corrupt` take it, and both still write the
+  canonical JSON beside it. Three forms: `gherkin` gives an `Examples` table
+  you paste into a scenario outline, `csv` opens in a spreadsheet, and
+  `markdown` is a table for a bug report.
+- **The three carry different things, because different people open them.**
+  The Gherkin table has one row per defect that was applied, since a row there
+  tells a test what to send and there is nothing to send for damage that never
+  happened. The CSV has a row for **every** defect that was ordered, with
+  columns saying whether it happened and why not, because it is a review of the
+  whole run. The Markdown table shows what happened and counts the rest in a
+  sentence under it.
+- Whatever a form leaves out, it **counts** in the file itself, so a missing
+  entry is a statement rather than a gap. The JSON beside it always carries
+  every entry with its reason.
+- **The CSV will not run in your spreadsheet.** A column name from the file you
+  damaged can start with `=`, `+`, `-` or `@`, which a spreadsheet treats as a
+  formula rather than as text, so those are written to be shown instead. This
+  protects the first pass: spreadsheets commonly drop the guard when they save
+  the file and it is opened again, so read the JSON when the exact bytes matter.
+  The values a mutator produced are not in the CSV at all, only in the JSON.
 - The flag has **no default**. Without it you get the JSON manifest and nothing
-  else. Only `gherkin` is written today, and a form this build does not write
-  is refused before your file is read rather than after.
+  else. A form this build does not write, such as the parameterised cases for
+  pytest, JUnit and NUnit, is refused before your file is read rather than
+  after.
 
 - **`qadg corrupt` damages a file this tool did not make.** Point it at a comma
   separated file, name the layers to attack, and it writes the same records with
@@ -43,6 +56,10 @@ repository once they are released.
   value in it are different requests and there is no safe default.
 
 ### Fixed
+
+- **`--manifest` was missing from the help of both verbs that accept it.** It
+  was accepted, named in refusals and used in examples, and `qadg help corrupt`
+  never mentioned it, so the only way to find the flag was to already know it.
 
 - **A run that wrote the Examples table did not say it had written it.** Asking
   for the form wrote a third file, and every sentence naming what the run

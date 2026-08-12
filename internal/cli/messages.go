@@ -7,7 +7,20 @@ import (
 	"strings"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestexport"
 )
+
+// manifestFlagDoc is what --manifest does, for both verbs that write a
+// manifest.
+//
+// 🔴 The list of forms is read from the register rather than typed here. This
+// flag was accepted, refused with a list and named in two examples while being
+// absent from the help of both verbs, so the one thing worth guarding is that
+// the sentence describing it cannot fall behind what the build writes.
+var manifestFlagDoc = flagDoc{"--manifest <form>", []string{"--manifest"},
+	"Also write the manifest in this form beside the JSON one: " +
+		strings.Join(manifestexport.Forms(), ", ") +
+		". Without it only the JSON is written."}
 
 // This file holds every piece of text the command line shows a person. It is
 // the only file in the package allowed to contain one.
@@ -340,6 +353,7 @@ var commandDocs = []commandDoc{
 			{"--out <dir>", []string{"--out"}, "Write the dataset here rather than where the recipe says."},
 			{"--seed <text>", []string{"--seed"}, "Draw from this seed rather than the one in the recipe. The same seed gives the same data."},
 			{"--format <name>", []string{"--format"}, "Write csv or json rather than the format the recipe asks for."},
+			manifestFlagDoc,
 			{"--overwrite", []string{"--overwrite"}, "Write over files that are already there. Without it an existing file stops the run."},
 			{"--dry-run", []string{"--dry-run"}, "Say what would be produced and write nothing."},
 		},
@@ -361,6 +375,7 @@ var commandDocs = []commandDoc{
 			{"--per-row <how>", []string{"--per-row"}, "exactly_one or any, for how many defects one damaged row carries."},
 			{"--exclude-fields <list>", []string{"--exclude-fields"}, "Columns to leave alone, whatever the layers say."},
 			{"--locale <name>", []string{"--locale"}, "Which locale's damage is available. It does not decide what the columns hold, the values do."},
+			manifestFlagDoc,
 			{"--overwrite", []string{"--overwrite"}, "Write over files that are already there. Without it an existing file stops the run."},
 			{"--dry-run", []string{"--dry-run"}, "Say what was worked out and what would be damaged, and write nothing."},
 		},

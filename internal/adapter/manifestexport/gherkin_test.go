@@ -166,9 +166,46 @@ func TestOnlyTheFormsThisBuildWritesAreUsable(t *testing.T) {
 			t.Errorf("%q is a form this build lists and it was refused", form)
 		}
 	}
-	for _, form := range []string{"gherkin ", "GHERKIN", "json", "markdown", "csv"} {
+	// The canonical JSON is deliberately not a form to ask for, and the rest are
+	// near misses of forms that do exist. Matching is exact rather than folded,
+	// because a flag that quietly accepts a different spelling than it documents
+	// is one more thing whose behaviour has to be remembered rather than read.
+	for _, form := range []string{"gherkin ", "GHERKIN", "json", "Markdown", "csv,gherkin", "feature"} {
 		if manifestexport.Usable(form) {
 			t.Errorf("%q is not a form this build writes and it was accepted", form)
 		}
+	}
+}
+
+// Every form this build lists writes to a file of its own, and nothing else
+// does.
+//
+// 🔴 The registry is one table read by the flag that refuses an unknown form,
+// by the code that opens the file and by the sentences telling a person what
+// was written. A form present in the list and absent from the table would be
+// accepted by the flag and then written nowhere, so the two directions are
+// asserted rather than the list alone.
+func TestEveryFormHasItsOwnFileAndNothingElseDoes(t *testing.T) {
+	seen := map[string]string{}
+	for _, form := range manifestexport.Forms() {
+		name := manifestexport.FileFor(form)
+		if name == "" {
+			t.Errorf("%q is listed as a form and is written to no file", form)
+			continue
+		}
+		if other, taken := seen[name]; taken {
+			t.Errorf("%q and %q are both written to %s, so one overwrites the other",
+				form, other, name)
+		}
+		seen[name] = form
+		if made := manifestexport.New(form, &strings.Builder{}, described(t), 1); made == nil {
+			t.Errorf("%q is listed as a form and nothing starts it", form)
+		}
+	}
+	if name := manifestexport.FileFor(""); name != "" {
+		t.Errorf("asking for no export named the file %q", name)
+	}
+	if made := manifestexport.New("", &strings.Builder{}, described(t), 1); made != nil {
+		t.Error("asking for no export started one anyway")
 	}
 }

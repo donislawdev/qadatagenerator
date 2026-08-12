@@ -34,12 +34,6 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
-// GherkinName is the file the Gherkin form is written to.
-//
-// The extension is the one a Gherkin tool recognises, and the stem matches the
-// canonical manifest beside it so that the two are obviously one run's output.
-const GherkinName = "expectation-manifest.feature"
-
 // The column headings, in the order the specification maps them.
 var gherkinColumns = [4]string{"row", "field", "mutator", "expectation"}
 
@@ -212,46 +206,4 @@ func widestExpectation() int {
 		widest = max(widest, runeCount(string(written)))
 	}
 	return widest
-}
-
-// FormGherkin is what the flag is given to ask for the Gherkin table.
-const FormGherkin = "gherkin"
-
-// Forms are the shapes this build can export a manifest in, in the order a
-// message lists them.
-//
-// The list is here rather than in the surface that reads the flag, so that the
-// refusal and the renderer cannot disagree about what exists. The canonical
-// JSON is deliberately absent: it is always written and is not something to
-// ask for.
-func Forms() []string { return []string{FormGherkin} }
-
-// FileFor is the file a form is written to, empty when no export was asked for.
-//
-// It is here rather than at the surfaces that announce a run, because a run
-// says what it wrote in more than one place and those places must not disagree
-// about how many files there are. An export nobody names is a file the caller
-// asked for and has no confirmation of, which reads exactly like a form that
-// was never written.
-func FileFor(form string) string {
-	if form == FormGherkin {
-		return GherkinName
-	}
-	return ""
-}
-
-// Usable reports whether a form is one this build writes.
-//
-// The empty string is usable and means no export, which is the default. That is
-// the one answer a caller has to be able to give without naming anything.
-func Usable(form string) bool {
-	if form == "" {
-		return true
-	}
-	for _, known := range Forms() {
-		if form == known {
-			return true
-		}
-	}
-	return false
 }

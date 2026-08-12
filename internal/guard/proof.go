@@ -574,6 +574,30 @@ var Guards = []Guard{
 	// naming the export in every run would pass a search for the name and would
 	// promise a file most runs never write.
 	{"a run names the export it wrote and names it only then", "TestARunNamesTheExportItWroteAndOnlyThen", "internal/cli", ByMutation},
+	// 🔴 The three forms differ by who opens them, and that decides what each
+	// one carries. These guard the decisions rather than the rendering: the
+	// spreadsheet form is a review of the whole run and keeps what was not
+	// applied, the report form is about damage that happened and counts the
+	// rest in words.
+	{"every ordered entry has a row in the spreadsheet form", "TestEveryOrderedEntryHasARowAndSaysWhetherItHappened", "internal/adapter/manifestexport", ByMutation},
+	{"the report form shows what happened and counts the rest", "TestTheReportShowsWhatHappenedAndCountsTheRest", "internal/adapter/manifestexport", ByMutation},
+	// 🔴 The one injection class the catalog names as aimed at the file an
+	// application exports, arriving in the file this tool exports. A report
+	// that runs code when it is opened is our defect and not a property of the
+	// spreadsheet.
+	{"a value a spreadsheet would run is written so it shows", "TestAValueASpreadsheetWouldRunIsWrittenSoItShows", "internal/adapter/manifestexport", ByMutation},
+	{"a value a mutator produced never reaches the spreadsheet form", "TestTheValuesThemselvesAreNotInTheSpreadsheetForm", "internal/adapter/manifestexport", ByMutation},
+	// 🔴 The same class as the missing Examples keyword, one form along: without
+	// the rule the document renders as a paragraph, every renderer accepts it
+	// and what arrives in the report is unreadable.
+	{"the report form carries the rule that makes it render", "TestTheTableCarriesTheRuleThatMakesItRender", "internal/adapter/manifestexport", ByMutation},
+	{"a pipe in a column name does not add a column to the report", "TestAPipeInAColumnNameDoesNotAddAColumn", "internal/adapter/manifestexport", ByMutation},
+	{"every form this build lists writes to a file of its own", "TestEveryFormHasItsOwnFileAndNothingElseDoes", "internal/adapter/manifestexport", ByMutation},
+	// 🔴 The direction that was missing. Two tests already went from the
+	// documentation to the parser, and a flag in the parser and absent from the
+	// documentation satisfied both. That is how --manifest came to be accepted
+	// by two verbs while appearing in the help of neither.
+	{"every flag a verb accepts is one it documents", "TestEveryFlagAVerbAcceptsIsOneItDocuments", "internal/cli", ByMutation},
 
 	// 🔴 The second road of the same class, and the one that needed a guard
 	// rather than a repair. Thirteen messages across four schemes wrote a value

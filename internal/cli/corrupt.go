@@ -39,7 +39,7 @@ type damage struct {
 	// are peers while entries arrive, and they stay peers at the end: each one
 	// has a last line of its own, and an export left unclosed would be a file
 	// that stops mid table without saying so.
-	exported *manifestexport.Gherkin
+	exported manifestexport.Export
 	// form is the export that was asked for, empty for none. It is kept so that
 	// the summary can name the file rather than infer it from the handle.
 	form string
@@ -198,13 +198,13 @@ func withDamage(built recipe.Recipe, source values.Source, writer generate.Write
 	}
 	entries := manifestjson.New(file, version.Manifest)
 	sinks := corrupted.Tee{entries}
-	var exported *manifestexport.Gherkin
-	if exportForm == manifestexport.FormGherkin {
-		file, err := files.Create(manifestexport.GherkinName)
+	var exported manifestexport.Export
+	if name := manifestexport.FileFor(exportForm); name != "" {
+		file, err := files.Create(name)
 		if err != nil {
 			return nil, nil, err
 		}
-		exported = manifestexport.NewGherkin(file, described, widestCount(built))
+		exported = manifestexport.New(exportForm, file, described, widestCount(built))
 		sinks = append(sinks, exported)
 	}
 	engine := corrupt.New(described, mutatorRegistry{}, schemeRegistry{source},

@@ -291,6 +291,40 @@ Entries with `applied: false` are excluded from this export. There is nothing in
 
 The Gherkin and parameterised forms are what decide whether this format is useful at all. They close the gap between having corrupted data and still having to write the assertions by hand.
 
+### What each form carries, and why they differ
+
+The forms are not three arrangements of one table. They differ by who opens them, and that decides which entries belong in each.
+
+| Form | Entries | What closes it |
+|---|---|---|
+| Gherkin | applied only | a line counting what was left out |
+| Markdown | applied only | a sentence counting what was left out |
+| CSV | every ordered entry | nothing, because nothing is left out |
+
+A row in the Gherkin form is an instruction to a test, so an entry that was not applied has nothing for a test to send. The Markdown form is pasted into a report about damage that happened, where fifty rows saying nothing happened bury the seven that did. The CSV form is a review of the whole run, and a table showing only what succeeded reads as the whole account of it. In every case the entries left out of a form are counted in it, so that an omission is a statement rather than a gap.
+
+### CSV mapping
+
+| Column | Source |
+|---|---|
+| `row` | `location.row` |
+| `field` | `location.field` |
+| `mutator` | `mutator` |
+| `layer` | `layer` |
+| `expectation` | `expectation` |
+| `confidence` | `confidence` |
+| `applied` | `applied`, as `yes` or `no` |
+| `failure_kind` | `failure_kind`, empty when the damage was applied |
+| `failure_reason` | `failure_reason`, empty when the damage was applied |
+
+`value_before` and `value_after` are deliberately absent. They are in the JSON. They are also the one part of an entry that can be an attack payload rather than a description of one, and this form exists to be opened in a spreadsheet.
+
+A value opening with `=`, `+`, `-`, `@`, a tab or a carriage return is written with a leading apostrophe, because a spreadsheet would otherwise run it as a formula rather than show it. The value can be a column name out of the file being damaged, so it is whatever its author wrote. This protects the first pass only: a leading apostrophe is commonly dropped when a spreadsheet saves the file and it is opened again. Read the JSON when the exact bytes matter.
+
+### Markdown mapping
+
+The columns are those of the Gherkin form. The table carries a rule row under its heading, without which the lines render as a paragraph rather than as a table.
+
 ---
 
 ## Verification

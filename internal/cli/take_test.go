@@ -334,8 +334,12 @@ func TestEveryRefusalOfThisVerbIsCompleteAndMentionsNoRecipe(t *testing.T) {
 			[]string{commandCorrupt, "--layers", "L3", "--rows", "NaN%", source}},
 		// Asked before the file is opened, so that a typo in the form costs a
 		// refusal rather than a pass over a file the user chose the size of.
+		// The form named here is one the specification lists and this build does
+		// not write, which is the one somebody is most likely to try. A form
+		// nobody would ask for would test the refusal without testing the gap
+		// between what is specified and what is built.
 		{"a manifest form this build does not write",
-			[]string{commandCorrupt, "--layers", "L3", "--manifest", "markdown", source}},
+			[]string{commandCorrupt, "--layers", "L3", "--manifest", "junit", source}},
 		{"a per row setting nobody knows", []string{commandCorrupt, "--layers", "L3", "--per-row", "two", source}},
 		{"a delimiter of two characters", []string{commandCorrupt, "--layers", "L3", "--delimiter", "||", source}},
 		{"no file at all", []string{commandCorrupt, "--layers", "L3"}},

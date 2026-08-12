@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"flag"
 	"strings"
 	"testing"
 
@@ -643,5 +644,43 @@ func TestEveryFlagAVerbDocumentsIsOneItAccepts(t *testing.T) {
 					doc.name, refused.shown)
 			}
 		}
+	}
+}
+
+// 🔴 The other direction, which is the one that was missing.
+//
+// Two tests already went from the documentation to the parser, and a flag
+// present in the parser and absent from the documentation satisfied both of
+// them. That is what happened: --manifest was accepted by two verbs, listed in
+// their refusals and named in two examples, while appearing in the help of
+// neither. A register closed one way is a register that answers half the
+// question, and this project has paid for that shape more than once.
+func TestEveryFlagAVerbAcceptsIsOneItDocuments(t *testing.T) {
+	// The verbs that declare flags of their own. validate has none and takes
+	// only the cross cutting ones, which are documented in one place for every
+	// command and are covered by the test above.
+	declared := map[string]func(*flag.FlagSet){
+		commandGenerate: func(set *flag.FlagSet) { declareGenerate(set) },
+		commandCorrupt:  func(set *flag.FlagSet) { declareCorrupt(set) },
+	}
+	for _, doc := range commandDocs {
+		declare, has := declared[doc.name]
+		if !has {
+			continue
+		}
+		documented := map[string]bool{}
+		for _, flag := range append(append([]flagDoc{}, doc.flags...), crossCuttingFlagDocs...) {
+			for _, spelling := range flag.names {
+				documented[strings.TrimPrefix(spelling, "--")] = true
+			}
+		}
+		set := flag.NewFlagSet(doc.name, flag.ContinueOnError)
+		declare(set)
+		set.VisitAll(func(accepted *flag.Flag) {
+			if !documented[accepted.Name] {
+				t.Errorf("%s accepts --%s and its help never mentions it, so the only way "+
+					"to find the flag is to already know it", doc.name, accepted.Name)
+			}
+		})
 	}
 }

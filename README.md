@@ -39,7 +39,9 @@ Every corrupted dataset ships with a second file. It records where each defect i
 
 Without it, corrupted data is useless to an automated test, because the test has no way to know what to expect. This is why lists of hostile strings never made it into anyone's CI pipeline. They supply the input and leave out the answer.
 
-The manifest is written as JSON. It is meant to export as CSV, Markdown and as a Gherkin `Examples` table as well, so that an existing scenario can consume it without hand-written assertions, and those three are specified rather than built. This paragraph says which is which on purpose: a README that describes the plan in the present tense is the first place a project starts overstating itself.
+The manifest is written as JSON, and `--manifest` also writes it as a Gherkin `Examples` table, as CSV or as Markdown, so that an existing scenario can consume it without hand-written assertions. Parameterised cases for pytest, JUnit and NUnit are specified and not built. This paragraph says which is which on purpose: a README that describes the plan in the present tense is the first place a project starts overstating itself.
+
+The three forms differ by who opens them, and that decides what each one carries. The Gherkin table holds one row per defect that was applied, because a row there is an instruction to a test and there is nothing to send for damage that never happened. The CSV holds every ordered defect with a column saying whether it happened and why not, because it is a review of the whole run. The Markdown table holds what happened and counts the rest in a sentence under it.
 
 ### Reverse mutators
 
