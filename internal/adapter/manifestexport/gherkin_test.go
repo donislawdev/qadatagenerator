@@ -209,3 +209,33 @@ func TestEveryFormHasItsOwnFileAndNothingElseDoes(t *testing.T) {
 		t.Error("asking for no export started one anyway")
 	}
 }
+
+// 🔴 An entry a scenario cannot check is left out and counted, not written.
+//
+// What counts as a complaint is knowledge about one application rather than
+// about the data, so a row expecting one hands a test a case it has nothing to
+// assert against, and such a test goes green by not looking. Leaving it out
+// silently would be the same failure this form already refuses for damage that
+// never happened, so the count is stated.
+func TestAnEntryAScenarioCannotCheckIsLeftOutAndCounted(t *testing.T) {
+	var out strings.Builder
+	table := manifestexport.NewGherkin(&out, described(t), 3)
+	table.Add(applied(1, "pesel", "L3.checksum.off_by_one"))
+	marked := applied(2, "note", "L3.sentinel.placeholder_value")
+	marked.Expectation = catalog.Warning
+	table.Add(marked)
+	if err := table.Finish(); err != nil {
+		t.Fatal(err)
+	}
+
+	written := out.String()
+	if got := table.Written(); got != 1 {
+		t.Errorf("the table says it wrote %d rows, want 1", got)
+	}
+	if strings.Contains(written, "L3.sentinel.placeholder_value") {
+		t.Errorf("an entry a scenario cannot check was given a row:\n%s", written)
+	}
+	if !strings.Contains(written, "1 more were applied and are not here") {
+		t.Errorf("the file does not count what it left out for being uncheckable:\n%s", written)
+	}
+}

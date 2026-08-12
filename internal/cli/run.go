@@ -202,6 +202,8 @@ func runCommand(out *streams, command []string, asked invocation) int {
 		return runGenerate(out, command[1:], asked.global)
 	case commandCorrupt:
 		return runCorrupt(out, command[1:], asked.global)
+	case commandVerify:
+		return runVerify(out, command[1:], asked.global)
 	case commandHelp:
 		return runHelp(out, command[1:])
 	default:
@@ -588,18 +590,24 @@ func fail(out *streams, err error) int {
 // message already, and what to do next is decided by exactly these two things:
 // the kind of the failure, and whether this run was told what the data should
 // look like.
+// 🔴 The test is which verbs DO have a recipe, rather than which one does not.
+// The first version listed the single verb without one, and the next verb
+// without one inherited advice naming a file it has no idea about and a help
+// page for somebody else's command. Asking the other question means a verb
+// added tomorrow is right by default and only a verb that really reads a
+// recipe has to say so.
 func whatToDoAbout(kind fault.Kind, verb string) string {
-	fromAFile := verb == commandCorrupt
+	hasRecipe := verb == commandValidate || verb == commandGenerate
 	switch kind {
 	case fault.IO:
 		return doAboutIO
 	case fault.Config:
-		if fromAFile {
-			return doAboutConfigCorrupt
+		if !hasRecipe {
+			return doAboutConfigFlags + verb + doAboutConfigFlagsTail
 		}
 		return doAboutConfig
 	case fault.Data:
-		if fromAFile {
+		if !hasRecipe {
 			return doAboutDataCorrupt
 		}
 		return doAboutData

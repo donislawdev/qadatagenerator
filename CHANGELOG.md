@@ -12,6 +12,32 @@ repository once they are released.
 
 ### Added
 
+- **`qadg verify` compares a manifest against what your application actually
+  did.** Give it the manifest a run wrote and a record of how your system
+  reacted, and it reports where the two disagree. It is the only command that
+  fails because of your application rather than because of itself, and the only
+  one that returns exit code 4.
+- **Four kinds of disagreement, kept apart because they mean different things.**
+  A value taken that should have been refused is a hole in validation. A value
+  refused that should have been taken is validation blocking real users. A value
+  taken in silence where a complaint was expected is the third. Records your
+  system never reacted to at all are the fourth, and no check of one row against
+  one verdict finds those.
+- **A disagreement on a soft expectation is reported and does not fail the run.**
+  Soft means the right reaction depends on your rules rather than on the data,
+  so failing on one would be this tool asserting something it cannot know.
+- **`stored` tells a value that survived from one quietly changed.** A system
+  that takes a row, turns text into zero and cuts a long string to fit did not
+  accept your value, it accepted a different one, and no status code says so.
+  The field is optional, and when it is missing the report says which questions
+  it could not answer rather than reporting a clean result.
+- The format you produce is specified in `spec/application-response.md`. It is
+  the one format this tool only ever reads.
+- **Rows expecting a warning are no longer written to the Gherkin export.**
+  What counts as a complaint is knowledge about your application, so a scenario
+  had nothing to assert against such a row. They are counted in the file
+  instead, and the JSON manifest carries them as it always did.
+
 - **`qadg corrupt` now works out which of your columns go together, and damages
   that.** When a column of national identifiers agrees with a neighbouring
   column on the gender or the date it encodes, on every record, the run says so
@@ -86,8 +112,8 @@ repository once they are released.
 
 - **The README said the second pillar was a specification rather than a feature.**
   It has been one since the verb above landed, so the status paragraph now names
-  all four verbs and says plainly that this build implements a small part of the
-  corruption catalog.
+  every verb this build carries and says plainly that this build implements a
+  small part of the corruption catalog.
 - **The README promised manifest exports in the present tense.** JSON is written,
   and CSV, Markdown and the Gherkin table are specified rather than built. The
   paragraph now says which is which, because a README describing the plan in the

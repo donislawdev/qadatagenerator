@@ -43,6 +43,9 @@ type Gherkin struct {
 	err     error
 	written int
 	skipped int
+	// unassertable counts entries a scenario has nothing to check, which are
+	// applied and still left out.
+	unassertable int
 	// widths are the padding targets of the bounded columns, by the index of
 	// gherkinColumns. The name column has no target and is not in here.
 	widths [4]int
@@ -90,6 +93,16 @@ func (g *Gherkin) Add(defect manifest.Defect) {
 		g.skipped++
 		return
 	}
+	// 🔴 An entry expecting the application to take the value and complain has
+	// nothing a scenario can assert. What counts as a complaint is knowledge
+	// about one application rather than about the data, so a row here would
+	// hand a test a case it cannot check and the test would go green by not
+	// looking. Counted apart and stated, because leaving it out silently is the
+	// failure this form already refuses for damage that never happened.
+	if defect.Expectation == catalog.Warning {
+		g.unassertable++
+		return
+	}
 	g.written++
 	g.writeRow([4]string{
 		strconv.Itoa(defect.Location.Row),
@@ -111,6 +124,12 @@ func (g *Gherkin) Finish() error {
 		g.write("# No damage was applied in this run, so this table has no rows.\n")
 	}
 	g.write(fmt.Sprintf("# %d applied, %d ordered and not applied.\n", g.written, g.skipped))
+	if g.unassertable > 0 {
+		g.write(fmt.Sprintf("# %d more were applied and are not here, because they expect the "+
+			"application to take the value and say something about it, which is knowledge about "+
+			"one application rather than about the data. The canonical manifest carries them.\n",
+			g.unassertable))
+	}
 	return g.err
 }
 

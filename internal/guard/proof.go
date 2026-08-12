@@ -618,6 +618,21 @@ var Guards = []Guard{
 	// less than the run knew. Nothing compared the two until this did.
 	{"an inferred relation reaches the file with its basis", "TestAnInferredRelationReachesTheFileWithItsBasis", "internal/adapter/manifestjson", ByMutation},
 
+	// 🔴 The verb that reports on somebody else's application, and the only one
+	// that returns the expectation code. What it must never do is assert more
+	// than it was given: a soft disagreement belongs to the application's own
+	// rules, and a question the response record cannot answer is not a pass.
+	{"only a hard disagreement returns the expectation code", "TestOnlyAHardDisagreementReturnsTheExpectationCode", "internal/cli", ByMutation},
+	{"a soft disagreement is reported and does not fail the run", "TestASoftDisagreementIsReportedAndDoesNotFailTheRun", "internal/app/verify", ByMutation},
+	{"a question the record cannot answer is left unsettled", "TestAQuestionTheRecordCannotAnswerIsLeftUnsettled", "internal/app/verify", ByMutation},
+	// 🔴 Measured on a real engine: a row taken, text turned into zero and a
+	// string cut to the column width, with no error at all. A system holding
+	// something other than what it was sent took a different value.
+	{"a value quietly changed is told from one taken as sent", "TestAValueQuietlyChangedIsToldFromOneTakenAsSent", "internal/app/verify", ByMutation},
+	{"records nobody reacted to are counted from the dataset", "TestRecordsNobodyReactedToAreCountedFromTheDataset", "internal/app/verify", ByMutation},
+	{"looking and finding nothing is not the same as not looking", "TestLookingAndFindingNothingIsNotTheSameAsNotLooking", "internal/adapter/responsejson", ByMutation},
+	{"an entry a scenario cannot check is left out and counted", "TestAnEntryAScenarioCannotCheckIsLeftOutAndCounted", "internal/adapter/manifestexport", ByMutation},
+
 	// 🔴 The second road of the same class, and the one that needed a guard
 	// rather than a repair. Thirteen messages across four schemes wrote a value
 	// in with the quoting verb, so a fourteenth scheme would have written a

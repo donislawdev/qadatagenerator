@@ -86,6 +86,14 @@ const (
 	// beside a manifest saying what the damage was and what should happen to it.
 	commandCorrupt = "corrupt"
 
+	// commandVerify is the name as typed, and a public contract for the same
+	// reason as the three above it.
+	//
+	// 🔴 It is the only verb that reports on an application rather than on its
+	// own work, and the only one that returns the expectation code. That code
+	// has been in the table since the first day with nothing able to return it.
+	commandVerify = "verify"
+
 	// corruptedSuffix is what tells the damaged file from the one it came from.
 	//
 	// 🔴 It exists because this is the only verb that reads and writes in one
@@ -147,6 +155,18 @@ const (
 	problemGenerateArgumentsWhy     = "it reads a recipe and writes the dataset that recipe describes"
 	problemGenerateArgumentsAllowed = "one path to a recipe file"
 	problemGenerateArgumentsDo      = "qadg generate recipe.yaml"
+
+	problemVerifyArguments        = "verify takes a manifest and a response record"
+	problemVerifyArgumentsWhy     = "it compares what a run promised about a dataset against what an application actually did with it"
+	problemVerifyArgumentsAllowed = "two paths, the manifest first and the response record second"
+	problemVerifyArgumentsDo      = "qadg verify expectation-manifest.json response.json"
+
+	noteVerifyCompared = "compared "
+	noteVerifyEntries  = " entries against what the application did"
+	noteVerifyOneEntry = " entry against what the application did"
+	noteVerifyAgreed   = "the application did what the manifest said it should, for every entry compared"
+	noteVerifySoft     = " rest on rules belonging to your application rather than to the data, so they are reported and do not fail the run"
+	noteVerifyLimit    = "not settled here: "
 
 	problemCorruptArguments        = "corrupt takes one file"
 	problemCorruptArgumentsWhy     = "it reads a file of records and writes those records back with damage in them"
@@ -262,8 +282,9 @@ const (
 	// The same two, for the verb that has no recipe. A reader damaging a file
 	// somebody sent them has nothing to validate and nothing to rewrite, so the
 	// next move is in the flags they typed or in the file they were given.
-	doAboutConfigCorrupt = "check the flags of this command. qadg help corrupt lists them with what each one takes"
-	doAboutDataCorrupt   = "the file cannot be used as it stands, so change the file or the flags describing it"
+	doAboutConfigFlags     = "check the flags of this command. qadg help "
+	doAboutConfigFlagsTail = " lists them with what each one takes"
+	doAboutDataCorrupt     = "the file cannot be used as it stands, so change the file or the flags describing it"
 
 	problemHelpSubject        = "no command called "
 	problemHelpSubjectWhy     = "help describes a command this build has"
@@ -362,6 +383,16 @@ var commandDocs = []commandDoc{
 			{"--overwrite", []string{"--overwrite"}, "Write over files that are already there. Without it an existing file stops the run."},
 			{"--dry-run", []string{"--dry-run"}, "Say what would be produced and write nothing."},
 		},
+	},
+	{
+		name:      commandVerify,
+		summary:   "Compare a manifest against what your application did.",
+		arguments: "<manifest> <response>",
+		what: "Reads the manifest a run wrote and a record of what your application did with that\n" +
+			"data, and reports where the two disagree. It is the only command that fails because\n" +
+			"of your application rather than because of itself.",
+		example: "qadg verify expectation-manifest.json response.json",
+		flags:   []flagDoc{},
 	},
 	{
 		name:      commandCorrupt,

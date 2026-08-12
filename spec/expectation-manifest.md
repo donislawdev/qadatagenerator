@@ -302,6 +302,8 @@ The canonical form is JSON. Other forms are derived from it and carry no informa
 
 Entries with `applied: false` are excluded from this export. There is nothing in the dataset for a test to send.
 
+Entries whose expectation is `warning` are excluded as well, and for a different reason: what counts as a complaint is knowledge about one application rather than about the data, so a scenario has nothing to assert against such a row and would go green by not looking. Both exclusions are counted in the file, so that an omission is a statement rather than a gap.
+
 The Gherkin and parameterised forms are what decide whether this format is useful at all. They close the gap between having corrupted data and still having to write the assertions by hand.
 
 ### What each form carries, and why they differ
