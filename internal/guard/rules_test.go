@@ -146,9 +146,39 @@ func TestCommandLineBinaryNeverReachesTheWindow(t *testing.T) {
 	if !Has(pkgs, "cmd/qadg") {
 		t.Fatal("cmd/qadg is not in the graph, so this rule would check nothing")
 	}
+	// The other end needs the same treatment and did not have it until the
+	// window existed. While nothing lived under internal/gui this test passed
+	// by searching for a destination that was not there, which reads exactly
+	// like an isolation that holds.
+	if !anyPackageUnder(pkgs, ViewRoot) {
+		t.Fatalf("no package lives under %s, so this rule would check nothing", ViewRoot)
+	}
 	chain := Reach(pkgs, module, "cmd/qadg", "internal/gui")
 	if chain != nil {
 		t.Fatalf("cmd/qadg reaches internal/gui through %s", strings.Join(chain, " -> "))
+	}
+}
+
+// anyPackageUnder says whether the graph holds a package at or below prefix.
+//
+// Has answers about one exact path, and the window is a tree of packages
+// rather than a single one, so the two questions are not the same question.
+func anyPackageUnder(pkgs []Package, prefix string) bool {
+	for _, pkg := range pkgs {
+		if within(pkg.Path, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+func TestTheWindowIsPresentEnoughForTheIsolationToMeanSomething(t *testing.T) {
+	pkgs := []Package{{Path: "internal/gui/theme"}}
+	if !anyPackageUnder(pkgs, ViewRoot) {
+		t.Error("a package below the window counts as the window being there")
+	}
+	if anyPackageUnder([]Package{{Path: "internal/cli"}}, ViewRoot) {
+		t.Error("a package outside the window does not count as the window being there")
 	}
 }
 

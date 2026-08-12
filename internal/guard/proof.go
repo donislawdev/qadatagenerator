@@ -59,12 +59,15 @@ type Guard struct {
 // Raising it to make a run green is the same act as editing a golden value for
 // the same reason. Lowering it is ordinary work.
 //
-// It stands at one, and the one is honest rather than lazy: the rule that the
-// command line binary never reaches the window cannot be broken on purpose
-// while there is no window to reach. A mutation adding that import would not
-// compile, so it would report a broken tree instead of a caught fault. This
-// drops to nought on the day the graphical half exists.
-const UnprovenCeiling = 1
+// It stood at one until the window existed, and the reason was written here
+// rather than left to be rediscovered: the rule that the command line binary
+// never reaches the window could not be broken on purpose while there was no
+// window to reach, so a mutation adding that import reported a broken tree
+// instead of a caught fault. The condition for the return was stated as the
+// day the graphical half exists, that day came with the theme package, and
+// the mutation now compiles and is caught. This is what a condition for a
+// return is for.
+const UnprovenCeiling = 0
 
 // Guards is the register.
 //
@@ -86,7 +89,8 @@ var Guards = []Guard{
 	{"the scanner sees the base package depending on ours", "TestLayersCatchesTheBasePackageDependingOnUs", "internal/guard", ByProbe},
 	{"a package may be split into files without the rule noticing", "TestLayersAllowsAPackageToImportItsOwnSubpackage", "internal/guard", ByProbe},
 	{"an indirect import is found, not only a direct one", "TestReachFindsAnIndirectPath", "internal/guard", ByProbe},
-	{"the command line binary never pulls in the window", "TestCommandLineBinaryNeverReachesTheWindow", "internal/guard", Unproven},
+	{"the command line binary never pulls in the window", "TestCommandLineBinaryNeverReachesTheWindow", "internal/guard", ByMutation},
+	{"the window is present enough for that isolation to mean something", "TestTheWindowIsPresentEnoughForTheIsolationToMeanSomething", "internal/guard", ByProbe},
 	{"the guards themselves never ship inside the product", "TestGuardsShipWithNoBinary", "internal/guard", ByMutation},
 	{"the independent validators never ship inside the product", "TestTheIndependentValidatorsShipWithNoBinary", "internal/guard", ByMutation},
 	{"a test file importing a test only package is not a finding", "TestTestOnlyIgnoresTestFiles", "internal/guard", ByProbe},
@@ -111,6 +115,23 @@ var Guards = []Guard{
 	{"an allowance for a file that stopped using it is reported rather than left open", "TestSyscallAllowanceNeverNamesAFileThatDoesNotUseIt", "internal/guard", ByProbe},
 	{"a test may reach the system where the product may not", "TestSyscallScannerIgnoresTests", "internal/guard", ByProbe},
 	{"the scan actually reached the product", "TestTheSyscallScanReachesTheProduct", "internal/guard", ByProbe},
+
+	// --- the window, whose values may only live in one package --------------
+	//
+	// These stand before the first screen rather than after it. Written
+	// afterwards, the literal guard would have had to tolerate whatever that
+	// screen happened to do, and the tolerance would have looked like a rule.
+	// The first three are probes because the only package under the window
+	// today is the theme itself, which is the one place exempt, so there is no
+	// product code for a mutation to break yet.
+	{"the window takes every colour and every distance from the theme", "TestTheWindowTakesEveryValueFromTheTheme", "internal/guard", ByProbe},
+	{"the scanner sees a value the window wrote for itself", "TestTheLiteralGuardFiresOnTheViewAndNotOnTheTheme", "internal/guard", ByProbe},
+	{"a window that is gone is reported rather than read as clean", "TestTheLiteralGuardIsLoudWhenTheWindowIsGone", "internal/guard", ByProbe},
+	{"the theme is exempt by the list and not by its name", "TestTheThemeIsExemptByTheListAndNotByItsName", "internal/guard", ByProbe},
+	{"a spacing step survives the scaling factors a desktop applies", "TestEveryStepSurvivesTheCommonScalingFactors", "internal/gui/theme", ByMutation},
+	{"the scale never gives one distance two names", "TestEveryStepOfTheScaleIsUsedOnce", "internal/gui/theme", ByMutation},
+	{"a colour of the palette is never translucent, so its measured contrast is about what is shown", "TestEveryColourIsFullyOpaque", "internal/gui/theme", ByMutation},
+	{"the background is the reference of the measurement and never one of its subjects", "TestEveryNameInThePaletteIsUsedOnce", "internal/gui/theme", ByMutation},
 
 	// --- the register guarding the register ---------------------------------
 	{"a guard added here cannot stay out of the register", "TestEveryGuardInThisPackageIsRegistered", "internal/guard", ByMutation},
