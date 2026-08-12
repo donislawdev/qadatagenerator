@@ -569,6 +569,11 @@ var Guards = []Guard{
 	// by the number of rows, which is the amplification class arriving in a
 	// place nobody would look for it.
 	{"one enormous column name does not pad every other row", "TestOneEnormousColumnNameDoesNotPadEveryOtherRow", "internal/adapter/manifestexport", ByMutation},
+	// 🔴 A file written and not named is a silence, and this one was found by
+	// running the tool rather than by reading it. The guard closes both ways:
+	// naming the export in every run would pass a search for the name and would
+	// promise a file most runs never write.
+	{"a run names the export it wrote and names it only then", "TestARunNamesTheExportItWroteAndOnlyThen", "internal/cli", ByMutation},
 
 	// 🔴 The second road of the same class, and the one that needed a guard
 	// rather than a repair. Thirteen messages across four schemes wrote a value

@@ -195,7 +195,8 @@ func writeDamaged(out *streams, ask damageRequest) int {
 	}
 	committed = true
 
-	out.note(ask.written + " and " + manifestjson.Name + " written to " + *ask.own.out)
+	out.note(listOf(append([]string{ask.written}, manifestFiles(*ask.own.manifest)...)) +
+		" written to " + *ask.own.out)
 	for _, line := range broken.told.summary() {
 		out.note(line)
 	}
@@ -246,7 +247,8 @@ func buildDamage(ask damageRequest, files *store.Set) (*takenDamage, error) {
 		canDoWithoutRecipe(ask.shape, ask.from))
 	wrapped := corrupted.New(writer, engine, &selector, sinks, ask.shape)
 	return &takenDamage{
-		told:  damage{writer: wrapped, entries: entries, selector: &selector, exported: exported},
+		told: damage{writer: wrapped, entries: entries, selector: &selector,
+			exported: exported, form: *ask.own.manifest},
 		shape: ask.shape,
 	}, nil
 }
@@ -530,6 +532,7 @@ func sayWhatWouldHappen(out *streams, source *sourcecsv.File, own *takeFlags,
 	out.note(noteDryRunPolicy + kindsOfDamage(ordered) + " in " + *own.layers +
 		", and this build implements " + counted(implemented, "kind") + " of them. " +
 		noteDryRunEveryOrder)
-	out.note(noteDryRunWrites + source.Table().Entity + corruptedSuffix +
-		" and " + manifestjson.Name + " in " + *own.out)
+	out.note(noteDryRunWrites + listOf(append(
+		[]string{source.Table().Entity + corruptedSuffix}, manifestFiles(*own.manifest)...)) +
+		" in " + *own.out)
 }

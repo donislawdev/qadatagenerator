@@ -40,6 +40,37 @@ type damage struct {
 	// has a last line of its own, and an export left unclosed would be a file
 	// that stops mid table without saying so.
 	exported *manifestexport.Gherkin
+	// form is the export that was asked for, empty for none. It is kept so that
+	// the summary can name the file rather than infer it from the handle.
+	form string
+}
+
+// manifestFiles names the manifest files one run writes.
+//
+// 🔴 One function rather than a phrase repeated at each surface, because a run
+// says what it wrote in three places and a second form added to only two of
+// them would leave the third quietly announcing the wrong set of files.
+func manifestFiles(form string) []string {
+	if name := manifestexport.FileFor(form); name != "" {
+		return []string{manifestjson.Name, name}
+	}
+	return []string{manifestjson.Name}
+}
+
+// listOf writes names the way a sentence does.
+//
+// Two files joined by "and" read fine and three joined by two of them do not,
+// which is what a second export form would have produced at every surface that
+// announces a run.
+func listOf(names []string) string {
+	switch len(names) {
+	case 0:
+		return ""
+	case 1:
+		return names[0]
+	default:
+		return strings.Join(names[:len(names)-1], ", ") + " and " + names[len(names)-1]
+	}
 }
 
 // closeExport writes the last line of the export, if there is one.
@@ -60,7 +91,8 @@ func (d *damage) closeExport() error {
 // run that did almost nothing wrong.
 func (d *damage) summary() []string {
 	lines := []string{fmt.Sprintf("%s ordered, %d applied, manifest in %s",
-		counted(d.writer.Requested(), "defect"), d.writer.Applied(), manifestjson.Name)}
+		counted(d.writer.Requested(), "defect"), d.writer.Applied(),
+		listOf(manifestFiles(d.form)))}
 	if missing := d.writer.Requested() - d.writer.Applied(); missing > 0 {
 		lines = append(lines, fmt.Sprintf(
 			"%s could not be applied, and the manifest carries the reason for each one",
@@ -180,6 +212,7 @@ func withDamage(built recipe.Recipe, source values.Source, writer generate.Write
 	wrapped := corrupted.New(writer, engine, &selector, sinks, schema)
 	return wrapped, &damage{
 		writer: wrapped, entries: entries, selector: &selector, exported: exported,
+		form: exportForm,
 	}, nil
 }
 

@@ -44,6 +44,13 @@ repository once they are released.
 
 ### Fixed
 
+- **A run that wrote the Examples table did not say it had written it.** Asking
+  for the form wrote a third file, and every sentence naming what the run
+  produced listed two, so a mistyped output path looked exactly like a form that
+  was never written. The summary, the line naming what was written and the
+  `--dry-run` announcement now all name it, and none of them names it when you
+  did not ask for it.
+
 - **The README said the second pillar was a specification rather than a feature.**
   It has been one since the verb above landed, so the status paragraph now names
   all four verbs and says plainly that this build implements a small part of the

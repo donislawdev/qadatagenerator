@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestexport"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/provider/pl"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/provider/us"
@@ -261,6 +262,50 @@ func TestADryRunSaysWhatItWorkedOutAndWritesNothing(t *testing.T) {
 		if !strings.Contains(got.log, wanted) {
 			t.Errorf("a dry run did not say %q, and said %q", wanted, got.log)
 		}
+	}
+}
+
+// A run names every file it wrote, and an export is a file it wrote.
+//
+// 🔴 Both directions, and the second one is the reason this test is not a
+// search for a string. A build naming the export in every run passes a test
+// that only looks for the name, and it would be wrong in the commoner case:
+// most runs ask for no export and must not promise a file that is not there.
+//
+// The silence this closes was real and was found by running the tool rather
+// than by reading it. Asking for the Gherkin form wrote a third file, and every
+// sentence saying what the run produced listed two, so whoever asked for the
+// form had nothing telling them it arrived.
+func TestARunNamesTheExportItWroteAndOnlyThen(t *testing.T) {
+	source := somebodyElsesFile(t, 40)
+	for _, given := range []struct {
+		what  string
+		flags []string
+		named bool
+	}{
+		{"an export was asked for", []string{"--manifest", "gherkin"}, true},
+		{"no export was asked for", nil, false},
+		{"a dry run was asked for one", []string{"--manifest", "gherkin", "--dry-run"}, true},
+		{"a dry run was asked for none", []string{"--dry-run"}, false},
+	} {
+		t.Run(given.what, func(t *testing.T) {
+			asked := append([]string{commandCorrupt, "--out", t.TempDir(), "--layers", "L3"},
+				given.flags...)
+			got := run(append(asked, source)...)
+			if got.code != 0 {
+				t.Fatalf("the run ended with %d and said %q", got.code, got.log)
+			}
+			if named := strings.Contains(got.log, manifestexport.GherkinName); named != given.named {
+				t.Errorf("the run named %s: %t, and it should be %t. It said %q",
+					manifestexport.GherkinName, named, given.named, got.log)
+			}
+			// The canonical manifest is named whatever was asked for, because it
+			// is written whatever was asked for.
+			if !strings.Contains(got.log, manifestjson.Name) {
+				t.Errorf("the run did not name %s at all, and said %q",
+					manifestjson.Name, got.log)
+			}
+		})
 	}
 }
 

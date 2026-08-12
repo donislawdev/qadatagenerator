@@ -153,10 +153,23 @@ func (g *Gherkin) write(text string) {
 
 // escapeCell makes a value safe inside a table cell.
 //
-// A pipe would end the cell and a newline would end the row, so both are
-// written the way the Gherkin grammar spells them. The value is not shortened:
-// this file is data for a test rather than a message for a person, and a
-// truncated column name names a column that does not exist.
+// A pipe would end the cell and a newline would end the row. Those two and the
+// backslash are written the way the Gherkin grammar spells them, and a reader
+// gets the original value back: measured against the reference parser, \| comes
+// back as a pipe, \\ as a backslash and \n as a newline.
+//
+// 🔴 The carriage return is the exception and it is written here rather than
+// left to be discovered. The grammar has no escape for it, so \r reaches a
+// reader as those two characters instead of the character itself. That is the
+// better of two wrong answers and not a good one: a bare carriage return
+// survives in the middle of a cell and is silently dropped at the end of one,
+// which would hand a test a column name shorter than the column. A visible
+// substitution beats a quiet loss, and the limit is recorded as B-141 rather
+// than papered over. This is measured, not assumed.
+//
+// The value is not shortened: this file is data for a test rather than a
+// message for a person, and a truncated column name names a column that does
+// not exist.
 func escapeCell(value string) string {
 	replaced := strings.NewReplacer(
 		`\`, `\\`,
@@ -212,6 +225,20 @@ const FormGherkin = "gherkin"
 // JSON is deliberately absent: it is always written and is not something to
 // ask for.
 func Forms() []string { return []string{FormGherkin} }
+
+// FileFor is the file a form is written to, empty when no export was asked for.
+//
+// It is here rather than at the surfaces that announce a run, because a run
+// says what it wrote in more than one place and those places must not disagree
+// about how many files there are. An export nobody names is a file the caller
+// asked for and has no confirmation of, which reads exactly like a form that
+// was never written.
+func FileFor(form string) string {
+	if form == FormGherkin {
+		return GherkinName
+	}
+	return ""
+}
 
 // Usable reports whether a form is one this build writes.
 //
