@@ -41,9 +41,21 @@ type locationDocument struct {
 // finds both of them. An absent not_inferred would be the difference between a
 // report and an advertisement, and the model refuses one anyway.
 type inferenceDocument struct {
-	Method      string                   `json:"method"`
-	Columns     []inferredColumnDocument `json:"columns"`
-	NotInferred []string                 `json:"not_inferred"`
+	Method  string                   `json:"method"`
+	Columns []inferredColumnDocument `json:"columns"`
+	// Relations is left out when nothing was proved between columns, because
+	// an empty list and no list say the same thing here and the shorter one
+	// reads better. What is never left out is not_inferred, which says how far
+	// the looking went whether or not it found anything.
+	Relations   []inferredRelationDocument `json:"relations,omitempty"`
+	NotInferred []string                   `json:"not_inferred"`
+}
+
+type inferredRelationDocument struct {
+	Field string `json:"field"`
+	With  string `json:"with"`
+	Kind  string `json:"kind"`
+	Basis string `json:"basis"`
 }
 
 type inferredColumnDocument struct {
@@ -163,6 +175,12 @@ func inferenceOf(inferred *manifest.Inference) *inferenceDocument {
 		document.Columns = append(document.Columns, inferredColumnDocument{
 			Field: column.Field, Type: column.Type,
 			Scheme: column.Scheme, Basis: column.Basis,
+		})
+	}
+	for _, relation := range inferred.Relations {
+		document.Relations = append(document.Relations, inferredRelationDocument{
+			Field: relation.Field, With: relation.With,
+			Kind: relation.Kind, Basis: relation.Basis,
 		})
 	}
 	return document

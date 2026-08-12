@@ -12,6 +12,22 @@ repository once they are released.
 
 ### Added
 
+- **`qadg corrupt` now works out which of your columns go together, and damages
+  that.** When a column of national identifiers agrees with a neighbouring
+  column on the gender or the date it encodes, on every record, the run says so
+  and the two defects that contradict a neighbouring column start working on a
+  file with no recipe. Measured on a file of sixty records: eighteen defects
+  applied where there had been none.
+- **It does not need to know what your column is called or what its values
+  mean.** A column standing one for one against the encoded gender is tied to
+  the identifier whether it holds `M` and `F`, `K` and `M`, or two words in any
+  other language. What is checked is the mapping, not the vocabulary.
+- **The evidence is counted in how easily the agreement could have been a
+  coincidence, not in how many records there are.** A column agreeing with a
+  seven to one split of genders agrees by accident one time in four, so it is
+  refused. The run prints the count behind every relation it states, and the
+  manifest carries it.
+
 - **`--manifest` writes the manifest in a form you can use directly.** Both
   `qadg generate` and `qadg corrupt` take it, and both still write the
   canonical JSON beside it. Three forms: `gherkin` gives an `Examples` table

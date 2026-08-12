@@ -76,9 +76,11 @@ type Finding struct {
 
 // Schema is a shape worked out by looking, and the evidence for it.
 type Schema struct {
-	entity   string
-	fields   []recipe.FieldInfo
-	findings []Finding
+	entity    string
+	fields    []recipe.FieldInfo
+	findings  []Finding
+	relations []Relation
+	rules     []recipe.Rule
 }
 
 // Contract check, so that a mismatch fails to compile rather than at run time.
@@ -105,6 +107,23 @@ func From(table dataset.Table, samples []dataset.Sample, schemes []provider.Prov
 			Name: column, Type: finding.Type, Scheme: finding.Scheme,
 		})
 	}
+
+	// Relations come second because they are read off a column already known to
+	// carry a scheme. A scheme is proved by a value on its own, and an agreement
+	// needs two columns and the records they share, so the cheaper question is
+	// settled first and only its answers are asked the dearer one.
+	carriers := make(map[string]provider.Provider, len(selfChecking))
+	for _, scheme := range selfChecking {
+		carriers[scheme.ID()] = scheme
+	}
+	for _, finding := range built.findings {
+		if finding.Scheme == "" {
+			continue
+		}
+		built.relations = append(built.relations,
+			relationsOf(finding.Field, carriers[finding.Scheme], table.Columns, byName)...)
+	}
+	built.rules = rulesOf(built.relations)
 	return built
 }
 
@@ -217,8 +236,12 @@ func NotInferred() []string {
 		"uniqueness, because values that happen not to repeat were not declared unique",
 		"the set of allowed values of an enumerated column, which a file never carries",
 		"the primary key, and with it every defect about the identity of a record",
-		"relations between columns, so damage promising to contradict a neighbouring column " +
-			"has nothing to contradict",
+		// 🔴 Relations are read now, and the sentence has to say how far that
+		// goes rather than disappear. A reader who saw the old wording and now
+		// sees nothing would conclude that every relation is found, and the two
+		// that are found are the two a numbering scheme can prove on its own.
+		"relations between columns beyond the date and the gender a numbering scheme encodes, " +
+			"which are the only two a value can prove without being told",
 		"relations between tables, because one file is one table",
 		"numeric, date and postal column types, because a column of digits is not a column " +
 			"of numbers",
@@ -246,10 +269,24 @@ func (s Schema) FieldsOf(entity string) []recipe.FieldInfo {
 // to a record elsewhere.
 func (s Schema) ParentsOf(string) []recipe.ParentInfo { return nil }
 
-// RulesOf returns nothing: a rule binding two columns is a statement about what
-// the data is supposed to satisfy, and a file carries what it holds rather than
-// what it promised.
-func (s Schema) RulesOf(string) []recipe.Rule { return nil }
+// RulesOf returns the agreements the values themselves proved.
+//
+// 🔴 This is the one entry that came off the list of what a file cannot say,
+// and it came off because it is the one that can be measured. Every other
+// property a recipe declares is a statement about what the data is supposed to
+// satisfy, and no amount of looking at values settles it: values that happen
+// not to repeat were not declared unique. An agreement between two columns is
+// different in kind, because a disagreement would show. The bar it has to
+// clear is in Coincidences and it is the same bar the schemes answer to.
+func (s Schema) RulesOf(entity string) []recipe.Rule {
+	if entity != s.entity {
+		return nil
+	}
+	return s.rules
+}
+
+// Relations is what was proved between columns, for the manifest.
+func (s Schema) Relations() []Relation { return s.relations }
 
 // PrimaryKeyOf returns nothing: a column whose values happen not to repeat in
 // this file was not declared to identify a record.

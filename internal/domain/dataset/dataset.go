@@ -79,6 +79,16 @@ type Sample struct {
 	// Values are the non-empty values that were kept, in the order they
 	// appeared.
 	Values []string
+	// Rows is the record each kept value came from, counting the first record
+	// after the header as one. It is the same length as Values.
+	//
+	// 🔴 Without it two samples cannot be read side by side, and reading them
+	// side by side while believing otherwise is worse than not reading them at
+	// all. Empty cells are dropped rather than kept, so the third value of one
+	// column and the third of another come from the same record only when
+	// neither column has a gap above them. Anything comparing two columns has
+	// to line them up by record, and this is what lets it.
+	Rows []int
 	// NonEmpty and Empty count the whole column rather than the sample.
 	//
 	// An empty cell is counted apart rather than kept, because it is evidence

@@ -242,6 +242,14 @@ type Inference struct {
 	Method string
 	// Columns is what was decided about each column, in column order.
 	Columns []InferredColumn
+	// Relations is what was proved to hold between two columns, empty when
+	// nothing was.
+	//
+	// Separate from the columns rather than folded into them, because a
+	// relation is a statement about a pair and belongs to neither half of it.
+	// Damage that contradicts a neighbouring column rests on exactly these, so
+	// a reader doubting such an entry reads the basis here.
+	Relations []InferredRelation
 	// NotInferred names the properties this way of looking never reads.
 	//
 	// It is required rather than optional, and the model refuses an inference
@@ -266,6 +274,21 @@ type InferredColumn struct {
 	// about. "Nothing recognised these values" is an answer, and a column with
 	// no entry at all would leave the reader unable to tell a column that was
 	// examined from one that was overlooked.
+	Basis string
+}
+
+// InferredRelation is one agreement between two columns and the evidence for it.
+type InferredRelation struct {
+	// Field is the column carrying the numbering scheme and With is the column
+	// it agrees with. The direction is the one a mutator works in: it rebuilds
+	// the identifier and leaves it contradicting the neighbour.
+	Field string
+	With  string
+	// Kind is what agrees, such as the date or the gender the scheme encodes.
+	Kind string
+	// Basis is the evidence, as a sentence a person reads. Required for the
+	// same reason a column basis is: a relation stated without one is this
+	// tool asking to be trusted about somebody else's data.
 	Basis string
 }
 

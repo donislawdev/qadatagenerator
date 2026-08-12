@@ -599,6 +599,25 @@ var Guards = []Guard{
 	// by two verbs while appearing in the help of neither.
 	{"every flag a verb accepts is one it documents", "TestEveryFlagAVerbAcceptsIsOneItDocuments", "internal/cli", ByMutation},
 
+	// 🔴 The one property that came off the list of what a file cannot say,
+	// and it came off because it is the one that can be measured. What a
+	// gender column looks like in somebody else's file cannot be known, so
+	// what is proved is the mapping rather than the vocabulary. The threshold
+	// is the same bar the schemes answer to and it is counted in ways of being
+	// dealt out rather than in records, because a split of seven to one agrees
+	// by accident one time in four.
+	{"a column standing for the encoded gender is tied to it", "TestAColumnStandingForTheEncodedGenderIsTiedToIt", "internal/adapter/infer", ByMutation},
+	{"an agreement worth nothing is refused", "TestAnAgreementWorthNothingIsRefused", "internal/adapter/infer", ByMutation},
+	// 🔴 Empty cells are dropped when a column is sampled, so two columns line
+	// up by position only when neither has a gap. Reading them by position
+	// compares one person's identifier against another person's gender and
+	// calls the disagreement evidence.
+	{"two columns are lined up by record and not by position", "TestColumnsAreLinedUpByRecordAndNotByPosition", "internal/adapter/infer", ByMutation},
+	// 🔴 The model gained a member and the writer kept its own document
+	// type, so both halves were correct on their own while the file said
+	// less than the run knew. Nothing compared the two until this did.
+	{"an inferred relation reaches the file with its basis", "TestAnInferredRelationReachesTheFileWithItsBasis", "internal/adapter/manifestjson", ByMutation},
+
 	// 🔴 The second road of the same class, and the one that needed a guard
 	// rather than a repair. Thirteen messages across four schemes wrote a value
 	// in with the quoting verb, so a fourteenth scheme would have written a

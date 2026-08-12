@@ -65,6 +65,10 @@ A run that damages a file it did not produce has nothing declaring what the colu
     { "field": "note", "type": "string",
       "basis": "no numbering scheme this build carries accepted 40 values of this column" }
   ],
+  "relations": [
+    { "field": "pesel", "with": "sex", "kind": "gender",
+      "basis": "every one of 60 records holding both columns has the gender encoded in pesel standing for the same value of sex, and the values could have been dealt out more than a hundred million ways" }
+  ],
   "not_inferred": [
     "maximum length, because the longest value in a file is not a declared limit"
   ]
@@ -79,11 +83,20 @@ A run that damages a file it did not produce has nothing declaring what the colu
 | `columns[].type` | yes | what it was taken to hold |
 | `columns[].numbering_scheme` | no | the scheme it was taken to follow, absent when none was confirmed |
 | `columns[].basis` | yes | the evidence, as a sentence a person reads |
+| `relations` | no | agreements proved between two columns, absent when none was |
+| `relations[].field` | yes | the column carrying the numbering scheme |
+| `relations[].with` | yes | the column it agrees with |
+| `relations[].kind` | yes | what agrees, such as the date or the gender the scheme encodes |
+| `relations[].basis` | yes | the evidence, as a sentence a person reads |
 | `not_inferred` | yes | the properties this way of looking never reads out of a file |
 
 **Every column gets an entry, including the ones nothing was concluded about.** A column with no entry would leave a reader unable to tell one that was examined from one that was overlooked, and the columns nothing was recognised in are exactly the ones where ordered damage had nothing to work with.
 
 **`basis` is a sentence rather than a pair of counts.** Its reader is a person deciding whether the tool guessed right about their data. A reader handed `{"tested": 40, "passed": 40}` has to already know how much forty is worth.
+
+🔴 **A relation is the one thing a file can be made to prove about how two columns go together, and it is proved by counting rather than by recognising.** What a gender column looks like in somebody else's file cannot be known, since its values may be M and F, or K and M, or two words in any language. So a relation is not found by reading the values but by asking whether they stand one for one against what the numbering scheme encodes, on every record that carries both columns.
+
+The bar is the same one a numbering scheme answers to, and it is counted in the ways the values could have been dealt out across the records rather than in the number of records. That distinction decides the member: a column agreeing with a gender split of seven to one has eight ways of lining up and agrees by accident one time in four, while the same eight records split evenly have seventy. A producer stating relations on a count of records is stating them on the thinnest evidence in the file.
 
 🔴 **`not_inferred` is required, and a producer that omits it is not writing this format.** A report listing what it recognised and stopping reads as a complete account of the file. The whole point of this member is that a guess about somebody else's data must be arguable by the person whose data it is, and they cannot argue with a limit nobody stated.
 

@@ -211,7 +211,7 @@ func (f *File) survey() error {
 			return f.readFailure(err)
 		}
 		rows++
-		f.gather(fields)
+		f.gather(fields, rows)
 	}
 	f.table.Rows = rows
 	if rows == 0 {
@@ -222,7 +222,11 @@ func (f *File) survey() error {
 }
 
 // gather records one row into the samples.
-func (f *File) gather(fields []string) {
+//
+// The record number travels with the value, because a column with a gap in it
+// keeps fewer values than the rows above it and anything reading two columns
+// side by side would otherwise compare one record against another.
+func (f *File) gather(fields []string, row int) {
 	for at := range f.samples {
 		if at >= len(fields) {
 			continue
@@ -235,6 +239,7 @@ func (f *File) gather(fields []string) {
 		f.samples[at].NonEmpty++
 		if len(f.samples[at].Values) < SampleCap {
 			f.samples[at].Values = append(f.samples[at].Values, value)
+			f.samples[at].Rows = append(f.samples[at].Rows, row)
 		}
 	}
 }

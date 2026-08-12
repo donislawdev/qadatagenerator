@@ -203,7 +203,12 @@ const (
 
 	// What a run says about the guesses it had to make. They go on the log
 	// channel for the person watching, and into the manifest for good.
-	noteNotInferred = "maximum length, required columns, uniqueness and relations between columns are not read from a file, so damage needing any of them is recorded as not applied with the reason. The manifest lists all of them"
+	// 🔴 This sentence used to name the properties one by one, and it was a
+	// second copy of a list that lives in the code that decides them. The day
+	// relations came off that list, the copy went on saying they were not read
+	// and nothing could have caught it. It now points at the list instead of
+	// repeating it.
+	noteNotInferred = "what this mode does not read out of a file is listed in the manifest, and damage needing any of it is recorded as not applied with the reason"
 	// 🔴 Everything a run changes without being asked to belongs here rather
 	// than in the manifest, where every entry is something somebody ordered.
 	// The blank line half was measured while writing the test: a line with

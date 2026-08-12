@@ -84,9 +84,35 @@ func (i *Inference) problems() []string {
 					"argue with", column.Field))
 		}
 	}
+	problems = append(problems, i.relationProblems()...)
 	if len(i.NotInferred) == 0 {
 		problems = append(problems, "the envelope infers a schema without saying what it does "+
 			"not infer, which would read as a complete account of the file")
+	}
+	return problems
+}
+
+// relationProblems holds a relation to the same rule as a column.
+//
+// A relation is what damage contradicting a neighbouring column rests on, so a
+// relation stated without evidence is this tool asking to be trusted about
+// somebody else's data. Both columns are named for the same reason: an
+// agreement with nothing on one side of it is not an agreement.
+func (i *Inference) relationProblems() []string {
+	var problems []string
+	for _, relation := range i.Relations {
+		switch {
+		case strings.TrimSpace(relation.Field) == "" || strings.TrimSpace(relation.With) == "":
+			problems = append(problems, "an inferred relation does not name both of the columns "+
+				"it holds between")
+		case strings.TrimSpace(relation.Kind) == "":
+			problems = append(problems, fmt.Sprintf(
+				"the relation between %s and %s does not say what agrees", relation.Field, relation.With))
+		case strings.TrimSpace(relation.Basis) == "":
+			problems = append(problems, fmt.Sprintf(
+				"the relation between %s and %s carries no basis, so it is a conclusion nobody "+
+					"can argue with", relation.Field, relation.With))
+		}
 	}
 	return problems
 }

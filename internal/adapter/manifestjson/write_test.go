@@ -158,3 +158,55 @@ func TestTheEnvelopeCarriesTheCountsItWasGiven(t *testing.T) {
 			document.Run.Requested, document.Run.Applied)
 	}
 }
+
+// 🔴 Every part of an inference the model carries reaches the file.
+//
+// This is a guard against a shape that has bitten twice: the model gains a
+// member, the writer keeps its own document type, and both halves are correct
+// on their own while the file quietly says less than the run knew. It happened
+// here with relations, which the envelope carried and the document dropped, and
+// nothing failed because nothing compared the two.
+//
+// The relation is what damage contradicting a neighbouring column stands on, so
+// a manifest missing it asks the reader to take that damage on trust.
+func TestAnInferredRelationReachesTheFileWithItsBasis(t *testing.T) {
+	var buffer bytes.Buffer
+	writer := manifestjson.New(&buffer, "0.1")
+	envelope := anEnvelope()
+	envelope.Inference = &manifest.Inference{
+		Method:  "values-validated",
+		Columns: []manifest.InferredColumn{{Field: "pesel", Type: "identifier", Basis: "every value"}},
+		Relations: []manifest.InferredRelation{
+			{Field: "pesel", With: "sex", Kind: "gender", Basis: "every record agrees"},
+		},
+		NotInferred: []string{"maximum length"},
+	}
+	writer.Add(anEntry("one"))
+	if err := writer.Finish(envelope, 1, 1); err != nil {
+		t.Fatalf("the manifest did not close: %v", err)
+	}
+
+	var document struct {
+		Run struct {
+			Inference struct {
+				Relations []struct {
+					Field, With, Kind, Basis string
+				} `json:"relations"`
+			} `json:"schema_inference"`
+		} `json:"run"`
+	}
+	if err := json.Unmarshal(buffer.Bytes(), &document); err != nil {
+		t.Fatalf("the document does not parse: %v", err)
+	}
+	written := document.Run.Inference.Relations
+	if len(written) != 1 {
+		t.Fatalf("the run proved one relation and the file carries %d:\n%s",
+			len(written), buffer.String())
+	}
+	if written[0].Field != "pesel" || written[0].With != "sex" {
+		t.Errorf("the relation names %s and %s", written[0].Field, written[0].With)
+	}
+	if written[0].Kind == "" || written[0].Basis == "" {
+		t.Errorf("the relation reached the file without saying what agrees or why: %+v", written[0])
+	}
+}

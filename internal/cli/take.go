@@ -314,6 +314,12 @@ func inferenceRecord(shape infer.Schema) *manifest.Inference {
 			Scheme: finding.Scheme, Basis: finding.Basis,
 		})
 	}
+	for _, relation := range shape.Relations() {
+		record.Relations = append(record.Relations, manifest.InferredRelation{
+			Field: relation.Field, With: relation.With,
+			Kind: string(relation.Kind), Basis: relation.Basis,
+		})
+	}
 	return record
 }
 
@@ -499,6 +505,14 @@ func sayWhatWasWorkedOut(out *streams, source *sourcecsv.File, shape infer.Schem
 	for _, finding := range shape.Findings() {
 		out.detail(finding.Field + " taken for " + describeFinding(finding) + ", because " +
 			finding.Basis)
+	}
+	// A relation is what damage contradicting a neighbouring column stands on,
+	// so it is said here beside the columns rather than left to the manifest.
+	// Somebody watching a run decide things about their file is the reader most
+	// able to say that a relation is wrong.
+	for _, relation := range shape.Relations() {
+		out.detail(relation.Field + " taken to agree with " + relation.With + " on " +
+			string(relation.Kind) + ", because " + relation.Basis)
 	}
 	if source.HadByteOrderMark() {
 		out.warn(noteByteOrderMark)

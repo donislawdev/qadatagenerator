@@ -45,9 +45,20 @@ func tableOf(columns ...string) dataset.Table {
 	return dataset.Table{Entity: "records", Columns: columns, Rows: 40}
 }
 
-// sampleOf builds what the reader would have gathered from a column.
+// sampleOf builds what the reader would have gathered from a column with no
+// gaps in it, so the values sit on records one upwards.
 func sampleOf(field string, values []string) dataset.Sample {
-	return dataset.Sample{Field: field, Values: values, NonEmpty: len(values)}
+	rows := make([]int, len(values))
+	for at := range values {
+		rows[at] = at + 1
+	}
+	return dataset.Sample{Field: field, Values: values, NonEmpty: len(values), Rows: rows}
+}
+
+// sampleAtRows builds what the reader would have gathered from a column with
+// gaps in it, naming the record each value came from.
+func sampleAtRows(field string, values []string, rows []int) dataset.Sample {
+	return dataset.Sample{Field: field, Values: values, NonEmpty: len(values), Rows: rows}
 }
 
 func findingFor(t *testing.T, shape infer.Schema, field string) infer.Finding {
