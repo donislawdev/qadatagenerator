@@ -66,6 +66,52 @@ func noteAbout(plan generate.Plan, field string) (generate.Note, bool) {
 	return generate.Note{}, false
 }
 
+// Two tables that fit one at a time do not have to fit together.
+//
+// 🔴 Measured on 2026-08-13 with the real binary: two entities of 9223372036854775807
+// rows each ended with exit code nought and a summary line reading minus two
+// rows written. The reader refuses a single count larger than this build can
+// hold, so each of them was accepted on its own and the sum wrapped one entity
+// later. The guard protected a field where the rule was about the arithmetic.
+func TestRowsThatDoNotAddUpToACountableTotalAreRefused(t *testing.T) {
+	const most = int(^uint(0) >> 1)
+	values := knownValues{generators: []string{"first_name"}}
+	field := recipe.Field{Name: "first_name", Generator: "first_name"}
+
+	twice := func(count int) recipe.Recipe {
+		return recipe.Recipe{
+			Seed: "plan", Locale: "pl-PL",
+			Entities: []recipe.Entity{
+				{Name: "a", Count: count, HasCount: true, Fields: []recipe.Field{field}},
+				{Name: "b", Count: count, HasCount: true, Fields: []recipe.Field{field}},
+			},
+		}
+	}
+
+	if _, err := generate.Prepare(twice(most), values); err == nil {
+		t.Error("two tables of the largest countable size were accepted together")
+	} else if !strings.Contains(err.Error(), "add up to more than") {
+		t.Errorf("the refusal does not say the total is what went wrong: %v", err)
+	}
+
+	// Half of the range each is the case that wrapped all the way round to the
+	// most negative number rather than to a small one, so it is the case where
+	// a check on the sign alone would have looked right.
+	if _, err := generate.Prepare(twice(most/2+1), values); err == nil {
+		t.Error("two tables of half the countable range each were accepted together")
+	}
+
+	// The refusal is about the total and must not start refusing ordinary
+	// recipes, which is the failure mode of a ceiling put in the wrong place.
+	plan, err := generate.Prepare(twice(3), values)
+	if err != nil {
+		t.Fatalf("an ordinary recipe was refused: %v", err)
+	}
+	if plan.TotalRows() != 6 {
+		t.Errorf("the plan counts %d rows for two tables of three", plan.TotalRows())
+	}
+}
+
 // A column this build will leave empty is named in the plan.
 //
 // 🔴 This is the silence found on 2026-08-10 while planning the second pillar.

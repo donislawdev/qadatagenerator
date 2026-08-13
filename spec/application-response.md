@@ -78,3 +78,13 @@ Mismatches on entries whose expectation is **soft** are reported and do not, on 
 ## Producing the file
 
 The shortest honest version is one entry per row with a verdict, which every import loop already knows. Add `stored` when you can read back what landed, and `warnings` when your application has them. Each field you add widens what the comparison can tell you, and the report always says which questions it could not answer with what it was given.
+
+## Versioning and compatibility
+
+`spec_version` is required, and a reader is expected to act on what it says rather than only on whether it is there.
+
+- The format evolves by **adding** fields. The meaning of an existing field never changes.
+- **A reader ignores fields it does not know**, so that a record from a newer producer stays readable.
+- **An unknown MINOR version is read, and the reader says it did.** Whatever the newer version added is invisible to an older reader, and a comparison that did not mention this would be reporting on evidence it only partly understands.
+- 🔴 **An unknown MAJOR version is refused.** A major version is the one where the meaning of an existing field changes. Reading this file is how a tool decides whether an application behaved correctly, so a verdict drawn from a record the reader cannot claim to understand is worse than no verdict.
+- A reader that refuses a version says which one it speaks, because otherwise the producer cannot act on the refusal.

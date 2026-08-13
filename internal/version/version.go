@@ -36,6 +36,15 @@ const Manifest = "0.1"
 // link gets wired instead of being discovered later.
 const Recipe = "0.1"
 
+// Response is the version of the application response format this build reads.
+//
+// It is the one format this tool only ever reads, so this constant is not part
+// of Set: Set answers what this binary produces, and adding a member to it
+// changes what every pipeline parses out of --version. The number is still
+// needed here, because a reader that refuses a version it does not know has to
+// know which one it does.
+const Response = "0.1"
+
 // Set is the whole answer to the question of what this binary speaks.
 //
 // The JSON names are what a pipeline parses, so they are part of the surface

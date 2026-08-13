@@ -368,3 +368,5 @@ A question the response record does not carry the evidence to answer is neither 
 - **Consumers must ignore unknown fields** rather than failing on them, so that a manifest from a newer producer stays readable.
 - A consumer that meets an unknown mutator identifier reports it as unknown instead of guessing.
 - A tool must be able to read an older manifest and say what is missing from it.
+- **An unknown MINOR version is read, and the reader says it did.** The rule above is about growth by adding, and a minor version is what adding produces. What the newer version added is invisible to an older reader by definition, so reading such a manifest in silence would report on evidence only partly understood.
+- 🔴 **An unknown MAJOR version is refused.** A major version is the one where the meaning of an existing field changes, so a reader meeting one cannot know what it is holding. This matters most where a manifest is read to judge an application: a verdict drawn from a document the reader cannot claim to understand is worse than no verdict, because it will be believed.

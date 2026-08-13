@@ -122,7 +122,7 @@ func generateFrom(out *streams, path string, own *generateFlags, flags crossCutt
 	}
 
 	if *own.dryRun {
-		writePlan(out, plan, applied, flags)
+		writePlan(out, plan, applied, flags, true)
 		for _, line := range plannedDamage(built) {
 			out.note(line)
 		}
@@ -137,7 +137,7 @@ func generateFrom(out *streams, path string, own *generateFlags, flags crossCutt
 	if err != nil {
 		return fail(out, err)
 	}
-	writePlan(out, plan, applied, flags)
+	writePlan(out, plan, applied, flags, false)
 	// What the damage did goes after the counts of what was produced, because
 	// it is a statement about the same files and reads as one continuous answer.
 	for _, line := range told {
@@ -377,7 +377,11 @@ func counted(number int, word string) string {
 // The counts go on the log channel and not on the data channel, because they
 // describe the dataset rather than being part of it. A pipeline that wants them
 // as a document asks with the machine readable flag.
-func writePlan(out *streams, plan generate.Plan, applied []override, flags crossCutting) {
+//
+// trial says the run wrote nothing, and it changes the last word of the summary
+// rather than the counts. A trial run saying rows written is a sentence that
+// sends somebody looking for files nobody wrote.
+func writePlan(out *streams, plan generate.Plan, applied []override, flags crossCutting, trial bool) {
 	if *flags.json {
 		writeJSONPlan(out, plan, applied)
 		return
@@ -393,8 +397,12 @@ func writePlan(out *streams, plan generate.Plan, applied []override, flags cross
 		out.detail(planned.Entity + ": " + counted(planned.Rows, "row") + ", " +
 			counted(len(planned.Columns), "column"))
 	}
-	out.note(strconv.Itoa(len(plan.Entities)) + summaryTables +
-		strconv.Itoa(plan.TotalRows()) + summaryRows)
+	ending := summaryWritten
+	if trial {
+		ending = summaryPlanned
+	}
+	out.note(counted(len(plan.Entities), "table") + ", " +
+		counted(plan.TotalRows(), "row") + ending)
 }
 
 type jsonPlan struct {

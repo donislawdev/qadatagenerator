@@ -10,6 +10,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
+	"github.com/donislawdev/qadatagenerator/internal/version"
 )
 
 // MaxSize is how large a manifest this build reads back.
@@ -51,18 +52,25 @@ func Load(path string) (manifest.Manifest, error) {
 
 	var read manifestDocument
 	if err := json.Unmarshal(raw, &read); err != nil {
-		return manifest.Manifest{}, fault.Wrap(fault.Data, err, path+
+		return manifest.Manifest{}, fault.Wrap(fault.Config, err, path+
 			" is not a manifest this build can read. It has to be the JSON manifest a run wrote, "+
 			"rather than one of the forms exported beside it")
 	}
 	if len(read.Defects) == 0 && read.SpecVersion == "" {
-		return manifest.Manifest{}, fault.New(fault.Data, path+
+		return manifest.Manifest{}, fault.New(fault.Config, path+
 			" carries neither a spec version nor a single entry, so it is not a manifest")
 	}
 	built, problems := asManifest(read)
 	if len(problems) > 0 {
-		return manifest.Manifest{}, fault.New(fault.Data, path+
+		return manifest.Manifest{}, fault.New(fault.Config, path+
 			" is a manifest this build would not have written: "+strings.Join(problems, ". "))
+	}
+	if version.Compatibility(version.Manifest, built.SpecVersion()) == version.Unreadable {
+		return manifest.Manifest{}, fault.New(fault.Config, path+" is written to version "+
+			fault.Shorten(built.SpecVersion())+" of the manifest format, and this build speaks "+
+			version.Manifest+". A different major version is one where what a field means has "+
+			"changed, so reading it here would be guesswork. Use a build that speaks it, or "+
+			"produce the manifest again with this one")
 	}
 	return built, nil
 }

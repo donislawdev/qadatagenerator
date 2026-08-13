@@ -16,6 +16,7 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/response"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
+	"github.com/donislawdev/qadatagenerator/internal/version"
 )
 
 // MaxSize is how large a response record this build reads.
@@ -82,19 +83,27 @@ func read(from io.Reader, path string) (response.Record, error) {
 	// the producer believes they supplied.
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&read); err != nil {
-		return response.Record{}, fault.Wrap(fault.Data, err, path+
+		return response.Record{}, fault.Wrap(fault.Config, err, path+
 			" is not a response record this build can read. See spec/application-response.md "+
 			"for the shape, and check the member names")
 	}
 	if err := trailing(decoder); err != nil {
-		return response.Record{}, fault.Wrap(fault.Data, err, path+
+		return response.Record{}, fault.Wrap(fault.Config, err, path+
 			" carries more than one document, and a run is one record")
 	}
 
 	built := asRecord(read)
 	if problems := built.Problems(); len(problems) > 0 {
-		return response.Record{}, fault.New(fault.Data, path+" cannot be compared: "+
+		return response.Record{}, fault.New(fault.Config, path+" cannot be compared: "+
 			strings.Join(problems, ". "))
+	}
+	if version.Compatibility(version.Response, built.SpecVersion) == version.Unreadable {
+		return response.Record{}, fault.New(fault.Config, path+" is written to version "+
+			fault.Shorten(built.SpecVersion)+" of the response format, and this build speaks "+
+			version.Response+". A different major version is one where what a field means has "+
+			"changed, so a comparison against it would be a verdict on your application drawn "+
+			"from a document this build cannot read. Write the record to a version this build "+
+			"speaks, or use a build that speaks that one")
 	}
 	return built, nil
 }

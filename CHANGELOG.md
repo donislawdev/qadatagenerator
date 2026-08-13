@@ -12,6 +12,23 @@ repository once they are released.
 
 ### BREAKING
 
+- **Exit code 3 now means any document you gave the run is not valid**, not
+  only a recipe or a policy. A manifest or a response record that cannot be
+  read used to end with code 5, which is the code for a recipe that is valid
+  and cannot be satisfied. The three codes now line up: 6 means the bytes could
+  not be read, 3 means the bytes are not a valid document, 5 means the document
+  is valid and what it asks for cannot be done. A CI branching on 3 keeps
+  working. A CI branching on 5 to catch an unreadable manifest has to move.
+- **`verify` refuses a manifest or a response record written to a major format
+  version this build does not speak.** It used to compare them and report on
+  your application anyway, whatever the version said, including versions that
+  are not numbers. A record from a newer MINOR version is still read, and the
+  run now says so, because whatever that version added is invisible here.
+- **A recipe whose tables ask for more rows in total than this build can count
+  is refused.** Two tables that each fit could add up to a number that does
+  not, and the run then reported a negative row count and succeeded. Only
+  recipes no run could ever have finished are affected.
+
 - **A number in a recipe must be written in plain decimal digits.** Writing
   `count: 010` used to produce eight rows, because YAML reads a leading nought
   as octal. It now stops the run and tells you that `010` is read as `8`.
@@ -20,6 +37,10 @@ repository once they are released.
 
 ### Fixed
 
+- **A trial run no longer says it wrote anything.** `generate --dry-run` ended
+  with a line reading `2 tables, 7 rows written`, which sent you looking for
+  files nobody made. It now says `7 rows would be written`. The same line also
+  wrote `1 tables` for a single table, and now agrees with itself.
 - **Two runs writing into the same directory no longer overwrite each other.**
   Starting a second run against a directory a first one is still writing now
   stops immediately and tells you so, instead of both finishing and one result

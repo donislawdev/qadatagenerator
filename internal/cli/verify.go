@@ -8,6 +8,8 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/responsejson"
 	"github.com/donislawdev/qadatagenerator/internal/app/verify"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
+	"github.com/donislawdev/qadatagenerator/internal/version"
 )
 
 // runVerify compares a manifest against what an application did with the data.
@@ -59,12 +61,30 @@ func compareAt(out *streams, manifestPath, responsePath string) int {
 		return fail(out, err)
 	}
 
+	// The refusal for a version this build cannot read happened in the readers.
+	// What is left is the readable half: a document from the same major line
+	// written to a minor version this build has never seen. It is read, and the
+	// run says so, because a comparison that silently ignored the difference
+	// would be reporting on evidence it only partly understands.
+	noteVersion(out, noteVerifyManifestVersion, version.Manifest, promised.SpecVersion())
+	noteVersion(out, noteVerifyResponseVersion, version.Response, actual.SpecVersion)
+
 	report := verify.Compare(promised, actual)
 	say(out, report)
 	if report.Failed() {
 		return finish(out, codeExpectation)
 	}
 	return finish(out, codeOK)
+}
+
+// noteVersion says that a document was read to a version of its format that
+// this build does not write, and says nothing when it was not.
+func noteVersion(out *streams, what, speaks, claimed string) {
+	if version.Compatibility(speaks, claimed) != version.WithinTheLine {
+		return
+	}
+	out.warn(what + fault.Shorten(claimed) + noteVerifyVersionTail + speaks +
+		noteVerifyVersionEnd)
 }
 
 // say writes the report on the log channel.

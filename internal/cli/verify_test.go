@@ -90,6 +90,104 @@ func TestOnlyAHardDisagreementReturnsTheExpectationCode(t *testing.T) {
 	}
 }
 
+// manifestAtVersion writes a sound manifest that names some other version of
+// the format, so that the version is the only thing under test.
+func manifestAtVersion(t *testing.T, into, spec string) string {
+	t.Helper()
+	path := filepath.Join(into, "other-version.json")
+	file, err := os.Create(path)
+	if err != nil {
+		t.Fatalf("cannot write the manifest this test reads: %v", err)
+	}
+	writer := manifestjson.New(file, spec)
+	writer.Add(manifest.Defect{
+		ID:       "case",
+		Location: manifest.Location{Entity: "customer", Row: 1, Field: "pesel"},
+		Mutator:  "L3.checksum.off_by_one", Layer: catalog.Layer("L3"),
+		Applied: true, ValueAfter: "sent", HasValueAfter: true,
+		Expectation: catalog.Rejection, Confidence: catalog.Hard,
+		Rationale: "the check digit no longer agrees",
+	})
+	err = writer.Finish(manifest.Run{
+		GeneratedAt: "2026-08-13T00:00:00Z", Seed: "s", Locale: "pl-PL",
+		CatalogVersion: "0.1", RowsTotal: 1, RowsMutated: 1,
+	}, 1, 1)
+	if err != nil {
+		t.Fatalf("the manifest did not close: %v", err)
+	}
+	_ = file.Close()
+	return path
+}
+
+// A document from a version this build cannot read is refused rather than
+// compared.
+//
+// 🔴 This is the sharpest thing measured on 2026-08-13. A complete response
+// record differing ONLY in its version, claiming 99.0 or banana or a couple of
+// spaces, ended with exit code nought and the sentence that the application had
+// done what the manifest said. That is a verdict on somebody else's system
+// drawn from a document this build cannot claim to understand, which is rule
+// five of the project moved one step outwards, onto the document itself.
+func TestADocumentFromAVersionThisBuildCannotReadIsRefused(t *testing.T) {
+	const sound = `{"spec_version":"0.1","rows":[{"row":1,"verdict":"rejected","code":"E1"}]}`
+
+	for _, given := range []struct {
+		what     string
+		manifest func(t *testing.T, into string) string
+		response string
+	}{
+		{"a manifest from a later major version",
+			func(t *testing.T, into string) string { return manifestAtVersion(t, into, "99.0") },
+			sound},
+		{"a response record from a later major version",
+			func(t *testing.T, into string) string {
+				return manifestFor(t, into, catalog.Rejection, catalog.Hard)
+			},
+			`{"spec_version":"99.0","rows":[{"row":1,"verdict":"rejected","code":"E1"}]}`},
+		{"a response record whose version is a word",
+			func(t *testing.T, into string) string {
+				return manifestFor(t, into, catalog.Rejection, catalog.Hard)
+			},
+			`{"spec_version":"banana","rows":[{"row":1,"verdict":"rejected","code":"E1"}]}`},
+	} {
+		t.Run(given.what, func(t *testing.T) {
+			into := t.TempDir()
+			got := run(commandVerify, given.manifest(t, into), responseFor(t, into, given.response))
+			if got.code != int(codeConfig) {
+				t.Errorf("%s ended with %d, want %d. It said %q",
+					given.what, got.code, codeConfig, got.log)
+			}
+			if !strings.Contains(got.log, "version") {
+				t.Errorf("the refusal for %s does not say the version is the problem: %q",
+					given.what, got.log)
+			}
+		})
+	}
+}
+
+// A document from the same major line and a minor version this build has never
+// seen is read, and the run says so.
+//
+// The format grows by adding, so such a document is readable and refusing it
+// would make every upgrade a reason to keep old files unreadable. What must not
+// happen is reading it in silence, because whatever the newer version added is
+// invisible here by definition.
+func TestADocumentFromANewerMinorVersionIsReadAndSaidSo(t *testing.T) {
+	into := t.TempDir()
+	got := run(commandVerify, manifestAtVersion(t, into, "0.9"),
+		responseFor(t, into, `{"spec_version":"0.1","rows":[{"row":1,"verdict":"rejected","code":"E1"}]}`))
+
+	if got.code != 0 {
+		t.Fatalf("a readable manifest was refused with %d: %s", got.code, got.log)
+	}
+	if !strings.Contains(got.log, "0.9") {
+		t.Errorf("the run does not say which version it read: %q", got.log)
+	}
+	if !strings.Contains(got.log, "not part of what follows") {
+		t.Errorf("the run does not say what reading it costs: %q", got.log)
+	}
+}
+
 // Every refusal of this verb is complete and never sends the reader to a recipe
 // it does not have.
 //

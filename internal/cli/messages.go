@@ -168,6 +168,15 @@ const (
 	noteVerifySoft     = " rest on rules belonging to your application rather than to the data, so they are reported and do not fail the run"
 	noteVerifyLimit    = "not settled here: "
 
+	// The two halves of one sentence about a document from the same major
+	// version line as this build, written to a minor version it has never seen.
+	// It is read, because the format grows by adding, and it is announced,
+	// because what was added is by definition invisible here.
+	noteVerifyManifestVersion = "the manifest is written to version "
+	noteVerifyResponseVersion = "the response record is written to version "
+	noteVerifyVersionTail     = " and this build speaks "
+	noteVerifyVersionEnd      = ". It is read as far as this build understands it, so anything the newer version added is not part of what follows"
+
 	problemCorruptArguments        = "corrupt takes one file"
 	problemCorruptArgumentsWhy     = "it reads a file of records and writes those records back with damage in them"
 	problemCorruptArgumentsAllowed = "one path to a comma separated file"
@@ -251,8 +260,11 @@ const (
 	stoppedByUser   = "stopped before the dataset was complete. No output file was left behind and the temporary files this run made are gone"
 	stoppedBySystem = "stopped by the system before the dataset was complete. No output file was left behind and the temporary files this run made are gone"
 
-	summaryTables = " tables, "
-	summaryRows   = " rows written"
+	// The summary of a run counts its tables and its rows, and the two endings
+	// keep a trial run from claiming a write that never happened. The counts
+	// themselves go through counted, so that a line never reads 1 tables.
+	summaryWritten = " written"
+	summaryPlanned = " would be written"
 
 	flagsHeading = "Flags:"
 
@@ -284,7 +296,11 @@ const (
 	// next move is in the flags they typed or in the file they were given.
 	doAboutConfigFlags     = "check the flags of this command. qadg help "
 	doAboutConfigFlagsTail = " lists them with what each one takes"
-	doAboutDataCorrupt     = "the file cannot be used as it stands, so change the file or the flags describing it"
+	// A verb reading documents it did not write needs a third answer. Sending
+	// its reader to the flags would name the one thing that is not the problem,
+	// which is the same failure the recipe advice made for the damaging verb.
+	doAboutConfigDocument = "check that each file is the document it is meant to be. The message above names which one and what was wrong with it"
+	doAboutDataCorrupt    = "the file cannot be used as it stands, so change the file or the flags describing it"
 
 	problemHelpSubject        = "no command called "
 	problemHelpSubjectWhy     = "help describes a command this build has"

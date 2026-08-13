@@ -40,7 +40,7 @@ var exitTable = []exitEntry{
 	{codeOK, "OK", "the run succeeded", fault.Unknown},
 	{codeRuntime, "RUNTIME", "a tool failure that belongs nowhere else", fault.Runtime},
 	{codeUsage, "USAGE", "wrong invocation syntax or an unknown flag", fault.Usage},
-	{codeConfig, "CONFIG", "the recipe or the corruption policy is not valid", fault.Config},
+	{codeConfig, "CONFIG", "a document this run was given is not valid: a recipe, a policy, a manifest or a response record", fault.Config},
 	{codeExpectation, "EXPECTATION", "data was produced, but the application under test did not behave as the manifest says", fault.Expectation},
 	{codeData, "DATA", "the recipe is valid, but it cannot be satisfied", fault.Data},
 	{codeIO, "IO", "a read or a write failed", fault.IO},

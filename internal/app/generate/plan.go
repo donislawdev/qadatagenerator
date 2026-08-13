@@ -40,6 +40,10 @@ type Plan struct {
 }
 
 // TotalRows is how many records the whole plan holds.
+//
+// It can add without checking because Prepare refused any recipe whose rows do
+// not fit, so a plan that exists is one whose total can be counted. That is the
+// invariant this method rests on, and the refusal below is what holds it up.
 func (p Plan) TotalRows() int {
 	total := 0
 	for _, entity := range p.Entities {
@@ -47,6 +51,25 @@ func (p Plan) TotalRows() int {
 	}
 	return total
 }
+
+// fitsWithTheRest reports whether one more table can be added to a total.
+//
+// # Why a sum, when the ceiling is on a single count
+//
+// The recipe reader already refuses a count larger than this build can hold, so
+// each entity fits on its own. Two of them did not have to. Measured on
+// 2026-08-13: two entities of 9223372036854775807 rows each ended the run with
+// exit code nought and a summary reading minus two rows written. The guard
+// protected a field rather than the arithmetic, so the arithmetic wrapped one
+// entity later.
+func fitsWithTheRest(total, rows int) bool {
+	return rows <= 0 || total <= maxInt-rows
+}
+
+// maxInt is the largest value this build can count to. Written from the type
+// rather than typed out, because the number differs between builds and a
+// literal here would be right on one machine and wrong on another.
+const maxInt = int(^uint(0) >> 1)
 
 // Prepare works out what a run will produce and refuses what it cannot.
 //
@@ -63,6 +86,7 @@ func Prepare(rec recipe.Recipe, values Values) (Plan, error) {
 	source := seed.New(rec.Seed)
 	produced := make(map[string]dataset.Table, len(ordered))
 
+	total := 0
 	for _, entity := range ordered {
 		if err := checkGenerators(entity, values, &plan); err != nil {
 			return Plan{}, err
@@ -71,11 +95,26 @@ func Prepare(rec recipe.Recipe, values Values) (Plan, error) {
 		if err != nil {
 			return Plan{}, err
 		}
+		if !fitsWithTheRest(total, planned.Rows) {
+			return Plan{}, tooManyRows(planned.Entity)
+		}
+		total += planned.Rows
 		plan.Notes = append(plan.Notes, notesFor(entity, values)...)
 		produced[entity.Name] = planned
 		plan.Entities = append(plan.Entities, planned)
 	}
 	return plan, nil
+}
+
+// tooManyRows refuses a recipe whose tables add up to more rows than this build
+// can count, in the same words the reader uses for a single count that does not
+// fit.
+func tooManyRows(entity string) error {
+	return fault.New(fault.Config, fmt.Sprintf(
+		"the rows of every table in this recipe add up to more than the %d this build can "+
+			"count, and %s is the table that goes past it. A count is not refused on its own "+
+			"here, so this is about the total. Lower the counts, or split the recipe into "+
+			"runs that each ask for fewer rows", maxInt, entity))
 }
 
 // planEntity works out the row count of one entity and, when it has a parent,

@@ -170,6 +170,60 @@ func TestADryRunAnswersWithoutWritingAnything(t *testing.T) {
 	}
 }
 
+// The summary of a run says what happened, and a trial run did not write.
+//
+// Two failures live on that one line and both were found by measuring rather
+// than by reading it. A trial run said rows written, which sends somebody
+// looking for files nobody made, and a single table said 1 tables, which is the
+// exact sentence counted was written to prevent.
+func TestTheSummarySaysWhatTheRunDidAndCountsAgreeWithTheirWords(t *testing.T) {
+	dir := t.TempDir()
+	out := filepath.Join(dir, "data")
+	path := recipeIn(t, dir, smallRecipe(out))
+
+	trial := run(commandGenerate, "--dry-run", path)
+	if trial.code != 0 {
+		t.Fatalf("the trial run ended with %d: %s", trial.code, trial.log)
+	}
+	if !strings.Contains(trial.log, "2 tables, 7 rows would be written") {
+		t.Errorf("the trial run does not say what a real one would write: %q", trial.log)
+	}
+	if strings.Contains(trial.log, "rows written") {
+		t.Errorf("the trial run claims it wrote rows: %q", trial.log)
+	}
+
+	written := run(commandGenerate, path)
+	if written.code != 0 {
+		t.Fatalf("the run ended with %d: %s", written.code, written.log)
+	}
+	if !strings.Contains(written.log, "2 tables, 7 rows written") {
+		t.Errorf("the run does not say what it wrote: %q", written.log)
+	}
+
+	// One table of one row is the case where every word of the line is
+	// singular, and it is the case the plural rule gets wrong.
+	single := filepath.Join(dir, "single")
+	body := `version: "0.1"
+seed: "test-seed"
+entities:
+  customer:
+    count: 1
+    fields:
+      first_name: { generator: first_name }
+output:
+  format: csv
+  dir: ` + strings.ReplaceAll(single, `\`, `/`) + `
+  file_per_entity: true
+`
+	lone := run(commandGenerate, "--dry-run", recipeIn(t, t.TempDir(), body))
+	if lone.code != 0 {
+		t.Fatalf("the run of one entity ended with %d: %s", lone.code, lone.log)
+	}
+	if !strings.Contains(lone.log, "1 table, 1 row would be written") {
+		t.Errorf("the counts do not agree with their words: %q", lone.log)
+	}
+}
+
 // A generator this build does not have is refused by name, with the list of the
 // ones it does, rather than producing a column of nothing.
 func TestAGeneratorThisBuildLacksIsRefusedWithTheList(t *testing.T) {
