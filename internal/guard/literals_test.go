@@ -51,6 +51,17 @@ func TestTheLiteralGuardFiresOnTheViewAndNotOnTheTheme(t *testing.T) {
 		"func c() color.NRGBA { return color.NRGBA{R: 0, G: 0, B: 0, A: 1} }\n")
 	written("internal/gui/screen", "text.go", "package screen\n\nfunc s() string { return \"#1B1B1B\" }\n")
 	written("internal/gui/screen", "gap.go", "package screen\n\nfunc g() int { return 12 }\n")
+	// A value assigned to a struct field rather than passed to a call.
+	//
+	// This case is here because a neighbouring project reported it as the hole
+	// in their own version of this guard: theirs enumerated the calls that
+	// carry a value, so anything reaching the screen another way was invisible.
+	// Ours reads every literal in the tree rather than the arguments of a list
+	// of calls, which should make it immune. Should is not a measurement, so
+	// the case is written down.
+	written("internal/gui/screen", "field.go", "package screen\n\nimport \"image/color\"\n\n"+
+		"type style struct {\n\tInk  color.NRGBA\n\tPad  int\n}\n\n"+
+		"var s = style{Ink: color.NRGBA{R: 255, G: 0, B: 0, A: 255}, Pad: 16}\n")
 	// Nought and one are how a program says empty and single, so they are the
 	// two numbers a view may still write.
 	written("internal/gui/screen", "clean.go", "package screen\n\n"+
@@ -71,10 +82,16 @@ func TestTheLiteralGuardFiresOnTheViewAndNotOnTheTheme(t *testing.T) {
 	if err != nil {
 		t.Fatalf("cannot read the tree: %v", err)
 	}
-	if len(findings) != 3 {
-		t.Fatalf("expected three findings, got %d:\n%s", len(findings), strings.Join(findings, "\n"))
+	// Seven, and the count is worth reading rather than adjusting until it
+	// passes. One colour literal, one hex string, one bare number, and four in
+	// the struct field file: the colour value itself, its two channels that are
+	// not nought or one, and the padding. The channels counting separately is
+	// the guard being thorough rather than noisy, since each is a value
+	// somebody typed into a view.
+	if len(findings) != 7 {
+		t.Fatalf("expected seven findings, got %d:\n%s", len(findings), strings.Join(findings, "\n"))
 	}
-	for _, want := range []string{"screen/colour.go:", "screen/gap.go:", "screen/text.go:"} {
+	for _, want := range []string{"screen/colour.go:", "screen/gap.go:", "screen/text.go:", "screen/field.go:"} {
 		if !containsPrefix(findings, "internal/gui/"+want) {
 			t.Errorf("no finding names %s:\n%s", want, strings.Join(findings, "\n"))
 		}

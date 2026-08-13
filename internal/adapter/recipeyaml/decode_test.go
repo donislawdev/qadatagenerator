@@ -218,7 +218,32 @@ func TestProblems(t *testing.T) {
 			where: "seed",
 			// The message shows the 8 the user never wrote, which is the
 			// whole reason a number is refused here.
-			what: "read 8 as a number",
+			//
+			// This used to be caught only because a seed has to be text, so a
+			// number in that place was a type error. A count is a number, so
+			// the same spelling went through: measured on 2026-08-12 through
+			// the built binary, count: 010 produced eight rows and exit code
+			// nought. Every number is now checked by how it was written, and
+			// this case is answered by that check rather than by the type.
+			what: "is read as 8",
+		},
+		{
+			name:  "a count YAML read as octal, which used to pass silently",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    count: 010\n    fields:\n      x: { generator: y }\n",
+			where: "entities.a.count",
+			what:  "written as 010 is read as 8",
+		},
+		{
+			name:  "a number written in hexadecimal",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    count: 0x10\n    fields:\n      x: { generator: y }\n",
+			where: "entities.a.count",
+			what:  "is read as 16",
+		},
+		{
+			name:  "a number carrying digit separators",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    count: 1_0\n    fields:\n      x: { generator: y }\n",
+			where: "entities.a.count",
+			what:  "is read as 10",
 		},
 		{
 			name:  "a schema version this build does not speak",

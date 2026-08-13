@@ -10,6 +10,14 @@ repository once they are released.
 
 ## [Unreleased]
 
+### BREAKING
+
+- **A number in a recipe must be written in plain decimal digits.** Writing
+  `count: 010` used to produce eight rows, because YAML reads a leading nought
+  as octal. It now stops the run and tells you that `010` is read as `8`.
+  Leading noughts, `0x`, `0o`, `0b` and underscores between digits are all
+  refused rather than guessed at. If you meant ten, write `10`.
+
 ### Fixed
 
 - **Two runs writing into the same directory no longer overwrite each other.**

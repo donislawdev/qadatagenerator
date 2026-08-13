@@ -208,6 +208,13 @@ func Decode(data []byte) Result {
 		return reader.result(recipe.Recipe{})
 	}
 
+	// Numbers are checked against how they were WRITTEN, which is only possible
+	// here: one line further down the spellings have already become values and
+	// 010 is indistinguishable from 8.
+	if refuseCleverNumberSpellings(reader, body) {
+		return reader.result(recipe.Recipe{})
+	}
+
 	var root any
 	if err := yaml.NodeToValue(body, &root, yaml.UseOrderedMap()); err != nil {
 		reader.report("", "the file is not valid YAML: "+firstLine(err.Error()), "",
