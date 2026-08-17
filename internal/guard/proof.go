@@ -76,6 +76,8 @@ const UnprovenCeiling = 0
 // between the product and a promise it makes to somebody outside it.
 var Guards = []Guard{
 	// --- the architecture guards, all of them in this package ---------------
+	{"every refusal either side of the boundary between exit code 3 and 5 says why it is there", "TestEveryRefusalEitherSideOfTheBoundarySaysWhy", "internal/guard", ByMutation},
+	{"a reason in that register is an argument rather than the kind said twice", "TestEveryReasonInTheRegisterSaysSomething", "internal/guard", ByMutation},
 	{"no package can reach outside this machine", "TestRepositoryOpensNothing", "internal/guard", ByMutation},
 	{"the scanner sees an import that reaches outside", "TestNetworkCatchesAnImportThatReachesOutside", "internal/guard", ByProbe},
 	{"parsing an address is not talking to one", "TestNetworkAllowsAddressParsing", "internal/guard", ByProbe},
