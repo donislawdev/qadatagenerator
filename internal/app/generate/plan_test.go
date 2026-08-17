@@ -68,7 +68,7 @@ func noteAbout(plan generate.Plan, field string) (generate.Note, bool) {
 
 // Two tables that fit one at a time do not have to fit together.
 //
-// 🔴 Measured on 2026-08-13 with the real binary: two entities of 9223372036854775807
+// 🔴 Measured on 2026-08-17 with the real binary: two entities of 9223372036854775807
 // rows each ended with exit code nought and a summary line reading minus two
 // rows written. The reader refuses a single count larger than this build can
 // hold, so each of them was accepted on its own and the sum wrapped one entity

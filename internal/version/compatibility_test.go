@@ -9,7 +9,7 @@ import (
 // What a build can do with a version it was handed, case by case.
 //
 // 🔴 The case that made this function necessary is the third one below. Until
-// 2026-08-13 a response record claiming version 99.0 was compared entry by
+// 2026-08-17 a response record claiming version 99.0 was compared entry by
 // entry and the run ended saying the application had behaved as promised. The
 // field was checked for being present and never for what it said.
 func TestWhatThisBuildCanDoWithAVersion(t *testing.T) {

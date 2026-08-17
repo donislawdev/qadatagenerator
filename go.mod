@@ -6,7 +6,7 @@ module github.com/donislawdev/qadatagenerator
 // Pinned, not a minimum. Determinism is an unbreakable rule in this project,
 // so the toolchain that produced a dataset is part of what has to be
 // reproducible. CI pins the same version through GOTOOLCHAIN.
-go 1.26.5
+go 1.26.6
 
 require github.com/goccy/go-yaml v1.19.2
 
@@ -47,7 +47,7 @@ require (
 	github.com/go-gl/gl v0.0.0-20260331235117-4566fea9a276 // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	golang.org/x/image v0.43.0 // indirect
-	golang.org/x/net v0.35.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/text v0.38.0 // indirect
 )

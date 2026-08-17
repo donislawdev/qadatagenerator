@@ -8,7 +8,7 @@ import "strings"
 // # Why this exists at all
 //
 // Both readable formats carry the version they were written to, and until
-// 2026-08-13 that field was checked for being PRESENT and never for what it
+// 2026-08-17 that field was checked for being PRESENT and never for what it
 // said. A response record claiming version 99.0, or banana, was compared entry
 // by entry and the run ended saying the application had behaved as promised.
 // That is a verdict about somebody else's system, drawn from a document this

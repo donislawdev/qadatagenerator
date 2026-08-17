@@ -30,7 +30,7 @@ env:
   # Pinned rather than treated as a minimum. Determinism is an unbreakable
   # rule here, so the toolchain that produced a result is part of what has to
   # be reproducible.
-  GOTOOLCHAIN: go1.26.5
+  GOTOOLCHAIN: go1.26.6
   # The command line binary has to build without a C toolchain, which is what
   # keeps it cross compilable from one machine. Only the window needs CGO.
   CGO_ENABLED: "0"
@@ -54,7 +54,7 @@ jobs:
           # Quoted on purpose. This project refuses an unquoted version in a
           # recipe because YAML reads 1.0 as a number, and the same reader is
           # reading this file.
-          go-version: "1.26.5"
+          go-version: "1.26.6"
 
       - name: build
         run: go build ./...
@@ -88,7 +88,7 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.26.5"
+          go-version: "1.26.6"
 
       # There is a guard in internal/guard that asks this question of our own
       # files, and it cannot answer it for the whole binary. It reads the
@@ -127,7 +127,7 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.26.5"
+          go-version: "1.26.6"
 
       - name: test with the race detector
         # CGO_ENABLED is 1 here and 0 everywhere else in this file, which looks
@@ -153,7 +153,7 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.26.5"
+          go-version: "1.26.6"
 
       # The nearest thing this project has to a reviewer who reads every line.
       # The owner does not read the code and there is no second author, so a
@@ -171,7 +171,7 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.26.5"
+          go-version: "1.26.6"
 
       # Reports only the vulnerabilities our code can actually reach, rather
       # than every advisory that mentions a module we happen to require. That
@@ -183,7 +183,7 @@ jobs:
       # it, and the licence flag already answers half of that question.
       - uses: golang/govulncheck-action@v1.1.0
         with:
-          go-version-input: "1.26.5"
+          go-version-input: "1.26.6"
           check-latest: false
 
   coverage:
@@ -204,7 +204,7 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.26.5"
+          go-version: "1.26.6"
 
       - name: measure and compare against the floor
         shell: bash
@@ -247,7 +247,7 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.26.5"
+          go-version: "1.26.6"
 
       - name: build the command line binary for three systems
         shell: bash

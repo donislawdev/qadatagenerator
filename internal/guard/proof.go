@@ -355,6 +355,8 @@ var Guards = []Guard{
 	{"a dataset carrying identifiers says about itself that it describes nobody", "TestTheNoteSaysTheValuesAreSynthetic", "internal/cli", ByMutation},
 	{"a dry run answers the same arithmetic and touches no disk", "TestADryRunAnswersWithoutWritingAnything", "internal/cli", ByMutation},
 	{"the summary says what the run did, and every count agrees with its word", "TestTheSummarySaysWhatTheRunDidAndCountsAgreeWithTheirWords", "internal/cli", ByMutation},
+	{"every capability of the command line is answered for from the side of the window", "TestEveryCapabilityOfTheCommandLineIsAnsweredForFromTheWindow", "internal/cli", ByMutation},
+	{"a claim that the window reaches something names a test that is in the tree", "TestEveryClaimAboutTheWindowNamesATestThatExists", "internal/cli", ByMutation},
 	{"a document written to a version this build cannot read is refused rather than compared", "TestADocumentFromAVersionThisBuildCannotReadIsRefused", "internal/cli", ByMutation},
 	{"a document from a newer minor version is read and the run says what that costs", "TestADocumentFromANewerMinorVersionIsReadAndSaidSo", "internal/cli", ByMutation},
 	{"what a build can do with a version it was handed follows the major line", "TestWhatThisBuildCanDoWithAVersion", "internal/version", ByMutation},

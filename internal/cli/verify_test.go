@@ -109,7 +109,7 @@ func manifestAtVersion(t *testing.T, into, spec string) string {
 		Rationale: "the check digit no longer agrees",
 	})
 	err = writer.Finish(manifest.Run{
-		GeneratedAt: "2026-08-13T00:00:00Z", Seed: "s", Locale: "pl-PL",
+		GeneratedAt: "2026-08-17T00:00:00Z", Seed: "s", Locale: "pl-PL",
 		CatalogVersion: "0.1", RowsTotal: 1, RowsMutated: 1,
 	}, 1, 1)
 	if err != nil {
@@ -122,7 +122,7 @@ func manifestAtVersion(t *testing.T, into, spec string) string {
 // A document from a version this build cannot read is refused rather than
 // compared.
 //
-// 🔴 This is the sharpest thing measured on 2026-08-13. A complete response
+// 🔴 This is the sharpest thing measured on 2026-08-17. A complete response
 // record differing ONLY in its version, claiming 99.0 or banana or a couple of
 // spaces, ended with exit code nought and the sentence that the application had
 // done what the manifest said. That is a verdict on somebody else's system

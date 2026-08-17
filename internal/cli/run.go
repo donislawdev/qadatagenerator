@@ -598,7 +598,7 @@ func fail(out *streams, err error) int {
 // recipe has to say so.
 func whatToDoAbout(kind fault.Kind, verb string) string {
 	hasRecipe := verb == commandValidate || verb == commandGenerate
-	// 🔴 The same question asked a second time, on 2026-08-13. Widening code 3
+	// 🔴 The same question asked a second time, on 2026-08-17. Widening code 3
 	// to cover any input document that is not valid (DEC-172) gave this verb a
 	// Config failure about a FILE, and the advice for a verb without a recipe
 	// names the flags. Which is exactly the shape of the earlier mistake: true

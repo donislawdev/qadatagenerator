@@ -442,17 +442,17 @@ var ThirdParty = []Component{
 	},
 	{
 		Module:  "golang.org/x/net",
-		Version: "v0.35.0",
+		Version: "v0.55.0",
 		License: "BSD-3-Clause",
 		Source:  "https://golang.org/x/net",
-		Checked: "2026-08-12",
+		Checked: "2026-08-17",
 	},
 	{
 		Module:  "golang.org/x/sys",
-		Version: "v0.30.0",
+		Version: "v0.45.0",
 		License: "BSD-3-Clause",
 		Source:  "https://golang.org/x/sys",
-		Checked: "2026-08-12",
+		Checked: "2026-08-17",
 	},
 	{
 		Module:  "golang.org/x/text",

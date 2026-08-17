@@ -35,6 +35,14 @@ repository once they are released.
   Leading noughts, `0x`, `0o`, `0b` and underscores between digits are all
   refused rather than guessed at. If you meant ten, write `10`.
 
+### Security
+
+- **This build now compiles with go1.26.6 and a newer `golang.org/x/net`.**
+  Five vulnerabilities in the Go standard library and one in `x/net` were
+  reachable from the window, through the toolkit it draws with. The command
+  line tool is unaffected in what it does, and nothing about how you run it
+  changes.
+
 ### Fixed
 
 - **A trial run no longer says it wrote anything.** `generate --dry-run` ended

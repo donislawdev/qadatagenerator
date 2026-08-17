@@ -58,7 +58,7 @@ func (p Plan) TotalRows() int {
 //
 // The recipe reader already refuses a count larger than this build can hold, so
 // each entity fits on its own. Two of them did not have to. Measured on
-// 2026-08-13: two entities of 9223372036854775807 rows each ended the run with
+// 2026-08-17: two entities of 9223372036854775807 rows each ended the run with
 // exit code nought and a summary reading minus two rows written. The guard
 // protected a field rather than the arithmetic, so the arithmetic wrapped one
 // entity later.
