@@ -63,6 +63,11 @@ var WindowReach = map[string]Claim{
 		Screen: "the About screen carries both licenses, every module and what each one covers",
 		Test:   "TestTheScreenCarriesEveryFactTheLicenceFlagPrints",
 	},
+	"verify": {
+		Screen: "the second state of the manifest browser: the same entries, each carrying how the " +
+			"application answered, with what could not be settled and what could not be seen",
+		Test: "TestTheSecondStateShowsWhatTheApplicationDidWithEveryJudgedRow",
+	},
 }
 
 // NotYetInWindow is what the command line can be asked for and the window
@@ -75,7 +80,6 @@ var NotYetInWindow = map[string]string{
 	"generate":                 "waits for the recipe editor with the live preview",
 	"validate":                 "waits for the same editor, which shows problems beside the field they belong to",
 	"corrupt":                  "waits for the Take and damage screen",
-	"verify":                   "waits for the second state of the manifest browser",
 	"help":                     "waits for the first control carrying a hint. No help screen is planned, and that is recorded, but a window with no hints answers nothing",
 	"-h/--help":                "the same as the verb above it",
 	"--json":                   "waits for Save as JSON on the About screen. The reader here is a compliance scanner, so the window has to PRODUCE the file rather than show it",
@@ -118,7 +122,10 @@ var MediumOnly = map[string]string{
 // It is the length of NotYetInWindow written down, so that the distance is a
 // number in the code rather than an impression. Lower it when a screen closes
 // the gap. Raising it is a decision about the product, not housekeeping.
-const NotYetCeiling = 24
+//
+// It stood at 24 from 2026-08-17, when this register was written, until later
+// that day, when the manifest browser took verify out of the list above.
+const NotYetCeiling = 23
 
 // MediumOnlyCeiling caps the exceptions for the same reason, one number lower
 // than nothing: three flags say how the output looks, and a fourth would be a

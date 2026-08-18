@@ -39,6 +39,32 @@ const (
 	Missing Kind = "the dataset arrived incomplete"
 )
 
+// kinds is every disagreement this build reports, which is what lets a surface
+// be held to the whole set rather than to the ones it happened to think of.
+var kinds = map[Kind]bool{Hole: true, Overzealous: true, Silent: true, Missing: true}
+
+// Kinds is the closed set written out, sorted.
+//
+// # Why a reader needs the set and not only the value it was handed
+//
+// The command line is English by contract and prints these as they are. The
+// window is translated, so it needs one phrase per kind, and a register of
+// phrases can only be closed against a list. A fifth kind would otherwise reach
+// a screen as an empty space rather than as a failing test.
+//
+// The detail beside a finding stays as this package writes it, in English, and
+// that is a limit rather than an oversight. It names rows, columns and values
+// in a sentence composed for the case at hand, so it is not a closed set and
+// cannot become one without this package writing prose for every language.
+func Kinds() []Kind {
+	all := make([]Kind, 0, len(kinds))
+	for kind := range kinds {
+		all = append(all, kind)
+	}
+	sort.Slice(all, func(i, j int) bool { return all[i] < all[j] })
+	return all
+}
+
 // Finding is one disagreement.
 type Finding struct {
 	Kind       Kind

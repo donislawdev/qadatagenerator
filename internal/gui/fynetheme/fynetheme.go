@@ -72,6 +72,15 @@ func (Dark) Color(name fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color {
 	if ours, found := colourFor[name]; found {
 		return palette.Named(ours).NRGBA()
 	}
+	// A screen may also ask for an entry of the palette by its own name, which
+	// is what lets a control of the toolkit carry a measured colour. The
+	// alternative was a piece of canvas text per coloured phrase, and that does
+	// not trim itself to the space it was given: measured on 2026-08-18 in a
+	// window 1342 pixels wide, columns of such text ran over one another and
+	// two facts about different things were drawn in the same place.
+	if entry, ours := palette.Lookup(string(name)); ours {
+		return entry.NRGBA()
+	}
 	if name == toolkit.ColorNameMenuBackground || name == toolkit.ColorNameOverlayBackground {
 		return palette.Background.NRGBA()
 	}

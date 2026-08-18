@@ -10,7 +10,8 @@
 //
 // This file stays short for the same reason cmd/qadg does. Everything worth
 // testing lives in internal/gui, where a screen can be rendered without a
-// display.
+// display. What is left here is the one thing a test cannot do: opening a real
+// window, and saying which reader each screen gets.
 package main
 
 import (
@@ -18,8 +19,12 @@ import (
 	"fyne.io/fyne/v2/app"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/responsejson"
 	"github.com/donislawdev/qadatagenerator/internal/gui/about"
 	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
+	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
+	"github.com/donislawdev/qadatagenerator/internal/gui/shell"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/license"
 	"github.com/donislawdev/qadatagenerator/internal/version"
@@ -30,8 +35,21 @@ func main() {
 	application.Settings().SetTheme(fynetheme.Dark{})
 
 	text := i18n.English
-	window := application.NewWindow(text.T(i18n.AboutWindowTitle))
-	window.SetContent(about.Content(text, license.Current(), version.Current()))
+	window := application.NewWindow(text.T(i18n.WindowTitle))
+
+	// The readers are handed to the screen here rather than reached for inside
+	// it, which is what lets every state of that screen be built in a test
+	// against documents that never touch a disk.
+	browser := manifestview.New(text, window, manifestview.Readers{
+		Manifest: manifestjson.Load,
+		Response: responsejson.Load,
+	})
+	frame := shell.New([]shell.Screen{
+		{Name: text.T(i18n.ScreenManifest), Content: browser.Content()},
+		{Name: text.T(i18n.ScreenAbout), Content: about.Content(text, license.Current(), version.Current())},
+	})
+
+	window.SetContent(frame.Content())
 	// A window with no size of its own shrinks to what its content demands, and
 	// a scrolling container demands almost nothing. Running the first build
 	// showed one heading in a window 128 pixels tall while every test was

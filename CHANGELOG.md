@@ -10,6 +10,37 @@ repository once they are released.
 
 ## [Unreleased]
 
+### Added
+
+- **A manifest browser in the window.** Open the manifest a run left beside its
+  dataset and see what that run promised: what was damaged, where, what your
+  application should do about it, and how much each of those expectations is
+  worth. Damage that was ordered and could not be applied is on the screen too,
+  in its own colour, together with the reason. A run where some of the ordered
+  damage did not happen looks nothing like a complete one.
+- **The same screen shows what your application did.** Open a response record
+  beside the manifest and each judged row carries the verdict, with
+  disagreements named. What the comparison could not settle, and what it could
+  not see at all given what the record carried, are stated under the table
+  rather than left out.
+- **The window now holds more than one screen.** Screens are listed down the
+  left and the one being read is marked. Today there are two: the manifest
+  browser and the About screen.
+- **A file chooser.** The window can open a manifest and a response record from
+  anywhere on your disk. Nothing is read until you choose it, and nothing is
+  written at all.
+
+### Fixed
+
+- **A manifest this tool wrote could not always be read back by this tool.**
+  Damage spanning several records, and damage located by a path inside a nested
+  structure, lost part of their location when the manifest was read, so `verify`
+  refused a manifest that `generate` had just written. A third case was quieter
+  and worse: damage to the bytes of a file lost the offset saying where in the
+  file it was, and nothing reported anything. If you have manifests produced by
+  an earlier build, they were written correctly and can now be read.
+
+
 ### BREAKING
 
 - **Exit code 3 now means any document you gave the run is not valid**, not

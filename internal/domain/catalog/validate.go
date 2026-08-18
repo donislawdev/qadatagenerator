@@ -41,6 +41,37 @@ func KnownExpectation(expectation Expectation) bool { return knownExpectations[e
 // KnownConfidence reports whether a confidence is either of the two.
 func KnownConfidence(confidence Confidence) bool { return knownConfidences[confidence] }
 
+// Expectations and Confidences are the vocabularies written out, sorted.
+//
+// # Why a reader needs the whole set and not only a membership test
+//
+// A surface that has to say each of these in a language is a surface that has
+// to carry one phrase per value, and the register of phrases is only closable
+// against a list. Asked one value at a time, the question "is anything
+// missing" cannot be put at all, and a fourth expectation would reach a screen
+// as a blank space rather than as a failing test.
+//
+// Sorted, because the order of a map in Go is deliberately not stable and a
+// caller comparing two registers would otherwise be comparing two orderings.
+func Expectations() []Expectation {
+	all := make([]Expectation, 0, len(knownExpectations))
+	for expectation := range knownExpectations {
+		all = append(all, expectation)
+	}
+	sort.Slice(all, func(i, j int) bool { return all[i] < all[j] })
+	return all
+}
+
+// Confidences is every confidence a manifest entry may carry.
+func Confidences() []Confidence {
+	all := make([]Confidence, 0, len(knownConfidences))
+	for confidence := range knownConfidences {
+		all = append(all, confidence)
+	}
+	sort.Slice(all, func(i, j int) bool { return all[i] < all[j] })
+	return all
+}
+
 // New builds a catalog out of entries and reports everything wrong with them.
 //
 // It returns every problem rather than the first one. Whoever is fixing a

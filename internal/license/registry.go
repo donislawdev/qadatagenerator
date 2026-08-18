@@ -231,6 +231,13 @@ var ThirdParty = []Component{
 		Checked: "2026-08-12",
 	},
 	{
+		Module:  "github.com/FyshOS/fancyfs",
+		Version: "v0.0.1",
+		License: "BSD-3-Clause",
+		Source:  "https://github.com/FyshOS/fancyfs",
+		Checked: "2026-08-17",
+	},
+	{
 		Module:  "github.com/anthonynsimon/bild",
 		Version: "v0.14.0",
 		License: "MIT",

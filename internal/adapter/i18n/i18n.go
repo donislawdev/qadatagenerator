@@ -30,10 +30,20 @@ import (
 // Key is the name a screen asks for text by.
 type Key string
 
+// The keys the window itself carries, rather than any one screen.
+//
+// The title stopped belonging to the About screen on 2026-08-17, when a second
+// screen arrived and the window stopped being that one screen with a frame
+// around it.
+const (
+	WindowTitle Key = "window.title"
+
+	ScreenAbout    Key = "screen.about"
+	ScreenManifest Key = "screen.manifest"
+)
+
 // The keys of the About screen.
 const (
-	AboutWindowTitle Key = "about.window.title"
-
 	AboutHeadingVersions   Key = "about.heading.versions"
 	AboutHeadingLicenses   Key = "about.heading.licenses"
 	AboutHeadingComponents Key = "about.heading.components"
@@ -57,16 +67,122 @@ const (
 	AboutEmptyData       Key = "about.empty.data"
 )
 
+// The keys of the manifest browser.
+//
+// # Why the vocabularies are keys and the values beside them are not
+//
+// A mutator identifier, a column name and a seed are data. They read the same
+// in every language and they are what somebody pastes into a report, so
+// translating them would change what the screen is showing. An expectation, a
+// confidence and a reason damage could not be applied are the opposite: three,
+// two and six closed sets, each one a phrase this project writes for a person
+// to read. Registers below turn each of those sets into keys, and a test closes
+// them against the domain in both directions, so a seventh reason cannot reach
+// a screen as an empty space.
+const (
+	ManifestOpen         Key = "manifest.open"
+	ManifestOpenResponse Key = "manifest.open-response"
+	ManifestEmpty        Key = "manifest.empty"
+	ManifestUnreadable   Key = "manifest.unreadable"
+
+	ManifestHeadingRun       Key = "manifest.heading.run"
+	ManifestHeadingEntries   Key = "manifest.heading.entries"
+	ManifestHeadingUnsettled Key = "manifest.heading.unsettled"
+	ManifestHeadingLimits    Key = "manifest.heading.limits"
+
+	ManifestRunGenerated   Key = "manifest.run.generated"
+	ManifestRunSeed        Key = "manifest.run.seed"
+	ManifestRunLocale      Key = "manifest.run.locale"
+	ManifestRunCatalog     Key = "manifest.run.catalog"
+	ManifestRunSpec        Key = "manifest.run.spec"
+	ManifestRunRecipe      Key = "manifest.run.recipe"
+	ManifestRunPolicy      Key = "manifest.run.policy"
+	ManifestRunTag         Key = "manifest.run.tag"
+	ManifestRunSource      Key = "manifest.run.source"
+	ManifestRunRowsTotal   Key = "manifest.run.rows-total"
+	ManifestRunRowsMutated Key = "manifest.run.rows-mutated"
+
+	ManifestCountRequested  Key = "manifest.count.requested"
+	ManifestCountApplied    Key = "manifest.count.applied"
+	ManifestCountNotApplied Key = "manifest.count.not-applied"
+
+	ManifestEntryApplied    Key = "manifest.entry.applied"
+	ManifestEntryNotApplied Key = "manifest.entry.not-applied"
+	ManifestEntryBefore     Key = "manifest.entry.before"
+	ManifestEntryAfter      Key = "manifest.entry.after"
+
+	ManifestColumnMutator    Key = "manifest.column.mutator"
+	ManifestColumnPlace      Key = "manifest.column.place"
+	ManifestColumnExpect     Key = "manifest.column.expect"
+	ManifestColumnConfidence Key = "manifest.column.confidence"
+	ManifestColumnStatus     Key = "manifest.column.status"
+	ManifestColumnDetail     Key = "manifest.column.detail"
+
+	ManifestPlaceWholeFile Key = "manifest.place.whole-file"
+	ManifestPlaceRow       Key = "manifest.place.row"
+	ManifestPlaceByte      Key = "manifest.place.byte"
+
+	ManifestExpectationRejection  Key = "manifest.expectation.rejection"
+	ManifestExpectationAcceptance Key = "manifest.expectation.acceptance"
+	ManifestExpectationWarning    Key = "manifest.expectation.warning"
+
+	ManifestConfidenceHard Key = "manifest.confidence.hard"
+	ManifestConfidenceSoft Key = "manifest.confidence.soft"
+	ManifestLegendSoft     Key = "manifest.legend.soft"
+
+	ManifestFailureUndescribed         Key = "manifest.failure.undescribed"
+	ManifestFailureUnimplemented       Key = "manifest.failure.unimplemented"
+	ManifestFailureRunLacksCapability  Key = "manifest.failure.run-lacks-capability"
+	ManifestFailureFieldTypeNotCovered Key = "manifest.failure.field-type-not-covered"
+	ManifestFailureSchemeNotCovered    Key = "manifest.failure.scheme-not-covered"
+	ManifestFailureDeclinedByMutator   Key = "manifest.failure.declined-by-mutator"
+
+	VerifyCompared        Key = "verify.compared"
+	VerifyAgreed          Key = "verify.agreed"
+	VerifyNoAnswer        Key = "verify.no-answer"
+	VerifyVerdictAccepted Key = "verify.verdict.accepted"
+	VerifyVerdictRejected Key = "verify.verdict.rejected"
+
+	VerifyKindHole        Key = "verify.kind.hole"
+	VerifyKindOverzealous Key = "verify.kind.overzealous"
+	VerifyKindSilent      Key = "verify.kind.silent"
+	VerifyKindMissing     Key = "verify.kind.missing"
+)
+
 // Keys is every key a screen may ask for, so a test can close the register
 // from the side the code is on.
 var Keys = []Key{
-	AboutWindowTitle,
+	WindowTitle, ScreenAbout, ScreenManifest,
+
 	AboutHeadingVersions, AboutHeadingLicenses, AboutHeadingComponents,
 	AboutHeadingData, AboutHeadingNotices,
 	AboutVersionTool, AboutVersionCatalog, AboutVersionManifest, AboutVersionRecipe,
 	AboutLicenseCode, AboutLicenseSpec,
 	AboutColumnChecked,
 	AboutEmptyComponents, AboutEmptyData,
+
+	ManifestOpen, ManifestOpenResponse, ManifestEmpty, ManifestUnreadable,
+	ManifestHeadingRun, ManifestHeadingEntries, ManifestHeadingUnsettled,
+	ManifestHeadingLimits,
+	ManifestRunGenerated, ManifestRunSeed, ManifestRunLocale, ManifestRunCatalog,
+	ManifestRunSpec, ManifestRunRecipe, ManifestRunPolicy, ManifestRunTag,
+	ManifestRunSource, ManifestRunRowsTotal, ManifestRunRowsMutated,
+	ManifestCountRequested, ManifestCountApplied, ManifestCountNotApplied,
+	ManifestEntryApplied, ManifestEntryNotApplied,
+	ManifestEntryBefore, ManifestEntryAfter,
+	ManifestColumnMutator, ManifestColumnPlace, ManifestColumnExpect,
+	ManifestColumnConfidence, ManifestColumnStatus, ManifestColumnDetail,
+	ManifestPlaceWholeFile, ManifestPlaceRow, ManifestPlaceByte,
+	ManifestExpectationRejection, ManifestExpectationAcceptance,
+	ManifestExpectationWarning,
+	ManifestConfidenceHard, ManifestConfidenceSoft, ManifestLegendSoft,
+	ManifestFailureUndescribed, ManifestFailureUnimplemented,
+	ManifestFailureRunLacksCapability, ManifestFailureFieldTypeNotCovered,
+	ManifestFailureSchemeNotCovered, ManifestFailureDeclinedByMutator,
+
+	VerifyCompared, VerifyAgreed, VerifyNoAnswer,
+	VerifyVerdictAccepted, VerifyVerdictRejected,
+	VerifyKindHole, VerifyKindOverzealous, VerifyKindSilent, VerifyKindMissing,
 }
 
 // The catalogue travels inside the binary, because a window that needs a file

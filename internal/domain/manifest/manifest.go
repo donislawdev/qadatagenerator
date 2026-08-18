@@ -191,6 +191,26 @@ var failureKinds = map[FailureKind]bool{
 // Known reports whether this is one of the kinds the format defines.
 func (k FailureKind) Known() bool { return failureKinds[k] }
 
+// FailureKinds is the closed set written out, sorted.
+//
+// # Why the whole set and not only the membership test above
+//
+// A surface that shows a person why ordered damage did not happen needs one
+// phrase per kind, and a register of phrases can only be closed against a list.
+// Asked one kind at a time, nothing can put the question "is any kind
+// unanswered", so a seventh kind would arrive on a screen as a blank space
+// instead of as a failing test. The ban on silence is the whole reason an
+// unapplied entry carries a kind at all, and it would be undone at the last
+// step by the one surface a person actually reads.
+func FailureKinds() []FailureKind {
+	all := make([]FailureKind, 0, len(failureKinds))
+	for kind := range failureKinds {
+		all = append(all, kind)
+	}
+	sort.Slice(all, func(i, j int) bool { return all[i] < all[j] })
+	return all
+}
+
 // Run is the envelope: what this run was, and how much of it happened.
 type Run struct {
 	// GeneratedAt is when the run happened, as text in the form the manifest

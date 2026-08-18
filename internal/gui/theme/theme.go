@@ -199,6 +199,20 @@ func Named(name string) Color {
 	return colorsByName[NameText]
 }
 
+// Lookup is the colour of that name, and whether this palette has one.
+//
+// # Why this exists beside Named
+//
+// Named always answers, which is what a view wants: a control has to be painted
+// something. This one reports whether the name is ours at all, which is what the
+// bridge to the toolkit needs, since it is asked for colours by names that
+// belong to the toolkit and has to tell those apart from ours without a second
+// list of what ours are.
+func Lookup(name string) (Color, bool) {
+	entry, ok := colorsByName[name]
+	return entry, ok
+}
+
 // StepOf is the distance a view asks for by name. The same reasoning as Named
 // applies to the fallback.
 func StepOf(name string) float32 {
@@ -234,6 +248,70 @@ const (
 	StartWidth  float32 = 900
 	StartHeight float32 = 700
 )
+
+// SidebarWidth is how wide the column naming the screens is.
+//
+// # Why the window has such a column at all
+//
+// docs/08 names seven screens. Tabs across the top narrow as they are added,
+// so the name of the screen a person is on stops being fully readable exactly
+// when there are enough screens for that to matter, and a list down the side
+// does not have that property. The owner chose it on 2026-08-17, recorded with
+// what was turned down.
+//
+// # Why this number
+//
+// A choice with a reason rather than a measurement, and written as such. It
+// holds the longest screen name in the catalogue without wrapping it, and
+// leaves the content the greater part of a window opened at StartWidth. What
+// would change it: the first screen name that wraps here, or a language whose
+// names are longer than the English ones.
+const SidebarWidth float32 = 220
+
+// EntryColumnWidths is how wide each column of the manifest table is.
+//
+// # Why a row is columns rather than lines
+//
+// The first drawing put every fact of an entry on a line of its own, four lines
+// to a row. Running it showed what the practice on data tables says outright:
+// multi line rows destroy the vertical rhythm that makes a list scannable, so a
+// reader compares by reading rather than by looking, and an entry with nothing
+// to say on one line leaves a hole that pushes its last line against the
+// following entry.
+//
+// # Why the widths differ rather than being equal
+//
+// Equal columns were the second attempt and they waste the room the long
+// columns need on the short ones: "row 4" and a sentence explaining why damage
+// could not be applied do not want the same width. The proportions below come
+// from what each column holds: an identifier of the form LAYER.area.variant, a
+// place, one of three phrases, one of two, one of two words, and a sentence.
+//
+// The last one is deliberately the widest, because it is the one column allowed
+// to carry prose. Practice on tables reserves full wrapping for exactly one
+// column and holds every other to a single line, which is the same rhythm the
+// paragraph above is about.
+//
+// Every value is a multiple of the spacing module for the reason recorded with
+// that module: a desktop scales the interface by a factor the user picks, and
+// these land on whole numbers at the common ones.
+var EntryColumnWidths = []float32{280, 240, 220, 340, 140, 720}
+
+// EntryColumns is how many columns one entry is laid out in.
+func EntryColumns() int { return len(EntryColumnWidths) }
+
+// EnvelopeColumns is how many columns of label and value pairs the envelope of
+// a run is split into.
+//
+// It lives here rather than beside the screen for the reason every other value
+// of the view does: the guard refuses a bare number anywhere in the window, and
+// it draws no line between a count and a distance. That refusal is worth more
+// than the exception would be, since "this one is only a count" is the sentence
+// every value in a view could be introduced with.
+//
+// Two, because the envelope carries about a dozen pairs and one column of them
+// is a tall block of a screen whose subject is the table under it.
+const EnvelopeColumns = 2
 
 // Space is one step of the spacing scale.
 type Space struct {

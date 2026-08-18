@@ -104,11 +104,7 @@ func asManifest(read manifestDocument) (manifest.Manifest, []string) {
 			FailureReason: entry.FailureReason,
 			FailureKind:   manifest.FailureKind(entry.FailureKind),
 		}
-		defect.Location = manifest.Location{
-			Entity: entry.Location.Entity,
-			Row:    entry.Location.Row,
-			Field:  entry.Location.Field,
-		}
+		defect.Location = locationFrom(entry.Location)
 		if entry.ValueBefore != nil {
 			defect.ValueBefore, defect.HasValueBefore = *entry.ValueBefore, true
 		}
@@ -134,4 +130,41 @@ func asManifest(read manifestDocument) (manifest.Manifest, []string) {
 		RowsTotal:      read.Run.RowsTotal,
 		RowsMutated:    read.Run.RowsMutated,
 	}, defects)
+}
+
+// locationFrom turns a place on disk back into a place in the model, whole.
+//
+// # Why every member and not the three a row usually has
+//
+// It read the entity, the row and the field until 2026-08-17, which is what an
+// entry damaging a value carries and what every test here happened to use. The
+// layers name places differently, so the other three members are not decoration:
+// a container defect may name only a path, set integrity damage names the other
+// records it spans, and damage to the bytes names an offset. Dropping them cost
+// two different failures, and only one of them was loud.
+//
+// Loud: an entry that came back without its path or without the records it
+// spans is one the model refuses, so a manifest this tool wrote from its own
+// full policy could not be opened by this tool at all, and verify said the input
+// document was invalid while naming our own file.
+//
+// Quiet, and the worse of the two: damage to the bytes of a file legitimately
+// names no place, so an offset dropped on the way in raises no complaint
+// anywhere. The document opens, the run succeeds, and the manifest has simply
+// stopped saying where in the file the damage was. That is this project's own
+// ban on silence, broken by the reader.
+func locationFrom(document locationDocument) manifest.Location {
+	place := manifest.Location{
+		Entity: document.Entity,
+		Row:    document.Row,
+		Field:  document.Field,
+		Path:   document.Path,
+	}
+	if document.ByteOffset != nil {
+		place.ByteOffset, place.HasByteOffset = *document.ByteOffset, true
+	}
+	for _, related := range document.Related {
+		place.Related = append(place.Related, locationFrom(related))
+	}
+	return place
 }

@@ -9,7 +9,11 @@
 # The rules for this text are the ones in the project handbook: say what the
 # thing does, name what is on screen, no filler, and no em dash or semicolon.
 
-about.window.title: About QA Data Generator
+window.title: QA Data Generator
+
+screen.about: About
+screen.manifest: Manifest browser
+
 about.heading.versions: Versions
 about.heading.licenses: Licenses
 about.heading.components: Third party components
@@ -28,3 +32,71 @@ about.column.checked: License read on
 
 about.empty.components: This build links no third party module.
 about.empty.data: This build carries no reference data.
+
+manifest.open: Open manifest...
+manifest.open-response: Open application response...
+manifest.empty: No manifest is open. Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data.
+manifest.unreadable: This file could not be read as a manifest.
+
+manifest.heading.run: This run
+manifest.heading.entries: Ordered damage
+manifest.heading.unsettled: Not settled
+manifest.heading.limits: What this comparison could not see
+
+manifest.run.generated: Generated
+manifest.run.seed: Seed
+manifest.run.locale: Data locale
+manifest.run.catalog: Corruption catalog
+manifest.run.spec: Manifest format
+manifest.run.recipe: Recipe
+manifest.run.policy: Corruption policy
+manifest.run.tag: Tag
+manifest.run.source: Source file
+manifest.run.rows-total: Rows
+manifest.run.rows-mutated: Rows changed
+
+manifest.count.requested: Ordered
+manifest.count.applied: Applied
+manifest.count.not-applied: Not applied
+
+manifest.entry.applied: applied
+manifest.entry.not-applied: NOT APPLIED
+manifest.entry.before: was
+manifest.entry.after: now
+
+manifest.column.mutator: Damage
+manifest.column.place: Where
+manifest.column.expect: Expected
+manifest.column.confidence: Certainty
+manifest.column.status: Outcome
+manifest.column.detail: Why, and what changed
+
+manifest.place.whole-file: whole file
+manifest.place.row: row
+manifest.place.byte: byte
+
+manifest.expectation.rejection: should be rejected
+manifest.expectation.acceptance: should be accepted
+manifest.expectation.warning: should be accepted and marked
+
+manifest.confidence.hard: hard
+manifest.confidence.soft: "~ soft"
+manifest.legend.soft: A soft expectation is marked ~ and means the right answer depends on the rules of your application rather than on the data, so a disagreement there is reported and never failed on.
+
+manifest.failure.undescribed: not in the catalog
+manifest.failure.unimplemented: not built yet
+manifest.failure.run-lacks-capability: the run cannot do it
+manifest.failure.field-type-not-covered: no column of that kind
+manifest.failure.scheme-not-covered: scheme not covered
+manifest.failure.declined-by-mutator: the damage declined
+
+verify.compared: Entries compared
+verify.agreed: The application answered the way the manifest expected, everywhere it could be judged.
+verify.no-answer: The response record says nothing about this row.
+verify.verdict.accepted: the application accepted this row
+verify.verdict.rejected: the application rejected this row
+
+verify.kind.hole: accepted although the manifest expected a rejection
+verify.kind.overzealous: rejected although the manifest expected it to be accepted
+verify.kind.silent: taken without the mark the manifest expected
+verify.kind.missing: the application never answered for this row

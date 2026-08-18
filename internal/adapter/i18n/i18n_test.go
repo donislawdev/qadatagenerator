@@ -40,7 +40,7 @@ func TestTheEmbeddedCatalogueIsReadable(t *testing.T) {
 	if English.Language() != "en" {
 		t.Fatalf("the English catalogue reports language %q", English.Language())
 	}
-	if got := English.T(AboutWindowTitle); got == string(AboutWindowTitle) {
+	if got := English.T(WindowTitle); got == string(WindowTitle) {
 		t.Fatal("the title resolved to its own key, so the embedded file did not parse")
 	}
 }
