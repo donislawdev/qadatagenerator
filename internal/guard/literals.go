@@ -29,8 +29,25 @@ const ViewRoot = "internal/gui"
 //
 // A second entry here is a claim that some other package needs values of its
 // own. That claim deserves the paragraph this one has.
+//
+// # The second entry, and why it is not the beginning of a list
+//
+// internal/gui/screens draws nothing. It says which screens exist, in which
+// states, and what sample document each state is built from, so that the guard
+// comparing stored screens and the probe rendering pictures walk one list rather
+// than two that drift apart. Its numbers are therefore data and not distances: a
+// row number in a sample manifest, how many records that manifest describes, and
+// how many times Tab is pressed to reach a control. None of them reaches a
+// layout, and the package holds no colour at all.
+//
+// 🔴 What would make this entry wrong, so that it can be recognised rather than
+// argued about: the day anything in that package sizes, positions or paints
+// something. If it grows a call that lays a widget out, this exemption stops
+// describing it and the package has to take its values from the theme like every
+// other one.
 var LiteralsAllowed = map[string]bool{
-	"internal/gui/theme": true,
+	"internal/gui/theme":   true,
+	"internal/gui/screens": true,
 }
 
 // A colour written as text, in either case, in any string the window carries.

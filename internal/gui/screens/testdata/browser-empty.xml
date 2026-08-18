@@ -1,0 +1,56 @@
+<canvas padded size="1342x900">
+	<content>
+		<container pos="8,8" size="1326x884">
+			<container size="220x884">
+				<container size="220x884">
+					<widget size="220x28" type="*widget.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
+						<widget pos="62,4" size="122x20" type="*widget.RichText">
+							<text alignment="center" bold size="122x19">Manifest browser</text>
+						</widget>
+						<image fillMode="contain" pos="34,4" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
+					</widget>
+					<widget pos="0,36" size="220x28" type="*widget.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
+						<widget pos="88,4" size="42x19" type="*widget.RichText">
+							<text alignment="center" bold size="42x19">About</text>
+						</widget>
+					</widget>
+				</container>
+			</container>
+			<container pos="228,0" size="1098x884">
+				<container size="1098x884">
+					<container pos="24,24" size="1050x836">
+						<container size="1050x28">
+							<widget size="123x28" type="*widget.Button">
+								<rectangle fillColor="button" radius="5" size="123x28"/>
+								<rectangle size="123x28"/>
+								<widget pos="4,4" size="115x19" type="*widget.RichText">
+									<text alignment="center" bold size="115x19">Open manifest...</text>
+								</widget>
+							</widget>
+							<widget pos="131,0" size="206x28" type="*widget.Button">
+								<rectangle fillColor="button" radius="5" size="206x28"/>
+								<rectangle size="206x28"/>
+								<widget pos="4,4" size="198x19" type="*widget.RichText">
+									<text alignment="center" bold color="disabled" size="198x19">Open application response...</text>
+								</widget>
+							</widget>
+						</container>
+						<container pos="0,36" size="1050x800">
+							<widget size="1050x800" type="*widget.Scroll">
+								<widget size="1050x800" type="*widget.Label">
+									<widget size="1050x800" type="*widget.RichText">
+										<text pos="4,4" size="895x19">No manifest is open. Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data.</text>
+									</widget>
+								</widget>
+							</widget>
+						</container>
+					</container>
+				</container>
+			</container>
+		</container>
+	</content>
+</canvas>

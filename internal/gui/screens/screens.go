@@ -1,0 +1,270 @@
+// Package screens says which screens this window has, in which states, and how
+// each state is reached.
+//
+// # Why this exists rather than a list in each place that needs one
+//
+// Two things need to put a screen into a state without a person: the guard that
+// checks the window still draws what it drew yesterday, and the probe in tools
+// that renders every state to a picture. Written twice, those two lists drift,
+// and the drift is silent because both keep passing. The neighbouring project
+// measured exactly that on the day their second screen arrived: their probe
+// asked every screen for a field that only one of them had, so two states were
+// never photographed and nothing said so.
+//
+// So the list lives once, here, and both callers walk it.
+//
+// # Why the sample is built in code rather than read from a file
+//
+// A manifest on disk would have to be regenerated whenever the format moves,
+// and the thing that notices a format move is precisely the guard reading it.
+// A manifest built here moves with the model in the same commit, and the golden
+// files below it are then a statement about the drawing rather than about the
+// reader.
+package screens
+
+import (
+	"fyne.io/fyne/v2"
+
+	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
+	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
+	"github.com/donislawdev/qadatagenerator/internal/domain/response"
+	"github.com/donislawdev/qadatagenerator/internal/gui/about"
+	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
+	"github.com/donislawdev/qadatagenerator/internal/gui/shell"
+	"github.com/donislawdev/qadatagenerator/internal/license"
+	"github.com/donislawdev/qadatagenerator/internal/version"
+)
+
+// Data is what the states are drawn from.
+type Data struct {
+	Promised  manifest.Manifest
+	Actual    response.Record
+	HasActual bool
+}
+
+// Keyboard is a walk through the window, as a person would make it.
+//
+// Tabs are counted rather than named, because the toolkit moves focus by
+// position and naming a control here would be a second register of what the
+// window already holds.
+type Keyboard struct {
+	Tabs int
+	Keys []fyne.KeyName
+}
+
+// State is one screen in one condition, and how to get there.
+type State struct {
+	// Name is the file name a picture of this state gets, so it is a word
+	// somebody reads in a directory listing rather than an index.
+	Name string
+	// Purpose says what this state is worth looking at for.
+	Purpose string
+	// Screen is which screen of the shell it lives on.
+	Screen int
+	// NeedsManifest and NeedsResponse say what the state cannot be built
+	// without, so a caller with neither skips it loudly instead of drawing an
+	// empty screen and calling it the state that was asked for.
+	NeedsManifest bool
+	NeedsResponse bool
+	// Keyboard is applied after the window exists, because focus with no canvas
+	// has nothing to land on.
+	Keyboard Keyboard
+}
+
+// All is every state this window can be put into, for both screens.
+//
+// One list for both screens on purpose. A list written for one screen stays a
+// list of one screen forever, and nobody notices, because it is green.
+func All() []State {
+	return []State{
+		{
+			Name:    "browser-empty",
+			Purpose: "no manifest open, a sentence rather than an empty rectangle",
+			Screen:  0,
+		},
+		{
+			Name:          "browser-promised",
+			Purpose:       "a manifest open, which is what a run promised about a dataset",
+			Screen:        0,
+			NeedsManifest: true,
+		},
+		{
+			Name:          "browser-compared",
+			Purpose:       "the same manifest beside what an application did about it",
+			Screen:        0,
+			NeedsManifest: true,
+			NeedsResponse: true,
+		},
+		{
+			Name:          "browser-focus-button",
+			Purpose:       "the keyboard on the button that opens a manifest",
+			Screen:        0,
+			NeedsManifest: true,
+			Keyboard:      Keyboard{Tabs: 3},
+		},
+		{
+			Name:          "browser-focus-cell",
+			Purpose:       "the keyboard inside the table, three rows down and one column across",
+			Screen:        0,
+			NeedsManifest: true,
+			Keyboard: Keyboard{
+				Tabs: 5,
+				Keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight},
+			},
+		},
+		{
+			Name:    "about",
+			Purpose: "versions, licences and every third party component",
+			Screen:  1,
+		},
+		{
+			Name:     "about-focus-name",
+			Purpose:  "the keyboard on the name of the screen being read",
+			Screen:   1,
+			Keyboard: Keyboard{Tabs: 2},
+		},
+	}
+}
+
+// Buildable reports whether this state can be drawn from the data given, and
+// says what is missing when it cannot.
+func (s State) Buildable(data Data) (bool, string) {
+	if s.NeedsManifest && data.Promised.SpecVersion() == "" {
+		return false, "no manifest"
+	}
+	if s.NeedsResponse && !data.HasActual {
+		return false, "no response record"
+	}
+	return true, ""
+}
+
+// Assemble builds the whole window in one state, and hands back its content.
+//
+// The screen is put into its state through the same calls the file chooser
+// makes, so nothing here can reach a state a person cannot.
+func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
+	view := manifestview.New(text, nil, manifestview.Readers{})
+	frame := shell.New([]shell.Screen{
+		{Name: text.T(i18n.ScreenManifest), Content: view.Content()},
+		{Name: text.T(i18n.ScreenAbout), Content: about.Content(text, license.Current(), version.Current())},
+	})
+	if state.NeedsManifest {
+		view.Open(data.Promised)
+	}
+	if state.NeedsResponse && data.HasActual {
+		view.Compare(data.Actual)
+	}
+	frame.Open(state.Screen)
+	return frame.Content()
+}
+
+// Walk applies the keyboard of a state to a canvas that already exists.
+//
+// It presses rather than calls: Tab goes through the focus manager and an arrow
+// goes to whatever holds focus, which is the road a key travels in a real
+// window. Calling a method on the control directly reaches places a key cannot,
+// and would answer a question nobody asked.
+func Walk(canvas fyne.Canvas, state State) {
+	for i := 0; i < state.Keyboard.Tabs; i++ {
+		canvas.FocusNext()
+	}
+	for _, key := range state.Keyboard.Keys {
+		if focused := canvas.Focused(); focused != nil {
+			focused.TypedKey(&fyne.KeyEvent{Name: key})
+		}
+	}
+}
+
+// Sample is a manifest and a response record small enough to read and wide
+// enough to carry every kind of entry the screen draws differently.
+//
+// Every colour of the palette that means something appears at least once, and
+// so does damage that was ordered and could not be applied, because that is the
+// entry this product exists to make visible.
+func Sample() Data {
+	promised, problems := manifest.New("0.1", manifest.Run{
+		GeneratedAt:    "2026-08-18T09:19:59Z",
+		Seed:           "policy-walkthrough",
+		Locale:         "pl-PL",
+		CatalogVersion: "0.1",
+		Recipe:         "policy walkthrough",
+		RowsTotal:      6,
+		RowsMutated:    4,
+	}, sampleDefects())
+	if len(problems) > 0 {
+		// A sample that is not a valid manifest would make every golden file
+		// below it a statement about a document this tool would refuse.
+		panic("the sample manifest is not valid: " + problems[0])
+	}
+	return Data{Promised: promised, Actual: sampleResponse(), HasActual: true}
+}
+
+func sampleDefects() []manifest.Defect {
+	return []manifest.Defect{{
+		ID:       "one",
+		Location: manifest.Location{Entity: "customer", Row: 1, Field: "pesel"},
+		Mutator:  "L3.checksum.off_by_one", Layer: catalog.Domain, Applied: true,
+		ValueBefore: "44051401359", HasValueBefore: true,
+		ValueAfter: "44051401358", HasValueAfter: true,
+		Expectation: catalog.Rejection, Confidence: catalog.Hard,
+		Rationale: "the check digit no longer agrees with the digits before it",
+	}, {
+		ID:       "two",
+		Location: manifest.Location{Entity: "customer", Row: 2, Field: "last_name"},
+		Mutator:  "L2.string.empty", Layer: catalog.FieldShape, Applied: true,
+		ValueBefore: "Fronczek", HasValueBefore: true,
+		ValueAfter: "", HasValueAfter: true,
+		Expectation: catalog.Rejection, Confidence: catalog.Soft,
+		Rationale: "a required column arrived empty",
+	}, {
+		ID:       "three",
+		Location: manifest.Location{Entity: "customer", Row: 3, Field: "gender"},
+		Mutator:  "L2.coercion.text_to_number", Layer: catalog.FieldShape, Applied: true,
+		ValueBefore: "F", HasValueBefore: true,
+		ValueAfter: "6", HasValueAfter: true,
+		Expectation: catalog.Acceptance, Confidence: catalog.Soft,
+		Rationale: "a value outside the set the column is documented to carry",
+	}, {
+		ID:       "four",
+		Location: manifest.Location{Entity: "customer", Row: 4, Field: "quantity"},
+		Mutator:  "L2.type.string_in_numeric", Layer: catalog.FieldShape, Applied: true,
+		ValueBefore: "3492", HasValueBefore: true,
+		ValueAfter: "n/a", HasValueAfter: true,
+		Expectation: catalog.Warning, Confidence: catalog.Soft,
+		Rationale: "text where the column is documented to carry a number",
+	}, {
+		ID:       "five",
+		Location: manifest.Location{Entity: "customer", Row: 5, Field: "birth_date"},
+		Mutator:  "L2.date.impossible", Layer: catalog.FieldShape, Applied: false,
+		FailureKind:   manifest.Unimplemented,
+		FailureReason: "this build carries no implementation of them yet, only its description",
+		Expectation:   catalog.Rejection, Confidence: catalog.Hard,
+		Rationale: "a date that never happened",
+	}, {
+		ID:       "six",
+		Location: manifest.Location{Entity: "customer", Row: 6, Field: "ssn"},
+		Mutator:  "L3.sentinel.placeholder_value", Layer: catalog.Domain, Applied: false,
+		FailureKind:   manifest.Unimplemented,
+		FailureReason: "this build carries no implementation of them yet, only its description",
+		Expectation:   catalog.Acceptance, Confidence: catalog.Soft,
+		Rationale: "a placeholder an issuer never gives out",
+	}}
+}
+
+// sampleResponse answers about four of the six rows, and that is the point.
+//
+// One row disagrees with a hard expectation, one disagrees with a soft one, and
+// two rows are absent, which is what makes the screen say what the comparison
+// could not settle rather than pretending it settled everything.
+func sampleResponse() response.Record {
+	return response.Record{
+		SpecVersion: "0.1",
+		Rows: []response.Row{
+			{Number: 1, Verdict: response.Rejected, Code: "ERR_CHECKSUM"},
+			{Number: 2, Verdict: response.Accepted},
+			{Number: 3, Verdict: response.Accepted},
+			{Number: 4, Verdict: response.Rejected, Code: "ERR_TYPE"},
+		},
+	}
+}
