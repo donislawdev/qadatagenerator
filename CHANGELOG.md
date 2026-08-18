@@ -32,6 +32,13 @@ repository once they are released.
 
 ### Fixed
 
+- **Enter presses a button in the window, and not only the space bar.** A
+  button nobody can press with the pointer, such as the one for a response
+  record before a manifest is open, still ignores both.
+- **Opening a response record with the manifest button now says so.** It used to
+  list the fields a manifest envelope needs, one sentence each, which is true
+  about the file and no help at all when you have opened the right file with the
+  wrong button.
 - **The window can now be used with a keyboard, and it shows you where you are.**
   Tab moves through the window in the order you read it, starting with the list
   of screens down the left. In the table of ordered damage, the arrow keys move

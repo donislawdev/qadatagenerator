@@ -177,6 +177,9 @@ var Guards = []Guard{
 	{"every state of every screen still draws what it drew before", "TestEveryScreenStillDrawsWhatItDrewBefore", "internal/gui/screens", ByMutation},
 	{"every state on the list can be built from the sample, so none goes unrendered", "TestEveryStateCanBeBuiltFromTheSample", "internal/gui/screens", ByMutation},
 	{"a state that needs a manifest is refused without one rather than drawn empty", "TestAStateThatNeedsAManifestIsRefusedWithoutOne", "internal/gui/screens", ByMutation},
+	{"a button answers to Enter as well as to the space bar", "TestAButtonIsPressedByEnterAndBySpace", "internal/gui/parts", ByMutation},
+	{"a button nobody can press with the pointer stays unpressable from the keyboard", "TestADisabledButtonIgnoresEnter", "internal/gui/parts", ByMutation},
+	{"a response record opened as a manifest is told apart rather than judged as one", "TestAResponseRecordOpenedAsAManifestIsToldApart", "internal/adapter/manifestjson", ByMutation},
 
 	// --- the register guarding the register ---------------------------------
 	{"a guard added here cannot stay out of the register", "TestEveryGuardInThisPackageIsRegistered", "internal/guard", ByMutation},

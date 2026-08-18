@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 
+	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
@@ -124,7 +125,9 @@ func TestAFrameWithNoScreensSaysThereIsNothingShowing(t *testing.T) {
 // cause is that the convenient way of building a border hands the middle over
 // before the edges, and the keyboard walks the order it was handed.
 func TestTheKeyboardMeetsTheNamesBeforeTheScreen(t *testing.T) {
-	inside := widget.NewButton("something inside the screen", func() {})
+	// Built with the same button the screens use, so the walk meets the type a
+	// person actually reaches rather than a stand in of another kind.
+	inside := parts.NewButton("something inside the screen", func() {})
 	frame := New([]Screen{
 		{Name: "Manifest browser", Content: inside},
 		{Name: "About", Content: widget.NewLabel("the about screen")},
@@ -138,7 +141,7 @@ func TestTheKeyboardMeetsTheNamesBeforeTheScreen(t *testing.T) {
 	wanted := []string{"Manifest browser", "About", "something inside the screen"}
 	for at, name := range wanted {
 		canvas.FocusNext()
-		button, ok := canvas.Focused().(*widget.Button)
+		button, ok := canvas.Focused().(*parts.Button)
 		if !ok {
 			t.Fatalf("stop %d of the walk is %T rather than a button", at+1, canvas.Focused())
 		}

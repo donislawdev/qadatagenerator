@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
@@ -151,7 +152,7 @@ func TestTheKeyboardMeetsTheButtonsBeforeTheEntries(t *testing.T) {
 
 	canvas := window.Canvas()
 	canvas.FocusNext()
-	button, ok := canvas.Focused().(*widget.Button)
+	button, ok := canvas.Focused().(*parts.Button)
 	if !ok {
 		t.Fatalf("the first thing the keyboard reaches is %T rather than a button", canvas.Focused())
 	}

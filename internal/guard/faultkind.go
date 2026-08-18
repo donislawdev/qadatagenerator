@@ -68,7 +68,7 @@ var RefusalKinds = map[string]string{
 	"internal/cli.writerFor Config":                          "the recipe asks for a format this build does not write",
 
 	// --- Data: a valid document asks for something that cannot be done --------
-	"internal/adapter/manifestjson.Load Data":                "the manifest is larger than this build reads back at once. The document is valid and this build cannot hold it, which is the other side of the boundary",
+	"internal/adapter/manifestjson.bytesOf Data":             "the manifest is larger than this build reads back at once. The document is valid and this build cannot hold it, which is the other side of the boundary",
 	"internal/adapter/responsejson.read Data":                "the response record is larger than this build reads at once, for the same reason as the manifest above",
 	"internal/adapter/sourcecsv.File.changedUnderneath Data": "the source file changed while it was being read. 🔴 The file is the DATA being worked on rather than a document telling this tool what to do, which is where DEC-172 draws the line",
 	"internal/adapter/sourcecsv.File.openAndReadHeader Data": "the source file is empty, and an empty file is data this mode cannot work with rather than an invalid instruction",

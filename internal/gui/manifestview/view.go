@@ -12,6 +12,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/app/verify"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/domain/response"
+	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
@@ -40,7 +41,7 @@ type View struct {
 	window  fyne.Window
 	read    Readers
 	body    *fyne.Container
-	respond *widget.Button
+	respond *parts.Button
 
 	promised   manifest.Manifest
 	hasPromise bool
@@ -56,7 +57,7 @@ type View struct {
 // New builds the screen. The window is what a file chooser has to appear over.
 func New(text i18n.Catalogue, window fyne.Window, read Readers) *View {
 	view := &View{text: text, window: window, read: read, body: container.NewStack()}
-	view.respond = widget.NewButton(text.T(i18n.ManifestOpenResponse), view.chooseResponse)
+	view.respond = parts.NewButton(text.T(i18n.ManifestOpenResponse), view.chooseResponse)
 	// Nothing to compare a response against until a manifest is open, and a
 	// control that cannot do anything yet says so by being unavailable rather
 	// than by failing after the fact.
@@ -76,7 +77,7 @@ func New(text i18n.Catalogue, window fyne.Window, read Readers) *View {
 // and the layout is told separately where each one goes. It draws the same and
 // it walks the way the eye does.
 func (v *View) Content() fyne.CanvasObject {
-	open := widget.NewButton(v.text.T(i18n.ManifestOpen), v.chooseManifest)
+	open := parts.NewButton(v.text.T(i18n.ManifestOpen), v.chooseManifest)
 	bar := container.NewHBox(open, v.respond)
 	return inset(container.New(layout.NewBorderLayout(bar, nil, nil, nil), bar, v.body))
 }

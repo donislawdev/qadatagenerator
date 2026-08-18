@@ -34,20 +34,9 @@ const MaxSize = 48 * 1024 * 1024
 // the disk, so what matters is that the reader refuses anything it cannot
 // read rather than filling in a default.
 func Load(path string) (manifest.Manifest, error) {
-	handle, err := os.Open(path)
+	raw, err := bytesOf(path)
 	if err != nil {
-		return manifest.Manifest{}, fault.Wrap(fault.IO, err, "cannot read the manifest "+path)
-	}
-	defer func() { _ = handle.Close() }()
-
-	raw, err := io.ReadAll(io.LimitReader(handle, MaxSize+1))
-	if err != nil {
-		return manifest.Manifest{}, fault.Wrap(fault.IO, err, "cannot read the manifest "+path)
-	}
-	if len(raw) > MaxSize {
-		return manifest.Manifest{}, fault.New(fault.Data, path+" is larger than "+
-			strconv.Itoa(MaxSize/(1024*1024))+" MB, which is as much of a manifest as this build "+
-			"reads back at once")
+		return manifest.Manifest{}, err
 	}
 
 	var read manifestDocument
@@ -59,6 +48,31 @@ func Load(path string) (manifest.Manifest, error) {
 	if len(read.Defects) == 0 && read.SpecVersion == "" {
 		return manifest.Manifest{}, fault.New(fault.Config, path+
 			" carries neither a spec version nor a single entry, so it is not a manifest")
+	}
+	// # Why a document with no entries is asked what it is instead
+	//
+	// A response record carries a spec version of its own, so it walks past the
+	// question above and is then judged as a manifest with an empty envelope.
+	// The refusal that came out named the fields a manifest envelope needs, one
+	// sentence each, which is true of the document in front of it and useless to
+	// the person holding it: they had opened the right file with the wrong
+	// button. Seen when the owner ran the window on 2026-08-18.
+	//
+	// So a document with no entries is asked whether it looks like the other
+	// format this tool reads, and told apart by what only that one has: rows
+	// carrying a verdict.
+	//
+	// 🔴 Only that document is refused here, and the narrowness is a correction
+	// of this very fix. Refusing every document with no entries would have
+	// refused a manifest this tool writes itself, because a run that ordered no
+	// damage produces one and the writer beside this reader has a test saying so.
+	// The fix was broader than the fault for about ten minutes, which is what the
+	// rule about a correction being a claim of its own is for.
+	if len(read.Defects) == 0 && looksLikeResponse(raw) {
+		return manifest.Manifest{}, fault.New(fault.Config, path+
+			" is an application response record rather than a manifest. It says what an "+
+			"application did with the rows it was given, so open it with the response button "+
+			"beside a manifest that is already open, or pass it to verify as the response")
 	}
 	built, problems := asManifest(read)
 	if len(problems) > 0 {
@@ -73,6 +87,31 @@ func Load(path string) (manifest.Manifest, error) {
 			"produce the manifest again with this one")
 	}
 	return built, nil
+}
+
+// bytesOf reads the file whole, within the limit this build reads back at once.
+//
+// Split out of Load rather than inlined, because Load says what a manifest has
+// to be and this says how much of a file is read. Two subjects in one function
+// was also what pushed it past the hard length limit the day the refusal about
+// response records was added, and the limit is not negotiable.
+func bytesOf(path string) ([]byte, error) {
+	handle, err := os.Open(path)
+	if err != nil {
+		return nil, fault.Wrap(fault.IO, err, "cannot read the manifest "+path)
+	}
+	defer func() { _ = handle.Close() }()
+
+	raw, err := io.ReadAll(io.LimitReader(handle, MaxSize+1))
+	if err != nil {
+		return nil, fault.Wrap(fault.IO, err, "cannot read the manifest "+path)
+	}
+	if len(raw) > MaxSize {
+		return nil, fault.New(fault.Data, path+" is larger than "+
+			strconv.Itoa(MaxSize/(1024*1024))+" MB, which is as much of a manifest as this build "+
+			"reads back at once")
+	}
+	return raw, nil
 }
 
 // manifestDocument is the reading side of the shape, and it is deliberately
@@ -167,4 +206,27 @@ func locationFrom(document locationDocument) manifest.Location {
 		place.Related = append(place.Related, locationFrom(related))
 	}
 	return place
+}
+
+// looksLikeResponse reports whether these bytes are the other document this tool
+// reads: a record of what an application did.
+//
+// It asks for the one member no manifest has, a row carrying a verdict, rather
+// than for the spec version both formats carry. Asking for the version would put
+// the two formats into one namespace they do not share.
+func looksLikeResponse(raw []byte) bool {
+	var document struct {
+		Rows []struct {
+			Verdict string `json:"verdict"`
+		} `json:"rows"`
+	}
+	if err := json.Unmarshal(raw, &document); err != nil {
+		return false
+	}
+	for _, row := range document.Rows {
+		if strings.TrimSpace(row.Verdict) != "" {
+			return true
+		}
+	}
+	return false
 }

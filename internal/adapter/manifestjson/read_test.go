@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
@@ -161,5 +162,46 @@ func TestAnOffsetOfNoughtIsNotTheSameAsNoOffset(t *testing.T) {
 	if !read.Defects()[0].Location.HasByteOffset {
 		t.Error("damage at the first byte came back as damage with no place, and the first byte " +
 			"of a file is a real place")
+	}
+}
+
+// A response record opened as a manifest is told apart rather than judged as one.
+//
+// 🔴 This is the guard for a refusal the owner met on 2026-08-18 by opening the
+// right file with the wrong button. A response record carries a spec version of
+// its own, so it walked past the check for a document that is nothing at all and
+// was then measured against the rules for a manifest envelope. What came out was
+// four true sentences about missing seeds and locales, and not one word saying
+// what the file actually was.
+//
+// The pair matters as much as the case: a manifest with no entries is a document
+// this tool writes itself, so it must still be read.
+func TestAResponseRecordOpenedAsAManifestIsToldApart(t *testing.T) {
+	directory := t.TempDir()
+	record := filepath.Join(directory, "application-response.json")
+	contents := `{"spec_version":"0.1","dataset":{"rows_total":60},` +
+		`"rows":[{"row":1,"verdict":"rejected","code":"ERR_CHECKSUM"},{"row":2,"verdict":"accepted"}]}`
+	if err := os.WriteFile(record, []byte(contents), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := manifestjson.Load(record)
+	if err == nil {
+		t.Fatal("a response record was read as a manifest")
+	}
+	if !strings.Contains(err.Error(), "response record") {
+		t.Errorf("the refusal reads %q, and it never says the file is a response record, "+
+			"so somebody who opened the right file with the wrong button learns nothing", err)
+	}
+
+	empty := filepath.Join(directory, "no-damage.json")
+	envelope := `{"spec_version":"0.1","run":{"generated_at":"2026-08-18T00:00:00Z","seed":"s",` +
+		`"locale":"pl-PL","catalog_version":"0.1","rows_total":1,"rows_mutated":0},"defects":[]}`
+	if err := os.WriteFile(empty, []byte(envelope), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := manifestjson.Load(empty); err != nil {
+		t.Errorf("a manifest of a run that ordered no damage was refused: %v.\nThis tool writes such "+
+			"a manifest itself, so refusing to read one is a rule that contradicts the writer", err)
 	}
 }

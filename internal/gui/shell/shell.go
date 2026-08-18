@@ -23,6 +23,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
+	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
@@ -39,7 +40,7 @@ type Screen struct {
 // Shell is the frame and which screen is showing.
 type Shell struct {
 	screens []Screen
-	buttons []*widget.Button
+	buttons []*parts.Button
 	body    *fyne.Container
 }
 
@@ -62,8 +63,8 @@ func New(screens []Screen) *Shell {
 // reachable without one, and a button is what this toolkit gives focus to and
 // draws a focus ring around. That ring is measured: the focus colour stands at
 // 9.02 against the window, where the guideline asks for three.
-func (s *Shell) button(index int) *widget.Button {
-	return widget.NewButton(s.screens[index].Name, func() { s.Open(index) })
+func (s *Shell) button(index int) *parts.Button {
+	return parts.NewButton(s.screens[index].Name, func() { s.Open(index) })
 }
 
 // Open shows one screen and marks its name as the one being read.

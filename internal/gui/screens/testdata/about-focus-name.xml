@@ -3,14 +3,14 @@
 		<container pos="8,8" size="1326x884">
 			<container size="220x884">
 				<container size="220x884">
-					<widget size="220x28" type="*widget.Button">
+					<widget size="220x28" type="*parts.Button">
 						<rectangle fillColor="button" radius="5" size="220x28"/>
 						<rectangle size="220x28"/>
 						<widget pos="48,4" size="122x19" type="*widget.RichText">
 							<text alignment="center" bold size="122x19">Manifest browser</text>
 						</widget>
 					</widget>
-					<widget pos="0,36" size="220x28" type="*widget.Button">
+					<widget pos="0,36" size="220x28" type="*parts.Button">
 						<rectangle fillColor="focus" radius="5" size="220x28"/>
 						<rectangle size="220x28"/>
 						<widget pos="102,4" size="42x20" type="*widget.RichText">
