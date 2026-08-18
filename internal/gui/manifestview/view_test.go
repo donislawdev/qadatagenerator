@@ -134,3 +134,60 @@ func TestADocumentThatCannotBeReadLeavesTheScreenSayingWhy(t *testing.T) {
 		t.Error("the control for the second state is available with no manifest open")
 	}
 }
+
+// Opening a manifest from outside reaches the same state as the chooser does.
+//
+// 🔴 This is the guard for a drift that happened within the hour on 2026-08-18.
+// The rendering probe in tools needs the states of this screen without a file
+// chooser, and the first exported way in only drew the screen. Drawing is not
+// the state: the button that opens a response record stays disabled, so the
+// probe photographed a screen no person can reach by opening a manifest, and
+// the picture was wrong in a way that reads as correct.
+func TestOpeningAManifestFromOutsideReachesTheSameStateAsTheChooser(t *testing.T) {
+	view := New(i18n.English, nil, Readers{})
+	if !view.respond.Disabled() {
+		t.Fatal("the response button is available before there is a manifest to judge against")
+	}
+
+	promised, problems := manifest.New("0.1", manifest.Run{
+		GeneratedAt: "2026-08-18T00:00:00Z", Seed: "s", Locale: "pl-PL",
+		CatalogVersion: "0.1", RowsTotal: 1, RowsMutated: 1,
+	}, []manifest.Defect{{
+		ID:       "one",
+		Location: manifest.Location{Entity: "customer", Row: 1, Field: "pesel"},
+		Mutator:  "L3.checksum.off_by_one", Layer: catalog.Domain, Applied: true,
+		ValueBefore: "44051401359", HasValueBefore: true,
+		ValueAfter: "44051401358", HasValueAfter: true,
+		Expectation: catalog.Rejection, Confidence: catalog.Hard,
+		Rationale: "the check digit no longer agrees",
+	}})
+	if len(problems) > 0 {
+		t.Fatalf("the manifest this test is built on is not valid: %v", problems)
+	}
+
+	view.Open(promised)
+	if view.respond.Disabled() {
+		t.Error("a manifest is open and the response button is still unavailable, so this way in " +
+			"reaches a state the chooser never leaves behind")
+	}
+	if !view.hasPromise {
+		t.Error("a manifest is on the screen and the screen does not know it holds one")
+	}
+
+	actual := response.Record{SpecVersion: "0.1", Rows: []response.Row{{Number: 1, Verdict: response.Rejected}}}
+	if !view.Compare(actual) {
+		t.Error("a record was refused although there is a manifest to judge it against")
+	}
+}
+
+// A record with no manifest beside it is refused rather than drawn.
+//
+// The comparison has nothing to say without a manifest, and a screen showing it
+// would be saying it anyway.
+func TestAResponseRecordWithNoManifestIsRefused(t *testing.T) {
+	view := New(i18n.English, nil, Readers{})
+	actual := response.Record{SpecVersion: "0.1", Rows: []response.Row{{Number: 1, Verdict: response.Accepted}}}
+	if view.Compare(actual) {
+		t.Error("a record was compared against a manifest that is not there")
+	}
+}

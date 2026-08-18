@@ -172,6 +172,8 @@ var Guards = []Guard{
 	{"the keyboard meets the controls of a screen before its entries", "TestTheKeyboardMeetsTheButtonsBeforeTheEntries", "internal/gui/manifestview", ByMutation},
 	{"the cell the keyboard stands on is marked, and the mark leaves with the focus", "TestTheCellTheKeyboardStandsOnIsMarkedAndTheMarkLeavesWithIt", "internal/gui/manifestview", ByMutation},
 	{"the mark of the keyboard is drawn rather than merely recorded", "TestTheMarkOfTheKeyboardReachesThePixels", "internal/gui/manifestview", ByMutation},
+	{"a manifest opened from outside reaches the same state as the chooser leaves behind", "TestOpeningAManifestFromOutsideReachesTheSameStateAsTheChooser", "internal/gui/manifestview", ByMutation},
+	{"a response record with no manifest beside it is refused rather than drawn", "TestAResponseRecordWithNoManifestIsRefused", "internal/gui/manifestview", ByMutation},
 
 	// --- the register guarding the register ---------------------------------
 	{"a guard added here cannot stay out of the register", "TestEveryGuardInThisPackageIsRegistered", "internal/guard", ByMutation},

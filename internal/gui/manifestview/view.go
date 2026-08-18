@@ -93,6 +93,40 @@ func inset(content fyne.CanvasObject) fyne.CanvasObject {
 	return container.New(layout.NewCustomPaddedLayout(margin, margin, margin, margin), content)
 }
 
+// Open puts a manifest on the screen, with everything that goes with it.
+//
+// # Why this is exported, and why it is not merely a draw
+//
+// Something outside this package has to be able to reach the states of this
+// screen without a file chooser, which is what the rendering probe in tools
+// does. The readers were already injectable, so this was the one step that
+// could not be reached from outside.
+//
+// It carries the whole state change rather than the drawing alone, and that is
+// the correction of a real drift measured on 2026-08-18: an exported call that
+// only drew left the button for a response record disabled, so the probe
+// rendered a screen no person can reach by opening a manifest. Two paths into
+// one state had come apart within the hour. The chooser calls this too.
+func (v *View) Open(promised manifest.Manifest) {
+	v.promised, v.hasPromise = promised, true
+	v.respond.Enable()
+	v.show(v.rendered(Build(v.text, promised, nil)))
+}
+
+// Compare puts the answer of an application beside the manifest already open.
+//
+// A record without a manifest to judge it against is refused rather than drawn,
+// because the comparison has nothing to say and a screen showing it would be
+// saying it anyway.
+func (v *View) Compare(actual response.Record) bool {
+	if !v.hasPromise {
+		return false
+	}
+	comparison := Comparison{Record: actual, Report: verify.Compare(v.promised, actual)}
+	v.show(v.rendered(Build(v.text, v.promised, &comparison)))
+	return true
+}
+
 func (v *View) show(content fyne.CanvasObject) {
 	v.body.Objects = []fyne.CanvasObject{content}
 	v.body.Refresh()
@@ -122,9 +156,7 @@ func (v *View) chooseManifest() {
 			v.show(sentence(v.text.T(i18n.ManifestUnreadable) + " " + readErr.Error()))
 			return
 		}
-		v.promised, v.hasPromise = promised, true
-		v.respond.Enable()
-		v.show(v.rendered(Build(v.text, promised, nil)))
+		v.Open(promised)
 	}, v.window)
 }
 
@@ -139,8 +171,7 @@ func (v *View) chooseResponse() {
 			v.show(sentence(v.text.T(i18n.ManifestUnreadable) + " " + readErr.Error()))
 			return
 		}
-		comparison := Comparison{Record: actual, Report: verify.Compare(v.promised, actual)}
-		v.show(v.rendered(Build(v.text, v.promised, &comparison)))
+		v.Compare(actual)
 	}, v.window)
 }
 
