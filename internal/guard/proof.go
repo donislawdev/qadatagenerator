@@ -744,6 +744,18 @@ var Guards = []Guard{
 	{"damaging a file where it sits leaves the source alone", "TestDamagingAFileInItsOwnDirectoryLeavesTheSourceAlone", "internal/cli", ByMutation},
 	{"the evidence for every column reaches the manifest", "TestTheManifestCarriesTheEvidenceForEveryColumn", "internal/cli", ByMutation},
 	{"the same file and seed give the same damage", "TestTheSameFileAndSeedGiveTheSameDamage", "internal/cli", ByMutation},
+
+	// The mode itself, which both surfaces run one of.
+	//
+	// 🔴 The second of these guards a failure that has no compiler behind it.
+	// A surface turns a refusal into words with a switch, and a switch has a
+	// last branch: a kind added to the mode and forgotten at a surface comes
+	// out described as some other refusal entirely, in a complete and
+	// confident message about the wrong thing. It is proved by a probe rather
+	// than by a mutation because what it protects against is an ADDITION, and
+	// the fault therefore has to be planted as one.
+	{"a setting this build cannot carry out is refused for its own reason", "TestEachUnusableSettingIsRefusedForItsOwnReason", "internal/take", ByMutation},
+	{"every refusal of the mode has words of its own at this surface", "TestEveryRefusalOfTheModeHasWordsOfItsOwn", "internal/cli", ByProbe},
 }
 
 // CountByProof returns how many guards are in each state.

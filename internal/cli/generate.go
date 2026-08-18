@@ -249,10 +249,10 @@ func produce(built recipe.Recipe, plan generate.Plan, source values.Source,
 	}
 	var told []string
 	if broken != nil {
-		if err := broken.finish(built, plan, time.Now()); err != nil {
+		if err := closeRecipeManifest(broken, built, plan, time.Now()); err != nil {
 			return nil, err
 		}
-		told = broken.summary()
+		told = summaryOf(broken.Counts(), *own.manifest)
 	}
 	if err := writeRunNote(files, built, plan); err != nil {
 		return nil, err

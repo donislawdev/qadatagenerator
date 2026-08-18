@@ -3,42 +3,29 @@ package cli
 import (
 	"flag"
 	"io"
-	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/corrupted"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/infer"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestexport"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/mutators"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/sourcecsv"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/store"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
-	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
-	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
-	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
-	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
-	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
-	"github.com/donislawdev/qadatagenerator/internal/fault"
-	"github.com/donislawdev/qadatagenerator/internal/version"
+	"github.com/donislawdev/qadatagenerator/internal/take"
 )
 
-// The take and corrupt mode: somebody else's file goes in, the same file with
-// damage in it and a manifest beside it come out.
+// The take and corrupt mode as the command line offers it.
 //
-// # What makes this different from the mode that generates
+// # What is here and what moved out
 //
-// There, five suppliers say what a run can do and a recipe declares what every
-// column holds. Here nobody declared anything, so the shape is worked out by
-// looking at the values, and the manifest carries the evidence for what was
-// worked out. Everything downstream of that is the same engine, the same
-// selector and the same writer, which is deliberate: damage that behaved
-// differently depending on where the records came from would be a second
-// product.
+// What is here is the flags, the four part refusals and the sentences. What the
+// mode actually does moved to internal/take on 2026-08-19, when the window had
+// to do the same work: the layer test forbids a screen to import this package,
+// so an assembly living here could only be reached by copying it, and a second
+// copy of the rules about damaging somebody else's file is the thing this
+// project can least afford to have drift.
+//
+// The division is not a matter of taste. Everything both surfaces have to agree
+// on is over there, and everything that is a property of speaking to a terminal
+// is here.
 
 // takeFlags are the settings this verb takes beyond the cross cutting ones.
 type takeFlags struct {
@@ -63,15 +50,16 @@ type takeFlags struct {
 }
 
 func declareCorrupt(set *flag.FlagSet) *takeFlags {
+	defaults := take.Defaults()
 	return &takeFlags{
-		out:       set.String("out", ".", ""),
-		seed:      set.String("seed", defaultCorruptSeed, ""),
+		out:       set.String("out", defaults.Out, ""),
+		seed:      set.String("seed", defaults.Seed, ""),
 		layers:    set.String("layers", "", ""),
 		rows:      set.String("rows", "", ""),
 		perRow:    set.String("per-row", "", ""),
 		exclude:   set.String("exclude-fields", "", ""),
-		delimiter: set.String("delimiter", ",", ""),
-		locale:    set.String("locale", defaultCorruptLocale, ""),
+		delimiter: set.String("delimiter", defaults.Delimiter, ""),
+		locale:    set.String("locale", defaults.Locale, ""),
 		overwrite: set.Bool("overwrite", false, ""),
 		dryRun:    set.Bool("dry-run", false, ""),
 		manifest:  set.String("manifest", "", ""),
@@ -83,6 +71,16 @@ func declareCorrupt(set *flag.FlagSet) *takeFlags {
 // was left out is told from one given its own default.
 func (f *takeFlags) note(set *flag.FlagSet) {
 	set.Visit(func(seen *flag.Flag) { f.given[seen.Name] = true })
+}
+
+// settings turns the flags into what the mode takes.
+func (f *takeFlags) settings() take.Settings {
+	return take.Settings{
+		Out: *f.out, Seed: *f.seed, Layers: take.NamesIn(*f.layers), Rows: *f.rows,
+		PerRow: *f.perRow, ExcludeFields: take.NamesIn(*f.exclude),
+		Delimiter: *f.delimiter, Locale: *f.locale, Overwrite: *f.overwrite,
+		Manifest: *f.manifest,
+	}
 }
 
 // runCorrupt damages a file somebody else made.
@@ -124,371 +122,144 @@ func corruptFile(out *streams, path string, own *takeFlags) int {
 	if err != nil {
 		return fail(out, err)
 	}
-	if refusal, wrong := unusablePolicyFlags(own, described); wrong {
-		return usage(out, refusal)
+	settings := own.settings()
+	// Everything answerable without the file is answered first. The file is
+	// somebody else's and they chose its size, so a pass over it must not be
+	// the price of a typo.
+	if refusal := take.Check(settings, described); refusal.Refused() {
+		return usage(out, refusalOf(refusal))
 	}
-	written, refusal, ok := outputPath(path, own)
-	if !ok {
-		return usage(out, refusal)
+	if refusal := take.CheckOutput(path, settings); refusal.Refused() {
+		return usage(out, refusalOf(refusal))
 	}
 
-	source, err := sourcecsv.Open(path, []rune(*own.delimiter)[0])
+	opened, err := take.Open(path, settings)
 	if err != nil {
 		return fail(out, err)
 	}
-	defer func() { _ = source.Close() }()
+	defer func() { _ = opened.Close() }()
 
-	from := values.New(*own.locale, *own.seed)
-	shape := infer.From(source.Table(), source.Samples(), from.Schemes())
-	sayWhatWasWorkedOut(out, source, shape)
+	sayWhatWasWorkedOut(out, opened)
 	if *own.dryRun {
-		sayWhatWouldHappen(out, source, own, described)
+		sayWhatWouldHappen(out, opened, own, described)
 		return finish(out, codeOK)
 	}
-	return writeDamaged(out, damageRequest{
-		source: source, shape: shape, path: path, written: written,
-		own: own, described: described, from: from,
-	})
+	return writeDamaged(out, opened, own, described)
 }
 
-// damageRequest is everything the writing half needs, gathered so that the
-// function taking it stays inside the limit on how many things one function may
-// be handed.
-type damageRequest struct {
-	source    *sourcecsv.File
-	shape     infer.Schema
-	path      string
-	written   string
-	own       *takeFlags
-	described catalog.Catalog
-	from      values.Source
-}
-
-// writeDamaged runs the engine over the file and puts everything on the disk,
-// or leaves the directory exactly as it found it.
-func writeDamaged(out *streams, ask damageRequest) int {
-	files := store.New(*ask.own.out, *ask.own.overwrite)
-	committed := false
-	defer func() {
-		if !committed {
-			files.Discard()
-		}
-	}()
-
+// writeDamaged runs the engine over the file and says what was left behind.
+func writeDamaged(out *streams, opened *take.Opened, own *takeFlags,
+	described catalog.Catalog) int {
 	// The watch starts here rather than at the top, because up to this line
 	// nothing has been written and there is nothing to take back.
 	watcher := watchSignals()
 	defer watcher.release()
 
-	broken, err := buildDamage(ask, files)
+	result, err := opened.Corrupt(own.settings(), described, watcher, time.Now())
 	if err != nil {
 		return fail(out, err)
 	}
-	if err := corrupt.Run(ask.source, broken.told.writer, watcher); err != nil {
-		return fail(out, err)
-	}
-	if err := broken.closeManifest(ask, time.Now()); err != nil {
-		return fail(out, err)
-	}
-	if err := files.Commit(); err != nil {
-		return fail(out, err)
-	}
-	committed = true
-
-	out.note(listOf(append([]string{ask.written}, manifestFiles(*ask.own.manifest)...)) +
-		" written to " + *ask.own.out)
-	for _, line := range broken.told.summary() {
+	out.note(listOf(result.Written) + " written to " + result.Out)
+	for _, line := range summaryOf(result.Counts, *own.manifest) {
 		out.note(line)
 	}
 	return finish(out, codeOK)
 }
 
-// takenDamage is what a damaging run holds: the pieces every run of the engine
-// has, and the guesses that only this mode makes.
+// refusalWords is what this surface says about one refusal of the mode.
 //
-// The first part is the same value the mode that generates uses, so the summary
-// a person reads is written once and says the same thing whatever produced the
-// records.
-type takenDamage struct {
-	told  damage
-	shape infer.Schema
+// The first part is a prefix rather than a whole sentence, because most of these
+// refusals name the value that was wrong and the value arrives with the refusal.
+type refusalWords struct {
+	// what is the opening, with the offending value appended to it.
+	what string
+	// why is the reason, which never varies.
+	why string
+	// allowed is what would have been taken, for the refusals whose answer is a
+	// sentence. It is empty for the ones whose answer is a list, and the list
+	// then comes from the refusal itself, because only the catalog knows it.
+	allowed string
+	// instead is what to do about it.
+	instead string
 }
 
-// buildDamage assembles the engine, the selector and the two files.
-func buildDamage(ask damageRequest, files *store.Set) (*takenDamage, error) {
-	selector, err := corrupt.NewSelector(policyOf(ask.own), ask.described, ask.shape,
-		seed.New(*ask.own.seed))
-	if err != nil {
-		return nil, err
-	}
-	writer, err := format.NewPlainCSV(fileMaker{files}, ask.written, *ask.own.delimiter)
-	if err != nil {
-		return nil, err
-	}
-	file, err := files.Create(manifestjson.Name)
-	if err != nil {
-		return nil, err
-	}
-	entries := manifestjson.New(file, version.Manifest)
-	// The export is a peer of the canonical manifest rather than a rendering of
-	// it afterwards, so it is opened here and fed the same entries at the same
-	// moment. Nothing reads what this run just wrote.
-	sinks := corrupted.Tee{entries}
-	var exported manifestexport.Export
-	if name := manifestexport.FileFor(*ask.own.manifest); name != "" {
-		file, err := files.Create(name)
-		if err != nil {
-			return nil, err
-		}
-		exported = manifestexport.New(*ask.own.manifest, file, ask.described,
-			ask.source.Table().Rows)
-		sinks = append(sinks, exported)
-	}
-	engine := corrupt.New(ask.described, mutatorRegistry{}, schemeRegistry{ask.from},
-		canDoWithoutRecipe(ask.shape, ask.from))
-	wrapped := corrupted.New(writer, engine, &selector, sinks, ask.shape)
-	return &takenDamage{
-		told: damage{writer: wrapped, entries: entries, selector: &selector,
-			exported: exported, form: *ask.own.manifest},
-		shape: ask.shape,
-	}, nil
-}
-
-// canDoWithoutRecipe gathers what this run is able to do when nothing declared
-// anything.
+// refusalSays is every refusal the mode can produce, in the words this surface
+// uses for it.
 //
-// Four of the five suppliers answer as they always do. The one that changes is
-// the schema, which here is what was worked out by looking rather than what
-// somebody wrote down, and it therefore brings much less: no maximum length, no
-// required column, no key and no relation. That is the point rather than a
-// shortfall, and every entry it leaves inapplicable says so in the manifest.
-func canDoWithoutRecipe(shape infer.Schema, source values.Source) capability.Set {
-	names := format.CapabilitiesOf(format.NameCSV)
-	names = append(names, recipe.CapabilitiesOf(shape)...)
-	names = append(names, values.CapabilitiesOfView(shape, source)...)
-	names = append(names, capability.UnicodeNormalization)
-	return capability.NewSet(names...)
-}
-
-// closeManifest writes the envelope, including the evidence for everything this
-// run had to guess.
+// # Why a register and not the switch this used to be
 //
-// The counts come from what the run did rather than from what it meant to do,
-// and the whole envelope is held against the model before a byte of it is
-// written: a manifest the domain would refuse must not reach a disk, because
-// whoever reads it will read it as a promise.
-func (d *takenDamage) closeManifest(ask damageRequest, at time.Time) error {
-	run := manifest.Run{
-		GeneratedAt:    at.UTC().Format(time.RFC3339),
-		Seed:           *ask.own.seed,
-		Locale:         *ask.own.locale,
-		CatalogVersion: version.Catalog,
-		Source:         ask.path,
-		Inference:      inferenceRecord(d.shape),
-		RowsTotal:      ask.source.Table().Rows,
-		RowsMutated:    d.told.writer.RowsMutated(),
-	}
-	if problems := run.Problems(); len(problems) > 0 {
-		return fault.New(fault.Runtime, "the manifest envelope is not usable: "+problems[0])
-	}
-	if err := d.told.entries.Finish(run, d.told.writer.Requested(),
-		d.told.writer.Applied()); err != nil {
-		return err
-	}
-	// The canonical manifest goes first, so that a failure to close the export
-	// is reported after the document everything else is compared against.
-	// Either failure ends the run, and a run that ends leaves nothing behind,
-	// so neither file is ever shipped half written.
-	return d.told.closeExport()
-}
-
-// inferenceRecord turns what was worked out into what the manifest carries.
-func inferenceRecord(shape infer.Schema) *manifest.Inference {
-	record := &manifest.Inference{
-		Method:      inferenceMethod,
-		NotInferred: infer.NotInferred(),
-	}
-	for _, finding := range shape.Findings() {
-		record.Columns = append(record.Columns, manifest.InferredColumn{
-			Field: finding.Field, Type: finding.Type,
-			Scheme: finding.Scheme, Basis: finding.Basis,
-		})
-	}
-	for _, relation := range shape.Relations() {
-		record.Relations = append(record.Relations, manifest.InferredRelation{
-			Field: relation.Field, With: relation.With,
-			Kind: string(relation.Kind), Basis: relation.Basis,
-		})
-	}
-	return record
-}
-
-// policyOf turns the flags into the policy the engine takes.
+// A switch has a last branch, and a kind added to the mode and forgotten here
+// would land in it. What came out was not silence, which somebody would notice.
+// It was a complete, confident, four part message about a different refusal
+// entirely: somebody whose delimiter was wrong being told their run would write
+// over the file it reads. No compiler reports that and no reader of the switch
+// sees it.
 //
-// It builds the same value a recipe would have produced, so that the engine
-// cannot tell where the policy came from. A second shape for the same thing
-// would be a second set of rules about what a policy means.
-func policyOf(own *takeFlags) recipe.Policy {
-	return recipe.Policy{
-		Layers:        namesIn(*own.layers),
-		Rows:          *own.rows,
-		PerRow:        *own.perRow,
-		ExcludeFields: namesIn(*own.exclude),
-	}
+// A register can be held against the list of kinds in both directions, which is
+// what the guard beside it does. A kind with no words fails, and words for a
+// kind that no longer exists fail too.
+var refusalSays = map[take.RefusalKind]refusalWords{
+	take.NoLayers: {
+		what: problemCorruptNoLayers, why: problemCorruptNoLayersWhy,
+		instead: problemCorruptNoLayersDo,
+	},
+	take.UnknownLayer: {
+		what: problemCorruptUnknownLayer, why: problemCorruptUnknownLayerWhy,
+		instead: problemCorruptNoLayersDo,
+	},
+	take.UnreadableDelimiter: {
+		what: problemCorruptDelimiter, why: problemCorruptDelimiterWhy,
+		allowed: problemCorruptDelimiterAllowed, instead: problemCorruptDelimiterDo,
+	},
+	take.UnknownManifestForm: {
+		what: problemCorruptManifest, why: problemCorruptManifestWhy,
+		instead: problemCorruptManifestDo,
+	},
+	take.UnreadableShare: {
+		what: problemCorruptRows, why: problemCorruptRowsWhy,
+		allowed: problemCorruptRowsAllowed, instead: problemCorruptRowsDo,
+	},
+	take.UnknownPerRow: {
+		what: problemCorruptPerRow, why: problemCorruptPerRowWhy,
+		instead: problemCorruptPerRowDo,
+	},
+	take.WouldOverwriteSource: {
+		what: problemCorruptWouldOverwrite, why: problemCorruptWouldOverwriteWhy,
+		allowed: problemCorruptWouldOverwriteAllowed,
+		instead: problemCorruptWouldOverwriteDo,
+	},
 }
 
-// namesIn splits a comma separated list, dropping what is only whitespace.
-func namesIn(written string) []string {
-	var names []string
-	for _, part := range strings.Split(written, ",") {
-		if trimmed := strings.TrimSpace(part); trimmed != "" {
-			names = append(names, trimmed)
+// refusalOf turns a refusal of the mode into the four parts a person reads.
+//
+// # Why the sentences are here rather than beside the rule
+//
+// The rule is shared with the window and the sentences cannot be: this channel
+// is English always, by an unbreakable rule, while the window shows whatever it
+// was translated into. What travels between the two surfaces is therefore which
+// requests are refused, and each surface says it in its own words.
+func refusalOf(refusal take.Refusal) problem {
+	words, known := refusalSays[refusal.Kind]
+	if !known {
+		// Unreachable while the guard beside this holds, and it says so out
+		// loud rather than describing this as some other refusal. A message
+		// naming what it does not know is recoverable. One confidently naming
+		// the wrong cause is not.
+		return problem{
+			what:    problemCorruptUnnamedRefusal + refusal.Kind.Name(),
+			why:     problemCorruptUnnamedRefusalWhy,
+			allowed: strings.Join(refusal.Allowed, ", "),
+			instead: problemCorruptUnnamedRefusalDo,
 		}
 	}
-	return names
-}
-
-// unusablePolicyFlags refuses an invocation that cannot order damage, and says
-// what would have.
-//
-// # Why the layers have no default
-//
-// Choosing them would be deciding what "damage this file" means on somebody
-// else's behalf, and the cheapest default to defend, everything, would take the
-// bytes and the container apart on a file whose owner wanted to test an import.
-// Giving this a default later breaks nothing, because every invocation without
-// it is refused today. Changing a default later breaks every pipeline that
-// relied on it, so the direction that keeps the door open is the one taken.
-func unusablePolicyFlags(own *takeFlags, described catalog.Catalog) (problem, bool) {
-	if refusal, unusable := unusableLayers(own, described); unusable {
-		return refusal, true
+	allowed := words.allowed
+	if allowed == "" {
+		allowed = strings.Join(refusal.Allowed, ", ")
 	}
-	return unusableFlagValues(own)
-}
-
-// unusableLayers refuses a run that named no layer, or named one this build
-// carries no damage in.
-//
-// It is separate from the values below because it asks a different kind of
-// question. A layer is answered against the catalog, and the answer changes as
-// the catalog grows. The values below are answered against this build's own
-// vocabulary and do not.
-func unusableLayers(own *takeFlags, described catalog.Catalog) (problem, bool) {
-	// The same answer validate gives about a recipe, from the same place. Two
-	// lists of which layers carry damage would tell somebody their policy is
-	// fine while the verb that runs it did nothing.
-	carried := mutators.Coverage{Described: described}.Layers()
-	named := namesIn(*own.layers)
-	if len(named) == 0 {
-		return problem{
-			what:    problemCorruptNoLayers,
-			why:     problemCorruptNoLayersWhy,
-			allowed: strings.Join(carried, ", "),
-			instead: problemCorruptNoLayersDo,
-		}, true
+	return problem{
+		what: words.what + refusal.Value, why: words.why,
+		allowed: allowed, instead: words.instead,
 	}
-	carries := map[string]bool{}
-	for _, layer := range carried {
-		carries[layer] = true
-	}
-	for _, layer := range named {
-		if !carries[layer] {
-			return problem{
-				what:    problemCorruptUnknownLayer + layer,
-				why:     problemCorruptUnknownLayerWhy,
-				allowed: strings.Join(carried, ", "),
-				instead: problemCorruptNoLayersDo,
-			}, true
-		}
-	}
-	return problem{}, false
-}
-
-// unusableFlagValues refuses a value this build cannot read, one flag at a
-// time.
-//
-// 🔴 Every one of these is asked here rather than where the value is used, and
-// the reason is the same for all four: the file is opened after this, and a
-// pass over a file the user chose the size of must not be the price of a typo.
-func unusableFlagValues(own *takeFlags) (problem, bool) {
-	if len([]rune(*own.delimiter)) != 1 {
-		return problem{
-			what:    problemCorruptDelimiter + *own.delimiter,
-			why:     problemCorruptDelimiterWhy,
-			allowed: problemCorruptDelimiterAllowed,
-			instead: problemCorruptDelimiterDo,
-		}, true
-	}
-	if !manifestexport.Usable(*own.manifest) {
-		return problem{
-			what:    problemCorruptManifest + *own.manifest,
-			why:     problemCorruptManifestWhy,
-			allowed: strings.Join(manifestexport.Forms(), ", "),
-			instead: problemCorruptManifestDo,
-		}, true
-	}
-	if err := corrupt.UsableShare(*own.rows); err != nil {
-		return problem{
-			what:    problemCorruptRows + *own.rows,
-			why:     problemCorruptRowsWhy,
-			allowed: problemCorruptRowsAllowed,
-			instead: problemCorruptRowsDo,
-		}, true
-	}
-	if err := corrupt.UsablePerRow(*own.perRow); err != nil {
-		return problem{
-			what:    problemCorruptPerRow + *own.perRow,
-			why:     problemCorruptPerRowWhy,
-			allowed: strings.Join(corrupt.PerRowChoices(), ", "),
-			instead: problemCorruptPerRowDo,
-		}, true
-	}
-	return problem{}, false
-}
-
-// outputPath works out what the damaged file is called, and refuses a run that
-// would write over the file it is reading.
-//
-// # Why both the suffix and the check
-//
-// The suffix makes the collision impossible by construction, so the check can
-// never fire while the name is built this way. It stays because it guards
-// something that cannot be taken back: this is the only verb that reads and
-// writes at once, and the day somebody changes how the name is built, a
-// redundant check is what stands between that change and a person losing the
-// file they handed over. It has a mutation of its own for the same reason.
-func outputPath(source string, own *takeFlags) (string, problem, bool) {
-	name := sourcecsv.EntityOf(source) + corruptedSuffix
-	written := filepath.Join(*own.out, name)
-	if sameFile(written, source) {
-		return "", problem{
-			what:    problemCorruptWouldOverwrite + source,
-			why:     problemCorruptWouldOverwriteWhy,
-			allowed: problemCorruptWouldOverwriteAllowed,
-			instead: problemCorruptWouldOverwriteDo,
-		}, false
-	}
-	return name, problem{}, true
-}
-
-// sameFile reports whether two paths name one place, as far as comparing text
-// can tell.
-//
-// It compares cleaned absolute paths. That answers the case this guards, which
-// is a directory and a name that meet, and it does not answer links or two
-// mounts of one volume. Saying so here is cheaper than a reader assuming it
-// covers more: what covers the rest is the suffix above, which keeps the two
-// names apart whatever the file system thinks.
-func sameFile(written, source string) bool {
-	left, err := filepath.Abs(written)
-	if err != nil {
-		return false
-	}
-	right, err := filepath.Abs(source)
-	if err != nil {
-		return false
-	}
-	return filepath.Clean(left) == filepath.Clean(right)
 }
 
 // sayWhatWasWorkedOut puts the guesses on the log channel, where somebody
@@ -498,10 +269,11 @@ func sameFile(written, source string) bool {
 // the person watching, and it is deliberately not shortened: a column nothing
 // was recognised in is exactly the one they need to know about, because that is
 // where the damage they ordered will have had nothing to work with.
-func sayWhatWasWorkedOut(out *streams, source *sourcecsv.File, shape infer.Schema) {
-	table := source.Table()
+func sayWhatWasWorkedOut(out *streams, opened *take.Opened) {
+	table := opened.Table()
 	out.note(table.Entity + ": " + counted(table.Rows, "row") + ", " +
 		counted(len(table.Columns), "column") + ", nothing declared what any of them holds")
+	shape := opened.Shape()
 	for _, finding := range shape.Findings() {
 		out.detail(finding.Field + " taken for " + describeFinding(finding) + ", because " +
 			finding.Basis)
@@ -514,7 +286,7 @@ func sayWhatWasWorkedOut(out *streams, source *sourcecsv.File, shape infer.Schem
 		out.detail(relation.Field + " taken to agree with " + relation.With + " on " +
 			string(relation.Kind) + ", because " + relation.Basis)
 	}
-	if source.HadByteOrderMark() {
+	if opened.HadByteOrderMark() {
 		out.warn(noteByteOrderMark)
 	}
 	out.detail(noteRewritten)
@@ -535,19 +307,11 @@ func describeFinding(finding infer.Finding) string {
 // It reports what is certain rather than estimating. How many rows a share
 // comes to is a draw, and a number here that the real run then missed would be
 // worse than no number.
-func sayWhatWouldHappen(out *streams, source *sourcecsv.File, own *takeFlags,
+func sayWhatWouldHappen(out *streams, opened *take.Opened, own *takeFlags,
 	described catalog.Catalog) {
-	coverage := mutators.Coverage{Described: described}
-	ordered, implemented := 0, 0
-	for _, layer := range namesIn(*own.layers) {
-		inLayer := len(described.InLayer(catalog.Layer(layer)))
-		ordered += inLayer
-		implemented += inLayer - coverage.Unimplemented(layer)
-	}
-	out.note(noteDryRunPolicy + kindsOfDamage(ordered) + " in " + *own.layers +
-		", and this build implements " + counted(implemented, "kind") + " of them. " +
+	planned := opened.Plan(own.settings(), described)
+	out.note(noteDryRunPolicy + kindsOfDamage(planned.Ordered) + " in " + *own.layers +
+		", and this build implements " + counted(planned.Implemented, "kind") + " of them. " +
 		noteDryRunEveryOrder)
-	out.note(noteDryRunWrites + listOf(append(
-		[]string{source.Table().Entity + corruptedSuffix}, manifestFiles(*own.manifest)...)) +
-		" in " + *own.out)
+	out.note(noteDryRunWrites + listOf(planned.Writes) + " in " + planned.Out)
 }

@@ -94,38 +94,6 @@ const (
 	// has been in the table since the first day with nothing able to return it.
 	commandVerify = "verify"
 
-	// corruptedSuffix is what tells the damaged file from the one it came from.
-	//
-	// 🔴 It exists because this is the only verb that reads and writes in one
-	// run, so it is the only one that could destroy what it was given. The
-	// suffix makes that collision impossible by construction rather than by the
-	// caller remembering to point the output somewhere else.
-	corruptedSuffix = ".corrupted.csv"
-
-	// defaultCorruptSeed is what the draws come from when nobody said.
-	//
-	// A recipe carries its seed and a file does not, so this mode needs one of
-	// its own. It is a fixed word rather than a clock reading, because two runs
-	// of one command have to damage the same rows: a seed taken from the time
-	// would make this the one verb whose output nobody can reproduce.
-	defaultCorruptSeed = "0"
-
-	// defaultCorruptLocale is what the envelope records when nobody said.
-	//
-	// It matches what the source of values defaults to, so the two cannot
-	// disagree. In this mode it decides less than it looks: which numbering
-	// scheme a column follows is worked out from the values and not from the
-	// locale, and the manifest says so in its own section.
-	defaultCorruptLocale = "en-US"
-
-	// inferenceMethod names how a schema was worked out, for the manifest.
-	//
-	// It is a name rather than a sentence because a reader comparing two
-	// manifests needs to tell one way of looking from another at a glance. What
-	// the way of looking actually is belongs in the basis of each column, which
-	// is where a person reads it.
-	inferenceMethod = "values-validated"
-
 	// commandHelp is the name as typed, and a public contract for the same
 	// reason as the two above it.
 	//
@@ -229,6 +197,19 @@ const (
 	problemCorruptWouldOverwriteWhy     = "the damaged records would replace the records they were made from, and nothing could bring the file back"
 	problemCorruptWouldOverwriteAllowed = "an output directory that is not where the source file is"
 	problemCorruptWouldOverwriteDo      = "qadg corrupt --out ./damaged --layers L2,L3 records.csv"
+
+	// problemCorruptUnnamedRefusal is what this surface says when the mode
+	// refuses a run for a reason this surface has no words for.
+	//
+	// 🔴 It should be unreachable, and it exists because the alternative to
+	// saying so is worse. Turning a refusal into words reads a register, and a
+	// kind missing from it would otherwise come out as whichever entry the
+	// lookup happened to land on. A message that names what it does not know
+	// sends the reader somewhere useful. One that confidently names the wrong
+	// cause sends them to fix something that was never broken.
+	problemCorruptUnnamedRefusal    = "this build refused the run for a reason it cannot put into words, "
+	problemCorruptUnnamedRefusalWhy = "the run was stopped for a real reason and this copy of the tool has no message for that reason, which is a fault in the tool rather than in what was asked of it"
+	problemCorruptUnnamedRefusalDo  = "qadg corrupt --dry-run --layers L2,L3 records.csv"
 
 	// What a run says about the guesses it had to make. They go on the log
 	// channel for the person watching, and into the manifest for good.

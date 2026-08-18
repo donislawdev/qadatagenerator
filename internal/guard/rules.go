@@ -114,19 +114,34 @@ var layerRules = []layerRule{
 		why:       "the failure kind sits under everything else, so it can depend on nothing of ours",
 	},
 	{
-		pkg:       "internal/version",
-		forbidden: []string{"internal/app", "internal/adapter", "internal/cli", "internal/gui"},
-		why:       "the version numbers are read by every layer, so they may not know any of them",
+		pkg: "internal/version",
+		forbidden: []string{"internal/app", "internal/adapter", "internal/cli", "internal/gui",
+			"internal/damage", "internal/take"},
+		why: "the version numbers are read by every layer, so they may not know any of them",
 	},
 	{
-		pkg:       "internal/domain",
-		forbidden: []string{"internal/app", "internal/adapter", "internal/cli", "internal/gui"},
-		why:       "the domain knows nothing about files, formats, the command line or the window",
+		pkg: "internal/domain",
+		forbidden: []string{"internal/app", "internal/adapter", "internal/cli", "internal/gui",
+			"internal/damage", "internal/take"},
+		why: "the domain knows nothing about files, formats, the command line or the window",
 	},
 	{
-		pkg:       "internal/app",
-		forbidden: []string{"internal/adapter", "internal/cli", "internal/gui"},
-		why:       "a use case takes what it needs as a port and does not know where the data comes from",
+		pkg: "internal/app",
+		forbidden: []string{"internal/adapter", "internal/cli", "internal/gui",
+			"internal/damage", "internal/take"},
+		why: "a use case takes what it needs as a port and does not know where the data comes from",
+	},
+	{
+		pkg:       "internal/damage",
+		forbidden: []string{"internal/cli", "internal/gui", "internal/take"},
+		why: "the assembly that breaks records is what both surfaces share, so it may " +
+			"know neither of them, and it sits below the mode that uses it",
+	},
+	{
+		pkg:       "internal/take",
+		forbidden: []string{"internal/cli", "internal/gui"},
+		why: "the take and corrupt mode exists so that both surfaces run one of it, " +
+			"which it cannot do while knowing either",
 	},
 	{
 		pkg:       "internal/cli",

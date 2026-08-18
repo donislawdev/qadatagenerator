@@ -7,55 +7,18 @@ import (
 	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/corrupted"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestexport"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/mutators"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/store"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
-	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
+	"github.com/donislawdev/qadatagenerator/internal/damage"
 	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
-	"github.com/donislawdev/qadatagenerator/internal/domain/mutator"
-	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
-	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
-	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/version"
 )
-
-// damage is everything a run needs to break what it produces, gathered in one
-// place so that the ordinary path stays readable.
-type damage struct {
-	writer   *corrupted.Writer
-	entries  *manifestjson.Writer
-	selector *corrupt.Selector
-	// exported is the extra form the manifest was asked for, or nothing.
-	//
-	// It is held so that it can be closed. The canonical manifest and an export
-	// are peers while entries arrive, and they stay peers at the end: each one
-	// has a last line of its own, and an export left unclosed would be a file
-	// that stops mid table without saying so.
-	exported manifestexport.Export
-	// form is the export that was asked for, empty for none. It is kept so that
-	// the summary can name the file rather than infer it from the handle.
-	form string
-}
-
-// manifestFiles names the manifest files one run writes.
-//
-// 🔴 One function rather than a phrase repeated at each surface, because a run
-// says what it wrote in three places and a second form added to only two of
-// them would leave the third quietly announcing the wrong set of files.
-func manifestFiles(form string) []string {
-	if name := manifestexport.FileFor(form); name != "" {
-		return []string{manifestjson.Name, name}
-	}
-	return []string{manifestjson.Name}
-}
 
 // listOf writes names the way a sentence does.
 //
@@ -73,15 +36,7 @@ func listOf(names []string) string {
 	}
 }
 
-// closeExport writes the last line of the export, if there is one.
-func (d *damage) closeExport() error {
-	if d.exported == nil {
-		return nil
-	}
-	return d.exported.Finish()
-}
-
-// summary is what a person is told about the damage, on the log channel.
+// summaryOf is what a person is told about the damage, on the log channel.
 //
 // # Why every category is named rather than only the worst
 //
@@ -89,11 +44,15 @@ func (d *damage) closeExport() error {
 // false impression of the scope. A run where fifty nine of sixty ordered
 // defects were not applied looks, from a count of applied ones alone, like a
 // run that did almost nothing wrong.
-func (d *damage) summary() []string {
+//
+// The counts arrive as numbers and the sentences are made here, because this
+// channel is English always while the other surface is translated. One shared
+// sentence would have to be wrong on one of them.
+func summaryOf(counts damage.Counts, form string) []string {
 	lines := []string{fmt.Sprintf("%s ordered, %d applied, manifest in %s",
-		counted(d.writer.Requested(), "defect"), d.writer.Applied(),
-		listOf(manifestFiles(d.form)))}
-	if missing := d.writer.Requested() - d.writer.Applied(); missing > 0 {
+		counted(counts.Requested, "defect"), counts.Applied,
+		listOf(damage.Files(form)))}
+	if missing := counts.Missing(); missing > 0 {
 		lines = append(lines, fmt.Sprintf(
 			"%s could not be applied, and the manifest carries the reason for each one",
 			counted(missing, "defect")))
@@ -103,12 +62,13 @@ func (d *damage) summary() []string {
 		// fault and nothing to act on, while a handful of entries saying the
 		// run lacks something is a recipe somebody can fix. Those two look
 		// identical in a single number.
-		lines = append(lines, d.writer.ByKind()...)
+		lines = append(lines, counts.ByKind...)
 	}
-	if unpartnered := d.selector.Unpartnered(); unpartnered > 0 {
+	if counts.Unpartnered > 0 {
 		lines = append(lines, fmt.Sprintf(
 			"%s about the integrity of the set were not ordered at all, because a table of "+
-				"one row has no second record for such a defect to span", counted(unpartnered, "defect")))
+				"one row has no second record for such a defect to span",
+			counted(counts.Unpartnered, "defect")))
 	}
 	return lines
 }
@@ -178,7 +138,7 @@ func kindsOfDamage(count int) string {
 // neither a dataset nor a manifest, rather than a manifest describing records
 // nobody will find.
 func withDamage(built recipe.Recipe, source values.Source, writer generate.Writer,
-	files *store.Set, exportForm string) (generate.Writer, *damage, error) {
+	files *store.Set, exportForm string) (generate.Writer, *damage.Run, error) {
 	if !built.Policy.Asks() {
 		return writer, nil, nil
 	}
@@ -187,33 +147,15 @@ func withDamage(built recipe.Recipe, source values.Source, writer generate.Write
 		return nil, nil, err
 	}
 	schema := values.SchemaOf(built, source)
-	selector, err := corrupt.NewSelector(built.Policy, described, schema, seed.New(built.Seed))
+	run, err := damage.Start(damage.Ask{
+		Files: files, Next: writer, Described: described, Schema: schema,
+		Policy: built.Policy, Seed: built.Seed, Can: canDo(built, source, schema),
+		Schemes: source, Form: exportForm, WidestRows: widestCount(built),
+	})
 	if err != nil {
 		return nil, nil, err
 	}
-
-	file, err := files.Create(manifestjson.Name)
-	if err != nil {
-		return nil, nil, err
-	}
-	entries := manifestjson.New(file, version.Manifest)
-	sinks := corrupted.Tee{entries}
-	var exported manifestexport.Export
-	if name := manifestexport.FileFor(exportForm); name != "" {
-		file, err := files.Create(name)
-		if err != nil {
-			return nil, nil, err
-		}
-		exported = manifestexport.New(exportForm, file, described, widestCount(built))
-		sinks = append(sinks, exported)
-	}
-	engine := corrupt.New(described, mutatorRegistry{}, schemeRegistry{source},
-		canDo(built, source, schema))
-	wrapped := corrupted.New(writer, engine, &selector, sinks, schema)
-	return wrapped, &damage{
-		writer: wrapped, entries: entries, selector: &selector, exported: exported,
-		form: exportForm,
-	}, nil
+	return run.Writer(), run, nil
 }
 
 // widestCount is the largest number of rows any one entity will have.
@@ -249,35 +191,15 @@ func canDo(built recipe.Recipe, source values.Source, schema recipe.SchemaView) 
 	return capability.NewSet(names...)
 }
 
-// mutatorRegistry adapts the package of implementations to the port the engine
-// takes. The two differ by nothing but a package boundary, and converting here
-// keeps the use case from importing an adapter.
-type mutatorRegistry struct{}
-
-func (mutatorRegistry) Lookup(id catalog.ID) (mutator.Mutator, bool) {
-	return mutators.Lookup(id)
-}
-
-// schemeRegistry adapts the registry of generators to the port the engine takes
-// for numbering schemes.
-//
-// It is the same registry the values come from, which is the point: a column
-// filled by the national identifier generator is damaged by the national
-// identifier provider, and there is no second list where the two could disagree.
-type schemeRegistry struct{ source values.Source }
-
-func (r schemeRegistry) Of(scheme string) (provider.Provider, bool) {
-	return r.source.ProviderNamed(scheme)
-}
-
-// finishManifest closes the document with the envelope.
+// closeRecipeManifest writes the envelope of a manifest produced beside
+// generated data.
 //
 // The counts come from what the run actually did rather than from what it meant
-// to do, and they are held against the model before anything is written: a
-// manifest the domain would refuse must not reach a disk, because whoever reads
-// it will read it as a promise.
-func (d *damage) finish(built recipe.Recipe, plan generate.Plan, at time.Time) error {
-	run := manifest.Run{
+// to do. Holding the envelope against the model happens where it is written,
+// which is the one place both modes pass through.
+func closeRecipeManifest(run *damage.Run, built recipe.Recipe, plan generate.Plan,
+	at time.Time) error {
+	envelope := manifest.Run{
 		GeneratedAt:    at.UTC().Format(time.RFC3339),
 		Seed:           built.Seed,
 		Locale:         built.Locale,
@@ -285,16 +207,7 @@ func (d *damage) finish(built recipe.Recipe, plan generate.Plan, at time.Time) e
 		Recipe:         built.Name,
 		Tag:            built.Tag,
 		RowsTotal:      plan.TotalRows(),
-		RowsMutated:    d.writer.RowsMutated(),
+		RowsMutated:    run.RowsMutated(),
 	}
-	if problems := run.Problems(); len(problems) > 0 {
-		return fault.New(fault.Runtime, "the manifest envelope is not usable: "+problems[0])
-	}
-	if err := d.entries.Finish(run, d.writer.Requested(), d.writer.Applied()); err != nil {
-		return err
-	}
-	// The canonical manifest first, then the export, for the same reason the
-	// other verb does it in that order: a failure to close either ends the run,
-	// and a run that ends leaves nothing behind.
-	return d.closeExport()
+	return run.Finish(envelope)
 }

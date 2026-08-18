@@ -14,6 +14,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
+	"github.com/donislawdev/qadatagenerator/internal/take"
 )
 
 // somebodyElsesFile writes a file this tool did not make, in a directory of its
@@ -83,7 +84,7 @@ func damaged(t *testing.T, source string, extra ...string) (map[string]any, outc
 	if err := json.Unmarshal(raw, &document); err != nil {
 		t.Fatalf("the manifest does not parse: %v", err)
 	}
-	written, err := os.ReadFile(filepath.Join(into, "contacts"+corruptedSuffix))
+	written, err := os.ReadFile(filepath.Join(into, "contacts"+take.Suffix))
 	if err != nil {
 		t.Fatalf("the run left no damaged file: %v", err)
 	}
@@ -119,7 +120,7 @@ func TestTheManifestCarriesTheEvidenceForEveryColumn(t *testing.T) {
 	if !carried {
 		t.Fatal("the run guessed what the columns hold and the manifest does not say so")
 	}
-	if inference["method"] != inferenceMethod {
+	if inference["method"] != take.InferenceMethod {
 		t.Errorf("the method is recorded as %v", inference["method"])
 	}
 	columns := inference["columns"].([]any)
@@ -406,7 +407,7 @@ func TestDamagingAFileInItsOwnDirectoryLeavesTheSourceAlone(t *testing.T) {
 	if string(back) != original {
 		t.Errorf("the file that was read came back as %q rather than as %q", string(back), original)
 	}
-	if _, err := os.Stat(filepath.Join(made, "contacts"+corruptedSuffix)); err != nil {
+	if _, err := os.Stat(filepath.Join(made, "contacts"+take.Suffix)); err != nil {
 		t.Errorf("the damaged records were not written beside the source: %v", err)
 	}
 }
