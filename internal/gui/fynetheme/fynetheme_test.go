@@ -104,3 +104,38 @@ func TestFontsAndIconsResolve(t *testing.T) {
 		t.Error("no icon resolved")
 	}
 }
+
+// Nothing a control can be painted with may equal the colour that says where
+// the keyboard is.
+//
+// 🔴 This is the guard for a defect a person saw on a real window on
+// 2026-08-18 and no test could: the toolkit marks focus by blending the focus
+// colour into the background of the control, so a control whose background is
+// already that colour shows nothing at all when it takes focus. The name of the
+// open screen was painted in the primary colour, this theme answered for
+// primary and for focus with one value, and pressing Tab onto that name changed
+// not a single pixel.
+//
+// It compares what the theme answers rather than what the rendered tree calls
+// it, and the difference is the whole point. The tree named those two
+// rectangles fillColor="primary" and fillColor="focus", which reads like two
+// colours and was one.
+func TestNoBackgroundOfAControlIsTheColourOfFocus(t *testing.T) {
+	focus := (Dark{}).Color(toolkit.ColorNameFocus, toolkit.VariantDark)
+	backgrounds := []fyne.ThemeColorName{
+		toolkit.ColorNamePrimary,
+		toolkit.ColorNameButton,
+		toolkit.ColorNameSelection,
+		toolkit.ColorNameHover,
+		toolkit.ColorNameBackground,
+		toolkit.ColorNameInputBackground,
+		toolkit.ColorNameMenuBackground,
+		toolkit.ColorNameOverlayBackground,
+	}
+	for _, name := range backgrounds {
+		if got := (Dark{}).Color(name, toolkit.VariantDark); got == focus {
+			t.Errorf("a control painted with %s carries the focus colour already, so focus lands on it "+
+				"and nothing on the screen changes", name)
+		}
+	}
+}

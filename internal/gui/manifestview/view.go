@@ -44,6 +44,13 @@ type View struct {
 
 	promised   manifest.Manifest
 	hasPromise bool
+
+	// Where the keyboard is standing in the table, and whether the table is the
+	// thing holding focus. Both are needed: the cell somebody moved to is worth
+	// marking only while the table is what the keyboard is talking to.
+	highlight    widget.TableCellID
+	hasHighlight bool
+	tableFocused bool
 }
 
 // New builds the screen. The window is what a file chooser has to appear over.
@@ -59,10 +66,19 @@ func New(text i18n.Catalogue, window fyne.Window, read Readers) *View {
 }
 
 // Content is the whole screen.
+//
+// # Why the parts are listed in the order they are read rather than as a border
+//
+// The keyboard walks the objects of a container in the order they were given,
+// and the convenient way of building a border puts the edges after the middle.
+// Measured on 2026-08-18: the first press of Tab landed on the table, and the
+// button above it came second. So the objects are handed over in reading order
+// and the layout is told separately where each one goes. It draws the same and
+// it walks the way the eye does.
 func (v *View) Content() fyne.CanvasObject {
 	open := widget.NewButton(v.text.T(i18n.ManifestOpen), v.chooseManifest)
 	bar := container.NewHBox(open, v.respond)
-	return inset(container.NewBorder(bar, nil, nil, nil, v.body))
+	return inset(container.New(layout.NewBorderLayout(bar, nil, nil, nil), bar, v.body))
 }
 
 // inset keeps content off the edges of the window by the margin of the scale.
@@ -157,7 +173,12 @@ func (v *View) rendered(screen Screen) fyne.CanvasObject {
 		lines(screen.Notes),
 		heading(v.text.T(i18n.ManifestHeadingEntries)),
 	)
-	return container.NewBorder(head, v.foot(screen), nil, nil, v.table(screen.Rows))
+	foot := v.foot(screen)
+	// Reading order again, for the reason given at Content. Nothing in the head
+	// or the foot takes focus today, so this changes no walk on its own. It is
+	// written this way so that the day one of them carries a control, the walk
+	// is already right rather than newly wrong.
+	return container.New(layout.NewBorderLayout(head, foot, nil, nil), head, foot, v.table(screen.Rows))
 }
 
 // table is the entries, as a table.
@@ -175,20 +196,35 @@ func (v *View) rendered(screen Screen) fyne.CanvasObject {
 // built only for what can be seen, which is what keeps a manifest of a hundred
 // thousand entries from costing what it would in a plain column.
 func (v *View) table(rows []Row) fyne.CanvasObject {
-	entries := widget.NewTableWithHeaders(
+	v.hasHighlight, v.tableFocused = false, false
+	entries := newKeyboardTable(
 		func() (int, int) { return len(rows), palette.EntryColumns() },
 		func() fyne.CanvasObject { return painted(Line{}) },
 		func(cell widget.TableCellID, object fyne.CanvasObject) {
 			if text, ok := object.(*widget.RichText); ok && cell.Row < len(rows) {
-				set(text, rows[cell.Row].Cell(cell.Col))
+				set(text, rows[cell.Row].Cell(cell.Col), v.cellStyle(cell))
 			}
-		})
+		},
+		func(has bool) { v.tableFocused = has },
+	)
 	entries.ShowHeaderColumn = false
 	entries.CreateHeader = func() fyne.CanvasObject { return bold(Line{Color: palette.NameTextSubdued}) }
 	entries.UpdateHeader = func(cell widget.TableCellID, object fyne.CanvasObject) {
 		if text, ok := object.(*widget.RichText); ok {
-			set(text, Line{Text: v.columnName(cell.Col), Color: palette.NameTextSubdued})
+			set(text, Line{Text: v.columnName(cell.Col), Color: palette.NameTextSubdued},
+				fyne.TextStyle{Bold: true})
 		}
+	}
+	// The toolkit redraws the cell it is leaving and the cell it is arriving at
+	// before it says where it arrived, so the mark has to be moved by hand here.
+	// Without these two refreshes the mark trails one key press behind.
+	entries.OnHighlighted = func(cell widget.TableCellID) {
+		previous, had := v.highlight, v.hasHighlight
+		v.highlight, v.hasHighlight = cell, true
+		if had && previous != cell {
+			entries.RefreshItem(previous)
+		}
+		entries.RefreshItem(cell)
 	}
 	for column, width := range palette.EntryColumnWidths {
 		entries.SetColumnWidth(column, width)
@@ -364,7 +400,11 @@ func segmentOf(line Line) *widget.TextSegment {
 // assigning to the segment changes what the object holds, and the screen goes on
 // showing what was last drawn until something asks for it again, which matters
 // here because every cell of a table was already drawn as some other cell.
-func set(target *widget.RichText, line Line) {
+// The weight and the underline are written on every update rather than only
+// when there is something to mark. Cells are drawn from a pool and handed out
+// again as the table scrolls, so a style left behind on one would reappear under
+// a row that has nothing to do with it.
+func set(target *widget.RichText, line Line, style fyne.TextStyle) {
 	name := line.Color
 	if name == "" {
 		name = palette.NameText
@@ -375,5 +415,35 @@ func set(target *widget.RichText, line Line) {
 	}
 	segment.Text = line.Text
 	segment.Style.ColorName = fyne.ThemeColorName(name)
+	segment.Style.TextStyle = style
 	target.Refresh()
+}
+
+// cellStyle marks the one cell the keyboard is standing on.
+//
+// # Why weight and an underline rather than a colour behind the cell
+//
+// The toolkit marks the cell by moving its hover rectangle, which this project
+// paints in the colour of a row under the pointer. Measured on 2026-08-18 that
+// rectangle stands at 1.18 against the surface behind it, where docs/17 asks
+// three for anything carrying meaning without words, so as an indicator it is
+// not there at all.
+//
+// Repainting that rectangle brighter cannot fix it, and the reason is arithmetic
+// rather than taste: to reach three against the surface the fill needs a
+// luminance of at least 0.153, and for the text of this product to keep four and
+// a half on top of it the same fill may be at most 0.140. The two do not meet.
+// A cell filled brightly enough to show where the keyboard is would be a cell
+// whose words can no longer be read.
+//
+// So the mark is the text itself. It keeps the colour that says what the entry
+// means, which a fill would have taken away, and it adds weight and a line under
+// the words. That is a shape as well as a colour, which is what docs/17 asks of
+// anything carrying meaning, and the text it is drawn in already stands at 8.13
+// against the surface.
+func (v *View) cellStyle(cell widget.TableCellID) fyne.TextStyle {
+	if v.tableFocused && v.hasHighlight && v.highlight == cell {
+		return fyne.TextStyle{Bold: true, Underline: true}
+	}
+	return fyne.TextStyle{}
 }

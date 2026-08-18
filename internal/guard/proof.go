@@ -166,6 +166,12 @@ var Guards = []Guard{
 	{"interface text keeps the punctuation this repository uses", "TestNoEntryUsesPunctuationThisRepositoryRefuses", "internal/adapter/i18n", ByMutation},
 	{"every colour the window shows comes from the measured palette", "TestEveryColourAnsweredHereComesFromTheMeasuredPalette", "internal/gui/fynetheme", ByMutation},
 	{"a colour nobody claimed is visible rather than a hole", "TestAnUnclaimedColourFallsThroughAndIsNeverInvisible", "internal/gui/fynetheme", ByMutation},
+	{"nothing a control is painted with equals the colour that says where the keyboard is", "TestNoBackgroundOfAControlIsTheColourOfFocus", "internal/gui/fynetheme", ByMutation},
+	{"the keyboard meets the names of the screens before the screen itself", "TestTheKeyboardMeetsTheNamesBeforeTheScreen", "internal/gui/shell", ByMutation},
+	{"the screen a person is on is marked by a shape rather than by colour alone", "TestTheOpenScreenIsMarkedByAShapeRatherThanByColourAlone", "internal/gui/shell", ByMutation},
+	{"the keyboard meets the controls of a screen before its entries", "TestTheKeyboardMeetsTheButtonsBeforeTheEntries", "internal/gui/manifestview", ByMutation},
+	{"the cell the keyboard stands on is marked, and the mark leaves with the focus", "TestTheCellTheKeyboardStandsOnIsMarkedAndTheMarkLeavesWithIt", "internal/gui/manifestview", ByMutation},
+	{"the mark of the keyboard is drawn rather than merely recorded", "TestTheMarkOfTheKeyboardReachesThePixels", "internal/gui/manifestview", ByMutation},
 
 	// --- the register guarding the register ---------------------------------
 	{"a guard added here cannot stay out of the register", "TestEveryGuardInThisPackageIsRegistered", "internal/guard", ByMutation},

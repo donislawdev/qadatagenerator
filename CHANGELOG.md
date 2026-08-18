@@ -32,6 +32,15 @@ repository once they are released.
 
 ### Fixed
 
+- **The window can now be used with a keyboard, and it shows you where you are.**
+  Tab moves through the window in the order you read it, starting with the list
+  of screens down the left. In the table of ordered damage, the arrow keys move
+  from cell to cell and the cell you are on is drawn in bold and underlined, so
+  it stays visible without taking away the colour that says what the entry means.
+  The name of the screen you are on carries a mark of its own, so it is no longer
+  confused with the name the keyboard happens to be on. Two limits are worth
+  knowing: the About screen cannot be scrolled with a keyboard yet, and a button
+  is pressed with the space bar rather than with Enter.
 - **A manifest this tool wrote could not always be read back by this tool.**
   Damage spanning several records, and damage located by a path inside a nested
   structure, lost part of their location when the manifest was read, so `verify`

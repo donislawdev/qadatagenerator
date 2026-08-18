@@ -130,8 +130,8 @@ func TestEveryPartOfAnEntryReachesTheColumnItsHeadingNames(t *testing.T) {
 // reuse only starts once there are more entries than cells on screen.
 func TestAReusedCellCarriesNothingFromTheEntryBeforeIt(t *testing.T) {
 	cell := painted(Line{})
-	set(cell, Line{Text: "the column follows no scheme this damage suits", Color: palette.NameNotApplied})
-	set(cell, Line{Text: "applied", Color: palette.NameTextSubdued})
+	set(cell, Line{Text: "the column follows no scheme this damage suits", Color: palette.NameNotApplied}, fyne.TextStyle{})
+	set(cell, Line{Text: "applied", Color: palette.NameTextSubdued}, fyne.TextStyle{})
 
 	if shows(cell, "the column follows no scheme this damage suits") {
 		t.Error("the cell still shows what the entry before it put there")
@@ -190,7 +190,7 @@ func TestAColumnThatDoesNotExistIsEmptyRatherThanFatal(t *testing.T) {
 // read the tree. It renders and asks whether any pixel differs from the ground.
 func TestAFilledCellDrawsSomethingRatherThanAnEmptyRectangle(t *testing.T) {
 	cell := painted(Line{})
-	set(cell, sample().Expect)
+	set(cell, sample().Expect, fyne.TextStyle{})
 
 	window := test.NewWindow(cell)
 	defer window.Close()

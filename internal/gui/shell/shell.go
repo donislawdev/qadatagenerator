@@ -19,6 +19,8 @@ package shell
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
@@ -66,18 +68,33 @@ func (s *Shell) button(index int) *widget.Button {
 
 // Open shows one screen and marks its name as the one being read.
 //
-// The mark is weight rather than colour alone. The three meaning colours of
-// this palette differ from one another by a contrast of 1.18 to 1.41, so a
-// colour on its own is a difference somebody who does not separate hues cannot
-// see, and this project holds that as a measurement rather than as a guideline.
+// # Why the mark is a shape and not the colour it used to be
+//
+// It was the toolkit's high importance, which paints the name in the primary
+// colour. This project answers for the primary colour and for the focus colour
+// with the same measured value, so the name of the screen a person was on and
+// the name the keyboard was on were painted identically. Seen on a real window
+// on 2026-08-18: the first press of Tab changed nothing anybody could see, and
+// the second made two names look equally current.
+//
+// Reading the rendered tree says the same thing in words, and shows the trap in
+// guarding it by name: the two rectangles are reported as fillColor="primary"
+// and fillColor="focus", two names for one value. So the guard compares what
+// the theme answers, not what the tree calls it.
+//
+// The mark is therefore a shape, which docs/17 asks for anyway: a colour that
+// carries meaning on its own is a difference somebody who does not separate
+// hues cannot see. The colour is left to mean one thing only, which is where
+// the keyboard is.
 func (s *Shell) Open(index int) {
 	if index < 0 || index >= len(s.screens) {
 		return
 	}
 	for at, button := range s.buttons {
 		button.Importance = widget.MediumImportance
+		button.SetIcon(nil)
 		if at == index {
-			button.Importance = widget.HighImportance
+			button.SetIcon(theme.NavigateNextIcon())
 		}
 		button.Refresh()
 	}
@@ -100,13 +117,22 @@ func (s *Shell) Showing() (int, bool) {
 }
 
 // Content is the whole frame.
+//
+// # Why the column is handed over before the body
+//
+// The keyboard walks the objects of a container in the order they were given,
+// and the convenient way of building a border appends the edges after the
+// middle. Measured on 2026-08-18: Tab reached the screen first and the column of
+// names, which stands down the left and is read first, came last. The layout is
+// therefore told where the parts go, and the parts are handed over in the order
+// a person meets them.
 func (s *Shell) Content() fyne.CanvasObject {
 	names := make([]fyne.CanvasObject, 0, len(s.buttons))
 	for _, button := range s.buttons {
 		names = append(names, button)
 	}
 	column := container.New(fixedWidth{width: palette.SidebarWidth}, container.NewVBox(names...))
-	return container.NewBorder(nil, nil, column, nil, s.body)
+	return container.New(layout.NewBorderLayout(nil, nil, column, nil), column, s.body)
 }
 
 // fixedWidth gives what it holds one width whatever is in it.

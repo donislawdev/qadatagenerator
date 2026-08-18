@@ -63,24 +63,6 @@ func TestEveryScreenCanBeOpenedByItsName(t *testing.T) {
 	}
 }
 
-// The screen being read is marked by weight rather than by colour alone.
-//
-// 🔴 Measured rather than assumed: the meaning colours of this palette differ
-// from one another by a contrast of 1.18 to 1.41, so somebody who does not
-// separate hues sees one shade of grey. A mark carried by colour alone is a
-// mark they do not have.
-func TestTheScreenBeingReadIsMarkedWithoutRelyingOnColour(t *testing.T) {
-	frame := New(screens())
-	frame.Open(1)
-
-	if frame.buttons[1].Importance != widget.HighImportance {
-		t.Error("the name of the screen being read carries no weight of its own")
-	}
-	if frame.buttons[0].Importance == widget.HighImportance {
-		t.Error("the name of a screen nobody is reading is marked as if it were")
-	}
-}
-
 // Asking for a screen that is not there leaves the frame as it was.
 //
 // A frame that emptied itself on a bad index would turn a mistake in one place
@@ -131,5 +113,69 @@ func TestAFrameWithNoScreensSaysThereIsNothingShowing(t *testing.T) {
 	}
 	if frame.Content() == nil {
 		t.Error("a frame with no screens builds no content at all, so a window would have nothing to hold")
+	}
+}
+
+// The keyboard meets the names of the screens before the screen itself.
+//
+// 🔴 Measured on 2026-08-18 before this was true: Tab reached the control inside
+// the screen first, and the column of names, which stands down the left and is
+// what a person reads first, came last. The drawing said nothing about it. The
+// cause is that the convenient way of building a border hands the middle over
+// before the edges, and the keyboard walks the order it was handed.
+func TestTheKeyboardMeetsTheNamesBeforeTheScreen(t *testing.T) {
+	inside := widget.NewButton("something inside the screen", func() {})
+	frame := New([]Screen{
+		{Name: "Manifest browser", Content: inside},
+		{Name: "About", Content: widget.NewLabel("the about screen")},
+	})
+
+	window := test.NewWindow(frame.Content())
+	defer window.Close()
+	window.Resize(fyne.NewSize(900, 600))
+
+	canvas := window.Canvas()
+	wanted := []string{"Manifest browser", "About", "something inside the screen"}
+	for at, name := range wanted {
+		canvas.FocusNext()
+		button, ok := canvas.Focused().(*widget.Button)
+		if !ok {
+			t.Fatalf("stop %d of the walk is %T rather than a button", at+1, canvas.Focused())
+		}
+		if button.Text != name {
+			t.Errorf("stop %d of the walk is %q, and reading the window it should be %q",
+				at+1, button.Text, name)
+		}
+	}
+}
+
+// The screen a person is on is marked by a shape, not by a colour alone.
+//
+// 🔴 Colour alone was what it used to be, and it collided with the one other
+// thing this window says in colour: where the keyboard is. Both were the same
+// measured value, so on a real window the mark of the open screen and the mark
+// of focus were the same picture. docs/17 asks for a shape beside any colour
+// carrying meaning, and this is that shape.
+func TestTheOpenScreenIsMarkedByAShapeRatherThanByColourAlone(t *testing.T) {
+	all := screens()
+	frame := New(all)
+
+	for index := range all {
+		frame.Open(index)
+		for at, button := range frame.buttons {
+			marked := button.Icon != nil
+			if at == index && !marked {
+				t.Errorf("screen %d is open and its name carries no mark, so only colour says which screen it is",
+					index)
+			}
+			if at != index && marked {
+				t.Errorf("screen %d is not open and its name carries the mark, so two names claim to be current",
+					at)
+			}
+			if button.Importance != widget.MediumImportance {
+				t.Errorf("the name of screen %d asks for importance %v, and importance here paints the name in "+
+					"the colour that belongs to focus", at, button.Importance)
+			}
+		}
 	}
 }

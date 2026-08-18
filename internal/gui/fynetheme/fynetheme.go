@@ -55,12 +55,18 @@ var colourFor = map[fyne.ThemeColorName]string{
 	toolkit.ColorNameError:             palette.NameRejection,
 	toolkit.ColorNameSuccess:           palette.NameAcceptance,
 	toolkit.ColorNameWarning:           palette.NameWarning,
-	toolkit.ColorNamePrimary:           palette.NameFocus,
-	toolkit.ColorNameFocus:             palette.NameFocus,
-	toolkit.ColorNameSelection:         palette.NameRowSelected,
-	toolkit.ColorNameHover:             palette.NameRowHover,
-	toolkit.ColorNameSeparator:         palette.NameRowDivider,
-	toolkit.ColorNameInputBorder:       palette.NameBorderActive,
+	// Primary is what the toolkit paints a control that is the chosen one, and
+	// focus is what it blends into whatever the keyboard is on. Until
+	// 2026-08-18 both answered with the same value, and the result was a
+	// control that could not show it had focus, because it was already painted
+	// in the colour focus arrives in. Seen on a real window, guarded next door
+	// in the test that no background equals the focus colour.
+	toolkit.ColorNamePrimary:     palette.NameRowSelected,
+	toolkit.ColorNameFocus:       palette.NameFocus,
+	toolkit.ColorNameSelection:   palette.NameRowSelected,
+	toolkit.ColorNameHover:       palette.NameRowHover,
+	toolkit.ColorNameSeparator:   palette.NameRowDivider,
+	toolkit.ColorNameInputBorder: palette.NameBorderActive,
 }
 
 // Color answers with a measured colour where this project has one.
