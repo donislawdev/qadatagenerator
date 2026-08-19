@@ -59,7 +59,7 @@ func TestMain(m *testing.M) {
 //     half is held by the guard that renders and counts pixels, and that is why
 //     that one exists rather than being replaced by this file.
 func TestEveryScreenStillDrawsWhatItDrewBefore(t *testing.T) {
-	data := Sample()
+	data := sampleWithSource(t)
 	for _, state := range All() {
 		t.Run(state.Name, func(t *testing.T) {
 			drawn := render(t, data, state)
@@ -96,13 +96,29 @@ func TestEveryScreenStillDrawsWhatItDrewBefore(t *testing.T) {
 // so. Here the sample carries a manifest and a response record precisely so that
 // no state has an excuse.
 func TestEveryStateCanBeBuiltFromTheSample(t *testing.T) {
-	data := Sample()
+	data := sampleWithSource(t)
 	for _, state := range All() {
 		if buildable, missing := state.Buildable(data); !buildable {
 			t.Errorf("state %q cannot be built from the sample: %s, so nothing ever renders it",
 				state.Name, missing)
 		}
 	}
+}
+
+// sampleWithSource is the sample together with a file this tool did not make.
+//
+// The file is written into a directory of the test rather than kept in the
+// repository, because the screen it feeds reads whatever it is pointed at and a
+// committed file would be a second thing to keep in step with the readers.
+func sampleWithSource(t *testing.T) Data {
+	t.Helper()
+	data := Sample()
+	path, err := SampleFile(t.TempDir())
+	if err != nil {
+		t.Fatalf("cannot write the file the take and corrupt screen reads: %v", err)
+	}
+	data.SourcePath = path
+	return data
 }
 
 // A state that needs a manifest says so rather than drawing an empty screen.

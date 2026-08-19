@@ -35,6 +35,16 @@ import (
 type Screen struct {
 	Name    string
 	Content fyne.CanvasObject
+	// OnDropped is what this screen does with a file dropped onto the window,
+	// or nothing for a screen that takes none.
+	//
+	// It is declared here rather than on the screen itself because dropping is
+	// a property of the WINDOW: the toolkit takes one callback for the whole of
+	// it, so a screen registering its own would be overwriting whatever the
+	// last screen registered. Which screen is open is something this frame
+	// already knows, so the routing belongs here and can be checked without a
+	// window at all.
+	OnDropped func([]fyne.URI)
 }
 
 // Shell is the frame and which screen is showing.
@@ -101,6 +111,29 @@ func (s *Shell) Open(index int) {
 	}
 	s.body.Objects = []fyne.CanvasObject{s.screens[index].Content}
 	s.body.Refresh()
+}
+
+// Dropped hands a dropped file to the screen a person is looking at.
+//
+// # Why the screen underneath rather than every screen
+//
+// A drop is aimed at what is on display. Handing it to all of them would have
+// the manifest browser open something somebody dropped while reading About, and
+// handing it to a fixed screen would mean the window quietly switching under
+// them. A screen that takes no files ignores the drop, which is what a person
+// dropping one onto the About screen expects.
+//
+// The position is taken and not used. The toolkit reports where the drop landed
+// and no screen here places anything by pixel, so using it would be inventing a
+// meaning for a number nobody set.
+func (s *Shell) Dropped(_ fyne.Position, dropped []fyne.URI) {
+	index, showing := s.Showing()
+	if !showing || len(dropped) == 0 {
+		return
+	}
+	if takes := s.screens[index].OnDropped; takes != nil {
+		takes(dropped)
+	}
 }
 
 // Showing is the index of the screen on display, and reports whether there is

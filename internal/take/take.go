@@ -26,6 +26,7 @@ package take
 
 import (
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
@@ -41,6 +42,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/version"
 )
 
@@ -202,7 +204,23 @@ type Opened struct {
 // settings, and a run that never starts must not have read a large file into
 // memory for nothing.
 func Open(path string, settings Settings) (*Opened, error) {
-	file, err := sourcecsv.Open(path, []rune(settings.Delimiter)[0])
+	// 🔴 The separator is held against the same rule Check holds it against,
+	// and this is the second place rather than the first. Every caller is meant
+	// to have been refused already, so this line should be unreachable.
+	//
+	// It exists because of what happens when it is not. Taking the first rune
+	// of an empty setting is a panic, and a panic on the command line is an
+	// ugly ending while a panic in a window is the program disappearing while
+	// somebody was typing. A screen puts a separator under a person's cursor,
+	// so the empty value between two keystrokes is ordinary rather than
+	// exotic.
+	separator := []rune(settings.Delimiter)
+	if len(separator) != 1 {
+		return nil, fault.New(fault.Config,
+			"the field separator has to be one character and this run was given "+
+				strconv.Quote(settings.Delimiter))
+	}
+	file, err := sourcecsv.Open(path, separator[0])
 	if err != nil {
 		return nil, err
 	}
@@ -225,6 +243,13 @@ func (o *Opened) Shape() infer.Schema { return o.shape }
 // HadByteOrderMark reports whether the file began with a byte order mark, which
 // is worth telling somebody because the file written back does not have one.
 func (o *Opened) HadByteOrderMark() bool { return o.file.HadByteOrderMark() }
+
+// NotInferred names what looking at values can never establish.
+//
+// It is answered here rather than left to each surface, because the list is a
+// property of the way of looking rather than of who is asking. A surface that
+// forgot to mention it would be promising damage this mode cannot do.
+func (o *Opened) NotInferred() []string { return infer.NotInferred() }
 
 // Plan is what a run would do, without doing any of it.
 //

@@ -6,11 +6,18 @@
 					<widget size="220x28" type="*parts.Button">
 						<rectangle fillColor="button" radius="5" size="220x28"/>
 						<rectangle size="220x28"/>
+						<widget pos="50,4" size="118x19" type="*widget.RichText">
+							<text alignment="center" bold size="118x19">Take and corrupt</text>
+						</widget>
+					</widget>
+					<widget pos="0,36" size="220x28" type="*parts.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
 						<widget pos="48,4" size="122x19" type="*widget.RichText">
 							<text alignment="center" bold size="122x19">Manifest browser</text>
 						</widget>
 					</widget>
-					<widget pos="0,36" size="220x28" type="*parts.Button">
+					<widget pos="0,72" size="220x28" type="*parts.Button">
 						<rectangle fillColor="focus" radius="5" size="220x28"/>
 						<rectangle size="220x28"/>
 						<widget pos="102,4" size="42x20" type="*widget.RichText">
@@ -21,1131 +28,1133 @@
 				</container>
 			</container>
 			<container pos="228,0" size="1098x884">
-				<widget size="1098x884" type="*widget.Scroll">
-					<container size="1098x3169">
-						<widget size="1098x27" type="*widget.Label">
-							<widget size="1098x27" type="*widget.RichText">
-								<text bold pos="4,4" size="59x19">Versions</text>
+				<container size="1098x884">
+					<widget pos="24,24" size="1050x836" type="*widget.Scroll">
+						<container size="1050x3169">
+							<widget size="1050x27" type="*widget.Label">
+								<widget size="1050x27" type="*widget.RichText">
+									<text bold pos="4,4" size="59x19">Versions</text>
+								</widget>
 							</widget>
-						</widget>
-						<container pos="0,35" size="1098x132">
-							<container size="1098x27">
-								<widget size="36x27" type="*widget.Label">
-									<widget size="36x27" type="*widget.RichText">
-										<text bold pos="4,4" size="28x19">Tool</text>
+							<container pos="0,35" size="1050x132">
+								<container size="1050x27">
+									<widget size="36x27" type="*widget.Label">
+										<widget size="36x27" type="*widget.RichText">
+											<text bold pos="4,4" size="28x19">Tool</text>
+										</widget>
 									</widget>
+									<widget pos="44,0" size="39x27" type="*widget.Label">
+										<widget size="39x27" type="*widget.RichText">
+											<text pos="4,4" size="31x19">0.1.0</text>
+										</widget>
+									</widget>
+								</container>
+								<container pos="0,35" size="1050x27">
+									<widget size="140x27" type="*widget.Label">
+										<widget size="140x27" type="*widget.RichText">
+											<text bold pos="4,4" size="132x19">Corruption catalog</text>
+										</widget>
+									</widget>
+									<widget pos="148,0" size="27x27" type="*widget.Label">
+										<widget size="27x27" type="*widget.RichText">
+											<text pos="4,4" size="19x19">0.1</text>
+										</widget>
+									</widget>
+								</container>
+								<container pos="0,70" size="1050x27">
+									<widget size="122x27" type="*widget.Label">
+										<widget size="122x27" type="*widget.RichText">
+											<text bold pos="4,4" size="114x19">Manifest format</text>
+										</widget>
+									</widget>
+									<widget pos="130,0" size="27x27" type="*widget.Label">
+										<widget size="27x27" type="*widget.RichText">
+											<text pos="4,4" size="19x19">0.1</text>
+										</widget>
+									</widget>
+								</container>
+								<container pos="0,105" size="1050x27">
+									<widget size="111x27" type="*widget.Label">
+										<widget size="111x27" type="*widget.RichText">
+											<text bold pos="4,4" size="103x19">Recipe schema</text>
+										</widget>
+									</widget>
+									<widget pos="119,0" size="27x27" type="*widget.Label">
+										<widget size="27x27" type="*widget.RichText">
+											<text pos="4,4" size="19x19">0.1</text>
+										</widget>
+									</widget>
+								</container>
+							</container>
+							<widget pos="0,175" size="1050x4" type="*widget.Separator">
+								<rectangle fillColor="separator" size="1050x4"/>
+							</widget>
+							<widget pos="0,187" size="1050x27" type="*widget.Label">
+								<widget size="1050x27" type="*widget.RichText">
+									<text bold pos="4,4" size="59x19">Licenses</text>
 								</widget>
-								<widget pos="44,0" size="39x27" type="*widget.Label">
-									<widget size="39x27" type="*widget.RichText">
-										<text pos="4,4" size="31x19">0.1.0</text>
+							</widget>
+							<container pos="0,222" size="1050x97">
+								<container size="1050x27">
+									<widget size="42x27" type="*widget.Label">
+										<widget size="42x27" type="*widget.RichText">
+											<text bold pos="4,4" size="34x19">Code</text>
+										</widget>
+									</widget>
+									<widget pos="50,0" size="90x27" type="*widget.Label">
+										<widget size="90x27" type="*widget.RichText">
+											<text pos="4,4" size="82x19">GPL-3.0-only</text>
+										</widget>
+									</widget>
+								</container>
+								<container pos="0,35" size="1050x27">
+									<widget size="97x27" type="*widget.Label">
+										<widget size="97x27" type="*widget.RichText">
+											<text bold pos="4,4" size="89x19">Specification</text>
+										</widget>
+									</widget>
+									<widget pos="105,0" size="71x27" type="*widget.Label">
+										<widget size="71x27" type="*widget.RichText">
+											<text pos="4,4" size="63x19">CC-BY-4.0</text>
+										</widget>
+									</widget>
+								</container>
+								<widget pos="0,70" size="1050x27" type="*widget.Label">
+									<widget size="1050x27" type="*widget.RichText">
+										<text pos="4,4" size="488x19">Applies to spec/ and to the corruption catalog entries built into this binary.</text>
 									</widget>
 								</widget>
 							</container>
-							<container pos="0,35" size="1098x27">
-								<widget size="140x27" type="*widget.Label">
-									<widget size="140x27" type="*widget.RichText">
-										<text bold pos="4,4" size="132x19">Corruption catalog</text>
-									</widget>
+							<widget pos="0,327" size="1050x4" type="*widget.Separator">
+								<rectangle fillColor="separator" size="1050x4"/>
+							</widget>
+							<widget pos="0,339" size="1050x27" type="*widget.Label">
+								<widget size="1050x27" type="*widget.RichText">
+									<text bold pos="4,4" size="168x19">Third party components</text>
 								</widget>
-								<widget pos="148,0" size="27x27" type="*widget.Label">
-									<widget size="27x27" type="*widget.RichText">
-										<text pos="4,4" size="19x19">0.1</text>
-									</widget>
-								</widget>
+							</widget>
+							<container pos="0,374" size="1050x2657">
+								<container size="1050x62">
+									<container size="1050x27">
+										<widget size="114x27" type="*widget.Label">
+											<widget size="114x27" type="*widget.RichText">
+												<text bold pos="4,4" size="106x19">fyne.io/fyne/v2</text>
+											</widget>
+										</widget>
+										<widget pos="122,0" size="145x27" type="*widget.Label">
+											<widget size="145x27" type="*widget.RichText">
+												<text pos="4,4" size="137x19">v2.8.0   BSD-3-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="154x27" type="*widget.Label">
+											<widget size="154x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="146x19">https://fyne.io/fyne/v2</text>
+											</widget>
+										</widget>
+										<widget pos="162,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,70" size="1050x62">
+									<container size="1050x27">
+										<widget size="112x27" type="*widget.Label">
+											<widget size="112x27" type="*widget.RichText">
+												<text bold pos="4,4" size="104x19">fyne.io/systray</text>
+											</widget>
+										</widget>
+										<widget pos="120,0" size="138x27" type="*widget.Label">
+											<widget size="138x27" type="*widget.RichText">
+												<text pos="4,4" size="130x19">v1.12.2   Apache-2.0</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="151x27" type="*widget.Label">
+											<widget size="151x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="143x19">https://fyne.io/systray</text>
+											</widget>
+										</widget>
+										<widget pos="159,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,140" size="1050x62">
+									<container size="1050x27">
+										<widget size="210x27" type="*widget.Label">
+											<widget size="210x27" type="*widget.RichText">
+												<text bold pos="4,4" size="202x19">github.com/BurntSushi/toml</text>
+											</widget>
+										</widget>
+										<widget pos="218,0" size="82x27" type="*widget.Label">
+											<widget size="82x27" type="*widget.RichText">
+												<text pos="4,4" size="74x19">v1.6.0   MIT</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="244x27" type="*widget.Label">
+											<widget size="244x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="236x19">https://github.com/BurntSushi/toml</text>
+											</widget>
+										</widget>
+										<widget pos="252,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,210" size="1050x62">
+									<container size="1050x27">
+										<widget size="200x27" type="*widget.Label">
+											<widget size="200x27" type="*widget.RichText">
+												<text bold pos="4,4" size="192x19">github.com/FyshOS/fancyfs</text>
+											</widget>
+										</widget>
+										<widget pos="208,0" size="145x27" type="*widget.Label">
+											<widget size="145x27" type="*widget.RichText">
+												<text pos="4,4" size="137x19">v0.0.1   BSD-3-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="236x27" type="*widget.Label">
+											<widget size="236x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="228x19">https://github.com/FyshOS/fancyfs</text>
+											</widget>
+										</widget>
+										<widget pos="244,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-17</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,280" size="1050x62">
+									<container size="1050x27">
+										<widget size="236x27" type="*widget.Label">
+											<widget size="236x27" type="*widget.RichText">
+												<text bold pos="4,4" size="228x19">github.com/anthonynsimon/bild</text>
+											</widget>
+										</widget>
+										<widget pos="244,0" size="90x27" type="*widget.Label">
+											<widget size="90x27" type="*widget.RichText">
+												<text pos="4,4" size="82x19">v0.14.0   MIT</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="269x27" type="*widget.Label">
+											<widget size="269x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="261x19">https://github.com/anthonynsimon/bild</text>
+											</widget>
+										</widget>
+										<widget pos="277,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,350" size="1050x62">
+									<container size="1050x27">
+										<widget size="253x27" type="*widget.Label">
+											<widget size="253x27" type="*widget.RichText">
+												<text bold pos="4,4" size="245x19">github.com/clipperhouse/uax29/v2</text>
+											</widget>
+										</widget>
+										<widget pos="261,0" size="82x27" type="*widget.Label">
+											<widget size="82x27" type="*widget.RichText">
+												<text pos="4,4" size="74x19">v2.2.0   MIT</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="287x27" type="*widget.Label">
+											<widget size="287x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="279x19">https://github.com/clipperhouse/uax29/v2</text>
+											</widget>
+										</widget>
+										<widget pos="295,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,420" size="1050x62">
+									<container size="1050x27">
+										<widget size="216x27" type="*widget.Label">
+											<widget size="216x27" type="*widget.RichText">
+												<text bold pos="4,4" size="208x19">github.com/davecgh/go-spew</text>
+											</widget>
+										</widget>
+										<widget pos="224,0" size="78x27" type="*widget.Label">
+											<widget size="78x27" type="*widget.RichText">
+												<text pos="4,4" size="70x19">v1.1.1   ISC</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="252x27" type="*widget.Label">
+											<widget size="252x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="244x19">https://github.com/davecgh/go-spew</text>
+											</widget>
+										</widget>
+										<widget pos="260,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,491" size="1050x62">
+									<container size="1050x27">
+										<widget size="161x27" type="*widget.Label">
+											<widget size="161x27" type="*widget.RichText">
+												<text bold pos="4,4" size="153x19">github.com/fredbi/uri</text>
+											</widget>
+										</widget>
+										<widget pos="169,0" size="82x27" type="*widget.Label">
+											<widget size="82x27" type="*widget.RichText">
+												<text pos="4,4" size="74x19">v1.1.1   MIT</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="198x27" type="*widget.Label">
+											<widget size="198x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="190x19">https://github.com/fredbi/uri</text>
+											</widget>
+										</widget>
+										<widget pos="206,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,561" size="1050x62">
+									<container size="1050x27">
+										<widget size="207x27" type="*widget.Label">
+											<widget size="207x27" type="*widget.RichText">
+												<text bold pos="4,4" size="199x19">github.com/fsnotify/fsnotify</text>
+											</widget>
+										</widget>
+										<widget pos="215,0" size="145x27" type="*widget.Label">
+											<widget size="145x27" type="*widget.RichText">
+												<text pos="4,4" size="137x19">v1.9.0   BSD-3-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="240x27" type="*widget.Label">
+											<widget size="240x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="232x19">https://github.com/fsnotify/fsnotify</text>
+											</widget>
+										</widget>
+										<widget pos="248,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,631" size="1050x62">
+									<container size="1050x27">
+										<widget size="176x27" type="*widget.Label">
+											<widget size="176x27" type="*widget.RichText">
+												<text bold pos="4,4" size="168x19">github.com/fyne-io/gl-js</text>
+											</widget>
+										</widget>
+										<widget pos="184,0" size="370x27" type="*widget.Label">
+											<widget size="370x27" type="*widget.RichText">
+												<text pos="4,4" size="362x19">v0.2.1-0.20260315212741-029c47fd27e8   BSD-3-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="213x27" type="*widget.Label">
+											<widget size="213x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="205x19">https://github.com/fyne-io/gl-js</text>
+											</widget>
+										</widget>
+										<widget pos="221,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,701" size="1050x62">
+									<container size="1050x27">
+										<widget size="194x27" type="*widget.Label">
+											<widget size="194x27" type="*widget.RichText">
+												<text bold pos="4,4" size="186x19">github.com/fyne-io/glfw-js</text>
+											</widget>
+										</widget>
+										<widget pos="202,0" size="82x27" type="*widget.Label">
+											<widget size="82x27" type="*widget.RichText">
+												<text pos="4,4" size="74x19">v0.4.0   MIT</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="229x27" type="*widget.Label">
+											<widget size="229x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="221x19">https://github.com/fyne-io/glfw-js</text>
+											</widget>
+										</widget>
+										<widget pos="237,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,771" size="1050x62">
+									<container size="1050x27">
+										<widget size="191x27" type="*widget.Label">
+											<widget size="191x27" type="*widget.RichText">
+												<text bold pos="4,4" size="183x19">github.com/fyne-io/image</text>
+											</widget>
+										</widget>
+										<widget pos="199,0" size="145x27" type="*widget.Label">
+											<widget size="145x27" type="*widget.RichText">
+												<text pos="4,4" size="137x19">v0.1.1   BSD-3-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="228x27" type="*widget.Label">
+											<widget size="228x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="220x19">https://github.com/fyne-io/image</text>
+											</widget>
+										</widget>
+										<widget pos="236,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,841" size="1050x62">
+									<container size="1050x27">
+										<widget size="189x27" type="*widget.Label">
+											<widget size="189x27" type="*widget.RichText">
+												<text bold pos="4,4" size="181x19">github.com/fyne-io/oksvg</text>
+											</widget>
+										</widget>
+										<widget pos="197,0" size="145x27" type="*widget.Label">
+											<widget size="145x27" type="*widget.RichText">
+												<text pos="4,4" size="137x19">v0.2.0   BSD-3-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="225x27" type="*widget.Label">
+											<widget size="225x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="217x19">https://github.com/fyne-io/oksvg</text>
+											</widget>
+										</widget>
+										<widget pos="233,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,912" size="1050x62">
+									<container size="1050x27">
+										<widget size="147x27" type="*widget.Label">
+											<widget size="147x27" type="*widget.RichText">
+												<text bold pos="4,4" size="139x19">github.com/go-gl/gl</text>
+											</widget>
+										</widget>
+										<widget pos="155,0" size="296x27" type="*widget.Label">
+											<widget size="296x27" type="*widget.RichText">
+												<text pos="4,4" size="288x19">v0.0.0-20260331235117-4566fea9a276   MIT</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">https://github.com/go-gl/gl</text>
+											</widget>
+										</widget>
+										<widget pos="195,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,982" size="1050x62">
+									<container size="1050x27">
+										<widget size="235x27" type="*widget.Label">
+											<widget size="235x27" type="*widget.RichText">
+												<text bold pos="4,4" size="227x19">github.com/go-gl/glfw/v3.4/glfw</text>
+											</widget>
+										</widget>
+										<widget pos="243,0" size="412x27" type="*widget.Label">
+											<widget size="412x27" type="*widget.RichText">
+												<text pos="4,4" size="404x19">v0.1.0-pre.1.0.20260707082822-2a407d02d01a   BSD-3-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="269x27" type="*widget.Label">
+											<widget size="269x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="261x19">https://github.com/go-gl/glfw/v3.4/glfw</text>
+											</widget>
+										</widget>
+										<widget pos="277,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,1052" size="1050x62">
+									<container size="1050x27">
+										<widget size="197x27" type="*widget.Label">
+											<widget size="197x27" type="*widget.RichText">
+												<text bold pos="4,4" size="189x19">github.com/go-text/render</text>
+											</widget>
+										</widget>
+										<widget pos="205,0" size="145x27" type="*widget.Label">
+											<widget size="145x27" type="*widget.RichText">
+												<text pos="4,4" size="137x19">v0.2.1   BSD-3-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="232x27" type="*widget.Label">
+											<widget size="232x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="224x19">https://github.com/go-text/render</text>
+											</widget>
+										</widget>
+										<widget pos="240,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,1122" size="1050x62">
+									<container size="1050x27">
+										<widget size="230x27" type="*widget.Label">
+											<widget size="230x27" type="*widget.RichText">
+												<text bold pos="4,4" size="222x19">github.com/go-text/typesetting</text>
+											</widget>
+										</widget>
+										<widget pos="238,0" size="145x27" type="*widget.Label">
+											<widget size="145x27" type="*widget.RichText">
+												<text pos="4,4" size="137x19">v0.3.4   BSD-3-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="262x27" type="*widget.Label">
+											<widget size="262x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="254x19">https://github.com/go-text/typesetting</text>
+											</widget>
+										</widget>
+										<widget pos="270,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,1192" size="1050x62">
+									<container size="1050x27">
+										<widget size="196x27" type="*widget.Label">
+											<widget size="196x27" type="*widget.RichText">
+												<text bold pos="4,4" size="188x19">github.com/goccy/go-yaml</text>
+											</widget>
+										</widget>
+										<widget pos="204,0" size="90x27" type="*widget.Label">
+											<widget size="90x27" type="*widget.RichText">
+												<text pos="4,4" size="82x19">v1.19.2   MIT</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="232x27" type="*widget.Label">
+											<widget size="232x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="224x19">https://github.com/goccy/go-yaml</text>
+											</widget>
+										</widget>
+										<widget pos="240,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-01</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,1262" size="1050x62">
+									<container size="1050x27">
+										<widget size="206x27" type="*widget.Label">
+											<widget size="206x27" type="*widget.RichText">
+												<text bold pos="4,4" size="198x19">github.com/godbus/dbus/v5</text>
+											</widget>
+										</widget>
+										<widget pos="214,0" size="145x27" type="*widget.Label">
+											<widget size="145x27" type="*widget.RichText">
+												<text pos="4,4" size="137x19">v5.2.2   BSD-2-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="244x27" type="*widget.Label">
+											<widget size="244x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="236x19">https://github.com/godbus/dbus/v5</text>
+											</widget>
+										</widget>
+										<widget pos="252,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,1332" size="1050x62">
+									<container size="1050x27">
+										<widget size="258x27" type="*widget.Label">
+											<widget size="258x27" type="*widget.RichText">
+												<text bold pos="4,4" size="250x19">github.com/hack-pad/go-indexeddb</text>
+											</widget>
+										</widget>
+										<widget pos="266,0" size="130x27" type="*widget.Label">
+											<widget size="130x27" type="*widget.RichText">
+												<text pos="4,4" size="122x19">v0.3.2   Apache-2.0</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="293x27" type="*widget.Label">
+											<widget size="293x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="285x19">https://github.com/hack-pad/go-indexeddb</text>
+											</widget>
+										</widget>
+										<widget pos="301,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,1403" size="1050x62">
+									<container size="1050x27">
+										<widget size="204x27" type="*widget.Label">
+											<widget size="204x27" type="*widget.RichText">
+												<text bold pos="4,4" size="196x19">github.com/hack-pad/safejs</text>
+											</widget>
+										</widget>
+										<widget pos="212,0" size="130x27" type="*widget.Label">
+											<widget size="130x27" type="*widget.RichText">
+												<text pos="4,4" size="122x19">v0.1.0   Apache-2.0</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="239x27" type="*widget.Label">
+											<widget size="239x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="231x19">https://github.com/hack-pad/safejs</text>
+											</widget>
+										</widget>
+										<widget pos="247,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,1473" size="1050x62">
+									<container size="1050x27">
+										<widget size="240x27" type="*widget.Label">
+											<widget size="240x27" type="*widget.RichText">
+												<text bold pos="4,4" size="232x19">github.com/jeandeaual/go-locale</text>
+											</widget>
+										</widget>
+										<widget pos="248,0" size="293x27" type="*widget.Label">
+											<widget size="293x27" type="*widget.RichText">
+												<text pos="4,4" size="285x19">v0.0.0-20250612000132-0ef82f21eade   MIT</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="274x27" type="*widget.Label">
+											<widget size="274x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="266x19">https://github.com/jeandeaual/go-locale</text>
+											</widget>
+										</widget>
+										<widget pos="282,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,1543" size="1050x62">
+									<container size="1050x27">
+										<widget size="218x27" type="*widget.Label">
+											<widget size="218x27" type="*widget.RichText">
+												<text bold pos="4,4" size="210x19">github.com/jsummers/gobmp</text>
+											</widget>
+										</widget>
+										<widget pos="226,0" size="300x27" type="*widget.Label">
+											<widget size="300x27" type="*widget.RichText">
+												<text pos="4,4" size="292x19">v0.0.0-20230614200233-a9de23ed2e25   MIT</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="254x27" type="*widget.Label">
+											<widget size="254x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="246x19">https://github.com/jsummers/gobmp</text>
+											</widget>
+										</widget>
+										<widget pos="262,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,1613" size="1050x62">
+									<container size="1050x27">
+										<widget size="142x27" type="*widget.Label">
+											<widget size="142x27" type="*widget.RichText">
+												<text bold pos="4,4" size="134x19">github.com/kr/text</text>
+											</widget>
+										</widget>
+										<widget pos="150,0" size="82x27" type="*widget.Label">
+											<widget size="82x27" type="*widget.RichText">
+												<text pos="4,4" size="74x19">v0.2.0   MIT</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="180x27" type="*widget.Label">
+											<widget size="180x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="172x19">https://github.com/kr/text</text>
+											</widget>
+										</widget>
+										<widget pos="188,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,1683" size="1050x62">
+									<container size="1050x27">
+										<widget size="238x27" type="*widget.Label">
+											<widget size="238x27" type="*widget.RichText">
+												<text bold pos="4,4" size="230x19">github.com/mattn/go-runewidth</text>
+											</widget>
+										</widget>
+										<widget pos="246,0" size="90x27" type="*widget.Label">
+											<widget size="90x27" type="*widget.RichText">
+												<text pos="4,4" size="82x19">v0.0.24   MIT</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="270x27" type="*widget.Label">
+											<widget size="270x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="262x19">https://github.com/mattn/go-runewidth</text>
+											</widget>
+										</widget>
+										<widget pos="278,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,1753" size="1050x62">
+									<container size="1050x27">
+										<widget size="170x27" type="*widget.Label">
+											<widget size="170x27" type="*widget.RichText">
+												<text bold pos="4,4" size="162x19">github.com/nfnt/resize</text>
+											</widget>
+										</widget>
+										<widget pos="178,0" size="294x27" type="*widget.Label">
+											<widget size="294x27" type="*widget.RichText">
+												<text pos="4,4" size="286x19">v0.0.0-20180221191011-83c6a9932646   ISC</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="207x27" type="*widget.Label">
+											<widget size="207x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="199x19">https://github.com/nfnt/resize</text>
+											</widget>
+										</widget>
+										<widget pos="215,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,1824" size="1050x62">
+									<container size="1050x27">
+										<widget size="249x27" type="*widget.Label">
+											<widget size="249x27" type="*widget.RichText">
+												<text bold pos="4,4" size="241x19">github.com/nicksnyder/go-i18n/v2</text>
+											</widget>
+										</widget>
+										<widget pos="257,0" size="82x27" type="*widget.Label">
+											<widget size="82x27" type="*widget.RichText">
+												<text pos="4,4" size="74x19">v2.5.1   MIT</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="283x27" type="*widget.Label">
+											<widget size="283x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="275x19">https://github.com/nicksnyder/go-i18n/v2</text>
+											</widget>
+										</widget>
+										<widget pos="291,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,1894" size="1050x62">
+									<container size="1050x27">
+										<widget size="224x27" type="*widget.Label">
+											<widget size="224x27" type="*widget.RichText">
+												<text bold pos="4,4" size="216x19">github.com/pmezard/go-difflib</text>
+											</widget>
+										</widget>
+										<widget pos="232,0" size="145x27" type="*widget.Label">
+											<widget size="145x27" type="*widget.RichText">
+												<text pos="4,4" size="137x19">v1.0.0   BSD-2-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="259x27" type="*widget.Label">
+											<widget size="259x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="251x19">https://github.com/pmezard/go-difflib</text>
+											</widget>
+										</widget>
+										<widget pos="267,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,1964" size="1050x62">
+									<container size="1050x27">
+										<widget size="209x27" type="*widget.Label">
+											<widget size="209x27" type="*widget.RichText">
+												<text bold pos="4,4" size="201x19">github.com/rymdport/portal</text>
+											</widget>
+										</widget>
+										<widget pos="217,0" size="130x27" type="*widget.Label">
+											<widget size="130x27" type="*widget.RichText">
+												<text pos="4,4" size="122x19">v0.4.2   Apache-2.0</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="243x27" type="*widget.Label">
+											<widget size="243x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="235x19">https://github.com/rymdport/portal</text>
+											</widget>
+										</widget>
+										<widget pos="251,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,2034" size="1050x62">
+									<container size="1050x27">
+										<widget size="190x27" type="*widget.Label">
+											<widget size="190x27" type="*widget.RichText">
+												<text bold pos="4,4" size="182x19">github.com/srwiley/oksvg</text>
+											</widget>
+										</widget>
+										<widget pos="198,0" size="361x27" type="*widget.Label">
+											<widget size="361x27" type="*widget.RichText">
+												<text pos="4,4" size="353x19">v0.0.0-20221011165216-be6e8873101c   BSD-3-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="225x27" type="*widget.Label">
+											<widget size="225x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="217x19">https://github.com/srwiley/oksvg</text>
+											</widget>
+										</widget>
+										<widget pos="233,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,2104" size="1050x62">
+									<container size="1050x27">
+										<widget size="199x27" type="*widget.Label">
+											<widget size="199x27" type="*widget.RichText">
+												<text bold pos="4,4" size="191x19">github.com/srwiley/rasterx</text>
+											</widget>
+										</widget>
+										<widget pos="207,0" size="356x27" type="*widget.Label">
+											<widget size="356x27" type="*widget.RichText">
+												<text pos="4,4" size="348x19">v0.0.0-20220730225603-2ab79fcdd4ef   BSD-3-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="233x27" type="*widget.Label">
+											<widget size="233x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="225x19">https://github.com/srwiley/rasterx</text>
+											</widget>
+										</widget>
+										<widget pos="241,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,2174" size="1050x62">
+									<container size="1050x27">
+										<widget size="200x27" type="*widget.Label">
+											<widget size="200x27" type="*widget.RichText">
+												<text bold pos="4,4" size="192x19">github.com/stretchr/testify</text>
+											</widget>
+										</widget>
+										<widget pos="208,0" size="90x27" type="*widget.Label">
+											<widget size="90x27" type="*widget.RichText">
+												<text pos="4,4" size="82x19">v1.11.1   MIT</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="233x27" type="*widget.Label">
+											<widget size="233x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="225x19">https://github.com/stretchr/testify</text>
+											</widget>
+										</widget>
+										<widget pos="241,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,2245" size="1050x62">
+									<container size="1050x27">
+										<widget size="198x27" type="*widget.Label">
+											<widget size="198x27" type="*widget.RichText">
+												<text bold pos="4,4" size="190x19">github.com/yuin/goldmark</text>
+											</widget>
+										</widget>
+										<widget pos="206,0" size="82x27" type="*widget.Label">
+											<widget size="82x27" type="*widget.RichText">
+												<text pos="4,4" size="74x19">v1.8.2   MIT</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="233x27" type="*widget.Label">
+											<widget size="233x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="225x19">https://github.com/yuin/goldmark</text>
+											</widget>
+										</widget>
+										<widget pos="241,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,2315" size="1050x62">
+									<container size="1050x27">
+										<widget size="147x27" type="*widget.Label">
+											<widget size="147x27" type="*widget.RichText">
+												<text bold pos="4,4" size="139x19">golang.org/x/image</text>
+											</widget>
+										</widget>
+										<widget pos="155,0" size="153x27" type="*widget.Label">
+											<widget size="153x27" type="*widget.RichText">
+												<text pos="4,4" size="145x19">v0.43.0   BSD-3-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">https://golang.org/x/image</text>
+											</widget>
+										</widget>
+										<widget pos="195,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,2385" size="1050x62">
+									<container size="1050x27">
+										<widget size="127x27" type="*widget.Label">
+											<widget size="127x27" type="*widget.RichText">
+												<text bold pos="4,4" size="119x19">golang.org/x/net</text>
+											</widget>
+										</widget>
+										<widget pos="135,0" size="153x27" type="*widget.Label">
+											<widget size="153x27" type="*widget.RichText">
+												<text pos="4,4" size="145x19">v0.55.0   BSD-3-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="167x27" type="*widget.Label">
+											<widget size="167x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="159x19">https://golang.org/x/net</text>
+											</widget>
+										</widget>
+										<widget pos="175,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-17</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,2455" size="1050x62">
+									<container size="1050x27">
+										<widget size="125x27" type="*widget.Label">
+											<widget size="125x27" type="*widget.RichText">
+												<text bold pos="4,4" size="117x19">golang.org/x/sys</text>
+											</widget>
+										</widget>
+										<widget pos="133,0" size="153x27" type="*widget.Label">
+											<widget size="153x27" type="*widget.RichText">
+												<text pos="4,4" size="145x19">v0.45.0   BSD-3-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="166x27" type="*widget.Label">
+											<widget size="166x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="158x19">https://golang.org/x/sys</text>
+											</widget>
+										</widget>
+										<widget pos="174,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-17</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,2525" size="1050x62">
+									<container size="1050x27">
+										<widget size="131x27" type="*widget.Label">
+											<widget size="131x27" type="*widget.RichText">
+												<text bold pos="4,4" size="123x19">golang.org/x/text</text>
+											</widget>
+										</widget>
+										<widget pos="139,0" size="153x27" type="*widget.Label">
+											<widget size="153x27" type="*widget.RichText">
+												<text pos="4,4" size="145x19">v0.38.0   BSD-3-Clause</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="171x27" type="*widget.Label">
+											<widget size="171x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="163x19">https://golang.org/x/text</text>
+											</widget>
+										</widget>
+										<widget pos="179,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
+								<container pos="0,2595" size="1050x62">
+									<container size="1050x27">
+										<widget size="129x27" type="*widget.Label">
+											<widget size="129x27" type="*widget.RichText">
+												<text bold pos="4,4" size="121x19">gopkg.in/yaml.v3</text>
+											</widget>
+										</widget>
+										<widget pos="137,0" size="130x27" type="*widget.Label">
+											<widget size="130x27" type="*widget.RichText">
+												<text pos="4,4" size="122x19">v3.0.1   Apache-2.0</text>
+											</widget>
+										</widget>
+									</container>
+									<container pos="0,35" size="1050x27">
+										<widget size="169x27" type="*widget.Label">
+											<widget size="169x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="161x19">https://gopkg.in/yaml.v3</text>
+											</widget>
+										</widget>
+										<widget pos="177,0" size="187x27" type="*widget.Label">
+											<widget size="187x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+											</widget>
+										</widget>
+									</container>
+								</container>
 							</container>
-							<container pos="0,70" size="1098x27">
-								<widget size="122x27" type="*widget.Label">
-									<widget size="122x27" type="*widget.RichText">
-										<text bold pos="4,4" size="114x19">Manifest format</text>
+							<widget pos="0,3040" size="1050x4" type="*widget.Separator">
+								<rectangle fillColor="separator" size="1050x4"/>
+							</widget>
+							<widget pos="0,3052" size="1050x27" type="*widget.Label">
+								<widget size="1050x27" type="*widget.RichText">
+									<text bold pos="4,4" size="213x19">What this means for your data</text>
+								</widget>
+							</widget>
+							<container pos="0,3087" size="1050x81">
+								<widget size="1050x27" type="*widget.Label">
+									<widget size="1050x27" type="*widget.RichText">
+										<text pos="4,4" size="747x19">Data generated with this tool belongs to you. It is not a derived work, and the license of this tool does not cover it.</text>
 									</widget>
 								</widget>
-								<widget pos="130,0" size="27x27" type="*widget.Label">
-									<widget size="27x27" type="*widget.RichText">
-										<text pos="4,4" size="19x19">0.1</text>
-									</widget>
-								</widget>
-							</container>
-							<container pos="0,105" size="1098x27">
-								<widget size="111x27" type="*widget.Label">
-									<widget size="111x27" type="*widget.RichText">
-										<text bold pos="4,4" size="103x19">Recipe schema</text>
-									</widget>
-								</widget>
-								<widget pos="119,0" size="27x27" type="*widget.Label">
-									<widget size="27x27" type="*widget.RichText">
-										<text pos="4,4" size="19x19">0.1</text>
+								<widget pos="0,35" size="1050x46" type="*widget.Label">
+									<widget size="1050x46" type="*widget.RichText">
+										<text pos="4,4" size="1035x19">Every value this tool produces is synthetic and is generated for testing. Names, addresses, identifiers and account numbers do not describe anybody. Where a</text>
+										<text pos="4,23" size="1026x19">value resembles a real person, company or institution, that is a coincidence of arithmetic rather than a record of anything, and it must not be treated as one.</text>
 									</widget>
 								</widget>
 							</container>
 						</container>
-						<widget pos="0,175" size="1098x4" type="*widget.Separator">
-							<rectangle fillColor="separator" size="1098x4"/>
+						<widget pos="0,836" size="1050x0" type="*widget.Shadow">
+							<linearGradient endColor="shadow" pos="0,-8" size="1050x8"/>
 						</widget>
-						<widget pos="0,187" size="1098x27" type="*widget.Label">
-							<widget size="1098x27" type="*widget.RichText">
-								<text bold pos="4,4" size="59x19">Licenses</text>
+						<widget pos="1044,0" size="6x836" type="*widget.scrollBarArea">
+							<widget pos="3,0" size="3x220" type="*widget.scrollBar">
+								<rectangle fillColor="scrollbar" radius="3" size="3x220"/>
 							</widget>
 						</widget>
-						<container pos="0,222" size="1098x97">
-							<container size="1098x27">
-								<widget size="42x27" type="*widget.Label">
-									<widget size="42x27" type="*widget.RichText">
-										<text bold pos="4,4" size="34x19">Code</text>
-									</widget>
-								</widget>
-								<widget pos="50,0" size="90x27" type="*widget.Label">
-									<widget size="90x27" type="*widget.RichText">
-										<text pos="4,4" size="82x19">GPL-3.0-only</text>
-									</widget>
-								</widget>
-							</container>
-							<container pos="0,35" size="1098x27">
-								<widget size="97x27" type="*widget.Label">
-									<widget size="97x27" type="*widget.RichText">
-										<text bold pos="4,4" size="89x19">Specification</text>
-									</widget>
-								</widget>
-								<widget pos="105,0" size="71x27" type="*widget.Label">
-									<widget size="71x27" type="*widget.RichText">
-										<text pos="4,4" size="63x19">CC-BY-4.0</text>
-									</widget>
-								</widget>
-							</container>
-							<widget pos="0,70" size="1098x27" type="*widget.Label">
-								<widget size="1098x27" type="*widget.RichText">
-									<text pos="4,4" size="488x19">Applies to spec/ and to the corruption catalog entries built into this binary.</text>
-								</widget>
-							</widget>
-						</container>
-						<widget pos="0,327" size="1098x4" type="*widget.Separator">
-							<rectangle fillColor="separator" size="1098x4"/>
-						</widget>
-						<widget pos="0,339" size="1098x27" type="*widget.Label">
-							<widget size="1098x27" type="*widget.RichText">
-								<text bold pos="4,4" size="168x19">Third party components</text>
-							</widget>
-						</widget>
-						<container pos="0,374" size="1098x2657">
-							<container size="1098x62">
-								<container size="1098x27">
-									<widget size="114x27" type="*widget.Label">
-										<widget size="114x27" type="*widget.RichText">
-											<text bold pos="4,4" size="106x19">fyne.io/fyne/v2</text>
-										</widget>
-									</widget>
-									<widget pos="122,0" size="145x27" type="*widget.Label">
-										<widget size="145x27" type="*widget.RichText">
-											<text pos="4,4" size="137x19">v2.8.0   BSD-3-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="154x27" type="*widget.Label">
-										<widget size="154x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="146x19">https://fyne.io/fyne/v2</text>
-										</widget>
-									</widget>
-									<widget pos="162,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,70" size="1098x62">
-								<container size="1098x27">
-									<widget size="112x27" type="*widget.Label">
-										<widget size="112x27" type="*widget.RichText">
-											<text bold pos="4,4" size="104x19">fyne.io/systray</text>
-										</widget>
-									</widget>
-									<widget pos="120,0" size="138x27" type="*widget.Label">
-										<widget size="138x27" type="*widget.RichText">
-											<text pos="4,4" size="130x19">v1.12.2   Apache-2.0</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="151x27" type="*widget.Label">
-										<widget size="151x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="143x19">https://fyne.io/systray</text>
-										</widget>
-									</widget>
-									<widget pos="159,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,140" size="1098x62">
-								<container size="1098x27">
-									<widget size="210x27" type="*widget.Label">
-										<widget size="210x27" type="*widget.RichText">
-											<text bold pos="4,4" size="202x19">github.com/BurntSushi/toml</text>
-										</widget>
-									</widget>
-									<widget pos="218,0" size="82x27" type="*widget.Label">
-										<widget size="82x27" type="*widget.RichText">
-											<text pos="4,4" size="74x19">v1.6.0   MIT</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="244x27" type="*widget.Label">
-										<widget size="244x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="236x19">https://github.com/BurntSushi/toml</text>
-										</widget>
-									</widget>
-									<widget pos="252,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,210" size="1098x62">
-								<container size="1098x27">
-									<widget size="200x27" type="*widget.Label">
-										<widget size="200x27" type="*widget.RichText">
-											<text bold pos="4,4" size="192x19">github.com/FyshOS/fancyfs</text>
-										</widget>
-									</widget>
-									<widget pos="208,0" size="145x27" type="*widget.Label">
-										<widget size="145x27" type="*widget.RichText">
-											<text pos="4,4" size="137x19">v0.0.1   BSD-3-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="236x27" type="*widget.Label">
-										<widget size="236x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="228x19">https://github.com/FyshOS/fancyfs</text>
-										</widget>
-									</widget>
-									<widget pos="244,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-17</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,280" size="1098x62">
-								<container size="1098x27">
-									<widget size="236x27" type="*widget.Label">
-										<widget size="236x27" type="*widget.RichText">
-											<text bold pos="4,4" size="228x19">github.com/anthonynsimon/bild</text>
-										</widget>
-									</widget>
-									<widget pos="244,0" size="90x27" type="*widget.Label">
-										<widget size="90x27" type="*widget.RichText">
-											<text pos="4,4" size="82x19">v0.14.0   MIT</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="269x27" type="*widget.Label">
-										<widget size="269x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="261x19">https://github.com/anthonynsimon/bild</text>
-										</widget>
-									</widget>
-									<widget pos="277,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,350" size="1098x62">
-								<container size="1098x27">
-									<widget size="253x27" type="*widget.Label">
-										<widget size="253x27" type="*widget.RichText">
-											<text bold pos="4,4" size="245x19">github.com/clipperhouse/uax29/v2</text>
-										</widget>
-									</widget>
-									<widget pos="261,0" size="82x27" type="*widget.Label">
-										<widget size="82x27" type="*widget.RichText">
-											<text pos="4,4" size="74x19">v2.2.0   MIT</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="287x27" type="*widget.Label">
-										<widget size="287x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="279x19">https://github.com/clipperhouse/uax29/v2</text>
-										</widget>
-									</widget>
-									<widget pos="295,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,420" size="1098x62">
-								<container size="1098x27">
-									<widget size="216x27" type="*widget.Label">
-										<widget size="216x27" type="*widget.RichText">
-											<text bold pos="4,4" size="208x19">github.com/davecgh/go-spew</text>
-										</widget>
-									</widget>
-									<widget pos="224,0" size="78x27" type="*widget.Label">
-										<widget size="78x27" type="*widget.RichText">
-											<text pos="4,4" size="70x19">v1.1.1   ISC</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="252x27" type="*widget.Label">
-										<widget size="252x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="244x19">https://github.com/davecgh/go-spew</text>
-										</widget>
-									</widget>
-									<widget pos="260,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,491" size="1098x62">
-								<container size="1098x27">
-									<widget size="161x27" type="*widget.Label">
-										<widget size="161x27" type="*widget.RichText">
-											<text bold pos="4,4" size="153x19">github.com/fredbi/uri</text>
-										</widget>
-									</widget>
-									<widget pos="169,0" size="82x27" type="*widget.Label">
-										<widget size="82x27" type="*widget.RichText">
-											<text pos="4,4" size="74x19">v1.1.1   MIT</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="198x27" type="*widget.Label">
-										<widget size="198x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="190x19">https://github.com/fredbi/uri</text>
-										</widget>
-									</widget>
-									<widget pos="206,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,561" size="1098x62">
-								<container size="1098x27">
-									<widget size="207x27" type="*widget.Label">
-										<widget size="207x27" type="*widget.RichText">
-											<text bold pos="4,4" size="199x19">github.com/fsnotify/fsnotify</text>
-										</widget>
-									</widget>
-									<widget pos="215,0" size="145x27" type="*widget.Label">
-										<widget size="145x27" type="*widget.RichText">
-											<text pos="4,4" size="137x19">v1.9.0   BSD-3-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="240x27" type="*widget.Label">
-										<widget size="240x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="232x19">https://github.com/fsnotify/fsnotify</text>
-										</widget>
-									</widget>
-									<widget pos="248,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,631" size="1098x62">
-								<container size="1098x27">
-									<widget size="176x27" type="*widget.Label">
-										<widget size="176x27" type="*widget.RichText">
-											<text bold pos="4,4" size="168x19">github.com/fyne-io/gl-js</text>
-										</widget>
-									</widget>
-									<widget pos="184,0" size="370x27" type="*widget.Label">
-										<widget size="370x27" type="*widget.RichText">
-											<text pos="4,4" size="362x19">v0.2.1-0.20260315212741-029c47fd27e8   BSD-3-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="213x27" type="*widget.Label">
-										<widget size="213x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="205x19">https://github.com/fyne-io/gl-js</text>
-										</widget>
-									</widget>
-									<widget pos="221,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,701" size="1098x62">
-								<container size="1098x27">
-									<widget size="194x27" type="*widget.Label">
-										<widget size="194x27" type="*widget.RichText">
-											<text bold pos="4,4" size="186x19">github.com/fyne-io/glfw-js</text>
-										</widget>
-									</widget>
-									<widget pos="202,0" size="82x27" type="*widget.Label">
-										<widget size="82x27" type="*widget.RichText">
-											<text pos="4,4" size="74x19">v0.4.0   MIT</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="229x27" type="*widget.Label">
-										<widget size="229x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="221x19">https://github.com/fyne-io/glfw-js</text>
-										</widget>
-									</widget>
-									<widget pos="237,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,771" size="1098x62">
-								<container size="1098x27">
-									<widget size="191x27" type="*widget.Label">
-										<widget size="191x27" type="*widget.RichText">
-											<text bold pos="4,4" size="183x19">github.com/fyne-io/image</text>
-										</widget>
-									</widget>
-									<widget pos="199,0" size="145x27" type="*widget.Label">
-										<widget size="145x27" type="*widget.RichText">
-											<text pos="4,4" size="137x19">v0.1.1   BSD-3-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="228x27" type="*widget.Label">
-										<widget size="228x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="220x19">https://github.com/fyne-io/image</text>
-										</widget>
-									</widget>
-									<widget pos="236,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,841" size="1098x62">
-								<container size="1098x27">
-									<widget size="189x27" type="*widget.Label">
-										<widget size="189x27" type="*widget.RichText">
-											<text bold pos="4,4" size="181x19">github.com/fyne-io/oksvg</text>
-										</widget>
-									</widget>
-									<widget pos="197,0" size="145x27" type="*widget.Label">
-										<widget size="145x27" type="*widget.RichText">
-											<text pos="4,4" size="137x19">v0.2.0   BSD-3-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="225x27" type="*widget.Label">
-										<widget size="225x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="217x19">https://github.com/fyne-io/oksvg</text>
-										</widget>
-									</widget>
-									<widget pos="233,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,912" size="1098x62">
-								<container size="1098x27">
-									<widget size="147x27" type="*widget.Label">
-										<widget size="147x27" type="*widget.RichText">
-											<text bold pos="4,4" size="139x19">github.com/go-gl/gl</text>
-										</widget>
-									</widget>
-									<widget pos="155,0" size="296x27" type="*widget.Label">
-										<widget size="296x27" type="*widget.RichText">
-											<text pos="4,4" size="288x19">v0.0.0-20260331235117-4566fea9a276   MIT</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">https://github.com/go-gl/gl</text>
-										</widget>
-									</widget>
-									<widget pos="195,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,982" size="1098x62">
-								<container size="1098x27">
-									<widget size="235x27" type="*widget.Label">
-										<widget size="235x27" type="*widget.RichText">
-											<text bold pos="4,4" size="227x19">github.com/go-gl/glfw/v3.4/glfw</text>
-										</widget>
-									</widget>
-									<widget pos="243,0" size="412x27" type="*widget.Label">
-										<widget size="412x27" type="*widget.RichText">
-											<text pos="4,4" size="404x19">v0.1.0-pre.1.0.20260707082822-2a407d02d01a   BSD-3-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="269x27" type="*widget.Label">
-										<widget size="269x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="261x19">https://github.com/go-gl/glfw/v3.4/glfw</text>
-										</widget>
-									</widget>
-									<widget pos="277,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,1052" size="1098x62">
-								<container size="1098x27">
-									<widget size="197x27" type="*widget.Label">
-										<widget size="197x27" type="*widget.RichText">
-											<text bold pos="4,4" size="189x19">github.com/go-text/render</text>
-										</widget>
-									</widget>
-									<widget pos="205,0" size="145x27" type="*widget.Label">
-										<widget size="145x27" type="*widget.RichText">
-											<text pos="4,4" size="137x19">v0.2.1   BSD-3-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="232x27" type="*widget.Label">
-										<widget size="232x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="224x19">https://github.com/go-text/render</text>
-										</widget>
-									</widget>
-									<widget pos="240,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,1122" size="1098x62">
-								<container size="1098x27">
-									<widget size="230x27" type="*widget.Label">
-										<widget size="230x27" type="*widget.RichText">
-											<text bold pos="4,4" size="222x19">github.com/go-text/typesetting</text>
-										</widget>
-									</widget>
-									<widget pos="238,0" size="145x27" type="*widget.Label">
-										<widget size="145x27" type="*widget.RichText">
-											<text pos="4,4" size="137x19">v0.3.4   BSD-3-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="262x27" type="*widget.Label">
-										<widget size="262x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="254x19">https://github.com/go-text/typesetting</text>
-										</widget>
-									</widget>
-									<widget pos="270,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,1192" size="1098x62">
-								<container size="1098x27">
-									<widget size="196x27" type="*widget.Label">
-										<widget size="196x27" type="*widget.RichText">
-											<text bold pos="4,4" size="188x19">github.com/goccy/go-yaml</text>
-										</widget>
-									</widget>
-									<widget pos="204,0" size="90x27" type="*widget.Label">
-										<widget size="90x27" type="*widget.RichText">
-											<text pos="4,4" size="82x19">v1.19.2   MIT</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="232x27" type="*widget.Label">
-										<widget size="232x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="224x19">https://github.com/goccy/go-yaml</text>
-										</widget>
-									</widget>
-									<widget pos="240,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-01</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,1262" size="1098x62">
-								<container size="1098x27">
-									<widget size="206x27" type="*widget.Label">
-										<widget size="206x27" type="*widget.RichText">
-											<text bold pos="4,4" size="198x19">github.com/godbus/dbus/v5</text>
-										</widget>
-									</widget>
-									<widget pos="214,0" size="145x27" type="*widget.Label">
-										<widget size="145x27" type="*widget.RichText">
-											<text pos="4,4" size="137x19">v5.2.2   BSD-2-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="244x27" type="*widget.Label">
-										<widget size="244x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="236x19">https://github.com/godbus/dbus/v5</text>
-										</widget>
-									</widget>
-									<widget pos="252,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,1332" size="1098x62">
-								<container size="1098x27">
-									<widget size="258x27" type="*widget.Label">
-										<widget size="258x27" type="*widget.RichText">
-											<text bold pos="4,4" size="250x19">github.com/hack-pad/go-indexeddb</text>
-										</widget>
-									</widget>
-									<widget pos="266,0" size="130x27" type="*widget.Label">
-										<widget size="130x27" type="*widget.RichText">
-											<text pos="4,4" size="122x19">v0.3.2   Apache-2.0</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="293x27" type="*widget.Label">
-										<widget size="293x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="285x19">https://github.com/hack-pad/go-indexeddb</text>
-										</widget>
-									</widget>
-									<widget pos="301,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,1403" size="1098x62">
-								<container size="1098x27">
-									<widget size="204x27" type="*widget.Label">
-										<widget size="204x27" type="*widget.RichText">
-											<text bold pos="4,4" size="196x19">github.com/hack-pad/safejs</text>
-										</widget>
-									</widget>
-									<widget pos="212,0" size="130x27" type="*widget.Label">
-										<widget size="130x27" type="*widget.RichText">
-											<text pos="4,4" size="122x19">v0.1.0   Apache-2.0</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="239x27" type="*widget.Label">
-										<widget size="239x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="231x19">https://github.com/hack-pad/safejs</text>
-										</widget>
-									</widget>
-									<widget pos="247,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,1473" size="1098x62">
-								<container size="1098x27">
-									<widget size="240x27" type="*widget.Label">
-										<widget size="240x27" type="*widget.RichText">
-											<text bold pos="4,4" size="232x19">github.com/jeandeaual/go-locale</text>
-										</widget>
-									</widget>
-									<widget pos="248,0" size="293x27" type="*widget.Label">
-										<widget size="293x27" type="*widget.RichText">
-											<text pos="4,4" size="285x19">v0.0.0-20250612000132-0ef82f21eade   MIT</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="274x27" type="*widget.Label">
-										<widget size="274x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="266x19">https://github.com/jeandeaual/go-locale</text>
-										</widget>
-									</widget>
-									<widget pos="282,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,1543" size="1098x62">
-								<container size="1098x27">
-									<widget size="218x27" type="*widget.Label">
-										<widget size="218x27" type="*widget.RichText">
-											<text bold pos="4,4" size="210x19">github.com/jsummers/gobmp</text>
-										</widget>
-									</widget>
-									<widget pos="226,0" size="300x27" type="*widget.Label">
-										<widget size="300x27" type="*widget.RichText">
-											<text pos="4,4" size="292x19">v0.0.0-20230614200233-a9de23ed2e25   MIT</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="254x27" type="*widget.Label">
-										<widget size="254x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="246x19">https://github.com/jsummers/gobmp</text>
-										</widget>
-									</widget>
-									<widget pos="262,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,1613" size="1098x62">
-								<container size="1098x27">
-									<widget size="142x27" type="*widget.Label">
-										<widget size="142x27" type="*widget.RichText">
-											<text bold pos="4,4" size="134x19">github.com/kr/text</text>
-										</widget>
-									</widget>
-									<widget pos="150,0" size="82x27" type="*widget.Label">
-										<widget size="82x27" type="*widget.RichText">
-											<text pos="4,4" size="74x19">v0.2.0   MIT</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="180x27" type="*widget.Label">
-										<widget size="180x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="172x19">https://github.com/kr/text</text>
-										</widget>
-									</widget>
-									<widget pos="188,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,1683" size="1098x62">
-								<container size="1098x27">
-									<widget size="238x27" type="*widget.Label">
-										<widget size="238x27" type="*widget.RichText">
-											<text bold pos="4,4" size="230x19">github.com/mattn/go-runewidth</text>
-										</widget>
-									</widget>
-									<widget pos="246,0" size="90x27" type="*widget.Label">
-										<widget size="90x27" type="*widget.RichText">
-											<text pos="4,4" size="82x19">v0.0.24   MIT</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="270x27" type="*widget.Label">
-										<widget size="270x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="262x19">https://github.com/mattn/go-runewidth</text>
-										</widget>
-									</widget>
-									<widget pos="278,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,1753" size="1098x62">
-								<container size="1098x27">
-									<widget size="170x27" type="*widget.Label">
-										<widget size="170x27" type="*widget.RichText">
-											<text bold pos="4,4" size="162x19">github.com/nfnt/resize</text>
-										</widget>
-									</widget>
-									<widget pos="178,0" size="294x27" type="*widget.Label">
-										<widget size="294x27" type="*widget.RichText">
-											<text pos="4,4" size="286x19">v0.0.0-20180221191011-83c6a9932646   ISC</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="207x27" type="*widget.Label">
-										<widget size="207x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="199x19">https://github.com/nfnt/resize</text>
-										</widget>
-									</widget>
-									<widget pos="215,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,1824" size="1098x62">
-								<container size="1098x27">
-									<widget size="249x27" type="*widget.Label">
-										<widget size="249x27" type="*widget.RichText">
-											<text bold pos="4,4" size="241x19">github.com/nicksnyder/go-i18n/v2</text>
-										</widget>
-									</widget>
-									<widget pos="257,0" size="82x27" type="*widget.Label">
-										<widget size="82x27" type="*widget.RichText">
-											<text pos="4,4" size="74x19">v2.5.1   MIT</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="283x27" type="*widget.Label">
-										<widget size="283x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="275x19">https://github.com/nicksnyder/go-i18n/v2</text>
-										</widget>
-									</widget>
-									<widget pos="291,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,1894" size="1098x62">
-								<container size="1098x27">
-									<widget size="224x27" type="*widget.Label">
-										<widget size="224x27" type="*widget.RichText">
-											<text bold pos="4,4" size="216x19">github.com/pmezard/go-difflib</text>
-										</widget>
-									</widget>
-									<widget pos="232,0" size="145x27" type="*widget.Label">
-										<widget size="145x27" type="*widget.RichText">
-											<text pos="4,4" size="137x19">v1.0.0   BSD-2-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="259x27" type="*widget.Label">
-										<widget size="259x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="251x19">https://github.com/pmezard/go-difflib</text>
-										</widget>
-									</widget>
-									<widget pos="267,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,1964" size="1098x62">
-								<container size="1098x27">
-									<widget size="209x27" type="*widget.Label">
-										<widget size="209x27" type="*widget.RichText">
-											<text bold pos="4,4" size="201x19">github.com/rymdport/portal</text>
-										</widget>
-									</widget>
-									<widget pos="217,0" size="130x27" type="*widget.Label">
-										<widget size="130x27" type="*widget.RichText">
-											<text pos="4,4" size="122x19">v0.4.2   Apache-2.0</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="243x27" type="*widget.Label">
-										<widget size="243x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="235x19">https://github.com/rymdport/portal</text>
-										</widget>
-									</widget>
-									<widget pos="251,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,2034" size="1098x62">
-								<container size="1098x27">
-									<widget size="190x27" type="*widget.Label">
-										<widget size="190x27" type="*widget.RichText">
-											<text bold pos="4,4" size="182x19">github.com/srwiley/oksvg</text>
-										</widget>
-									</widget>
-									<widget pos="198,0" size="361x27" type="*widget.Label">
-										<widget size="361x27" type="*widget.RichText">
-											<text pos="4,4" size="353x19">v0.0.0-20221011165216-be6e8873101c   BSD-3-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="225x27" type="*widget.Label">
-										<widget size="225x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="217x19">https://github.com/srwiley/oksvg</text>
-										</widget>
-									</widget>
-									<widget pos="233,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,2104" size="1098x62">
-								<container size="1098x27">
-									<widget size="199x27" type="*widget.Label">
-										<widget size="199x27" type="*widget.RichText">
-											<text bold pos="4,4" size="191x19">github.com/srwiley/rasterx</text>
-										</widget>
-									</widget>
-									<widget pos="207,0" size="356x27" type="*widget.Label">
-										<widget size="356x27" type="*widget.RichText">
-											<text pos="4,4" size="348x19">v0.0.0-20220730225603-2ab79fcdd4ef   BSD-3-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="233x27" type="*widget.Label">
-										<widget size="233x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="225x19">https://github.com/srwiley/rasterx</text>
-										</widget>
-									</widget>
-									<widget pos="241,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,2174" size="1098x62">
-								<container size="1098x27">
-									<widget size="200x27" type="*widget.Label">
-										<widget size="200x27" type="*widget.RichText">
-											<text bold pos="4,4" size="192x19">github.com/stretchr/testify</text>
-										</widget>
-									</widget>
-									<widget pos="208,0" size="90x27" type="*widget.Label">
-										<widget size="90x27" type="*widget.RichText">
-											<text pos="4,4" size="82x19">v1.11.1   MIT</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="233x27" type="*widget.Label">
-										<widget size="233x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="225x19">https://github.com/stretchr/testify</text>
-										</widget>
-									</widget>
-									<widget pos="241,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,2245" size="1098x62">
-								<container size="1098x27">
-									<widget size="198x27" type="*widget.Label">
-										<widget size="198x27" type="*widget.RichText">
-											<text bold pos="4,4" size="190x19">github.com/yuin/goldmark</text>
-										</widget>
-									</widget>
-									<widget pos="206,0" size="82x27" type="*widget.Label">
-										<widget size="82x27" type="*widget.RichText">
-											<text pos="4,4" size="74x19">v1.8.2   MIT</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="233x27" type="*widget.Label">
-										<widget size="233x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="225x19">https://github.com/yuin/goldmark</text>
-										</widget>
-									</widget>
-									<widget pos="241,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,2315" size="1098x62">
-								<container size="1098x27">
-									<widget size="147x27" type="*widget.Label">
-										<widget size="147x27" type="*widget.RichText">
-											<text bold pos="4,4" size="139x19">golang.org/x/image</text>
-										</widget>
-									</widget>
-									<widget pos="155,0" size="153x27" type="*widget.Label">
-										<widget size="153x27" type="*widget.RichText">
-											<text pos="4,4" size="145x19">v0.43.0   BSD-3-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">https://golang.org/x/image</text>
-										</widget>
-									</widget>
-									<widget pos="195,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,2385" size="1098x62">
-								<container size="1098x27">
-									<widget size="127x27" type="*widget.Label">
-										<widget size="127x27" type="*widget.RichText">
-											<text bold pos="4,4" size="119x19">golang.org/x/net</text>
-										</widget>
-									</widget>
-									<widget pos="135,0" size="153x27" type="*widget.Label">
-										<widget size="153x27" type="*widget.RichText">
-											<text pos="4,4" size="145x19">v0.55.0   BSD-3-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="167x27" type="*widget.Label">
-										<widget size="167x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="159x19">https://golang.org/x/net</text>
-										</widget>
-									</widget>
-									<widget pos="175,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-17</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,2455" size="1098x62">
-								<container size="1098x27">
-									<widget size="125x27" type="*widget.Label">
-										<widget size="125x27" type="*widget.RichText">
-											<text bold pos="4,4" size="117x19">golang.org/x/sys</text>
-										</widget>
-									</widget>
-									<widget pos="133,0" size="153x27" type="*widget.Label">
-										<widget size="153x27" type="*widget.RichText">
-											<text pos="4,4" size="145x19">v0.45.0   BSD-3-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="166x27" type="*widget.Label">
-										<widget size="166x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="158x19">https://golang.org/x/sys</text>
-										</widget>
-									</widget>
-									<widget pos="174,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-17</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,2525" size="1098x62">
-								<container size="1098x27">
-									<widget size="131x27" type="*widget.Label">
-										<widget size="131x27" type="*widget.RichText">
-											<text bold pos="4,4" size="123x19">golang.org/x/text</text>
-										</widget>
-									</widget>
-									<widget pos="139,0" size="153x27" type="*widget.Label">
-										<widget size="153x27" type="*widget.RichText">
-											<text pos="4,4" size="145x19">v0.38.0   BSD-3-Clause</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="171x27" type="*widget.Label">
-										<widget size="171x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="163x19">https://golang.org/x/text</text>
-										</widget>
-									</widget>
-									<widget pos="179,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,2595" size="1098x62">
-								<container size="1098x27">
-									<widget size="129x27" type="*widget.Label">
-										<widget size="129x27" type="*widget.RichText">
-											<text bold pos="4,4" size="121x19">gopkg.in/yaml.v3</text>
-										</widget>
-									</widget>
-									<widget pos="137,0" size="130x27" type="*widget.Label">
-										<widget size="130x27" type="*widget.RichText">
-											<text pos="4,4" size="122x19">v3.0.1   Apache-2.0</text>
-										</widget>
-									</widget>
-								</container>
-								<container pos="0,35" size="1098x27">
-									<widget size="169x27" type="*widget.Label">
-										<widget size="169x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="161x19">https://gopkg.in/yaml.v3</text>
-										</widget>
-									</widget>
-									<widget pos="177,0" size="187x27" type="*widget.Label">
-										<widget size="187x27" type="*widget.RichText">
-											<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-										</widget>
-									</widget>
-								</container>
-							</container>
-						</container>
-						<widget pos="0,3040" size="1098x4" type="*widget.Separator">
-							<rectangle fillColor="separator" size="1098x4"/>
-						</widget>
-						<widget pos="0,3052" size="1098x27" type="*widget.Label">
-							<widget size="1098x27" type="*widget.RichText">
-								<text bold pos="4,4" size="213x19">What this means for your data</text>
-							</widget>
-						</widget>
-						<container pos="0,3087" size="1098x81">
-							<widget size="1098x27" type="*widget.Label">
-								<widget size="1098x27" type="*widget.RichText">
-									<text pos="4,4" size="747x19">Data generated with this tool belongs to you. It is not a derived work, and the license of this tool does not cover it.</text>
-								</widget>
-							</widget>
-							<widget pos="0,35" size="1098x46" type="*widget.Label">
-								<widget size="1098x46" type="*widget.RichText">
-									<text pos="4,4" size="1074x19">Every value this tool produces is synthetic and is generated for testing. Names, addresses, identifiers and account numbers do not describe anybody. Where a value</text>
-									<text pos="4,23" size="987x19">resembles a real person, company or institution, that is a coincidence of arithmetic rather than a record of anything, and it must not be treated as one.</text>
-								</widget>
-							</widget>
-						</container>
-					</container>
-					<widget pos="0,884" size="1098x0" type="*widget.Shadow">
-						<linearGradient endColor="shadow" pos="0,-8" size="1098x8"/>
 					</widget>
-					<widget pos="1092,0" size="6x884" type="*widget.scrollBarArea">
-						<widget pos="3,0" size="3x246" type="*widget.scrollBar">
-							<rectangle fillColor="scrollbar" radius="3" size="3x246"/>
-						</widget>
-					</widget>
-				</widget>
+				</container>
 			</container>
 		</container>
 	</content>

@@ -25,6 +25,7 @@ package screens
 import (
 	"fyne.io/fyne/v2"
 
+	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
@@ -32,7 +33,9 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/gui/about"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/shell"
+	"github.com/donislawdev/qadatagenerator/internal/gui/takeview"
 	"github.com/donislawdev/qadatagenerator/internal/license"
+	"github.com/donislawdev/qadatagenerator/internal/take"
 	"github.com/donislawdev/qadatagenerator/internal/version"
 )
 
@@ -41,6 +44,13 @@ type Data struct {
 	Promised  manifest.Manifest
 	Actual    response.Record
 	HasActual bool
+	// SourcePath is a file this tool did not make, for the screen whose whole
+	// subject is somebody else's file.
+	//
+	// It is a path rather than the contents, because that screen reads a file
+	// the way a person hands it one. Building its state from a value in memory
+	// would photograph a screen nobody can reach.
+	SourcePath string
 }
 
 // Keyboard is a walk through the window, as a person would make it.
@@ -67,6 +77,15 @@ type State struct {
 	// empty screen and calling it the state that was asked for.
 	NeedsManifest bool
 	NeedsResponse bool
+	// NeedsSource says the state cannot be built without a file this tool did
+	// not make.
+	NeedsSource bool
+	// Layers are the kinds of damage ticked before the picture is taken.
+	//
+	// They go through the control rather than into the settings behind it, so
+	// this reaches the state a person reaches by clicking and not one only this
+	// list can produce.
+	Layers []string
 	// Keyboard is applied after the window exists, because focus with no canvas
 	// has nothing to land on.
 	Keyboard Keyboard
@@ -77,52 +96,90 @@ type State struct {
 // One list for both screens on purpose. A list written for one screen stays a
 // list of one screen forever, and nobody notices, because it is green.
 func All() []State {
+	states := takeStates()
+	states = append(states, browserStates()...)
+	return append(states, aboutStates()...)
+}
+
+// takeStates are the states of the screen that damages somebody else's file.
+func takeStates() []State {
+	return []State{
+
+		{
+			Name:    "take-empty",
+			Purpose: "no file chosen, a sentence rather than an empty rectangle",
+			Screen:  0,
+		},
+		{
+			Name:        "take-refused",
+			Purpose:     "a file read and no kind of damage chosen, so the screen says why it would not run",
+			Screen:      0,
+			NeedsSource: true,
+		},
+		{
+			Name:        "take-plan",
+			Purpose:     "a file read and two kinds of damage chosen, so the screen says what a run would do",
+			Screen:      0,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+		},
+	}
+}
+
+// browserStates are the states of the manifest browser.
+func browserStates() []State {
 	return []State{
 		{
 			Name:    "browser-empty",
 			Purpose: "no manifest open, a sentence rather than an empty rectangle",
-			Screen:  0,
+			Screen:  1,
 		},
 		{
 			Name:          "browser-promised",
 			Purpose:       "a manifest open, which is what a run promised about a dataset",
-			Screen:        0,
+			Screen:        1,
 			NeedsManifest: true,
 		},
 		{
 			Name:          "browser-compared",
 			Purpose:       "the same manifest beside what an application did about it",
-			Screen:        0,
+			Screen:        1,
 			NeedsManifest: true,
 			NeedsResponse: true,
 		},
 		{
 			Name:          "browser-focus-button",
 			Purpose:       "the keyboard on the button that opens a manifest",
-			Screen:        0,
+			Screen:        1,
 			NeedsManifest: true,
-			Keyboard:      Keyboard{Tabs: 3},
+			Keyboard:      Keyboard{Tabs: 4},
 		},
 		{
 			Name:          "browser-focus-cell",
 			Purpose:       "the keyboard inside the table, three rows down and one column across",
-			Screen:        0,
+			Screen:        1,
 			NeedsManifest: true,
 			Keyboard: Keyboard{
-				Tabs: 5,
+				Tabs: 6,
 				Keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight},
 			},
 		},
+	}
+}
+
+// aboutStates are the states of the screen naming what this build is.
+func aboutStates() []State {
+	return []State{
 		{
 			Name:    "about",
 			Purpose: "versions, licences and every third party component",
-			Screen:  1,
+			Screen:  2,
 		},
 		{
 			Name:     "about-focus-name",
 			Purpose:  "the keyboard on the name of the screen being read",
-			Screen:   1,
-			Keyboard: Keyboard{Tabs: 2},
+			Screen:   2,
+			Keyboard: Keyboard{Tabs: 3},
 		},
 	}
 }
@@ -136,6 +193,9 @@ func (s State) Buildable(data Data) (bool, string) {
 	if s.NeedsResponse && !data.HasActual {
 		return false, "no response record"
 	}
+	if s.NeedsSource && data.SourcePath == "" {
+		return false, "no source file"
+	}
 	return true, ""
 }
 
@@ -145,7 +205,9 @@ func (s State) Buildable(data Data) (bool, string) {
 // makes, so nothing here can reach a state a person cannot.
 func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	view := manifestview.New(text, nil, manifestview.Readers{})
+	damage := takeview.New(text, nil, describedDamage(), take.Open)
 	frame := shell.New([]shell.Screen{
+		{Name: text.T(i18n.ScreenTake), Content: damage.Content(), OnDropped: damage.Dropped},
 		{Name: text.T(i18n.ScreenManifest), Content: view.Content()},
 		{Name: text.T(i18n.ScreenAbout), Content: about.Content(text, license.Current(), version.Current())},
 	})
@@ -155,8 +217,32 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	if state.NeedsResponse && data.HasActual {
 		view.Compare(data.Actual)
 	}
+	if state.NeedsSource && data.SourcePath != "" {
+		// The failure is deliberately not swallowed into an empty screen: a
+		// state that says it needs a file and then draws one that has none is a
+		// picture of something nobody asked for.
+		if err := damage.Open(data.SourcePath); err != nil {
+			panic("the sample source file could not be read: " + err.Error())
+		}
+	}
+	if len(state.Layers) > 0 {
+		damage.ChooseLayers(state.Layers)
+	}
 	frame.Open(state.Screen)
 	return frame.Content()
+}
+
+// describedDamage is the catalog this build carries.
+//
+// A failure here means the binary is not what it was built as, and every state
+// below it would then be a picture of a screen that cannot exist, so it stops
+// rather than drawing one.
+func describedDamage() catalog.Catalog {
+	described, err := catalogyaml.Load()
+	if err != nil {
+		panic("this build cannot read its own catalog of damage: " + err.Error())
+	}
+	return described
 }
 
 // Walk applies the keyboard of a state to a canvas that already exists.

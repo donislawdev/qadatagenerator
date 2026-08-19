@@ -79,19 +79,7 @@ func New(text i18n.Catalogue, window fyne.Window, read Readers) *View {
 func (v *View) Content() fyne.CanvasObject {
 	open := parts.NewButton(v.text.T(i18n.ManifestOpen), v.chooseManifest)
 	bar := container.NewHBox(open, v.respond)
-	return inset(container.New(layout.NewBorderLayout(bar, nil, nil, nil), bar, v.body))
-}
-
-// inset keeps content off the edges of the window by the margin of the scale.
-//
-// The first drawing had none, so every word began at the frame. A margin is not
-// decoration here: it is what separates the window from the thing inside it,
-// and its size is the one the scale already names for exactly this. It is
-// applied once, around the whole screen, rather than around each part, because
-// two of them stacked read as a gap somebody forgot to close.
-func inset(content fyne.CanvasObject) fyne.CanvasObject {
-	margin := palette.StepOf(palette.NameStepSection)
-	return container.New(layout.NewCustomPaddedLayout(margin, margin, margin, margin), content)
+	return parts.Inset(container.New(layout.NewBorderLayout(bar, nil, nil, nil), bar, v.body))
 }
 
 // Open puts a manifest on the screen, with everything that goes with it.

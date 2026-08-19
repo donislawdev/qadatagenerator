@@ -40,6 +40,7 @@ const (
 
 	ScreenAbout    Key = "screen.about"
 	ScreenManifest Key = "screen.manifest"
+	ScreenTake     Key = "screen.take"
 )
 
 // The keys of the About screen.
@@ -65,6 +66,96 @@ const (
 
 	AboutEmptyComponents Key = "about.empty.components"
 	AboutEmptyData       Key = "about.empty.data"
+)
+
+// The keys of the take and corrupt screen.
+//
+// # Why the refusals are keys here and sentences at the other surface
+//
+// The mode refuses a run by kind rather than by sentence, because the command
+// line is English by rule and this window shows whatever it was translated
+// into. Every kind therefore needs words here, including the four that no
+// control on this screen can produce: the layers are tick boxes and the
+// manifest forms are a list, so nothing a person clicks can name one that does
+// not exist. They are translated anyway, because the guard holding this
+// register against the list of kinds cannot tell a refusal that is unreachable
+// today from one that becomes reachable the day somebody swaps a list for a
+// text field.
+const (
+	TakeChoose     Key = "take.choose"
+	TakeEmpty      Key = "take.empty"
+	TakeDrop       Key = "take.drop"
+	TakeUnreadable Key = "take.unreadable"
+
+	TakeHeadingFile     Key = "take.heading.file"
+	TakeHeadingSettings Key = "take.heading.settings"
+	TakeHeadingPlan     Key = "take.heading.plan"
+
+	TakeFileRows              Key = "take.file.rows"
+	TakeFileColumns           Key = "take.file.columns"
+	TakeFileNothingDeclared   Key = "take.file.nothing-declared"
+	TakeFileTakenFor          Key = "take.file.taken-for"
+	TakeFileBecause           Key = "take.file.because"
+	TakeFileAgreesWith        Key = "take.file.agrees-with"
+	TakeFileByteOrderMark     Key = "take.file.byte-order-mark"
+	TakeFileNotInferred       Key = "take.file.not-inferred"
+	TakeFileOneColumn         Key = "take.file.one-column"
+	TakeFileNothingRecognised Key = "take.file.nothing-recognised"
+
+	TakeSettingLayers    Key = "take.setting.layers"
+	TakeSettingRows      Key = "take.setting.rows"
+	TakeSettingPerRow    Key = "take.setting.per-row"
+	TakeSettingExclude   Key = "take.setting.exclude"
+	TakeSettingDelimiter Key = "take.setting.delimiter"
+	TakeSettingLocale    Key = "take.setting.locale"
+	TakeSettingSeed      Key = "take.setting.seed"
+	TakeSettingOut       Key = "take.setting.out"
+	TakeSettingManifest  Key = "take.setting.manifest"
+	TakeSettingNone      Key = "take.setting.none"
+
+	TakePlanKinds       Key = "take.plan.kinds"
+	TakePlanImplemented Key = "take.plan.implemented"
+	TakePlanWrites      Key = "take.plan.writes"
+	TakePlanWritesTo    Key = "take.plan.writes-to"
+	TakePlanEveryOrder  Key = "take.plan.every-order"
+
+	TakeRefusalAllowed Key = "take.refusal.allowed"
+	TakeRefusalInstead Key = "take.refusal.instead"
+
+	TakeRefusalNoLayers    Key = "take.refusal.no-layers"
+	TakeRefusalNoLayersWhy Key = "take.refusal.no-layers.why"
+	TakeRefusalNoLayersDo  Key = "take.refusal.no-layers.do"
+
+	TakeRefusalUnknownLayer    Key = "take.refusal.unknown-layer"
+	TakeRefusalUnknownLayerWhy Key = "take.refusal.unknown-layer.why"
+	TakeRefusalUnknownLayerDo  Key = "take.refusal.unknown-layer.do"
+
+	TakeRefusalDelimiter        Key = "take.refusal.delimiter"
+	TakeRefusalDelimiterWhy     Key = "take.refusal.delimiter.why"
+	TakeRefusalDelimiterAllowed Key = "take.refusal.delimiter.allowed"
+	TakeRefusalDelimiterDo      Key = "take.refusal.delimiter.do"
+
+	TakeRefusalManifestForm    Key = "take.refusal.manifest-form"
+	TakeRefusalManifestFormWhy Key = "take.refusal.manifest-form.why"
+	TakeRefusalManifestFormDo  Key = "take.refusal.manifest-form.do"
+
+	TakeRefusalShare        Key = "take.refusal.share"
+	TakeRefusalShareWhy     Key = "take.refusal.share.why"
+	TakeRefusalShareAllowed Key = "take.refusal.share.allowed"
+	TakeRefusalShareDo      Key = "take.refusal.share.do"
+
+	TakeRefusalPerRow    Key = "take.refusal.per-row"
+	TakeRefusalPerRowWhy Key = "take.refusal.per-row.why"
+	TakeRefusalPerRowDo  Key = "take.refusal.per-row.do"
+
+	TakeRefusalOverwriteSource        Key = "take.refusal.overwrite-source"
+	TakeRefusalOverwriteSourceWhy     Key = "take.refusal.overwrite-source.why"
+	TakeRefusalOverwriteSourceAllowed Key = "take.refusal.overwrite-source.allowed"
+	TakeRefusalOverwriteSourceDo      Key = "take.refusal.overwrite-source.do"
+
+	TakeRefusalUnnamed    Key = "take.refusal.unnamed"
+	TakeRefusalUnnamedWhy Key = "take.refusal.unnamed.why"
+	TakeRefusalUnnamedDo  Key = "take.refusal.unnamed.do"
 )
 
 // The keys of the manifest browser.
@@ -152,7 +243,7 @@ const (
 // Keys is every key a screen may ask for, so a test can close the register
 // from the side the code is on.
 var Keys = []Key{
-	WindowTitle, ScreenAbout, ScreenManifest,
+	WindowTitle, ScreenAbout, ScreenManifest, ScreenTake,
 
 	AboutHeadingVersions, AboutHeadingLicenses, AboutHeadingComponents,
 	AboutHeadingData, AboutHeadingNotices,
@@ -179,6 +270,29 @@ var Keys = []Key{
 	ManifestFailureUndescribed, ManifestFailureUnimplemented,
 	ManifestFailureRunLacksCapability, ManifestFailureFieldTypeNotCovered,
 	ManifestFailureSchemeNotCovered, ManifestFailureDeclinedByMutator,
+
+	TakeChoose, TakeEmpty, TakeDrop, TakeUnreadable,
+	TakeHeadingFile, TakeHeadingSettings, TakeHeadingPlan,
+	TakeFileRows, TakeFileColumns, TakeFileNothingDeclared,
+	TakeFileTakenFor, TakeFileBecause, TakeFileAgreesWith,
+	TakeFileByteOrderMark, TakeFileNotInferred,
+	TakeFileOneColumn, TakeFileNothingRecognised,
+	TakeSettingLayers, TakeSettingRows, TakeSettingPerRow, TakeSettingExclude,
+	TakeSettingDelimiter, TakeSettingLocale, TakeSettingSeed, TakeSettingOut,
+	TakeSettingManifest, TakeSettingNone,
+	TakePlanKinds, TakePlanImplemented, TakePlanWrites, TakePlanWritesTo,
+	TakePlanEveryOrder,
+	TakeRefusalAllowed, TakeRefusalInstead,
+	TakeRefusalNoLayers, TakeRefusalNoLayersWhy, TakeRefusalNoLayersDo,
+	TakeRefusalUnknownLayer, TakeRefusalUnknownLayerWhy, TakeRefusalUnknownLayerDo,
+	TakeRefusalDelimiter, TakeRefusalDelimiterWhy, TakeRefusalDelimiterAllowed,
+	TakeRefusalDelimiterDo,
+	TakeRefusalManifestForm, TakeRefusalManifestFormWhy, TakeRefusalManifestFormDo,
+	TakeRefusalShare, TakeRefusalShareWhy, TakeRefusalShareAllowed, TakeRefusalShareDo,
+	TakeRefusalPerRow, TakeRefusalPerRowWhy, TakeRefusalPerRowDo,
+	TakeRefusalOverwriteSource, TakeRefusalOverwriteSourceWhy,
+	TakeRefusalOverwriteSourceAllowed, TakeRefusalOverwriteSourceDo,
+	TakeRefusalUnnamed, TakeRefusalUnnamedWhy, TakeRefusalUnnamedDo,
 
 	VerifyCompared, VerifyAgreed, VerifyNoAnswer,
 	VerifyVerdictAccepted, VerifyVerdictRejected,

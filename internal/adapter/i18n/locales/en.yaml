@@ -13,6 +13,7 @@ window.title: QA Data Generator
 
 screen.about: About
 screen.manifest: Manifest browser
+screen.take: Take and corrupt
 
 about.heading.versions: Versions
 about.heading.licenses: Licenses
@@ -100,3 +101,78 @@ verify.kind.hole: accepted although the manifest expected a rejection
 verify.kind.overzealous: rejected although the manifest expected it to be accepted
 verify.kind.silent: taken without the mark the manifest expected
 verify.kind.missing: the application never answered for this row
+
+take.choose: Choose a file
+take.empty: Choose a file this tool did not make. Nothing is read until you choose one, and nothing is written until you ask for it.
+take.drop: You can also drop a file onto this window.
+take.unreadable: This file could not be read.
+
+take.heading.file: What this file holds
+take.heading.settings: What to damage
+take.heading.plan: What would happen
+
+take.file.rows: Records
+take.file.columns: Columns
+take.file.nothing-declared: Nothing declared what these columns hold, so it was worked out by looking at the values.
+take.file.taken-for: taken for
+take.file.because: because
+take.file.agrees-with: taken to agree with
+take.file.byte-order-mark: This file begins with a byte order mark. The damaged file is written without one.
+take.file.not-inferred: Looking at values cannot establish these. Damage that needs them is still ordered, and the manifest carries the reason it could not be applied.
+take.file.one-column: This file was read as a single column. A file written by a European spreadsheet separates its fields with a semicolon rather than a comma, so check the field separator before damaging it.
+take.file.nothing-recognised: No column was recognised as carrying a numbering scheme, so damage aimed at one has nothing to work with in this file.
+
+take.setting.layers: Kinds of damage
+take.setting.rows: Share of records
+take.setting.per-row: Defects per record
+take.setting.exclude: Columns to leave alone
+take.setting.delimiter: Field separator
+take.setting.locale: Data locale
+take.setting.seed: Seed
+take.setting.out: Write to
+take.setting.manifest: Extra manifest form
+take.setting.none: none
+
+take.plan.kinds: Kinds of damage ordered
+take.plan.implemented: Of those, this build can carry out
+take.plan.writes: Files this would write
+take.plan.writes-to: in
+take.plan.every-order: A real run writes one manifest entry for every ordered defect, applied or not.
+
+take.refusal.allowed: What would be taken
+take.refusal.instead: What to do
+
+take.refusal.no-layers: No kind of damage is chosen
+take.refusal.no-layers.why: The kinds decide what this does, and there is no default, because damaging the bytes of a file and damaging a value inside it are different requests.
+take.refusal.no-layers.do: Tick at least one kind of damage above.
+
+take.refusal.unknown-layer: This build describes no damage of this kind
+take.refusal.unknown-layer.why: A kind with nothing described in it would order a run that produced nothing while looking as though it had.
+take.refusal.unknown-layer.do: Choose a kind from the list above.
+
+take.refusal.delimiter: The field separator has to be one character
+take.refusal.delimiter.why: It is the character that separates the fields of one line, both when this reads the file and when it writes it back.
+take.refusal.delimiter.allowed: One character, such as a comma or a semicolon
+take.refusal.delimiter.do: Put a single character in the field separator above.
+
+take.refusal.manifest-form: This build does not write a manifest in that form
+take.refusal.manifest-form.why: The manifest is always written as JSON, and this setting asks for an extra form of it beside that one.
+take.refusal.manifest-form.do: Choose a form from the list above.
+
+take.refusal.share: The share of records cannot be read
+take.refusal.share.why: It decides how much of the file is damaged, and a value nobody can read would leave that to a default the run never mentioned.
+take.refusal.share.allowed: A percentage, such as 5% or 100%
+take.refusal.share.do: Put a percentage in the share of records above.
+
+take.refusal.per-row: No such setting for how many defects one record carries
+take.refusal.per-row.why: Anything else would be read as one defect per record, so a misspelling would quietly reduce the damage and the run would still report success.
+take.refusal.per-row.do: Choose a setting from the list above.
+
+take.refusal.overwrite-source: This run would write over the file it is reading
+take.refusal.overwrite-source.why: The damaged records would replace the records they were made from, and nothing could bring the file back.
+take.refusal.overwrite-source.allowed: A directory that is not where the file itself sits
+take.refusal.overwrite-source.do: Choose another directory to write to.
+
+take.refusal.unnamed: This build stopped the run for a reason it cannot put into words
+take.refusal.unnamed.why: The run was stopped for a real reason and this copy of the tool has no message for it, which is a fault in the tool rather than in what was asked of it.
+take.refusal.unnamed.do: Report this, and say which settings were on screen.

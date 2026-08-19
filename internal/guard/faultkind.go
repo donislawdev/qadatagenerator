@@ -66,6 +66,7 @@ var RefusalKinds = map[string]string{
 	"internal/app/validate.Run Config":                       "this is the verb whose whole answer is whether the recipe is valid",
 	"internal/cli.recipeAt Config":                           "the recipe carries problems, and this verb was asked to produce data rather than to report on them",
 	"internal/cli.writerFor Config":                          "the recipe asks for a format this build does not write",
+	"internal/take.Open Config":                              "the field separator is not one character. It is a setting somebody gave rather than data, and it is answered here a second time because a screen puts it under a cursor, where the empty value between two keystrokes would otherwise be a panic",
 
 	// --- Data: a valid document asks for something that cannot be done --------
 	"internal/adapter/manifestjson.bytesOf Data":             "the manifest is larger than this build reads back at once. The document is valid and this build cannot hold it, which is the other side of the boundary",

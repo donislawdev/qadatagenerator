@@ -1,0 +1,76 @@
+<canvas padded size="1342x900">
+	<content>
+		<container pos="8,8" size="1326x884">
+			<container size="220x884">
+				<container size="220x884">
+					<widget size="220x28" type="*parts.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
+						<widget pos="64,4" size="118x20" type="*widget.RichText">
+							<text alignment="center" bold size="118x19">Take and corrupt</text>
+						</widget>
+						<image fillMode="contain" pos="36,4" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
+					</widget>
+					<widget pos="0,36" size="220x28" type="*parts.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
+						<widget pos="48,4" size="122x19" type="*widget.RichText">
+							<text alignment="center" bold size="122x19">Manifest browser</text>
+						</widget>
+					</widget>
+					<widget pos="0,72" size="220x28" type="*parts.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
+						<widget pos="88,4" size="42x19" type="*widget.RichText">
+							<text alignment="center" bold size="42x19">About</text>
+						</widget>
+					</widget>
+				</container>
+			</container>
+			<container pos="228,0" size="1098x884">
+				<container size="1098x884">
+					<container pos="24,24" size="1050x836">
+						<widget pos="0,354" size="1050x481" type="*container.Split">
+							<widget size="522x481" type="*widget.Scroll">
+							</widget>
+							<widget pos="522,0" size="5x481" type="*container.divider">
+								<rectangle fillColor="shadow" size="5x481"/>
+								<rectangle fillColor="foreground" pos="0,224" size="4x32"/>
+							</widget>
+							<widget pos="527,0" size="522x481" type="*widget.Scroll">
+								<container size="522x481">
+									<widget size="522x4" type="*widget.Separator">
+										<rectangle fillColor="separator" size="522x4"/>
+									</widget>
+								</container>
+							</widget>
+						</widget>
+						<container size="1050x346">
+							<container size="1050x28">
+								<widget size="96x28" type="*parts.Button">
+									<rectangle fillColor="button" radius="5" size="96x28"/>
+									<rectangle size="96x28"/>
+									<widget pos="4,4" size="88x19" type="*widget.RichText">
+										<text alignment="center" bold size="88x19">Choose a file</text>
+									</widget>
+								</widget>
+							</container>
+							<container pos="0,36" size="1050x310">
+								<widget size="1050x217" type="*widget.Label">
+									<widget size="1050x217" type="*widget.RichText">
+										<text pos="4,4" size="758x19">Choose a file this tool did not make. Nothing is read until you choose one, and nothing is written until you ask for it.</text>
+									</widget>
+								</widget>
+								<widget pos="0,225" size="1050x84" type="*widget.Label">
+									<widget size="1050x84" type="*widget.RichText">
+										<text pos="4,4" size="271x19">You can also drop a file onto this window.</text>
+									</widget>
+								</widget>
+							</container>
+						</container>
+					</container>
+				</container>
+			</container>
+		</container>
+	</content>
+</canvas>

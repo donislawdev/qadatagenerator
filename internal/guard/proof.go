@@ -756,6 +756,21 @@ var Guards = []Guard{
 	// the fault therefore has to be planted as one.
 	{"a setting this build cannot carry out is refused for its own reason", "TestEachUnusableSettingIsRefusedForItsOwnReason", "internal/take", ByMutation},
 	{"every refusal of the mode has words of its own at this surface", "TestEveryRefusalOfTheModeHasWordsOfItsOwn", "internal/cli", ByProbe},
+
+	// The screen for that mode.
+	//
+	// 🔴 The third of these is a rule written before anything can break it. The
+	// catalog carries no security module today, so the guard passes with
+	// nothing to look at, and the day one arrives it fails. Written afterwards
+	// it would be written by somebody looking at a screen that already offers
+	// it as one tick box among the others, which is the thing the rule forbids.
+	{"every refusal of the mode has words on the screen too",
+		"TestEveryRefusalOfTheModeHasWordsOnThisScreen", "internal/gui/takeview", ByMutation},
+	{"a dropped file reaches the screen a person is looking at",
+		"TestADroppedFileReachesTheScreenOnDisplay", "internal/gui/shell", ByMutation},
+	{"the module that must be chosen deliberately is never one tick box among others",
+		"TestNothingChosenDeliberatelyIsOfferedAsOneTickBoxAmongOthers",
+		"internal/gui/takeview", ByProbe},
 }
 
 // CountByProof returns how many guards are in each state.

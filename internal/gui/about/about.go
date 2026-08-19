@@ -17,6 +17,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/license"
 	"github.com/donislawdev/qadatagenerator/internal/version"
 )
@@ -41,7 +42,7 @@ func Content(text i18n.Catalogue, report license.Report, versions version.Set) f
 		heading(text, i18n.AboutHeadingNotices),
 		noticeList(report),
 	}
-	return container.NewVScroll(container.NewVBox(sections...))
+	return parts.Inset(container.NewVScroll(container.NewVBox(sections...)))
 }
 
 func heading(text i18n.Catalogue, key i18n.Key) fyne.CanvasObject {

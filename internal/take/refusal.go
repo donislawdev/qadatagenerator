@@ -164,6 +164,30 @@ func checkValues(settings Settings) Refusal {
 	return Refusal{}
 }
 
+// The lists a surface builds its controls from.
+//
+// # Why these are here and not read off the adapters directly
+//
+// A screen offering these as tick boxes and lists needs the same three sets the
+// checks above answer against. Reading them straight from the adapters would
+// work and would put a second opinion about them in the window: the day a list
+// here grows, a control built from another list stops offering what this build
+// accepts, and nothing says so. One place answers both questions instead.
+//
+// It also keeps the window from importing three adapters to draw one screen.
+
+// LayersIn is every kind of damage this build describes, in the order a person
+// reads them.
+func LayersIn(described catalog.Catalog) []string {
+	return mutators.Coverage{Described: described}.Layers()
+}
+
+// ManifestForms is every extra form of the manifest this build writes.
+func ManifestForms() []string { return manifestexport.Forms() }
+
+// PerRowChoices is every setting for how many defects one record may carry.
+func PerRowChoices() []string { return corrupt.PerRowChoices() }
+
 // NamesIn splits a comma separated list, dropping what is only whitespace.
 //
 // It is here rather than at each surface because both of them take these lists
