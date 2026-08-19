@@ -233,11 +233,12 @@ func (v *View) refusedNow() bool {
 //
 // A bar that travels while a run goes on is what every other program shows, and
 // this window does not show one. The reason is measured rather than a matter of
-// taste: the toolkit draws both of its endless indicators as a rectangle whose
-// position comes from a clock, that position is part of the stored tree of every
-// screen, and the guard comparing those trees would then be red or green
-// depending on when it ran. A guard that fails at random is a guard somebody
-// turns off.
+// taste: both of the toolkit's endless indicators animate forever from the moment
+// they are shown, and their geometry comes from a clock. One travels a rectangle on
+// a fifty millisecond tick and the other turns three circles on a two second loop.
+// Either way that geometry is part of the stored tree of every screen, so the guard
+// comparing those trees would be red or green depending on when it ran. A guard that
+// fails at random is a guard somebody turns off.
 //
 // What a person actually needs is here in words: that the file is being damaged,
 // that nothing is on the disk yet under its own name, and the way to stop.
