@@ -1,15 +1,14 @@
 // Package takeview builds the screen for the take and corrupt mode: somebody
-// else's file goes in, and this says what is in it and what damaging it would
-// do.
+// else's file goes in, and this says what is in it, what damaging it would do,
+// and then does it.
 //
-// # What this screen does not do yet
+// # Why the button, the state in progress and the way to stop arrived together
 //
-// It writes nothing, and it has no button that would. That is deliberate rather
-// than unfinished: a control that does nothing is a promise, and a disabled one
-// with no reason beside it is a puzzle. Writing arrives with the state that
-// shows a run in progress and the way to stop it, because those three belong
-// together and a screen that could start a run it could not stop would be worse
-// than one that cannot start it.
+// The screen was a preview first, on purpose. A control that does nothing is a
+// promise and a disabled one with no reason beside it is a puzzle, so nothing
+// offered to start a run until all three of these existed: a screen that could
+// begin a run it could not stop would be worse than one that could not begin
+// one at all.
 //
 // # Why the mode is asked rather than reimplemented
 //
@@ -21,6 +20,7 @@
 package takeview
 
 import (
+	"errors"
 	"strconv"
 
 	"fyne.io/fyne/v2"
@@ -52,10 +52,23 @@ type View struct {
 	window    fyne.Window
 	described catalog.Catalog
 	openFile  Opener
+	run       Background
 
 	chosen take.Settings
 	opened *take.Opened
 	path   string
+
+	// What the screen is doing and what the last run left. The stage decides
+	// what is drawn and the two beside it carry what there is to say about it.
+	stage  stage
+	result take.Result
+	failed error
+	// halt is how the run in flight is asked to end, and nothing while there is
+	// none.
+	halt *stopper
+	// closing records that somebody asked for the window while a run was going
+	// on, so that the window can be given to them once the run has stopped.
+	closing bool
 
 	// The parts that change with what is on screen. They are kept rather than
 	// rebuilt, because rebuilding a control throws away what somebody typed
@@ -67,6 +80,7 @@ type View struct {
 	split       *container.Split
 	settingsBox *fyne.Container
 	planBox     *fyne.Container
+	runBox      *fyne.Container
 
 	layers    *widget.CheckGroup
 	share     *widget.Entry
@@ -77,16 +91,26 @@ type View struct {
 	seed      *widget.Entry
 	out       *widget.Entry
 	manifest  *widget.Select
+	overwrite *widget.Check
+
+	chooseFile *parts.Button
+	damage     *parts.Button
+	stop       *parts.Button
 }
 
-// New builds the screen. The window is what a file chooser has to appear over.
+// New builds the screen.
+//
+// The window is what a file chooser has to appear over and what a run takes
+// over while it is going on. The background is where a run happens, handed in
+// so that every state of this screen can be reached without a goroutine.
 func New(text i18n.Catalogue, window fyne.Window, described catalog.Catalog,
-	openFile Opener) *View {
+	openFile Opener, run Background) *View {
 	view := &View{
 		text: text, window: window, described: described, openFile: openFile,
-		chosen: take.Defaults(),
-		empty:  container.NewVBox(), fileBox: container.NewVBox(),
+		run: run, chosen: take.Defaults(),
+		empty: container.NewVBox(), fileBox: container.NewVBox(),
 		settingsBox: container.NewVBox(), planBox: container.NewVBox(),
+		runBox: container.NewVBox(),
 	}
 	view.buildControls()
 	view.empty.Objects = []fyne.CanvasObject{
@@ -103,7 +127,6 @@ func New(text i18n.Catalogue, window fyne.Window, described catalog.Catalog,
 // last would draw the same and walk backwards, which was measured on this
 // project once already.
 func (v *View) Content() fyne.CanvasObject {
-	choose := parts.NewButton(v.text.T(i18n.TakeChoose), v.choose)
 	// What the file holds is on the left and what to do about it on the right,
 	// each scrolling on its own.
 	//
@@ -121,13 +144,22 @@ func (v *View) Content() fyne.CanvasObject {
 		v.settingsBox,
 		widget.NewSeparator(),
 		v.planBox,
+		widget.NewSeparator(),
+		v.runBox,
 	)
 	split := container.NewHSplit(
 		container.NewVScroll(v.fileBox),
 		container.NewVScroll(answer),
 	)
 	v.split = split
-	body := container.NewVBox(container.NewHBox(choose), v.empty)
+	body := container.NewVBox(container.NewHBox(v.chooseFile), v.empty)
+	// 🔴 Drawn again now that the split exists. The screen was first drawn while
+	// this was still being built, so the state with no file had hidden every box
+	// and left the split itself showing: two separator lines across an otherwise
+	// empty half of the screen, dividing nothing from nothing. Seen in the
+	// stored tree rather than by anybody looking, which is what that guard is
+	// for.
+	v.redraw()
 	return parts.Inset(container.NewBorder(body, nil, nil, nil, split))
 }
 
@@ -141,15 +173,40 @@ func (v *View) Content() fyne.CanvasObject {
 // alone, which is the correction of a drift this project measured on the other
 // screen, where an exported call that only drew reached a state no person can.
 func (v *View) Open(path string) error {
+	if v.busy() {
+		// Nothing may take the file away from a run that is walking it. The
+		// button that chooses one is disabled for the length of a run, and a
+		// file dropped onto the window arrives by another road entirely, which
+		// is why the rule lives here rather than on the control.
+		return errRunInProgress
+	}
 	opened, err := v.openFile(path, v.chosen)
 	if err != nil {
 		v.opened, v.path = nil, ""
+		v.forgetLastRun()
 		v.showUnreadable(err)
 		return err
+	}
+	if path != v.path {
+		// A different file, so what the last run did is about something else.
+		v.forgetLastRun()
 	}
 	v.opened, v.path = opened, path
 	v.redraw()
 	return nil
+}
+
+// errRunInProgress is what Open answers while a run is walking the file.
+//
+// It never reaches a screen, so it is a sentence rather than a key: the two
+// roads into Open are a control that is disabled and a file dropped onto the
+// window, and both of them ignore what comes back.
+var errRunInProgress = errors.New("a run is in progress, so the file cannot be changed")
+
+// forgetLastRun clears what this screen says about a run that is now about
+// another file.
+func (v *View) forgetLastRun() {
+	v.stage, v.result, v.failed = stageReady, take.Result{}, nil
 }
 
 // Dropped takes a file dropped onto the window.
@@ -206,9 +263,11 @@ func (v *View) redraw() {
 	v.empty.Hide()
 	v.drawFile()
 	v.drawPlan()
+	v.drawRun()
 	v.fileBox.Show()
 	v.settingsBox.Show()
 	v.planBox.Show()
+	v.runBox.Show()
 	if v.split != nil {
 		v.split.Show()
 	}
@@ -220,6 +279,7 @@ func (v *View) hideSplit() {
 	v.fileBox.Hide()
 	v.settingsBox.Hide()
 	v.planBox.Hide()
+	v.runBox.Hide()
 	if v.split != nil {
 		v.split.Hide()
 	}
@@ -231,6 +291,29 @@ func wrapped(words string) *widget.Label {
 	label := widget.NewLabel(words)
 	label.Wrapping = fyne.TextWrapWord
 	return label
+}
+
+// beside is a mark with a paragraph that follows the width of the window.
+//
+// 🔴 A row of the toolkit gives each thing the width it asks for and no more,
+// and a wrapping label asks for the width of its whole sentence. Put in a row it
+// therefore does not wrap at all, it runs off the right edge, and the wrapping
+// that was set on it does nothing. Seen on the render of the state that shows a
+// run going on: the sentence saying what stopping leaves behind was cut mid
+// word at the edge of the screen. A border gives its middle whatever is left
+// over after the edges, which is the width wrapping needs.
+func beside(mark fyne.Resource, words fyne.CanvasObject) fyne.CanvasObject {
+	return container.NewBorder(nil, nil, widget.NewIcon(mark), nil, words)
+}
+
+// wrappedPair is a label and a value long enough to need wrapping.
+//
+// Paths and lists of file names are as long as somebody's directory, so the
+// value beside the label is the one thing on this screen whose length nobody
+// here decides.
+func wrappedPair(label, value string) fyne.CanvasObject {
+	name := widget.NewLabelWithStyle(label, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	return container.NewBorder(nil, nil, name, nil, wrapped(value))
 }
 
 func heading(words string) fyne.CanvasObject {

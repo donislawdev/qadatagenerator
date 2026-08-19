@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 )
 
@@ -54,6 +55,19 @@ func (v *View) buildControls() {
 		v.settingChanged()
 	})
 	v.manifest.SetSelected(v.text.T(i18n.TakeSettingNone))
+	// Replacing what is already there is off until somebody says otherwise, and
+	// that is the same answer the command line gives. A run that quietly wrote
+	// over a file in somebody's working directory is the failure the writer of
+	// files exists to prevent, and a window is where an accidental second press
+	// is easiest.
+	v.overwrite = widget.NewCheck("", func(ticked bool) {
+		v.chosen.Overwrite = ticked
+		v.settingChanged()
+	})
+
+	v.chooseFile = parts.NewButton(v.text.T(i18n.TakeChoose), v.choose)
+	v.damage = parts.NewButton(v.text.T(i18n.TakeRun), v.Start)
+	v.stop = parts.NewButton(v.text.T(i18n.TakeStop), v.Stop)
 	v.settingsBox.Objects = []fyne.CanvasObject{
 		heading(v.text.T(i18n.TakeHeadingSettings)), v.form(),
 	}
@@ -98,6 +112,7 @@ func (v *View) form() fyne.CanvasObject {
 		widget.NewFormItem(v.text.T(i18n.TakeSettingSeed), v.seed),
 		widget.NewFormItem(v.text.T(i18n.TakeSettingOut), v.out),
 		widget.NewFormItem(v.text.T(i18n.TakeSettingManifest), v.manifest),
+		widget.NewFormItem(v.text.T(i18n.TakeSettingOverwrite), v.overwrite),
 	)
 }
 
@@ -116,15 +131,21 @@ func (v *View) formNamed(picked string) string {
 	return picked
 }
 
-// settingChanged redraws the answer to what a run would do.
+// settingChanged redraws the answer to what a run would do, and the button
+// that would do it.
 //
 // Nothing is read and nothing is written. The whole cost of this is asking the
 // mode two questions about values already in memory.
+//
+// The button goes with the answer rather than being left alone, because the
+// two say one thing between them: a setting that would be refused takes the
+// answer away and has to take the way of acting on it away as well.
 func (v *View) settingChanged() {
 	if v.opened == nil {
 		return
 	}
 	v.drawPlan()
+	v.drawRun()
 }
 
 // reopen reads the file again, because the separator decides how it is read.
@@ -158,7 +179,7 @@ func (v *View) planContent() fyne.CanvasObject {
 	return container.NewVBox(
 		pair(v.text.T(i18n.TakePlanKinds), counted(planned.Ordered, "kind")),
 		pair(v.text.T(i18n.TakePlanImplemented), counted(planned.Implemented, "kind")),
-		pair(v.text.T(i18n.TakePlanWrites),
+		wrappedPair(v.text.T(i18n.TakePlanWrites),
 			listOf(planned.Writes)+" "+v.text.T(i18n.TakePlanWritesTo)+" "+planned.Out),
 		wrapped(v.text.T(i18n.TakePlanEveryOrder)),
 	)

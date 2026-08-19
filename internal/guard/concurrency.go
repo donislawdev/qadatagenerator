@@ -29,9 +29,25 @@ import (
 // temporary files on its own goroutine. Nothing else in the product knows a
 // signal exists.
 //
-// One entry is a number worth keeping. A second one deserves the same
-// paragraph, and if the paragraph is hard to write the concurrency is probably
-// in the wrong place.
+// # Why the second entry is here
+//
+// The toolkit draws on one thread, and a button is pressed on it. A run that
+// damaged somebody else's file on that thread would hold it for as long as the
+// file takes: the window would stop repainting, stop answering the keyboard and
+// stop offering the way to stop the run. The three things a screen owes a person
+// during a run are exactly the three that thread has to be free for, so this one
+// is not a choice about speed.
+//
+// The file listed keeps every concurrent thing about that in one place, the way
+// the first one does for signals. It starts the goroutine, hands the answer back
+// through the toolkit's own call for it, and turns a person pressing a button
+// into an answer the run asks for between records. The screens themselves stay
+// single threaded and nothing else in the window knows a goroutine exists.
+//
+// Two entries, one per surface, and each one is the same shape: work that cannot
+// be done where it was asked for, isolated in a file with nothing else in it. A
+// third deserves the same paragraph, and if the paragraph is hard to write the
+// concurrency is probably in the wrong place.
 //
 // # Why a guard rather than a rule in a document
 //
@@ -50,7 +66,8 @@ import (
 // right. The rules the architecture states, that the output is ordered by row
 // and that nothing mutable is shared, are still on whoever writes the code.
 var ConcurrencyAllowed = map[string]bool{
-	"internal/cli/signals.go": true,
+	"internal/cli/signals.go":             true,
+	"internal/gui/takeview/background.go": true,
 }
 
 // concurrencyPackages are imports whose whole purpose is coordinating work

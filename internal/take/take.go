@@ -300,6 +300,21 @@ type Result struct {
 // somebody pressing a button.
 func (o *Opened) Corrupt(settings Settings, described catalog.Catalog,
 	stop corrupt.Halt, at time.Time) (Result, error) {
+	// 🔴 The walk belongs to this run, so this run ends it, however it ends.
+	//
+	// The reader goes over the file twice and the second pass is what a run
+	// consumes. A run stopped between two records leaves that pass part way
+	// through, and the NEXT run of the same opened file would then carry on
+	// from where the last one stopped: a damaged file holding the records that
+	// were left, beside a manifest counting the whole file. Nothing about that
+	// result looks wrong.
+	//
+	// It became reachable the day a window existed. A command line run opens a
+	// file, damages it once and ends. A screen keeps the file while somebody
+	// reads what it holds, and stopping a run and pressing the button again is
+	// the ordinary thing to do.
+	defer func() { _ = o.file.Close() }()
+
 	files := store.New(settings.Out, settings.Overwrite)
 	committed := false
 	defer func() {

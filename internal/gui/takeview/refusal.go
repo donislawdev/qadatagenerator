@@ -104,7 +104,7 @@ func (v *View) refusal(refused take.Refusal) fyne.CanvasObject {
 	headline.TextStyle = fyne.TextStyle{Bold: true}
 	headline.Wrapping = fyne.TextWrapWord
 	lines := []fyne.CanvasObject{
-		container.NewHBox(widget.NewIcon(theme.WarningIcon()), headline),
+		beside(theme.WarningIcon(), headline),
 		wrapped(v.text.T(words.why)),
 	}
 	if allowed := v.allowedIn(refused, words); allowed != "" {

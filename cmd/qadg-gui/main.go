@@ -59,7 +59,10 @@ func main() {
 		fmt.Fprintln(os.Stderr, "this build cannot read its own catalog of damage:", err)
 		os.Exit(1)
 	}
-	damage := takeview.New(text, window, described, take.Open)
+	// The reader and the place a run happens are both handed in, which is what
+	// lets every state of that screen be reached in a test without a disk and
+	// without a goroutine.
+	damage := takeview.New(text, window, described, take.Open, takeview.InBackground)
 
 	frame := shell.New([]shell.Screen{
 		{Name: text.T(i18n.ScreenTake), Content: damage.Content(), OnDropped: damage.Dropped},

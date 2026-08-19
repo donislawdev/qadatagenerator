@@ -110,6 +110,7 @@ take.unreadable: This file could not be read.
 take.heading.file: What this file holds
 take.heading.settings: What to damage
 take.heading.plan: What would happen
+take.heading.result: What this run did
 
 take.file.rows: Records
 take.file.columns: Columns
@@ -131,6 +132,7 @@ take.setting.locale: Data locale
 take.setting.seed: Seed
 take.setting.out: Write to
 take.setting.manifest: Extra manifest form
+take.setting.overwrite: Replace files already there
 take.setting.none: none
 
 take.plan.kinds: Kinds of damage ordered
@@ -138,6 +140,24 @@ take.plan.implemented: Of those, this build can carry out
 take.plan.writes: Files this would write
 take.plan.writes-to: in
 take.plan.every-order: A real run writes one manifest entry for every ordered defect, applied or not.
+
+take.run: Damage this file
+take.stop: Stop this run
+take.running: This file is being damaged. Nothing appears under its own name until the whole run has succeeded, so stopping now leaves nothing behind.
+take.running.stopping: Stopping. The run ends after the record it is on, and leaves nothing behind.
+
+take.result.written: Files written
+take.result.in: in
+take.result.ordered: Defects ordered
+take.result.applied: Of those, applied
+take.result.missing: Could not be applied
+take.result.missing.why: The manifest names the reason for every one of them. Open it on the Manifest browser screen.
+take.result.unpartnered: Never ordered at all
+take.result.unpartnered.why: Damage to the integrity of a set needs a second record to span, and this file has too few rows for it.
+take.result.stopped: You stopped this run
+take.result.stopped.why: Nothing was written. Every file gets its real name only once a whole run has succeeded, so a run that ends early leaves nothing that looks complete.
+take.result.failed: This run did not finish
+take.result.failed.why: Every file gets its real name only once a whole run has succeeded, so nothing that looks complete was left behind.
 
 take.refusal.allowed: What would be taken
 take.refusal.instead: What to do

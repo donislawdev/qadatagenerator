@@ -771,6 +771,35 @@ var Guards = []Guard{
 	{"the module that must be chosen deliberately is never one tick box among others",
 		"TestNothingChosenDeliberatelyIsOfferedAsOneTickBoxAmongOthers",
 		"internal/gui/takeview", ByProbe},
+
+	// The screen writing, which arrived on 2026-08-19 with the state that shows
+	// a run going on and the way to end one.
+	//
+	// 🔴 The one below them, which lives in the mode rather than on the screen,
+	// is the one worth reading. Everything here would fail loudly, and that one
+	// guards a way of failing quietly: a run made after a stopped one damaging
+	// the records that were left rather than the file, and counting the whole
+	// file in its manifest. Nothing about the result looks wrong, and the
+	// command line cannot reach it at all.
+	{"the button damages the file and the screen says what it left behind",
+		"TestTheScreenDamagesTheFileAndSaysWhatItWrote", "internal/gui/takeview", ByMutation},
+	{"the screen says what a run would do before anybody asks for one, and writes nothing",
+		"TestTheScreenSaysWhatARunWouldDoBeforeItRunsAnything", "internal/gui/takeview", ByMutation},
+	{"every setting on the screen reaches the run rather than only the control",
+		"TestEverySettingOnTheScreenReachesTheRun", "internal/gui/takeview", ByMutation},
+	{"the share of records on the screen decides how much of the file is damaged",
+		"TestTheShareOfRecordsDecidesHowMuchIsDamaged", "internal/gui/takeview", ByMutation},
+	{"files already there are replaced only when the screen was told they may be",
+		"TestFilesAlreadyThereAreOnlyReplacedWhenTheSettingSaysSo",
+		"internal/gui/takeview", ByMutation},
+	{"a run somebody stops leaves nothing behind and the screen says so",
+		"TestARunSomebodyStopsLeavesNothingBehind", "internal/gui/takeview", ByMutation},
+	{"a run made after a stopped one damages the whole file rather than the rest of it",
+		"TestARunMadeAfterAStoppedOneDamagesTheWholeFile", "internal/take", ByMutation},
+	{"nothing on the screen can be changed while a run is going on",
+		"TestTheSettingsAreOutOfReachWhileARunIsGoingOn", "internal/gui/takeview", ByMutation},
+	{"asking for the window during a run stops the run before the process ends",
+		"TestAskingForTheWindowDuringARunStopsItFirst", "internal/gui/takeview", ByMutation},
 }
 
 // CountByProof returns how many guards are in each state.

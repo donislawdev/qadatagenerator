@@ -23,12 +23,33 @@ repository once they are released.
   disagreements named. What the comparison could not settle, and what it could
   not see at all given what the record carried, are stated under the table
   rather than left out.
+- **A screen that damages a file you already have.** Choose a file this tool did
+  not make, or drop it onto the window, and the screen says what it holds: how
+  many records and columns, what each column was taken to carry, and what that
+  conclusion rests on. Nothing declared any of it, so you are the only person
+  who can say a conclusion about your own file is wrong, and you can only say it
+  if you can see it. What looking at values can never establish is listed too.
+- **The same screen says what a run would do before it does anything.** The
+  kinds of damage, the share of records, the columns to leave alone, the field
+  separator, the seed and the rest are all there, and the answer beside them
+  changes as you change them. A setting the run would refuse takes the place of
+  that answer with the reason, what would be accepted instead, and what to do.
+  Nothing is written until you press the button, so this is what the command
+  line prints under its dry run flag without a switch to turn on.
+- **The button, and the way to stop what it started.** A run in progress greys
+  out every setting and offers the way to end it. Nothing appears under its own
+  name until a whole run has succeeded, so a run you stop leaves nothing behind,
+  and closing the window during a run stops the run first rather than leaving
+  files nobody will clean up. When it finishes, the screen says which files it
+  wrote and where, how many defects were ordered and how many reached the data.
+  If some could not be applied, it says how many and where the reason for each
+  one is.
 - **The window now holds more than one screen.** Screens are listed down the
-  left and the one being read is marked. Today there are two: the manifest
-  browser and the About screen.
-- **A file chooser.** The window can open a manifest and a response record from
-  anywhere on your disk. Nothing is read until you choose it, and nothing is
-  written at all.
+  left and the one being read is marked. Today there are three: the take and
+  corrupt screen, the manifest browser and the About screen.
+- **A file chooser.** The window can open a manifest, a response record and a
+  file to damage from anywhere on your disk. Nothing is read until you choose
+  it, and nothing is written until you ask for it.
 
 ### Fixed
 

@@ -68,6 +68,59 @@ var WindowReach = map[string]Claim{
 			"application answered, with what could not be settled and what could not be seen",
 		Test: "TestTheSecondStateShowsWhatTheApplicationDidWithEveryJudgedRow",
 	},
+	"corrupt": {
+		Screen: "the Take and corrupt screen: a file chosen or dropped, what it holds, what a run " +
+			"would do, and the button that does it",
+		Test: "TestTheScreenDamagesTheFileAndSaysWhatItWrote",
+	},
+	"corrupt --layers": {
+		Screen: "the kinds of damage, as tick boxes built from the catalog this build carries",
+		Test:   "TestEverySettingOnTheScreenReachesTheRun",
+	},
+	"corrupt --rows": {
+		Screen: "the share of records, as a field beside the kinds",
+		Test:   "TestEverySettingOnTheScreenReachesTheRun",
+	},
+	"corrupt --per-row": {
+		Screen: "the defects per record, as a list of what the engine knows rather than a field",
+		Test:   "TestEverySettingOnTheScreenReachesTheRun",
+	},
+	"corrupt --exclude-fields": {
+		Screen: "the columns to leave alone, as a field taking names the way the flag does",
+		Test:   "TestEverySettingOnTheScreenReachesTheRun",
+	},
+	"corrupt --delimiter": {
+		Screen: "the field separator, which reads the file again when it changes rather than only " +
+			"the run",
+		Test: "TestEverySettingOnTheScreenReachesTheRun",
+	},
+	"corrupt --locale": {
+		Screen: "the data locale, beside the interface language and never the same control",
+		Test:   "TestEverySettingOnTheScreenReachesTheRun",
+	},
+	"corrupt --seed": {
+		Screen: "the seed, which the screen fills with the one the mode uses when nobody says",
+		Test:   "TestEverySettingOnTheScreenReachesTheRun",
+	},
+	"corrupt --out": {
+		Screen: "the directory to write to, as a field, and the answer above the button names it",
+		Test:   "TestEverySettingOnTheScreenReachesTheRun",
+	},
+	"corrupt --manifest": {
+		Screen: "the extra form of the manifest, as a list whose first entry names the absence of " +
+			"one rather than leaving it blank",
+		Test: "TestEverySettingOnTheScreenReachesTheRun",
+	},
+	"corrupt --overwrite": {
+		Screen: "replacing files already there, as a tick box that is off until somebody says " +
+			"otherwise",
+		Test: "TestEverySettingOnTheScreenReachesTheRun",
+	},
+	"corrupt --dry-run": {
+		Screen: "the state the screen is in before anybody presses the button. A window writes " +
+			"nothing until it is told to, so this is what it does rather than a switch",
+		Test: "TestTheScreenSaysWhatARunWouldDoBeforeItRunsAnything",
+	},
 }
 
 // NotYetInWindow is what the command line can be asked for and the window
@@ -77,29 +130,17 @@ var WindowReach = map[string]Claim{
 // surfaces, and the ceiling below is that distance written as a number so that
 // it cannot grow by accident.
 var NotYetInWindow = map[string]string{
-	"generate":                 "waits for the recipe editor with the live preview",
-	"validate":                 "waits for the same editor, which shows problems beside the field they belong to",
-	"corrupt":                  "waits for the Take and corrupt screen",
-	"help":                     "waits for the first control carrying a hint. No help screen is planned, and that is recorded, but a window with no hints answers nothing",
-	"-h/--help":                "the same as the verb above it",
-	"--json":                   "waits for Save as JSON on the About screen. The reader here is a compliance scanner, so the window has to PRODUCE the file rather than show it",
-	"generate --out":           "waits for the directory picker of the editor",
-	"generate --seed":          "waits for the editor",
-	"generate --format":        "waits for the editor",
-	"generate --manifest":      "waits for the editor",
-	"generate --overwrite":     "waits for the editor",
-	"generate --dry-run":       "waits for the preview. In the window the answer is the default state rather than a switch, because a window writes nothing until it is told to",
-	"corrupt --layers":         "waits for the Take and corrupt screen",
-	"corrupt --rows":           "waits for the Take and corrupt screen",
-	"corrupt --out":            "waits for the Take and corrupt screen",
-	"corrupt --seed":           "waits for the Take and corrupt screen",
-	"corrupt --delimiter":      "waits for the Take and corrupt screen",
-	"corrupt --per-row":        "waits for the Take and corrupt screen",
-	"corrupt --exclude-fields": "waits for the Take and corrupt screen",
-	"corrupt --locale":         "waits for the Take and corrupt screen",
-	"corrupt --manifest":       "waits for the Take and corrupt screen",
-	"corrupt --overwrite":      "waits for the Take and corrupt screen",
-	"corrupt --dry-run":        "waits for the Take and corrupt screen, where it is the default state rather than a switch",
+	"generate":             "waits for the recipe editor with the live preview",
+	"validate":             "waits for the same editor, which shows problems beside the field they belong to",
+	"help":                 "waits for the first control carrying a hint. No help screen is planned, and that is recorded, but a window with no hints answers nothing",
+	"-h/--help":            "the same as the verb above it",
+	"--json":               "waits for Save as JSON on the About screen. The reader here is a compliance scanner, so the window has to PRODUCE the file rather than show it",
+	"generate --out":       "waits for the directory picker of the editor",
+	"generate --seed":      "waits for the editor",
+	"generate --format":    "waits for the editor",
+	"generate --manifest":  "waits for the editor",
+	"generate --overwrite": "waits for the editor",
+	"generate --dry-run":   "waits for the preview. In the window the answer is the default state rather than a switch, because a window writes nothing until it is told to",
 }
 
 // MediumOnly is what belongs to a terminal rather than to the product, with the
@@ -124,8 +165,12 @@ var MediumOnly = map[string]string{
 // the gap. Raising it is a decision about the product, not housekeeping.
 //
 // It stood at 24 from 2026-08-17, when this register was written, until later
-// that day, when the manifest browser took verify out of the list above.
-const NotYetCeiling = 23
+// that day, when the manifest browser took verify out of the list above. It
+// stood at 23 until 2026-08-19, when the Take and corrupt screen learned to
+// write and took the verb and its eleven flags with it in one step. That is the
+// largest single fall available today, and what is left is one verb, its five
+// flags and the four that stand alone.
+const NotYetCeiling = 11
 
 // MediumOnlyCeiling caps the exceptions for the same reason, one number lower
 // than nothing: three flags say how the output looks, and a fourth would be a

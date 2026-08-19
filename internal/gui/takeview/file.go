@@ -73,7 +73,7 @@ func (v *View) warnings(columns int) []fyne.CanvasObject {
 // lightness. A notice told apart by colour alone is a notice somebody who does
 // not separate hues never sees.
 func (v *View) notice(key i18n.Key) fyne.CanvasObject {
-	return container.NewHBox(widget.NewIcon(theme.WarningIcon()), wrapped(v.text.T(key)))
+	return beside(theme.WarningIcon(), wrapped(v.text.T(key)))
 }
 
 // conclusions are what each column was taken to hold, with what that rests on.

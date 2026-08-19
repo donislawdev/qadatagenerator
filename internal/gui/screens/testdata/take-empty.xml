@@ -30,21 +30,6 @@
 			<container pos="228,0" size="1098x884">
 				<container size="1098x884">
 					<container pos="24,24" size="1050x836">
-						<widget pos="0,354" size="1050x481" type="*container.Split">
-							<widget size="522x481" type="*widget.Scroll">
-							</widget>
-							<widget pos="522,0" size="5x481" type="*container.divider">
-								<rectangle fillColor="shadow" size="5x481"/>
-								<rectangle fillColor="foreground" pos="0,224" size="4x32"/>
-							</widget>
-							<widget pos="527,0" size="522x481" type="*widget.Scroll">
-								<container size="522x481">
-									<widget size="522x4" type="*widget.Separator">
-										<rectangle fillColor="separator" size="522x4"/>
-									</widget>
-								</container>
-							</widget>
-						</widget>
 						<container size="1050x346">
 							<container size="1050x28">
 								<widget size="96x28" type="*parts.Button">

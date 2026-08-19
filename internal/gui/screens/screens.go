@@ -23,10 +23,14 @@
 package screens
 
 import (
+	"errors"
+
 	"fyne.io/fyne/v2"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
+	"github.com/donislawdev/qadatagenerator/internal/damage"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/domain/response"
@@ -63,6 +67,41 @@ type Keyboard struct {
 	Keys []fyne.KeyName
 }
 
+// Ran is what a run of the take and corrupt mode left, for the states that show
+// one.
+//
+// # Why the outcome is declared rather than produced
+//
+// A real run writes files, and a list of states that wrote files would put them
+// either in this repository or in a directory whose name then appears in every
+// stored tree. Both make the guard comparing those trees answer about something
+// other than the drawing.
+//
+// So these states photograph the DRAWING of an outcome, from an outcome handed
+// to the screen the same way a real run hands it one. What holds the other half,
+// that the button really damages a file and really says what it wrote, is a test
+// in internal/gui/takeview which runs the whole thing into a directory of its
+// own. Neither answers the other's question.
+type Ran int
+
+const (
+	// RanNothing is a screen where nobody has pressed the button.
+	RanNothing Ran = iota
+	// RanInFlight is a run going on, which is the state that carries the way to
+	// stop it.
+	RanInFlight
+	// RanWritten is a run that carried out everything it ordered.
+	RanWritten
+	// RanPartial is a run that wrote its files with some of the ordered damage
+	// unapplied. docs/17 calls this the fifth state, and it is the one this
+	// product exists to make visible.
+	RanPartial
+	// RanStopped is a run somebody ended.
+	RanStopped
+	// RanFailed is a run that ended on a failure.
+	RanFailed
+)
+
 // State is one screen in one condition, and how to get there.
 type State struct {
 	// Name is the file name a picture of this state gets, so it is a word
@@ -86,6 +125,10 @@ type State struct {
 	// this reaches the state a person reaches by clicking and not one only this
 	// list can produce.
 	Layers []string
+	// Ran is what a run left behind, for the states that show one. A state with
+	// anything but RanNothing presses the button, so it also needs the kinds of
+	// damage above, or the screen would refuse the run it was asked for.
+	Ran Ran
 	// Keyboard is applied after the window exists, because focus with no canvas
 	// has nothing to land on.
 	Keyboard Keyboard
@@ -101,8 +144,14 @@ func All() []State {
 	return append(states, aboutStates()...)
 }
 
-// takeStates are the states of the screen that damages somebody else's file.
+// takeStates are the states of the screen that damages somebody else's file,
+// which is the screen with the most of them.
 func takeStates() []State {
+	return append(takeStatesBeforeARun(), takeStatesOfARun()...)
+}
+
+// takeStatesBeforeARun are the states in which nothing has been written.
+func takeStatesBeforeARun() []State {
 	return []State{
 
 		{
@@ -122,6 +171,57 @@ func takeStates() []State {
 			Screen:      0,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
+		},
+	}
+}
+
+// takeStatesOfARun are the states a run puts the screen into.
+//
+// Every one of them ticks kinds of damage first, because a state pressing the
+// button without them would be a picture of the screen refusing the run rather
+// than of the run.
+func takeStatesOfARun() []State {
+	return []State{
+		{
+			Name:        "take-running",
+			Purpose:     "a run going on, with the settings out of reach and the way to stop it in reach",
+			Screen:      0,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+			Ran:         RanInFlight,
+		},
+		{
+			Name:        "take-written",
+			Purpose:     "a run that finished and carried out everything it ordered",
+			Screen:      0,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+			Ran:         RanWritten,
+		},
+		{
+			Name: "take-partial",
+			Purpose: "a run that wrote its files with some of the ordered damage unapplied, " +
+				"which is the state a count of what was applied hides",
+			Screen:      0,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+			Ran:         RanPartial,
+		},
+		{
+			Name:        "take-stopped",
+			Purpose:     "a run somebody ended, which leaves nothing behind and says so",
+			Screen:      0,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+			Ran:         RanStopped,
+		},
+		{
+			Name:        "take-failed",
+			Purpose:     "a run that ended on a failure, with what failed and what that left",
+			Screen:      0,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+			Ran:         RanFailed,
 		},
 	}
 }
@@ -205,9 +305,9 @@ func (s State) Buildable(data Data) (bool, string) {
 // makes, so nothing here can reach a state a person cannot.
 func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	view := manifestview.New(text, nil, manifestview.Readers{})
-	damage := takeview.New(text, nil, describedDamage(), take.Open)
+	takeScreen := takeview.New(text, nil, describedDamage(), take.Open, outcomeOf(state.Ran))
 	frame := shell.New([]shell.Screen{
-		{Name: text.T(i18n.ScreenTake), Content: damage.Content(), OnDropped: damage.Dropped},
+		{Name: text.T(i18n.ScreenTake), Content: takeScreen.Content(), OnDropped: takeScreen.Dropped},
 		{Name: text.T(i18n.ScreenManifest), Content: view.Content()},
 		{Name: text.T(i18n.ScreenAbout), Content: about.Content(text, license.Current(), version.Current())},
 	})
@@ -221,15 +321,73 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 		// The failure is deliberately not swallowed into an empty screen: a
 		// state that says it needs a file and then draws one that has none is a
 		// picture of something nobody asked for.
-		if err := damage.Open(data.SourcePath); err != nil {
+		if err := takeScreen.Open(data.SourcePath); err != nil {
 			panic("the sample source file could not be read: " + err.Error())
 		}
 	}
 	if len(state.Layers) > 0 {
-		damage.ChooseLayers(state.Layers)
+		takeScreen.ChooseLayers(state.Layers)
+	}
+	if state.Ran != RanNothing {
+		// The same call the button makes, so the state is one a person reaches
+		// by pressing it rather than one only this list can produce.
+		takeScreen.Start()
 	}
 	frame.Open(state.Screen)
 	return frame.Content()
+}
+
+// outcomeOf is the place a run happens, for a state that wants a particular
+// outcome of one.
+//
+// It never carries the work out. What it hands back is what a real run of that
+// shape hands back, by the same road, so the screen cannot tell the difference
+// and the drawing is the drawing of a real outcome.
+func outcomeOf(ran Ran) takeview.Background {
+	return func(_ func() (take.Result, error), done func(take.Result, error)) {
+		switch ran {
+		case RanInFlight:
+			// Nothing is answered, so the run is still going when the picture
+			// is taken.
+		case RanWritten:
+			done(sampleRun(sampleOrdered), nil)
+		case RanPartial:
+			done(sampleRun(samplePartial), nil)
+		case RanStopped:
+			done(take.Result{}, takeview.ErrStopped)
+		case RanFailed:
+			done(take.Result{}, errors.New(sampleFailure))
+		}
+	}
+}
+
+// What a sample run of this mode did, as numbers.
+//
+// They are numbers rather than a run because of what the states above are for.
+// The share of records is a draw, so a real run of this file would produce a
+// count that moves whenever the sample file or the seed moves, and every stored
+// tree would then be a statement about the draw rather than about the screen.
+const (
+	sampleOrdered     = 14
+	samplePartial     = 9
+	sampleUnpartnered = 2
+	// sampleFailure is a failure of the kind the writer of files reports, in
+	// its own words, so that the state shows the length of message a person
+	// really gets rather than a short one chosen to fit.
+	sampleFailure = "out/contacts.corrupted.csv already exists. Delete it, choose another " +
+		"directory, or tick the setting that allows replacing. Nothing has been written"
+)
+
+// sampleRun is what a finished run left, with as many of the ordered defects
+// applied as the caller asks for.
+func sampleRun(applied int) take.Result {
+	return take.Result{
+		Written: []string{"contacts" + take.Suffix, manifestjson.Name},
+		Out:     "out",
+		Counts: damage.Counts{
+			Requested: sampleOrdered, Applied: applied, Unpartnered: sampleUnpartnered,
+		},
+	}
 }
 
 // describedDamage is the catalog this build carries.

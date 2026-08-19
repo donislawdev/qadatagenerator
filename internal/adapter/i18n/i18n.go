@@ -90,6 +90,7 @@ const (
 	TakeHeadingFile     Key = "take.heading.file"
 	TakeHeadingSettings Key = "take.heading.settings"
 	TakeHeadingPlan     Key = "take.heading.plan"
+	TakeHeadingResult   Key = "take.heading.result"
 
 	TakeFileRows              Key = "take.file.rows"
 	TakeFileColumns           Key = "take.file.columns"
@@ -111,6 +112,7 @@ const (
 	TakeSettingSeed      Key = "take.setting.seed"
 	TakeSettingOut       Key = "take.setting.out"
 	TakeSettingManifest  Key = "take.setting.manifest"
+	TakeSettingOverwrite Key = "take.setting.overwrite"
 	TakeSettingNone      Key = "take.setting.none"
 
 	TakePlanKinds       Key = "take.plan.kinds"
@@ -118,6 +120,26 @@ const (
 	TakePlanWrites      Key = "take.plan.writes"
 	TakePlanWritesTo    Key = "take.plan.writes-to"
 	TakePlanEveryOrder  Key = "take.plan.every-order"
+
+	// The words of a run: the one that starts it, the one that ends it early,
+	// and what a person is told while it is going on.
+	TakeRun         Key = "take.run"
+	TakeStop        Key = "take.stop"
+	TakeRunning     Key = "take.running"
+	TakeRunStopping Key = "take.running.stopping"
+
+	TakeResultWritten        Key = "take.result.written"
+	TakeResultIn             Key = "take.result.in"
+	TakeResultOrdered        Key = "take.result.ordered"
+	TakeResultApplied        Key = "take.result.applied"
+	TakeResultMissing        Key = "take.result.missing"
+	TakeResultMissingWhy     Key = "take.result.missing.why"
+	TakeResultUnpartnered    Key = "take.result.unpartnered"
+	TakeResultUnpartneredWhy Key = "take.result.unpartnered.why"
+	TakeResultStopped        Key = "take.result.stopped"
+	TakeResultStoppedWhy     Key = "take.result.stopped.why"
+	TakeResultFailed         Key = "take.result.failed"
+	TakeResultFailedWhy      Key = "take.result.failed.why"
 
 	TakeRefusalAllowed Key = "take.refusal.allowed"
 	TakeRefusalInstead Key = "take.refusal.instead"
@@ -272,16 +294,22 @@ var Keys = []Key{
 	ManifestFailureSchemeNotCovered, ManifestFailureDeclinedByMutator,
 
 	TakeChoose, TakeEmpty, TakeDrop, TakeUnreadable,
-	TakeHeadingFile, TakeHeadingSettings, TakeHeadingPlan,
+	TakeHeadingFile, TakeHeadingSettings, TakeHeadingPlan, TakeHeadingResult,
 	TakeFileRows, TakeFileColumns, TakeFileNothingDeclared,
 	TakeFileTakenFor, TakeFileBecause, TakeFileAgreesWith,
 	TakeFileByteOrderMark, TakeFileNotInferred,
 	TakeFileOneColumn, TakeFileNothingRecognised,
 	TakeSettingLayers, TakeSettingRows, TakeSettingPerRow, TakeSettingExclude,
 	TakeSettingDelimiter, TakeSettingLocale, TakeSettingSeed, TakeSettingOut,
-	TakeSettingManifest, TakeSettingNone,
+	TakeSettingManifest, TakeSettingOverwrite, TakeSettingNone,
 	TakePlanKinds, TakePlanImplemented, TakePlanWrites, TakePlanWritesTo,
 	TakePlanEveryOrder,
+	TakeRun, TakeStop, TakeRunning, TakeRunStopping,
+	TakeResultWritten, TakeResultIn, TakeResultOrdered, TakeResultApplied,
+	TakeResultMissing, TakeResultMissingWhy,
+	TakeResultUnpartnered, TakeResultUnpartneredWhy,
+	TakeResultStopped, TakeResultStoppedWhy,
+	TakeResultFailed, TakeResultFailedWhy,
 	TakeRefusalAllowed, TakeRefusalInstead,
 	TakeRefusalNoLayers, TakeRefusalNoLayersWhy, TakeRefusalNoLayersDo,
 	TakeRefusalUnknownLayer, TakeRefusalUnknownLayerWhy, TakeRefusalUnknownLayerDo,

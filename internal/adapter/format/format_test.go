@@ -133,14 +133,31 @@ func TestARecipeBecomesFilesWithTheRelationFollowable(t *testing.T) {
 }
 
 // 🔴 The promise the whole project rests on, asked of the first thing that
-// produces a whole dataset. Two runs of one seed have to be the same bytes.
+// produces a whole dataset. Runs of one seed have to be the same bytes.
+//
+// # Why several runs rather than two, which is the shape this had until
+// 2026-08-19
+//
+// What this guards against is randomness, and one comparison is one sample. The
+// mutation that breaks it walks a map instead of the declared fields, and Go
+// randomises that walk, so two runs can come out alike by luck. Measured that
+// day: two walks of a map of four keys come out in the same order 43.7% of the
+// time, a record is one such map, and the sample writes four records, so two
+// runs agree by chance in 3.71% of attempts. The full mutation run duly missed
+// it once.
+//
+// A third comparison takes that to roughly one attempt in eight hundred, for one
+// line. It does not make the proof certain, and nothing about a map walk can:
+// what it does is move the guard from failing once a month to failing once a
+// career.
 func TestTheSameSeedGivesTheSameBytes(t *testing.T) {
 	rec := sample(t, true, 7)
 	first := run(t, rec, asCSV).written["customer.csv"].String()
-	second := run(t, rec, asCSV).written["customer.csv"].String()
-	if first != second {
-		t.Fatal("two runs of one seed produced different bytes, which is the one thing this tool " +
-			"may never do")
+	for again := 0; again < 2; again++ {
+		if run(t, rec, asCSV).written["customer.csv"].String() != first {
+			t.Fatal("two runs of one seed produced different bytes, which is the one thing this " +
+				"tool may never do")
+		}
 	}
 	if strings.Contains(first, "\r") {
 		t.Error("a line ending came from the platform rather than from this writer")
