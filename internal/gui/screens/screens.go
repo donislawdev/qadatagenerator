@@ -182,6 +182,15 @@ func takeStatesBeforeARun() []State {
 			Keyboard:    Keyboard{Tabs: 4},
 		},
 		{
+			Name: "take-focus-setting",
+			Purpose: "the keyboard in a text setting, which is the one control the toolkit " +
+				"marks with the chosen colour rather than the focus colour",
+			Screen:      0,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+			Keyboard:    Keyboard{Tabs: 13},
+		},
+		{
 			Name: "take-focus-damage",
 			Purpose: "the keyboard at the far end of the screen, on the button that damages " +
 				"the file, having passed every setting of the run on the way",

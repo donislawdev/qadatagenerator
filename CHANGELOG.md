@@ -76,9 +76,11 @@ repository once they are released.
   the way to stop it, and when the run ends it moves back to the button that
   damages the file, so you never lose your place to a control that has left the
   screen. Starting a run with the mouse leaves the keyboard alone, and so does
-  walking off to another screen while a run is going on. One limit is worth
-  knowing: on a text setting the mark showing where the keyboard is stands out
-  much less than it does on the other controls.
+  walking off to another screen while a run is going on.
+- **A text field shows that the keyboard is in it.** Its outline turns pale blue
+  and is drawn a little thicker, so it stands apart from the fields around it
+  rather than shading from one grey into another. The same pale blue marks a
+  tick box you have ticked.
 - **A manifest this tool wrote could not always be read back by this tool.**
   Damage spanning several records, and damage located by a path inside a nested
   structure, lost part of their location when the manifest was read, so `verify`

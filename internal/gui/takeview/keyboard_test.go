@@ -311,7 +311,7 @@ func TestTheKeyboardCanBeSeenOnEveryKindOfControlHere(t *testing.T) {
 			box := widget.NewCheck("L2", func(bool) {})
 			return box, box
 		}},
-		{"a text setting", textSettingToday, func() (fyne.CanvasObject, fyne.Focusable) {
+		{"a text setting", visibleMark, func() (fyne.CanvasObject, fyne.Focusable) {
 			field := widget.NewEntry()
 			return field, field
 		}},
@@ -339,18 +339,11 @@ func TestTheKeyboardCanBeSeenOnEveryKindOfControlHere(t *testing.T) {
 				"nothing on the screen saying where a person is standing", kind.what)
 			continue
 		}
-		ratio := contrast(mark.was, mark.now)
-		if ratio < kind.floor {
+		if ratio := contrast(mark.was, mark.now); ratio < kind.floor {
 			t.Errorf("the keyboard arriving on %s paints %d pixels at a contrast of %.2f "+
-				"against what they replaced, and this kind of control measured %.2f "+
-				"before. A change this faint is a mark in the picture and not on "+
-				"anybody's screen", kind.what, covering, ratio, kind.floor)
-		}
-		if kind.floor < visibleMark && ratio >= visibleMark {
-			t.Errorf("the keyboard arriving on %s now measures %.2f, which meets the "+
-				"threshold of %.2f. Raise the floor for it to the threshold and close "+
-				"the backlog entry, so that the next change cannot quietly undo this",
-				kind.what, ratio, visibleMark)
+				"against what they replaced, and the threshold is %.2f. A change this "+
+				"faint is a mark in the picture and not on anybody's screen",
+				kind.what, covering, ratio, kind.floor)
 		}
 	}
 }
@@ -365,25 +358,6 @@ func TestTheKeyboardCanBeSeenOnEveryKindOfControlHere(t *testing.T) {
 // there, so something changed and nothing could be seen. A guard answering
 // "did anything change" would have called that a mark.
 const visibleMark = 3.0
-
-// textSettingToday is what a text setting measures, which is under the
-// threshold, and it is recorded rather than rounded up to it.
-//
-// 🔴 Measured on 2026-08-24 at 1.29, and the cause is not on this screen. The
-// toolkit marks a focused text field by restaining its border with the colour
-// it calls primary, and it is the only control here that does not use the
-// colour it calls focus. This project separated those two on 2026-08-18 so that
-// a control painted in the primary colour would still be able to show focus
-// arriving, and pointed primary at the background of a selected row. A selected
-// row has to be dark enough to read text on and a border marking focus has to
-// stand out, so the one value cannot be both, and putting focus back into
-// primary would break the guard that separation exists for.
-//
-// Recorded as a number rather than as a sentence because a sentence in a
-// comment is not watched by anything. The check above fails if it gets worse
-// and it also fails once it gets better, which is what asks for this line to be
-// removed on the day it stops being true. The backlog carries the rest.
-const textSettingToday = 1.25
 
 // paint is a colour that arrived where another colour was.
 type paint struct{ was, now color.Color }

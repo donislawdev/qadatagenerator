@@ -120,6 +120,7 @@ var Palette = []Color{
 	{"expect.not-applied", 0xC7, 0x92, 0xEA, RoleText, "a corruption that could not be applied, which is the ban on silence made visible"},
 	{"corrupted", 0xFF, 0x9E, 0x64, RoleText, "a corrupted value beside a correct one"},
 	{"focus", 0x4E, 0xC9, 0xF5, RoleSurface, "the focus indicator, WCAG 2.1.1"},
+	{"control.chosen", 0x9E, 0xD8, 0xF0, RoleSurface, "a control that has been chosen, and the border of a text field the keyboard is in"},
 	{"border.active", 0x6E, 0x6E, 0x6E, RoleSurface, "the border of the active control"},
 	{"row.divider", 0x3A, 0x3A, 0x3A, RoleAuxiliary, "the line between rows, which stands in for the zebra stripe that was measured not to work here"},
 	{"row.hover", 0x30, 0x30, 0x30, RoleAuxiliary, "the row under the pointer"},
@@ -133,32 +134,33 @@ var Palette = []Color{
 // is checked against the palette from both sides by a test, so a constant
 // without an entry and an entry without a constant are both failures.
 const (
-	NameSurface      = "surface"
-	NameText         = "text"
-	NameTextSubdued  = "text.subdued"
-	NameRejection    = "expect.rejection"
-	NameAcceptance   = "expect.acceptance"
-	NameWarning      = "expect.warning"
-	NameNotApplied   = "expect.not-applied"
-	NameCorrupted    = "corrupted"
-	NameFocus        = "focus"
-	NameBorderActive = "border.active"
-	NameRowDivider   = "row.divider"
-	NameRowHover     = "row.hover"
-	NameRowSelected  = "row.selected"
-	NameStepHairline = "hairline"
-	NameStepTight    = "tight"
-	NameStepRelated  = "related"
-	NameStepGroup    = "group"
-	NameStepSection  = "section"
-	NameStepMajor    = "major"
+	NameSurface       = "surface"
+	NameText          = "text"
+	NameTextSubdued   = "text.subdued"
+	NameRejection     = "expect.rejection"
+	NameAcceptance    = "expect.acceptance"
+	NameWarning       = "expect.warning"
+	NameNotApplied    = "expect.not-applied"
+	NameCorrupted     = "corrupted"
+	NameFocus         = "focus"
+	NameControlChosen = "control.chosen"
+	NameBorderActive  = "border.active"
+	NameRowDivider    = "row.divider"
+	NameRowHover      = "row.hover"
+	NameRowSelected   = "row.selected"
+	NameStepHairline  = "hairline"
+	NameStepTight     = "tight"
+	NameStepRelated   = "related"
+	NameStepGroup     = "group"
+	NameStepSection   = "section"
+	NameStepMajor     = "major"
 )
 
 // ColorNames is every colour constant above, so a test can close the register
 // from the side the constants are on.
 var ColorNames = []string{
 	NameSurface, NameText, NameTextSubdued, NameRejection, NameAcceptance,
-	NameWarning, NameNotApplied, NameCorrupted, NameFocus, NameBorderActive,
+	NameWarning, NameNotApplied, NameCorrupted, NameFocus, NameControlChosen, NameBorderActive,
 	NameRowDivider, NameRowHover, NameRowSelected,
 }
 
@@ -221,6 +223,34 @@ func StepOf(name string) float32 {
 	}
 	return stepsByName[NameStepTight].Step
 }
+
+// BorderThickness is how thick the toolkit draws the outline of a text field.
+//
+// # Why this is not a step of the spacing scale
+//
+// The scale measures distances BETWEEN things and its smallest step is 4. This
+// is the width of a line, which is not a distance between anything, and 4 draws
+// a text field like a picture frame. So it is a value of the view with a reason
+// beside it, the way the size the window opens at is.
+//
+// # Why 2 and not the toolkit's 1
+//
+// 🔴 Measured on 2026-08-24, and it is the difference between a colour that
+// exists and a colour anybody can see. The toolkit draws this outline offset by
+// half of its width, so at a width of 1 the line falls between two rows of
+// pixels and every pixel of it is a half blend with what is behind. Measured
+// through the pixels: the outline asked for #9ED8F0 and arrived as #617E8A,
+// against a border of #6E6E6E that had itself arrived as #484848, which is a
+// contrast of 2.12 where the rule asks for 3.0. No colour repairs that, because
+// the blend is what caps it: pure white measured 2.78.
+//
+// At a width of 2 the line lands on whole pixels and arrives as the colour it
+// was given, so the same #9ED8F0 measures 3.29, which is what the palette says
+// it should be. Wider than 2 changes nothing but the number of pixels covered.
+//
+// What would change it: a toolkit that stops offsetting the outline by half its
+// width, or a display scale where 2 stops landing on whole pixels.
+const BorderThickness float32 = 2
 
 // StartWidth and StartHeight are the size a window opens at.
 //

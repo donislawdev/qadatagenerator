@@ -61,7 +61,16 @@ var colourFor = map[fyne.ThemeColorName]string{
 	// control that could not show it had focus, because it was already painted
 	// in the colour focus arrives in. Seen on a real window, guarded next door
 	// in the test that no background equals the focus colour.
-	toolkit.ColorNamePrimary:     palette.NameRowSelected,
+	//
+	// 🔴 That separation pointed primary at the background of a selected row,
+	// and on 2026-08-24 the pixels said what that cost. A focused text field is
+	// the ONE control the toolkit marks with primary rather than with focus, so
+	// its mark became a dark blue against a mid grey border: 1.29 measured,
+	// where the rule asks for 3.0. One value cannot be both a row background
+	// dark enough to read text on and a border that stands out, so primary has
+	// a value of its own now and the selected row keeps its own under
+	// ColorNameSelection below.
+	toolkit.ColorNamePrimary:     palette.NameControlChosen,
 	toolkit.ColorNameFocus:       palette.NameFocus,
 	toolkit.ColorNameSelection:   palette.NameRowSelected,
 	toolkit.ColorNameHover:       palette.NameRowHover,
@@ -129,6 +138,15 @@ var sizeFor = map[fyne.ThemeSizeName]string{
 func (Dark) Size(name fyne.ThemeSizeName) float32 {
 	if ours, found := sizeFor[name]; found {
 		return palette.StepOf(ours)
+	}
+	// The outline of a text field is answered on its own rather than from the
+	// scale, because it is the width of a line and the scale measures distances
+	// between things. The reason for the number is beside it in the palette,
+	// and it is the difference between a mark that exists and one that can be
+	// seen: at the toolkit's own width the line falls between two rows of
+	// pixels and arrives as a half blend.
+	if name == toolkit.SizeNameInputBorder {
+		return palette.BorderThickness
 	}
 	return toolkit.DefaultTheme().Size(name)
 }

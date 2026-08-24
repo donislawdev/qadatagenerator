@@ -239,67 +239,67 @@
 													</widget>
 													<widget pos="201,0" size="429x27" type="*widget.CheckGroup">
 														<widget size="53x27" type="*widget.Check">
-															<circle pos="1,1" size="24x24"/>
-															<image pos="3,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-															<image pos="3,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-															<text pos="26,0" size="27x27">L0</text>
+															<circle pos="2,1" size="24x24"/>
+															<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+															<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+															<text pos="28,0" size="25x27">L0</text>
 														</widget>
 														<widget pos="53,0" size="53x27" type="*widget.Check">
-															<circle pos="1,1" size="24x24"/>
-															<image pos="3,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-															<image pos="3,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-															<text pos="26,0" size="27x27">L1</text>
+															<circle pos="2,1" size="24x24"/>
+															<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+															<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+															<text pos="28,0" size="25x27">L1</text>
 														</widget>
 														<widget pos="107,0" size="53x27" type="*widget.Check">
-															<circle pos="1,1" size="24x24"/>
-															<image pos="3,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-															<image pos="3,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-															<text pos="26,0" size="27x27">L2</text>
+															<circle pos="2,1" size="24x24"/>
+															<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+															<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+															<text pos="28,0" size="25x27">L2</text>
 														</widget>
 														<widget pos="160,0" size="53x27" type="*widget.Check">
-															<circle pos="1,1" size="24x24"/>
-															<image pos="3,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-															<image pos="3,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-															<text pos="26,0" size="27x27">L3</text>
+															<circle pos="2,1" size="24x24"/>
+															<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+															<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+															<text pos="28,0" size="25x27">L3</text>
 														</widget>
 														<widget pos="214,0" size="53x27" type="*widget.Check">
-															<circle pos="1,1" size="24x24"/>
-															<image pos="3,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-															<image pos="3,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-															<text pos="26,0" size="27x27">L4</text>
+															<circle pos="2,1" size="24x24"/>
+															<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+															<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+															<text pos="28,0" size="25x27">L4</text>
 														</widget>
 														<widget pos="268,0" size="53x27" type="*widget.Check">
-															<circle pos="1,1" size="24x24"/>
-															<image pos="3,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-															<image pos="3,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-															<text pos="26,0" size="27x27">L5</text>
+															<circle pos="2,1" size="24x24"/>
+															<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+															<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+															<text pos="28,0" size="25x27">L5</text>
 														</widget>
 														<widget pos="321,0" size="53x27" type="*widget.Check">
-															<circle pos="1,1" size="24x24"/>
-															<image pos="3,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-															<image pos="3,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-															<text pos="26,0" size="27x27">REV</text>
+															<circle pos="2,1" size="24x24"/>
+															<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+															<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+															<text pos="28,0" size="25x27">REV</text>
 														</widget>
 														<widget pos="375,0" size="53x27" type="*widget.Check">
-															<circle pos="1,1" size="24x24"/>
-															<image pos="3,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-															<image pos="3,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-															<text pos="26,0" size="27x27">UNI</text>
+															<circle pos="2,1" size="24x24"/>
+															<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+															<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+															<text pos="28,0" size="25x27">UNI</text>
 														</widget>
 													</widget>
 													<widget pos="0,35" size="193x27" type="*widget.RichText">
 														<text alignment="trailing" bold pos="75,4" size="113x19">Share of records</text>
 													</widget>
 													<widget pos="201,35" size="429x27" type="*widget.Entry">
-														<rectangle fillColor="inputBackground" pos="1,1" radius="5" size="427x25"/>
-														<rectangle radius="5" size="427x25" strokeColor="inputBorder" strokeWidth="1"/>
-														<widget pos="0,1" size="429x25" type="*widget.Scroll">
-															<widget size="429x25" type="*widget.entryContent">
-																<widget size="429x25" type="*widget.RichText">
-																	<text color="disabled" pos="4,3" size="0x19"></text>
+														<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="425x23"/>
+														<rectangle pos="1,1" radius="5" size="426x24" strokeColor="inputBorder" strokeWidth="2"/>
+														<widget pos="0,2" size="429x23" type="*widget.Scroll">
+															<widget size="429x23" type="*widget.entryContent">
+																<widget size="429x23" type="*widget.RichText">
+																	<text color="disabled" pos="4,2" size="0x19"></text>
 																</widget>
-																<widget size="429x25" type="*widget.RichText">
-																	<text pos="4,3" size="0x19"></text>
+																<widget size="429x23" type="*widget.RichText">
+																	<text pos="4,2" size="0x19"></text>
 																</widget>
 															</widget>
 														</widget>
@@ -321,15 +321,15 @@
 														<text alignment="trailing" bold pos="26,4" size="162x19">Columns to leave alone</text>
 													</widget>
 													<widget pos="201,105" size="429x27" type="*widget.Entry">
-														<rectangle fillColor="inputBackground" pos="1,1" radius="5" size="427x25"/>
-														<rectangle radius="5" size="427x25" strokeColor="inputBorder" strokeWidth="1"/>
-														<widget pos="0,1" size="429x25" type="*widget.Scroll">
-															<widget size="429x25" type="*widget.entryContent">
-																<widget size="429x25" type="*widget.RichText">
-																	<text color="disabled" pos="4,3" size="0x19"></text>
+														<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="425x23"/>
+														<rectangle pos="1,1" radius="5" size="426x24" strokeColor="inputBorder" strokeWidth="2"/>
+														<widget pos="0,2" size="429x23" type="*widget.Scroll">
+															<widget size="429x23" type="*widget.entryContent">
+																<widget size="429x23" type="*widget.RichText">
+																	<text color="disabled" pos="4,2" size="0x19"></text>
 																</widget>
-																<widget size="429x25" type="*widget.RichText">
-																	<text pos="4,3" size="0x19"></text>
+																<widget size="429x23" type="*widget.RichText">
+																	<text pos="4,2" size="0x19"></text>
 																</widget>
 															</widget>
 														</widget>
@@ -338,12 +338,12 @@
 														<text alignment="trailing" bold pos="83,4" size="105x19">Field separator</text>
 													</widget>
 													<widget pos="201,140" size="429x27" type="*widget.Entry">
-														<rectangle fillColor="inputBackground" pos="1,1" radius="5" size="427x25"/>
-														<rectangle radius="5" size="427x25" strokeColor="inputBorder" strokeWidth="1"/>
-														<widget pos="0,1" size="429x25" type="*widget.Scroll">
-															<widget size="429x25" type="*widget.entryContent">
-																<widget size="429x25" type="*widget.RichText">
-																	<text pos="4,3" size="3x19">,</text>
+														<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="425x23"/>
+														<rectangle pos="1,1" radius="5" size="426x24" strokeColor="inputBorder" strokeWidth="2"/>
+														<widget pos="0,2" size="429x23" type="*widget.Scroll">
+															<widget size="429x23" type="*widget.entryContent">
+																<widget size="429x23" type="*widget.RichText">
+																	<text pos="4,2" size="3x19">,</text>
 																</widget>
 															</widget>
 														</widget>
@@ -352,12 +352,12 @@
 														<text alignment="trailing" bold pos="110,4" size="78x19">Data locale</text>
 													</widget>
 													<widget pos="201,175" size="429x27" type="*widget.Entry">
-														<rectangle fillColor="inputBackground" pos="1,1" radius="5" size="427x25"/>
-														<rectangle radius="5" size="427x25" strokeColor="inputBorder" strokeWidth="1"/>
-														<widget pos="0,1" size="429x25" type="*widget.Scroll">
-															<widget size="429x25" type="*widget.entryContent">
-																<widget size="429x25" type="*widget.RichText">
-																	<text pos="4,3" size="38x19">en-US</text>
+														<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="425x23"/>
+														<rectangle pos="1,1" radius="5" size="426x24" strokeColor="inputBorder" strokeWidth="2"/>
+														<widget pos="0,2" size="429x23" type="*widget.Scroll">
+															<widget size="429x23" type="*widget.entryContent">
+																<widget size="429x23" type="*widget.RichText">
+																	<text pos="4,2" size="38x19">en-US</text>
 																</widget>
 															</widget>
 														</widget>
@@ -366,12 +366,12 @@
 														<text alignment="trailing" bold pos="155,4" size="33x19">Seed</text>
 													</widget>
 													<widget pos="201,210" size="429x27" type="*widget.Entry">
-														<rectangle fillColor="inputBackground" pos="1,1" radius="5" size="427x25"/>
-														<rectangle radius="5" size="427x25" strokeColor="inputBorder" strokeWidth="1"/>
-														<widget pos="0,1" size="429x25" type="*widget.Scroll">
-															<widget size="429x25" type="*widget.entryContent">
-																<widget size="429x25" type="*widget.RichText">
-																	<text pos="4,3" size="8x19">0</text>
+														<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="425x23"/>
+														<rectangle pos="1,1" radius="5" size="426x24" strokeColor="inputBorder" strokeWidth="2"/>
+														<widget pos="0,2" size="429x23" type="*widget.Scroll">
+															<widget size="429x23" type="*widget.entryContent">
+																<widget size="429x23" type="*widget.RichText">
+																	<text pos="4,2" size="8x19">0</text>
 																</widget>
 															</widget>
 														</widget>
@@ -380,12 +380,12 @@
 														<text alignment="trailing" bold pos="132,4" size="56x19">Write to</text>
 													</widget>
 													<widget pos="201,245" size="429x27" type="*widget.Entry">
-														<rectangle fillColor="inputBackground" pos="1,1" radius="5" size="427x25"/>
-														<rectangle radius="5" size="427x25" strokeColor="inputBorder" strokeWidth="1"/>
-														<widget pos="0,1" size="429x25" type="*widget.Scroll">
-															<widget size="429x25" type="*widget.entryContent">
-																<widget size="429x25" type="*widget.RichText">
-																	<text pos="4,3" size="3x19">.</text>
+														<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="425x23"/>
+														<rectangle pos="1,1" radius="5" size="426x24" strokeColor="inputBorder" strokeWidth="2"/>
+														<widget pos="0,2" size="429x23" type="*widget.Scroll">
+															<widget size="429x23" type="*widget.entryContent">
+																<widget size="429x23" type="*widget.RichText">
+																	<text pos="4,2" size="3x19">.</text>
 																</widget>
 															</widget>
 														</widget>
@@ -407,10 +407,10 @@
 														<text alignment="trailing" bold pos="4,4" size="185x19">Replace files already there</text>
 													</widget>
 													<widget pos="201,315" size="429x27" type="*widget.Check">
-														<circle pos="1,1" size="24x24"/>
-														<image pos="3,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-														<image pos="3,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-														<text pos="26,0" size="403x27"></text>
+														<circle pos="2,1" size="24x24"/>
+														<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+														<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+														<text pos="28,0" size="401x27"></text>
 													</widget>
 												</container>
 											</container>
