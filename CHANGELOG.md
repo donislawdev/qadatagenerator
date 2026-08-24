@@ -66,9 +66,19 @@ repository once they are released.
   from cell to cell and the cell you are on is drawn in bold and underlined, so
   it stays visible without taking away the colour that says what the entry means.
   The name of the screen you are on carries a mark of its own, so it is no longer
-  confused with the name the keyboard happens to be on. Two limits are worth
-  knowing: the About screen cannot be scrolled with a keyboard yet, and a button
-  is pressed with the space bar rather than with Enter.
+  confused with the name the keyboard happens to be on. One limit is worth
+  knowing: the About screen cannot be scrolled with a keyboard yet.
+- **The take and corrupt screen can be used with a keyboard too.** Tab now
+  reaches the button that chooses a file first, which is where it stands on the
+  screen, then every setting of the run in the order they are listed, and the
+  button that damages the file last. Each kind of damage is its own stop on the
+  way and the space bar ticks it. When you start a run, the keyboard moves to
+  the way to stop it, and when the run ends it moves back to the button that
+  damages the file, so you never lose your place to a control that has left the
+  screen. Starting a run with the mouse leaves the keyboard alone, and so does
+  walking off to another screen while a run is going on. One limit is worth
+  knowing: on a text setting the mark showing where the keyboard is stands out
+  much less than it does on the other controls.
 - **A manifest this tool wrote could not always be read back by this tool.**
   Damage spanning several records, and damage located by a path inside a nested
   structure, lost part of their location when the manifest was read, so `verify`

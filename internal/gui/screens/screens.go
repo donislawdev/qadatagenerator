@@ -172,6 +172,24 @@ func takeStatesBeforeARun() []State {
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 		},
+		{
+			Name: "take-focus-file",
+			Purpose: "the keyboard on the button that chooses a file, which is the first " +
+				"thing on this screen it reaches and was for a while the last",
+			Screen:      0,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+			Keyboard:    Keyboard{Tabs: 4},
+		},
+		{
+			Name: "take-focus-damage",
+			Purpose: "the keyboard at the far end of the screen, on the button that damages " +
+				"the file, having passed every setting of the run on the way",
+			Screen:      0,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+			Keyboard:    Keyboard{Tabs: 22},
+		},
 	}
 }
 
@@ -189,6 +207,16 @@ func takeStatesOfARun() []State {
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 			Ran:         RanInFlight,
+		},
+		{
+			Name: "take-focus-stop",
+			Purpose: "the keyboard on the way to stop a run, which is the only thing on " +
+				"this screen it can reach while one is going on",
+			Screen:      0,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+			Ran:         RanInFlight,
+			Keyboard:    Keyboard{Tabs: 4},
 		},
 		{
 			Name:        "take-written",

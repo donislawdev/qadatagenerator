@@ -26,6 +26,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
@@ -69,6 +70,11 @@ type View struct {
 	// closing records that somebody asked for the window while a run was going
 	// on, so that the window can be given to them once the run has stopped.
 	closing bool
+	// hadKeyboard records that the keyboard was on this screen when a run
+	// began, so that the end of the run knows whether it owes anybody a place
+	// to stand. Asked then rather than at the end, because by the end a person
+	// working by keyboard and a person working by mouse look the same.
+	hadKeyboard bool
 
 	// The parts that change with what is on screen. They are kept rather than
 	// rebuilt, because rebuilding a control throws away what somebody typed
@@ -123,9 +129,20 @@ func New(text i18n.Catalogue, window fyne.Window, described catalog.Catalog,
 // Content is the whole screen.
 //
 // The parts are handed over in the order a person reads them, which is also the
-// order the keyboard walks them. Building this as a border with the bar added
-// last would draw the same and walk backwards, which was measured on this
-// project once already.
+// order the keyboard walks them.
+//
+// 🔴 That sentence stood here before it was true. container.NewBorder appends
+// its edges after its middle, so the convenient call put the whole of the right
+// hand pane in front of the bar holding the button that chooses a file, and the
+// button standing at the very top of the screen was the nineteenth and last
+// thing the keyboard reached. Measured on 2026-08-24 by walking a real canvas.
+// Nothing about the drawing said so, which is the same failure the manifest
+// browser paid for on 2026-08-18 and the reason this comment was written in the
+// first place. A comment is not a guard, so what holds it now is a test.
+//
+// The layout is therefore built with the objects named in reading order rather
+// than through the call that reorders them, which is what the browser next door
+// already does.
 func (v *View) Content() fyne.CanvasObject {
 	// What the file holds is on the left and what to do about it on the right,
 	// each scrolling on its own.
@@ -160,7 +177,7 @@ func (v *View) Content() fyne.CanvasObject {
 	// stored tree rather than by anybody looking, which is what that guard is
 	// for.
 	v.redraw()
-	return parts.Inset(container.NewBorder(body, nil, nil, nil, split))
+	return parts.Inset(container.New(layout.NewBorderLayout(body, nil, nil, nil), body, split))
 }
 
 // Open reads a file and puts the screen into the state that shows it.

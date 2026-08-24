@@ -30,6 +30,17 @@
 			<container pos="228,0" size="1098x884">
 				<container size="1098x884">
 					<container pos="24,24" size="1050x836">
+						<container size="1050x28">
+							<container size="1050x28">
+								<widget size="96x28" type="*parts.Button">
+									<rectangle fillColor="button" radius="5" size="96x28"/>
+									<rectangle size="96x28"/>
+									<widget pos="4,4" size="88x19" type="*widget.RichText">
+										<text alignment="center" bold color="disabled" size="88x19">Choose a file</text>
+									</widget>
+								</widget>
+							</container>
+						</container>
 						<widget pos="0,36" size="1050x800" type="*container.Split">
 							<widget size="415x800" type="*widget.Scroll">
 								<container size="415x988">
@@ -486,17 +497,6 @@
 								</container>
 							</widget>
 						</widget>
-						<container size="1050x28">
-							<container size="1050x28">
-								<widget size="96x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="96x28"/>
-									<rectangle size="96x28"/>
-									<widget pos="4,4" size="88x19" type="*widget.RichText">
-										<text alignment="center" bold color="disabled" size="88x19">Choose a file</text>
-									</widget>
-								</widget>
-							</container>
-						</container>
 					</container>
 				</container>
 			</container>
