@@ -67,8 +67,8 @@ repository once they are released.
   it stays visible without taking away the colour that says what the entry means.
   The name of the screen you are on carries a mark of its own, so it is no longer
   confused with the name the keyboard happens to be on. One limit is worth
-  knowing: on the take and corrupt screen and in the manifest browser, the
-  panels still scroll with the wheel rather than with the keyboard.
+  knowing: the two panels of the take and corrupt screen still scroll with the
+  wheel rather than with the keyboard.
 - **The About screen can be read without a mouse.** Tab reaches the text itself
   and the arrows, Page Up, Page Down, Home and End move through it, with a page
   keeping the line you were on. Three quarters of that screen used to need a
