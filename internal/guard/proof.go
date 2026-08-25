@@ -186,6 +186,12 @@ var Guards = []Guard{
 	{"every state on the list can be built from the sample, so none goes unrendered", "TestEveryStateCanBeBuiltFromTheSample", "internal/gui/screens", ByMutation},
 	{"a state that needs a manifest is refused without one rather than drawn empty", "TestAStateThatNeedsAManifestIsRefusedWithoutOne", "internal/gui/screens", ByMutation},
 	{"a button answers to Enter as well as to the space bar", "TestAButtonIsPressedByEnterAndBySpace", "internal/gui/parts", ByMutation},
+	{"the keyboard reaches a scrolling area, which the toolkit's own never allows", "TestTheKeyboardReachesAScrollingArea", "internal/gui/parts", ByMutation},
+	{"every key a person expects to drive a scrolling area with drives it", "TestTheSixKeysDriveAScrollingArea", "internal/gui/parts", ByMutation},
+	{"a page keeps the line somebody was reading rather than jumping past it", "TestAPageKeepsTheLineSomebodyWasReading", "internal/gui/parts", ByMutation},
+	{"a scrolling area with nothing to scroll stays put", "TestAScrollingAreaWithNothingToScrollStaysPut", "internal/gui/parts", ByProbe},
+	{"the frame says where the keyboard is, and stops saying it when it leaves", "TestTheFrameSaysWhereTheKeyboardIs", "internal/gui/parts", ByMutation},
+	{"the frame is thick enough to arrive on the screen", "TestTheFrameIsThickEnoughToBeSeen", "internal/gui/parts", ByMutation},
 	{"a button nobody can press with the pointer stays unpressable from the keyboard", "TestADisabledButtonIgnoresEnter", "internal/gui/parts", ByMutation},
 	{"a response record opened as a manifest is told apart rather than judged as one", "TestAResponseRecordOpenedAsAManifestIsToldApart", "internal/adapter/manifestjson", ByMutation},
 

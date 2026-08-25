@@ -318,6 +318,23 @@ func aboutStates() []State {
 			Screen:   2,
 			Keyboard: Keyboard{Tabs: 3},
 		},
+		{
+			Name: "about-focus-body",
+			Purpose: "the keyboard in the text of the screen, which the toolkit's own " +
+				"scrolling area never allows it to reach",
+			Screen:   2,
+			Keyboard: Keyboard{Tabs: 4},
+		},
+		{
+			Name: "about-scrolled",
+			Purpose: "the same screen two pages further down, reached with the keyboard " +
+				"alone, which is three quarters of it that a mouse used to be needed for",
+			Screen: 2,
+			Keyboard: Keyboard{
+				Tabs: 4,
+				Keys: []fyne.KeyName{fyne.KeyPageDown, fyne.KeyPageDown},
+			},
+		},
 	}
 }
 

@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/license"
 	"github.com/donislawdev/qadatagenerator/internal/version"
 )
@@ -31,6 +32,11 @@ func texts(object fyne.CanvasObject) []string {
 		}
 		return found
 	case *container.Scroll:
+		return texts(typed.Content)
+	// The scrolling area of this screen is the keyboard's rather than the
+	// toolkit's own, and it is a type of its own, so a walk that knew only the
+	// toolkit's stopped at it and reported an empty screen.
+	case *parts.KeyScroll:
 		return texts(typed.Content)
 	}
 	return nil

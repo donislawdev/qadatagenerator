@@ -42,7 +42,12 @@ func Content(text i18n.Catalogue, report license.Report, versions version.Set) f
 		heading(text, i18n.AboutHeadingNotices),
 		noticeList(report),
 	}
-	return parts.Inset(container.NewVScroll(container.NewVBox(sections...)))
+	// The scrolling area is the keyboard's rather than the toolkit's own, which
+	// answers to the wheel and to nothing else. This screen is one long column
+	// and has no control on it at all, so without that the only way through it
+	// is a mouse: measured on 2026-08-24 at 3169 pixels of content in a window
+	// showing 836 of them, with every key leaving the offset at zero.
+	return parts.Inset(parts.NewKeyScroll(container.NewVBox(sections...)).Framed())
 }
 
 func heading(text i18n.Catalogue, key i18n.Key) fyne.CanvasObject {
