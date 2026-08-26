@@ -143,8 +143,15 @@ func (NeverStops) Stopped() error { return nil }
 // then the cost is its own rather than everybody's.
 type Writer interface {
 	// Begin announces a table and its columns.
+	//
+	// 🔴 It comes before every Write and End of that table, and the writers rely
+	// on it rather than checking. They keep the table Begin announced and reach
+	// for it by position, so a Write arriving first panics instead of failing.
+	// Run is the only caller and holds the order, which is why this is written
+	// down rather than guarded: a check in each writer would be four copies of
+	// one rule, and the rule belongs to whoever drives them.
 	Begin(entity dataset.Table) error
-	// Write takes one record.
+	// Write takes one record. It belongs to the table Begin last announced.
 	Write(record dataset.Record) error
 	// End closes a table.
 	End(entity dataset.Table) error
