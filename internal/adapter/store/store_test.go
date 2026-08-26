@@ -222,6 +222,96 @@ func TestADiscardedRunLeavesNoMarkerBehind(t *testing.T) {
 	next.Discard()
 }
 
+// Two things in one run may not share a destination, whether or not the run is
+// allowed to overwrite.
+//
+// 🔴 Overwriting says a file already on the disk may be replaced. It never said
+// a run may replace its own work, and it used to: both names reached Commit,
+// one was renamed over the other, and the run reported success with the rows it
+// had just thrown away still in its count. The run is asked for both orders,
+// because the first name taken is the one that survives and the refusal has to
+// reach the second whichever it is.
+func TestTwoThingsInOneRunCannotShareAName(t *testing.T) {
+	for _, overwrite := range []bool{false, true} {
+		set := store.New(t.TempDir(), overwrite)
+		if _, err := set.Create("run-note.json"); err != nil {
+			t.Fatalf("overwrite=%v: the first file was refused: %v", overwrite, err)
+		}
+		_, err := set.Create("run-note.json")
+		if err == nil {
+			t.Fatalf("overwrite=%v: one run wrote two things under one name", overwrite)
+		}
+		if kind := fault.KindOf(err); kind != fault.Config {
+			t.Errorf("overwrite=%v: a collision inside the recipe is %v rather than a "+
+				"configuration failure", overwrite, kind)
+		}
+		if !strings.Contains(err.Error(), "run-note.json") {
+			t.Errorf("overwrite=%v: the refusal does not name the file: %v", overwrite, err)
+		}
+		set.Discard()
+	}
+}
+
+// A rename that fails takes back the ones that had already succeeded, so that
+// the directory is left as it was found rather than holding half a dataset.
+//
+// 🔴 The trigger here is a directory standing where a file has to go, which is
+// the cheapest way to make a rename fail on every supported system. The ones it
+// stands in for are ordinary: a file held open by another program, a full disk,
+// a permission.
+func TestARenameThatFailsTakesTheEarlierOnesBack(t *testing.T) {
+	dir := t.TempDir()
+	set := store.New(dir, true)
+
+	first, err := set.Create("a.csv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := first.WriteString("first"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := set.Create("b.csv"); err != nil {
+		t.Fatal(err)
+	}
+	// The block goes on the second name, so that the first has already been
+	// renamed by the time the failure happens. A directory with something in it
+	// cannot be replaced by a rename.
+	blocked := filepath.Join(dir, "b.csv")
+	if err := os.Mkdir(blocked, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(blocked, "in the way"), []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := set.Commit(); err == nil {
+		t.Fatal("a rename onto a directory succeeded, so this test proves nothing")
+	}
+	if _, err := os.Stat(filepath.Join(dir, "a.csv")); !os.IsNotExist(err) {
+		t.Error("a file renamed before the failure was left under its real name")
+	}
+
+	set.Discard()
+	left := remaining(t, dir)
+	if len(left) != 1 || left[0] != "b.csv" {
+		t.Errorf("the directory holds %v rather than only what was put in the way", left)
+	}
+}
+
+// remaining names what a directory holds.
+func remaining(t *testing.T, dir string) []string {
+	t.Helper()
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var held []string
+	for _, entry := range entries {
+		held = append(held, entry.Name())
+	}
+	return held
+}
+
 // Overwriting is a deliberate act, and it takes no marker because it is not
 // promising anybody that the name was free.
 func TestOverwritingTakesNoMarker(t *testing.T) {

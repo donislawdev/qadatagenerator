@@ -149,11 +149,33 @@ func (v *View) settingChanged() {
 }
 
 // reopen reads the file again, because the separator decides how it is read.
+//
+// # Why this is not simply Open on the same path
+//
+// 🔴 Open answers about a file somebody chose, and a failure there means there
+// is no file, so it lets go of the path. Reading the same file again under a
+// new setting is a different question, and a failure means the setting is
+// wrong. The two shared one answer until 2026-08-26, and the separator is typed
+// one character at a time: deleting the comma before typing the semicolon
+// leaves an empty separator for one keystroke, which the reader refuses. The
+// screen then forgot the path, and the next keystroke found nothing to reopen,
+// so a person lost their open file to a backspace and could not get it back
+// without choosing it again.
+//
+// What the last run did is not forgotten either, because it is about this same
+// file and the file has not changed.
 func (v *View) reopen() {
 	if v.path == "" {
 		return
 	}
-	_ = v.Open(v.path)
+	opened, err := v.openFile(v.path, v.chosen)
+	if err != nil {
+		v.opened = nil
+		v.showUnreadable(err)
+		return
+	}
+	v.opened = opened
+	v.redraw()
 }
 
 // drawPlan answers what a run would do, or why it would not run at all.

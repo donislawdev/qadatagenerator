@@ -45,6 +45,12 @@ type Generators interface {
 	Known(generator string) bool
 	// Names returns every generator this build has, sorted, for the refusal.
 	Names() []string
+	// CanProduce reports whether this build can fill a field with that
+	// generator in a locale, and says why not when it cannot.
+	//
+	// The locale comes from the recipe being read rather than from the source
+	// this verb is given, which carries none.
+	CanProduce(generator, locale string) (bool, string)
 }
 
 // Catalog is the damage this build knows about, for checking a corruption
@@ -131,15 +137,30 @@ func unknownGenerators(rec recipe.Recipe, generators Generators) []recipe.Proble
 	var found []recipe.Problem
 	for _, entity := range rec.Entities {
 		for _, field := range entity.Fields {
-			if field.Generator == "" || generators.Known(field.Generator) {
+			if field.Generator == "" {
 				continue
 			}
-			found = append(found, recipe.Problem{
-				Where:   "entities." + entity.Name + ".fields." + field.Name,
-				What:    "this build has no generator called " + strconv.Quote(field.Generator),
-				Allowed: strings.Join(generators.Names(), ", "),
-				Hint:    "pick one of the names above, or drop the generator and give the field a type",
-			})
+			where := "entities." + entity.Name + ".fields." + field.Name
+			if !generators.Known(field.Generator) {
+				found = append(found, recipe.Problem{
+					Where:   where,
+					What:    "this build has no generator called " + strconv.Quote(field.Generator),
+					Allowed: strings.Join(generators.Names(), ", "),
+					Hint: "pick one of the names above, or drop the generator and give the " +
+						"field a type",
+				})
+				continue
+			}
+			// 🔴 The name is carried and the locale may still not be. generate
+			// refuses such a recipe on the first row, so calling it usable here
+			// is the two verbs disagreeing about one file, which is what this
+			// check exists to end.
+			if fine, why := generators.CanProduce(field.Generator, rec.Locale); !fine {
+				found = append(found, recipe.Problem{
+					Where: where, What: why,
+					Hint: "generate this recipe for a locale this build carries, or drop the field",
+				})
+			}
 		}
 	}
 	return found

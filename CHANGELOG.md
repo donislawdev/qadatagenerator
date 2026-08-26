@@ -51,8 +51,61 @@ repository once they are released.
   file to damage from anywhere on your disk. Nothing is read until you choose
   it, and nothing is written until you ask for it.
 
+### Changed
+
+- **Generating from word lists is about thirty times faster.** Every name, city
+  and region used to be drawn by reading and splitting the whole list again.
+  Measured on 100000 rows of four columns with three word lists: a median of
+  11.2 seconds before and 0.34 seconds after, over five interleaved pairs. The
+  data is identical byte for byte, so the same seed still gives the same
+  dataset.
+
 ### Fixed
 
+- **The nested JSON form put records of the third level under the wrong parent.**
+  A recipe with three levels of relation, such as customers holding orders
+  holding items, wrote the first parent's grandchildren again under the second
+  and left the real ones out of the file. The count of records was right, the
+  run ended successfully, and nothing said anything was wrong. If you have
+  generated nested JSON from a recipe with three or more levels, regenerate it.
+  Two levels were never affected, nor was the file per entity form.
+- **A run could write two things under one name and report success.** If an
+  entity was named after a file the run itself leaves beside your data, such as
+  run-note with the JSON format, one silently replaced the other while the log
+  reported both. Such a recipe is now refused before any work, and the message
+  names the file and tells you to rename the entity. Without the overwrite flag
+  the same recipe used to be refused with a message about another run writing
+  the file, which was never true.
+- **A failed run could leave half a dataset under its real names.** If a rename
+  failed part way through, because a file was held open by another program or
+  the disk was full, the files already renamed stayed behind without the record
+  of the run or the manifest. The whole set is now taken back, so the directory
+  is left as it was found. A machine losing power between two renames is still
+  outside what this can promise.
+- **validate and dry runs no longer pass a recipe that cannot run.** A generator
+  this build has, asked for in a locale it carries no word list for, used to
+  pass both and fail on the first row. The same is now refused by all three
+  verbs with the same sentence. An output format given with the flag rather than
+  in the recipe is also checked before the run, so a dry run no longer reports
+  how many rows it would write for a format nothing can write.
+- **Excluding every field of an entity other than the first is refused before
+  the run.** It used to generate everything and then fail at the end with a
+  message telling you to report a defect in the tool, for something in your own
+  recipe.
+- **The record beside your data now says which settings came from the command
+  line.** It recorded the value and not where it came from, so the file meant to
+  explain why two runs of one recipe differ was silent about the commonest
+  reason.
+- **A field asked to be unique and also to be empty is refused.** It used to
+  produce a column of empty values under a heading declaring every one of them
+  different.
+- **file_per_entity now says that it does nothing for CSV.** That form writes one
+  file per table whatever the setting says. Only the JSON form reads it.
+- **A manifest too large for this build to read back is now reported when it is
+  written**, rather than when you later try to verify against it.
+- **In the window, editing the separator no longer loses your open file.**
+  Deleting the last character left the field briefly unusable, and the screen
+  forgot which file was open and could not get it back.
 - **Enter presses a button in the window, and not only the space bar.** A
   button nobody can press with the pointer, such as the one for a response
   record before a manifest is open, still ignores both.

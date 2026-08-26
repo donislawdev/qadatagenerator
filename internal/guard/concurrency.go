@@ -49,6 +49,35 @@ import (
 // third deserves the same paragraph, and if the paragraph is hard to write the
 // concurrency is probably in the wrong place.
 //
+// # Why the third entry is here, and why it is not that shape
+//
+// 🔴 It starts no work at all, and saying otherwise would be the first step
+// towards a list that grows by resemblance. It shares something, which is the
+// other half of what this guard watches, so it is written out rather than filed
+// beside the two above.
+//
+// A word list becomes a value by drawing an index inside its length, so a run
+// asks for the whole list once per cell and used to read and split the file
+// every time. Measured on 2026-08-26: one hundred thousand rows of four columns
+// took 11.7 seconds with three word lists and 0.28 seconds without any, and a
+// single surname cost 3695 string allocations. The lists are compiled into the
+// binary and never change while it runs, so reading one twice is work with no
+// answer attached.
+//
+// What is shared is a map from a locale and a name to a list. It is mutable in
+// that entries are added to it, and its contents are not: every writer for a
+// key stores an equal list, because the bytes come from the same embedded file
+// and the parse is a pure function of them. So the rule the architecture states
+// holds in the sense that matters here, which is that no output can depend on
+// which goroutine got there first. That is the claim, and it is a claim about
+// this code rather than a property the type gives for free.
+//
+// 🔴 The lists handed out are shared, so no caller may write through one or
+// append to one without copying first. The one caller that filters a list does
+// it through a zero capacity reslice, which forces the append to allocate. A
+// test stands in front of that, because the change that would break it is one
+// character long and nothing else would notice.
+//
 // # Why a guard rather than a rule in a document
 //
 // The architecture already says the result is assembled by row number and
@@ -66,8 +95,9 @@ import (
 // right. The rules the architecture states, that the output is ordered by row
 // and that nothing mutable is shared, are still on whoever writes the code.
 var ConcurrencyAllowed = map[string]bool{
-	"internal/cli/signals.go":             true,
-	"internal/gui/takeview/background.go": true,
+	"internal/cli/signals.go":                    true,
+	"internal/gui/takeview/background.go":        true,
+	"internal/adapter/provider/corpus/corpus.go": true,
 }
 
 // concurrencyPackages are imports whose whole purpose is coordinating work

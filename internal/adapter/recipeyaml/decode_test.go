@@ -390,6 +390,17 @@ func TestProblems(t *testing.T) {
 			what:  "required and is also asked to be empty",
 		},
 		{
+			// 🔴 An empty value is a value, so the second row given one repeats
+			// the first. The run never noticed because emptiness is decided
+			// before uniqueness is asked, so the column came out holding
+			// nothing but empty values under a heading declaring every one of
+			// them different, and the run ended with nought.
+			name:  "a field that must be unique and is also asked to be empty",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y, unique: true, empty: 100% }\n",
+			where: "entities.a.fields.x",
+			what:  "unique and is also asked to be empty",
+		},
+		{
 			name:  "a maximum length of nothing",
 			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y, max_length: 0 }\n",
 			where: "entities.a.fields.x.max_length",

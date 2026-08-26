@@ -1,6 +1,7 @@
 package format_test
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -276,6 +277,141 @@ func TestTheNestedFormPutsChildrenInsideTheirParent(t *testing.T) {
 	if count := strings.Count(text, `"placed_at"`); count != 7 {
 		t.Errorf("seven children were made and %d are in the tree", count)
 	}
+}
+
+// threeLevels is a recipe with a grandchild, which is the shallowest shape in
+// which the tree can put a record under the wrong parent.
+func threeLevels(perEntity bool) recipe.Recipe {
+	return recipe.Recipe{
+		Version: "0.1", Seed: "three-levels", Locale: "pl-PL",
+		Output: recipe.Output{Format: "json", FilePerEntity: perEntity},
+		Entities: []recipe.Entity{
+			{Name: "customer", Count: 2, HasCount: true,
+				Fields: []recipe.Field{{Name: "city", Generator: "city"}}},
+			{Name: "order", Parents: []recipe.Parent{{Entity: "customer", Min: 2, Max: 2}},
+				Fields: []recipe.Field{{Name: "city", Generator: "city"}}},
+			{Name: "item", Parents: []recipe.Parent{{Entity: "order", Min: 2, Max: 2}},
+				Fields: []recipe.Field{{Name: "city", Generator: "city"}}},
+		},
+	}
+}
+
+// treeItem is a grandchild as it stands in the tree, naming the parent it
+// belongs to.
+type treeItem struct {
+	City  string `json:"city"`
+	Order string `json:"order"`
+}
+
+// treeRoot is as much of the tree as this test reads.
+type treeRoot struct {
+	Customers []struct {
+		Orders []struct {
+			Items []treeItem `json:"item"`
+		} `json:"order"`
+	} `json:"customer"`
+}
+
+// The tree has to carry every grandchild under the parent it belongs to.
+//
+// # Why three levels and not two
+//
+// 🔴 A child names its parent by the position that parent holds in the whole
+// table, and the tree walks a subset of a table once per parent. At two levels
+// the subset is the whole table, so counting positions inside the subset gives
+// the right answer by accident and no two level test can tell the two apart. At
+// three levels it stopped being an accident: grandchildren appeared under the
+// wrong parent, the real ones were absent, and the record count still added up,
+// so nothing counting rows would have noticed.
+//
+// # Why the flat form is the oracle
+//
+// The same run written a file per entity names each parent by key rather than
+// by position, and it cannot be affected by how the tree is walked. Comparing
+// the two asks the one question that matters: does the tree say what the run
+// produced.
+func TestTheTreeCarriesEveryGrandchildUnderTheParentItBelongsTo(t *testing.T) {
+	whole, made := run(t, threeLevels(false), asJSON).written["dataset.json"]
+	if !made {
+		t.Fatal("no single file was written")
+	}
+	flat, made := run(t, threeLevels(true), asJSON).written["item.json"]
+	if !made {
+		t.Fatal("no file for the grandchild was written")
+	}
+
+	var loose []treeItem
+	if err := json.Unmarshal([]byte(flat.String()), &loose); err != nil {
+		t.Fatalf("the flat form is not readable: %v", err)
+	}
+	expected := map[string][]string{}
+	for _, item := range loose {
+		expected[item.Order] = append(expected[item.Order], item.City)
+	}
+	if len(expected) != 4 {
+		t.Fatalf("the run was meant to make four orders with grandchildren, it made %d",
+			len(expected))
+	}
+
+	var tree treeRoot
+	if err := json.Unmarshal([]byte(whole.String()), &tree); err != nil {
+		t.Fatalf("the tree is not readable: %v", err)
+	}
+	seen := map[string]bool{}
+	for _, customer := range tree.Customers {
+		for _, order := range customer.Orders {
+			belongsTo := oneParent(t, order.Items)
+			if seen[belongsTo] {
+				t.Fatalf("the grandchildren of order %s stand under two different orders",
+					belongsTo)
+			}
+			seen[belongsTo] = true
+			if got := cities(order.Items); !sameOrder(got, expected[belongsTo]) {
+				t.Errorf("order %s holds %v in the tree and %v in the flat form",
+					belongsTo, got, expected[belongsTo])
+			}
+		}
+	}
+	for belongsTo := range expected {
+		if !seen[belongsTo] {
+			t.Errorf("the grandchildren of order %s are in no parent at all", belongsTo)
+		}
+	}
+}
+
+// oneParent answers which parent a group of grandchildren names, and refuses a
+// group that names more than one.
+func oneParent(t *testing.T, items []treeItem) string {
+	t.Helper()
+	if len(items) == 0 {
+		t.Fatal("an order in the tree holds no grandchildren, and each was given two")
+	}
+	for _, item := range items[1:] {
+		if item.Order != items[0].Order {
+			t.Fatalf("one order holds grandchildren of %s and of %s", items[0].Order, item.Order)
+		}
+	}
+	return items[0].Order
+}
+
+func cities(items []treeItem) []string {
+	taken := make([]string, 0, len(items))
+	for _, item := range items {
+		taken = append(taken, item.City)
+	}
+	return taken
+}
+
+func sameOrder(left, right []string) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for index := range left {
+		if left[index] != right[index] {
+			return false
+		}
+	}
+	return true
 }
 
 // A value carrying something that would end a field early has to survive the

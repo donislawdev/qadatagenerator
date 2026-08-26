@@ -29,6 +29,21 @@ func (r *reader) checkField(built recipe.Field, where string) {
 			"drop required if some rows should be empty, or drop empty if none should be")
 	}
 
+	// 🔴 A field asked to be unique and also to be empty in some rows. An empty
+	// value is still a value, so the second row given one repeats the first and
+	// the column does not hold what it declares. Nothing downstream notices:
+	// emptiness is decided before uniqueness is ever asked, so the set that
+	// remembers what has been taken never sees an empty value at all. Measured
+	// on 2026-08-26 with unique: true and empty: 100%, which produced a column
+	// of nothing but empty values, ended with nought and said not a word. A
+	// dataset put behind a UNIQUE constraint is then refused by the database
+	// for something the recipe itself declared.
+	if built.Unique && built.HasEmptyShare && built.EmptyShare > 0 {
+		r.report(where, "the field is asked to be unique and is also asked to be empty in some rows",
+			"either unique: true or a share under empty, not both",
+			"drop unique if some rows should be empty, or drop empty if every value has to differ")
+	}
+
 	// A unit with nothing to count. It reads as though a limit was set, which
 	// is exactly why it is worth a line rather than being ignored.
 	if built.LengthUnit != "" && !built.HasMaxLength {

@@ -119,7 +119,7 @@ func (w *JSON) Finish() error {
 			built.WriteString(",\n")
 		}
 		built.WriteString("  " + quoteJSON(table.planned.Entity) + ": ")
-		w.writeNested(&built, table, "  ")
+		w.writeNested(&built, table, wholeOf(table), "  ")
 		roots++
 	}
 	built.WriteString("\n}\n")
@@ -145,18 +145,45 @@ func (w *JSON) writeTable(into *strings.Builder, table *jsonTable, indent string
 	}
 }
 
-// writeNested writes one table with its children inside each record.
-func (w *JSON) writeNested(into *strings.Builder, table *jsonTable, indent string) {
+// placed is a record together with the position it holds in its own table.
+//
+// 🔴 The position travels with the record because a child names its parent by
+// the row number in the whole table, and the tree walks subsets of that table.
+// Writing the grandchildren of a subset by the position inside the subset put
+// them under the wrong parent and left the real ones out of the file
+// altogether, with the record count still adding up.
+type placed struct {
+	record dataset.Record
+	at     int
+}
+
+// wholeOf numbers every row of a table, which is what the roots of the tree are
+// written from.
+func wholeOf(table *jsonTable) []placed {
+	rows := make([]placed, 0, len(table.rows))
+	for at, record := range table.rows {
+		rows = append(rows, placed{record: record, at: at})
+	}
+	return rows
+}
+
+// writeNested writes the given rows of one table with their children inside
+// each record.
+//
+// The rows are passed in rather than read from the table, because a table
+// appears once as a whole and once per parent as a subset of itself, and the
+// writer has no business changing what the table holds in order to say which.
+func (w *JSON) writeNested(into *strings.Builder, table *jsonTable, rows []placed, indent string) {
 	children := w.childrenOf(table.planned.Entity)
 	into.WriteString("[\n")
-	for index, record := range table.rows {
+	for index, row := range rows {
 		if index > 0 {
 			into.WriteString(",\n")
 		}
 		into.WriteString(indent + "  ")
-		w.writeRecord(into, table, record, indent+"  ", w.gather(children, index))
+		w.writeRecord(into, table, row.record, indent+"  ", w.gather(children, row.at))
 	}
-	if len(table.rows) > 0 {
+	if len(rows) > 0 {
 		into.WriteString("\n")
 	}
 	into.WriteString(indent + "]")
@@ -166,17 +193,18 @@ func (w *JSON) writeNested(into *strings.Builder, table *jsonTable, indent strin
 type nested struct {
 	entity string
 	table  *jsonTable
-	rows   []dataset.Record
+	rows   []placed
 }
 
-// gather collects the children of one parent row.
+// gather collects the children of one parent row, keeping the position each of
+// them holds in its own table so that its own children can be found.
 func (w *JSON) gather(children []*jsonTable, parent int) []nested {
 	gathered := make([]nested, 0, len(children))
 	for _, child := range children {
-		rows := make([]dataset.Record, 0)
-		for _, record := range child.rows {
+		rows := make([]placed, 0)
+		for at, record := range child.rows {
 			if record.Parent == parent {
-				rows = append(rows, record)
+				rows = append(rows, placed{record: record, at: at})
 			}
 		}
 		gathered = append(gathered, nested{entity: child.planned.Entity, table: child, rows: rows})
@@ -212,10 +240,7 @@ func (w *JSON) writeRecord(into *strings.Builder, table *jsonTable, record datas
 	}
 	for _, child := range children {
 		into.WriteString(",\n" + indent + "  " + quoteJSON(child.entity) + ": ")
-		held := child.table.rows
-		child.table.rows = child.rows
-		w.writeNested(into, child.table, indent+"  ")
-		child.table.rows = held
+		w.writeNested(into, child.table, child.rows, indent+"  ")
 	}
 	into.WriteString("\n" + indent + "}")
 }

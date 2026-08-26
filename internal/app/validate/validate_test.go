@@ -29,6 +29,49 @@ func TestAUsableRecipeReportsWhatWasUnderstood(t *testing.T) {
 	}
 }
 
+// A generator this build carries and cannot fill in the recipe's locale is a
+// problem rather than a silence, because generate refuses such a recipe.
+//
+// 🔴 This verb is the gate people put in front of a pipeline, and it used to
+// call such a recipe usable. The run then failed on the first row, which is the
+// two verbs disagreeing about one file. The second half of this test matters as
+// much as the first: the same recipe in a locale this build carries has to stay
+// usable, or the gate would start refusing what works.
+func TestAGeneratorTheLocaleCannotFillIsAProblem(t *testing.T) {
+	forLocale := func(locale string) validate.Decoded {
+		return validate.Decoded{Recipe: recipe.Recipe{Locale: locale,
+			Entities: []recipe.Entity{{Name: "place",
+				Fields: []recipe.Field{{Name: "town", Generator: "city"}}}}}}
+	}
+
+	report, err := validate.Run(func([]byte) validate.Decoded { return forLocale("en-US") },
+		validate.Source{Name: "recipe.yaml"}, noCityHere{}, nil)
+	if err == nil {
+		t.Fatal("a recipe generate refuses was called usable")
+	}
+	if kind := fault.KindOf(err); kind != fault.Config {
+		t.Errorf("an unusable recipe is %v rather than a configuration failure", kind)
+	}
+	if len(report.Problems) != 1 {
+		t.Fatalf("the report has to name the field, it carries %+v", report.Problems)
+	}
+	if report.Problems[0].Where != "entities.place.fields.town" {
+		t.Errorf("the problem points at %q", report.Problems[0].Where)
+	}
+	if !strings.Contains(report.Problems[0].What, "en-US") {
+		t.Errorf("the problem does not name the locale: %q", report.Problems[0].What)
+	}
+
+	usable, err := validate.Run(func([]byte) validate.Decoded { return forLocale("pl-PL") },
+		validate.Source{Name: "recipe.yaml"}, noCityHere{}, nil)
+	if err != nil {
+		t.Fatalf("the same recipe was refused in a locale that carries the list: %v", err)
+	}
+	if !usable.Usable() {
+		t.Errorf("a recipe that runs was reported unusable: %+v", usable.Problems)
+	}
+}
+
 // The kind travels with the failure, so the surface never has to work out
 // which ending this was. A recipe that cannot be used says something about the
 // recipe and nothing about the tool.
@@ -91,6 +134,22 @@ type everyNameKnown struct{}
 
 func (everyNameKnown) Known(string) bool { return true }
 func (everyNameKnown) Names() []string   { return []string{"first_name"} }
+
+// CanProduce answers yes for every pair, which keeps the tests using this stub
+// about the names they were written for. The locale is answered for by
+// noCityHere below.
+func (everyNameKnown) CanProduce(string, string) (bool, string) { return true, "" }
+
+// noCityHere carries the generator and not the locale, which is the pair that
+// used to pass every check and fail on the first row.
+type noCityHere struct{ everyNameKnown }
+
+func (noCityHere) CanProduce(generator, locale string) (bool, string) {
+	if generator == "city" && locale == "en-US" {
+		return false, "this build has no cities for en-US"
+	}
+	return true, ""
+}
 
 // someLayers is a catalog carrying damage in two layers, one of which has
 // nothing implemented behind it yet.

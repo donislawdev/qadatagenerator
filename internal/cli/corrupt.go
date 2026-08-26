@@ -2,12 +2,15 @@ package cli
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/mutators"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/store"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
@@ -197,6 +200,41 @@ func canDo(built recipe.Recipe, source values.Source, schema recipe.SchemaView) 
 // The counts come from what the run actually did rather than from what it meant
 // to do. Holding the envelope against the model happens where it is written,
 // which is the one place both modes pass through.
+// tooLargeToReadBack says so when a run has written a manifest this build
+// cannot load again.
+//
+// # Why it is measured after the file is in place rather than estimated
+//
+// 🔴 The writer streams and has no ceiling, and the reader holds the whole
+// document while a comparison runs, so it stops at a size written beside it.
+// Nothing connected the two, and a run producing hundreds of thousands of
+// entries could leave a manifest that verify and the viewer both refuse. The
+// person who finds that out is the one running verify, days later, with the
+// run that made it long finished.
+//
+// The file is on the disk by the time this is asked, so the answer is its size
+// rather than a guess from a count of entries multiplied by a number somebody
+// wrote down once. An empty result means nothing is wrong, including the case
+// where the file cannot be measured at all: a run that has just succeeded must
+// not fail on the way out because of a warning about it.
+func tooLargeToReadBack(dir, form string) []string {
+	var lines []string
+	for _, name := range damage.Files(form) {
+		if !strings.HasSuffix(name, ".json") {
+			continue
+		}
+		info, err := os.Stat(filepath.Join(dir, name))
+		if err != nil || info.Size() <= manifestjson.MaxSize {
+			continue
+		}
+		lines = append(lines, fmt.Sprintf(
+			"%s is %d bytes, and this build reads a manifest of at most %d, so verify and the "+
+				"window will refuse it. Damage fewer rows, or split the run",
+			name, info.Size(), manifestjson.MaxSize))
+	}
+	return lines
+}
+
 func closeRecipeManifest(run *damage.Run, built recipe.Recipe, plan generate.Plan,
 	at time.Time) error {
 	envelope := manifest.Run{

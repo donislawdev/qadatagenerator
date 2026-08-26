@@ -7,6 +7,7 @@
 package responsejson
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
@@ -76,7 +77,10 @@ func read(from io.Reader, path string) (response.Record, error) {
 	}
 
 	var read document
-	decoder := json.NewDecoder(strings.NewReader(string(raw)))
+	// Read straight from the bytes. Turning them into a string and the string
+	// back into a reader copied the whole record twice, which at the size this
+	// build accepts is ninety six megabytes of work with no answer attached.
+	decoder := json.NewDecoder(bytes.NewReader(raw))
 	// An unknown member is refused rather than skipped. This file is written by
 	// hand or by somebody's script, so a misspelled member is the likely
 	// mistake, and silently ignoring it would mean comparing against evidence

@@ -46,6 +46,7 @@ import (
 	"path"
 	"sort"
 	"strings"
+	"sync"
 )
 
 //go:embed en-US pl-PL
@@ -53,6 +54,38 @@ var files embed.FS
 
 // Comment marks a line that describes the file rather than belonging to it.
 const comment = "#"
+
+// held is every list this build has already read, keyed by locale and name.
+//
+// # Why this is here at all
+//
+// 🔴 A list becomes a value by drawing an index inside its length, so a run
+// asks for the whole list once per cell. Reading and splitting the file every
+// time made a surname cost 3695 string allocations, and a dataset of 100000
+// rows with three word lists took thirty times as long as the same dataset
+// without them, measured on 2026-08-26 and written up in the backlog. Nothing
+// in the result changes: the same bytes come back in the same order, which is
+// the whole reason this is safe to do.
+//
+// # What every caller must therefore not do
+//
+// 🔴 The slice handed back is shared by every later caller. Nobody may write
+// through it, and nobody may append to it without taking a copy first. The one
+// caller that filters a list does so with a zero capacity slice of it, which
+// forces append to allocate rather than to write into the shared array. A
+// change from that to a plain reslice would corrupt every row drawn afterwards,
+// in a way no compiler and no type notices, so a test stands in front of it.
+//
+// A sync.Map rather than a mutex because the reads outnumber the writes by the
+// number of rows in the dataset, and there are as many writes as this build has
+// files.
+var held sync.Map
+
+// joined is every pair of lists that has already been put end to end, keyed by
+// locale and both names. It is separate from held because the join is a
+// different list with a different length, and rebuilding it per value costs two
+// copies of both lists.
+var joined sync.Map
 
 // Load returns one list, in the order it is stored.
 //
@@ -66,14 +99,50 @@ const comment = "#"
 // of nought makes that draw a division by nothing, which stops the run with a
 // panic naming the draw rather than the list. Refusing here names the list.
 func Load(locale, name string) ([]string, bool) {
+	key := locale + "/" + name
+	if kept, found := held.Load(key); found {
+		entries, _ := kept.([]string)
+		return entries, len(entries) > 0
+	}
 	raw, err := files.ReadFile(path.Join(locale, name+".txt"))
 	if err != nil {
+		held.Store(key, []string(nil))
 		return nil, false
 	}
 	entries := parse(string(raw))
+	held.Store(key, entries)
 	if len(entries) == 0 {
 		return nil, false
 	}
+	return entries, true
+}
+
+// Joined returns two lists end to end, in that order.
+//
+// A generator drawing from two lists as if they were one asks for the join once
+// per value, and building it there copies both lists every time. The order is
+// the order of the arguments, because it decides which index reaches which
+// entry and therefore what every dataset drawn this way holds.
+//
+// It answers false when either list is missing, and the caller names which by
+// asking Load. The same rule applies to what comes back as to Load: it is
+// shared, and nobody may write through it.
+func Joined(locale, first, second string) ([]string, bool) {
+	key := locale + "/" + first + "+" + second
+	if kept, found := joined.Load(key); found {
+		entries, _ := kept.([]string)
+		return entries, len(entries) > 0
+	}
+	left, foundLeft := Load(locale, first)
+	right, foundRight := Load(locale, second)
+	if !foundLeft || !foundRight {
+		joined.Store(key, []string(nil))
+		return nil, false
+	}
+	entries := make([]string, 0, len(left)+len(right))
+	entries = append(entries, left...)
+	entries = append(entries, right...)
+	joined.Store(key, entries)
 	return entries, true
 }
 

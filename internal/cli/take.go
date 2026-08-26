@@ -163,6 +163,11 @@ func writeDamaged(out *streams, opened *take.Opened, own *takeFlags,
 	for _, line := range summaryOf(result.Counts, *own.manifest) {
 		out.note(line)
 	}
+	// This verb is the one that damages somebody else's file, so it is the one
+	// that reaches a manifest too large to read back first.
+	for _, line := range tooLargeToReadBack(result.Out, *own.manifest) {
+		out.note(line)
+	}
 	return finish(out, codeOK)
 }
 

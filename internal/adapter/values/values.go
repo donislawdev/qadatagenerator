@@ -117,10 +117,14 @@ type Source struct {
 // Contract check, so that a mismatch fails to compile rather than at run time.
 var _ generate.Values = Source{}
 
+// defaultLocale is what a recipe naming none is read as, in one place because
+// the source and the answer about what it can produce have to agree on it.
+const defaultLocale = "en-US"
+
 // New returns a source of values for a locale and a seed.
 func New(locale, from string) Source {
 	if locale == "" {
-		locale = "en-US"
+		locale = defaultLocale
 	}
 	return Source{locale: locale, seed: seed.New(from)}
 }
@@ -344,18 +348,22 @@ type generator struct {
 	behind provider.Provider
 	// list is the corpus this draws from, empty when it draws from nothing.
 	list string
+	// needs answers whether this build can produce the value in a locale,
+	// before a row exists. A generator that works everywhere leaves it nil.
+	needs func(locale string) (bool, string)
 }
 
 // producers is the registry. It is a map rather than a switch so that the list
 // of names and the list of implementations cannot drift apart.
 var producers = map[string]generator{
-	FirstName:  {produce: Source.firstName, list: "first-names"},
-	LastName:   {produce: Source.lastName, list: "last-names"},
+	FirstName: {produce: Source.firstName, list: "first-names",
+		needs: fromLists("first-names-female", "first-names-male")},
+	LastName:   {produce: Source.lastName, list: "last-names", needs: surnameLists},
 	Gender:     {produce: Source.gender},
 	BirthDate:  {produce: Source.birthDate},
-	City:       {produce: fromList("cities"), list: "cities"},
-	Region:     {produce: fromList("regions"), list: "regions"},
-	PostalCode: {produce: Source.postalCode, behind: us.Postal{}},
+	City:       {produce: fromList("cities"), list: "cities", needs: fromLists("cities")},
+	Region:     {produce: fromList("regions"), list: "regions", needs: fromLists("regions")},
+	PostalCode: {produce: Source.postalCode, behind: us.Postal{}, needs: postalRegister},
 	Pesel:      {produce: fromProvider(pl.PESEL{}), behind: pl.PESEL{}},
 	Nip:        {produce: fromProvider(pl.NIP{}), behind: pl.NIP{}},
 	Regon:      {produce: fromProvider(pl.REGON{}), behind: pl.REGON{}},
@@ -440,12 +448,74 @@ func (s Source) birthDate(req generate.Request) (string, error) {
 // postalCode draws a code, and only where this build carries a register of
 // them.
 func (s Source) postalCode(req generate.Request) (string, error) {
-	if strings.HasPrefix(s.locale, "pl") {
-		return "", fault.New(fault.Config, "this build has no register of postal codes for "+
-			s.locale+", so a postal code cannot be produced there. Generate the dataset for en-US "+
-			"or drop the field")
+	if fine, why := postalRegister(s.locale); !fine {
+		return "", fault.New(fault.Config, why)
 	}
 	return us.Postal{}.Generate(provider.Request{Source: s.seed, At: req.At})
+}
+
+// noList is the sentence saying this build carries no such word list.
+//
+// 🔴 It stands in one place because two answers say it: the run, when it draws,
+// and the plan, before anything is drawn. Until 2026-08-26 only the run could
+// say it, so validate called a recipe usable and a dry run counted the rows of
+// a dataset that could not be produced. Two sentences would be two places for
+// the plan and the run to part company, which is the drift the plan exists to
+// make impossible.
+func noList(list, locale string) string {
+	return "this build has no " + list + " for " + locale
+}
+
+// postalRegister answers whether a postal code can be drawn in a locale.
+func postalRegister(locale string) (bool, string) {
+	if !strings.HasPrefix(locale, "pl") {
+		return true, ""
+	}
+	return false, "this build has no register of postal codes for " + locale +
+		", so a postal code cannot be produced there. Generate the dataset for en-US " +
+		"or drop the field"
+}
+
+// fromLists answers whether every named list is carried for a locale.
+func fromLists(names ...string) func(string) (bool, string) {
+	return func(locale string) (bool, string) {
+		for _, name := range names {
+			if _, found := corpus.Load(locale, name); !found {
+				return false, noList(name, locale)
+			}
+		}
+		return true, ""
+	}
+}
+
+// surnameLists names the lists a surname is drawn from, which depend on the
+// locale for the reason written at lastName.
+func surnameLists(locale string) (bool, string) {
+	if !strings.HasPrefix(locale, "pl") {
+		return fromLists("last-names")(locale)
+	}
+	return fromLists("last-names-male", "last-names-unisex")(locale)
+}
+
+// CanProduce reports whether this build can fill a field with that generator in
+// a locale, and says why not when it cannot.
+//
+// # Why the locale is an argument rather than the one this source carries
+//
+// The question belongs to the build rather than to a source, and both callers
+// ask it about a recipe rather than about themselves. The plan holds the
+// locale the recipe declared, and the validator is handed a source built with
+// none at all, so a method reading its own field would answer the validator
+// about the wrong locale every time.
+func (s Source) CanProduce(generator, locale string) (bool, string) {
+	if locale == "" {
+		locale = defaultLocale
+	}
+	known, found := producers[generator]
+	if !found || known.needs == nil {
+		return true, ""
+	}
+	return known.needs(locale)
 }
 
 // draw takes one entry out of a named list, honouring a maximum length by
@@ -457,7 +527,7 @@ func (s Source) postalCode(req generate.Request) (string, error) {
 func (s Source) draw(list string, req generate.Request) (string, error) {
 	entries, found := corpus.Load(s.locale, list)
 	if !found {
-		return "", fault.New(fault.Config, "this build has no "+list+" for "+s.locale)
+		return "", fault.New(fault.Config, noList(list, s.locale))
 	}
 	return s.pick(entries, list, req)
 }
@@ -465,12 +535,17 @@ func (s Source) draw(list string, req generate.Request) (string, error) {
 // drawEither draws from two lists as if they were one, without concatenating
 // them on every call.
 func (s Source) drawEither(first, second string, req generate.Request) (string, error) {
-	left, foundLeft := corpus.Load(s.locale, first)
-	right, foundRight := corpus.Load(s.locale, second)
-	if !foundLeft || !foundRight {
-		return "", fault.New(fault.Config, "this build has no "+first+" or "+second+" for "+s.locale)
+	entries, found := corpus.Joined(s.locale, first, second)
+	if !found {
+		// Named one at a time rather than as a pair, so that the sentence is
+		// the one the plan gives for the same list and the reader is told which
+		// of the two is missing rather than that one of them is.
+		if _, carried := corpus.Load(s.locale, first); !carried {
+			return "", fault.New(fault.Config, noList(first, s.locale))
+		}
+		return "", fault.New(fault.Config, noList(second, s.locale))
 	}
-	return s.pick(append(append([]string{}, left...), right...), first, req)
+	return s.pick(entries, first, req)
 }
 
 // pick chooses one entry, from those that fit when a limit is declared.

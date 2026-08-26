@@ -49,6 +49,7 @@ var RefusalKinds = map[string]string{
 	"internal/adapter/manifestjson.Load Config":              "the manifest is not a manifest, is one this build would not have written, or names a major version it cannot read. All three are the document being wrong",
 	"internal/adapter/responsejson.read Config":              "the response record cannot be read as one, carries two documents, fails the model or names a major version this build does not speak",
 	"internal/adapter/store.usableName Config":               "the name comes from the recipe, and a name that cannot become a file is the recipe asking for something impossible before any data exists",
+	"internal/adapter/store.Set.ownName Config":              "an entity is named after a file the run itself leaves, so the recipe asks for two things under one name. The names this tool reserves are fixed, which makes the recipe the only end anybody can move",
 	"internal/adapter/values.Source.Produce Config":          "the recipe names a generator this build does not have, which is a spelling in a document rather than a limit of the data",
 	"internal/adapter/values.Source.draw Config":             "the recipe asks for a list this build carries for no locale, so the pair of locale and field is what has to change",
 	"internal/adapter/values.Source.drawEither Config":       "the same as draw, for a field drawing from two lists at once",
@@ -66,6 +67,7 @@ var RefusalKinds = map[string]string{
 	"internal/app/validate.Run Config":                       "this is the verb whose whole answer is whether the recipe is valid",
 	"internal/cli.recipeAt Config":                           "the recipe carries problems, and this verb was asked to produce data rather than to report on them",
 	"internal/cli.writerFor Config":                          "the recipe asks for a format this build does not write",
+	"internal/cli.usableFormat Config":                       "the run asks for a format this build does not write, from the recipe or from the flag that overrides it, and either way it is a document that cannot be acted on rather than one that cannot be met",
 	"internal/take.Open Config":                              "the field separator is not one character. It is a setting somebody gave rather than data, and it is answered here a second time because a screen puts it under a cursor, where the empty value between two keystrokes would otherwise be a panic",
 
 	// --- Data: a valid document asks for something that cannot be done --------

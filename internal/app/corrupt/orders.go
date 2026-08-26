@@ -2,6 +2,7 @@ package corrupt
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
@@ -82,22 +83,49 @@ func NewSelector(policy recipe.Policy, described catalog.Catalog, view recipe.Sc
 // times in a manifest. It is also the shape of a typo: a name in
 // exclude_fields that matches nothing looks identical to one that matches
 // everything, and only the arithmetic tells them apart.
+//
+// # Why every entity is walked rather than the first one that survives
+//
+// 🔴 It used to answer as soon as one entity kept a field, which made the check
+// about the first entity in the recipe rather than about the recipe. An
+// exclusion emptying the second entity passed here, the run generated every row
+// and wrote every temporary file, and the failure arrived at the end as an
+// entry the manifest model refused. That reached the reader as exit code 1 with
+// a sentence telling them to report a defect in the tool, for a fault that was
+// in their own file and was visible before a single row existed.
 func (s *Selector) somethingToDamage() error {
+	var emptied []string
 	for _, entity := range s.view.EntityNames() {
 		fields := s.view.FieldsOf(entity)
 		if len(fields) == 0 {
 			continue
 		}
-		for _, field := range fields {
-			if !s.excluded(field.Name) {
-				return nil
-			}
+		if everyFieldExcluded(s, fields) {
+			emptied = append(emptied, entity)
 		}
-		return fault.New(fault.Config, fmt.Sprintf(
-			"policy.exclude_fields leaves nothing to damage in %s, because it names every "+
-				"field the entity has. Remove a name from the list, or drop the policy", entity))
 	}
-	return nil
+	if len(emptied) == 0 {
+		return nil
+	}
+	held := "the entity has"
+	if len(emptied) > 1 {
+		held = "those entities have"
+	}
+	return fault.New(fault.Config, fmt.Sprintf(
+		"policy.exclude_fields leaves nothing to damage in %s, because it names every "+
+			"field %s. Remove a name from the list, or drop the policy",
+		strings.Join(emptied, ", "), held))
+}
+
+// everyFieldExcluded answers whether a policy has taken away everything an
+// entity could offer.
+func everyFieldExcluded(s *Selector, fields []recipe.FieldInfo) bool {
+	for _, field := range fields {
+		if !s.excluded(field.Name) {
+			return false
+		}
+	}
+	return true
 }
 
 // Orders returns the damage asked for in one row, in the order it will be

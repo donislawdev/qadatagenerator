@@ -45,7 +45,7 @@ func TestARunStoppedPartWayLeavesNothingBehind(t *testing.T) {
 	}
 
 	own := declareGenerate(flag.NewFlagSet(commandGenerate, flag.ContinueOnError))
-	_, stopped := produce(built, plan, source, own, &stopsAfter{after: 2})
+	_, stopped := produce(built, plan, source, own, nil, &stopsAfter{after: 2})
 
 	if kind := fault.KindOf(stopped); kind != fault.Interrupted {
 		t.Fatalf("a stopped run ended as %v rather than as an interrupted one: %v", kind, stopped)

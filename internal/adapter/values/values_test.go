@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/donislawdev/qadatagenerator/internal/adapter/provider/corpus"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
@@ -17,6 +18,114 @@ func at(field string, row int64) seed.Coordinate {
 
 func ask(generator, field string, row int64) generate.Request {
 	return generate.Request{Generator: generator, At: at(field, row)}
+}
+
+// Drawing under a limit leaves the shared word list as it was.
+//
+// # What this is really about
+//
+// 🔴 The lists are read once and handed to every later caller, so the slice a
+// generator receives is the one the next row will receive. Honouring a maximum
+// length means keeping the entries that fit, and doing that in place would move
+// them to the front of the shared array and shorten what everybody sees
+// afterwards. Every row drawn after the first limited one would then come from
+// a list nobody chose, silently, and the dataset would still look ordinary.
+//
+// The code is correct because it filters through a zero capacity reslice, which
+// forces the append to allocate a new array. That is one character away from
+// being wrong, no compiler notices the difference, and the only symptom is
+// wrong data. So the invariant is asserted rather than described.
+func TestDrawingUnderALimitLeavesTheSharedListAlone(t *testing.T) {
+	const list = "cities"
+	before, found := corpus.Load("pl-PL", list)
+	if !found {
+		t.Fatalf("this build carries no %s for pl-PL, so this test proves nothing", list)
+	}
+	kept := append([]string(nil), before...)
+	if len(kept) < 2 {
+		t.Fatalf("a list of %d entries cannot show this", len(kept))
+	}
+
+	source := values.New("pl-PL", "shared")
+	for row := int64(0); row < 20; row++ {
+		request := ask(values.City, "city", row)
+		request.MaxLength, request.HasMaxLength, request.Unit = 6, true, "characters"
+		if _, err := source.Produce(request); err != nil {
+			t.Fatalf("row %d: %v", row, err)
+		}
+	}
+
+	after, _ := corpus.Load("pl-PL", list)
+	if len(after) != len(kept) {
+		t.Fatalf("the shared list held %d entries and now holds %d", len(kept), len(after))
+	}
+	for index := range kept {
+		if after[index] != kept[index] {
+			t.Fatalf("entry %d of the shared list was %q and is now %q",
+				index, kept[index], after[index])
+		}
+	}
+}
+
+// What this build says it can produce is what it produces, for every generator
+// in every locale.
+//
+// # Why this test exists at all
+//
+// 🔴 The answer the plan gives is a second copy of the knowledge held by the
+// generators themselves: which word lists each one draws on, and how that
+// depends on the locale. A second copy is a place for the two to part company,
+// and this project has paid for that shape before. Nothing in the compiler
+// notices when a generator starts drawing on a list its answer does not name,
+// and the failure would be the exact one the answer was added to prevent: a
+// recipe called usable that dies on the first row, or a recipe refused that
+// would have worked.
+//
+// # Why the answer is checked for every gender rather than once
+//
+// Which list a name is drawn from depends on the gender the row carries, so a
+// build holding one list and not the other produces some rows and fails on
+// others. The promise the plan makes is about the whole run, so a yes has to
+// hold for every binding and a no has to be a real failure for at least one.
+func TestWhatThisBuildSaysItCanProduceIsWhatItProduces(t *testing.T) {
+	bindings := []struct {
+		what   string
+		agrees provider.Agreement
+	}{
+		{"no gender", provider.Agreement{}},
+		{"a woman", provider.NewAgreement(map[string]string{
+			provider.RoleGender: string(provider.Female)})},
+		{"a man", provider.NewAgreement(map[string]string{
+			provider.RoleGender: string(provider.Male)})},
+	}
+	// A locale this build does not carry stands beside the ones it does, so
+	// that the refusing half of the answer is exercised and not only the
+	// agreeing half.
+	for _, locale := range []string{"en-US", "pl-PL", "xx-XX"} {
+		source := values.New(locale, "can-produce")
+		for _, generator := range source.Names() {
+			fine, why := source.CanProduce(generator, locale)
+			failed := ""
+			for _, binding := range bindings {
+				request := ask(generator, "f", 1)
+				request.Agrees = binding.agrees
+				if _, err := source.Produce(request); err != nil {
+					failed = binding.what + ": " + err.Error()
+					break
+				}
+			}
+			switch {
+			case fine && failed != "":
+				t.Errorf("%s in %s is said to be producible and is not, for %s",
+					generator, locale, failed)
+			case !fine && failed == "":
+				t.Errorf("%s in %s is refused as %q and produces a value for every gender",
+					generator, locale, why)
+			case !fine && why == "":
+				t.Errorf("%s in %s is refused without saying why", generator, locale)
+			}
+		}
+	}
 }
 
 // A Polish surname inflects with the gender of the bearer, so a woman must

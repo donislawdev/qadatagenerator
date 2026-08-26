@@ -114,12 +114,16 @@ func generateFrom(out *streams, path string, own *generateFlags, flags crossCutt
 		return code
 	}
 	applied := overrides(&built, own)
+	if err := usableFormat(built, applied); err != nil {
+		return fail(out, err)
+	}
 
 	source := values.New(built.Locale, built.Seed)
 	plan, err := generate.Prepare(built, source)
 	if err != nil {
 		return fail(out, err)
 	}
+	noteUnreadSettings(built, &plan)
 
 	if *own.dryRun {
 		writePlan(out, plan, applied, flags, true)
@@ -133,7 +137,7 @@ func generateFrom(out *streams, path string, own *generateFlags, flags crossCutt
 	// this line nothing has been written and there is nothing to take back.
 	watcher := watchSignals()
 	defer watcher.release()
-	told, err := produce(built, plan, source, own, watcher)
+	told, err := produce(built, plan, source, own, applied, watcher)
 	if err != nil {
 		return fail(out, err)
 	}
@@ -181,6 +185,11 @@ func recipeAt(out *streams, path string) (recipe.Recipe, int, bool) {
 	return decoded.Recipe, 0, true
 }
 
+// settingFormat is the name the record of the run gives the output format, in
+// one place because the refusal for an unwritable form reads it to say whether
+// the recipe or the command line asked.
+const settingFormat = "output.format"
+
 // override is one setting the command line moved.
 //
 // It carries both sides rather than only the winner, because two runs of one
@@ -204,7 +213,7 @@ func overrides(built *recipe.Recipe, own *generateFlags) []override {
 		built.Output.Dir = *own.out
 	}
 	if own.given["format"] {
-		applied = append(applied, override{"output.format", built.Output.Format, *own.format})
+		applied = append(applied, override{settingFormat, built.Output.Format, *own.format})
 		built.Output.Format = *own.format
 	}
 	return applied
@@ -217,7 +226,7 @@ func overrides(built *recipe.Recipe, own *generateFlags) []override {
 // part way is one of the two endings this function has, and an ending that only
 // a real signal can reach is an ending nothing checks.
 func produce(built recipe.Recipe, plan generate.Plan, source values.Source,
-	own *generateFlags, stop generate.Halt) ([]string, error) {
+	own *generateFlags, applied []override, stop generate.Halt) ([]string, error) {
 	dir := built.Output.Dir
 	if dir == "" {
 		dir = "."
@@ -254,7 +263,7 @@ func produce(built recipe.Recipe, plan generate.Plan, source values.Source,
 		}
 		told = summaryOf(broken.Counts(), *own.manifest)
 	}
-	if err := writeRunNote(files, built, plan); err != nil {
+	if err := writeRunNote(files, built, plan, applied); err != nil {
 		return nil, err
 	}
 	// Nothing is asked about a signal from here on. Everything is written and
@@ -265,10 +274,67 @@ func produce(built recipe.Recipe, plan generate.Plan, source values.Source,
 		return nil, err
 	}
 	committed = true
+	if broken != nil {
+		told = append(told, tooLargeToReadBack(dir, *own.manifest)...)
+	}
 	return told, nil
 }
 
+// usableFormat refuses a form this build cannot write, before anything is
+// planned, and names whoever asked for it.
+//
+// # Why this is here and not only where the writer is made
+//
+// 🔴 The reader of recipes refuses an unknown format, so the refusal beside the
+// writer was reached only through the flag, which arrives after the reader has
+// finished. Two things followed from that and both were measured on 2026-08-26.
+// A dry run returns before the writer is ever made, so generate --dry-run
+// --format parquet printed how many rows it would write and ended with nought,
+// while the same command without --dry-run ended with three. And the refusal
+// said the recipe had asked for a word that came from the command line, which
+// sends somebody to edit a file that is correct.
+func usableFormat(built recipe.Recipe, applied []override) error {
+	switch built.Output.Format {
+	case "", formatCSV, formatJSON:
+		return nil
+	}
+	asked := "the recipe asks for "
+	for _, moved := range applied {
+		if moved.Setting == settingFormat {
+			asked = "the command line asks for "
+		}
+	}
+	return fault.New(fault.Config, "this build writes "+formatCSV+" and "+formatJSON+
+		", and "+asked+built.Output.Format)
+}
+
+// noteUnreadSettings records the settings this run carries and does not read.
+//
+// 🔴 file_per_entity decides the shape of the object form and means nothing to
+// the comma separated one, which writes a file per table whatever it says. The
+// setting did nothing and said nothing about doing nothing, in the format a
+// recipe gets when it asks for none, which is the silence this product exists
+// to find. The plan is the right place for it: the same sentence reaches the
+// log, the plan on the data channel and the record left beside the data.
+func noteUnreadSettings(built recipe.Recipe, plan *generate.Plan) {
+	if built.Output.FilePerEntity {
+		return
+	}
+	if built.Output.Format != "" && built.Output.Format != formatCSV {
+		return
+	}
+	plan.Notes = append(plan.Notes, generate.Note{
+		Where: "output.file_per_entity",
+		What: "the " + formatCSV + " form writes one file per table whatever this says, so it " +
+			"changes nothing here. The " + formatJSON + " form is the one that reads it",
+	})
+}
+
 // writerFor chooses the writer the recipe asked for.
+//
+// The last branch is a backstop rather than the refusal anybody meets:
+// usableFormat answers first, before a plan exists, and names where the word
+// came from. This one cannot, so it says neither.
 func writerFor(built recipe.Recipe, files *store.Set) (generate.Writer, error) {
 	switch built.Output.Format {
 	case "", formatCSV:
@@ -277,7 +343,7 @@ func writerFor(built recipe.Recipe, files *store.Set) (generate.Writer, error) {
 		return format.NewJSON(fileMaker{files}, built)
 	default:
 		return nil, fault.New(fault.Config, "this build writes "+formatCSV+" and "+formatJSON+
-			", and the recipe asks for "+built.Output.Format)
+			", and this run asks for "+built.Output.Format)
 	}
 }
 
@@ -327,15 +393,22 @@ type noteEntry struct {
 // It goes into a file rather than only onto the log, because a log stays in the
 // pipeline and the data travels. Somebody holding a folder of records has to be
 // able to learn from the folder itself that the values in it describe nobody.
-func writeRunNote(files *store.Set, built recipe.Recipe, plan generate.Plan) error {
+func writeRunNote(files *store.Set, built recipe.Recipe, plan generate.Plan,
+	applied []override) error {
 	note := runNote{
 		Tool: version.Tool, Catalog: version.Catalog,
 		Manifest: version.Manifest, RecipeVersion: version.Recipe,
 		Seed: built.Seed, Locale: built.Locale, Tag: built.Tag,
 		Tables:        make([]noteTable, 0, len(plan.Entities)),
 		NotDone:       make([]noteEntry, 0, len(plan.Notes)),
-		Overrides:     make([]override, 0),
+		Overrides:     applied,
 		SyntheticData: license.SyntheticDataNotice,
+	}
+	if note.Overrides == nil {
+		// A run with nothing overridden writes an empty list rather than a
+		// null, because somebody reading these files reads them all the same
+		// way and a type that changes with the flags is a trap for them.
+		note.Overrides = make([]override, 0)
 	}
 	for _, planned := range plan.Entities {
 		note.Tables = append(note.Tables, noteTable{

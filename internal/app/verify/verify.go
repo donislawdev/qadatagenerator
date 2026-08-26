@@ -123,6 +123,7 @@ func (r Report) Failed() bool {
 func Compare(promised manifest.Manifest, actual response.Record) Report {
 	report := Report{}
 	missing := map[int]bool{}
+	answers := byRow(actual)
 	for _, defect := range promised.Defects() {
 		if !defect.Applied {
 			// Damage that never happened has nothing in the dataset for the
@@ -132,7 +133,7 @@ func Compare(promised manifest.Manifest, actual response.Record) Report {
 			continue
 		}
 		report.Compared++
-		answer, reacted := actual.ByRow(defect.Location.Row)
+		answer, reacted := answers[defect.Location.Row]
 		if !reacted {
 			if !missing[defect.Location.Row] {
 				missing[defect.Location.Row] = true
@@ -148,6 +149,28 @@ func Compare(promised manifest.Manifest, actual response.Record) Report {
 		return report.Findings[i].Row < report.Findings[j].Row
 	})
 	return report
+}
+
+// byRow indexes the answers once, because the comparison asks about one row per
+// entry and a scan would make that quadratic.
+//
+// 🔴 The sizes are not hypothetical: the viewer of these documents calls a
+// hundred thousand entries ordinary, and the largest record this build reads
+// holds about four hundred thousand rows. Asking each of the first for one of
+// the second by walking the list is ten billion comparisons for a verb that
+// runs in somebody's pipeline.
+//
+// The first answer for a row wins, which is the answer the scan gave. A record
+// naming one row twice is refused by the model before it reaches here, so the
+// rule matters only for keeping the two the same.
+func byRow(actual response.Record) map[int]response.Row {
+	indexed := make(map[int]response.Row, len(actual.Rows))
+	for _, row := range actual.Rows {
+		if _, already := indexed[row.Number]; !already {
+			indexed[row.Number] = row
+		}
+	}
+	return indexed
 }
 
 func (r *Report) add(finding *Finding, unsettled *Unsettled) {

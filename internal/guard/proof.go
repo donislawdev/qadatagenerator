@@ -360,6 +360,7 @@ var Guards = []Guard{
 	{"the count a child states is exact and the cardinality bounds how it is spread", "TestTheChildCountIsExactAndTheParentsShareIt", "internal/adapter/format", ByMutation},
 	{"a count the bounds cannot reach is refused with the arithmetic rather than trimmed", "TestACountTheBoundsCannotReachIsRefusedWithTheArithmetic", "internal/adapter/format", ByMutation},
 	{"the nested form puts children inside the parent they belong to", "TestTheNestedFormPutsChildrenInsideTheirParent", "internal/adapter/format", ByMutation},
+	{"the tree carries every grandchild under the parent it belongs to, at three levels where a subset stops standing in for the whole table", "TestTheTreeCarriesEveryGrandchildUnderTheParentItBelongsTo", "internal/adapter/format", ByMutation},
 	{"one file per table means one file per table", "TestTheFlatObjectFormWritesOneFilePerTable", "internal/adapter/format", ByMutation},
 	{"a value carrying a delimiter or a quote survives being written", "TestAValueCarryingTheDelimiterOrAQuoteSurvives", "internal/adapter/format", ByMutation},
 	{"a field asked to be unique never repeats a value", "TestAUniqueFieldNeverRepeatsAValue", "internal/adapter/format", ByMutation},
@@ -372,11 +373,17 @@ var Guards = []Guard{
 	{"a fixed width value too long for its field is refused rather than cut", "TestAFixedWidthValueTooLongForItsFieldIsRefused", "internal/adapter/values", ByMutation},
 	{"bytes and characters are counted apart, which is why the unit is carried", "TestBytesAndCharactersAreCountedDifferently", "internal/adapter/values", ByMutation},
 	{"a generator this build lacks is refused by name and the known ones can be listed", "TestAnUnknownGeneratorIsRefusedAndTheKnownOnesCanBeListed", "internal/adapter/values", ByMutation},
+	{"what this build says it can produce is what it produces, for every generator in every locale", "TestWhatThisBuildSaysItCanProduceIsWhatItProduces", "internal/adapter/values", ByMutation},
+	{"drawing under a limit leaves the shared word list as it was, so the next row draws from the list somebody chose", "TestDrawingUnderALimitLeavesTheSharedListAlone", "internal/adapter/values", ByMutation},
+	{"a generator this build cannot fill in the recipe's locale is refused by the plan rather than on the first row", "TestAGeneratorTheLocaleCannotFillIsRefusedByThePlan", "internal/app/generate", ByMutation},
+	{"validate refuses the generator and locale pair that generate refuses, so the two verbs agree about one file", "TestAGeneratorTheLocaleCannotFillIsAProblem", "internal/app/validate", ByMutation},
 	{"the role a field plays comes from its generator and not from the name of the column", "TestTheRoleComesFromTheGeneratorAndOnlyTwoPlayOne", "internal/adapter/values", ByMutation},
 	{"every drawn date is a day that exists", "TestEveryDrawnDateIsARealDay", "internal/adapter/values", ByMutation},
 
 	// --- the disk, where a mistake costs somebody else's files ---------------
 	{"nothing appears under its real name before the whole run has succeeded", "TestNothingAppearsUnderItsRealNameBeforeTheRunSucceeds", "internal/adapter/store", ByMutation},
+	{"two things in one run never share a destination, whether or not the run may overwrite", "TestTwoThingsInOneRunCannotShareAName", "internal/adapter/store", ByMutation},
+	{"a rename that fails takes back the ones that had already succeeded", "TestARenameThatFailsTakesTheEarlierOnesBack", "internal/adapter/store", ByMutation},
 	{"a run that ends early takes its temporary files with it", "TestADiscardedRunLeavesNothingBehind", "internal/adapter/store", ByMutation},
 	{"an existing file stops the run unless overwriting was asked for", "TestAnExistingFileStopsTheRunUnlessOverwritingIsAllowed", "internal/adapter/store", ByMutation},
 	{"a name the file system would not keep is refused rather than repaired", "TestANameTheFileSystemWouldNotKeepIsRefusedRatherThanRepaired", "internal/adapter/store", ByMutation},
@@ -384,6 +391,7 @@ var Guards = []Guard{
 	// --- the verb, as somebody's pipeline meets it ---------------------------
 	{"a second run into the same directory is refused rather than overwriting", "TestASecondRunIntoTheSameDirectoryIsRefused", "internal/cli", ByMutation},
 	{"a dataset carrying identifiers says about itself that it describes nobody", "TestTheNoteSaysTheValuesAreSynthetic", "internal/cli", ByMutation},
+	{"the record of the run names the settings the command line overrode, which is what it exists to answer", "TestTheNoteSaysWhichSettingsTheCommandLineOverrode", "internal/cli", ByMutation},
 	{"a dry run answers the same arithmetic and touches no disk", "TestADryRunAnswersWithoutWritingAnything", "internal/cli", ByMutation},
 	{"the summary says what the run did, and every count agrees with its word", "TestTheSummarySaysWhatTheRunDidAndCountsAgreeWithTheirWords", "internal/cli", ByMutation},
 	{"every capability of the command line is answered for from the side of the window", "TestEveryCapabilityOfTheCommandLineIsAnsweredForFromTheWindow", "internal/cli", ByMutation},
@@ -600,6 +608,7 @@ var Guards = []Guard{
 	{"every kind of damage is ordered before any repeats", "TestEveryKindOfDamageIsOrderedBeforeAnyRepeats", "internal/app/corrupt", ByMutation},
 	{"which rows are damaged follows from the seed", "TestAShareOfRowsDamagesAboutThatShare", "internal/app/corrupt", ByMutation},
 	{"a column the policy excluded is never damaged", "TestAnExcludedColumnIsNeverAimedAt", "internal/app/corrupt", ByMutation},
+	{"an exclusion emptying any entity is refused before the run, and not only one emptying the first", "TestAnExclusionThatEmptiesAnyEntityIsRefused", "internal/app/corrupt", ByMutation},
 	{"damage is aimed at a column of the scheme it covers when the dataset has one", "TestDamageMeantForOneSchemeLandsOnThatScheme", "internal/app/corrupt", ByMutation},
 	{"a policy that excludes everything is refused rather than silent", "TestAPolicyThatExcludesEverythingIsRefused", "internal/app/corrupt", ByMutation},
 	// 🔴 The same statement as the recipe reader's entry above, in the second
@@ -814,6 +823,8 @@ var Guards = []Guard{
 		"TestTheSettingsAreOutOfReachWhileARunIsGoingOn", "internal/gui/takeview", ByMutation},
 	{"asking for the window during a run stops the run before the process ends",
 		"TestAskingForTheWindowDuringARunStopsItFirst", "internal/gui/takeview", ByMutation},
+	{"a separator that is briefly unusable does not take the open file away, and the next usable one brings it back",
+		"TestASeparatorThatIsBrieflyUnusableDoesNotTakeTheFileAway", "internal/gui/takeview", ByMutation},
 }
 
 // CountByProof returns how many guards are in each state.

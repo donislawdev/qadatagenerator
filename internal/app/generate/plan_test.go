@@ -6,6 +6,7 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
 // knownValues is a source of values that answers about names rather than
@@ -19,6 +20,9 @@ type knownValues struct {
 	generators []string
 	types      map[string]string
 	produces   []string
+	// missing names the generators this stub cannot fill, by locale, which is
+	// the pair a build can carry one half of.
+	missing map[string]string
 }
 
 func (v knownValues) Known(generator string) bool {
@@ -49,6 +53,13 @@ func (v knownValues) ProducesType(kind string) bool {
 }
 
 func (v knownValues) Produce(generate.Request) (string, error) { return "", nil }
+
+func (v knownValues) CanProduce(generator, locale string) (bool, string) {
+	if v.missing[generator] == locale {
+		return false, "this build has no " + generator + " for " + locale
+	}
+	return true, ""
+}
 
 func oneEntity(fields ...recipe.Field) recipe.Recipe {
 	return recipe.Recipe{
@@ -109,6 +120,49 @@ func TestRowsThatDoNotAddUpToACountableTotalAreRefused(t *testing.T) {
 	}
 	if plan.TotalRows() != 6 {
 		t.Errorf("the plan counts %d rows for two tables of three", plan.TotalRows())
+	}
+}
+
+// A generator this build carries and cannot fill in the recipe's locale is
+// refused by the plan, which is what a dry run answers from.
+//
+// 🔴 The name and the locale are two halves of one question and only the first
+// used to be asked. A recipe naming a generator whose word list this build does
+// not carry for that locale passed the plan, so validate called it usable and a
+// dry run reported how many rows it would write, while the real run failed on
+// the first row. The plan is meant to be the first phase of the run rather than
+// a separate estimator, and this is the line where it stopped being one.
+func TestAGeneratorTheLocaleCannotFillIsRefusedByThePlan(t *testing.T) {
+	values := knownValues{
+		generators: []string{"city"},
+		missing:    map[string]string{"city": "en-US"},
+	}
+	rec := recipe.Recipe{
+		Seed: "plan", Locale: "en-US",
+		Entities: []recipe.Entity{{Name: "place", Count: 2, HasCount: true,
+			Fields: []recipe.Field{{Name: "town", Generator: "city"}}}},
+	}
+
+	_, err := generate.Prepare(rec, values)
+	if err == nil {
+		t.Fatal("the plan accepted a generator this build cannot fill in that locale")
+	}
+	if kind := fault.KindOf(err); kind != fault.Config {
+		t.Errorf("a recipe asking for the impossible is %v rather than a configuration failure",
+			kind)
+	}
+	if !strings.Contains(err.Error(), "entities.place.fields.town") {
+		t.Errorf("the refusal does not name the field: %v", err)
+	}
+	if !strings.Contains(err.Error(), "en-US") {
+		t.Errorf("the refusal does not name the locale, which is half the answer: %v", err)
+	}
+
+	// The same recipe in a locale this stub can fill has to go through, or the
+	// refusal above would be about the generator rather than about the pair.
+	rec.Locale = "pl-PL"
+	if _, err := generate.Prepare(rec, values); err != nil {
+		t.Errorf("the same generator was refused in a locale that carries it: %v", err)
 	}
 }
 

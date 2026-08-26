@@ -79,6 +79,16 @@ type Values interface {
 	// this from the run instead would mean either a failure late or a quiet
 	// blank column, and the blank column is what this project calls silence.
 	ProducesType(kind string) bool
+	// CanProduce reports whether this build can fill a field with that
+	// generator in a locale, and says why not when it cannot.
+	//
+	// 🔴 Known answers about the name and this answers about the pair. A build
+	// carrying a generator and not the word list it draws on in the locale
+	// asked for used to pass every check and fail on the first row, so validate
+	// called such a recipe usable and a dry run counted the rows of a dataset
+	// that could not be made. The locale travels as an argument because the
+	// question is about the recipe rather than about whoever is asking.
+	CanProduce(generator, locale string) (bool, string)
 	// RoleOf returns the role a generator plays in a consistency rule, and
 	// whether it plays one at all.
 	//

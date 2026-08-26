@@ -429,6 +429,14 @@ func set(target *widget.RichText, line Line, style fyne.TextStyle) {
 	if name == "" {
 		name = palette.NameText
 	}
+	// The length is asked about before the position is taken. Nothing in this
+	// package builds a rich text without a segment, so this cannot happen
+	// today, and the cells are drawn from a pool the toolkit hands back and
+	// forth. A panic in a screen takes the window with it, and one line is
+	// cheaper than the belief that the pool will always hold what it held.
+	if len(target.Segments) == 0 {
+		return
+	}
 	segment, ok := target.Segments[0].(*widget.TextSegment)
 	if !ok {
 		return

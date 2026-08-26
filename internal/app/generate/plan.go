@@ -88,7 +88,7 @@ func Prepare(rec recipe.Recipe, values Values) (Plan, error) {
 
 	total := 0
 	for _, entity := range ordered {
-		if err := checkGenerators(entity, values, &plan); err != nil {
+		if err := checkGenerators(entity, values, rec.Locale, &plan); err != nil {
 			return Plan{}, err
 		}
 		planned, err := planEntity(entity, produced, source)
@@ -253,7 +253,7 @@ func expand(shares []int) []int {
 // configuration failure rather than a note. The validator already reports such
 // a name as unchecked, and this is the half that can finally tell a typo from a
 // setting we simply do not read.
-func checkGenerators(entity recipe.Entity, values Values, plan *Plan) error {
+func checkGenerators(entity recipe.Entity, values Values, locale string, plan *Plan) error {
 	for _, field := range entity.Fields {
 		where := "entities." + entity.Name + ".fields." + field.Name
 		switch {
@@ -275,6 +275,14 @@ func checkGenerators(entity recipe.Entity, values Values, plan *Plan) error {
 		case !values.Known(field.Generator):
 			return fault.New(fault.Config, where+": this build has no generator called "+
 				strconv.Quote(field.Generator)+". It has "+join(values.Names()))
+		default:
+			// 🔴 The name exists and the pair may still not. Asking here is
+			// what stops a dry run from counting rows that cannot be produced
+			// and validate from calling such a recipe usable, both of which it
+			// did until 2026-08-26.
+			if fine, why := values.CanProduce(field.Generator, locale); !fine {
+				return fault.New(fault.Config, where+": "+why)
+			}
 		}
 	}
 	return nil

@@ -42,6 +42,7 @@ type Set struct {
 	dir       string
 	overwrite bool
 	pending   map[string]string
+	destined  map[string]bool
 	reserved  map[string]bool
 	open      []*os.File
 }
@@ -52,6 +53,7 @@ func New(dir string, overwrite bool) *Set {
 		dir:       dir,
 		overwrite: overwrite,
 		pending:   make(map[string]string),
+		destined:  make(map[string]bool),
 		reserved:  make(map[string]bool),
 	}
 }
@@ -66,6 +68,9 @@ func (s *Set) Create(name string) (*os.File, error) {
 		return nil, err
 	}
 	final := filepath.Join(s.dir, name)
+	if err := s.ownName(name, final); err != nil {
+		return nil, err
+	}
 	if err := os.MkdirAll(s.dir, 0o755); err != nil {
 		return nil, fault.Wrap(fault.IO, err, "cannot make the output directory "+s.dir)
 	}
@@ -80,9 +85,38 @@ func (s *Set) Create(name string) (*os.File, error) {
 		s.release(s.marker(name))
 		return nil, fault.Wrap(fault.IO, err, "cannot open a temporary file in "+s.dir)
 	}
+	s.destined[final] = true
 	s.pending[temporary.Name()] = final
 	s.open = append(s.open, temporary)
 	return temporary, nil
+}
+
+// ownName refuses a destination this run has already taken for something else.
+//
+// # Why this is separate from claim, which answers the same question
+//
+// 🔴 claim answers it about somebody else and steps aside entirely when
+// overwriting is allowed, because overwriting says a file already on the disk
+// may be replaced. It never said a run may replace its own work, and until
+// 2026-08-26 it did: two things written under one name both reached Commit,
+// which renamed one over the other and reported success. A recipe with an
+// entity called run-note wrote two records, said so on the log, and left a
+// directory holding only the note. Nothing failed, nothing was missing from any
+// count, and the rows were gone.
+//
+// # Why the message tells the reader to rename the entity
+//
+// Of the two things colliding, only one is theirs. The names this tool reserves
+// for the record of the run and for the manifest are fixed by the tool, so the
+// only end of the collision anybody can move is the entity.
+func (s *Set) ownName(name, final string) error {
+	if !s.destined[final] {
+		return nil
+	}
+	return fault.New(fault.Config, fmt.Sprintf(
+		"this run writes %s twice, because an entity is named after a file the run itself "+
+			"leaves beside the data. One of the two would replace the other and nothing would "+
+			"say so. Rename the entity", name))
 }
 
 // marker is the hidden file that says a run holds this name.
@@ -164,6 +198,23 @@ func (s *Set) release(marker string) {
 // It renames in a sorted order so that a run interrupted between two renames
 // leaves the same partial state every time rather than one that depends on how
 // Go happened to iterate a map.
+//
+// # Why a rename that fails takes the earlier ones back
+//
+// 🔴 Renaming several files is not one operation, and no system offers one. A
+// failure part way through used to return the error and stop, leaving the files
+// already renamed under their real names: half a dataset, no record of the run,
+// no manifest, and the header of this package promising the opposite. The
+// triggers are ordinary rather than exotic, and on Windows they are daily: a
+// file held open by another program, a full disk, a permission.
+//
+// So the failure is undone. Each rename that succeeded is put back under the
+// temporary name it came from, which returns the directory to what it held
+// before, and Discard then removes those temporary files as it always did. What
+// this does not buy is atomicity: a machine losing power between two renames
+// still leaves the halfway state, because nothing short of writing the whole set
+// into one directory and renaming that directory would fix it. That is stated
+// rather than implied, and the alternative is in the backlog.
 func (s *Set) Commit() error {
 	for _, file := range s.open {
 		if err := file.Close(); err != nil {
@@ -172,11 +223,17 @@ func (s *Set) Commit() error {
 	}
 	s.open = nil
 
+	moved := make([]string, 0, len(s.pending))
 	for _, temporary := range sortedKeys(s.pending) {
 		final := s.pending[temporary]
 		if err := os.Rename(temporary, final); err != nil {
-			return fault.Wrap(fault.IO, err, "cannot put "+final+" in place")
+			return fault.Wrap(fault.IO, err, "cannot put "+final+" in place"+s.putBack(moved))
 		}
+		moved = append(moved, temporary)
+	}
+
+	for _, temporary := range moved {
+		final := s.pending[temporary]
 		delete(s.pending, temporary)
 		// Once the real file is in place it is the thing that stops the next
 		// run, so the marker has done its job and goes. Leaving it would block
@@ -185,6 +242,27 @@ func (s *Set) Commit() error {
 		s.release(filepath.Join(filepath.Dir(final), "."+filepath.Base(final)+".claim"))
 	}
 	return nil
+}
+
+// putBack undoes the renames that succeeded, and says what it could not undo.
+//
+// It reports by returning text rather than an error, because it runs on a path
+// that is already failing and the reader needs one sentence naming both the
+// failure and what is still on the disk because of it. Silence here would be the
+// worst of the three: a directory holding files nobody was told about.
+func (s *Set) putBack(moved []string) string {
+	var stuck []string
+	for index := len(moved) - 1; index >= 0; index-- {
+		temporary := moved[index]
+		if err := os.Rename(s.pending[temporary], temporary); err != nil {
+			stuck = append(stuck, s.pending[temporary])
+		}
+	}
+	if len(stuck) == 0 {
+		return ""
+	}
+	sort.Strings(stuck)
+	return ". These were written and could not be taken back: " + strings.Join(stuck, ", ")
 }
 
 // Discard removes everything this run made. It is what a signal handler calls,

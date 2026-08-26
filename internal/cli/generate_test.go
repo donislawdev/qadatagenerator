@@ -99,6 +99,71 @@ func TestTheNoteSaysTheValuesAreSynthetic(t *testing.T) {
 	}
 }
 
+// A setting the command line overrode is named in the note beside the data.
+//
+// # Why this is not a detail
+//
+// 🔴 The note exists to answer one question: why two runs of one recipe gave
+// different data. A seed from a flag is the commonest reason for that, and the
+// note recorded the overridden value while saying nothing about where it came
+// from, so the field that answers the question was empty in exactly the runs
+// that raise it. The log said it and the log stays in the pipeline while the
+// data travels, which is the whole reason this file exists.
+//
+// The second half asks for the empty list on a run with no overrides, because a
+// null where a list was is a change in the document for whoever parses it.
+func TestTheNoteSaysWhichSettingsTheCommandLineOverrode(t *testing.T) {
+	dir := t.TempDir()
+	out := filepath.Join(dir, "data")
+	path := recipeIn(t, dir, smallRecipe(out))
+
+	if got := run(commandGenerate, "--seed", "OVERRIDDEN", path); got.code != 0 {
+		t.Fatalf("the run ended with %d: %s", got.code, got.log)
+	}
+	note := noteIn(t, out)
+	if len(note.Overrides) != 1 {
+		t.Fatalf("one setting came from the command line and the note carries %+v", note.Overrides)
+	}
+	if note.Overrides[0].Setting != "seed" {
+		t.Errorf("the note names %q as the overridden setting", note.Overrides[0].Setting)
+	}
+	if note.Overrides[0].FromFlag != "OVERRIDDEN" {
+		t.Errorf("the note does not carry the value from the flag: %+v", note.Overrides[0])
+	}
+	if note.Overrides[0].FromRecipe == "" {
+		t.Error("the note does not say what the recipe asked for, which is half the answer")
+	}
+	if note.Seed != "OVERRIDDEN" {
+		t.Errorf("the note records the seed as %q rather than the one the run used", note.Seed)
+	}
+
+	plain := filepath.Join(dir, "plain")
+	if got := run(commandGenerate, recipeIn(t, dir, smallRecipe(plain))); got.code != 0 {
+		t.Fatalf("the run with nothing overridden ended with %d: %s", got.code, got.log)
+	}
+	read, err := os.ReadFile(filepath.Join(plain, runNoteName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(read), `"overrides": []`) {
+		t.Error("a run with nothing overridden writes something other than an empty list")
+	}
+}
+
+// noteIn reads the record of the run a verb left beside its data.
+func noteIn(t *testing.T, out string) runNote {
+	t.Helper()
+	read, err := os.ReadFile(filepath.Join(out, runNoteName))
+	if err != nil {
+		t.Fatalf("cannot read the note: %v", err)
+	}
+	var note runNote
+	if err := json.Unmarshal(read, &note); err != nil {
+		t.Fatalf("the note is not a document a pipeline can read: %v", err)
+	}
+	return note
+}
+
 // A second run into the same directory stops rather than overwriting, and says
 // what to do instead.
 func TestASecondRunIntoTheSameDirectoryIsRefused(t *testing.T) {

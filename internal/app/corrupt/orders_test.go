@@ -9,6 +9,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
 // aCatalog builds a catalog of entries with the given identifiers, all of them
@@ -139,6 +140,49 @@ func TestAnExcludedColumnIsNeverAimedAt(t *testing.T) {
 			}
 		}
 	}
+}
+
+// An exclusion that empties any entity is refused, and not only one that
+// empties the first.
+//
+// 🔴 The check used to answer as soon as one entity kept a field, so it was
+// about the first entity rather than about the recipe. An exclusion emptying
+// the second passed, the run made every row and every temporary file, and the
+// failure arrived at the end as exit code 1 with a sentence telling the reader
+// to report a defect in the tool. The recipe was theirs and the fault was
+// visible before a single row existed, which is why the second half of this
+// test asks for the exit kind and not only for the refusal.
+func TestAnExclusionThatEmptiesAnyEntityIsRefused(t *testing.T) {
+	described := aCatalog(t, "L2.a.one")
+	policy := recipe.Policy{Layers: []string{"L2"}, Rows: "100%", ExcludeFields: []string{"drop"}}
+
+	_, err := corrupt.NewSelector(policy, described, twoEntities(), seed.New("orders"))
+	if err == nil {
+		t.Fatal("an exclusion emptying the second entity was accepted")
+	}
+	if kind := fault.KindOf(err); kind != fault.Config {
+		t.Errorf("a policy the reader wrote is %v rather than a configuration failure", kind)
+	}
+	if !strings.Contains(err.Error(), "order") {
+		t.Errorf("the refusal does not name the entity it emptied: %v", err)
+	}
+	if strings.Contains(err.Error(), "customer") {
+		t.Errorf("the refusal names an entity that still had a field: %v", err)
+	}
+}
+
+// twoEntities is a schema whose second entity has one field and whose first has
+// two, which is the shape in which a check that stops at the first entity looks
+// exactly like one that does not.
+func twoEntities() recipe.SchemaView {
+	return recipe.Recipe{Seed: "s", Locale: "pl-PL", Entities: []recipe.Entity{
+		{Name: "customer", Count: 10, HasCount: true, Fields: []recipe.Field{
+			{Name: "city", Type: "string"}, {Name: "keep", Type: "string"},
+		}},
+		{Name: "order", Count: 10, HasCount: true, Fields: []recipe.Field{
+			{Name: "drop", Type: "string"},
+		}},
+	}}
 }
 
 // schemeCatalog builds one entry aimed at identifiers of named schemes, which
