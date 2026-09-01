@@ -12,6 +12,17 @@ repository once they are released.
 
 ### Added
 
+- **The window stays answerable while it reads a file.** Choosing a large file,
+  dropping one onto the window, changing the field separator or opening a
+  manifest no longer freezes the window for as long as the reading takes. The
+  screen says what it is reading and gives everything back when it is done, and
+  the button that damages a file is unavailable while the description of that
+  file is being replaced.
+- **Both panels of the take and corrupt screen scroll from the keyboard.** Down,
+  Up, Page Down, Page Up, Home and End drive whichever panel holds the keyboard,
+  and a frame says which one that is. Everything on that screen can now be
+  reached without a mouse, including while a run is going on, so you can read
+  what the file holds while it is being damaged.
 - **A manifest browser in the window.** Open the manifest a run left beside its
   dataset and see what that run promised: what was damaged, where, what your
   application should do about it, and how much each of those expectations is
@@ -61,6 +72,14 @@ repository once they are released.
   dataset.
 
 ### Fixed
+
+- **Closing the window from outside no longer leaves a run's working files
+  behind.** Stopping the container, logging out or shutting the machine down
+  during a run now ends that run first and gives the window up once it has, the
+  way the close button already did and the way the command line already did.
+  Until now those left temporary files and the marker naming what the run was
+  about to write, and the next run refused because of a marker that no longer
+  meant anything.
 
 - **The nested JSON form put records of the third level under the wrong parent.**
   A recipe with three levels of relation, such as customers holding orders

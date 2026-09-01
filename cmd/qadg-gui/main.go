@@ -26,6 +26,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/responsejson"
 	"github.com/donislawdev/qadatagenerator/internal/gui/about"
+	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/shell"
@@ -49,7 +50,7 @@ func main() {
 	browser := manifestview.New(text, window, manifestview.Readers{
 		Manifest: manifestjson.Load,
 		Response: responsejson.Load,
-	})
+	}, background.ReadInBackground)
 	// The catalog of damage is data compiled into this binary, so a failure to
 	// read it means the binary itself is not what it was built as. There is
 	// nothing a person could do about it from inside a window and nothing this
@@ -59,10 +60,14 @@ func main() {
 		fmt.Fprintln(os.Stderr, "this build cannot read its own catalog of damage:", err)
 		os.Exit(1)
 	}
-	// The reader and the place a run happens are both handed in, which is what
-	// lets every state of that screen be reached in a test without a disk and
-	// without a goroutine.
-	damage := takeview.New(text, window, described, take.Open, takeview.InBackground)
+	// The reader and the three places work happens are all handed in, which is
+	// what lets every state of that screen be reached in a test without a disk
+	// and without a goroutine.
+	damage := takeview.New(text, window, described, take.Open, background.Work{
+		Run:   background.InBackground,
+		Read:  background.ReadInBackground,
+		Watch: background.WatchForClosing,
+	})
 
 	frame := shell.New([]shell.Screen{
 		{Name: text.T(i18n.ScreenTake), Content: damage.Content(), OnDropped: damage.Dropped},

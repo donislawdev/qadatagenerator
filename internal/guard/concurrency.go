@@ -49,6 +49,17 @@ import (
 // third deserves the same paragraph, and if the paragraph is hard to write the
 // concurrency is probably in the wrong place.
 //
+// 🔴 That second entry moved on 2026-09-01, from internal/gui/takeview to a
+// package of its own, and the move is the point rather than a tidying. Two more
+// things in the window turned out to need the same treatment and neither of them
+// is on the screen that runs: reading somebody's file, which held the drawing
+// thread for the length of the file on every screen that opens one, and noticing
+// that the system has asked this program to stop, which the window did not do at
+// all. Filing each beside the screen that wants it would have grown this list by
+// one entry per screen, and a list nobody can read in one sitting is a list that
+// stops being read. The entry is still one file, still one surface, and the
+// paragraph above is still the whole of what it allows.
+//
 // # Why the third entry is here, and why it is not that shape
 //
 // 🔴 It starts no work at all, and saying otherwise would be the first step
@@ -96,7 +107,7 @@ import (
 // and that nothing mutable is shared, are still on whoever writes the code.
 var ConcurrencyAllowed = map[string]bool{
 	"internal/cli/signals.go":                    true,
-	"internal/gui/takeview/background.go":        true,
+	"internal/gui/background/background.go":      true,
 	"internal/adapter/provider/corpus/corpus.go": true,
 }
 

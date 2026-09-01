@@ -38,6 +38,7 @@ manifest.open: Open manifest...
 manifest.open-response: Open application response...
 manifest.empty: No manifest is open. Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data.
 manifest.unreadable: This file could not be read as a manifest.
+manifest.reading: Reading this file. A large manifest takes a moment, and the screen answers again as soon as it has been read.
 
 manifest.heading.run: This run
 manifest.heading.entries: Ordered damage
@@ -106,6 +107,7 @@ take.choose: Choose a file
 take.empty: Choose a file this tool did not make. Nothing is read until you choose one, and nothing is written until you ask for it.
 take.drop: You can also drop a file onto this window.
 take.unreadable: This file could not be read.
+take.reading: This file is being read, which means walking all of it. Nothing is written while that goes on, and the screen answers again as soon as it knows what the file holds.
 
 take.heading.file: What this file holds
 take.heading.settings: What to damage

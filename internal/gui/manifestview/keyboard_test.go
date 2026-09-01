@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
@@ -44,7 +45,7 @@ func marked(style fyne.TextStyle) bool { return style.Bold && style.Underline }
 // focused. A mark drawn on that answer stays behind on a table nobody is in,
 // pointing at a place the keyboard has left.
 func TestTheCellTheKeyboardStandsOnIsMarkedAndTheMarkLeavesWithIt(t *testing.T) {
-	view := New(i18n.English, nil, Readers{})
+	view := New(i18n.English, nil, Readers{}, background.ReadHere)
 	rows := []Row{sample(), sample(), sample()}
 	entries, ok := view.table(rows).(*keyboardTable)
 	if !ok {
@@ -142,7 +143,7 @@ func inkOf(t *testing.T, object fyne.CanvasObject) int {
 // came second. Nothing about the drawing said so, because the convenient way of
 // building a border hands the middle over first and the edges after it.
 func TestTheKeyboardMeetsTheButtonsBeforeTheEntries(t *testing.T) {
-	view := New(i18n.English, nil, Readers{})
+	view := New(i18n.English, nil, Readers{}, background.ReadHere)
 	content := view.Content()
 	view.show(view.rendered(Screen{Rows: []Row{sample(), sample()}}))
 

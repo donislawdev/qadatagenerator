@@ -175,7 +175,7 @@ var Guards = []Guard{
 	{"the keyboard meets the file before everything the file is used for", "TestTheKeyboardMeetsTheFileBeforeEverythingItIsUsedFor", "internal/gui/takeview", ByMutation},
 	{"the keyboard follows the two buttons of a run as they take each other's place", "TestTheKeyboardFollowsTheButtonsOfARun", "internal/gui/takeview", ByMutation},
 	{"a run leaves nobody standing on a setting it has put out of reach", "TestARunDoesNotLeaveTheKeyboardOnSomethingItPutOutOfReach", "internal/gui/takeview", ByMutation},
-	{"the keyboard is given back after a Tab pressed into nothing", "TestTheKeyboardIsGivenBackAfterATabIntoNothing", "internal/gui/takeview", ByMutation},
+	{"the keyboard is given back to somebody who started a run with it and then reached for the mouse", "TestTheKeyboardIsGivenBackToSomebodyWhoReachedForTheMouse", "internal/gui/takeview", ByMutation},
 	{"a run made with the mouse leaves the keyboard where the mouse left it", "TestARunStartedWithTheMouseLeavesTheKeyboardAlone", "internal/gui/takeview", ByMutation},
 	{"somebody who walks away from a run they started is not walked back", "TestSomebodyWhoWalksAwayFromARunIsNotWalkedBack", "internal/gui/takeview", ByMutation},
 	{"the keyboard has somewhere to go when the control that arrived cannot take it", "TestTheKeyboardHasSomewhereToGoWhenTheButtonCannotTakeIt", "internal/gui/takeview", ByMutation},
@@ -193,6 +193,23 @@ var Guards = []Guard{
 	{"the frame says where the keyboard is, and stops saying it when it leaves", "TestTheFrameSaysWhereTheKeyboardIs", "internal/gui/parts", ByMutation},
 	{"the frame is thick enough to arrive on the screen", "TestTheFrameIsThickEnoughToBeSeen", "internal/gui/parts", ByMutation},
 	{"a button nobody can press with the pointer stays unpressable from the keyboard", "TestADisabledButtonIgnoresEnter", "internal/gui/parts", ByMutation},
+	{"both panes of the take and corrupt screen can be read without a mouse", "TestBothPanesOfThisScreenCanBeReadWithoutAMouse", "internal/gui/takeview", ByMutation},
+	{"reading somebody's file happens somewhere other than the thread that draws, and the screen says so", "TestReadingAFileHappensSomewhereOtherThanTheThreadThatDraws", "internal/gui/takeview", ByMutation},
+	{"nothing damages a file while the description of it is being replaced", "TestNoRunBeginsWhileTheFileIsBeingReadAgain", "internal/gui/takeview", ByMutation},
+	{"an answer about a file nobody is waiting for any more is not drawn", "TestAnAnswerAboutAFileNobodyIsWaitingForIsNotDrawn", "internal/gui/takeview", ByMutation},
+	{"the system asking this program to stop ends the run before the window is given up", "TestTheSystemAskingThisProgramToStopEndsTheRunFirst", "internal/gui/takeview", ByMutation},
+	{"a run that ends on its own gives the two signals back", "TestARunThatEndsOnItsOwnGivesTheSignalsBack", "internal/gui/takeview", ByMutation},
+	{"a signal arriving after a run gives the window up rather than arming the next run to close it", "TestASignalThatArrivesAfterTheRunGivesTheWindowUpAtOnce", "internal/gui/takeview", ByMutation},
+	{"reading a document says so on the browser and puts its controls out of reach", "TestReadingADocumentSaysSoAndPutsTheControlsOutOfReach", "internal/gui/manifestview", ByMutation},
+	{"an answer about a document nobody is waiting for any more is not drawn", "TestAnAnswerAboutADocumentNobodyIsWaitingForIsNotDrawn", "internal/gui/manifestview", ByMutation},
+	{"a watch released twice does not take the window down with it", "TestReleasingAWatchTwiceIsSafe", "internal/gui/background", ByMutation},
+	{"a stopper answers the same thing however often it is asked", "TestAStopperAnswersTheSameThingHoweverOftenItIsAsked", "internal/gui/background", ByMutation},
+	// There is a third test in that package, TestARealSignalReachesTheWindow,
+	// and it is deliberately absent for the same reason its twin on the
+	// command line is. It is the only one proving the runtime delivers the
+	// signals this window asks for, and it cannot run on Windows, where the
+	// mutation runner runs. An entry claiming it was proven by mutation would
+	// be a sentence nobody has checked.
 	{"a response record opened as a manifest is told apart rather than judged as one", "TestAResponseRecordOpenedAsAManifestIsToldApart", "internal/adapter/manifestjson", ByMutation},
 
 	// --- the register guarding the register ---------------------------------

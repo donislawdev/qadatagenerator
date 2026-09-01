@@ -14,6 +14,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/domain/response"
+	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 )
 
 // chosenFile stands in for what a file chooser hands back.
@@ -34,7 +35,7 @@ func (c chosenFile) URI() fyne.URI            { return storage.NewFileURI(c.path
 // all against a real manifest. What each part says is checked next door,
 // against the model, which is where those questions can be asked precisely.
 func TestTheScreenDrawsInBothStates(t *testing.T) {
-	view := New(i18n.English, nil, Readers{})
+	view := New(i18n.English, nil, Readers{}, background.ReadHere)
 	if view.Content() == nil {
 		t.Fatal("the screen builds nothing at all")
 	}
@@ -75,7 +76,7 @@ func TestTheScreenDrawsInBothStates(t *testing.T) {
 // A column nobody defined is headed with nothing rather than taking the view
 // down, which is the same bargain the row makes about its cells.
 func TestAColumnWithNoHeadingIsEmptyRatherThanFatal(t *testing.T) {
-	view := New(i18n.English, nil, Readers{})
+	view := New(i18n.English, nil, Readers{}, background.ReadHere)
 	for _, absent := range []int{-1, len(columnNames)} {
 		if got := view.columnName(absent); got != "" {
 			t.Errorf("column %d is headed %q", absent, got)
@@ -90,7 +91,7 @@ func TestAColumnWithNoHeadingIsEmptyRatherThanFatal(t *testing.T) {
 // an error message would tell a person something went wrong when they were the
 // one who decided nothing should.
 func TestACancelledChooserChangesNothingAndAFailedOneSaysSo(t *testing.T) {
-	view := New(i18n.English, nil, Readers{})
+	view := New(i18n.English, nil, Readers{}, background.ReadHere)
 	before := view.body.Objects[0]
 
 	if _, ok := view.pathOf(nil, nil); ok {
@@ -124,7 +125,7 @@ func TestADocumentThatCannotBeReadLeavesTheScreenSayingWhy(t *testing.T) {
 		Manifest: func(string) (manifest.Manifest, error) {
 			return manifest.Manifest{}, errors.New("this is not a manifest")
 		},
-	})
+	}, background.ReadHere)
 	promised, err := view.read.Manifest("whatever")
 	if err == nil {
 		t.Fatal("the reader handed in for this test did not fail, so the test checks nothing")
@@ -144,7 +145,7 @@ func TestADocumentThatCannotBeReadLeavesTheScreenSayingWhy(t *testing.T) {
 // probe photographed a screen no person can reach by opening a manifest, and
 // the picture was wrong in a way that reads as correct.
 func TestOpeningAManifestFromOutsideReachesTheSameStateAsTheChooser(t *testing.T) {
-	view := New(i18n.English, nil, Readers{})
+	view := New(i18n.English, nil, Readers{}, background.ReadHere)
 	if !view.respond.Disabled() {
 		t.Fatal("the response button is available before there is a manifest to judge against")
 	}
@@ -185,7 +186,7 @@ func TestOpeningAManifestFromOutsideReachesTheSameStateAsTheChooser(t *testing.T
 // The comparison has nothing to say without a manifest, and a screen showing it
 // would be saying it anyway.
 func TestAResponseRecordWithNoManifestIsRefused(t *testing.T) {
-	view := New(i18n.English, nil, Readers{})
+	view := New(i18n.English, nil, Readers{}, background.ReadHere)
 	actual := response.Record{SpecVersion: "0.1", Rows: []response.Row{{Number: 1, Verdict: response.Accepted}}}
 	if view.Compare(actual) {
 		t.Error("a record was compared against a manifest that is not there")

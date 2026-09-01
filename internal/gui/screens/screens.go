@@ -35,6 +35,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/domain/response"
 	"github.com/donislawdev/qadatagenerator/internal/gui/about"
+	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/shell"
 	"github.com/donislawdev/qadatagenerator/internal/gui/takeview"
@@ -129,6 +130,14 @@ type State struct {
 	// anything but RanNothing presses the button, so it also needs the kinds of
 	// damage above, or the screen would refuse the run it was asked for.
 	Ran Ran
+	// Reading leaves the read of the file unanswered, which is the screen a
+	// person looks at while a large one is being walked.
+	//
+	// It is a place of work that never answers rather than a flag the screen
+	// carries, so this reaches the state by the one road a person reaches it
+	// by. A screen told to draw itself as reading would be a picture of a
+	// drawing rather than of a state.
+	Reading bool
 	// Keyboard is applied after the window exists, because focus with no canvas
 	// has nothing to land on.
 	Keyboard Keyboard
@@ -147,7 +156,8 @@ func All() []State {
 // takeStates are the states of the screen that damages somebody else's file,
 // which is the screen with the most of them.
 func takeStates() []State {
-	return append(takeStatesBeforeARun(), takeStatesOfARun()...)
+	states := append(takeStatesBeforeARun(), takeStatesOfTheKeyboard()...)
+	return append(states, takeStatesOfARun()...)
 }
 
 // takeStatesBeforeARun are the states in which nothing has been written.
@@ -172,6 +182,14 @@ func takeStatesBeforeARun() []State {
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 		},
+	}
+}
+
+// takeStatesOfTheKeyboard are the places on this screen the keyboard can stand,
+// which are worth a picture each because what marks them is a colour and a
+// shape rather than a word.
+func takeStatesOfTheKeyboard() []State {
+	return []State{
 		{
 			Name: "take-focus-file",
 			Purpose: "the keyboard on the button that chooses a file, which is the first " +
@@ -188,7 +206,16 @@ func takeStatesBeforeARun() []State {
 			Screen:      0,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 13},
+			Keyboard:    Keyboard{Tabs: 15},
+		},
+		{
+			Name: "take-focus-pane",
+			Purpose: "the keyboard on the pane that says what the file holds, which the " +
+				"toolkit's own scrolling area never lets it reach",
+			Screen:      0,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+			Keyboard:    Keyboard{Tabs: 5},
 		},
 		{
 			Name: "take-focus-damage",
@@ -197,7 +224,15 @@ func takeStatesBeforeARun() []State {
 			Screen:      0,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 22},
+			Keyboard:    Keyboard{Tabs: 24},
+		},
+		{
+			Name: "take-reading",
+			Purpose: "a file being read, which for a file this mode is for means walking " +
+				"all of it while the window stays answerable",
+			Screen:      0,
+			NeedsSource: true,
+			Reading:     true,
 		},
 	}
 }
@@ -225,7 +260,7 @@ func takeStatesOfARun() []State {
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 			Ran:         RanInFlight,
-			Keyboard:    Keyboard{Tabs: 4},
+			Keyboard:    Keyboard{Tabs: 6},
 		},
 		{
 			Name:        "take-written",
@@ -358,8 +393,16 @@ func (s State) Buildable(data Data) (bool, string) {
 // The screen is put into its state through the same calls the file chooser
 // makes, so nothing here can reach a state a person cannot.
 func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
-	view := manifestview.New(text, nil, manifestview.Readers{})
-	takeScreen := takeview.New(text, nil, describedDamage(), take.Open, outcomeOf(state.Ran))
+	view := manifestview.New(text, nil, manifestview.Readers{}, background.ReadHere)
+	// The read happens where it is asked for, because this caller has no
+	// drawing thread to hand anything back to and wants the screen finished by
+	// the time the call returns. Nothing is watching for a signal either: these
+	// screens belong to a test and to a probe rather than to a process somebody
+	// can ask to stop.
+	takeScreen := takeview.New(text, nil, describedDamage(), take.Open, background.Work{
+		Run:  outcomeOf(state.Ran),
+		Read: readingFor(state.Reading),
+	})
 	frame := shell.New([]shell.Screen{
 		{Name: text.T(i18n.ScreenTake), Content: takeScreen.Content(), OnDropped: takeScreen.Dropped},
 		{Name: text.T(i18n.ScreenManifest), Content: view.Content()},
@@ -372,12 +415,37 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 		view.Compare(data.Actual)
 	}
 	if state.NeedsSource && data.SourcePath != "" {
-		// The failure is deliberately not swallowed into an empty screen: a
-		// state that says it needs a file and then draws one that has none is a
-		// picture of something nobody asked for.
-		if err := takeScreen.Open(data.SourcePath); err != nil {
-			panic("the sample source file could not be read: " + err.Error())
-		}
+		takeScreen.Open(data.SourcePath)
+	}
+	if !state.Reading {
+		// A state whose read never answers stops here, because everything below
+		// asks the screen for something only a finished read can give it.
+		settle(takeScreen, state)
+	}
+	frame.Open(state.Screen)
+	return frame.Content()
+}
+
+// settle takes the screen that damages a file the rest of the way, once its
+// file has been read.
+//
+// 🔴 It is a call of its own rather than a branch inside Assemble, and the
+// reason is a mutation that went uncaught on 2026-09-01. Written as an early
+// return, this left Assemble with TWO calls asking the frame for a screen, and
+// the mutation aimed at the one that says every state renders on the first
+// screen then landed on a branch whose state is on the first screen anyway. A
+// guard that had been green for a fortnight was quietly answering about
+// nothing.
+func settle(takeScreen *takeview.View, state State) {
+	// The failure is deliberately not swallowed into an empty screen: a state
+	// that says it needs a file and then draws one that has none is a picture
+	// of something nobody asked for.
+	//
+	// It is asked for after the fact rather than handed back, because the read
+	// no longer happens where it is asked for. The place of work this screen
+	// was given reads where it stands, so by here it has finished.
+	if err := takeScreen.Unread(); err != nil {
+		panic("the sample source file could not be read: " + err.Error())
 	}
 	if len(state.Layers) > 0 {
 		takeScreen.ChooseLayers(state.Layers)
@@ -387,8 +455,18 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 		// by pressing it rather than one only this list can produce.
 		takeScreen.Start()
 	}
-	frame.Open(state.Screen)
-	return frame.Content()
+}
+
+// readingFor is the place a read happens, which for one state is nowhere.
+//
+// A read that never answers is what a person is looking at while a large file
+// is walked, and it is the only way to photograph that state: a read that
+// answers has finished by the time anything could take the picture.
+func readingFor(waiting bool) background.Read {
+	if waiting {
+		return func(func() func()) {}
+	}
+	return background.ReadHere
 }
 
 // outcomeOf is the place a run happens, for a state that wants a particular
@@ -397,7 +475,7 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 // It never carries the work out. What it hands back is what a real run of that
 // shape hands back, by the same road, so the screen cannot tell the difference
 // and the drawing is the drawing of a real outcome.
-func outcomeOf(ran Ran) takeview.Background {
+func outcomeOf(ran Ran) background.Run {
 	return func(_ func() (take.Result, error), done func(take.Result, error)) {
 		switch ran {
 		case RanInFlight:
@@ -408,7 +486,7 @@ func outcomeOf(ran Ran) takeview.Background {
 		case RanPartial:
 			done(sampleRun(samplePartial), nil)
 		case RanStopped:
-			done(take.Result{}, takeview.ErrStopped)
+			done(take.Result{}, background.ErrStopped)
 		case RanFailed:
 			done(take.Result{}, errors.New(sampleFailure))
 		}

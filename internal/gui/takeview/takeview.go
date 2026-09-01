@@ -20,7 +20,7 @@
 package takeview
 
 import (
-	"errors"
+	"path/filepath"
 	"strconv"
 
 	"fyne.io/fyne/v2"
@@ -31,6 +31,7 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
+	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 )
@@ -53,11 +54,33 @@ type View struct {
 	window    fyne.Window
 	described catalog.Catalog
 	openFile  Opener
-	run       Background
+	work      background.Work
 
 	chosen take.Settings
 	opened *take.Opened
 	path   string
+
+	// reading is the file being read right now, and nothing while none is.
+	//
+	// # Why this is not one more value of stage
+	//
+	// stage says what the last RUN left, and reading a file must not throw that
+	// away. The separator is read again on every keystroke, and a person who
+	// corrects a comma to a semicolon after a run has not undone the run.
+	reading string
+	// asked counts the reads asked for, so that an answer which is no longer
+	// the latest question is dropped rather than drawn.
+	//
+	// 🔴 Superseding rather than refusing, and the separator is why. It is
+	// typed one character at a time and each character reads the whole file, so
+	// a keystroke arriving during a read is ordinary. Refusing it would leave
+	// the file read under one separator while the field on screen showed
+	// another, which is the screen describing a file nobody has.
+	asked int
+	// unread is what the last attempt to read a file ended with, kept so that a
+	// caller assembling this screen without a person can say what went wrong
+	// rather than draw an empty screen and call it the state it asked for.
+	unread error
 
 	// What the screen is doing and what the last run left. The stage decides
 	// what is drawn and the two beside it carry what there is to say about it.
@@ -66,7 +89,12 @@ type View struct {
 	failed error
 	// halt is how the run in flight is asked to end, and nothing while there is
 	// none.
-	halt *stopper
+	halt *background.Stopper
+	// releaseWatch stops noticing the system asking this program to end, and is
+	// nothing outside a run. The watch covers the same stretch as the halt
+	// above, because it is the same question asked by somebody other than the
+	// person at the keyboard.
+	releaseWatch func()
 	// closing records that somebody asked for the window while a run was going
 	// on, so that the window can be given to them once the run has stopped.
 	closing bool
@@ -82,8 +110,12 @@ type View struct {
 	empty   *fyne.Container
 	fileBox *fyne.Container
 	// split holds the description apart from the settings, and is put away
-	// while there is no file to describe.
-	split       *container.Split
+	// while there is no file to describe. The two scrolling areas inside it are
+	// kept because each of them is a place the keyboard can stand.
+	split        *container.Split
+	fileScroll   *parts.KeyScroll
+	answerScroll *parts.KeyScroll
+
 	settingsBox *fyne.Container
 	planBox     *fyne.Container
 	runBox      *fyne.Container
@@ -107,21 +139,20 @@ type View struct {
 // New builds the screen.
 //
 // The window is what a file chooser has to appear over and what a run takes
-// over while it is going on. The background is where a run happens, handed in
-// so that every state of this screen can be reached without a goroutine.
+// over while it is going on. The work is where a run happens, where a file is
+// read and how the system asking this program to stop reaches here, all handed
+// in so that every state of this screen can be reached without a goroutine.
 func New(text i18n.Catalogue, window fyne.Window, described catalog.Catalog,
-	openFile Opener, run Background) *View {
+	openFile Opener, work background.Work) *View {
 	view := &View{
 		text: text, window: window, described: described, openFile: openFile,
-		run: run, chosen: take.Defaults(),
+		work: work, chosen: take.Defaults(),
 		empty: container.NewVBox(), fileBox: container.NewVBox(),
 		settingsBox: container.NewVBox(), planBox: container.NewVBox(),
 		runBox: container.NewVBox(),
 	}
 	view.buildControls()
-	view.empty.Objects = []fyne.CanvasObject{
-		wrapped(text.T(i18n.TakeEmpty)), wrapped(text.T(i18n.TakeDrop)),
-	}
+	view.sayNothingIsChosen()
 	view.redraw()
 	return view
 }
@@ -164,10 +195,21 @@ func (v *View) Content() fyne.CanvasObject {
 		widget.NewSeparator(),
 		v.runBox,
 	)
-	split := container.NewHSplit(
-		container.NewVScroll(v.fileBox),
-		container.NewVScroll(answer),
-	)
+	// 🔴 Both panes scroll with the keyboard rather than with the toolkit's own
+	// scrolling area, which answers to the wheel and to nothing else. This
+	// screen is the taller of the two that had one: the description of a file
+	// grows with the number of columns in it, and the settings are ten rows
+	// whatever the window is. Measured on the About screen on 2026-08-24, where
+	// the same absence left 73.6 percent of the content reachable only with a
+	// mouse.
+	//
+	// The cost is stated rather than discovered: each of these is one more
+	// place for the keyboard to stand, so the walk of this screen is two longer
+	// than it was and the stored states that count presses of Tab moved with
+	// it.
+	v.fileScroll = parts.NewKeyScroll(v.fileBox)
+	v.answerScroll = parts.NewKeyScroll(answer)
+	split := container.NewHSplit(v.fileScroll.Framed(), v.answerScroll.Framed())
 	v.split = split
 	body := container.NewVBox(container.NewHBox(v.chooseFile), v.empty)
 	// 🔴 Drawn again now that the split exists. The screen was first drawn while
@@ -189,36 +231,124 @@ func (v *View) Content() fyne.CanvasObject {
 // them to pictures. It carries the whole state change rather than the drawing
 // alone, which is the correction of a drift this project measured on the other
 // screen, where an exported call that only drew reached a state no person can.
-func (v *View) Open(path string) error {
+//
+// # Why it answers nothing
+//
+// 🔴 It used to hand back the failure of the read, and it cannot any more,
+// because the read no longer happens here. Reading a file this mode is for
+// means walking all of it: measured at 11.7 seconds for a hundred thousand
+// rows, which on the thread that draws is a window that stops repainting, stops
+// answering the keyboard and offers nothing to do about it. So the read is
+// handed to the place of work and what it found arrives later. What went wrong
+// is on the screen, and Unread carries it for a caller with nobody looking.
+func (v *View) Open(path string) {
 	if v.busy() {
 		// Nothing may take the file away from a run that is walking it. The
 		// button that chooses one is disabled for the length of a run, and a
 		// file dropped onto the window arrives by another road entirely, which
 		// is why the rule lives here rather than on the control.
-		return errRunInProgress
+		return
 	}
-	opened, err := v.openFile(path, v.chosen)
-	if err != nil {
-		v.opened, v.path = nil, ""
-		v.forgetLastRun()
-		v.showUnreadable(err)
-		return err
-	}
-	if path != v.path {
-		// A different file, so what the last run did is about something else.
-		v.forgetLastRun()
-	}
-	v.opened, v.path = opened, path
-	v.redraw()
-	return nil
+	v.startReading(path, func(opened *take.Opened, err error) {
+		if err != nil {
+			v.opened, v.path = nil, ""
+			v.forgetLastRun()
+			v.showUnreadable(err)
+			return
+		}
+		if path != v.path {
+			// A different file, so what the last run did is about something
+			// else.
+			v.forgetLastRun()
+		}
+		v.opened, v.path = opened, path
+		v.redraw()
+	})
 }
 
-// errRunInProgress is what Open answers while a run is walking the file.
+// Unread is what the last attempt to read a file ended with, or nothing.
 //
-// It never reaches a screen, so it is a sentence rather than a key: the two
-// roads into Open are a control that is disabled and a file dropped onto the
-// window, and both of them ignore what comes back.
-var errRunInProgress = errors.New("a run is in progress, so the file cannot be changed")
+// It exists for the callers that assemble this screen with nobody looking at
+// it. They ask for a state built on a file, and a screen that quietly drew the
+// empty state instead would be a picture of something nobody asked for.
+func (v *View) Unread() error { return v.unread }
+
+// startReading hands a read to the place of work and shows that it is going on.
+//
+// # Why the answer is checked against a counter before it is used
+//
+// Reads are superseded rather than refused, because the separator is read again
+// on every keystroke and a person types faster than a large file is walked.
+// Without the counter the answer about the file as it was two keystrokes ago
+// would arrive last and win, and the screen would describe a file read under a
+// separator nobody has on screen. The counter is read and written only on the
+// thread that draws, which is what lets it be a plain number.
+func (v *View) startReading(path string, answer func(*take.Opened, error)) {
+	v.asked++
+	wanted := v.asked
+	v.reading = path
+	v.unread = nil
+	v.drawReading()
+	settings := v.chosen
+	v.work.Read(func() func() {
+		opened, err := v.openFile(path, settings)
+		return func() {
+			if wanted != v.asked {
+				// A later read has already been asked for, so this answer is
+				// about a question nobody is asking any more.
+				return
+			}
+			v.reading = ""
+			v.unread = err
+			answer(opened, err)
+		}
+	})
+}
+
+// readingNow reports whether a file is being read right now.
+//
+// It is apart from busy, which is about a run. The two never overlap, and they
+// are asked about separately because they mean different things to a person: a
+// run may be stopped and a read may not, and a run draws a way out where a read
+// draws a sentence.
+func (v *View) readingNow() bool { return v.reading != "" }
+
+// drawReading says that a file is being read, in place of what is known about
+// the last one.
+//
+// A sentence rather than nothing, which is point eight of the GUI checklist: an
+// unchanged screen and a screen still working look identical, and the one thing
+// a person cannot do is tell them apart.
+func (v *View) drawReading() {
+	// The name of the file first, because it is what tells a person which read
+	// they are waiting for when they have just changed the separator on one
+	// file after another.
+	//
+	// 🔴 The name and not the path, for two reasons that happen to agree. A
+	// person knows their file by its name, and the whole path is a line of
+	// noise around it. And the stored tree of this state would otherwise carry
+	// the directory the sample was written into, which is a fresh temporary
+	// directory on every run, so the guard comparing those trees would fail at
+	// random. A guard that fails at random is a guard somebody turns off.
+	said := []fyne.CanvasObject{
+		wrapped(filepath.Base(v.reading)), wrapped(v.text.T(i18n.TakeReading)),
+	}
+	// Into whichever of the two is on screen, and never into both. The one that
+	// is hidden keeps whatever it last said, and a stored tree of this screen
+	// carries hidden objects as well as shown ones, so a sentence left in the
+	// wrong box would show up there as a screen saying two things at once.
+	if v.opened == nil {
+		v.empty.Objects = said
+		v.empty.Refresh()
+	} else {
+		v.fileBox.Objects = said
+		v.fileBox.Refresh()
+	}
+	// The button that would start a run goes with it. A run begun now would use
+	// the file as it was read a moment ago, under settings the screen has since
+	// been told to change, and would say so in a manifest.
+	v.drawRun()
+}
 
 // forgetLastRun clears what this screen says about a run that is now about
 // another file.
@@ -236,7 +366,7 @@ func (v *View) Dropped(dropped []fyne.URI) {
 	if len(dropped) == 0 {
 		return
 	}
-	_ = v.Open(dropped[0].Path())
+	v.Open(dropped[0].Path())
 }
 
 func (v *View) choose() {
@@ -252,7 +382,7 @@ func (v *View) choose() {
 			return
 		}
 		defer func() { _ = chosen.Close() }()
-		_ = v.Open(chosen.URI().Path())
+		v.Open(chosen.URI().Path())
 	}, v.window)
 }
 
@@ -278,6 +408,12 @@ func (v *View) redraw() {
 		return
 	}
 	v.empty.Hide()
+	// Put back what the empty box says, because a read that has just answered
+	// left the sentence about reading in it. It is hidden from here on, so this
+	// is not about what anybody sees: it is about the box holding what it
+	// means, so that the next time it is shown it is not a sentence about a
+	// file that was read minutes ago.
+	v.sayNothingIsChosen()
 	v.drawFile()
 	v.drawPlan()
 	v.drawRun()
@@ -288,6 +424,14 @@ func (v *View) redraw() {
 	if v.split != nil {
 		v.split.Show()
 	}
+}
+
+// sayNothingIsChosen is what the screen says before anybody has chosen a file.
+func (v *View) sayNothingIsChosen() {
+	v.empty.Objects = []fyne.CanvasObject{
+		wrapped(v.text.T(i18n.TakeEmpty)), wrapped(v.text.T(i18n.TakeDrop)),
+	}
+	v.empty.Refresh()
 }
 
 // hideSplit puts away everything that describes a file, for the state where

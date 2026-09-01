@@ -18,6 +18,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/damage"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
+	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 )
@@ -64,7 +65,12 @@ func screenOn(t *testing.T, window fyne.Window) (*View, *held) {
 		t.Fatalf("the catalog inside this binary could not be read: %v", err)
 	}
 	runs := &held{}
-	view := New(i18n.English, window, described, take.Open, runs.background)
+	// The read happens where it is asked for, so a test reads a real file and
+	// finds the screen finished by the time the call returns. Where a read
+	// happens is its own port, and the tests for that one hold it up on purpose.
+	view := New(i18n.English, window, described, take.Open, background.Work{
+		Run: runs.background, Read: background.ReadHere,
+	})
 	// The tree is built the way the shell builds it, so that everything a test
 	// reads is what a person would be looking at.
 	view.Content()
@@ -96,7 +102,8 @@ func sourceFile(t *testing.T, dir string) string {
 func opened(t *testing.T, window fyne.Window, source, out string) (*View, *held) {
 	t.Helper()
 	view, runs := screenOn(t, window)
-	if err := view.Open(source); err != nil {
+	view.Open(source)
+	if err := view.Unread(); err != nil {
 		t.Fatalf("the screen could not read the file: %v", err)
 	}
 	view.delimiter.SetText(separator)
@@ -393,8 +400,13 @@ func TestTheSettingsAreOutOfReachWhileARunIsGoingOn(t *testing.T) {
 				"would belong to neither the run nor the settings", named)
 		}
 	}
-	if second := view.Open(source); second == nil {
-		t.Error("a file dropped onto the window during a run replaced the one being walked")
+	// A file dropped onto the window during a run arrives by a road no control
+	// guards, so the refusal is asked about by its effect rather than by an
+	// answer: the screen has to be holding the file the run is walking.
+	view.Open(sourceFile(t, t.TempDir()))
+	if view.path != source {
+		t.Errorf("a file dropped onto the window during a run replaced the one being walked, "+
+			"leaving the screen holding %q", view.path)
 	}
 
 	runs.carryOut(t)

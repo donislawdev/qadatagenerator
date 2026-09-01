@@ -25,7 +25,8 @@ func TestASeparatorThatIsBrieflyUnusableDoesNotTakeTheFileAway(t *testing.T) {
 	source := sourceFile(t, t.TempDir())
 
 	view, _ := screenOn(t, window)
-	if err := view.Open(source); err != nil {
+	view.Open(source)
+	if err := view.Unread(); err != nil {
 		t.Fatalf("the screen could not read the file: %v", err)
 	}
 	view.delimiter.SetText(separator)

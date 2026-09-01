@@ -86,6 +86,7 @@ const (
 	TakeEmpty      Key = "take.empty"
 	TakeDrop       Key = "take.drop"
 	TakeUnreadable Key = "take.unreadable"
+	TakeReading    Key = "take.reading"
 
 	TakeHeadingFile     Key = "take.heading.file"
 	TakeHeadingSettings Key = "take.heading.settings"
@@ -197,6 +198,7 @@ const (
 	ManifestOpenResponse Key = "manifest.open-response"
 	ManifestEmpty        Key = "manifest.empty"
 	ManifestUnreadable   Key = "manifest.unreadable"
+	ManifestReading      Key = "manifest.reading"
 
 	ManifestHeadingRun       Key = "manifest.heading.run"
 	ManifestHeadingEntries   Key = "manifest.heading.entries"
@@ -275,6 +277,7 @@ var Keys = []Key{
 	AboutEmptyComponents, AboutEmptyData,
 
 	ManifestOpen, ManifestOpenResponse, ManifestEmpty, ManifestUnreadable,
+	ManifestReading,
 	ManifestHeadingRun, ManifestHeadingEntries, ManifestHeadingUnsettled,
 	ManifestHeadingLimits,
 	ManifestRunGenerated, ManifestRunSeed, ManifestRunLocale, ManifestRunCatalog,
@@ -293,7 +296,7 @@ var Keys = []Key{
 	ManifestFailureRunLacksCapability, ManifestFailureFieldTypeNotCovered,
 	ManifestFailureSchemeNotCovered, ManifestFailureDeclinedByMutator,
 
-	TakeChoose, TakeEmpty, TakeDrop, TakeUnreadable,
+	TakeChoose, TakeEmpty, TakeDrop, TakeUnreadable, TakeReading,
 	TakeHeadingFile, TakeHeadingSettings, TakeHeadingPlan, TakeHeadingResult,
 	TakeFileRows, TakeFileColumns, TakeFileNothingDeclared,
 	TakeFileTakenFor, TakeFileBecause, TakeFileAgreesWith,

@@ -38,10 +38,25 @@ import (
 // holding a function value, is invisible here, as it is to the concurrency
 // guard beside it. Both answer the question a reviewer would ask by reading,
 // which is a smaller question than what the program can do.
+// # Why the second entry names the same identifier as the first
+//
+// 🔴 It is the same promise on the other surface, not a second exception. The
+// window writes the same temporary files and holds the same markers as the
+// command line, so a system taking it down mid run leaves the same directory
+// behind. Until 2026-09-01 it left exactly that, because watchSignals lived in
+// internal/cli and internal/gui may not import it. The rule the two surfaces
+// share is the sixth unbreakable one, and it was broken in one direction: one
+// function, two behaviours, depending on which half of the product was asked.
+//
+// Naming one identifier twice rather than widening either entry is deliberate.
+// The allowance is read as a pair of file and name, so two files each allowed
+// one name is a smaller opening than one file allowed a package.
 var SyscallAllowed = map[string][]string{
 	// The termination signal, so that a run stopped by a system rather than by
 	// a person still removes what it was in the middle of writing.
 	"internal/cli/signals.go": {"SIGTERM"},
+	// The same, for a run started from the window.
+	"internal/gui/background/background.go": {"SIGTERM"},
 }
 
 // syscallPackage is the import being controlled.

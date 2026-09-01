@@ -1,0 +1,62 @@
+<canvas padded size="1342x900">
+	<content>
+		<container pos="8,8" size="1326x884">
+			<container size="220x884">
+				<container size="220x884">
+					<widget size="220x28" type="*parts.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
+						<widget pos="64,4" size="118x20" type="*widget.RichText">
+							<text alignment="center" bold size="118x19">Take and corrupt</text>
+						</widget>
+						<image fillMode="contain" pos="36,4" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
+					</widget>
+					<widget pos="0,36" size="220x28" type="*parts.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
+						<widget pos="48,4" size="122x19" type="*widget.RichText">
+							<text alignment="center" bold size="122x19">Manifest browser</text>
+						</widget>
+					</widget>
+					<widget pos="0,72" size="220x28" type="*parts.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
+						<widget pos="88,4" size="42x19" type="*widget.RichText">
+							<text alignment="center" bold size="42x19">About</text>
+						</widget>
+					</widget>
+				</container>
+			</container>
+			<container pos="228,0" size="1098x884">
+				<container size="1098x884">
+					<container pos="24,24" size="1050x836">
+						<container size="1050x346">
+							<container size="1050x28">
+								<widget size="96x28" type="*parts.Button">
+									<rectangle fillColor="button" radius="5" size="96x28"/>
+									<rectangle size="96x28"/>
+									<widget pos="4,4" size="88x19" type="*widget.RichText">
+										<text alignment="center" bold size="88x19">Choose a file</text>
+									</widget>
+								</widget>
+							</container>
+							<container pos="0,36" size="1050x310">
+								<widget size="1050x27" type="*widget.Label">
+									<widget size="1050x27" type="*widget.RichText">
+										<text pos="4,4" size="79x19">contacts.csv</text>
+									</widget>
+								</widget>
+								<widget pos="0,35" size="1050x275" type="*widget.Label">
+									<widget size="1050x275" type="*widget.RichText">
+										<text pos="4,4" size="1004x19">This file is being read, which means walking all of it. Nothing is written while that goes on, and the screen answers again as soon as it knows what the file</text>
+										<text pos="4,23" size="39x19">holds.</text>
+									</widget>
+								</widget>
+							</container>
+						</container>
+					</container>
+				</container>
+			</container>
+		</container>
+	</content>
+</canvas>

@@ -164,18 +164,23 @@ func (v *View) settingChanged() {
 //
 // What the last run did is not forgotten either, because it is about this same
 // file and the file has not changed.
+// Like Open it hands the read over rather than doing it here, and for the
+// sharper version of the same reason: this one is asked on every keystroke, so
+// reading the file where the key was pressed would mean a window that stops
+// answering the keyboard exactly while somebody is typing into it.
 func (v *View) reopen() {
 	if v.path == "" {
 		return
 	}
-	opened, err := v.openFile(v.path, v.chosen)
-	if err != nil {
-		v.opened = nil
-		v.showUnreadable(err)
-		return
-	}
-	v.opened = opened
-	v.redraw()
+	v.startReading(v.path, func(opened *take.Opened, err error) {
+		if err != nil {
+			v.opened = nil
+			v.showUnreadable(err)
+			return
+		}
+		v.opened = opened
+		v.redraw()
+	})
 }
 
 // drawPlan answers what a run would do, or why it would not run at all.

@@ -12,6 +12,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/app/verify"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/domain/response"
+	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
@@ -37,11 +38,33 @@ type Readers struct {
 // surface that reads a file the moment it is opened is a surface that acts on
 // its own, and this tool writes to other people's databases.
 type View struct {
-	text    i18n.Catalogue
-	window  fyne.Window
-	read    Readers
-	body    *fyne.Container
+	text   i18n.Catalogue
+	window fyne.Window
+	read   Readers
+	// load is where a document is read, so that the thread which draws is free
+	// while it happens.
+	//
+	// 🔴 It was read where the chooser answered until 2026-09-01, which is on
+	// the thread that draws. This screen reads manifests of up to 48 MB and
+	// then compares one against a record of what an application did, so the
+	// window stopped repainting and stopped answering the keyboard for the
+	// length of both. The file next door explains at length why a run may not
+	// happen there. Nothing had applied the same sentence to a read.
+	load background.Read
+	body *fyne.Container
+	// The two buttons are kept rather than built where they are drawn, because
+	// a read puts them out of reach and something has to hold them to do it.
+	open    *parts.Button
 	respond *parts.Button
+	// reading is what the screen says while a document is being read, and
+	// nothing while none is. It is a state of its own because point eight of
+	// the GUI checklist asks for a sentence rather than an unchanged screen: a
+	// window that has not answered yet and one that has nothing to say look
+	// alike, and telling them apart is the one thing a person cannot do.
+	reading bool
+	// asked counts the reads, so that an answer which is no longer the latest
+	// question is dropped rather than drawn over a newer one.
+	asked int
 
 	promised   manifest.Manifest
 	hasPromise bool
@@ -54,9 +77,13 @@ type View struct {
 	tableFocused bool
 }
 
-// New builds the screen. The window is what a file chooser has to appear over.
-func New(text i18n.Catalogue, window fyne.Window, read Readers) *View {
-	view := &View{text: text, window: window, read: read, body: container.NewStack()}
+// New builds the screen.
+//
+// The window is what a file chooser has to appear over, and the place of work
+// is where a document is read.
+func New(text i18n.Catalogue, window fyne.Window, read Readers, load background.Read) *View {
+	view := &View{text: text, window: window, read: read, load: load, body: container.NewStack()}
+	view.open = parts.NewButton(text.T(i18n.ManifestOpen), view.chooseManifest)
 	view.respond = parts.NewButton(text.T(i18n.ManifestOpenResponse), view.chooseResponse)
 	// Nothing to compare a response against until a manifest is open, and a
 	// control that cannot do anything yet says so by being unavailable rather
@@ -77,8 +104,7 @@ func New(text i18n.Catalogue, window fyne.Window, read Readers) *View {
 // and the layout is told separately where each one goes. It draws the same and
 // it walks the way the eye does.
 func (v *View) Content() fyne.CanvasObject {
-	open := parts.NewButton(v.text.T(i18n.ManifestOpen), v.chooseManifest)
-	bar := container.NewHBox(open, v.respond)
+	bar := container.NewHBox(v.open, v.respond)
 	return parts.Inset(container.New(layout.NewBorderLayout(bar, nil, nil, nil), bar, v.body))
 }
 
@@ -138,14 +164,18 @@ func (v *View) chooseManifest() {
 		if !ok {
 			return
 		}
-		promised, readErr := v.read.Manifest(path)
-		if readErr != nil {
-			v.hasPromise = false
-			v.respond.Disable()
-			v.show(sentence(v.text.T(i18n.ManifestUnreadable) + " " + readErr.Error()))
-			return
-		}
-		v.Open(promised)
+		v.startReading(func() func() {
+			promised, readErr := v.read.Manifest(path)
+			return func() {
+				if readErr != nil {
+					v.hasPromise = false
+					v.respond.Disable()
+					v.unreadable(readErr)
+					return
+				}
+				v.Open(promised)
+			}
+		})
 	}, v.window)
 }
 
@@ -155,13 +185,72 @@ func (v *View) chooseResponse() {
 		if !ok || !v.hasPromise {
 			return
 		}
-		actual, readErr := v.read.Response(path)
-		if readErr != nil {
-			v.show(sentence(v.text.T(i18n.ManifestUnreadable) + " " + readErr.Error()))
-			return
-		}
-		v.Compare(actual)
+		v.startReading(func() func() {
+			actual, readErr := v.read.Response(path)
+			return func() {
+				if readErr != nil {
+					v.unreadable(readErr)
+					return
+				}
+				v.Compare(actual)
+			}
+		})
 	}, v.window)
+}
+
+// startReading hands a read to the place of work, says on screen that it is
+// going on, and puts the controls out of reach until it answers.
+//
+// # Why the answer is checked against a counter before it is used
+//
+// The buttons are disabled for the length of a read, so two reads cannot be
+// asked for by anybody clicking. The counter is here anyway, because that
+// sentence is about the controls and this one is about the screen: the day
+// something else opens a document, an answer about the document before last
+// would otherwise arrive second and be drawn over a newer one.
+//
+// The read itself builds what to do about it, on the goroutine that read, out
+// of values it made there. Nothing is shared between the two threads.
+func (v *View) startReading(read func() func()) {
+	v.asked++
+	wanted := v.asked
+	v.reading = true
+	v.freeze()
+	v.show(sentence(v.text.T(i18n.ManifestReading)))
+	v.load(func() func() {
+		act := read()
+		return func() {
+			if wanted != v.asked {
+				return
+			}
+			v.reading = false
+			v.thaw()
+			act()
+		}
+	})
+}
+
+// unreadable puts a failed read where the document would have been.
+func (v *View) unreadable(err error) {
+	v.show(sentence(v.text.T(i18n.ManifestUnreadable) + " " + err.Error()))
+}
+
+// freeze puts the two buttons out of reach for the length of a read.
+//
+// A control that cannot do anything yet says so by being unavailable rather
+// than by being pressable and ignored. The button for a response record goes
+// back to whatever it was, because whether it may be used at all is decided by
+// there being a manifest open and not by this.
+func (v *View) freeze() {
+	v.open.Disable()
+	v.respond.Disable()
+}
+
+func (v *View) thaw() {
+	v.open.Enable()
+	if v.hasPromise {
+		v.respond.Enable()
+	}
 }
 
 // pathOf reads a choice, and reports whether there is anything to do about it.

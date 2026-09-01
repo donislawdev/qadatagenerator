@@ -147,12 +147,14 @@ func TestARunDoesNotLeaveTheKeyboardOnSomethingItPutOutOfReach(t *testing.T) {
 		t.Run(where.what, func(t *testing.T) {
 			view, _, canvas := onACanvas(t)
 			if where.reach == nil {
-				// The first tick box, reached the way a person reaches it: one
-				// press past the button that chooses a file.
-				canvas.FocusNext()
-				canvas.FocusNext()
+				// The first tick box, reached the way a person reaches it: past
+				// the button that chooses a file and past the two panes, which
+				// are places to stand as well as places to read.
+				for presses := 0; presses < 4; presses++ {
+					canvas.FocusNext()
+				}
 				if _, isTick := canvas.Focused().(*widget.Check); !isTick {
-					t.Fatalf("the second thing the keyboard reaches is %s rather than a "+
+					t.Fatalf("the fourth thing the keyboard reaches is %s rather than a "+
 						"tick box, so this case is testing something else",
 						describe(canvas.Focused()))
 				}
@@ -170,29 +172,43 @@ func TestARunDoesNotLeaveTheKeyboardOnSomethingItPutOutOfReach(t *testing.T) {
 	}
 }
 
-// The keyboard is given back after a Tab pressed into nothing.
+// The keyboard is given back to somebody who started a run with it and then
+// reached for the mouse.
 //
-// 🔴 The moment between asking a run to stop and the run answering is the one
-// moment this screen has nothing the keyboard can hold: every setting is out of
-// reach and the way to stop has been disabled so that a second press means
-// nothing. A Tab pressed there is answered by the toolkit with nothing at all,
-// and the person's place is gone. Measured on 2026-08-24.
-func TestTheKeyboardIsGivenBackAfterATabIntoNothing(t *testing.T) {
+// 🔴 This guard used to reach the same branch a different way, and the way it
+// used is gone. Until the two panes of this screen became reachable without a
+// mouse, the moment between asking a run to stop and the run answering was the
+// one moment here with nothing at all the keyboard could hold: every setting
+// out of reach and the way to stop disabled so that a second press means
+// nothing. A Tab pressed there was answered with nothing, and the person's
+// place was gone. Measured on 2026-08-24, and on 2026-09-01 the two scrolling
+// areas took that moment away by being somewhere to stand.
+//
+// The branch it protected is still reachable and still worth protecting,
+// because the mouse also leaves the keyboard nowhere: the toolkit clears focus
+// on every tap. Somebody who begins a run from the keyboard and then stops it
+// with the pointer is standing nowhere and is owed a place, and telling them
+// apart from somebody who only ever used the pointer is what the screen
+// remembers rather than looks at.
+func TestTheKeyboardIsGivenBackToSomebodyWhoReachedForTheMouse(t *testing.T) {
 	view, runs, canvas := onACanvas(t)
 	standOn(t, canvas, view.damage)
 	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
-	canvas.Focused().TypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
+	if canvas.Focused() != fyne.Focusable(view.stop) {
+		t.Fatalf("the run did not begin from the keyboard, which left it on %s",
+			describe(canvas.Focused()))
+	}
 
-	canvas.FocusNext()
+	test.Tap(view.stop)
 	if canvas.Focused() != nil {
-		t.Skip("a Tab pressed while a run is stopping now lands somewhere, so the case " +
-			"this guard was written for no longer exists on this screen")
+		t.Skipf("tapping a button no longer clears the keyboard, it left it on %s, so the "+
+			"moment this guard is about no longer exists", describe(canvas.Focused()))
 	}
 
 	runs.carryOut(t)
 	if canvas.Focused() != fyne.Focusable(view.damage) {
-		t.Errorf("a run was started and stopped from the keyboard, a Tab pressed while it "+
-			"stopped left the keyboard nowhere, and the end of the run put it on %s",
+		t.Errorf("a run was started from the keyboard and stopped with the mouse, which "+
+			"left the keyboard nowhere, and the end of the run put it on %s",
 			describe(canvas.Focused()))
 	}
 }

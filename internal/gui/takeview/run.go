@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 )
 
@@ -66,6 +67,15 @@ func (v *View) Start() {
 	if v.opened == nil || v.busy() {
 		return
 	}
+	if v.readingNow() {
+		// The file is being read again under a setting somebody has just
+		// changed, so what this screen holds describes a file that is about to
+		// be replaced. A run started from it would damage the file it was told
+		// about a moment ago and write a manifest saying so. The button is
+		// disabled for the length of a read, and this is the half that does not
+		// depend on a control staying disabled.
+		return
+	}
 	if take.Check(v.chosen, v.described).Refused() {
 		return
 	}
@@ -78,7 +88,7 @@ func (v *View) Start() {
 	// the same reason one level up, and this is the half that does not depend
 	// on a control staying disabled.
 	opened, settings, described := v.opened, v.chosen, v.described
-	halt := newStopper()
+	halt := background.NewStopper()
 	v.halt = halt
 	v.stage = stageRunning
 	v.freeze()
@@ -88,7 +98,8 @@ func (v *View) Start() {
 	// the end of the run has a keyboard of its own to place.
 	v.hadKeyboard = v.handKeyboardOver(v.stop, v.damage)
 	v.interceptClose()
-	v.run(func() (take.Result, error) {
+	v.watchForClosing()
+	v.work.Run(func() (take.Result, error) {
 		return opened.Corrupt(settings, described, halt, time.Now())
 	}, v.finished)
 }
@@ -101,7 +112,7 @@ func (v *View) Stop() {
 	if v.stage != stageRunning || v.halt == nil {
 		return
 	}
-	v.halt.stop()
+	v.halt.Stop()
 	v.stage = stageStopping
 	v.drawRun()
 }
@@ -124,20 +135,19 @@ func (v *View) finished(result take.Result, err error) {
 	switch {
 	case err == nil:
 		v.stage = stageWritten
-	case errors.Is(err, ErrStopped):
+	case errors.Is(err, background.ErrStopped):
 		v.stage = stageStopped
 	default:
 		v.stage = stageFailed
 	}
 	v.thaw()
 	v.releaseClose()
+	v.releaseWatchForClosing()
 	if v.closing {
 		// Somebody asked for the window while the run was going on, and the run
 		// was stopped rather than the window taken away from underneath it.
 		v.closing = false
-		if v.window != nil {
-			v.window.Close()
-		}
+		v.leave()
 		return
 	}
 	v.drawRun()
@@ -170,6 +180,68 @@ func (v *View) interceptClose() {
 func (v *View) releaseClose() {
 	if v.window != nil {
 		v.window.SetCloseIntercept(nil)
+	}
+}
+
+// watchForClosing makes the system asking this program to stop mean what the
+// close button means.
+//
+// # Why a signal is answered the same way as the close button
+//
+// They are the same ask from different people. A person clicking the cross and
+// a container being stopped both want this program to end, and both cost the
+// same thing if it ends where it stands: the temporary files of the run and the
+// marker holding its name are left in somebody's output directory, and the next
+// run finds the marker and refuses for a reason that stopped being true. The
+// window already knew how to answer one of them, so the other is routed into
+// the same answer rather than given a second one that could drift from it.
+//
+// # Why the watch lives no longer than the run
+//
+// Outside a run nothing is half written, so a person killing this window gets
+// the instant end their desktop would have given them anyway. That is the same
+// boundary the command line draws, and drawing it differently here would be the
+// parity rule broken in the other direction.
+func (v *View) watchForClosing() {
+	if v.work.Watch == nil {
+		// A caller assembling this screen with nobody looking at it has no
+		// process to be asked about. Said out loud rather than left to a nil
+		// call, because the states of this screen are built exactly that way.
+		return
+	}
+	v.releaseWatch = v.work.Watch(v.stoppedFromOutside)
+}
+
+func (v *View) releaseWatchForClosing() {
+	if v.releaseWatch == nil {
+		return
+	}
+	v.releaseWatch()
+	v.releaseWatch = nil
+}
+
+// stoppedFromOutside is what a signal means once it reaches the thread that
+// draws.
+//
+// 🔴 The run may already have ended by the time this arrives, and that is
+// ordinary rather than exotic: the signal is noticed on a goroutine and acted
+// on here, and a run that stops in between is a run with nothing left to take
+// back. Setting the flag anyway would arm the NEXT run to close the window
+// behind whoever started it.
+func (v *View) stoppedFromOutside() {
+	if !v.busy() {
+		v.leave()
+		return
+	}
+	v.closing = true
+	v.Stop()
+}
+
+// leave gives up the window, which is the answer to being asked to stop once
+// there is nothing left to clean up.
+func (v *View) leave() {
+	if v.window != nil {
+		v.window.Close()
 	}
 }
 
@@ -210,11 +282,16 @@ func (v *View) runContent() []fyne.CanvasObject {
 	}
 	drawn := []fyne.CanvasObject{container.NewHBox(v.damage)}
 	v.damage.Enable()
-	if v.refusedNow() {
+	if v.refusedNow() || v.readingNow() {
 		// Disabled rather than absent, and the reason is directly above it in
 		// the answer to what would happen. A control that vanishes leaves a
 		// person looking for it, and one that is disabled beside its reason is
 		// the same information without the search.
+		//
+		// A read in flight disables it for a reason of its own: what stands on
+		// the screen describes the file as it was read a moment ago, and a run
+		// started from it would damage the file and then say, in a manifest,
+		// that it had been told something else.
 		v.damage.Disable()
 	}
 	if outcome := v.outcome(); outcome != nil {
