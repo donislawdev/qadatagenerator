@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -471,4 +473,142 @@ func TestAFailureFromBelowStillSaysWhatToDo(t *testing.T) {
 			}
 		})
 	}
+}
+
+// 🔴 The third recipe this rule was found broken on, and the one that closed a
+// class rather than a case.
+//
+// Measured on 2026-09-02 with the binary: a recipe whose relations form a loop
+// was answered can be used. So was one whose entity belongs to two others.
+// Neither of those is a matter of taste, and both are refused in a file the
+// engine owns and this verb was not asking. Half of what makes a recipe
+// unusable was known one function away and never reported.
+func TestValidateRefusesARelationTheEngineWillNotOrder(t *testing.T) {
+	loop := recipeFile(t, `version: "0.1"
+seed: "s"
+locale: pl-PL
+entities:
+  a:
+    belongs_to: { b: 0-2 }
+    fields:
+      x: { generator: city }
+  b:
+    belongs_to: { a: 0-2 }
+    fields:
+      y: { generator: city }
+`)
+
+	checked := run(commandValidate, loop)
+	produced := run(commandGenerate, "--dry-run", loop)
+
+	if checked.code != int(codeConfig) {
+		t.Errorf("validate ended with %d and a recipe that cannot be used is %d: %s",
+			checked.code, codeConfig, checked.log)
+	}
+	if checked.code != produced.code {
+		t.Errorf("validate says %d and generate says %d about the same file",
+			checked.code, produced.code)
+	}
+	if !strings.Contains(checked.log, "loop") {
+		t.Errorf("the refusal does not say what is wrong with the relations: %s", checked.log)
+	}
+}
+
+// A recipe that reads correctly and cannot be carried out is warned about, and
+// the answer is still yes.
+//
+// 🔴 The two verbs deliberately end with different codes here, which is the
+// opposite of the test above and rests on DEC-116. Whether a recipe is written
+// correctly and whether a run of it is worth attempting are two questions, the
+// second belongs to the engine and has an exit code of its own, and a verb that
+// refused it would be answering the first question with the second one's
+// answer. What this verb owes is that it does not say can be used about it.
+func TestARecipeThatCannotBeRunIsWarnedAboutRatherThanRefused(t *testing.T) {
+	wide := recipeFile(t, `version: "0.1"
+seed: "s"
+locale: pl-PL
+entities:
+  customer:
+    count: 3
+    fields:
+      x: { generator: city }
+  order:
+    belongs_to: { customer: "0-9223372036854775807" }
+    fields:
+      y: { generator: city }
+`)
+
+	checked := run(commandValidate, wide)
+	produced := run(commandGenerate, "--dry-run", wide)
+
+	if checked.code != int(codeOK) {
+		t.Errorf("validate ended with %d about a recipe that reads correctly: %s",
+			checked.code, checked.log)
+	}
+	if produced.code != int(codeData) {
+		t.Errorf("the dry run ended with %d and a valid recipe that cannot be satisfied "+
+			"is %d: %s", produced.code, codeData, produced.log)
+	}
+	if strings.Contains(checked.log, "can be used") {
+		t.Errorf("validate says a recipe can be used when the run of it would not "+
+			"start: %s", checked.log)
+	}
+	if !strings.Contains(checked.log, "would not be carried out") {
+		t.Errorf("validate does not say that a run of it would not happen: %s", checked.log)
+	}
+	if !strings.Contains(checked.log, "4000000000") {
+		t.Errorf("the warning does not carry the arithmetic, so it reads as a rule "+
+			"somebody chose: %s", checked.log)
+	}
+}
+
+// What validate says a run would write is what the dry run says it would
+// write.
+//
+// 🔴 The oracle is the other verb rather than a number written here. A count
+// spelled out in a test freezes whatever this build does today, including a
+// mistake, and the whole worth of this sentence is that somebody can trust it
+// before running anything. Two sentences about one number are also how somebody
+// comes to believe there are two numbers.
+func TestWhatValidateSaysARunWouldWriteIsWhatTheDryRunSays(t *testing.T) {
+	path := recipeFile(t, `version: "0.1"
+seed: "s"
+locale: pl-PL
+entities:
+  customer:
+    count: 3
+    fields:
+      x: { generator: city }
+  order:
+    belongs_to: { customer: 0-4 }
+    fields:
+      y: { generator: city }
+`)
+
+	checked := run(commandValidate, path)
+	produced := run(commandGenerate, "--dry-run", path)
+
+	rows := rowsIn(t, produced.log, `([0-9]+) rows would be written`)
+	tables := rowsIn(t, produced.log, `([0-9]+) tables?, `)
+	wanted := "would write " + counted(rows, "row") + " in " + counted(tables, "table")
+	if !strings.Contains(checked.log, wanted) {
+		t.Errorf("validate does not say %q while the dry run writes %d rows in %d "+
+			"tables.\nvalidate: %s\ndry run: %s", wanted, rows, tables,
+			checked.log, produced.log)
+	}
+}
+
+// rowsIn pulls the one number a pattern captures out of a log.
+func rowsIn(t *testing.T, log, pattern string) int {
+	t.Helper()
+	found := regexp.MustCompile(pattern).FindStringSubmatch(log)
+	if found == nil {
+		t.Fatalf("the dry run said nothing matching %q, so there is nothing to compare "+
+			"against: %s", pattern, log)
+	}
+	number, err := strconv.Atoi(found[1])
+	if err != nil {
+		t.Fatalf("the dry run wrote %q where a number was expected: %v", found[1], err)
+	}
+	return number
 }

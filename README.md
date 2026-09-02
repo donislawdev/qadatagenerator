@@ -4,7 +4,7 @@ A **QA test data generator** with a CLI and a GUI. Cross-platform, fully offline
 
 > A test data generator that understands **what the data means**, and can corrupt it on purpose while telling you exactly what it broke, at which layer, and how your application is supposed to respond.
 
-**Status: early development.** The specifications below are drafts. Both pillars work today. `qadg generate` turns a recipe into files, `qadg validate` reports every problem a recipe has, `qadg corrupt` damages a file this tool did not make and writes an expectation manifest beside it, `qadg verify` compares that manifest against what your application did with the data, and `qadg help` explains any of them. This build implements a small part of the corruption catalog, and a run says so: every ordered defect gets a manifest entry whether or not it happened. Nothing has been released.
+**Status: early development.** The specifications below are drafts. Both pillars work today. `qadg generate` turns a recipe into files, `qadg validate` reports every problem a recipe has and says what a run of it would write, `qadg corrupt` damages a file this tool did not make and writes an expectation manifest beside it, `qadg verify` compares that manifest against what your application did with the data, and `qadg help` explains any of them. This build implements a small part of the corruption catalog, and a run says so: every ordered defect gets a manifest entry whether or not it happened. Nothing has been released.
 
 ---
 

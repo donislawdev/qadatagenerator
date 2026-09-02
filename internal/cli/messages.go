@@ -675,6 +675,21 @@ const (
 	problemUncheckedHow  = ". Run without --quiet to see which."
 
 	summaryValid = " can be used. Understood "
+	// The answer for a recipe that reads correctly and that the engine will
+	// not run.
+	//
+	// It does not say can be used, and the difference is the whole sentence. A
+	// recipe with nothing wrong in it whose run stops on its first phase is
+	// neither of the two things this verb used to say, and answering with
+	// either of them would be a true half beside a false one. The warning
+	// above it carries what the engine said, so this is only the verdict.
+	summaryValidUnrunnable = " reads correctly and a run of it would not be carried out. " +
+		"Run qadg generate --dry-run to have that answered with an exit code."
+	// What a run of a usable recipe would write.
+	//
+	// In the words the dry run already uses, because two sentences about one
+	// number are how somebody comes to believe there are two numbers.
+	summaryWouldWrite = "A run of it would write "
 	// The two counts each carry both of their forms, the way the warning above
 	// them does. What made this a pair rather than one word with a letter added
 	// is written at understood below.

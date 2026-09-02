@@ -83,6 +83,7 @@ var RefusalKinds = map[string]string{
 	"internal/adapter/values.Source.pick Data":               "no entry of the list is short enough for the length this field accepts",
 	"internal/app/generate.reachable Data":                   "the count of a child cannot be reached by any deal of its parents, so the recipe is valid and its arithmetic does not work out",
 	"internal/app/generate.withinReach Data":                 "the relation reads correctly and asks for more rows than this build can hold a plan for, which is the engine answering whether a run can be carried out rather than the reader answering whether a recipe is well formed",
+	"internal/cli.alsoAskTheEngine Config":                   "the engine found something wrong with the recipe that the reader of the document could not see, and it is counted with the rest of the problems because it is one of them. A refusal saying instead that a correct recipe cannot be carried out never reaches here and leaves as a warning beside an answer of yes",
 	"internal/app/generate.uniqueValue Data":                 "a unique field ran out of values while drawing, which is the definition of a valid recipe that cannot be satisfied",
 }
 

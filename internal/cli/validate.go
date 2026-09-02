@@ -12,7 +12,9 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/mutators"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
+	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
+	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
@@ -88,17 +90,118 @@ func validateRecipeAt(out *streams, path string, flags crossCutting) int {
 	if catalogErr != nil {
 		return fail(out, catalogErr)
 	}
-	report, runErr := validate.Run(decodeRecipe, validate.Source{Name: path, Data: data},
+	// Read once and handed to both, the way the window already does it. The use
+	// case takes a decoder rather than a document, and the engine below needs
+	// the document, so a closure over what was read keeps the use case from
+	// knowing that recipes are YAML while costing one reading instead of two.
+	// A recipe may be 256 KB and reading one that size is measured in hundreds
+	// of megabytes, so the difference is not academic.
+	decoded := decodeRecipe(data)
+	report, runErr := validate.Run(func([]byte) validate.Decoded { return decoded },
+		validate.Source{Name: path, Data: data},
 		values.New("", ""), mutators.Coverage{Described: described})
+
+	// The second half of the question, and it is put only to a recipe the first
+	// half approved: a plan of a document with problems in it would report the
+	// same problems again in worse words.
+	outlook := whatARunWouldDo{}
+	if runErr == nil {
+		outlook, runErr = alsoAskTheEngine(&report, decoded.Recipe, path)
+	}
+
 	if *flags.json {
-		writeJSONReport(out, report)
+		writeJSONReport(out, report, outlook)
 	} else {
-		writeReport(out, report)
+		writeReport(out, report, outlook)
 	}
 	if runErr != nil {
 		return finishFailed(out, runErr)
 	}
 	return finish(out, codeOK)
+}
+
+// alsoAskTheEngine puts the second half of the question and folds the answer
+// into the report.
+//
+// A refusal that says the recipe is wrong joins the problems, so that it
+// arrives in the same list and the same shape as every other one, in both the
+// prose and the machine readable form. The count in the failure is rebuilt
+// rather than taken from the use case, because the list it counts has just
+// grown.
+//
+// Split from the caller because that function reached the length this project
+// holds a function to, and the limit is bent for nothing.
+func alsoAskTheEngine(report *validate.Report, rec recipe.Recipe,
+	path string) (whatARunWouldDo, error) {
+	outlook := askThePlan(rec)
+	if outlook.wrong == nil {
+		return outlook, nil
+	}
+	report.Problems = append(report.Problems, recipe.Problem{What: outlook.wrong.Error()})
+	return outlook, fault.New(fault.Config,
+		counted(len(report.Problems), "problem")+" in "+path)
+}
+
+// whatARunWouldDo is what the engine says about a recipe that reads correctly.
+//
+// # Why this verb asks the engine at all
+//
+// 🔴 Because half of what makes a recipe unusable is only known there, and
+// until 2026-09-02 this verb said nothing about that half. Measured with the
+// real binary on that day: a recipe whose relations form a loop was answered
+// can be used, and so was one whose entity belongs to two others, and so was
+// one asking for a relation wider than the arithmetic behind it. The first two
+// are refusals nobody could argue with, and the sentences refusing them exist
+// in one file in the engine and nowhere else, so this verb could not have
+// produced them. The README promises that this verb reports every problem a
+// recipe has, and it was reporting the problems one reader could see.
+//
+// # Why the kind of the failure decides what happens to it, rather than a rule
+// written here
+//
+// The engine already refuses on both sides of a line this project drew and
+// guards: exit code 3 says a document is not valid, and 5 says a valid one
+// cannot be carried out. DEC-116 put the second of those outside this verb on
+// purpose, because whether a run is worth attempting is the engine's question
+// and has its own code. So a refusal that says the recipe is wrong becomes a
+// problem here, and one that says it cannot be satisfied becomes a warning
+// beside an answer that is still yes.
+//
+// Nothing new decides which is which. The register in internal/guard holds
+// every refusal either side of that boundary together with why it is there,
+// and a new one that says neither turns the build red.
+type whatARunWouldDo struct {
+	tables, rows int
+	// wrong is a fault of the recipe that only the engine asks about.
+	wrong error
+	// cannot is a recipe that is right and could not be carried out.
+	cannot error
+}
+
+// askThePlan works out what a run would produce, without producing it.
+//
+// The values carry the recipe's own locale and seed, unlike the registry the
+// use case above is given, which is asked only which names exist. A generator
+// this build cannot fill in the recipe's locale is a refusal that depends on
+// the locale, so asking with an empty one would answer a question nobody put.
+//
+// # What the count of rows is an answer about
+//
+// The recipe as it is written, and this verb has no flag that could change
+// that. A relation with a range in it has its shares drawn from the seed, so
+// generate given a different seed writes a different number of rows and both
+// numbers are right. The three flags that override a recipe belong to the verb
+// that runs it, which is where somebody who overrode one will be reading.
+func askThePlan(rec recipe.Recipe) whatARunWouldDo {
+	plan, err := generate.Prepare(rec, values.New(rec.Locale, rec.Seed))
+	switch {
+	case err == nil:
+		return whatARunWouldDo{tables: len(plan.Entities), rows: plan.TotalRows()}
+	case fault.KindOf(err) == fault.Config:
+		return whatARunWouldDo{wrong: err}
+	default:
+		return whatARunWouldDo{cannot: err}
+	}
 }
 
 // readRecipe reads a recipe and stops one byte past the largest one this build
@@ -156,7 +259,7 @@ func decodeRecipe(data []byte) validate.Decoded {
 // not the data the tool produces, and a later --json has to be able to put
 // machine readable findings on standard output without a word of prose above
 // them.
-func writeReport(out *streams, report validate.Report) {
+func writeReport(out *streams, report validate.Report, outlook whatARunWouldDo) {
 	for _, found := range report.Problems {
 		// A problem with the file as a whole has no place inside it, and
 		// prefixing it with an empty place reads as a missing word.
@@ -182,9 +285,23 @@ func writeReport(out *streams, report validate.Report) {
 		}
 	}
 
-	if report.Usable() {
-		out.note(report.Name + summaryValid + understood(report.Entities, report.Fields))
+	if !report.Usable() {
+		return
 	}
+	if outlook.cannot != nil {
+		// A warning rather than a problem, and the answer below it is still
+		// yes. The recipe is right, and whether a run of it can be carried out
+		// is a question with an exit code of its own on another verb.
+		out.warn(outlook.cannot.Error())
+		out.note(report.Name + summaryValidUnrunnable)
+		return
+	}
+	out.note(report.Name + summaryValid + understood(report.Entities, report.Fields))
+	// What a run would write, said in the same words the dry run uses, because
+	// two sentences about one number are how somebody comes to believe there
+	// are two numbers.
+	out.note(summaryWouldWrite + counted(outlook.rows, "row") + " in " +
+		counted(outlook.tables, "table") + ".")
 }
 
 // The shape below is what a pipeline parses, so it is a public contract and
@@ -198,6 +315,18 @@ type jsonReport struct {
 	Fields    int           `json:"fields"`
 	Problems  []jsonProblem `json:"problems"`
 	Unchecked []jsonNote    `json:"unchecked"`
+
+	// Tables and Rows are what a run of this recipe would write, and they mean
+	// something only when usable is true and unrunnable is absent. That is
+	// said here rather than left to be worked out, because nought rows and
+	// nothing worked out are the same number.
+	Tables int `json:"tables"`
+	Rows   int `json:"rows"`
+	// Unrunnable is why a recipe that reads correctly could not be carried
+	// out. It is absent when it could, which is the ordinary case, and a
+	// pipeline that wants this to fail a build reads it rather than the exit
+	// code, because the recipe is not what is wrong.
+	Unrunnable string `json:"unrunnable,omitempty"`
 }
 
 // jsonProblem is a problem as a build reads it.
@@ -243,7 +372,7 @@ func placeSuffix(line int) string {
 // rule is there so that a half written dataset never looks complete. A report
 // asked for by name is the answer to the question, not a piece of a dataset,
 // and withholding it exactly when it is needed would make the flag useless.
-func writeJSONReport(out *streams, report validate.Report) {
+func writeJSONReport(out *streams, report validate.Report, outlook whatARunWouldDo) {
 	document := jsonReport{
 		Recipe:    report.Name,
 		Usable:    report.Usable(),
@@ -251,6 +380,11 @@ func writeJSONReport(out *streams, report validate.Report) {
 		Fields:    report.Fields,
 		Problems:  make([]jsonProblem, 0, len(report.Problems)),
 		Unchecked: make([]jsonNote, 0, len(report.Unchecked)),
+		Tables:    outlook.tables,
+		Rows:      outlook.rows,
+	}
+	if outlook.cannot != nil {
+		document.Unrunnable = outlook.cannot.Error()
 	}
 	for _, found := range report.Problems {
 		document.Problems = append(document.Problems, jsonProblem(found))
