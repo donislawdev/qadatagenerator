@@ -545,3 +545,43 @@ func TestTheFlatObjectFormWritesOneFilePerTable(t *testing.T) {
 		t.Error("the flat form nested a child inside its parent")
 	}
 }
+
+// 🔴 A writer that trusts its caller is a writer that writes two things into
+// one column the day it gains a second caller.
+//
+// The plan now refuses this recipe before any writer is built, which is where
+// B-205 put the rule so that validate and a dry run could see it too. That
+// makes this line unreachable through generate, and unreachable is exactly the
+// state in which a guard quietly stops being one. So the writer is called here
+// directly, with the table a plan would have handed it.
+func TestAWriterRefusesATableWhoseRelationWantsAColumnAFieldAlreadyHas(t *testing.T) {
+	rec := recipe.Recipe{
+		Version: "0.1", Seed: "s", Locale: "pl-PL",
+		Output: recipe.Output{Format: "csv"},
+		Entities: []recipe.Entity{
+			{
+				Name: "customer", Count: 1, HasCount: true,
+				Fields: []recipe.Field{{Name: "first_name", Generator: "first_name"}},
+			},
+			{
+				Name: "order", Count: 1, HasCount: true,
+				Fields:  []recipe.Field{{Name: "customer", Generator: "first_name"}},
+				Parents: []recipe.Parent{{Entity: "customer", Min: 0, Max: 1}},
+			},
+		},
+	}
+	writer, err := format.NewCSV(newHeld(), rec)
+	if err != nil {
+		t.Fatalf("the writer could not be built at all: %v", err)
+	}
+
+	table := dataset.Table{
+		Entity: "order", Columns: []string{"customer"}, Rows: 1,
+		Parent: "customer", ParentOf: []int{0},
+	}
+	if err := writer.Begin(table); err == nil {
+		t.Fatal("the writer began a table in which the relation and a field want one column")
+	} else if !strings.Contains(err.Error(), "customer") {
+		t.Errorf("the refusal does not name the column both things want: %v", err)
+	}
+}

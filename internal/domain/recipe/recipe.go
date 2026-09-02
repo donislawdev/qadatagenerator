@@ -434,6 +434,38 @@ func (e Entity) FieldNames() []string {
 	return names
 }
 
+// ParentColumnCollision returns the name a child would carry twice, once as a
+// field of its own and once as the column pointing at the entity it belongs
+// to, and whether there is one.
+//
+// # Why the rule lives here rather than where it is fatal
+//
+// It is fatal in the writer composing a file, because that is where two things
+// would go into one column, and it was written there and stayed there. The
+// cost of that was measured on 2026-09-02 and recorded as B-205: validate
+// called such a recipe usable, a dry run counted its rows, and generate refused
+// it with a message telling the reader to run validate. The refusal sent people
+// to the verb that had just approved the file.
+//
+// A collision between a field name and a relation is a fact about a recipe, not
+// about a file format, so it belongs where the recipe does. Both surfaces now
+// ask this one function, and the wording each of them uses is its own, the way
+// an unknown generator is already reported twice in two shapes.
+//
+// Every parent is looked at rather than only the first. A second parent is
+// refused elsewhere, so today the loop sees one, and the day it sees two this
+// answers about both instead of about whichever came first.
+func (e Entity) ParentColumnCollision() (string, bool) {
+	for _, parent := range e.Parents {
+		for _, field := range e.Fields {
+			if field.Name == parent.Entity {
+				return parent.Entity, true
+			}
+		}
+	}
+	return "", false
+}
+
 // SortProblems puts problems in a stable order so that two runs over the same
 // recipe report them the same way. Sorting by where they are rather than by
 // the order they were found also groups everything about one field together.

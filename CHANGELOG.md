@@ -101,6 +101,15 @@ repository once they are released.
 
 ### Fixed
 
+- **A recipe whose relation and one of its fields want the same column is now
+  refused by every verb that reads it.** An entity that belongs to `customer`
+  and also has a field called `customer` cannot be written, because the column
+  naming the parent and the column holding the field are one column. Until now
+  `qadg validate` called such a recipe usable, `qadg generate --dry-run` counted
+  the rows it would write, and only the real run refused it, with a message
+  telling you to run `qadg validate`. All three now refuse it, and `validate`
+  names the field and the line it is on so you know which one to rename.
+
 - **`qadg validate` no longer says `1 entities and 1 fields`.** A recipe with one
   entity and one field in it now reads `Understood 1 entity and 1 field.`, which
   is what the same sentence in the window already said. The two surfaces

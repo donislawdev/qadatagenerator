@@ -126,6 +126,7 @@ func Run(decode Decoder, source Source, generators Generators, described Catalog
 		report.Fields += len(entity.Fields)
 	}
 	report.Problems = append(report.Problems, unknownGenerators(decoded.Recipe, generators)...)
+	report.Problems = append(report.Problems, collidingParentColumns(decoded.Recipe)...)
 	report.Problems = append(report.Problems, unusableLayers(decoded.Recipe, described)...)
 	// The problems raised above name their places the way the decoder does, so
 	// they can be given the same lines. Done here, once, rather than at each
@@ -191,6 +192,40 @@ func unknownGenerators(rec recipe.Recipe, generators Generators) []recipe.Proble
 				})
 			}
 		}
+	}
+	return found
+}
+
+// collidingParentColumns reports every child carrying a field named after the
+// entity it belongs to.
+//
+// # Why this is a problem and not a note
+//
+// The relation puts a column of that name beside the fields, so the two would
+// share one column and the writer refuses rather than guessing which of them
+// the reader wanted. generate therefore ends on it, and until 2026-09-02 this
+// verb answered that the same recipe can be used. That is not a gap in a check
+// but the opposite of the truth, from the one verb whose whole purpose is this
+// sentence, and it is the same shape as the unknown generator above: found by
+// running the binary, with every test green.
+//
+// 🔴 The refusal generate ends on made it worse rather than softer. It says
+// `try: qadg validate <recipe> reports every problem the recipe has at once`,
+// so it sent whoever hit it to the command that had just approved the file.
+func collidingParentColumns(rec recipe.Recipe) []recipe.Problem {
+	var found []recipe.Problem
+	for _, entity := range rec.Entities {
+		name, collides := entity.ParentColumnCollision()
+		if !collides {
+			continue
+		}
+		found = append(found, recipe.Problem{
+			Where: "entities." + entity.Name + ".fields." + name,
+			What: "this entity belongs to " + strconv.Quote(name) + " and also has a field of " +
+				"that name, so the relation and the field would need the same column",
+			Hint: "rename the field. The column carrying the relation takes the name of the " +
+				"entity it points at",
+		})
 	}
 	return found
 }

@@ -392,6 +392,64 @@ entities:
 	}
 }
 
+// 🔴 The same rule, and the second recipe this project found it broken on.
+//
+// B-205, measured on 2026-09-02 with the binary: a child carrying a field named
+// after the entity it belongs to was called usable by validate, counted by a
+// dry run, and refused by generate. The refusal told the reader to run validate,
+// which had just approved the file, so the tool sent people to the answer that
+// was wrong.
+//
+// Three surfaces are checked rather than two, because the dry run is the half
+// that was still disagreeing after the first repair: the refusal used to live in
+// the writer, and a dry run builds no writer.
+func TestTheThreeAnswersAboutARelationCollidingWithAFieldAgree(t *testing.T) {
+	dir := t.TempDir()
+	body := `version: "0.1"
+seed: "s"
+entities:
+  customer:
+    count: 2
+    fields:
+      id: { generator: first_name }
+  order:
+    count: 2
+    belongs_to: { customer: 0-2 }
+    fields:
+      customer: { generator: first_name }
+`
+	path := recipeIn(t, dir, body)
+
+	checked := run(commandValidate, path)
+	planned := run(commandGenerate, "--dry-run", path)
+	// 🔴 The output directory is named although this run is expected to refuse
+	// before it writes anything. A test that relies on the refusal to keep the
+	// disk clean stops being a test the moment the refusal breaks, and it stops
+	// being one by writing its files into this package. Found by a mutation of
+	// the very rule this test guards, which wrote customer.csv beside the code.
+	produced := run(commandGenerate, "--out", filepath.Join(dir, "written"), path)
+
+	for name, got := range map[string]outcome{
+		commandValidate: checked, "generate --dry-run": planned, commandGenerate: produced,
+	} {
+		if got.code != int(codeConfig) {
+			t.Errorf("%s ended with %d and a recipe that cannot be used is %d: %s",
+				name, got.code, codeConfig, got.log)
+		}
+		if !strings.Contains(got.log, "customer") {
+			t.Errorf("the refusal from %s does not name the column both things want: %s",
+				name, got.log)
+		}
+	}
+
+	// The place is named as the field to rename rather than as the entity,
+	// because renaming the entity would be the other way to resolve it and it
+	// is not the one this tool recommends.
+	if !strings.Contains(checked.log, "entities.order.fields.customer") {
+		t.Errorf("validate does not point at the field to rename: %s", checked.log)
+	}
+}
+
 // 🔴 Every refusal says what to do next, whichever layer it came from.
 //
 // The rule has always said four parts. The command line kept it where a refusal

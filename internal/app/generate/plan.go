@@ -128,6 +128,16 @@ func planEntity(entity recipe.Entity, done map[string]dataset.Table, source seed
 	if len(entity.Parents) == 0 {
 		return planned, nil
 	}
+	// 🔴 Refused in the first phase rather than by the writer that trips on it,
+	// because a plan says what will be produced and the column carrying the
+	// relation is part of that. Left to the writer, a dry run counted the rows
+	// of a dataset the real run refuses to write, which is the same disagreement
+	// between the two phases that B-205 is about between the two verbs.
+	if name, collides := entity.ParentColumnCollision(); collides {
+		return dataset.Table{}, fault.New(fault.Config, "entities."+entity.Name+" has a field "+
+			"called "+name+" and also belongs to an entity of that name, so the relation and "+
+			"the field would need the same column. Rename the field")
+	}
 
 	parent := entity.Parents[0]
 	owner, known := done[parent.Entity]

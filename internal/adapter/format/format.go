@@ -94,12 +94,22 @@ func parentColumn(entity recipe.Entity, planned dataset.Table) (string, error) {
 	if planned.Parent == "" {
 		return "", nil
 	}
-	for _, column := range planned.Columns {
-		if column == planned.Parent {
-			return "", fault.New(fault.Config, "entities."+entity.Name+" has a field called "+
-				planned.Parent+" and also belongs to an entity of that name, so the relation and "+
-				"the field would share a column. Rename the field")
-		}
+	// 🔴 The question is asked of the recipe rather than answered here, so that
+	// validate can ask the same one. It could not before, because the rule lived
+	// in this file and a use case may not import an adapter, and the cost of
+	// that was B-205: this refusal used to arrive after validate had approved
+	// the same recipe, and it told the reader to go and run validate.
+	//
+	// It stays here although the plan now refuses such a recipe before any
+	// writer is built, so nothing reaches this line through generate any more.
+	// A writer that trusts its caller to have checked is a writer that writes a
+	// file with two things in one column the day it gains a second caller. The
+	// test beside it calls this directly, so the guard is reachable even when
+	// the path is not.
+	if _, collides := entity.ParentColumnCollision(); collides {
+		return "", fault.New(fault.Config, "entities."+entity.Name+" has a field called "+
+			planned.Parent+" and also belongs to an entity of that name, so the relation and "+
+			"the field would share a column. Rename the field")
 	}
 	return planned.Parent, nil
 }
