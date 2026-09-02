@@ -26,7 +26,7 @@
 // child is decided by sharing the children out among the parents, which needs
 // to know how many children there are. So the plan is made from the real counts
 // and then cut, which keeps row i as row i, its parent included.
-package preview
+package produce
 
 import (
 	"encoding/csv"
@@ -107,12 +107,12 @@ type Sample struct {
 	Notes []generate.Note
 }
 
-// Of produces the first rows of every table a recipe describes.
+// Preview produces the first rows of every table a recipe describes.
 //
 // The failure it returns is whatever the plan, the writer or the run said, with
 // its kind intact, so that a caller can tell a recipe that cannot be used from
 // a build that cannot do what it asks.
-func Of(rec recipe.Recipe, values generate.Values, rows int) (Sample, error) {
+func Preview(rec recipe.Recipe, values generate.Values, rows int) (Sample, error) {
 	if rows < 1 {
 		rows = DefaultRows
 	}

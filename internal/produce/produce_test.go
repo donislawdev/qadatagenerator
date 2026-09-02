@@ -1,4 +1,4 @@
-package preview
+package produce
 
 import (
 	"encoding/csv"
@@ -88,7 +88,7 @@ func TestASampleIsTheFirstRowsTheRunItselfWouldWrite(t *testing.T) {
 	rec := related(60)
 	whole := wholeRun(t, rec)
 
-	sample, err := Of(rec, values.New(rec.Locale, rec.Seed), 7)
+	sample, err := Preview(rec, values.New(rec.Locale, rec.Seed), 7)
 	if err != nil {
 		t.Fatalf("the sample could not be made: %v", err)
 	}
@@ -125,7 +125,7 @@ func TestTheKeyNamingTheParentIsTheOneTheRunWrites(t *testing.T) {
 	rec := related(60)
 	whole := wholeRun(t, rec)
 
-	sample, err := Of(rec, values.New(rec.Locale, rec.Seed), 5)
+	sample, err := Preview(rec, values.New(rec.Locale, rec.Seed), 5)
 	if err != nil {
 		t.Fatalf("the sample could not be made: %v", err)
 	}
@@ -174,7 +174,7 @@ func TestTheKeyNamingTheParentIsTheOneTheRunWrites(t *testing.T) {
 // count of nought is a table that says so rather than an empty rectangle.
 func TestATableSaysWhetherItWasCutOrIsSimplyShort(t *testing.T) {
 	rec := related(3)
-	sample, err := Of(rec, values.New(rec.Locale, rec.Seed), DefaultRows)
+	sample, err := Preview(rec, values.New(rec.Locale, rec.Seed), DefaultRows)
 	if err != nil {
 		t.Fatalf("the sample could not be made: %v", err)
 	}
@@ -213,7 +213,7 @@ func TestASampleLeavesNothingBehind(t *testing.T) {
 	dir := t.TempDir()
 	t.Chdir(dir)
 
-	if _, err := Of(related(60), values.New("pl-PL", "preview-seed"), DefaultRows); err != nil {
+	if _, err := Preview(related(60), values.New("pl-PL", "preview-seed"), DefaultRows); err != nil {
 		t.Fatalf("the sample could not be made: %v", err)
 	}
 
@@ -238,7 +238,7 @@ func TestARecipeThePlanRefusesIsRefusedHere(t *testing.T) {
 	rec.Entities[1].Fields = append(rec.Entities[1].Fields,
 		recipe.Field{Name: "customer", Generator: "first_name"})
 
-	if _, err := Of(rec, values.New(rec.Locale, rec.Seed), DefaultRows); err == nil {
+	if _, err := Preview(rec, values.New(rec.Locale, rec.Seed), DefaultRows); err == nil {
 		t.Fatal("a recipe whose relation and field want one column produced a sample")
 	} else if !strings.Contains(err.Error(), "customer") {
 		t.Errorf("the refusal does not name the column both things want: %v", err)

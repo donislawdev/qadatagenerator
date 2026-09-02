@@ -1,6 +1,7 @@
 package recipeview_test
 
 import (
+	"strconv"
 	"strings"
 	"testing"
 
@@ -19,7 +20,7 @@ import (
 // can look at the answer on the line after it asked for one.
 func here(t *testing.T, check recipeview.Check) *recipeview.View {
 	t.Helper()
-	view := recipeview.New(i18n.English, check, background.Work{Read: background.ReadHere})
+	view := recipeview.New(i18n.English, check, nil, background.Work{Read: background.ReadHere}, nil)
 	view.Content()
 	return view
 }
@@ -140,7 +141,7 @@ func TestAnAnswerAboutARecipeNobodyIsWaitingForIsNotDrawn(t *testing.T) {
 		// The report names the recipe it was asked about, so the assertion
 		// below is about WHICH answer was kept rather than about how many.
 		return recipeview.Answer{Report: validate.Report{Name: string(data)}}
-	}, later)
+	}, nil, later, nil)
 	view.Content()
 
 	view.SetRecipe("first")
@@ -169,7 +170,7 @@ func TestTheScreenSaysThatItIsChecking(t *testing.T) {
 	waiting := background.Work{Read: func(func() func()) {}}
 	view := recipeview.New(i18n.English, func(string, []byte) recipeview.Answer {
 		return recipeview.Answer{}
-	}, waiting)
+	}, nil, waiting, nil)
 	view.Content()
 
 	view.SetRecipe(screens.CleanRecipe)
@@ -194,11 +195,17 @@ func TestTheDrawnAnswerCarriesThePlaceAndTheLine(t *testing.T) {
 	drawn := rendered(t, view)
 	report, _ := view.Report()
 	found := report.Problems[0]
-	for _, wanted := range []string{found.Where, i18n.English.T(i18n.RecipeLine), found.What} {
-		if !strings.Contains(drawn, wanted) {
-			t.Errorf("the drawn answer is missing %q, so a person reading the screen "+
-				"gets less than a person reading the command line.\n%s", wanted, drawn)
-		}
+	// 🔴 The whole sentence rather than the words of it one at a time. Looked
+	// for separately, the word line was found in the markup itself the day this
+	// screen gained a table: a scrolling area draws a linearGradient for its
+	// shadow, and a mutation that took the line out of every problem went
+	// unnoticed. A drawing is text, so an assertion about it has to be about
+	// what the screen SAYS rather than about letters that appear somewhere.
+	wanted := found.Where + " (" + i18n.English.T(i18n.RecipeLine) + " " +
+		strconv.Itoa(found.Line) + "): " + found.What
+	if !strings.Contains(drawn, wanted) {
+		t.Errorf("the drawn answer does not carry %q, so a person reading the screen "+
+			"gets less than a person reading the command line.\n%s", wanted, drawn)
 	}
 }
 

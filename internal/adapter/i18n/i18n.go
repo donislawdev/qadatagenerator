@@ -305,6 +305,32 @@ const (
 	RecipeParentOutside Key = "recipe.parent-outside"
 	RecipeRefused       Key = "recipe.refused"
 	RecipeWillNotDo     Key = "recipe.will-not-do"
+
+	// The bar along the bottom, which is the half of this screen that writes.
+	//
+	// 🔴 The three reasons a run cannot start are three keys rather than one,
+	// because a disabled button that says only that it is disabled sends
+	// somebody looking for what they did wrong. Each of them names the one
+	// thing to do next.
+	RecipeWriteTo       Key = "recipe.write-to"
+	RecipeChooseDir     Key = "recipe.choose-dir"
+	RecipeReplace       Key = "recipe.replace"
+	RecipeGenerate      Key = "recipe.generate"
+	RecipeStopRun       Key = "recipe.stop-run"
+	RecipeWouldWrite    Key = "recipe.would-write"
+	RecipeNothingYet    Key = "recipe.nothing-yet"
+	RecipeNeedRecipe    Key = "recipe.need-recipe"
+	RecipeNeedFix       Key = "recipe.need-fix"
+	RecipeNeedDirectory Key = "recipe.need-directory"
+	RecipeDirHint       Key = "recipe.dir-hint"
+	RecipeWriting       Key = "recipe.writing"
+	RecipeStopping      Key = "recipe.stopping"
+	RecipeWrote         Key = "recipe.wrote"
+	RecipeIn            Key = "recipe.in"
+	RecipeFile          Key = "recipe.file"
+	RecipeFiles         Key = "recipe.files"
+	RecipeRunStopped    Key = "recipe.run-stopped"
+	RecipeRunFailed     Key = "recipe.run-failed"
 )
 
 // Keys is every key a screen may ask for, so a test can close the register
@@ -378,6 +404,10 @@ var Keys = []Key{
 	RecipeUnchecked, RecipeEntity, RecipeEntities, RecipeField, RecipeFields,
 	RecipeShowing, RecipeOf, RecipeRow, RecipeRows, RecipeNoRows, RecipeNoFields,
 	RecipeAsText, RecipeParentOutside, RecipeRefused, RecipeWillNotDo,
+	RecipeWriteTo, RecipeChooseDir, RecipeReplace, RecipeGenerate, RecipeStopRun,
+	RecipeWouldWrite, RecipeNothingYet, RecipeNeedRecipe, RecipeNeedFix,
+	RecipeNeedDirectory, RecipeDirHint, RecipeWriting, RecipeStopping, RecipeWrote, RecipeIn,
+	RecipeFile, RecipeFiles, RecipeRunStopped, RecipeRunFailed,
 }
 
 // The catalogue travels inside the binary, because a window that needs a file

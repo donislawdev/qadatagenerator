@@ -121,6 +121,28 @@ var WindowReach = map[string]Claim{
 			"problem at the place and the line it belongs to and a list of what was not checked",
 		Test: "TestTheScreenJudgesTheRecipeWrittenOnIt",
 	},
+	"generate": {
+		Screen: "the recipe editor: the button along the bottom writes the dataset the " +
+			"recipe describes, into the directory named beside it",
+		Test: "TestTheScreenWritesTheDatasetAndSaysWhatItWrote",
+	},
+	"generate --out": {
+		Screen: "the directory to write to, as a field with a chooser beside it. It starts " +
+			"empty on purpose: a window has no working directory anybody can see, so it " +
+			"refuses to guess where somebody's files go",
+		Test: "TestADisabledButtonSaysWhichOfTheThreeThingsIsMissing",
+	},
+	"generate --overwrite": {
+		Screen: "replacing files already there, as a tick box that is off until somebody " +
+			"says otherwise",
+		Test: "TestASecondRunRefusesToReplaceFilesUnlessItIsTold",
+	},
+	"generate --dry-run": {
+		Screen: "the state the screen is in before the button is pressed: the first rows of " +
+			"every table and the names of the files a run would write. A window writes " +
+			"nothing until it is told to, so this is what it does rather than a switch",
+		Test: "TestWhatTheScreenSaysItWouldWriteIsWhatTheRunWrites",
+	},
 	"corrupt --dry-run": {
 		Screen: "the state the screen is in before anybody presses the button. A window writes " +
 			"nothing until it is told to, so this is what it does rather than a switch",
@@ -135,16 +157,12 @@ var WindowReach = map[string]Claim{
 // surfaces, and the ceiling below is that distance written as a number so that
 // it cannot grow by accident.
 var NotYetInWindow = map[string]string{
-	"generate":             "waits for the recipe editor with the live preview",
-	"help":                 "waits for the first control carrying a hint. No help screen is planned, and that is recorded, but a window with no hints answers nothing",
-	"-h/--help":            "the same as the verb above it",
-	"--json":               "waits for Save as JSON on the About screen. The reader here is a compliance scanner, so the window has to PRODUCE the file rather than show it",
-	"generate --out":       "waits for the directory picker of the editor",
-	"generate --seed":      "waits for the editor",
-	"generate --format":    "waits for the editor",
-	"generate --manifest":  "waits for the editor",
-	"generate --overwrite": "waits for the editor",
-	"generate --dry-run":   "waits for the preview. In the window the answer is the default state rather than a switch, because a window writes nothing until it is told to",
+	"help":                "waits for the first control carrying a hint. No help screen is planned, and that is recorded, but a window with no hints answers nothing",
+	"-h/--help":           "the same as the verb above it",
+	"--json":              "waits for Save as JSON on the About screen. The reader here is a compliance scanner, so the window has to PRODUCE the file rather than show it",
+	"generate --seed":     "waits for the editor",
+	"generate --format":   "waits for the editor",
+	"generate --manifest": "waits for the editor",
 }
 
 // MediumOnly is what belongs to a terminal rather than to the product, with the
@@ -177,11 +195,17 @@ var MediumOnly = map[string]string{
 // written on it through the same use case, decoder, generator registry and
 // catalog the verb uses.
 //
-// 🔴 It took validate and NOT generate, although both were waiting on this one
-// screen. The editor reads a recipe and says what is wrong with it, and writes
-// nothing, so the verb that produces files is still not reachable here. Moving
-// it now would be the register describing a screen somebody intends to build.
-const NotYetCeiling = 10
+// It stood at 10 until later on 2026-09-02, when the same screen learned to
+// write. Four went at once: the verb, the directory it writes to, the tick box
+// that replaces files already there, and the dry run, which in a window is the
+// state before the button rather than a switch.
+//
+// 🔴 What did NOT go with them is worth more than what did. The seed, the form
+// of the output and the extra manifest are flags that OVERRIDE what the recipe
+// says, and this screen edits the recipe. A control for them would be a second
+// place to say one thing, two lines apart, and the window would have to decide
+// which of the two it meant.
+const NotYetCeiling = 6
 
 // MediumOnlyCeiling caps the exceptions for the same reason, one number lower
 // than nothing: three flags say how the output looks, and a fourth would be a

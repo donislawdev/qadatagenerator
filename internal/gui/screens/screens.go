@@ -135,6 +135,13 @@ type State struct {
 	// taken. It goes in through the field a person types into, so the state is
 	// one somebody reaches by typing rather than one only this list produces.
 	Recipe string
+	// Into is the directory the recipe editor writes to, as somebody typed it.
+	//
+	// 🔴 A word rather than a real path, and never one this machine has. A
+	// stored tree carries whatever is in the field, so a real directory would
+	// put somebody's home in a file this repository keeps and would differ
+	// between two machines running the same guard.
+	Into string
 	// Checking leaves the judging of the recipe unanswered, which is the screen
 	// a person looks at while a large one is being read. It is the recipe
 	// editor's twin of Reading below, and separate for the same reason: the two
@@ -414,15 +421,23 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 		Run:  outcomeOf(state.Ran),
 		Read: readingFor(state.Reading),
 	})
-	recipeScreen := recipeview.New(text, recipeview.Checker(describedDamage()), background.Work{
-		Read: readingFor(state.Checking),
-	})
+	// 🔴 The way to write is handed in as nothing at all. A state of this list
+	// is a picture, and a picture that wrote a dataset would leave it either in
+	// this repository or in a directory whose name then appears in every stored
+	// tree. The button is drawn in whatever state it is in, which is what these
+	// pictures are of, and that the button really writes is held by a test in
+	// the screen's own package against a directory of its own.
+	recipeScreen := recipeview.New(text, recipeview.Checker(describedDamage()), nil,
+		background.Work{Read: readingFor(state.Checking)}, nil)
 	frame := shell.New([]shell.Screen{
 		{Name: text.T(i18n.ScreenRecipe), Content: recipeScreen.Content()},
 		{Name: text.T(i18n.ScreenTake), Content: takeScreen.Content(), OnDropped: takeScreen.Dropped},
 		{Name: text.T(i18n.ScreenManifest), Content: view.Content()},
 		{Name: text.T(i18n.ScreenAbout), Content: about.Content(text, license.Current(), version.Current())},
 	})
+	if state.Into != "" {
+		recipeScreen.SetOut(state.Into)
+	}
 	if state.Recipe != "" {
 		recipeScreen.SetRecipe(state.Recipe)
 	}

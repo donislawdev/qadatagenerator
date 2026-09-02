@@ -89,13 +89,16 @@ func assemble(text i18n.Catalogue, window fyne.Window) *shell.Shell {
 		Read:  background.ReadInBackground,
 		Watch: background.WatchForClosing,
 	})
-	// The recipe editor reads nothing from disk yet, so the only place of work
-	// it is given is the one that judges what is typed. A recipe is allowed to
-	// be 256 KB and parsing one inside that limit can cost hundreds of
-	// megabytes, so that judging belongs anywhere except the thread that draws.
-	editor := recipeview.New(text, recipeview.Checker(described), background.Work{
-		Read: background.ReadInBackground,
-	})
+	// Two places of work rather than one. A recipe is allowed to be 256 KB and
+	// parsing one inside that limit can cost hundreds of megabytes, so judging
+	// what is typed belongs anywhere except the thread that draws. Writing the
+	// dataset belongs there even less: it is the one thing on this screen that
+	// can take minutes.
+	editor := recipeview.New(text, recipeview.Checker(described), recipeview.Writer(),
+		background.Work{
+			Read:    background.ReadInBackground,
+			Produce: background.ProduceInBackground,
+		}, window)
 
 	// The editor is first, and that is the answer to why it was built: somebody
 	// who opened this window before it could generate nothing with it, and the

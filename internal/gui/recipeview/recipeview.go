@@ -25,13 +25,14 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
-	"github.com/donislawdev/qadatagenerator/internal/preview"
+	"github.com/donislawdev/qadatagenerator/internal/produce"
 )
 
 // Check reads a recipe and says what is wrong with it.
@@ -61,7 +62,7 @@ type Answer struct {
 	// Sample is the first rows of each table the recipe describes. It is empty
 	// when the report has problems, because a recipe that cannot be used
 	// produces nothing to show.
-	Sample preview.Sample
+	Sample produce.Sample
 	// Refused is the failure of a recipe that passed validation and still
 	// cannot be run.
 	//
@@ -77,7 +78,12 @@ type Answer struct {
 type View struct {
 	text  i18n.Catalogue
 	check Check
+	write Write
 	work  background.Work
+	// window is what a directory chooser opens over, and nothing else. A screen
+	// that reaches further into the window than that is a screen that cannot be
+	// built without one, and every stored state of this one is built without.
+	window fyne.Window
 
 	editor *parts.Editor
 	// answer is what is drawn under the recipe: the problems, or the sentence
@@ -106,11 +112,30 @@ type View struct {
 	asked int
 	// checking is true while a check is in flight, so the screen can say so.
 	checking bool
+
+	// The bar along the bottom and what the last run left behind.
+	out      *widget.Entry
+	choose   *parts.Button
+	replace  *widget.Check
+	run      *parts.Button
+	status   *fyne.Container
+	halt     *background.Stopper
+	stopping bool
+	written  produce.Written
+	failed   error
+	ran      bool
+	// closing says somebody asked to leave while a run was going on, so that
+	// the window is given up once the run has ended rather than while it is
+	// still writing.
+	closing      bool
+	releaseWatch func()
 }
 
 // New builds the screen.
-func New(text i18n.Catalogue, check Check, work background.Work) *View {
-	view := &View{text: text, check: check, work: work}
+func New(text i18n.Catalogue, check Check, write Write, work background.Work,
+	window fyne.Window) *View {
+	view := &View{text: text, check: check, write: write, work: work, window: window}
+	view.buildBar()
 	view.editor = parts.NewEditor(view.Recheck)
 	view.editor.SetPlaceHolder(text.T(i18n.RecipePlaceholder))
 	view.answerBox = container.NewVBox()
@@ -145,6 +170,7 @@ func (v *View) Content() fyne.CanvasObject {
 	// reading eleven problems can take it back. Neither of the two is the one
 	// that always deserves more.
 	split := container.NewVSplit(v.editor, v.answerPane.Framed())
+	bar := v.bar()
 	// 🔴 No share is set here, and the empty line is the decision. Giving the
 	// recipe the larger half reads as obviously right and is a number nobody
 	// measured, and the guard over values in the window said so: the view holds
@@ -154,7 +180,12 @@ func (v *View) Content() fyne.CanvasObject {
 	// and the divider belongs to the person, who is the only one here who knows
 	// whether they are reading the recipe or the answer.
 	v.draw()
-	return parts.Inset(split)
+	// 🔴 The split is named before the bar, because the layout walks its objects
+	// in the order they are given and a person reads this screen downwards. The
+	// bar is drawn along the bottom either way, so the two orders differ only in
+	// where the keyboard goes, and this project has twice paid for the walk that
+	// comes out of taking the drawing for the order.
+	return parts.Inset(container.New(layout.NewBorderLayout(nil, bar, nil, nil), split, bar))
 }
 
 // SetRecipe puts a recipe on the screen and judges it, without anybody typing.
@@ -259,6 +290,8 @@ func (v *View) draw() {
 	v.drawWillNotDo()
 	v.drawUnchecked()
 	v.answerBox.Refresh()
+	// The bar says what a run would do now, so it moves with every answer.
+	v.drawBar()
 }
 
 // drawRefusal says that the recipe reads correctly and cannot be run anyway.

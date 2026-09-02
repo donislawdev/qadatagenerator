@@ -57,6 +57,7 @@ import (
 	"fyne.io/fyne/v2"
 
 	"github.com/donislawdev/qadatagenerator/internal/fault"
+	"github.com/donislawdev/qadatagenerator/internal/produce"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 )
 
@@ -73,6 +74,14 @@ import (
 type Work struct {
 	// Run is where a run of the take and corrupt mode happens.
 	Run Run
+	// Produce is where a run that makes a dataset from a recipe happens.
+	//
+	// A second port of the same shape rather than one made general, for the
+	// reason the shape exists at all: the answer is a value the port carries,
+	// so a stand in can hand a screen an outcome without writing any files, and
+	// the outcome of the two modes is a different type. One port over both
+	// would carry an empty interface, and every screen would open it again.
+	Produce Produce
 	// Read is where somebody else's file is read.
 	Read Read
 	// Watch is how the system asking this program to stop reaches a screen, or
@@ -99,6 +108,12 @@ type Work struct {
 // type with one method would be a name for the same thing.
 type Run func(work func() (take.Result, error), done func(take.Result, error))
 
+// Produce is where a dataset is made, and how the answer comes back.
+//
+// The same shape as Run above and for the same reason, which is written out
+// there: the four outcomes of a run have to be reachable without a disk.
+type Produce func(work func() (produce.Written, error), done func(produce.Written, error))
+
 // Read is where a file is read, and how what was read reaches the screen.
 //
 // The function handed in does the reading and returns what to do about it. That
@@ -124,6 +139,15 @@ func InBackground(work func() (take.Result, error), done func(take.Result, error
 	go func() {
 		result, err := work()
 		fyne.Do(func() { done(result, err) })
+	}()
+}
+
+// ProduceInBackground makes a dataset off the drawing thread and answers on it.
+func ProduceInBackground(work func() (produce.Written, error),
+	done func(produce.Written, error)) {
+	go func() {
+		written, err := work()
+		fyne.Do(func() { done(written, err) })
 	}()
 }
 

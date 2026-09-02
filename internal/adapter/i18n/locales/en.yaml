@@ -226,3 +226,22 @@ recipe.as-text: This recipe writes the object form, so the file is shown as it w
 recipe.parent-outside: not in this preview
 recipe.refused: This recipe reads correctly and still cannot be run.
 recipe.will-not-do: What this run will not do
+recipe.write-to: Write to
+recipe.choose-dir: Choose...
+recipe.replace: Replace files already there
+recipe.generate: Generate this dataset
+recipe.stop-run: Stop this run
+recipe.would-write: Would write
+recipe.nothing-yet: Nothing has been written yet.
+recipe.need-recipe: Write a recipe above, and this button writes what it describes.
+recipe.need-fix: Fix what is wrong with the recipe above, and this button writes what it describes.
+recipe.dir-hint: Choose or paste a path
+recipe.need-directory: Choose a directory first. This window writes nowhere until you say where.
+recipe.writing: Writing this dataset. Nothing appears under its own name until the whole run has succeeded, so stopping now leaves nothing behind.
+recipe.stopping: Stopping. The run ends after the record it is on, and leaves nothing behind.
+recipe.wrote: Wrote
+recipe.in: in
+recipe.file: file
+recipe.files: files
+recipe.run-stopped: You stopped this run. Nothing was written, because every file gets its real name only once a whole run has succeeded.
+recipe.run-failed: This run did not finish, and nothing that looks complete was left behind.

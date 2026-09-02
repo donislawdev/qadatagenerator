@@ -36,54 +36,113 @@
 			</container>
 			<container pos="228,0" size="1098x884">
 				<container size="1098x884">
-					<widget pos="24,24" size="1050x836" type="*container.Split">
-						<widget size="1050x415" type="*parts.Editor">
-							<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="1046x411"/>
-							<rectangle pos="1,1" radius="5" size="1047x413" strokeColor="inputBorder" strokeWidth="2"/>
-							<widget pos="0,2" size="1050x411" type="*widget.Scroll">
-								<widget size="1050x411" type="*widget.entryContent">
-									<widget size="1050x411" type="*widget.RichText">
-										<text monospace pos="4,2" size="117x16">version: "0.1"</text>
-										<text monospace pos="4,18" size="117x16">seed: "sample"</text>
-										<text monospace pos="4,34" size="75x16">entities:</text>
-										<text monospace pos="4,50" size="92x16">  customer:</text>
-										<text monospace pos="4,67" size="101x16">    count: 4</text>
-										<text monospace pos="4,83" size="92x16">    fields:</text>
-										<text monospace pos="4,99" size="92x16">      name:</text>
-										<text monospace pos="4,116" size="244x16">        generator: first_name</text>
-										<text monospace pos="4,132" size="67x16">  order:</text>
-										<text monospace pos="4,148" size="101x16">    count: 7</text>
-										<text monospace pos="4,164" size="277x16">    belongs_to: { customer: 5-5 }</text>
-										<text monospace pos="4,181" size="92x16">    fields:</text>
-										<text monospace pos="4,197" size="134x16">      placed_at:</text>
-										<text monospace pos="4,213" size="244x16">        generator: birth_date</text>
-										<text monospace pos="4,230" size="0x16"></text>
+					<container pos="24,24" size="1050x836">
+						<widget size="1050x709" type="*container.Split">
+							<widget size="1050x352" type="*parts.Editor">
+								<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="1046x348"/>
+								<rectangle pos="1,1" radius="5" size="1047x349" strokeColor="inputBorder" strokeWidth="2"/>
+								<widget pos="0,2" size="1050x348" type="*widget.Scroll">
+									<widget size="1050x348" type="*widget.entryContent">
+										<widget size="1050x348" type="*widget.RichText">
+											<text monospace pos="4,2" size="117x16">version: "0.1"</text>
+											<text monospace pos="4,18" size="117x16">seed: "sample"</text>
+											<text monospace pos="4,34" size="75x16">entities:</text>
+											<text monospace pos="4,50" size="92x16">  customer:</text>
+											<text monospace pos="4,67" size="101x16">    count: 4</text>
+											<text monospace pos="4,83" size="92x16">    fields:</text>
+											<text monospace pos="4,99" size="92x16">      name:</text>
+											<text monospace pos="4,116" size="244x16">        generator: first_name</text>
+											<text monospace pos="4,132" size="67x16">  order:</text>
+											<text monospace pos="4,148" size="101x16">    count: 7</text>
+											<text monospace pos="4,164" size="277x16">    belongs_to: { customer: 5-5 }</text>
+											<text monospace pos="4,181" size="92x16">    fields:</text>
+											<text monospace pos="4,197" size="134x16">      placed_at:</text>
+											<text monospace pos="4,213" size="244x16">        generator: birth_date</text>
+											<text monospace pos="4,230" size="0x16"></text>
+										</widget>
 									</widget>
 								</widget>
 							</widget>
-						</widget>
-						<widget pos="0,415" size="1050x5" type="*container.divider">
-							<rectangle fillColor="shadow" size="1050x5"/>
-							<rectangle fillColor="foreground" pos="509,0" size="32x4"/>
-						</widget>
-						<container pos="0,420" size="1050x415">
-							<rectangle size="1050x415" strokeWidth="2"/>
-							<widget size="1050x415" type="*parts.KeyScroll">
-								<container size="1050x415">
-									<widget size="1050x27" type="*widget.Label">
-										<widget size="1050x27" type="*widget.RichText">
-											<text bold pos="4,4" size="348x19">This recipe reads correctly and still cannot be run.</text>
-										</widget>
-									</widget>
-									<widget pos="0,35" size="1050x84" type="*widget.Label">
-										<widget size="1050x84" type="*widget.RichText">
-											<text pos="4,4" size="1008x19">order asks for 7 rows and belongs to customer, which has 4 rows at 5 to 5 each, so the count has to be between 20 and 20. Change the count or the range</text>
-										</widget>
-									</widget>
-								</container>
+							<widget pos="0,352" size="1050x5" type="*container.divider">
+								<rectangle fillColor="shadow" size="1050x5"/>
+								<rectangle fillColor="foreground" pos="509,0" size="32x4"/>
 							</widget>
+							<container pos="0,357" size="1050x352">
+								<rectangle size="1050x352" strokeWidth="2"/>
+								<widget size="1050x352" type="*parts.KeyScroll">
+									<container size="1050x352">
+										<widget size="1050x27" type="*widget.Label">
+											<widget size="1050x27" type="*widget.RichText">
+												<text bold pos="4,4" size="348x19">This recipe reads correctly and still cannot be run.</text>
+											</widget>
+										</widget>
+										<widget pos="0,35" size="1050x65" type="*widget.Label">
+											<widget size="1050x65" type="*widget.RichText">
+												<text pos="4,4" size="1008x19">order asks for 7 rows and belongs to customer, which has 4 rows at 5 to 5 each, so the count has to be between 20 and 20. Change the count or the range</text>
+											</widget>
+										</widget>
+									</container>
+								</widget>
+							</container>
+						</widget>
+						<container pos="0,717" size="1050x118">
+							<container size="1050x28">
+								<widget pos="68,0" size="902x28" type="*widget.Entry">
+									<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="898x24"/>
+									<rectangle pos="1,1" radius="5" size="900x25" strokeColor="inputBorder" strokeWidth="2"/>
+									<widget pos="0,2" size="902x24" type="*widget.Scroll">
+										<widget size="902x24" type="*widget.entryContent">
+											<widget size="902x24" type="*widget.RichText">
+												<text color="disabled" pos="4,2" size="151x19">Choose or paste a path</text>
+											</widget>
+											<widget size="902x24" type="*widget.RichText">
+												<text pos="4,2" size="0x19"></text>
+											</widget>
+										</widget>
+									</widget>
+								</widget>
+								<widget size="60x28" type="*widget.Label">
+									<widget size="60x28" type="*widget.RichText">
+										<text pos="4,4" size="52x19">Write to</text>
+									</widget>
+								</widget>
+								<widget pos="979,0" size="70x28" type="*parts.Button">
+									<rectangle fillColor="button" radius="5" size="70x28"/>
+									<rectangle size="70x28"/>
+									<widget pos="4,4" size="62x19" type="*widget.RichText">
+										<text alignment="center" bold size="62x19">Choose...</text>
+									</widget>
+								</widget>
+							</container>
+							<container pos="0,36" size="1050x28">
+								<widget pos="208,0" size="673x28" type="*widget.Label">
+									<widget size="673x28" type="*widget.RichText">
+										<text pos="4,4" size="0x19"></text>
+									</widget>
+								</widget>
+								<widget size="200x28" type="*widget.Check">
+									<circle pos="2,2" size="24x24"/>
+									<image pos="4,4" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+									<image pos="4,4" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+									<text pos="28,0" size="172x28">Replace files already there</text>
+								</widget>
+								<widget pos="890,0" size="159x28" type="*parts.Button">
+									<rectangle fillColor="button" radius="5" size="159x28"/>
+									<rectangle size="159x28"/>
+									<widget pos="4,4" size="151x19" type="*widget.RichText">
+										<text alignment="center" bold color="disabled" size="151x19">Generate this dataset</text>
+									</widget>
+								</widget>
+							</container>
+							<container pos="0,72" size="1050x46">
+								<widget size="1050x46" type="*widget.Label">
+									<widget size="1050x46" type="*widget.RichText">
+										<text pos="4,4" size="529x19">Fix what is wrong with the recipe above, and this button writes what it describes.</text>
+									</widget>
+								</widget>
+							</container>
 						</container>
-					</widget>
+					</container>
 				</container>
 			</container>
 		</container>

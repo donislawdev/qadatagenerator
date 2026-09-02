@@ -57,6 +57,14 @@ func recipeStatesOfTheAnswer() []State {
 			Recipe: RelatedRecipe,
 		},
 		{
+			Name: "recipe-ready",
+			Purpose: "a recipe that can be used with somewhere to write it, which is the " +
+				"one state where the button is not the thing saying what is missing",
+			Screen: 0,
+			Recipe: CleanRecipe,
+			Into:   "a-directory",
+		},
+		{
 			Name: "recipe-no-rows",
 			Purpose: "a recipe that can be used and produces nothing, which is a sentence " +
 				"rather than a heading with an empty rectangle under it",
@@ -87,6 +95,15 @@ func recipeStatesOfTheKeyboard() []State {
 			Screen:   0,
 			Recipe:   CleanRecipe,
 			Keyboard: Keyboard{Tabs: 7},
+		},
+		{
+			Name: "recipe-focus-button",
+			Purpose: "the keyboard on the button that writes, which is the last stop of the " +
+				"walk because the bar is read last",
+			Screen:   0,
+			Recipe:   CleanRecipe,
+			Into:     "a-directory",
+			Keyboard: Keyboard{Tabs: 11},
 		},
 		{
 			Name:     "recipe-focus-editor",

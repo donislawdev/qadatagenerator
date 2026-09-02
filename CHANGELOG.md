@@ -12,6 +12,22 @@ repository once they are released.
 
 ### Added
 
+- **The window writes datasets.** The recipe editor has a bar along the bottom:
+  a directory to write to with a chooser beside it, a tick box for replacing
+  files already there, and a button. Above the button it says which files a run
+  would write, so you know before you press it. While a run goes on the settings
+  are out of reach and the button becomes a way to stop it, and closing the
+  window stops the run first, because nothing appears under its real name until
+  the whole run has succeeded.
+
+  The directory starts empty and the button waits for one. A window has no
+  working directory anybody can see, so this one refuses to guess where your
+  files should go.
+
+  What the button writes is what the rows above it showed: the preview and the
+  run are the same plan, the same engine and the same writer, and the only
+  difference is that one of them reaches a disk.
+
 - **The recipe editor shows the rows your recipe would produce.** Under the
   verdict there is now a table for each entity, carrying the first ten rows of
   it exactly as a run would write them, columns included: a child table shows

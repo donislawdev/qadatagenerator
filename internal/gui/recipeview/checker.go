@@ -6,7 +6,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
-	"github.com/donislawdev/qadatagenerator/internal/preview"
+	"github.com/donislawdev/qadatagenerator/internal/produce"
 )
 
 // Checker fills the port above the way qadg validate fills it.
@@ -60,8 +60,8 @@ func Checker(described catalog.Catalog) Check {
 		// exist. A sample drawn from an empty locale would be a sample of a run
 		// nobody asked for, and the whole worth of the preview is that it is
 		// the run.
-		sample, err := preview.Of(decoded.Recipe, values.New(decoded.Recipe.Locale,
-			decoded.Recipe.Seed), preview.DefaultRows)
+		sample, err := produce.Preview(decoded.Recipe, values.New(decoded.Recipe.Locale,
+			decoded.Recipe.Seed), produce.DefaultRows)
 		if err != nil {
 			// A recipe validate approved and the plan refuses. That gap is
 			// smaller than it was, because one of its cases was closed on

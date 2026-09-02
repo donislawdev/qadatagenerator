@@ -8,7 +8,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
 	"github.com/donislawdev/qadatagenerator/internal/gui/recipeview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/screens"
-	"github.com/donislawdev/qadatagenerator/internal/preview"
+	"github.com/donislawdev/qadatagenerator/internal/produce"
 )
 
 // The rows on screen are the rows the run would write.
@@ -16,7 +16,7 @@ import (
 // 🔴 It is held against the sample rather than against a list of expected
 // values, because a list written here would be a second statement of what this
 // build produces and would go on agreeing with itself after the engine changed.
-// What makes the sample the run's own rows is guarded in internal/preview, and
+// What makes the sample the run's own rows is guarded in internal/produce, and
 // this is the other half: that the screen draws them rather than something else.
 func TestTheRowsOnScreenAreTheRowsTheSampleCarries(t *testing.T) {
 	view := here(t, real(t))
@@ -143,7 +143,7 @@ func TestAParentOutsideTheSampleIsNamedRatherThanLeftBlank(t *testing.T) {
 	view := here(t, func(string, []byte) recipeview.Answer {
 		return recipeview.Answer{
 			Report: validate.Report{Entities: 1, Fields: 1},
-			Sample: preview.Sample{Tables: []preview.Table{{
+			Sample: produce.Sample{Tables: []produce.Table{{
 				Entity:       "order",
 				Columns:      []string{"placed_at", "customer"},
 				Rows:         [][]string{{"2004-01-25", ""}},
@@ -165,7 +165,7 @@ func TestAParentOutsideTheSampleIsNamedRatherThanLeftBlank(t *testing.T) {
 
 // sampleOf is what the real check produces for a recipe, so that a test can
 // hold the screen against it.
-func sampleOf(t *testing.T, recipe string) preview.Sample {
+func sampleOf(t *testing.T, recipe string) produce.Sample {
 	t.Helper()
 	answer := real(t)(i18n.English.T(i18n.RecipeName), []byte(recipe))
 	if answer.Refused != nil {

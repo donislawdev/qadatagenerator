@@ -12,7 +12,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
-	"github.com/donislawdev/qadatagenerator/internal/preview"
+	"github.com/donislawdev/qadatagenerator/internal/produce"
 )
 
 // drawPreview puts the first rows of every table under the verdict.
@@ -26,7 +26,7 @@ import (
 // meant, before anything is written.
 //
 // The rows are the run's own first rows rather than an illustration of them, and
-// what makes that true is in internal/preview rather than here.
+// what makes that true is in internal/produce rather than here.
 func (v *View) drawPreview() {
 	for _, table := range v.answer.Sample.Tables {
 		v.answerBox.Add(heading(table.Entity))
@@ -68,7 +68,7 @@ func (v *View) drawWrittenText() {
 // A table shorter than the sample and a table cut down to it are different
 // things and read differently, so the sentence differs rather than the number
 // alone. Somebody looking at three rows has seen the whole table.
-func (v *View) rowsShown(table preview.Table) string {
+func (v *View) rowsShown(table produce.Table) string {
 	if !table.Cut() {
 		return counted(table.Total, v.text.T(i18n.RecipeRow), v.text.T(i18n.RecipeRows))
 	}
@@ -86,7 +86,7 @@ func (v *View) rowsShown(table preview.Table) string {
 // heading is part of it, and cells exist only for what can be seen. The type
 // used here is the extension that says when the keyboard arrives and leaves,
 // which is shared with that screen rather than copied from it.
-func (v *View) rows(table preview.Table) fyne.CanvasObject {
+func (v *View) rows(table produce.Table) fyne.CanvasObject {
 	shown := table
 	built := parts.NewKeyTable(
 		func() (int, int) { return len(shown.Rows), len(shown.Columns) },
@@ -150,7 +150,7 @@ func (v *View) cell() *widget.RichText {
 // them would be the tool failing to answer without saying so. Everywhere else
 // an empty value is an ordinary thing for generated data to be, and stays
 // empty.
-func (v *View) cellText(table preview.Table, row, column int) string {
+func (v *View) cellText(table produce.Table, row, column int) string {
 	if row >= len(table.Rows) || column >= len(table.Rows[row]) {
 		return ""
 	}
@@ -180,7 +180,7 @@ func written(text string) fyne.CanvasObject {
 // so the width is of the text rather than of a guess about characters. Only the
 // ends of the range are ours, and they live in the theme with everything else
 // this view is not allowed to decide.
-func (v *View) widthOf(table preview.Table, column int) float32 {
+func (v *View) widthOf(table produce.Table, column int) float32 {
 	widest := measure(table.Columns[column])
 	// 🔴 Measured on what the cell will SAY rather than on the value behind it,
 	// and the two differ. A cell whose parent lies outside the sample carries
