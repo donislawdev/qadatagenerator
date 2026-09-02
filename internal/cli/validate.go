@@ -183,9 +183,7 @@ func writeReport(out *streams, report validate.Report) {
 	}
 
 	if report.Usable() {
-		out.note(report.Name + summaryValid +
-			strconv.Itoa(report.Entities) + summaryEntities +
-			strconv.Itoa(report.Fields) + summaryFields)
+		out.note(report.Name + summaryValid + understood(report.Entities, report.Fields))
 	}
 }
 

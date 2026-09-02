@@ -145,6 +145,53 @@ func TestValidateAcceptsAUsableRecipe(t *testing.T) {
 	}
 }
 
+// A recipe with one of each, so that the sentence about what was read has to
+// say entity and field rather than entities and fields.
+const oneOfEachRecipe = usableRecipe
+
+// A recipe with two entities and three fields between them, which is what
+// stops the repair from being a spelling.
+const severalOfEachRecipe = `version: "0.1"
+entities:
+  customer:
+    count: 2
+    fields:
+      id:   { type: uuid, unique: true }
+      note: { type: uuid }
+  order:
+    count: 3
+    fields:
+      id: { type: uuid }
+`
+
+// # What this guards, and why it is a test rather than a careful constant
+//
+// B-204: the window said 1 entity, 1 field and the command line said
+// 1 entities and 1 fields about the same recipe, so the two surfaces answered
+// one question in two ways over a single line.
+//
+// Both forms are checked in one test on purpose. A sentence that is always
+// singular reads correctly about the first recipe below, and a sentence that
+// is always plural reads correctly about the second, so either half alone is a
+// guard that a wrong answer walks past.
+func TestWhatWasUnderstoodIsCountedInTheSingularWhenThereIsOneOfIt(t *testing.T) {
+	one := run(commandValidate, recipeFile(t, oneOfEachRecipe))
+	if one.code != 0 {
+		t.Fatalf("ended with %d, log: %s", one.code, one.log)
+	}
+	if !strings.Contains(one.log, "1 entity and 1 field.") {
+		t.Errorf("one of each is not written in the singular: %q", one.log)
+	}
+
+	several := run(commandValidate, recipeFile(t, severalOfEachRecipe))
+	if several.code != 0 {
+		t.Fatalf("ended with %d, log: %s", several.code, several.log)
+	}
+	if !strings.Contains(several.log, "2 entities and 3 fields.") {
+		t.Errorf("more than one of each is not written in the plural: %q", several.log)
+	}
+}
+
 // A recipe that cannot be used says something about the recipe, so the run
 // ends with the configuration code and not with a tool failure.
 func TestValidateRefusesAnUnusableRecipeWithTheConfigurationCode(t *testing.T) {

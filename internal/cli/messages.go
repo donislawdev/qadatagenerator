@@ -668,9 +668,14 @@ const (
 	problemUncheckedMany = " declarations were not checked"
 	problemUncheckedHow  = ". Run without --quiet to see which."
 
-	summaryValid    = " can be used. Understood "
-	summaryEntities = " entities and "
-	summaryFields   = " fields."
+	summaryValid = " can be used. Understood "
+	// The two counts each carry both of their forms, the way the warning above
+	// them does. What made this a pair rather than one word with a letter added
+	// is written at understood below.
+	summaryEntityOne  = " entity and "
+	summaryEntityMany = " entities and "
+	summaryFieldOne   = " field."
+	summaryFieldMany  = " fields."
 )
 
 // uncheckedHeadline builds the warning about what was not looked at.
@@ -687,6 +692,39 @@ func uncheckedHeadline(count int, detailHidden bool) string {
 		headline += problemUncheckedHow
 	}
 	return headline
+}
+
+// understood says how much of the recipe was read, in the singular where there
+// is one of it.
+//
+// # Why a pair of words rather than a letter added to one
+//
+// The window says this same sentence and builds its plural by adding an s,
+// which is English and only English, and it says so in a comment because that
+// is all a comment can do. Here the words were already two constants, the way
+// the warning above them is, so each form has a place of its own to go the day
+// a catalogue carries this line. That is the cheap half of B-184 rather than
+// the whole of it: what is still missing is a language whose plural is not one
+// more form but three.
+//
+// # Why this was worth a repair at all
+//
+// The two surfaces answered the same question in different words. The window
+// read 1 entity, 1 field and the command line read 1 entities and 1 fields
+// about the same recipe, which is the sixth rule broken by one line rather
+// than by a missing function.
+func understood(entities, fields int) string {
+	sentence := strconv.Itoa(entities)
+	if entities == 1 {
+		sentence += summaryEntityOne
+	} else {
+		sentence += summaryEntityMany
+	}
+	sentence += strconv.Itoa(fields)
+	if fields == 1 {
+		return sentence + summaryFieldOne
+	}
+	return sentence + summaryFieldMany
 }
 
 // Log prefixes. They stay stable because people grep CI logs for them.

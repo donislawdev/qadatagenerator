@@ -101,6 +101,11 @@ repository once they are released.
 
 ### Fixed
 
+- **`qadg validate` no longer says `1 entities and 1 fields`.** A recipe with one
+  entity and one field in it now reads `Understood 1 entity and 1 field.`, which
+  is what the same sentence in the window already said. The two surfaces
+  answered one question about the same recipe in two ways.
+
 - **Closing the window from outside no longer leaves a run's working files
   behind.** Stopping the container, logging out or shutting the machine down
   during a run now ends that run first and gives the window up once it has, the

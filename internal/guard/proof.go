@@ -436,6 +436,7 @@ var Guards = []Guard{
 	{"a place nobody wrote is reported without a line rather than with a wrong one", "TestAPlaceNobodyWroteIsReportedWithoutALine", "internal/adapter/recipeyaml", ByProbe},
 	{"a problem raised above the decoder is pointed at the same line the decoder would have pointed at", "TestAProblemRaisedAboveTheDecoderCarriesTheLineOfItsPlace", "internal/app/validate", ByMutation},
 	{"validate refuses exactly what generate would refuse", "TestValidateRefusesARecipeGenerateWouldRefuse", "internal/cli", ByMutation},
+	{"the two surfaces count what they understood of a recipe in the same words", "TestWhatWasUnderstoodIsCountedInTheSingularWhenThereIsOneOfIt", "internal/cli", ByMutation},
 	{"a refusal says what to do next whichever layer it came from", "TestAFailureFromBelowStillSaysWhatToDo", "internal/cli", ByMutation},
 
 	// --- being stopped from outside -----------------------------------------
