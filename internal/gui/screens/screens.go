@@ -37,6 +37,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/gui/about"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
+	"github.com/donislawdev/qadatagenerator/internal/gui/recipeview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/shell"
 	"github.com/donislawdev/qadatagenerator/internal/gui/takeview"
 	"github.com/donislawdev/qadatagenerator/internal/license"
@@ -130,6 +131,15 @@ type State struct {
 	// anything but RanNothing presses the button, so it also needs the kinds of
 	// damage above, or the screen would refuse the run it was asked for.
 	Ran Ran
+	// Recipe is what is written on the recipe editor before the picture is
+	// taken. It goes in through the field a person types into, so the state is
+	// one somebody reaches by typing rather than one only this list produces.
+	Recipe string
+	// Checking leaves the judging of the recipe unanswered, which is the screen
+	// a person looks at while a large one is being read. It is the recipe
+	// editor's twin of Reading below, and separate for the same reason: the two
+	// screens are told to wait by different places of work.
+	Checking bool
 	// Reading leaves the read of the file unanswered, which is the screen a
 	// person looks at while a large one is being walked.
 	//
@@ -148,9 +158,59 @@ type State struct {
 // One list for both screens on purpose. A list written for one screen stays a
 // list of one screen forever, and nobody notices, because it is green.
 func All() []State {
-	states := takeStates()
+	states := recipeStates()
+	states = append(states, takeStates()...)
 	states = append(states, browserStates()...)
 	return append(states, aboutStates()...)
+}
+
+// recipeStates are the states of the screen a recipe is written on.
+//
+// The three that matter are the three answers this screen can give: nothing
+// written yet, something written and wrong, something written and usable. The
+// fourth is the one nobody can photograph any other way, because a check that
+// answers has finished before a picture could be taken.
+func recipeStates() []State {
+	return []State{
+		{
+			Name:    "recipe-empty",
+			Purpose: "nothing written yet, a sentence saying what to do rather than an empty rectangle",
+			Screen:  0,
+		},
+		{
+			Name:    "recipe-problems",
+			Purpose: "a recipe that cannot be used, each problem at the line it was written on",
+			Screen:  0,
+			Recipe:  BrokenRecipe,
+		},
+		{
+			Name:    "recipe-clean",
+			Purpose: "a recipe that can be used, with what was read of it, so approval is not bare",
+			Screen:  0,
+			Recipe:  CleanRecipe,
+		},
+		{
+			Name:     "recipe-checking",
+			Purpose:  "a recipe being judged, which for a large one means the screen says so and stays answerable",
+			Screen:   0,
+			Recipe:   CleanRecipe,
+			Checking: true,
+		},
+		{
+			Name:     "recipe-focus-editor",
+			Purpose:  "the keyboard in the field the recipe is written in, which it can also leave",
+			Screen:   0,
+			Recipe:   BrokenRecipe,
+			Keyboard: Keyboard{Tabs: 5},
+		},
+		{
+			Name:     "recipe-focus-answer",
+			Purpose:  "the keyboard on the pane holding the answer, which the toolkit's own scrolling area never lets it reach",
+			Screen:   0,
+			Recipe:   BrokenRecipe,
+			Keyboard: Keyboard{Tabs: 6},
+		},
+	}
 }
 
 // takeStates are the states of the screen that damages somebody else's file,
@@ -167,18 +227,18 @@ func takeStatesBeforeARun() []State {
 		{
 			Name:    "take-empty",
 			Purpose: "no file chosen, a sentence rather than an empty rectangle",
-			Screen:  0,
+			Screen:  1,
 		},
 		{
 			Name:        "take-refused",
 			Purpose:     "a file read and no kind of damage chosen, so the screen says why it would not run",
-			Screen:      0,
+			Screen:      1,
 			NeedsSource: true,
 		},
 		{
 			Name:        "take-plan",
 			Purpose:     "a file read and two kinds of damage chosen, so the screen says what a run would do",
-			Screen:      0,
+			Screen:      1,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 		},
@@ -194,43 +254,43 @@ func takeStatesOfTheKeyboard() []State {
 			Name: "take-focus-file",
 			Purpose: "the keyboard on the button that chooses a file, which is the first " +
 				"thing on this screen it reaches and was for a while the last",
-			Screen:      0,
-			NeedsSource: true,
-			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 4},
-		},
-		{
-			Name: "take-focus-setting",
-			Purpose: "the keyboard in a text setting, which is the one control the toolkit " +
-				"marks with the chosen colour rather than the focus colour",
-			Screen:      0,
-			NeedsSource: true,
-			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 15},
-		},
-		{
-			Name: "take-focus-pane",
-			Purpose: "the keyboard on the pane that says what the file holds, which the " +
-				"toolkit's own scrolling area never lets it reach",
-			Screen:      0,
+			Screen:      1,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 			Keyboard:    Keyboard{Tabs: 5},
 		},
 		{
+			Name: "take-focus-setting",
+			Purpose: "the keyboard in a text setting, which is the one control the toolkit " +
+				"marks with the chosen colour rather than the focus colour",
+			Screen:      1,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+			Keyboard:    Keyboard{Tabs: 16},
+		},
+		{
+			Name: "take-focus-pane",
+			Purpose: "the keyboard on the pane that says what the file holds, which the " +
+				"toolkit's own scrolling area never lets it reach",
+			Screen:      1,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+			Keyboard:    Keyboard{Tabs: 6},
+		},
+		{
 			Name: "take-focus-damage",
 			Purpose: "the keyboard at the far end of the screen, on the button that damages " +
 				"the file, having passed every setting of the run on the way",
-			Screen:      0,
+			Screen:      1,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 24},
+			Keyboard:    Keyboard{Tabs: 25},
 		},
 		{
 			Name: "take-reading",
 			Purpose: "a file being read, which for a file this mode is for means walking " +
 				"all of it while the window stays answerable",
-			Screen:      0,
+			Screen:      1,
 			NeedsSource: true,
 			Reading:     true,
 		},
@@ -247,7 +307,7 @@ func takeStatesOfARun() []State {
 		{
 			Name:        "take-running",
 			Purpose:     "a run going on, with the settings out of reach and the way to stop it in reach",
-			Screen:      0,
+			Screen:      1,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 			Ran:         RanInFlight,
@@ -256,16 +316,16 @@ func takeStatesOfARun() []State {
 			Name: "take-focus-stop",
 			Purpose: "the keyboard on the way to stop a run, which is the only thing on " +
 				"this screen it can reach while one is going on",
-			Screen:      0,
+			Screen:      1,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 			Ran:         RanInFlight,
-			Keyboard:    Keyboard{Tabs: 6},
+			Keyboard:    Keyboard{Tabs: 7},
 		},
 		{
 			Name:        "take-written",
 			Purpose:     "a run that finished and carried out everything it ordered",
-			Screen:      0,
+			Screen:      1,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 			Ran:         RanWritten,
@@ -274,7 +334,7 @@ func takeStatesOfARun() []State {
 			Name: "take-partial",
 			Purpose: "a run that wrote its files with some of the ordered damage unapplied, " +
 				"which is the state a count of what was applied hides",
-			Screen:      0,
+			Screen:      1,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 			Ran:         RanPartial,
@@ -282,7 +342,7 @@ func takeStatesOfARun() []State {
 		{
 			Name:        "take-stopped",
 			Purpose:     "a run somebody ended, which leaves nothing behind and says so",
-			Screen:      0,
+			Screen:      1,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 			Ran:         RanStopped,
@@ -290,7 +350,7 @@ func takeStatesOfARun() []State {
 		{
 			Name:        "take-failed",
 			Purpose:     "a run that ended on a failure, with what failed and what that left",
-			Screen:      0,
+			Screen:      1,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 			Ran:         RanFailed,
@@ -304,35 +364,35 @@ func browserStates() []State {
 		{
 			Name:    "browser-empty",
 			Purpose: "no manifest open, a sentence rather than an empty rectangle",
-			Screen:  1,
+			Screen:  2,
 		},
 		{
 			Name:          "browser-promised",
 			Purpose:       "a manifest open, which is what a run promised about a dataset",
-			Screen:        1,
+			Screen:        2,
 			NeedsManifest: true,
 		},
 		{
 			Name:          "browser-compared",
 			Purpose:       "the same manifest beside what an application did about it",
-			Screen:        1,
+			Screen:        2,
 			NeedsManifest: true,
 			NeedsResponse: true,
 		},
 		{
 			Name:          "browser-focus-button",
 			Purpose:       "the keyboard on the button that opens a manifest",
-			Screen:        1,
+			Screen:        2,
 			NeedsManifest: true,
-			Keyboard:      Keyboard{Tabs: 4},
+			Keyboard:      Keyboard{Tabs: 5},
 		},
 		{
 			Name:          "browser-focus-cell",
 			Purpose:       "the keyboard inside the table, three rows down and one column across",
-			Screen:        1,
+			Screen:        2,
 			NeedsManifest: true,
 			Keyboard: Keyboard{
-				Tabs: 6,
+				Tabs: 7,
 				Keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight},
 			},
 		},
@@ -345,28 +405,28 @@ func aboutStates() []State {
 		{
 			Name:    "about",
 			Purpose: "versions, licences and every third party component",
-			Screen:  2,
+			Screen:  3,
 		},
 		{
 			Name:     "about-focus-name",
 			Purpose:  "the keyboard on the name of the screen being read",
-			Screen:   2,
-			Keyboard: Keyboard{Tabs: 3},
+			Screen:   3,
+			Keyboard: Keyboard{Tabs: 4},
 		},
 		{
 			Name: "about-focus-body",
 			Purpose: "the keyboard in the text of the screen, which the toolkit's own " +
 				"scrolling area never allows it to reach",
-			Screen:   2,
-			Keyboard: Keyboard{Tabs: 4},
+			Screen:   3,
+			Keyboard: Keyboard{Tabs: 5},
 		},
 		{
 			Name: "about-scrolled",
 			Purpose: "the same screen two pages further down, reached with the keyboard " +
 				"alone, which is three quarters of it that a mouse used to be needed for",
-			Screen: 2,
+			Screen: 3,
 			Keyboard: Keyboard{
-				Tabs: 4,
+				Tabs: 5,
 				Keys: []fyne.KeyName{fyne.KeyPageDown, fyne.KeyPageDown},
 			},
 		},
@@ -403,11 +463,18 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 		Run:  outcomeOf(state.Ran),
 		Read: readingFor(state.Reading),
 	})
+	recipeScreen := recipeview.New(text, recipeview.Checker(describedDamage()), background.Work{
+		Read: readingFor(state.Checking),
+	})
 	frame := shell.New([]shell.Screen{
+		{Name: text.T(i18n.ScreenRecipe), Content: recipeScreen.Content()},
 		{Name: text.T(i18n.ScreenTake), Content: takeScreen.Content(), OnDropped: takeScreen.Dropped},
 		{Name: text.T(i18n.ScreenManifest), Content: view.Content()},
 		{Name: text.T(i18n.ScreenAbout), Content: about.Content(text, license.Current(), version.Current())},
 	})
+	if state.Recipe != "" {
+		recipeScreen.SetRecipe(state.Recipe)
+	}
 	if state.NeedsManifest {
 		view.Open(data.Promised)
 	}

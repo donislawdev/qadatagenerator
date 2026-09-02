@@ -12,6 +12,21 @@ repository once they are released.
 
 ### Added
 
+- **A recipe editor in the window, and the window opens on it.** Write or paste a
+  recipe and see what is wrong with it as you type: every problem at the place
+  and the line it belongs to, the values that would have been accepted, and what
+  to do instead. A recipe with nothing wrong says so and says how much of it was
+  read, so an approval is never bare. Underneath either answer is the list of
+  what this build did not check. Nothing is written to disk: this screen reads
+  what you type and judges it, and the step that produces files comes next.
+  `qadg validate` is now reachable from the window as well as from a terminal,
+  and both give the same answer because both ask the same question.
+- **The Tab key leaves the recipe editor instead of being typed into it.** A
+  multi line field normally swallows Tab, which leaves anybody working from the
+  keyboard unable to get out of it. Tab now moves on to the next control. A tab
+  character cannot be used to indent YAML anyway, so nothing that could have
+  been written is lost, and a tab inside a quoted value is still written as 	.
+
 - **A problem in a recipe says which line it is on.** `qadg validate` used to name
   the place a problem belongs to, such as `entities.customer.count`, and leave
   you to find it. It now says the line as well, on the report you read and in

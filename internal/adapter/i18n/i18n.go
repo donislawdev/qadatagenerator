@@ -41,6 +41,7 @@ const (
 	ScreenAbout    Key = "screen.about"
 	ScreenManifest Key = "screen.manifest"
 	ScreenTake     Key = "screen.take"
+	ScreenRecipe   Key = "screen.recipe"
 )
 
 // The keys of the About screen.
@@ -264,10 +265,33 @@ const (
 	VerifyKindMissing     Key = "verify.kind.missing"
 )
 
+// The keys of the recipe editor.
+//
+// A problem is drawn from these in the same order the command line writes one,
+// because somebody who reads one report and then the other is reading about the
+// same recipe and should not have to translate between them.
+const (
+	RecipeEmpty       Key = "recipe.empty"
+	RecipePlaceholder Key = "recipe.placeholder"
+	RecipeChecking    Key = "recipe.checking"
+	RecipeName        Key = "recipe.name"
+
+	RecipeHeadingRecipe   Key = "recipe.heading.recipe"
+	RecipeHeadingProblems Key = "recipe.heading.problems"
+
+	RecipeNoObjections Key = "recipe.no-objections"
+	RecipeLine         Key = "recipe.line"
+	RecipeAllowed      Key = "recipe.allowed"
+	RecipeTry          Key = "recipe.try"
+	RecipeUnchecked    Key = "recipe.unchecked"
+	RecipeEntity       Key = "recipe.entity"
+	RecipeField        Key = "recipe.field"
+)
+
 // Keys is every key a screen may ask for, so a test can close the register
 // from the side the code is on.
 var Keys = []Key{
-	WindowTitle, ScreenAbout, ScreenManifest, ScreenTake,
+	WindowTitle, ScreenAbout, ScreenManifest, ScreenTake, ScreenRecipe,
 
 	AboutHeadingVersions, AboutHeadingLicenses, AboutHeadingComponents,
 	AboutHeadingData, AboutHeadingNotices,
@@ -328,6 +352,11 @@ var Keys = []Key{
 	VerifyCompared, VerifyAgreed, VerifyNoAnswer,
 	VerifyVerdictAccepted, VerifyVerdictRejected,
 	VerifyKindHole, VerifyKindOverzealous, VerifyKindSilent, VerifyKindMissing,
+
+	RecipeEmpty, RecipePlaceholder, RecipeChecking, RecipeName,
+	RecipeHeadingRecipe, RecipeHeadingProblems,
+	RecipeNoObjections, RecipeLine, RecipeAllowed, RecipeTry,
+	RecipeUnchecked, RecipeEntity, RecipeField,
 }
 
 // The catalogue travels inside the binary, because a window that needs a file

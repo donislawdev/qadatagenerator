@@ -198,3 +198,19 @@ take.refusal.overwrite-source.do: Choose another directory to write to.
 take.refusal.unnamed: This build stopped the run for a reason it cannot put into words
 take.refusal.unnamed.why: The run was stopped for a real reason and this copy of the tool has no message for it, which is a fault in the tool rather than in what was asked of it.
 take.refusal.unnamed.do: Report this, and say which settings were on screen.
+
+screen.recipe: Recipe
+
+recipe.empty: Write or paste a recipe here. It is checked as you type, and nothing is written to disk until you ask for it.
+recipe.placeholder: A recipe, in YAML
+recipe.checking: Checking this recipe.
+recipe.name: this recipe
+recipe.heading.recipe: Recipe
+recipe.heading.problems: Problems
+recipe.no-objections: No objections. This recipe can be used as it stands.
+recipe.line: line
+recipe.allowed: allowed
+recipe.try: try
+recipe.unchecked: What was not checked
+recipe.entity: entity
+recipe.field: field

@@ -116,6 +116,11 @@ var WindowReach = map[string]Claim{
 			"otherwise",
 		Test: "TestEverySettingOnTheScreenReachesTheRun",
 	},
+	"validate": {
+		Screen: "the recipe editor: a recipe written or pasted, judged as it is typed, with each " +
+			"problem at the place and the line it belongs to and a list of what was not checked",
+		Test: "TestTheScreenJudgesTheRecipeWrittenOnIt",
+	},
 	"corrupt --dry-run": {
 		Screen: "the state the screen is in before anybody presses the button. A window writes " +
 			"nothing until it is told to, so this is what it does rather than a switch",
@@ -131,7 +136,6 @@ var WindowReach = map[string]Claim{
 // it cannot grow by accident.
 var NotYetInWindow = map[string]string{
 	"generate":             "waits for the recipe editor with the live preview",
-	"validate":             "waits for the same editor, which shows problems beside the field they belong to",
 	"help":                 "waits for the first control carrying a hint. No help screen is planned, and that is recorded, but a window with no hints answers nothing",
 	"-h/--help":            "the same as the verb above it",
 	"--json":               "waits for Save as JSON on the About screen. The reader here is a compliance scanner, so the window has to PRODUCE the file rather than show it",
@@ -168,9 +172,16 @@ var MediumOnly = map[string]string{
 // that day, when the manifest browser took verify out of the list above. It
 // stood at 23 until 2026-08-19, when the Take and corrupt screen learned to
 // write and took the verb and its eleven flags with it in one step. That is the
-// largest single fall available today, and what is left is one verb, its five
-// flags and the four that stand alone.
-const NotYetCeiling = 11
+// largest single fall available today. It stood at 11 until 2026-09-02, when the
+// first step of the recipe editor took validate: the screen judges what is
+// written on it through the same use case, decoder, generator registry and
+// catalog the verb uses.
+//
+// 🔴 It took validate and NOT generate, although both were waiting on this one
+// screen. The editor reads a recipe and says what is wrong with it, and writes
+// nothing, so the verb that produces files is still not reachable here. Moving
+// it now would be the register describing a screen somebody intends to build.
+const NotYetCeiling = 10
 
 // MediumOnlyCeiling caps the exceptions for the same reason, one number lower
 // than nothing: three flags say how the output looks, and a fourth would be a

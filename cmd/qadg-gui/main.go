@@ -29,6 +29,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
+	"github.com/donislawdev/qadatagenerator/internal/gui/recipeview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/shell"
 	"github.com/donislawdev/qadatagenerator/internal/gui/takeview"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
@@ -44,9 +45,32 @@ func main() {
 	text := i18n.English
 	window := application.NewWindow(text.T(i18n.WindowTitle))
 
-	// The readers are handed to the screen here rather than reached for inside
-	// it, which is what lets every state of that screen be built in a test
-	// against documents that never touch a disk.
+	frame := assemble(text, window)
+
+	// Dropping is a property of the window rather than of a control, so the
+	// frame is what receives it and hands it to whichever screen is open.
+	window.SetOnDropped(frame.Dropped)
+	window.SetContent(frame.Content())
+	// A window with no size of its own shrinks to what its content demands, and
+	// a scrolling container demands almost nothing. Running the first build
+	// showed one heading in a window 128 pixels tall while every test was
+	// green, because the tests read the content rather than how much of it a
+	// person can see.
+	window.Resize(fyne.NewSize(palette.StartWidth, palette.StartHeight))
+	window.ShowAndRun()
+}
+
+// assemble builds every screen and the frame around them.
+//
+// It is apart from main because main had grown past the limit on the length of
+// a function, and the limit is bent for nothing. What came out is the half that
+// answers a different question: main opens a window and shows it, this decides
+// what is in it.
+//
+// Every screen is handed its readers and its places of work here rather than
+// reaching for them, which is what lets each of them be built in a test with no
+// disk and no goroutine.
+func assemble(text i18n.Catalogue, window fyne.Window) *shell.Shell {
 	browser := manifestview.New(text, window, manifestview.Readers{
 		Manifest: manifestjson.Load,
 		Response: responsejson.Load,
@@ -60,30 +84,26 @@ func main() {
 		fmt.Fprintln(os.Stderr, "this build cannot read its own catalog of damage:", err)
 		os.Exit(1)
 	}
-	// The reader and the three places work happens are all handed in, which is
-	// what lets every state of that screen be reached in a test without a disk
-	// and without a goroutine.
 	damage := takeview.New(text, window, described, take.Open, background.Work{
 		Run:   background.InBackground,
 		Read:  background.ReadInBackground,
 		Watch: background.WatchForClosing,
 	})
+	// The recipe editor reads nothing from disk yet, so the only place of work
+	// it is given is the one that judges what is typed. A recipe is allowed to
+	// be 256 KB and parsing one inside that limit can cost hundreds of
+	// megabytes, so that judging belongs anywhere except the thread that draws.
+	editor := recipeview.New(text, recipeview.Checker(described), background.Work{
+		Read: background.ReadInBackground,
+	})
 
-	frame := shell.New([]shell.Screen{
+	// The editor is first, and that is the answer to why it was built: somebody
+	// who opened this window before it could generate nothing with it, and the
+	// screen a window opens on is the one it is judged by.
+	return shell.New([]shell.Screen{
+		{Name: text.T(i18n.ScreenRecipe), Content: editor.Content()},
 		{Name: text.T(i18n.ScreenTake), Content: damage.Content(), OnDropped: damage.Dropped},
 		{Name: text.T(i18n.ScreenManifest), Content: browser.Content()},
 		{Name: text.T(i18n.ScreenAbout), Content: about.Content(text, license.Current(), version.Current())},
 	})
-
-	// Dropping is a property of the window rather than of a control, so the
-	// frame is what receives it and hands it to whichever screen is open.
-	window.SetOnDropped(frame.Dropped)
-	window.SetContent(frame.Content())
-	// A window with no size of its own shrinks to what its content demands, and
-	// a scrolling container demands almost nothing. Running the first build
-	// showed one heading in a window 128 pixels tall while every test was
-	// green, because the tests read the content rather than how much of it a
-	// person can see.
-	window.Resize(fyne.NewSize(palette.StartWidth, palette.StartHeight))
-	window.ShowAndRun()
 }

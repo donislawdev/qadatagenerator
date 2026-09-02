@@ -6,19 +6,26 @@
 					<widget size="220x28" type="*parts.Button">
 						<rectangle fillColor="button" radius="5" size="220x28"/>
 						<rectangle size="220x28"/>
+						<widget pos="86,4" size="46x19" type="*widget.RichText">
+							<text alignment="center" bold size="46x19">Recipe</text>
+						</widget>
+					</widget>
+					<widget pos="0,36" size="220x28" type="*parts.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
 						<widget pos="64,4" size="118x20" type="*widget.RichText">
 							<text alignment="center" bold size="118x19">Take and corrupt</text>
 						</widget>
 						<image fillMode="contain" pos="36,4" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
 					</widget>
-					<widget pos="0,36" size="220x28" type="*parts.Button">
+					<widget pos="0,72" size="220x28" type="*parts.Button">
 						<rectangle fillColor="button" radius="5" size="220x28"/>
 						<rectangle size="220x28"/>
 						<widget pos="48,4" size="122x19" type="*widget.RichText">
 							<text alignment="center" bold size="122x19">Manifest browser</text>
 						</widget>
 					</widget>
-					<widget pos="0,72" size="220x28" type="*parts.Button">
+					<widget pos="0,108" size="220x28" type="*parts.Button">
 						<rectangle fillColor="button" radius="5" size="220x28"/>
 						<rectangle size="220x28"/>
 						<widget pos="88,4" size="42x19" type="*widget.RichText">
