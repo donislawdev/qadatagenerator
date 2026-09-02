@@ -85,9 +85,13 @@ var (
 // breaking change for everybody reading them.
 const MaxSize = 256 * 1024
 
-// MaxNestingDepth is the deepest a recipe may nest the bracketed shapes, which
-// are the flow sequence written with square brackets and the flow mapping
-// written with braces. Both count towards the same depth.
+// MaxNestingDepth is the deepest a recipe may nest, in any of the three
+// spellings that buy the parser the same cost: the flow sequence written with
+// square brackets, the flow mapping written with braces, and the block
+// sequence written with dashes along one line. The two bracketed shapes count
+// towards one depth together. The dashes are counted within a line and against
+// this same number, because what this bounds is cost and each spelling buys it
+// the same way.
 //
 // # Why a second limit when there is already one on size
 //
@@ -126,8 +130,42 @@ const MaxSize = 256 * 1024
 // at the size limit itself, because a payload built to be expensive is a weapon
 // aimed at whoever runs it.
 //
+// # Why dashes are here too, which they were not until 2026-09-02
+//
+// A block sequence nests without writing a bracket at all, and along one line
+// it costs two bytes a level. Measured on 2026-09-02, on dashes:
+//
+//	2 000 levels     4 kB      33 MB
+//	5 000 levels    10 kB     100 MB
+//	10 000 levels   20 kB     334 MB
+//	20 000 levels   40 kB   1 242 MB
+//	40 000 levels   80 kB   4 779 MB
+//
+// Eighty kilobytes is under a third of the size limit and already costs nearly
+// five gigabytes. The parser does refuse the document in the end, and the
+// refusal arrives after the memory has been taken, which is the same as not
+// refusing it. Below ten thousand levels it does not refuse at all: a ten
+// kilobyte document parses in full, costs a hundred megabytes, and is turned
+// away for not being a mapping of keys.
+//
+// Three neighbouring shapes were measured beside it, because each of them
+// decides how much of this the count has to understand. A dash followed by two
+// spaces nests the same way and costs 1 245 MB, so what is counted is a dash
+// followed by blanks rather than a two byte token. A dash followed by a tab is
+// refused by the parser for the tab, at 45 MB. And no other one line spelling
+// is expensive: a run of question marks costs 45 MB and question marks
+// alternating with dashes cost 65 MB, because both die on the syntax before
+// they build anything.
+//
 // Ordinary indented nesting stays cleared, at nineteen megabytes for three
-// hundred and fifty kilobytes, which is past the size limit already.
+// hundred and fifty kilobytes, which is past the size limit already. So does
+// the same shape written with dashes one to a line, and for a reason worth
+// keeping: indentation has to grow with depth, so the bytes grow with the
+// square of it and the size limit caps the depth near seven hundred. Measured
+// on 2026-09-02, seven hundred levels in 247 kB cost 24 MB, and a document
+// spending its whole size budget on dashes spread over sixty five lines
+// reached 33 MB. That is why the dashes are counted within a line rather than
+// across the file.
 //
 // # Why sixty four
 //
@@ -136,6 +174,11 @@ const MaxSize = 256 * 1024
 // and a field written inline as a mapping, which is another. Sixty four leaves
 // room for a shape nobody has thought of while refusing everything a bomb
 // needs.
+//
+// The dashes were held to the same number after counting them, rather than
+// before. Measured across every file in this repository on 2026-09-02, the
+// longest run of dashes opening a list along one line is seven, and it is a
+// seed handed to the fuzzer. Every recipe written to be read has one.
 const MaxNestingDepth = 64
 
 // MaxDeclarableLength is the largest maximum length a field may declare.

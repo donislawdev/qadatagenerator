@@ -1,6 +1,7 @@
 package recipeyaml_test
 
 import (
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -115,6 +116,93 @@ entities:
     fields:
       s: { type: enum, values: [new, active, closed] }
 `)
+}
+
+// # Why the count grew a third spelling on 2026-09-02
+//
+// A sequence written with dashes nests without a bracket, so it walked past a
+// limit that counted brackets. Along one line it costs two bytes a level,
+// which put a document at under a third of the size limit at nearly five
+// gigabytes. The measurements are at MaxNestingDepth.
+//
+// The payload here is deliberately modest, for the reason its two siblings
+// give: a test may not be a weapon. That leaves the assertion with a problem
+// worth naming, because a modest payload is also a cheap one. Ten kilobytes of
+// dashes cost about a tenth of a second without the guard, and a time bound
+// loose enough to be stable on a busy machine cannot tell that from nothing.
+// So this measures what the guard actually saves, which is memory.
+func TestARecipeNestedInDashesAlongOneLineIsRefusedBeforeParsing(t *testing.T) {
+	nested := []byte(strings.Repeat("- ", 5000) + "x")
+
+	var before, after runtime.MemStats
+	runtime.ReadMemStats(&before)
+	result := recipeyaml.Decode(nested)
+	runtime.ReadMemStats(&after)
+
+	if result.Valid() {
+		t.Fatal("a recipe nesting dashes past the limit was accepted")
+	}
+	if len(result.Problems) != 1 || !strings.Contains(result.Problems[0].What, "dashes") {
+		t.Fatalf("expected one problem naming the dashes, got %+v", result.Problems)
+	}
+	if taken := after.TotalAlloc - before.TotalAlloc; taken > 8<<20 {
+		t.Errorf("the refusal allocated %d bytes, so the parser was handed the input after all", taken)
+	}
+}
+
+// The dashes are held to the number the brackets are held to, so the boundary
+// is worth pinning from both sides. Sixty four is already a shape nobody
+// writes, and it is still not what this refuses.
+func TestTheDashesAreCountedUpToTheSameLimitAsTheBrackets(t *testing.T) {
+	atTheLimit := recipeyaml.Decode([]byte(strings.Repeat("- ", 64) + "x"))
+	for _, problem := range atTheLimit.Problems {
+		if strings.Contains(problem.What, "dashes") {
+			t.Fatalf("sixty four dashes were refused for nesting, got %+v", atTheLimit.Problems)
+		}
+	}
+
+	past := recipeyaml.Decode([]byte(strings.Repeat("- ", 65) + "x"))
+	if past.Valid() || len(past.Problems) == 0 ||
+		!strings.Contains(past.Problems[0].What, "dashes") {
+		t.Fatalf("sixty five dashes were not refused for nesting, got %+v", past.Problems)
+	}
+}
+
+// # Why a dash and two spaces has to count the same as a dash and one
+//
+// Measured on 2026-09-02: the same depth written with two spaces after every
+// dash cost 1 245 MB against 1 243 MB for one space, so the spelling that is
+// cheaper to refuse is the same price to read. A count looking for a two byte
+// token would have turned one away and waved the other through, which is a
+// guard shaped like a guard.
+func TestADashCountsWhateverBlanksFollowIt(t *testing.T) {
+	result := recipeyaml.Decode([]byte(strings.Repeat("-  ", 65) + "x"))
+
+	if result.Valid() || len(result.Problems) == 0 ||
+		!strings.Contains(result.Problems[0].What, "dashes") {
+		t.Fatalf("dashes separated by two spaces were not counted, got %+v", result.Problems)
+	}
+}
+
+// # Why the count resets at every newline
+//
+// Depth carried across lines is bought with indentation, and indentation costs
+// the square of the depth, so the size limit caps that shape near seven
+// hundred levels. Measured on 2026-09-02: seven hundred levels in 247 kB cost
+// 24 MB, and a file spending its whole size budget on dashes spread over sixty
+// five lines reached 33 MB. Counting across the file would therefore refuse a
+// long list somebody wrote while refusing nothing a bomb needs.
+func TestTheDashesAreCountedWithinALineAndNotAcrossTheFile(t *testing.T) {
+	line := strings.Repeat("- ", 33) + "\n"
+
+	result := recipeyaml.Decode([]byte(strings.Repeat(line, 3)))
+
+	for _, problem := range result.Problems {
+		if strings.Contains(problem.What, "dashes") {
+			t.Fatalf("three lines of thirty three dashes were refused for nesting, got %+v",
+				result.Problems)
+		}
+	}
 }
 
 // # A recipe in the wrong encoding names its encoding

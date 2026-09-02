@@ -391,11 +391,33 @@ func refusedBeforeParsing(r *reader, data []byte) bool {
 		return true
 	}
 
+	return refusedForNesting(r, data)
+}
+
+// refusedForNesting answers the spellings of one bomb, and reports whether one
+// of them refused.
+//
+// It is part of the block above rather than a check of its own: it reads bytes,
+// it parses nothing, and the cost it refuses belongs to the parser. It sits in
+// a function of its own because the block grew past the length this project
+// holds a function to on the day a third spelling was counted, and a limit bent
+// to fit the code it measures is not a limit.
+func refusedForNesting(r *reader, data []byte) bool {
 	// One pass over bytes already in hand, comparing four characters, which is
 	// free next to what it refuses.
 	if depth := deepestNesting(data); depth > MaxNestingDepth {
 		r.report("", fmt.Sprintf("the recipe nests brackets %d deep and this build reads at most %d", depth, MaxNestingDepth),
 			fmt.Sprintf("nesting up to %d deep, counting square brackets and braces together", MaxNestingDepth),
+			"nothing written by hand nests anywhere near this deep, so check that the file is a recipe and not something else")
+		return true
+	}
+
+	// The same question asked of the spelling that needs no bracket, in a
+	// second pass for the same reason the first one is free: both are linear
+	// over bytes already in hand, and the gigabytes they refuse are not.
+	if depth := deepestBlockSequence(data); depth > MaxNestingDepth {
+		r.report("", fmt.Sprintf("the recipe opens %d lists with dashes along one line and this build reads at most %d", depth, MaxNestingDepth),
+			fmt.Sprintf("up to %d dashes opening a list along one line", MaxNestingDepth),
 			"nothing written by hand nests anywhere near this deep, so check that the file is a recipe and not something else")
 		return true
 	}
@@ -522,6 +544,57 @@ func deepestNesting(data []byte) int {
 	}
 	return deepest
 }
+
+// deepestBlockSequence returns the deepest a single line nests sequences
+// written with dashes rather than brackets.
+//
+// # Why this is not the function above with more characters in its switch
+//
+// The bracketed shapes announce where they close, so one counter walks the
+// whole file. A dash closes nothing: what ends it is the end of the line, and
+// depth carried on beyond that is bought with indentation, which the note at
+// the limit shows costs the square of the depth and is therefore capped by the
+// size limit at around seven hundred. So the two are counted differently
+// because they are shaped differently, and the count that matters here resets
+// at every newline.
+//
+// # What counts as one level
+//
+// A dash followed by one or more blanks, because that is what the format calls
+// an entry and because a dash with two spaces after it was measured nesting
+// exactly as deep and costing exactly as much. Counting a two byte token would
+// have refused the cheapest spelling and waved the next one through.
+//
+// A run inside a quoted string counts as well, on the same terms the bracket
+// scan is written on and erring the same safe way. Sixty four dashes in a row
+// inside a value is not a recipe anybody has written, and reading quotes here
+// would mean keeping a second parser correct.
+func deepestBlockSequence(data []byte) int {
+	deepest, run, at := 0, 0, 0
+	for at < len(data) {
+		if data[at] == '-' && at+1 < len(data) && blank(data[at+1]) {
+			run++
+			if run > deepest {
+				deepest = run
+			}
+			for at++; at < len(data) && blank(data[at]); at++ {
+			}
+			continue
+		}
+		// Anything else ends the run, and the end of a line is one of those
+		// things rather than a case of its own. A newline is not a blank, so
+		// it arrives here, which is the whole of how the count stays inside a
+		// line. Written as its own branch it would have done exactly what this
+		// one does, and a condition nobody can break is a condition nobody can
+		// test.
+		run, at = 0, at+1
+	}
+	return deepest
+}
+
+// blank reports whether a byte is what YAML puts between one token and the
+// next. A newline is deliberately not one of them.
+func blank(symbol byte) bool { return symbol == ' ' || symbol == '\t' }
 
 // shorten trims one part of a message to something a report can carry.
 //
