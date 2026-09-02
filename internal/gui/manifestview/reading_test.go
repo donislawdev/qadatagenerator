@@ -63,7 +63,7 @@ func TestReadingADocumentSaysSoAndPutsTheControlsOutOfReach(t *testing.T) {
 		Manifest: func(string) (manifest.Manifest, error) {
 			return manifest.Manifest{}, errors.New("nothing was read, this test never answers")
 		},
-	}, func(read func() func()) { waiting = append(waiting, read) })
+	}, func(read func() func(), _ func(error) func()) { waiting = append(waiting, read) })
 	view.Content()
 
 	view.startReading(func() func() {
@@ -106,7 +106,7 @@ func TestReadingADocumentSaysSoAndPutsTheControlsOutOfReach(t *testing.T) {
 // saying which is which.
 func TestAnAnswerAboutADocumentNobodyIsWaitingForIsNotDrawn(t *testing.T) {
 	waiting := []func() func(){}
-	view := New(i18n.English, nil, Readers{}, func(read func() func()) {
+	view := New(i18n.English, nil, Readers{}, func(read func() func(), _ func(error) func()) {
 		waiting = append(waiting, read)
 	})
 	view.Content()

@@ -11,6 +11,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/recipeview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/screens"
@@ -134,7 +135,7 @@ func TestAnEmptyScreenIsNotAnApprovedOne(t *testing.T) {
 // answer out of order, because in order it cannot fail.
 func TestAnAnswerAboutARecipeNobodyIsWaitingForIsNotDrawn(t *testing.T) {
 	var answer []func()
-	later := background.Work{Read: func(read func() func()) {
+	later := background.Work{Read: func(read func() func(), _ func(error) func()) {
 		answer = append(answer, read())
 	}}
 	view := recipeview.New(i18n.English, func(_ string, data []byte) recipeview.Answer {
@@ -167,7 +168,7 @@ func TestAnAnswerAboutARecipeNobodyIsWaitingForIsNotDrawn(t *testing.T) {
 // A window that has not answered yet and a window that has stopped answering
 // look identical, and the sentence is the only thing that tells them apart.
 func TestTheScreenSaysThatItIsChecking(t *testing.T) {
-	waiting := background.Work{Read: func(func() func()) {}}
+	waiting := background.Work{Read: func(func() func(), func(error) func()) {}}
 	view := recipeview.New(i18n.English, func(string, []byte) recipeview.Answer {
 		return recipeview.Answer{}
 	}, nil, waiting, nil)
@@ -247,4 +248,69 @@ func lineOf(recipe, text string) int {
 		}
 	}
 	return 0
+}
+
+// A check that comes apart is drawn as a defect of this build, and not as a
+// refusal of the recipe.
+//
+// 🔴 The screen already had somewhere a failure could have been put, and using
+// it would have been wrong. A refusal here says that the recipe reads correctly
+// and still cannot be run, which is a sentence about what somebody wrote. A
+// panic is a sentence about us. This tool exists to argue against manifests
+// that blame an application for damage the tool did, and a screen blaming a
+// recipe for a defect of ours is the same dishonesty on the other surface.
+func TestACheckThatComesApartIsDrawnAsADefectOfThisBuildRatherThanARefusal(t *testing.T) {
+	crashing := background.Work{Read: func(_ func() func(), crashed func(error) func()) {
+		crashed(fault.FromPanic("the checker came apart"))()
+	}}
+	view := recipeview.New(i18n.English, func(string, []byte) recipeview.Answer {
+		return recipeview.Answer{}
+	}, nil, crashing, nil)
+	view.Content()
+
+	view.SetRecipe(screens.CleanRecipe)
+
+	drawn := rendered(t, view)
+	if !strings.Contains(drawn, fault.Crashed) {
+		t.Errorf("the screen does not say the build came apart, so somebody is left "+
+			"looking at a window that answered nothing.\n%s", drawn)
+	}
+	if !strings.Contains(drawn, i18n.English.T(i18n.RecipeCrashed)) {
+		t.Errorf("the screen names the defect and not what to do about it, which is the "+
+			"one thing a person can actually do with it.\n%s", drawn)
+	}
+	if strings.Contains(drawn, i18n.English.T(i18n.RecipeRefused)) {
+		t.Errorf("a defect of this build is drawn under the heading for a recipe that "+
+			"cannot be run, which blames the person who wrote it.\n%s", drawn)
+	}
+	if strings.Contains(drawn, i18n.English.T(i18n.RecipeNoObjections)) {
+		t.Errorf("a defect of this build is drawn beside an approval, so the screen says "+
+			"the recipe is fine and that it came apart at the same time.\n%s", drawn)
+	}
+}
+
+// The next check takes the crash off the screen, because what is drawn under a
+// recipe has to be about the recipe that is there now.
+func TestACheckThatFinishesTakesTheCrashOffTheScreen(t *testing.T) {
+	crash := true
+	work := background.Work{Read: func(read func() func(), crashed func(error) func()) {
+		if crash {
+			crashed(fault.FromPanic("the checker came apart"))()
+			return
+		}
+		read()()
+	}}
+	view := recipeview.New(i18n.English, func(string, []byte) recipeview.Answer {
+		return recipeview.Answer{}
+	}, nil, work, nil)
+	view.Content()
+
+	view.SetRecipe(screens.CleanRecipe)
+	crash = false
+	view.SetRecipe(screens.CleanRecipe + "\n")
+
+	if drawn := rendered(t, view); strings.Contains(drawn, fault.Crashed) {
+		t.Errorf("a crash from an earlier check is still on screen under a recipe that has "+
+			"been judged since.\n%s", drawn)
+	}
 }

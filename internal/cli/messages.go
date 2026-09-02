@@ -8,6 +8,7 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestexport"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
 // manifestFlagDoc is what --manifest does, for both verbs that write a
@@ -633,8 +634,13 @@ const (
 
 	// problemCrash reports that this program stopped in a way it does not
 	// understand. It is worded so that a bug report can quote it.
-	problemCrash   = "internal defect: the run stopped unexpectedly"
-	problemCrashDo = "report this together with the command that produced it"
+	//
+	// The words moved to the fault package on 2026-09-02, when the window
+	// learned to survive a panic and had to name it the same way. They are
+	// named here rather than reached for at each use, so that the rest of this
+	// file keeps reading as one list of what this surface says.
+	problemCrash   = fault.Crashed
+	problemCrashDo = fault.CrashedDo
 
 	// problemMissingKind reports a defect in this program rather than a
 	// mistake by the user. It is worded so that a bug report can quote it.

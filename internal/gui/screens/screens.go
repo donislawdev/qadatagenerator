@@ -497,7 +497,7 @@ func settle(takeScreen *takeview.View, state State) {
 // answers has finished by the time anything could take the picture.
 func readingFor(waiting bool) background.Read {
 	if waiting {
-		return func(func() func()) {}
+		return func(func() func(), func(error) func()) {}
 	}
 	return background.ReadHere
 }

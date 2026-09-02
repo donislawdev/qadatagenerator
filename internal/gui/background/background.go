@@ -29,6 +29,20 @@
 // of four columns took 11.7 seconds to walk. A window doing that where the
 // button was pressed is a window the desktop offers to kill.
 //
+// # Why a panic stops here rather than anywhere
+//
+// A panic on a goroutine cannot be recovered by whoever started it, so every
+// launcher below catches one and hands it back as a failure. Until 2026-09-02
+// none of them did, and any defect in the engine ended the window without a
+// word, taking along whatever was typed into it and not saved. The command
+// line had answered the same event since the day it could run anything.
+//
+// This is not about tidying up after a crash, and the difference was measured
+// rather than assumed: a deferred call on the goroutine that panics runs even
+// with nothing recovering it, so a run still removes the files and the marker
+// it was holding. What was missing was the account and the window to show it
+// in.
+//
 // # Why every answer travels back through the toolkit
 //
 // fyne.Do hands a function to the thread that draws, which is required of
@@ -121,7 +135,19 @@ type Produce func(work func() (produce.Written, error), done func(produce.Writte
 // itself, and it is run on the thread that draws. So nothing is shared between
 // the two threads and nothing is written into anything a screen might be
 // reading, which is the same promise Run keeps by handing its answer over.
-type Read func(read func() func())
+//
+// # Why there is a second function, and why it is not optional
+//
+// It says what the screen does when the reading itself comes apart, and it is
+// a parameter rather than a courtesy because the two ports beside this one
+// already have somewhere for a failure to go and this one had nowhere. A panic
+// during a read was therefore the end of the window, silently, and the reading
+// this window does most is judging a recipe while somebody types it.
+//
+// Written as something a caller may add, it would be the guard somebody does
+// not add. As a parameter the compiler asks every screen the question, and a
+// screen that has nothing to say can still only answer deliberately.
+type Read func(read func() func(), crashed func(error) func())
 
 // Watch starts noticing that the system has asked this program to stop, and
 // answers with the way to stop noticing.
@@ -129,32 +155,84 @@ type Read func(read func() func())
 // asked is called on the thread that draws.
 type Watch func(asked func()) (release func())
 
+// caught runs the work and turns a panic into a failure the screen can show.
+//
+// # Why a panic has to become a value here of all places
+//
+// A panic on a goroutine cannot be recovered by whoever started it. It ends
+// the process, so without this the window goes out mid sentence and takes
+// along whatever somebody had typed and not saved. The command line has
+// answered this since the day it could run anything, in internal/cli, and the
+// window had no answer at all until 2026-09-02.
+//
+// It is not about tidying up after the crash, and that distinction is measured
+// rather than assumed. A deferred call on the goroutine that panics runs even
+// when nothing recovers it, so a run removes its own temporary files and its
+// own marker while the stack unwinds. What was being lost is the account of
+// what happened and the window it would have been shown in.
+//
+// # Why it is generic when this package has one other generic function
+//
+// The three ports below carry three different answers, and the panic has to
+// arrive as the same failure in all three. Written out per port it would be
+// the same six lines three times, which is how two of them end up drifting the
+// day somebody improves one.
+func caught[T any](work func() (T, error)) (answer T, err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			err = fault.FromPanic(recovered)
+		}
+	}()
+	return work()
+}
+
 // InBackground runs the work off the drawing thread and answers on it.
 //
-// This is the one the window uses. It is three lines because everything that
-// makes concurrency dangerous is kept out of it: nothing here is shared, the
-// work owns everything it touches, and the answer is handed over rather than
+// This is the one the window uses. It is short because everything that makes
+// concurrency dangerous is kept out of it: nothing here is shared, the work
+// owns everything it touches, and the answer is handed over rather than
 // written into anything the screen might be reading.
 func InBackground(work func() (take.Result, error), done func(take.Result, error)) {
-	go func() {
-		result, err := work()
-		fyne.Do(func() { done(result, err) })
-	}()
+	startAndAnswer(work, done, fyne.Do)
 }
 
 // ProduceInBackground makes a dataset off the drawing thread and answers on it.
 func ProduceInBackground(work func() (produce.Written, error),
 	done func(produce.Written, error)) {
+	startAndAnswer(work, done, fyne.Do)
+}
+
+// startAndAnswer is both of the ports above, with the crossing back to the
+// drawing thread handed in.
+//
+// Split for the same one reason watchForClosing below is split, and it is the
+// reason worth splitting for: fyne.Do needs a toolkit that is running, so
+// without this seam the only way to ask whether a panic still ends the window
+// would be to open one. What the two ports have to promise is that the work is
+// started elsewhere and that a panic in it comes back as an answer, and both
+// of those are visible from here.
+func startAndAnswer[T any](work func() (T, error), done func(T, error),
+	onTheDrawingThread func(func())) {
 	go func() {
-		written, err := work()
-		fyne.Do(func() { done(written, err) })
+		answer, err := caught(work)
+		onTheDrawingThread(func() { done(answer, err) })
 	}()
 }
 
 // ReadInBackground reads off the drawing thread and acts on it there.
-func ReadInBackground(read func() func()) {
+func ReadInBackground(read func() func(), crashed func(error) func()) {
+	readInBackground(read, crashed, fyne.Do)
+}
+
+// readInBackground is the port above with the crossing handed in, for the
+// reason startAndAnswer gives.
+func readInBackground(read func() func(), crashed func(error) func(),
+	onTheDrawingThread func(func())) {
 	go func() {
-		act := read()
+		act, err := caught(func() (func(), error) { return read(), nil })
+		if err != nil {
+			act = crashed(err)
+		}
 		if act == nil {
 			// A read with nothing to do about it is allowed rather than a
 			// fault. Calling it anyway would take the window down for a
@@ -162,7 +240,7 @@ func ReadInBackground(read func() func()) {
 			// matters.
 			return
 		}
-		fyne.Do(act)
+		onTheDrawingThread(act)
 	}()
 }
 
@@ -173,7 +251,15 @@ func ReadInBackground(read func() func()) {
 // the guard holding what every screen draws, and the probe rendering them to
 // pictures. Both want the screen finished by the time the call returns, and
 // neither has a drawing thread to hand anything back to.
-func ReadHere(read func() func()) {
+//
+// # Why this one does not catch a panic while the one above does
+//
+// The one above catches because nobody else can: its goroutine is the end of
+// the line and a panic there is the end of the window. Here the caller owns
+// the thread, so a panic arrives where it was asked for, which is a test or a
+// probe. Turning it into a drawn sentence would mean a screen that renders
+// perfectly out of a defect, and a stored tree of that screen going green.
+func ReadHere(read func() func(), _ func(error) func()) {
 	if act := read(); act != nil {
 		act()
 	}

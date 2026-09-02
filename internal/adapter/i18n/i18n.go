@@ -304,6 +304,7 @@ const (
 	RecipeAsText        Key = "recipe.as-text"
 	RecipeParentOutside Key = "recipe.parent-outside"
 	RecipeRefused       Key = "recipe.refused"
+	RecipeCrashed       Key = "recipe.crashed"
 	RecipeWillNotDo     Key = "recipe.will-not-do"
 
 	// The bar along the bottom, which is the half of this screen that writes.
@@ -403,7 +404,7 @@ var Keys = []Key{
 	RecipeNoObjections, RecipeLine, RecipeAllowed, RecipeTry,
 	RecipeUnchecked, RecipeEntity, RecipeEntities, RecipeField, RecipeFields,
 	RecipeShowing, RecipeOf, RecipeRow, RecipeRows, RecipeNoRows, RecipeNoFields,
-	RecipeAsText, RecipeParentOutside, RecipeRefused, RecipeWillNotDo,
+	RecipeAsText, RecipeParentOutside, RecipeRefused, RecipeCrashed, RecipeWillNotDo,
 	RecipeWriteTo, RecipeChooseDir, RecipeReplace, RecipeGenerate, RecipeStopRun,
 	RecipeWouldWrite, RecipeNothingYet, RecipeNeedRecipe, RecipeNeedFix,
 	RecipeNeedDirectory, RecipeDirHint, RecipeWriting, RecipeStopping, RecipeWrote, RecipeIn,

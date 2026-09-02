@@ -2,7 +2,9 @@ package background
 
 import (
 	"errors"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
@@ -61,7 +63,7 @@ func TestAReadHereHappensWhereItWasAskedFor(t *testing.T) {
 	ReadHere(func() func() {
 		read = true
 		return func() { acted = true }
-	})
+	}, nil)
 	if !read {
 		t.Error("the read never happened")
 	}
@@ -77,5 +79,104 @@ func TestAReadHereHappensWhereItWasAskedFor(t *testing.T) {
 // says so by handing back nothing. Calling that nothing would take the window
 // down for a screen that decided, correctly, that its answer no longer matters.
 func TestAReadWithNothingToDoAboutItIsAllowed(t *testing.T) {
-	ReadHere(func() func() { return nil })
+	ReadHere(func() func() { return nil }, nil)
+}
+
+// # Why a panic here is a different event from a panic on a terminal
+//
+// A panic on a goroutine cannot be recovered by whoever started it, so before
+// 2026-09-02 anything this window handed over could end the process. On the
+// command line that costs a stack trace instead of four lines. In a window it
+// costs the window, and with it whatever somebody had typed and not saved.
+//
+// The engine behind these ports is the same engine, and it had a live way to
+// panic on the day this was written: a recipe declaring a range of children
+// wider than the arithmetic behind it, typed into the editor, reached this
+// through the reading port on the next keystroke.
+func TestWorkThatComesApartIsAnsweredRatherThanEndingTheWindow(t *testing.T) {
+	answered := make(chan error, 1)
+
+	startAndAnswer(func() (int, error) { panic("the engine came apart") },
+		func(_ int, err error) { answered <- err },
+		func(act func()) { act() })
+
+	err := <-answered
+	if err == nil {
+		t.Fatal("a panic in the work was answered as a success, so the screen would draw one")
+	}
+	if fault.KindOf(err) != fault.Runtime {
+		t.Errorf("the failure carries kind %v rather than a defect of ours, and the kind is "+
+			"what decides how it is reported", fault.KindOf(err))
+	}
+	if !strings.Contains(err.Error(), fault.Crashed) {
+		t.Errorf("the failure says %q, which does not name itself as a defect of this build, "+
+			"so a screen showing it would blame whoever was using it", err)
+	}
+	if !strings.Contains(err.Error(), "the engine came apart") {
+		t.Errorf("the failure says %q and drops what actually happened, which is the one "+
+			"thing a bug report needs", err)
+	}
+}
+
+// A read that comes apart reaches the screen through the way out the screen
+// chose, because a read had nowhere for a failure to go until this existed.
+//
+// 🔴 The reading port is the one that matters here rather than the one above.
+// This window reads while somebody types, so the engine runs on the reading
+// port far more often than on the running one, and that is the port that had
+// no answer.
+func TestAReadThatComesApartReachesTheWayOutTheScreenChose(t *testing.T) {
+	drawn := make(chan error, 1)
+
+	readInBackground(func() func() { panic("reading came apart") },
+		func(err error) func() { return func() { drawn <- err } },
+		func(act func()) { act() })
+
+	err := <-drawn
+	if fault.KindOf(err) != fault.Runtime {
+		t.Errorf("the failure carries kind %v rather than a defect of ours", fault.KindOf(err))
+	}
+	if !strings.Contains(err.Error(), "reading came apart") {
+		t.Errorf("the failure says %q and drops what actually happened", err)
+	}
+}
+
+// A read that finishes is not sent down the way out for a crash, which is the
+// half of the promise that is easy to lose while making the other half work.
+func TestAReadThatFinishesDoesNotGoThroughTheWayOutForACrash(t *testing.T) {
+	// Channels rather than flags, because the answer is made on one goroutine
+	// and read on another. Written with flags this test had a data race in it,
+	// and the race detector said so before anybody else did.
+	acted, crashed := make(chan struct{}, 1), make(chan struct{}, 1)
+
+	readInBackground(func() func() { return func() { acted <- struct{}{} } },
+		func(error) func() { return func() { crashed <- struct{}{} } },
+		func(act func()) { act() })
+
+	select {
+	case <-acted:
+	case <-crashed:
+		t.Fatal("a read that finished was reported as a crash, so a screen would draw a " +
+			"defect instead of the answer it had")
+	case <-time.After(2 * time.Second):
+		t.Fatal("a read that finished was never acted on")
+	}
+}
+
+// A panic in a ReadHere reaches the caller, which is the opposite promise from
+// the one above and is deliberate.
+//
+// This is what the guard holding every screen and the probe drawing them use.
+// Both own the thread they called on, so a panic arrives where it can be seen.
+// Turning it into a drawn sentence would give them a screen that renders
+// perfectly out of a defect, and a stored tree of that screen going green.
+func TestAPanicInAReadHereReachesTheCallerThatOwnsTheThread(t *testing.T) {
+	defer func() {
+		if recovered := recover(); recovered == nil {
+			t.Error("the panic was swallowed, so a probe would photograph a screen built " +
+				"out of a defect and a stored tree of it would be green")
+		}
+	}()
+
+	ReadHere(func() func() { panic("a probe wants to see this") }, nil)
 }

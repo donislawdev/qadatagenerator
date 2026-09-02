@@ -24,7 +24,9 @@ type heldReads struct {
 	waiting []func() func()
 }
 
-func (h *heldReads) read(read func() func()) { h.waiting = append(h.waiting, read) }
+func (h *heldReads) read(read func() func(), _ func(error) func()) {
+	h.waiting = append(h.waiting, read)
+}
 
 // answer carries out the read asked for nth, counting from zero, and hands the
 // screen what it found.

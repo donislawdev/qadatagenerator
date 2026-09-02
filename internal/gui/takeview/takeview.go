@@ -302,6 +302,19 @@ func (v *View) startReading(path string, answer func(*take.Opened, error)) {
 			v.unread = err
 			answer(opened, err)
 		}
+	}, func(err error) func() {
+		// A read that came apart takes the same road as a read that failed,
+		// with nothing opened. Every caller of this already has to handle a
+		// failure with no file behind it, so this adds a cause rather than a
+		// case.
+		return func() {
+			if wanted != v.asked {
+				return
+			}
+			v.reading = ""
+			v.unread = err
+			answer(nil, err)
+		}
 	})
 }
 

@@ -92,6 +92,13 @@ type View struct {
 	answerPane *parts.KeyScroll
 	// answer is what the last finished check said about the recipe.
 	answer Answer
+	// crashed is set when reading the recipe came apart rather than finished.
+	//
+	// It is a field of its own rather than a fourth outcome inside Answer,
+	// because Answer is what a check says about a recipe and this says nothing
+	// about the recipe at all. It is cleared by the next check, like every
+	// other thing on this screen that describes what is written above it.
+	crashed error
 	// checked says whether anything has been judged yet, which is not the same
 	// as a report with no problems in it. An empty screen has no report and a
 	// valid recipe has one, and drawing them alike would tell somebody their
@@ -232,6 +239,7 @@ func (v *View) Recheck(recipe string) {
 		v.checking = false
 		v.checked = false
 		v.answer = Answer{}
+		v.crashed = nil
 		v.draw()
 		return
 	}
@@ -253,6 +261,23 @@ func (v *View) Recheck(recipe string) {
 			v.checking = false
 			v.checked = true
 			v.answer = report
+			v.crashed = nil
+			v.draw()
+		}
+	}, func(err error) func() {
+		// 🔴 A crash is NOT drawn as a refusal, though the screen has one and
+		// it would have fitted. A refusal here says that the recipe reads
+		// correctly and still cannot be run, which is a sentence about what
+		// somebody wrote. This is a sentence about us, and putting our defect
+		// under their heading is the dishonesty this whole tool argues against.
+		return func() {
+			if wanted != v.asked {
+				return
+			}
+			v.checking = false
+			v.checked = true
+			v.answer = Answer{}
+			v.crashed = err
 			v.draw()
 		}
 	})
@@ -273,6 +298,8 @@ func (v *View) draw() {
 	switch {
 	case v.checking:
 		v.answerBox.Add(sentence(v.text.T(i18n.RecipeChecking)))
+	case v.crashed != nil:
+		v.drawCrash()
 	case !v.checked:
 		v.answerBox.Add(sentence(v.text.T(i18n.RecipeEmpty)))
 	case len(v.answer.Report.Problems) > 0:
@@ -302,6 +329,17 @@ func (v *View) draw() {
 func (v *View) drawRefusal() {
 	v.answerBox.Add(heading(v.text.T(i18n.RecipeRefused)))
 	v.answerBox.Add(sentence(v.answer.Refused.Error()))
+}
+
+// drawCrash says that this build came apart while reading the recipe.
+//
+// What happened comes first and what to do about it second, which is the order
+// a refusal uses on the other surface. The first line names itself as a defect
+// of ours, because that is how the failure was built, so the second line does
+// not have to argue it and can be the one thing a person can actually do.
+func (v *View) drawCrash() {
+	v.answerBox.Add(sentence(v.crashed.Error()))
+	v.answerBox.Add(sentence(v.text.T(i18n.RecipeCrashed)))
 }
 
 // drawWillNotDo lists what the plan says the run will not do.

@@ -227,6 +227,19 @@ func (v *View) startReading(read func() func()) {
 			v.thaw()
 			act()
 		}
+	}, func(err error) func() {
+		// A read that came apart goes where a read that failed goes. The
+		// sentence above it names the file, and the failure names itself as a
+		// defect of this build, so the two together say whose fault it is
+		// without this screen having to decide.
+		return func() {
+			if wanted != v.asked {
+				return
+			}
+			v.reading = false
+			v.thaw()
+			v.unreadable(err)
+		}
 	})
 }
 

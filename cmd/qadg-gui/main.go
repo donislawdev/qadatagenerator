@@ -25,6 +25,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/responsejson"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/about"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
@@ -39,6 +40,26 @@ import (
 )
 
 func main() {
+	// The last catch, for the one thread the goroutines cannot answer for.
+	//
+	// Everything this window starts elsewhere turns a panic into a failure a
+	// screen draws, in internal/gui/background. This is the thread that draws,
+	// where the toolkit calls back into our widgets, and a panic there arrives
+	// here with the window already gone.
+	//
+	// What it buys is the two things a crash owes somebody. A line on the error
+	// channel saying what happened, in the words the command line uses for the
+	// same event, instead of a stack trace. And an exit code of 1 rather than
+	// Go's own 2, which is the number this tool gives a wrong invocation, so
+	// whatever started this window is not told it typed something wrong.
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			fmt.Fprintln(os.Stderr, fault.FromPanic(recovered))
+			fmt.Fprintln(os.Stderr, fault.CrashedDo)
+			os.Exit(1)
+		}
+	}()
+
 	application := app.New()
 	application.Settings().SetTheme(fynetheme.Dark{})
 

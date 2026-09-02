@@ -225,6 +225,7 @@ recipe.no-fields: This entity has no fields, so its file would have no columns.
 recipe.as-text: This recipe writes the object form, so the file is shown as it would be written rather than as a table.
 recipe.parent-outside: not in this preview
 recipe.refused: This recipe reads correctly and still cannot be run.
+recipe.crashed: This is a defect in this build rather than a problem with the recipe. Report it together with the recipe that produced it.
 recipe.will-not-do: What this run will not do
 recipe.write-to: Write to
 recipe.choose-dir: Choose...
