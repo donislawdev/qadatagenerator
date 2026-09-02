@@ -425,6 +425,9 @@ var Guards = []Guard{
 	{"a setting the command line moved is recorded with both sides", "TestAFlagThatOverridesTheRecipeSaysSo", "internal/cli", ByMutation},
 	{"every surface that lists what this tool accepts lists all of it", "TestEverySurfaceListingCommandsNamesAllOfThem", "internal/cli", ByMutation},
 	{"a flag named in the help of a command is one that command accepts", "TestEveryFlagAVerbDocumentsIsOneItAccepts", "internal/cli", ByMutation},
+	{"every shape of place a problem can name is reported at the line it was written on", "TestEveryShapeOfPlaceIsReportedAtTheLineItWasWrittenOn", "internal/adapter/recipeyaml", ByMutation},
+	{"a path two places in a recipe claim is left without a line rather than pointing at one of them", "TestAPathTwoPlacesClaimIsLeftWithoutALine", "internal/adapter/recipeyaml", ByMutation},
+	{"a place nobody wrote is reported without a line rather than with a wrong one", "TestAPlaceNobodyWroteIsReportedWithoutALine", "internal/adapter/recipeyaml", ByProbe},
 	{"validate refuses exactly what generate would refuse", "TestValidateRefusesARecipeGenerateWouldRefuse", "internal/cli", ByMutation},
 	{"a refusal says what to do next whichever layer it came from", "TestAFailureFromBelowStillSaysWhatToDo", "internal/cli", ByMutation},
 

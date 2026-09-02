@@ -229,6 +229,15 @@ type Problem struct {
 	// Hint says what to do instead. Empty when the fix is obvious from
 	// What.
 	Hint string
+	// Line is where in the recipe this was written, or zero when the place
+	// cannot be tied to exactly one line.
+	//
+	// Zero is an ordinary answer rather than a failure. A problem about the
+	// file as a whole belongs to no line, a problem about a section that was
+	// never written has none to point at, and a name carrying a dot makes the
+	// path itself ambiguous. Whoever shows this draws no line rather than the
+	// wrong one.
+	Line int
 }
 
 // Unchecked is something a recipe declares that this build cannot verify yet.
@@ -435,4 +444,8 @@ func SortProblems(problems []Problem) {
 		}
 		return problems[i].What < problems[j].What
 	})
+	// Sorted by place and not by line, which is deliberate and worth saying
+	// because a list carrying line numbers invites the other order. Problems
+	// about one field belong together, and a person fixing a recipe fixes a
+	// field rather than a line.
 }

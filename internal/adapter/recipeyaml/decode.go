@@ -202,6 +202,10 @@ func Decode(data []byte) Result {
 			"check the indentation and that every key ends with a colon")
 		return reader.result(recipe.Recipe{})
 	}
+	// Where each place was written, taken from the tree this same parse
+	// produced. Nothing below has to ask for it, because every problem goes
+	// through one call and that call looks it up.
+	reader.lines = linesIn(file)
 
 	body, ok := reader.singleDocument(file)
 	if !ok {
@@ -281,7 +285,11 @@ func (r *reader) singleDocument(file *ast.File) (ast.Node, bool) {
 }
 
 type reader struct {
-	problems  []recipe.Problem
+	problems []recipe.Problem
+	// lines says which line each place was written on, or nothing before the
+	// file has been parsed. A place that is not in here has no line, which is
+	// an ordinary answer.
+	lines     map[string]int
 	unchecked []recipe.Unchecked
 }
 
@@ -298,6 +306,10 @@ func (r *reader) report(where, what, allowed, hint string) {
 		What:    shorten(what),
 		Allowed: shorten(allowed),
 		Hint:    shorten(hint),
+		// Resolved here rather than by whoever shows the problem, because this
+		// is the one place a place gets its name. A caller joining paths to
+		// lines afterwards would be spelling those paths a second time.
+		Line: r.lines[where],
 	})
 }
 

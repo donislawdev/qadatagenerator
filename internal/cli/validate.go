@@ -162,7 +162,7 @@ func writeReport(out *streams, report validate.Report) {
 		// prefixing it with an empty place reads as a missing word.
 		what := found.What
 		if found.Where != "" {
-			what = found.Where + ": " + what
+			what = found.Where + placeSuffix(found.Line) + ": " + what
 		}
 		out.report(problem{what: what, allowed: found.Allowed, instead: found.Hint})
 	}
@@ -202,17 +202,40 @@ type jsonReport struct {
 	Unchecked []jsonNote    `json:"unchecked"`
 }
 
+// jsonProblem is a problem as a build reads it.
+//
+// 🔴 It is converted from the domain type by a plain struct conversion, which
+// is a guard rather than a convenience: the day that type gains a field, this
+// stops compiling and somebody has to decide whether the field belongs on a
+// surface other people read. That is what happened when the line arrived.
+//
+// The line is omitted when there is none, because a problem about the file as a
+// whole belongs to no line and a zero there would read as the first one.
 type jsonProblem struct {
 	Where   string `json:"where"`
 	What    string `json:"what"`
 	Allowed string `json:"allowed,omitempty"`
 	Hint    string `json:"hint,omitempty"`
+	Line    int    `json:"line,omitempty"`
 }
 
 type jsonNote struct {
 	Where  string `json:"where"`
 	What   string `json:"what"`
 	Reason string `json:"reason"`
+}
+
+// placeSuffix says which line a place was written on, or nothing when it was
+// never written.
+//
+// The line comes after the place rather than before it, because the list is
+// ordered by place: problems about one field belong together, and a number in
+// front of each would read as an ordering the list does not have.
+func placeSuffix(line int) string {
+	if line == 0 {
+		return ""
+	}
+	return " (line " + strconv.Itoa(line) + ")"
 }
 
 // writeJSONReport puts the findings on the data channel, whether or not the
