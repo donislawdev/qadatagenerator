@@ -162,6 +162,20 @@ func (l lines) flush() error {
 
 // usableDelimiter refuses one that is not a single character, and defaults to a
 // comma.
+// Delimiter is the character this build separates values with for a recipe.
+//
+// It is exported so that whoever reads those bytes back reads them the way they
+// were written. A caller holding its own comma is a second answer to a question
+// the recipe is allowed to change, and the two would agree until the first
+// recipe that sets the setting.
+func Delimiter(rec recipe.Recipe) (rune, error) {
+	given, err := usableDelimiter(rec.Output.Delimiter, "the recipe gives ")
+	if err != nil {
+		return 0, err
+	}
+	return []rune(given)[0], nil
+}
+
 func usableDelimiter(given, from string) (string, error) {
 	if given == "" {
 		return ",", nil

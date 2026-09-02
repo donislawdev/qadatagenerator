@@ -439,6 +439,8 @@ var Guards = []Guard{
 	{"the two surfaces count what they understood of a recipe in the same words", "TestWhatWasUnderstoodIsCountedInTheSingularWhenThereIsOneOfIt", "internal/cli", ByMutation},
 	{"validate, a dry run and a run agree about a relation colliding with a field", "TestTheThreeAnswersAboutARelationCollidingWithAFieldAgree", "internal/cli", ByMutation},
 	{"a writer refuses a table whose relation and field want one column", "TestAWriterRefusesATableWhoseRelationWantsAColumnAFieldAlreadyHas", "internal/adapter/format", ByMutation},
+	{"a preview is the first rows of the run it stands for", "TestASampleIsTheFirstRowsTheRunItselfWouldWrite", "internal/preview", ByMutation},
+	{"the key naming the parent in a preview is the one the run writes", "TestTheKeyNamingTheParentIsTheOneTheRunWrites", "internal/preview", ByMutation},
 	{"a refusal says what to do next whichever layer it came from", "TestAFailureFromBelowStillSaysWhatToDo", "internal/cli", ByMutation},
 
 	// --- being stopped from outside -----------------------------------------

@@ -242,7 +242,7 @@ func produce(built recipe.Recipe, plan generate.Plan, source values.Source,
 		}
 	}()
 
-	writer, err := writerFor(built, files)
+	writer, err := format.For(fileMaker{files}, built)
 	if err != nil {
 		return nil, err
 	}
@@ -328,23 +328,6 @@ func noteUnreadSettings(built recipe.Recipe, plan *generate.Plan) {
 		What: "the " + formatCSV + " form writes one file per table whatever this says, so it " +
 			"changes nothing here. The " + formatJSON + " form is the one that reads it",
 	})
-}
-
-// writerFor chooses the writer the recipe asked for.
-//
-// The last branch is a backstop rather than the refusal anybody meets:
-// usableFormat answers first, before a plan exists, and names where the word
-// came from. This one cannot, so it says neither.
-func writerFor(built recipe.Recipe, files *store.Set) (generate.Writer, error) {
-	switch built.Output.Format {
-	case "", formatCSV:
-		return format.NewCSV(fileMaker{files}, built)
-	case formatJSON:
-		return format.NewJSON(fileMaker{files}, built)
-	default:
-		return nil, fault.New(fault.Config, "this build writes "+formatCSV+" and "+formatJSON+
-			", and this run asks for "+built.Output.Format)
-	}
 }
 
 // fileMaker adapts the set of files to what a writer asks for. The two

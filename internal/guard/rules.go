@@ -144,6 +144,12 @@ var layerRules = []layerRule{
 			"which it cannot do while knowing either",
 	},
 	{
+		pkg:       "internal/preview",
+		forbidden: []string{"internal/cli", "internal/gui"},
+		why: "answering what a recipe would produce is the same answer on both surfaces, " +
+			"and the window is only the first to ask",
+	},
+	{
 		pkg:       "internal/cli",
 		forbidden: []string{"internal/gui"},
 		why:       "the two surfaces run the same logic and never each other",

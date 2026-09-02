@@ -66,7 +66,7 @@ var RefusalKinds = map[string]string{
 	"internal/app/generate.tooManyRows Config":               "the counts add up to more rows than this build can count, which is arithmetic in the recipe rather than a limit met while producing",
 	"internal/app/validate.Run Config":                       "this is the verb whose whole answer is whether the recipe is valid",
 	"internal/cli.recipeAt Config":                           "the recipe carries problems, and this verb was asked to produce data rather than to report on them",
-	"internal/cli.writerFor Config":                          "the recipe asks for a format this build does not write",
+	"internal/adapter/format.For Config":                     "the recipe asks for a format this build does not write",
 	"internal/cli.usableFormat Config":                       "the run asks for a format this build does not write, from the recipe or from the flag that overrides it, and either way it is a document that cannot be acted on rather than one that cannot be met",
 	"internal/take.Open Config":                              "the field separator is not one character. It is a setting somebody gave rather than data, and it is answered here a second time because a screen puts it under a cursor, where the empty value between two keystrokes would otherwise be a panic",
 
