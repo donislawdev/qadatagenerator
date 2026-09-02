@@ -428,6 +428,7 @@ var Guards = []Guard{
 	{"every shape of place a problem can name is reported at the line it was written on", "TestEveryShapeOfPlaceIsReportedAtTheLineItWasWrittenOn", "internal/adapter/recipeyaml", ByMutation},
 	{"a path two places in a recipe claim is left without a line rather than pointing at one of them", "TestAPathTwoPlacesClaimIsLeftWithoutALine", "internal/adapter/recipeyaml", ByMutation},
 	{"a place nobody wrote is reported without a line rather than with a wrong one", "TestAPlaceNobodyWroteIsReportedWithoutALine", "internal/adapter/recipeyaml", ByProbe},
+	{"a problem raised above the decoder is pointed at the same line the decoder would have pointed at", "TestAProblemRaisedAboveTheDecoderCarriesTheLineOfItsPlace", "internal/app/validate", ByMutation},
 	{"validate refuses exactly what generate would refuse", "TestValidateRefusesARecipeGenerateWouldRefuse", "internal/cli", ByMutation},
 	{"a refusal says what to do next whichever layer it came from", "TestAFailureFromBelowStillSaysWhatToDo", "internal/cli", ByMutation},
 

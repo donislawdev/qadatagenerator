@@ -15,8 +15,10 @@ repository once they are released.
 - **A problem in a recipe says which line it is on.** `qadg validate` used to name
   the place a problem belongs to, such as `entities.customer.count`, and leave
   you to find it. It now says the line as well, on the report you read and in
-  the one `--json` produces. A problem about the file as a whole, or about a key
-  that was never written, carries no line rather than a misleading one.
+  the one `--json` produces, including the problems that are about what this
+  build can do rather than about the shape of the file, such as a generator it
+  has no name for. A problem about the file as a whole, or about a key that was
+  never written, carries no line rather than a misleading one.
 - **The window stays answerable while it reads a file.** Choosing a large file,
   dropping one onto the window, changing the field separator or opening a
   manifest no longer freezes the window for as long as the reading takes. The

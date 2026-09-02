@@ -167,6 +167,17 @@ type Result struct {
 	Recipe    recipe.Recipe
 	Problems  []recipe.Problem
 	Unchecked []recipe.Unchecked
+	// Lines says which line each place of the recipe was written on.
+	//
+	// It is handed out because problems are raised in two places. This package
+	// raises the ones about the shape of the file, and the use case above it
+	// raises the ones that need to know what this build can do, such as a
+	// generator nobody has. Those name their places by the same spelling and
+	// would otherwise be the only problems on a screen with no line, for a
+	// reason no person could see.
+	//
+	// A place that is not in here has no line. That is an ordinary answer.
+	Lines map[string]int
 }
 
 // Valid reports whether the recipe can be used.
@@ -329,7 +340,7 @@ func (r *reader) result(built recipe.Recipe) Result {
 		}
 		return r.unchecked[i].What < r.unchecked[j].What
 	})
-	return Result{Recipe: built, Problems: r.problems, Unchecked: r.unchecked}
+	return Result{Recipe: built, Problems: r.problems, Unchecked: r.unchecked, Lines: r.lines}
 }
 
 func (r *reader) recipe(top yaml.MapSlice) recipe.Recipe {

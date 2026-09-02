@@ -20,6 +20,16 @@ type Decoded struct {
 	Recipe    recipe.Recipe
 	Problems  []recipe.Problem
 	Unchecked []recipe.Unchecked
+	// Lines says which line each place of the recipe was written on, so that
+	// the problems raised here can be pointed at as precisely as the ones the
+	// decoder raised.
+	//
+	// 🔴 The reason it has to travel is that the spelling of a place is written
+	// down in more than one file. The decoder names a place while it walks, and
+	// the checks below build the same name from the model. Those two agreeing
+	// is what makes a line correct, and a guard holds them together rather than
+	// a hope.
+	Lines map[string]int
 }
 
 // Decoder turns the bytes of a recipe into a model and a list of problems.
@@ -117,12 +127,31 @@ func Run(decode Decoder, source Source, generators Generators, described Catalog
 	}
 	report.Problems = append(report.Problems, unknownGenerators(decoded.Recipe, generators)...)
 	report.Problems = append(report.Problems, unusableLayers(decoded.Recipe, described)...)
+	// The problems raised above name their places the way the decoder does, so
+	// they can be given the same lines. Done here, once, rather than at each
+	// place that builds a problem, because the join is one rule.
+	placeProblems(report.Problems, decoded.Lines)
 	report.Unchecked = append(report.Unchecked, whatThePolicyWillNotDo(decoded.Recipe, described)...)
 
 	if !report.Usable() {
 		return report, fault.New(fault.Config, plural(len(report.Problems), "problem")+" in "+source.Name)
 	}
 	return report, nil
+}
+
+// placeProblems gives every problem that has no line the one its place was
+// written on.
+//
+// A problem the decoder already placed keeps what it was given. A place nobody
+// can resolve to exactly one line keeps zero, which is what whoever draws it
+// reads as no line at all.
+func placeProblems(problems []recipe.Problem, lines map[string]int) {
+	for at := range problems {
+		if problems[at].Line != 0 {
+			continue
+		}
+		problems[at].Line = lines[problems[at].Where]
+	}
 }
 
 // unknownGenerators reports every field asking for a name this build lacks.

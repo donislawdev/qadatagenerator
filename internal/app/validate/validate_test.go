@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
@@ -240,4 +241,62 @@ func problemText(report validate.Report) string {
 		said = append(said, problem.Where+" "+problem.What+" "+problem.Allowed)
 	}
 	return strings.Join(said, "\n")
+}
+
+// A problem raised here, above the decoder, is pointed at the same line the
+// decoder would have pointed at.
+//
+// 🔴 This closes a spelling written down three times. The decoder names a place
+// while it walks the file, the walk that finds lines names it while it walks the
+// syntax tree, and the checks in this file build the same name from the model.
+// The first two are held together by a guard in the decoder's own package. This
+// is the third, and without it a recipe whose only fault is an unknown generator
+// would show a problem with no line beside problems that have one, for a reason
+// nobody looking at the screen could work out.
+//
+// It is a real join rather than a spelling comparison: the line asserted here is
+// the line the field is written on in the source below.
+func TestAProblemRaisedAboveTheDecoderCarriesTheLineOfItsPlace(t *testing.T) {
+	// version on line 1, entities on 2, customer on 3, count on 4,
+	// fields on 5, and the field with the unknown generator on line 6.
+	source := "version: \"0.1\"\nentities:\n  customer:\n    count: 1\n    fields:\n" +
+		"      email: { generator: nosuchgenerator }\n"
+
+	// The real decoder, reached the same way the command line reaches it: by
+	// converting its result rather than by rewriting the fields. That
+	// conversion is what fails the day either side gains a field, which is how
+	// the line arrived on this surface in the first place.
+	decode := func(data []byte) validate.Decoded { return validate.Decoded(recipeyaml.Decode(data)) }
+	report, err := validate.Run(decode,
+		validate.Source{Name: "recipe.yaml", Data: []byte(source)}, onlyKnown{}, nil)
+	if err == nil {
+		t.Fatal("a recipe asking for a generator this build has no name for was called usable")
+	}
+
+	found := false
+	for _, problem := range report.Problems {
+		if problem.Where != "entities.customer.fields.email" {
+			continue
+		}
+		found = true
+		if problem.Line != 6 {
+			t.Errorf("the unknown generator was reported at line %d and the field is written "+
+				"on line 6. The three places that spell this path have come apart, and the "+
+				"screen showing it points somewhere else", problem.Line)
+		}
+	}
+	if !found {
+		t.Fatal("nothing was reported about the field with the unknown generator, so this " +
+			"guard is checking something other than what it says")
+	}
+}
+
+// onlyKnown is a registry that knows one name, which is not the one the recipe
+// above asks for.
+type onlyKnown struct{}
+
+func (onlyKnown) Known(name string) bool { return name == "first_name" }
+func (onlyKnown) Names() []string        { return []string{"first_name"} }
+func (onlyKnown) CanProduce(string, string) (bool, string) {
+	return true, ""
 }
