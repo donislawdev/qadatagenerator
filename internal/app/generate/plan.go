@@ -11,6 +11,46 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
+// MaxChildRows is how many rows this build can plan for an entity that belongs
+// to another one, and how many parents it can share them out between.
+//
+// # Why there is a limit here when there is deliberately none on a count
+//
+// DEC-116 refused an upper limit on the number of rows a recipe may ask for,
+// and the reason it gave is the reason this exists rather than an argument
+// against it: validate answers whether a recipe is correct, and whether a run
+// can be carried out is the engine's question, answered with the exit code for
+// data. This is the engine answering it.
+//
+// It is also not the same quantity. An entity with no parent is streamed, so a
+// count of a billion costs a run its time and nothing else. An entity that
+// belongs to another is planned first: the plan says which parent each child
+// row belongs to, one machine word per row, before a byte is written.
+//
+// # Why four thousand million
+//
+// Measured on 2026-09-02, on a dry run of this build, which plans and writes
+// nothing: 8.4 bytes a row at a million rows and 7.8 at five million, which is
+// the one word this holds and nothing else. At this limit the index alone is
+// 32 GB before a single value is drawn, which is more memory than the machines
+// this is built for have. A run that reached it was never going to finish, so
+// what this changes is that it is told so with the arithmetic instead of being
+// stopped by the allocator, or by the operating system.
+//
+// The full run costs about seventy bytes a row on top, measured the same day
+// at five million rows, so the ceiling is generous by roughly a factor of ten
+// against what a machine could actually write.
+//
+// # What it prevents besides an unfinishable run
+//
+// Two panics, both reachable from a recipe and both reported as defects of
+// this tool until this existed. A range of nine million million million
+// children overflowed the arithmetic behind the draw and reached the seed as a
+// negative bound. A range of four thousand million million asked the runtime
+// for a slice it refuses to make. Neither is a mistake in the tool, and both
+// said it was.
+const MaxChildRows = 4_000_000_000
+
 // Note is something this run did not do, together with why.
 //
 // It exists because a run that did less than it promised has to say so, and
@@ -169,8 +209,18 @@ func shareOut(entity recipe.Entity, parent recipe.Parent, parents int, source se
 	if parents == 0 {
 		return nil, nil
 	}
+	if err := withinReach(entity, parent, parents); err != nil {
+		return nil, err
+	}
 	shares := make([]int, parents)
-	span := int64(parent.Max - parent.Min + 1)
+	// Both sides are widened before the subtraction rather than after it, which
+	// is the whole of the difference between this line and the one it replaced.
+	// It is defence in depth now that withinReach has bounded the range, in the
+	// same spirit as take.CheckOutput, which stays although the suffix makes it
+	// unreachable: the guard above answers a question about the recipe and this
+	// answers one about the arithmetic, and the day either moves the other is
+	// still true.
+	span := int64(parent.Max) - int64(parent.Min) + 1
 	for index := range shares {
 		shares[index] = parent.Min + int(source.IntN(seed.Coordinate{
 			Entity: entity.Name, Row: int64(index), Purpose: ":children",
@@ -183,6 +233,36 @@ func shareOut(entity recipe.Entity, parent recipe.Parent, parents int, source se
 		return nil, err
 	}
 	return repair(shares, entity, parent, source), nil
+}
+
+// withinReach refuses a relation this build cannot hold a plan for, showing
+// the arithmetic that says so.
+//
+// # Why the two questions are asked apart
+//
+// The parents are counted on their own because a share is held for each of
+// them while the draw goes on, so a parent table too large to index makes the
+// relation impossible whatever its range says. The product is then compared by
+// dividing rather than by multiplying, because multiplying is the overflow
+// this is here to refuse.
+func withinReach(entity recipe.Entity, parent recipe.Parent, parents int) error {
+	if int64(parents) > MaxChildRows {
+		return fault.New(fault.Data, fmt.Sprintf(
+			"%s belongs to %s, which has %d rows, and this build shares children out "+
+				"between at most %d parents. Lower the number of rows in %s",
+			entity.Name, parent.Entity, parents, MaxChildRows, parent.Entity))
+	}
+	most := int64(parent.Max)
+	if most > 0 && int64(parents) > MaxChildRows/most {
+		return fault.New(fault.Data, fmt.Sprintf(
+			"%s belongs to %s at up to %d children each, and %s has %d rows, so this asks "+
+				"for more than the %d rows this build can plan for. It holds one machine "+
+				"word for every child row before it writes anything. Lower the range or "+
+				"the number of parents",
+			entity.Name, parent.Entity, parent.Max, parent.Entity, parents,
+			MaxChildRows))
+	}
+	return nil
 }
 
 // reachable refuses a count the bounds cannot produce, showing the arithmetic.

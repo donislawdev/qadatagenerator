@@ -1,6 +1,7 @@
 package generate_test
 
 import (
+	"strconv"
 	"strings"
 	"testing"
 
@@ -238,5 +239,110 @@ func TestAGeneratorThisBuildLacksStopsTheRun(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "no_such_generator") {
 		t.Errorf("the refusal does not name the generator: %v", err)
+	}
+}
+
+// A relation asking for more rows than this build can plan for is refused with
+// the arithmetic, rather than reported as a defect of this tool.
+//
+// 🔴 Both of these ended with the four line message that begins internal
+// defect and asks for a bug report, measured with the real binary on
+// 2026-09-02. One reached the seed with a bound of minus nine million million
+// million, because the width of the range was worked out in the arithmetic
+// that had just overflowed. The other asked the runtime for a slice it refuses
+// to make. In each case a recipe somebody wrote was answered by this tool
+// blaming itself, which sends a person to report a fault that is not there.
+//
+// The limit itself is at MaxChildRows and carries the measurement behind it.
+// What matters here is that a refusal arrives at all, that it carries the kind
+// meaning the recipe reads correctly and cannot be carried out, and that it
+// quotes the numbers it was given.
+func TestARelationTooWideToPlanForIsRefusedWithTheArithmetic(t *testing.T) {
+	const most = int(^uint(0) >> 1)
+	values := knownValues{generators: []string{"first_name"}}
+
+	for _, width := range []int{most, 4_000_000_000_000_000_000, 2_000_000_000} {
+		_, err := generate.Prepare(related(3, 0, width), values)
+		if err == nil {
+			t.Fatalf("a range of nought to %d children each was accepted, so this build "+
+				"was about to plan for more rows than it can hold", width)
+		}
+		if fault.KindOf(err) != fault.Data {
+			t.Errorf("the refusal of nought to %d carries kind %v rather than the one "+
+				"meaning the recipe reads correctly and cannot be carried out",
+				width, fault.KindOf(err))
+		}
+		if !strings.Contains(err.Error(), strconv.Itoa(width)) {
+			t.Errorf("the refusal does not quote the range it was given, so nobody can "+
+				"tell which number to lower: %v", err)
+		}
+		if !strings.Contains(err.Error(), strconv.Itoa(generate.MaxChildRows)) {
+			t.Errorf("the refusal does not say what this build can do, which is the third "+
+				"of the four parts a refusal owes: %v", err)
+		}
+	}
+}
+
+// A parent table too large to hold a share for is refused even when the range
+// asks for no children at all.
+//
+// 🔴 This is the case the check on the range cannot see. A share is kept for
+// every parent while the draw goes on, so nought to nought children of nine
+// million million parents allocates nothing for the children and one word for
+// each parent. Multiplying by a range of nought gives nought, so a single
+// check written as a product would have let this through.
+func TestAParentTableTooLargeToShareOutBetweenIsRefused(t *testing.T) {
+	values := knownValues{generators: []string{"first_name"}}
+
+	_, err := generate.Prepare(related(generate.MaxChildRows+1, 0, 0), values)
+
+	if err == nil {
+		t.Fatal("a parent table larger than this build can share children out between " +
+			"was accepted")
+	}
+	if fault.KindOf(err) != fault.Data {
+		t.Errorf("the refusal carries kind %v rather than the one meaning the recipe "+
+			"reads correctly and cannot be carried out", fault.KindOf(err))
+	}
+	if !strings.Contains(err.Error(), "parents") {
+		t.Errorf("the refusal does not say that it is the number of parents that is too "+
+			"large, so somebody would go looking at the range: %v", err)
+	}
+}
+
+// The refusal is about what cannot be planned for and must leave ordinary
+// relations alone, which is the failure mode of a ceiling put in the wrong
+// place.
+//
+// 🔴 The boundary is pinned from above only, and that is deliberate rather
+// than lazy. A recipe just under it plans for four thousand million rows and
+// takes 32 GB to do it, so a test standing on the other side of the line would
+// be a test that has to be able to allocate it.
+func TestARelationThisBuildCanPlanForIsNotRefused(t *testing.T) {
+	values := knownValues{generators: []string{"first_name"}}
+
+	plan, err := generate.Prepare(related(3, 0, 4), values)
+
+	if err != nil {
+		t.Fatalf("an ordinary relation was refused: %v", err)
+	}
+	if plan.TotalRows() < 3 {
+		t.Errorf("the plan counts %d rows for three parents and their children",
+			plan.TotalRows())
+	}
+}
+
+// related is a recipe of one parent table and one child table that belongs to
+// it, with the cardinality handed in.
+func related(parents, low, high int) recipe.Recipe {
+	field := recipe.Field{Name: "first_name", Generator: "first_name"}
+	return recipe.Recipe{
+		Seed: "plan", Locale: "pl-PL",
+		Entities: []recipe.Entity{
+			{Name: "customer", Count: parents, HasCount: true,
+				Fields: []recipe.Field{field}},
+			{Name: "order", Fields: []recipe.Field{field},
+				Parents: []recipe.Parent{{Entity: "customer", Min: low, Max: high}}},
+		},
 	}
 }

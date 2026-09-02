@@ -82,6 +82,7 @@ var RefusalKinds = map[string]string{
 	"internal/adapter/values.Source.fromType Data":           "the field accepts fewer characters than a decimal needs for a point and two places",
 	"internal/adapter/values.Source.pick Data":               "no entry of the list is short enough for the length this field accepts",
 	"internal/app/generate.reachable Data":                   "the count of a child cannot be reached by any deal of its parents, so the recipe is valid and its arithmetic does not work out",
+	"internal/app/generate.withinReach Data":                 "the relation reads correctly and asks for more rows than this build can hold a plan for, which is the engine answering whether a run can be carried out rather than the reader answering whether a recipe is well formed",
 	"internal/app/generate.uniqueValue Data":                 "a unique field ran out of values while drawing, which is the definition of a valid recipe that cannot be satisfied",
 }
 
