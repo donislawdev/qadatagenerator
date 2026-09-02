@@ -71,6 +71,12 @@ repository once they are released.
 
 ### Changed
 
+- **The window is built on Fyne 2.8.1.** A patch release of the toolkit the
+  window uses, carrying its own performance work and fixes. What you see from
+  here is the version `qadg --license` and the About screen report, and two
+  components that left that list because this build no longer uses them.
+  Nothing this program draws changed.
+
 - **Generating from word lists is about thirty times faster.** Every name, city
   and region used to be drawn by reading and splitting the whole list again.
   Measured on 100000 rows of four columns with three word lists: a median of

@@ -32,7 +32,7 @@
 					<container pos="24,24" size="1050x836">
 						<rectangle size="1050x836" strokeColor="focus" strokeWidth="2"/>
 						<widget size="1050x836" type="*parts.KeyScroll">
-							<container pos="0,-1608" size="1050x3169">
+							<container pos="0,-1608" size="1050x3028">
 								<widget size="1050x27" type="*widget.Label">
 									<widget size="1050x27" type="*widget.RichText">
 										<text bold pos="4,4" size="59x19">Versions</text>
@@ -135,7 +135,7 @@
 										<text bold pos="4,4" size="168x19">Third party components</text>
 									</widget>
 								</widget>
-								<container pos="0,374" size="1050x2657">
+								<container pos="0,374" size="1050x2517">
 									<container size="1050x62">
 										<container size="1050x27">
 											<widget size="114x27" type="*widget.Label">
@@ -145,7 +145,7 @@
 											</widget>
 											<widget pos="122,0" size="145x27" type="*widget.Label">
 												<widget size="145x27" type="*widget.RichText">
-													<text pos="4,4" size="137x19">v2.8.0   BSD-3-Clause</text>
+													<text pos="4,4" size="137x19">v2.8.1   BSD-3-Clause</text>
 												</widget>
 											</widget>
 										</container>
@@ -157,7 +157,7 @@
 											</widget>
 											<widget pos="162,0" size="187x27" type="*widget.Label">
 												<widget size="187x27" type="*widget.RichText">
-													<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+													<text color="disabled" pos="4,4" size="179x19">License read on 2026-09-02</text>
 												</widget>
 											</widget>
 										</container>
@@ -169,9 +169,9 @@
 													<text bold pos="4,4" size="104x19">fyne.io/systray</text>
 												</widget>
 											</widget>
-											<widget pos="120,0" size="138x27" type="*widget.Label">
-												<widget size="138x27" type="*widget.RichText">
-													<text pos="4,4" size="130x19">v1.12.2   Apache-2.0</text>
+											<widget pos="120,0" size="362x27" type="*widget.Label">
+												<widget size="362x27" type="*widget.RichText">
+													<text pos="4,4" size="354x19">v1.12.3-0.20260810170012-af4e8e793ec4   Apache-2.0</text>
 												</widget>
 											</widget>
 										</container>
@@ -183,7 +183,7 @@
 											</widget>
 											<widget pos="159,0" size="187x27" type="*widget.Label">
 												<widget size="187x27" type="*widget.RichText">
-													<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
+													<text color="disabled" pos="4,4" size="179x19">License read on 2026-09-02</text>
 												</widget>
 											</widget>
 										</container>
@@ -320,32 +320,6 @@
 									</container>
 									<container pos="0,491" size="1050x62">
 										<container size="1050x27">
-											<widget size="161x27" type="*widget.Label">
-												<widget size="161x27" type="*widget.RichText">
-													<text bold pos="4,4" size="153x19">github.com/fredbi/uri</text>
-												</widget>
-											</widget>
-											<widget pos="169,0" size="82x27" type="*widget.Label">
-												<widget size="82x27" type="*widget.RichText">
-													<text pos="4,4" size="74x19">v1.1.1   MIT</text>
-												</widget>
-											</widget>
-										</container>
-										<container pos="0,35" size="1050x27">
-											<widget size="198x27" type="*widget.Label">
-												<widget size="198x27" type="*widget.RichText">
-													<text color="disabled" pos="4,4" size="190x19">https://github.com/fredbi/uri</text>
-												</widget>
-											</widget>
-											<widget pos="206,0" size="187x27" type="*widget.Label">
-												<widget size="187x27" type="*widget.RichText">
-													<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-												</widget>
-											</widget>
-										</container>
-									</container>
-									<container pos="0,561" size="1050x62">
-										<container size="1050x27">
 											<widget size="207x27" type="*widget.Label">
 												<widget size="207x27" type="*widget.RichText">
 													<text bold pos="4,4" size="199x19">github.com/fsnotify/fsnotify</text>
@@ -370,7 +344,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,631" size="1050x62">
+									<container pos="0,561" size="1050x62">
 										<container size="1050x27">
 											<widget size="176x27" type="*widget.Label">
 												<widget size="176x27" type="*widget.RichText">
@@ -396,7 +370,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,701" size="1050x62">
+									<container pos="0,631" size="1050x62">
 										<container size="1050x27">
 											<widget size="194x27" type="*widget.Label">
 												<widget size="194x27" type="*widget.RichText">
@@ -422,7 +396,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,771" size="1050x62">
+									<container pos="0,701" size="1050x62">
 										<container size="1050x27">
 											<widget size="191x27" type="*widget.Label">
 												<widget size="191x27" type="*widget.RichText">
@@ -448,7 +422,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,841" size="1050x62">
+									<container pos="0,771" size="1050x62">
 										<container size="1050x27">
 											<widget size="189x27" type="*widget.Label">
 												<widget size="189x27" type="*widget.RichText">
@@ -474,7 +448,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,912" size="1050x62">
+									<container pos="0,841" size="1050x62">
 										<container size="1050x27">
 											<widget size="147x27" type="*widget.Label">
 												<widget size="147x27" type="*widget.RichText">
@@ -500,7 +474,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,982" size="1050x62">
+									<container pos="0,912" size="1050x62">
 										<container size="1050x27">
 											<widget size="235x27" type="*widget.Label">
 												<widget size="235x27" type="*widget.RichText">
@@ -526,7 +500,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,1052" size="1050x62">
+									<container pos="0,982" size="1050x62">
 										<container size="1050x27">
 											<widget size="197x27" type="*widget.Label">
 												<widget size="197x27" type="*widget.RichText">
@@ -552,7 +526,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,1122" size="1050x62">
+									<container pos="0,1052" size="1050x62">
 										<container size="1050x27">
 											<widget size="230x27" type="*widget.Label">
 												<widget size="230x27" type="*widget.RichText">
@@ -578,7 +552,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,1192" size="1050x62">
+									<container pos="0,1122" size="1050x62">
 										<container size="1050x27">
 											<widget size="196x27" type="*widget.Label">
 												<widget size="196x27" type="*widget.RichText">
@@ -604,7 +578,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,1262" size="1050x62">
+									<container pos="0,1192" size="1050x62">
 										<container size="1050x27">
 											<widget size="206x27" type="*widget.Label">
 												<widget size="206x27" type="*widget.RichText">
@@ -630,7 +604,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,1332" size="1050x62">
+									<container pos="0,1262" size="1050x62">
 										<container size="1050x27">
 											<widget size="258x27" type="*widget.Label">
 												<widget size="258x27" type="*widget.RichText">
@@ -656,7 +630,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,1403" size="1050x62">
+									<container pos="0,1332" size="1050x62">
 										<container size="1050x27">
 											<widget size="204x27" type="*widget.Label">
 												<widget size="204x27" type="*widget.RichText">
@@ -682,7 +656,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,1473" size="1050x62">
+									<container pos="0,1403" size="1050x62">
 										<container size="1050x27">
 											<widget size="240x27" type="*widget.Label">
 												<widget size="240x27" type="*widget.RichText">
@@ -708,7 +682,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,1543" size="1050x62">
+									<container pos="0,1473" size="1050x62">
 										<container size="1050x27">
 											<widget size="218x27" type="*widget.Label">
 												<widget size="218x27" type="*widget.RichText">
@@ -734,33 +708,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,1613" size="1050x62">
-										<container size="1050x27">
-											<widget size="142x27" type="*widget.Label">
-												<widget size="142x27" type="*widget.RichText">
-													<text bold pos="4,4" size="134x19">github.com/kr/text</text>
-												</widget>
-											</widget>
-											<widget pos="150,0" size="82x27" type="*widget.Label">
-												<widget size="82x27" type="*widget.RichText">
-													<text pos="4,4" size="74x19">v0.2.0   MIT</text>
-												</widget>
-											</widget>
-										</container>
-										<container pos="0,35" size="1050x27">
-											<widget size="180x27" type="*widget.Label">
-												<widget size="180x27" type="*widget.RichText">
-													<text color="disabled" pos="4,4" size="172x19">https://github.com/kr/text</text>
-												</widget>
-											</widget>
-											<widget pos="188,0" size="187x27" type="*widget.Label">
-												<widget size="187x27" type="*widget.RichText">
-													<text color="disabled" pos="4,4" size="179x19">License read on 2026-08-12</text>
-												</widget>
-											</widget>
-										</container>
-									</container>
-									<container pos="0,1683" size="1050x62">
+									<container pos="0,1543" size="1050x62">
 										<container size="1050x27">
 											<widget size="238x27" type="*widget.Label">
 												<widget size="238x27" type="*widget.RichText">
@@ -786,7 +734,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,1753" size="1050x62">
+									<container pos="0,1613" size="1050x62">
 										<container size="1050x27">
 											<widget size="170x27" type="*widget.Label">
 												<widget size="170x27" type="*widget.RichText">
@@ -812,7 +760,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,1824" size="1050x62">
+									<container pos="0,1683" size="1050x62">
 										<container size="1050x27">
 											<widget size="249x27" type="*widget.Label">
 												<widget size="249x27" type="*widget.RichText">
@@ -838,7 +786,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,1894" size="1050x62">
+									<container pos="0,1753" size="1050x62">
 										<container size="1050x27">
 											<widget size="224x27" type="*widget.Label">
 												<widget size="224x27" type="*widget.RichText">
@@ -864,7 +812,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,1964" size="1050x62">
+									<container pos="0,1824" size="1050x62">
 										<container size="1050x27">
 											<widget size="209x27" type="*widget.Label">
 												<widget size="209x27" type="*widget.RichText">
@@ -890,7 +838,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,2034" size="1050x62">
+									<container pos="0,1894" size="1050x62">
 										<container size="1050x27">
 											<widget size="190x27" type="*widget.Label">
 												<widget size="190x27" type="*widget.RichText">
@@ -916,7 +864,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,2104" size="1050x62">
+									<container pos="0,1964" size="1050x62">
 										<container size="1050x27">
 											<widget size="199x27" type="*widget.Label">
 												<widget size="199x27" type="*widget.RichText">
@@ -942,7 +890,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,2174" size="1050x62">
+									<container pos="0,2034" size="1050x62">
 										<container size="1050x27">
 											<widget size="200x27" type="*widget.Label">
 												<widget size="200x27" type="*widget.RichText">
@@ -968,7 +916,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,2245" size="1050x62">
+									<container pos="0,2104" size="1050x62">
 										<container size="1050x27">
 											<widget size="198x27" type="*widget.Label">
 												<widget size="198x27" type="*widget.RichText">
@@ -994,7 +942,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,2315" size="1050x62">
+									<container pos="0,2174" size="1050x62">
 										<container size="1050x27">
 											<widget size="147x27" type="*widget.Label">
 												<widget size="147x27" type="*widget.RichText">
@@ -1020,7 +968,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,2385" size="1050x62">
+									<container pos="0,2245" size="1050x62">
 										<container size="1050x27">
 											<widget size="127x27" type="*widget.Label">
 												<widget size="127x27" type="*widget.RichText">
@@ -1046,7 +994,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,2455" size="1050x62">
+									<container pos="0,2315" size="1050x62">
 										<container size="1050x27">
 											<widget size="125x27" type="*widget.Label">
 												<widget size="125x27" type="*widget.RichText">
@@ -1072,7 +1020,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,2525" size="1050x62">
+									<container pos="0,2385" size="1050x62">
 										<container size="1050x27">
 											<widget size="131x27" type="*widget.Label">
 												<widget size="131x27" type="*widget.RichText">
@@ -1098,7 +1046,7 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,2595" size="1050x62">
+									<container pos="0,2455" size="1050x62">
 										<container size="1050x27">
 											<widget size="129x27" type="*widget.Label">
 												<widget size="129x27" type="*widget.RichText">
@@ -1125,15 +1073,15 @@
 										</container>
 									</container>
 								</container>
-								<widget pos="0,3040" size="1050x4" type="*widget.Separator">
+								<widget pos="0,2900" size="1050x4" type="*widget.Separator">
 									<rectangle fillColor="separator" size="1050x4"/>
 								</widget>
-								<widget pos="0,3052" size="1050x27" type="*widget.Label">
+								<widget pos="0,2912" size="1050x27" type="*widget.Label">
 									<widget size="1050x27" type="*widget.RichText">
 										<text bold pos="4,4" size="213x19">What this means for your data</text>
 									</widget>
 								</widget>
-								<container pos="0,3087" size="1050x81">
+								<container pos="0,2947" size="1050x81">
 									<widget size="1050x27" type="*widget.Label">
 										<widget size="1050x27" type="*widget.RichText">
 											<text pos="4,4" size="747x19">Data generated with this tool belongs to you. It is not a derived work, and the license of this tool does not cover it.</text>
@@ -1154,8 +1102,8 @@
 								<linearGradient endColor="shadow" pos="0,-8" size="1050x8"/>
 							</widget>
 							<widget pos="1044,0" size="6x836" type="*widget.scrollBarArea">
-								<widget pos="3,424" size="3x220" type="*widget.scrollBar">
-									<rectangle fillColor="scrollbar" radius="3" size="3x220"/>
+								<widget pos="3,443" size="3x230" type="*widget.scrollBar">
+									<rectangle fillColor="scrollbar" radius="3" size="3x230"/>
 								</widget>
 							</widget>
 						</widget>

@@ -211,17 +211,17 @@ type Component struct {
 var ThirdParty = []Component{
 	{
 		Module:  "fyne.io/fyne/v2",
-		Version: "v2.8.0",
+		Version: "v2.8.1",
 		License: "BSD-3-Clause",
 		Source:  "https://fyne.io/fyne/v2",
-		Checked: "2026-08-12",
+		Checked: "2026-09-02",
 	},
 	{
 		Module:  "fyne.io/systray",
-		Version: "v1.12.2",
+		Version: "v1.12.3-0.20260810170012-af4e8e793ec4",
 		License: "Apache-2.0",
 		Source:  "https://fyne.io/systray",
-		Checked: "2026-08-12",
+		Checked: "2026-09-02",
 	},
 	{
 		Module:  "github.com/BurntSushi/toml",
@@ -256,13 +256,6 @@ var ThirdParty = []Component{
 		Version: "v1.1.1",
 		License: "ISC",
 		Source:  "https://github.com/davecgh/go-spew",
-		Checked: "2026-08-12",
-	},
-	{
-		Module:  "github.com/fredbi/uri",
-		Version: "v1.1.1",
-		License: "MIT",
-		Source:  "https://github.com/fredbi/uri",
 		Checked: "2026-08-12",
 	},
 	{
@@ -368,13 +361,6 @@ var ThirdParty = []Component{
 		Version: "v0.0.0-20230614200233-a9de23ed2e25",
 		License: "MIT",
 		Source:  "https://github.com/jsummers/gobmp",
-		Checked: "2026-08-12",
-	},
-	{
-		Module:  "github.com/kr/text",
-		Version: "v0.2.0",
-		License: "MIT",
-		Source:  "https://github.com/kr/text",
 		Checked: "2026-08-12",
 	},
 	{
