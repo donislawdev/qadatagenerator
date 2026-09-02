@@ -145,6 +145,20 @@ func TestTheKeyNamingTheParentIsTheOneTheRunWrites(t *testing.T) {
 	if column < 0 {
 		t.Fatalf("the child carries no column naming its parent, only %v", child.Columns)
 	}
+	// 🔴 The sample says WHICH column that is, and it has to be this one. A
+	// surface uses it to tell an empty key from an empty value, and pointing at
+	// the wrong column would turn ordinary blank values into a sentence about
+	// parents.
+	if child.ParentColumn != column {
+		t.Errorf("the sample says the parent is column %d and it is column %d",
+			child.ParentColumn, column)
+	}
+	for _, table := range sample.Tables {
+		if table.Entity == "customer" && table.ParentColumn != -1 {
+			t.Errorf("a table belonging to nobody names column %d as its parent",
+				table.ParentColumn)
+		}
+	}
 
 	for at, row := range child.Rows {
 		want := whole["order"][at+1][column]

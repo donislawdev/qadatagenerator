@@ -59,6 +59,25 @@ type Table struct {
 	// Total is how many rows a real run would write, which is what makes the
 	// difference between a short table and a cut one visible.
 	Total int
+	// ParentColumn is where the key naming the parent sits, or minus one when
+	// this table belongs to nobody.
+	//
+	// 🔴 It travels so that a surface can tell one empty cell from another. The
+	// writer looks a parent up among the rows it has already written, and a
+	// sample holds ten of them, so a child whose parent is the four hundredth
+	// row gets an empty key back and no word about why. Everywhere else an
+	// empty value is an ordinary thing for generated data to be. Without this
+	// the two are the same cell.
+	ParentColumn int
+}
+
+// ParentUnknown reports whether the key naming the parent could not be read
+// back for this row, because the parent it names is outside the sample.
+func (t Table) ParentUnknown(row int) bool {
+	if t.ParentColumn < 0 || row >= len(t.Rows) || t.ParentColumn >= len(t.Rows[row]) {
+		return false
+	}
+	return t.Rows[row][t.ParentColumn] == ""
 }
 
 // Cut reports whether the real run would write more rows than this carries.
@@ -190,8 +209,18 @@ func tablesOf(plan generate.Plan, held *held, rec recipe.Recipe) ([]Table, error
 		if len(lines) == 0 {
 			continue
 		}
+		// The writer puts the key naming the parent after the fields, so the
+		// last column is that key whenever the table belongs to somebody. It is
+		// worked out from the plan rather than by matching the column name,
+		// because a recipe may name a field after another entity and the writer
+		// refuses exactly that case rather than resolving it.
+		parent := -1
+		if planned.Parent != "" {
+			parent = len(lines[0]) - 1
+		}
 		tables = append(tables, Table{
 			Entity: planned.Entity, Columns: lines[0], Rows: lines[1:], Total: planned.Rows,
+			ParentColumn: parent,
 		})
 	}
 	return tables, nil

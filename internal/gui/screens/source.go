@@ -119,4 +119,74 @@ entities:
       email:
         generator: person.email
 `
+
+	// RelatedRecipe is the shape a preview can get wrong, so it is the shape a
+	// picture has to be taken of: a child sharing out among parents, more rows
+	// than a sample carries, and values that are not ASCII.
+	//
+	// It photographs three things at once that no other recipe here does. The
+	// column naming the parent, which comes from the writer rather than from the
+	// recipe. The sentence saying how much of a table is on screen, which reads
+	// differently once a table is cut. And a value with Polish letters in it,
+	// which is what a column cut by byte rather than by character would break.
+	RelatedRecipe = `version: "0.1"
+seed: "sample"
+locale: pl-PL
+entities:
+  customer:
+    count: 4
+    primary_key: [pesel]
+    fields:
+      first_name:
+        generator: first_name
+      gender:
+        generator: gender
+      pesel:
+        generator: pesel
+    consistency:
+      - pesel matches: [first_name, gender]
+  order:
+    count: 25
+    belongs_to: { customer: 0-25 }
+    fields:
+      placed_at:
+        generator: birth_date
+`
+
+	// EmptyRecipe asks for no rows, which is legal and ordinary while somebody
+	// is writing a test, and is the one case where a table has to be a sentence
+	// rather than a heading with nothing under it.
+	EmptyRecipe = `version: "0.1"
+seed: "sample"
+entities:
+  customer:
+    count: 0
+    fields:
+      name:
+        generator: first_name
+`
+
+	// RefusedRecipe reads correctly and cannot be run: the relation allows each
+	// customer between five and five orders, and the count asked for cannot be
+	// reached that way.
+	//
+	// 🔴 It is the state B-205 was about, reached by a different door. That
+	// particular door was closed on 2026-09-02 by moving the rule into the
+	// recipe, so a picture of it would now be a picture of a problem. The plan
+	// still knows things the validator does not ask, and this is one of them.
+	RefusedRecipe = `version: "0.1"
+seed: "sample"
+entities:
+  customer:
+    count: 4
+    fields:
+      name:
+        generator: first_name
+  order:
+    count: 7
+    belongs_to: { customer: 5-5 }
+    fields:
+      placed_at:
+        generator: birth_date
+`
 )

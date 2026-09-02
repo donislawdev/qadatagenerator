@@ -440,6 +440,12 @@ var Guards = []Guard{
 	{"validate, a dry run and a run agree about a relation colliding with a field", "TestTheThreeAnswersAboutARelationCollidingWithAFieldAgree", "internal/cli", ByMutation},
 	{"a writer refuses a table whose relation and field want one column", "TestAWriterRefusesATableWhoseRelationWantsAColumnAFieldAlreadyHas", "internal/adapter/format", ByMutation},
 	{"a preview is the first rows of the run it stands for", "TestASampleIsTheFirstRowsTheRunItselfWouldWrite", "internal/preview", ByMutation},
+	{"the rows a recipe would produce are on the screen it is written on", "TestTheRowsOnScreenAreTheRowsTheSampleCarries", "internal/gui/recipeview", ByMutation},
+	{"a value is not cut short in a column with room for it", "TestAValueIsNotCutWhenItsColumnHasRoomForIt", "internal/gui/recipeview", ByMutation},
+	{"a recipe that produces no rows says so rather than drawing an empty table", "TestATableWithNoRowsIsASentenceRatherThanAnEmptyTable", "internal/gui/recipeview", ByMutation},
+	{"a recipe the plan refuses is not drawn as an approval", "TestARecipeThePlanRefusesIsDrawnAsARefusalAndNotAsAnApproval", "internal/gui/recipeview", ByMutation},
+	{"what was counted is written in the form of the word that fits it", "TestTheCountsOnScreenUseTheRightFormOfEachWord", "internal/gui/recipeview", ByMutation},
+	{"a parent outside the preview is named rather than left blank", "TestAParentOutsideTheSampleIsNamedRatherThanLeftBlank", "internal/gui/recipeview", ByMutation},
 	{"the key naming the parent in a preview is the one the run writes", "TestTheKeyNamingTheParentIsTheOneTheRunWrites", "internal/preview", ByMutation},
 	{"a refusal says what to do next whichever layer it came from", "TestAFailureFromBelowStillSaysWhatToDo", "internal/cli", ByMutation},
 

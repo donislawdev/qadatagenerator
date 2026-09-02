@@ -103,9 +103,9 @@ func TestAProblemReachesTheScreenWithItsLine(t *testing.T) {
 // select what they wrote and delete it.
 func TestAnEmptyScreenIsNotAnApprovedOne(t *testing.T) {
 	var asked int
-	view := here(t, func(string, []byte) validate.Report {
+	view := here(t, func(string, []byte) recipeview.Answer {
 		asked++
-		return validate.Report{}
+		return recipeview.Answer{}
 	})
 
 	view.SetRecipe(screens.CleanRecipe)
@@ -136,10 +136,10 @@ func TestAnAnswerAboutARecipeNobodyIsWaitingForIsNotDrawn(t *testing.T) {
 	later := background.Work{Read: func(read func() func()) {
 		answer = append(answer, read())
 	}}
-	view := recipeview.New(i18n.English, func(_ string, data []byte) validate.Report {
+	view := recipeview.New(i18n.English, func(_ string, data []byte) recipeview.Answer {
 		// The report names the recipe it was asked about, so the assertion
 		// below is about WHICH answer was kept rather than about how many.
-		return validate.Report{Name: string(data)}
+		return recipeview.Answer{Report: validate.Report{Name: string(data)}}
 	}, later)
 	view.Content()
 
@@ -167,8 +167,8 @@ func TestAnAnswerAboutARecipeNobodyIsWaitingForIsNotDrawn(t *testing.T) {
 // look identical, and the sentence is the only thing that tells them apart.
 func TestTheScreenSaysThatItIsChecking(t *testing.T) {
 	waiting := background.Work{Read: func(func() func()) {}}
-	view := recipeview.New(i18n.English, func(string, []byte) validate.Report {
-		return validate.Report{}
+	view := recipeview.New(i18n.English, func(string, []byte) recipeview.Answer {
+		return recipeview.Answer{}
 	}, waiting)
 	view.Content()
 

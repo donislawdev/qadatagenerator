@@ -12,6 +12,21 @@ repository once they are released.
 
 ### Added
 
+- **The recipe editor shows the rows your recipe would produce.** Under the
+  verdict there is now a table for each entity, carrying the first ten rows of
+  it exactly as a run would write them, columns included: a child table shows
+  the column naming the parent it belongs to, which comes from the file rather
+  than from the recipe. A table says how much of itself you are looking at, so
+  ten of twenty five rows reads as ten of twenty five. Nothing is written to
+  disk to produce it.
+
+  Two answers that had nowhere to appear before now do. A recipe that reads
+  correctly and still cannot be run says so instead of being approved, and a
+  recipe that asks for no rows says that in a sentence rather than drawing an
+  empty table. Under the rows, beside the list of what was not checked, is a
+  second list: what the run will not do, such as a column this build has no
+  values for and would leave empty.
+
 - **A recipe editor in the window, and the window opens on it.** Write or paste a
   recipe and see what is wrong with it as you type: every problem at the place
   and the line it belongs to, the values that would have been accepted, and what

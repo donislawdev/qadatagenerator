@@ -74,6 +74,61 @@
 											<text color="disabled" pos="4,4" size="96x19">1 entity, 1 field</text>
 										</widget>
 									</widget>
+									<widget pos="0,70" size="1050x27" type="*widget.Label">
+										<widget size="1050x27" type="*widget.RichText">
+											<text bold pos="4,4" size="66x19">customer</text>
+										</widget>
+									</widget>
+									<widget pos="0,105" size="1050x27" type="*widget.Label">
+										<widget size="1050x27" type="*widget.RichText">
+											<text color="disabled" pos="4,4" size="43x19">3 rows</text>
+										</widget>
+									</widget>
+									<container pos="0,140" size="1050x124">
+										<widget pos="8,0" size="1042x124" type="*parts.KeyTable">
+											<widget size="1042x27" type="*widget.clip">
+												<container size="0x0">
+													<rectangle fillColor="headerBackground" size="1042x27"/>
+													<widget size="96x27" type="*widget.RichText">
+														<text pos="4,4" size="37x19">name</text>
+													</widget>
+												</container>
+											</widget>
+											<widget pos="0,27" size="0x97" type="*widget.clip">
+												<container size="0x0">
+												</container>
+											</widget>
+											<widget size="0x27" type="*widget.clip">
+												<container size="0x0">
+													<rectangle fillColor="headerBackground" size="23x27"/>
+												</container>
+											</widget>
+											<widget size="1042x124" type="*widget.clip">
+												<container size="0x0">
+													<widget pos="0,56" size="1042x4" type="*widget.Separator">
+														<rectangle fillColor="separator" size="1042x4"/>
+													</widget>
+													<widget pos="0,91" size="1042x4" type="*widget.Separator">
+														<rectangle fillColor="separator" size="1042x4"/>
+													</widget>
+												</container>
+											</widget>
+											<widget pos="0,27" size="1042x97" type="*widget.Scroll">
+												<widget size="1042x97" type="*widget.tableCells">
+													<widget size="96x27" type="*widget.RichText">
+														<text pos="4,4" size="43x19">Shelby</text>
+													</widget>
+													<widget pos="0,35" size="96x27" type="*widget.RichText">
+														<text pos="4,4" size="49x19">Gordon</text>
+													</widget>
+													<widget pos="0,70" size="96x27" type="*widget.RichText">
+														<text pos="4,4" size="25x19">Gail</text>
+													</widget>
+												</widget>
+											</widget>
+										</widget>
+										<rectangle size="0x124"/>
+									</container>
 								</container>
 							</widget>
 						</container>

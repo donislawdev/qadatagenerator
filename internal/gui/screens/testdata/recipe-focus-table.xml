@@ -1,0 +1,141 @@
+<canvas padded size="1342x900">
+	<content>
+		<container pos="8,8" size="1326x884">
+			<container size="220x884">
+				<container size="220x884">
+					<widget size="220x28" type="*parts.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
+						<widget pos="100,4" size="46x20" type="*widget.RichText">
+							<text alignment="center" bold size="46x19">Recipe</text>
+						</widget>
+						<image fillMode="contain" pos="72,4" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
+					</widget>
+					<widget pos="0,36" size="220x28" type="*parts.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
+						<widget pos="50,4" size="118x19" type="*widget.RichText">
+							<text alignment="center" bold size="118x19">Take and corrupt</text>
+						</widget>
+					</widget>
+					<widget pos="0,72" size="220x28" type="*parts.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
+						<widget pos="48,4" size="122x19" type="*widget.RichText">
+							<text alignment="center" bold size="122x19">Manifest browser</text>
+						</widget>
+					</widget>
+					<widget pos="0,108" size="220x28" type="*parts.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
+						<widget pos="88,4" size="42x19" type="*widget.RichText">
+							<text alignment="center" bold size="42x19">About</text>
+						</widget>
+					</widget>
+				</container>
+			</container>
+			<container pos="228,0" size="1098x884">
+				<container size="1098x884">
+					<widget pos="24,24" size="1050x836" type="*container.Split">
+						<widget size="1050x415" type="*parts.Editor">
+							<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="1046x411"/>
+							<rectangle pos="1,1" radius="5" size="1047x413" strokeColor="inputBorder" strokeWidth="2"/>
+							<widget pos="0,2" size="1050x411" type="*widget.Scroll">
+								<widget size="1050x411" type="*widget.entryContent">
+									<widget size="1050x411" type="*widget.RichText">
+										<text monospace pos="4,2" size="117x16">version: "0.1"</text>
+										<text monospace pos="4,18" size="117x16">seed: "sample"</text>
+										<text monospace pos="4,34" size="75x16">entities:</text>
+										<text monospace pos="4,50" size="92x16">  customer:</text>
+										<text monospace pos="4,67" size="101x16">    count: 3</text>
+										<text monospace pos="4,83" size="92x16">    fields:</text>
+										<text monospace pos="4,99" size="92x16">      name:</text>
+										<text monospace pos="4,116" size="244x16">        generator: first_name</text>
+										<text monospace pos="4,132" size="0x16"></text>
+									</widget>
+								</widget>
+							</widget>
+						</widget>
+						<widget pos="0,415" size="1050x5" type="*container.divider">
+							<rectangle fillColor="shadow" size="1050x5"/>
+							<rectangle fillColor="foreground" pos="509,0" size="32x4"/>
+						</widget>
+						<container pos="0,420" size="1050x415">
+							<rectangle size="1050x415" strokeWidth="2"/>
+							<widget size="1050x415" type="*parts.KeyScroll">
+								<container size="1050x415">
+									<widget size="1050x27" type="*widget.Label">
+										<widget size="1050x27" type="*widget.RichText">
+											<text bold pos="4,4" size="352x19">No objections. This recipe can be used as it stands.</text>
+										</widget>
+									</widget>
+									<widget pos="0,35" size="1050x27" type="*widget.Label">
+										<widget size="1050x27" type="*widget.RichText">
+											<text color="disabled" pos="4,4" size="96x19">1 entity, 1 field</text>
+										</widget>
+									</widget>
+									<widget pos="0,70" size="1050x27" type="*widget.Label">
+										<widget size="1050x27" type="*widget.RichText">
+											<text bold pos="4,4" size="66x19">customer</text>
+										</widget>
+									</widget>
+									<widget pos="0,105" size="1050x27" type="*widget.Label">
+										<widget size="1050x27" type="*widget.RichText">
+											<text color="disabled" pos="4,4" size="43x19">3 rows</text>
+										</widget>
+									</widget>
+									<container pos="0,140" size="1050x124">
+										<widget pos="8,0" size="1042x124" type="*parts.KeyTable">
+											<widget size="1042x27" type="*widget.clip">
+												<container size="0x0">
+													<rectangle fillColor="headerBackground" size="1042x27"/>
+													<widget size="96x27" type="*widget.RichText">
+														<text pos="4,4" size="37x19">name</text>
+													</widget>
+												</container>
+											</widget>
+											<widget pos="0,27" size="0x97" type="*widget.clip">
+												<container size="0x0">
+												</container>
+											</widget>
+											<widget size="0x27" type="*widget.clip">
+												<container size="0x0">
+													<rectangle fillColor="headerBackground" size="23x27"/>
+												</container>
+											</widget>
+											<widget size="1042x124" type="*widget.clip">
+												<container size="0x0">
+													<rectangle fillColor="hover" pos="0,27" radius="3" size="96x27"/>
+													<widget pos="0,56" size="1042x4" type="*widget.Separator">
+														<rectangle fillColor="separator" size="1042x4"/>
+													</widget>
+													<widget pos="0,91" size="1042x4" type="*widget.Separator">
+														<rectangle fillColor="separator" size="1042x4"/>
+													</widget>
+												</container>
+											</widget>
+											<widget pos="0,27" size="1042x97" type="*widget.Scroll">
+												<widget size="1042x97" type="*widget.tableCells">
+													<widget size="96x27" type="*widget.RichText">
+														<text pos="4,4" size="43x19">Shelby</text>
+													</widget>
+													<widget pos="0,35" size="96x27" type="*widget.RichText">
+														<text pos="4,4" size="49x19">Gordon</text>
+													</widget>
+													<widget pos="0,70" size="96x27" type="*widget.RichText">
+														<text pos="4,4" size="25x19">Gail</text>
+													</widget>
+												</widget>
+											</widget>
+										</widget>
+										<rectangle size="0x124"/>
+									</container>
+								</container>
+							</widget>
+						</container>
+					</widget>
+				</container>
+			</container>
+		</container>
+	</content>
+</canvas>

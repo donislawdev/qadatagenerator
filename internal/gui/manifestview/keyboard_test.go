@@ -18,7 +18,7 @@ import (
 //
 // It goes through the table's own update rather than through the decision
 // beside it, so what is checked is the path a drawn cell actually takes.
-func styleOf(t *testing.T, entries *keyboardTable, cell widget.TableCellID) fyne.TextStyle {
+func styleOf(t *testing.T, entries *parts.KeyTable, cell widget.TableCellID) fyne.TextStyle {
 	t.Helper()
 	object := entries.CreateCell()
 	entries.UpdateCell(cell, object)
@@ -47,7 +47,7 @@ func marked(style fyne.TextStyle) bool { return style.Bold && style.Underline }
 func TestTheCellTheKeyboardStandsOnIsMarkedAndTheMarkLeavesWithIt(t *testing.T) {
 	view := New(i18n.English, nil, Readers{}, background.ReadHere)
 	rows := []Row{sample(), sample(), sample()}
-	entries, ok := view.table(rows).(*keyboardTable)
+	entries, ok := view.table(rows).(*parts.KeyTable)
 	if !ok {
 		t.Fatal("the entries are no longer shown in a table that says when it has focus")
 	}
@@ -163,7 +163,7 @@ func TestTheKeyboardMeetsTheButtonsBeforeTheEntries(t *testing.T) {
 	}
 
 	canvas.FocusNext()
-	if _, isTable := canvas.Focused().(*keyboardTable); !isTable {
+	if _, isTable := canvas.Focused().(*parts.KeyTable); !isTable {
 		t.Errorf("after the button the keyboard reaches %T rather than the entries", canvas.Focused())
 	}
 }

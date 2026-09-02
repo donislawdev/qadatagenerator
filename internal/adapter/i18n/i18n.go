@@ -284,8 +284,27 @@ const (
 	RecipeAllowed      Key = "recipe.allowed"
 	RecipeTry          Key = "recipe.try"
 	RecipeUnchecked    Key = "recipe.unchecked"
-	RecipeEntity       Key = "recipe.entity"
-	RecipeField        Key = "recipe.field"
+	// 🔴 Both forms of each, rather than one and a letter. The letter is what
+	// the window drew until 2026-09-02, and rendering read it back: four fields
+	// of two entities came out as "2 entitys". English alone is enough to
+	// break that rule, so the sixth language is not what this is waiting for.
+	RecipeEntity   Key = "recipe.entity"
+	RecipeEntities Key = "recipe.entities"
+	RecipeField    Key = "recipe.field"
+	RecipeFields   Key = "recipe.fields"
+
+	// The preview. A table says how much of itself is on screen, and the three
+	// sentences below it are the states a table can be in that are not a table.
+	RecipeRows          Key = "recipe.rows"
+	RecipeShowing       Key = "recipe.showing"
+	RecipeOf            Key = "recipe.of"
+	RecipeRow           Key = "recipe.row"
+	RecipeNoRows        Key = "recipe.no-rows"
+	RecipeNoFields      Key = "recipe.no-fields"
+	RecipeAsText        Key = "recipe.as-text"
+	RecipeParentOutside Key = "recipe.parent-outside"
+	RecipeRefused       Key = "recipe.refused"
+	RecipeWillNotDo     Key = "recipe.will-not-do"
 )
 
 // Keys is every key a screen may ask for, so a test can close the register
@@ -356,7 +375,9 @@ var Keys = []Key{
 	RecipeEmpty, RecipePlaceholder, RecipeChecking, RecipeName,
 	RecipeHeadingRecipe, RecipeHeadingProblems,
 	RecipeNoObjections, RecipeLine, RecipeAllowed, RecipeTry,
-	RecipeUnchecked, RecipeEntity, RecipeField,
+	RecipeUnchecked, RecipeEntity, RecipeEntities, RecipeField, RecipeFields,
+	RecipeShowing, RecipeOf, RecipeRow, RecipeRows, RecipeNoRows, RecipeNoFields,
+	RecipeAsText, RecipeParentOutside, RecipeRefused, RecipeWillNotDo,
 }
 
 // The catalogue travels inside the binary, because a window that needs a file

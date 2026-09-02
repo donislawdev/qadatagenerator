@@ -174,7 +174,7 @@
 										</container>
 									</container>
 								</container>
-								<widget pos="0,369" size="1050x105" type="*manifestview.keyboardTable">
+								<widget pos="0,369" size="1050x105" type="*parts.KeyTable">
 									<widget size="1050x27" type="*widget.clip">
 										<container size="0x0">
 											<rectangle fillColor="headerBackground" size="1050x27"/>

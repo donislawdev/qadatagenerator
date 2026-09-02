@@ -164,55 +164,6 @@ func All() []State {
 	return append(states, aboutStates()...)
 }
 
-// recipeStates are the states of the screen a recipe is written on.
-//
-// The three that matter are the three answers this screen can give: nothing
-// written yet, something written and wrong, something written and usable. The
-// fourth is the one nobody can photograph any other way, because a check that
-// answers has finished before a picture could be taken.
-func recipeStates() []State {
-	return []State{
-		{
-			Name:    "recipe-empty",
-			Purpose: "nothing written yet, a sentence saying what to do rather than an empty rectangle",
-			Screen:  0,
-		},
-		{
-			Name:    "recipe-problems",
-			Purpose: "a recipe that cannot be used, each problem at the line it was written on",
-			Screen:  0,
-			Recipe:  BrokenRecipe,
-		},
-		{
-			Name:    "recipe-clean",
-			Purpose: "a recipe that can be used, with what was read of it, so approval is not bare",
-			Screen:  0,
-			Recipe:  CleanRecipe,
-		},
-		{
-			Name:     "recipe-checking",
-			Purpose:  "a recipe being judged, which for a large one means the screen says so and stays answerable",
-			Screen:   0,
-			Recipe:   CleanRecipe,
-			Checking: true,
-		},
-		{
-			Name:     "recipe-focus-editor",
-			Purpose:  "the keyboard in the field the recipe is written in, which it can also leave",
-			Screen:   0,
-			Recipe:   BrokenRecipe,
-			Keyboard: Keyboard{Tabs: 5},
-		},
-		{
-			Name:     "recipe-focus-answer",
-			Purpose:  "the keyboard on the pane holding the answer, which the toolkit's own scrolling area never lets it reach",
-			Screen:   0,
-			Recipe:   BrokenRecipe,
-			Keyboard: Keyboard{Tabs: 6},
-		},
-	}
-}
-
 // takeStates are the states of the screen that damages somebody else's file,
 // which is the screen with the most of them.
 func takeStates() []State {

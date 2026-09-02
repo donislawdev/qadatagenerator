@@ -31,6 +31,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
+	"github.com/donislawdev/qadatagenerator/internal/preview"
 )
 
 // Check reads a recipe and says what is wrong with it.
@@ -42,7 +43,35 @@ import (
 // uses, so a recipe called clean here is a recipe called clean there. A screen
 // that built its own answer would be a second implementation of the rule, and
 // this project has paid for one of those already.
-type Check func(name string, data []byte) validate.Report
+type Check func(name string, data []byte) Answer
+
+// Answer is everything this screen learned about one recipe.
+//
+// # Why one answer rather than two ports
+//
+// Judging a recipe and working out what it would produce both begin by reading
+// the same bytes, and a recipe is allowed to be 256 KB. Two ports would mean two
+// readings on every key press, and the note on the reader says a document inside
+// that limit can cost hundreds of megabytes to parse. They also have to agree:
+// an approval drawn beside rows from an earlier recipe is the worst of the
+// outcomes, because it looks like an answer.
+type Answer struct {
+	// Report is what the recipe is, as validate sees it.
+	Report validate.Report
+	// Sample is the first rows of each table the recipe describes. It is empty
+	// when the report has problems, because a recipe that cannot be used
+	// produces nothing to show.
+	Sample preview.Sample
+	// Refused is the failure of a recipe that passed validation and still
+	// cannot be run.
+	//
+	// 🔴 This is not a gap between the two, it is the gap this project measured
+	// on 2026-09-02 and recorded as B-205: the plan and the writer know things
+	// the validator did not ask. One of those was repaired, and treating the
+	// rest as impossible is how the next one would arrive as an approval drawn
+	// over a refusal.
+	Refused error
+}
 
 // View is the screen and what it currently says about what is written on it.
 type View struct {
@@ -53,9 +82,10 @@ type View struct {
 	editor *parts.Editor
 	// answer is what is drawn under the recipe: the problems, or the sentence
 	// that there are none, or the sentence saying the recipe is being read.
-	answer      *fyne.Container
-	answerPane  *parts.KeyScroll
-	lastChecked validate.Report
+	answerBox  *fyne.Container
+	answerPane *parts.KeyScroll
+	// answer is what the last finished check said about the recipe.
+	answer Answer
 	// checked says whether anything has been judged yet, which is not the same
 	// as a report with no problems in it. An empty screen has no report and a
 	// valid recipe has one, and drawing them alike would tell somebody their
@@ -83,13 +113,13 @@ func New(text i18n.Catalogue, check Check, work background.Work) *View {
 	view := &View{text: text, check: check, work: work}
 	view.editor = parts.NewEditor(view.Recheck)
 	view.editor.SetPlaceHolder(text.T(i18n.RecipePlaceholder))
-	view.answer = container.NewVBox()
+	view.answerBox = container.NewVBox()
 	// 🔴 Built here rather than in Content, because it can take focus. The
 	// screen next door builds its panes in Content and carries B-203 for it: a
 	// second call there replaces a focusable widget while the keyboard is still
 	// standing on the old one, which is unreachable today and one refactor away
 	// from being a bug. Built once, the question cannot arise.
-	view.answerPane = parts.NewKeyScroll(view.answer)
+	view.answerPane = parts.NewKeyScroll(view.answerBox)
 	return view
 }
 
@@ -149,7 +179,7 @@ func (v *View) SetRecipe(recipe string) {
 }
 
 // Report is what the last finished check said, and whether there has been one.
-func (v *View) Report() (validate.Report, bool) { return v.lastChecked, v.checked }
+func (v *View) Report() (validate.Report, bool) { return v.answer.Report, v.checked }
 
 // Recheck judges what is on the screen, off the thread that draws.
 //
@@ -170,7 +200,7 @@ func (v *View) Recheck(recipe string) {
 	if recipe == "" {
 		v.checking = false
 		v.checked = false
-		v.lastChecked = validate.Report{}
+		v.answer = Answer{}
 		v.draw()
 		return
 	}
@@ -191,7 +221,7 @@ func (v *View) Recheck(recipe string) {
 			}
 			v.checking = false
 			v.checked = true
-			v.lastChecked = report
+			v.answer = report
 			v.draw()
 		}
 	})
@@ -208,32 +238,73 @@ func (v *View) Checking() bool { return v.checking }
 // makes a person work out which one is current. It is the same shape the screen
 // next door uses for a refusal.
 func (v *View) draw() {
-	v.answer.Objects = nil
+	v.answerBox.Objects = nil
 	switch {
 	case v.checking:
-		v.answer.Add(sentence(v.text.T(i18n.RecipeChecking)))
+		v.answerBox.Add(sentence(v.text.T(i18n.RecipeChecking)))
 	case !v.checked:
-		v.answer.Add(sentence(v.text.T(i18n.RecipeEmpty)))
-	case len(v.lastChecked.Problems) > 0:
+		v.answerBox.Add(sentence(v.text.T(i18n.RecipeEmpty)))
+	case len(v.answer.Report.Problems) > 0:
 		v.drawProblems()
+	case v.answer.Refused != nil:
+		// 🔴 A recipe the validator approved and the plan will not run. It takes
+		// the place of the approval rather than standing under it, for the same
+		// reason the problems do: two answers to one question make a person work
+		// out which is current, and here one of them would be wrong.
+		v.drawRefusal()
 	default:
 		v.drawClean()
+		v.drawPreview()
 	}
+	v.drawWillNotDo()
 	v.drawUnchecked()
-	v.answer.Refresh()
+	v.answerBox.Refresh()
+}
+
+// drawRefusal says that the recipe reads correctly and cannot be run anyway.
+//
+// The failure carries the four parts a refusal has, already assembled by
+// whoever raised it, so it is drawn as the sentence it is rather than taken
+// apart here.
+func (v *View) drawRefusal() {
+	v.answerBox.Add(heading(v.text.T(i18n.RecipeRefused)))
+	v.answerBox.Add(sentence(v.answer.Refused.Error()))
+}
+
+// drawWillNotDo lists what the plan says the run will not do.
+//
+// # Why this is a second list beside what was not checked
+//
+// They answer different questions and this project has one rule about that: a
+// list that answers two is a list somebody reads as answering the easier one.
+// What was not checked is about the READING of the recipe, and this is about
+// the RUN it describes: a column this build has no values for, a setting that
+// changes nothing in the form asked for. Until now the window carried the first
+// and dropped the second, so a column that will come out empty had nowhere to
+// be said.
+func (v *View) drawWillNotDo() {
+	if len(v.answer.Sample.Notes) == 0 {
+		return
+	}
+	v.answerBox.Add(widget.NewSeparator())
+	v.answerBox.Add(heading(v.text.T(i18n.RecipeWillNotDo) + " (" +
+		strconv.Itoa(len(v.answer.Sample.Notes)) + ")"))
+	for _, note := range v.answer.Sample.Notes {
+		v.answerBox.Add(detail(note.Where + ": " + note.What))
+	}
 }
 
 // drawProblems lists what is wrong, each at the line it was written on.
 func (v *View) drawProblems() {
-	v.answer.Add(heading(v.text.T(i18n.RecipeHeadingProblems) + " (" +
-		strconv.Itoa(len(v.lastChecked.Problems)) + ")"))
-	for _, found := range v.lastChecked.Problems {
-		v.answer.Add(sentence(v.place(found.Where, found.Line) + found.What))
+	v.answerBox.Add(heading(v.text.T(i18n.RecipeHeadingProblems) + " (" +
+		strconv.Itoa(len(v.answer.Report.Problems)) + ")"))
+	for _, found := range v.answer.Report.Problems {
+		v.answerBox.Add(sentence(v.place(found.Where, found.Line) + found.What))
 		if found.Allowed != "" {
-			v.answer.Add(detail(v.text.T(i18n.RecipeAllowed) + ": " + found.Allowed))
+			v.answerBox.Add(detail(v.text.T(i18n.RecipeAllowed) + ": " + found.Allowed))
 		}
 		if found.Hint != "" {
-			v.answer.Add(detail(v.text.T(i18n.RecipeTry) + ": " + found.Hint))
+			v.answerBox.Add(detail(v.text.T(i18n.RecipeTry) + ": " + found.Hint))
 		}
 	}
 }
@@ -245,26 +316,29 @@ func (v *View) drawProblems() {
 // bare approval of a file the tool misunderstood is the one answer this product
 // must never give.
 func (v *View) drawClean() {
-	v.answer.Add(heading(v.text.T(i18n.RecipeNoObjections)))
-	v.answer.Add(detail(
-		counted(v.lastChecked.Entities, v.text.T(i18n.RecipeEntity)) + ", " +
-			counted(v.lastChecked.Fields, v.text.T(i18n.RecipeField))))
+	v.answerBox.Add(heading(v.text.T(i18n.RecipeNoObjections)))
+	v.answerBox.Add(detail(
+		counted(v.answer.Report.Entities, v.text.T(i18n.RecipeEntity),
+			v.text.T(i18n.RecipeEntities)) + ", " +
+			counted(v.answer.Report.Fields, v.text.T(i18n.RecipeField),
+				v.text.T(i18n.RecipeFields))))
 }
 
-// counted writes a number with the thing it counts, in the singular where there
-// is one of it.
+// counted writes a number with the thing it counts, in whichever form of the
+// word fits it.
 //
-// 🔴 The plural is made by adding a letter, which is English and only English.
-// That is the same shape the screen next door uses and it is a limit rather
-// than a solution: the sixth key here in a language with three plural forms
-// would need the catalogue to carry them, which is what B-184 is about. It is
-// written down so the next language does not discover it by rendering
-// 1 entities.
-func counted(many int, thing string) string {
+// 🔴 Both forms come from the catalogue rather than one of them plus a letter.
+// The letter was what this screen drew until 2026-09-02, and rendering read it
+// back: two entities came out as "2 entitys". English alone breaks that rule,
+// so this was never waiting for a language with three plural forms. What is
+// still waiting for one is B-184, because a language that needs a third form
+// needs a third key and a rule for choosing between them, and that is a
+// mechanism rather than a second word.
+func counted(many int, one, rest string) string {
 	if many == 1 {
-		return "1 " + thing
+		return "1 " + one
 	}
-	return strconv.Itoa(many) + " " + thing + "s"
+	return strconv.Itoa(many) + " " + rest
 }
 
 // drawUnchecked says what this build did not look at.
@@ -273,14 +347,14 @@ func counted(many int, thing string) string {
 // type gives: a clean answer that hides its own blind spots invites trust it
 // has not earned.
 func (v *View) drawUnchecked() {
-	if !v.checked || len(v.lastChecked.Unchecked) == 0 {
+	if !v.checked || len(v.answer.Report.Unchecked) == 0 {
 		return
 	}
-	v.answer.Add(widget.NewSeparator())
-	v.answer.Add(heading(v.text.T(i18n.RecipeUnchecked) + " (" +
-		strconv.Itoa(len(v.lastChecked.Unchecked)) + ")"))
-	for _, skipped := range v.lastChecked.Unchecked {
-		v.answer.Add(detail(skipped.Where + ": " + skipped.What + " - " + skipped.Reason))
+	v.answerBox.Add(widget.NewSeparator())
+	v.answerBox.Add(heading(v.text.T(i18n.RecipeUnchecked) + " (" +
+		strconv.Itoa(len(v.answer.Report.Unchecked)) + ")"))
+	for _, skipped := range v.answer.Report.Unchecked {
+		v.answerBox.Add(detail(skipped.Where + ": " + skipped.What + " - " + skipped.Reason))
 	}
 }
 

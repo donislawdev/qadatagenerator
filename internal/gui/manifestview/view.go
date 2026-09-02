@@ -306,7 +306,7 @@ func (v *View) rendered(screen Screen) fyne.CanvasObject {
 // thousand entries from costing what it would in a plain column.
 func (v *View) table(rows []Row) fyne.CanvasObject {
 	v.hasHighlight, v.tableFocused = false, false
-	entries := newKeyboardTable(
+	entries := parts.NewKeyTable(
 		func() (int, int) { return len(rows), palette.EntryColumns() },
 		func() fyne.CanvasObject { return painted(Line{}) },
 		func(cell widget.TableCellID, object fyne.CanvasObject) {

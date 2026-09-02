@@ -213,4 +213,16 @@ recipe.allowed: allowed
 recipe.try: try
 recipe.unchecked: What was not checked
 recipe.entity: entity
+recipe.entities: entities
 recipe.field: field
+recipe.fields: fields
+recipe.showing: showing
+recipe.of: of
+recipe.row: row
+recipe.rows: rows
+recipe.no-rows: This table would have no rows, because the recipe asks for none.
+recipe.no-fields: This entity has no fields, so its file would have no columns.
+recipe.as-text: This recipe writes the object form, so the file is shown as it would be written rather than as a table.
+recipe.parent-outside: not in this preview
+recipe.refused: This recipe reads correctly and still cannot be run.
+recipe.will-not-do: What this run will not do

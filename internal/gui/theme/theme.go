@@ -330,6 +330,34 @@ var EntryColumnWidths = []float32{280, 240, 220, 340, 140, 720}
 // EntryColumns is how many columns one entry is laid out in.
 func EntryColumns() int { return len(EntryColumnWidths) }
 
+// PreviewColumnMin and PreviewColumnMax bound a column of the recipe preview.
+//
+// # Why bounds rather than a list of widths
+//
+// The manifest table above knows its six columns and can be told what each one
+// holds. A preview cannot: its columns are whatever somebody's recipe declares,
+// named by them and filled by generators this file has never heard of. So the
+// width of each is measured from what it actually holds, by the toolkit, and
+// only the two ends of the range are decided here.
+//
+// # Why both ends are needed
+//
+// Without the lower bound a column of a one character value would be a sliver
+// its own heading does not fit in. Without the upper one a single long value
+// takes the width of the pane and pushes every column after it out of sight,
+// which is the fault this project measured on the screen next door: a layout
+// that fits the sample and grows with the input. Between them a value that does
+// not fit truncates with an ellipsis rather than wrapping, because a preview
+// row is one line by rule.
+//
+// Both are multiples of the spacing module, for the reason recorded with that
+// module: a desktop scales the interface by a factor the user picks, and these
+// land on whole numbers at the common ones.
+const (
+	PreviewColumnMin float32 = 96
+	PreviewColumnMax float32 = 320
+)
+
 // EnvelopeColumns is how many columns of label and value pairs the envelope of
 // a run is split into.
 //
