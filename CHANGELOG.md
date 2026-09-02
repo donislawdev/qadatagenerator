@@ -25,7 +25,7 @@ repository once they are released.
   multi line field normally swallows Tab, which leaves anybody working from the
   keyboard unable to get out of it. Tab now moves on to the next control. A tab
   character cannot be used to indent YAML anyway, so nothing that could have
-  been written is lost, and a tab inside a quoted value is still written as 	.
+  been written is lost, and a tab inside a quoted value is still written as `\t`.
 
 - **A problem in a recipe says which line it is on.** `qadg validate` used to name
   the place a problem belongs to, such as `entities.customer.count`, and leave
