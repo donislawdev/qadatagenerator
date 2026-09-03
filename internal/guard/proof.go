@@ -414,6 +414,7 @@ var Guards = []Guard{
 	{"a generator this build lacks is refused by name and the known ones can be listed", "TestAnUnknownGeneratorIsRefusedAndTheKnownOnesCanBeListed", "internal/adapter/values", ByMutation},
 	{"what this build says it can produce is what it produces, for every generator in every locale", "TestWhatThisBuildSaysItCanProduceIsWhatItProduces", "internal/adapter/values", ByMutation},
 	{"drawing under a limit leaves the shared word list as it was, so the next row draws from the list somebody chose", "TestDrawingUnderALimitLeavesTheSharedListAlone", "internal/adapter/values", ByMutation},
+	{"a draw asked for more digits than the number it returns can hold is capped rather than walking off the end of the arithmetic", "TestADrawWiderThanTheNumbersItReturnsIsCappedRatherThanPanicking", "internal/adapter/values", ByMutation},
 	{"a generator this build cannot fill in the recipe's locale is refused by the plan rather than on the first row", "TestAGeneratorTheLocaleCannotFillIsRefusedByThePlan", "internal/app/generate", ByMutation},
 	{"validate refuses the generator and locale pair that generate refuses, so the two verbs agree about one file", "TestAGeneratorTheLocaleCannotFillIsAProblem", "internal/app/validate", ByMutation},
 	{"the role a field plays comes from its generator and not from the name of the column", "TestTheRoleComesFromTheGeneratorAndOnlyTwoPlayOne", "internal/adapter/values", ByMutation},

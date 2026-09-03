@@ -316,10 +316,32 @@ func (s Source) fromType(req generate.Request) (string, error) {
 	}
 }
 
+// widestDrawn is the most digits a draw can be asked for.
+//
+// # Why a ceiling on something nothing can reach
+//
+// Nothing does reach it, and that is read rather than hoped: the one caller
+// starts at defaultDigits, which is six, and only ever lowers it. The ceiling
+// is here for the reason take.CheckOutput is, which is that the cost of being
+// wrong is out of proportion to the cost of the check. The limit below is built
+// by multiplying, and ten to the nineteenth does not fit in the integer holding
+// it. It would wrap to a negative number and the draw would panic on a bound at
+// or below zero, in the middle of writing somebody's dataset, one value at a
+// time.
+//
+// Eighteen is arithmetic and not a taste: ten to the eighteenth is the largest
+// power of ten an int64 holds. Asking for more gets the widest number this can
+// draw rather than a panic, and how wide a field actually gets is decided by
+// the caller above rather than here.
+const widestDrawn = 18
+
 // wholeNumber draws a number of at most the given number of digits.
 func (s Source) wholeNumber(req generate.Request, digits int) int64 {
 	if digits < 1 {
 		return 0
+	}
+	if digits > widestDrawn {
+		digits = widestDrawn
 	}
 	limit := int64(1)
 	for i := 0; i < digits; i++ {
