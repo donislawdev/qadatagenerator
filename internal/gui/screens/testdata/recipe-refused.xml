@@ -81,6 +81,16 @@
 												<text pos="4,4" size="1008x19">order asks for 7 rows and belongs to customer, which has 4 rows at 5 to 5 each, so the count has to be between 20 and 20. Change the count or the range</text>
 											</widget>
 										</widget>
+										<widget pos="0,108" size="1050x28" type="*widget.Accordion">
+											<widget size="1050x28" type="*widget.Button">
+												<rectangle radius="5" size="1050x28"/>
+												<rectangle size="1050x28"/>
+												<widget pos="32,4" size="306x20" type="*widget.RichText">
+													<text alignment="center" bold size="306x19">What this build can generate, 13 generators</text>
+												</widget>
+												<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
+											</widget>
+										</widget>
 									</container>
 								</widget>
 							</container>

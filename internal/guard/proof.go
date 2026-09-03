@@ -23,52 +23,6 @@ package guard
 // new one added without an entry is still invisible. That is the honest limit
 // of this mechanism and it is written here rather than left to be discovered.
 
-// ProofState is how we know a guard can go red.
-type ProofState string
-
-const (
-	// ByMutation means the mutation list carries an entry that breaks the
-	// protected behaviour, and the named test goes red when it runs. This is
-	// the strongest of the three.
-	ByMutation ProofState = "mutation"
-	// ByProbe means there is no product code under the guard to break. It
-	// reads the tree, compares two lists or checks a document, so the fault
-	// is planted in a fixture inside the test itself.
-	ByProbe ProofState = "probe"
-	// Unproven means nobody has shown this one can fail. Said out loud so
-	// that it does not read like the other two. This list may only shrink.
-	Unproven ProofState = "unproven"
-)
-
-// Guard is one protected behaviour together with the test that protects it.
-type Guard struct {
-	// Behaviour is what stops being true if this guard is removed. One
-	// sentence, in the present tense, about the product rather than about the
-	// test.
-	Behaviour string
-	// Test is the name of the function that goes red.
-	Test string
-	// Package is where that function lives, relative to the module root.
-	Package string
-	// Proof is how we know it can go red.
-	Proof ProofState
-}
-
-// UnprovenCeiling is a ratchet. It may only be lowered.
-//
-// Raising it to make a run green is the same act as editing a golden value for
-// the same reason. Lowering it is ordinary work.
-//
-// It stood at one until the window existed, and the reason was written here
-// rather than left to be rediscovered: the rule that the command line binary
-// never reaches the window could not be broken on purpose while there was no
-// window to reach, so a mutation adding that import reported a broken tree
-// instead of a caught fault. The condition for the return was stated as the
-// day the graphical half exists, that day came with the theme package, and
-// the mutation now compiles and is caught. This is what a condition for a
-// return is for.
-const UnprovenCeiling = 0
-
 // Guards is the register.
 //
 // It is deliberately not every test in the project. A test that checks one
@@ -469,6 +423,13 @@ var Guards = []Guard{
 	{"the files named before a run are the files the run writes", "TestWhatTheScreenSaysItWouldWriteIsWhatTheRunWrites", "internal/gui/recipeview", ByMutation},
 	{"closing the window while a dataset is being written stops the run first", "TestAskingForTheWindowWhileWritingADatasetStopsItFirst", "internal/gui/recipeview", ByMutation},
 	{"a preview is the first rows of what a run writes to a disk", "TestWhatIsWrittenBeginsWithTheRowsThePreviewShowed", "internal/produce", ByMutation},
+
+	// --- what the recipe editor says to somebody who has never seen a recipe --
+	{"the example this screen offers is a recipe that runs and produces rows", "TestTheExampleThisScreenOffersIsARecipeThatRuns", "internal/gui/recipeview", ByMutation},
+	{"the offer of an example belongs to the empty screen, so nothing offers to replace what somebody wrote", "TestTheOfferOfAnExampleIsOnTheEmptyScreenAndNowhereElse", "internal/gui/recipeview", ByMutation},
+	{"the list of what this build can generate is the register, all of it", "TestTheListNamesEveryGeneratorThisBuildHas", "internal/gui/recipeview", ByMutation},
+	{"a generator that cannot be filled in a locale says why on this screen too", "TestTheListSaysWhereAGeneratorCannotBeFilled", "internal/gui/recipeview", ByMutation},
+	{"the list stays open while somebody types, because the answer under it is redrawn on every key press", "TestTheListStaysOpenWhileSomebodyTypes", "internal/gui/recipeview", ByMutation},
 	{"the files a run reports are the files its writer asked for", "TestTheNamesReportedAreTheNamesTheWriterAskedFor", "internal/produce", ByMutation},
 	{"a run of a recipe that fails leaves nothing behind", "TestARunThatFailsLeavesNothingBehind", "internal/produce", ByMutation},
 	{"a second run of a recipe refuses to replace files unless told", "TestASecondRunRefusesToReplaceFilesUnlessItIsTold", "internal/produce", ByMutation},
@@ -898,13 +859,4 @@ var Guards = []Guard{
 		"TestAskingForTheWindowDuringARunStopsItFirst", "internal/gui/takeview", ByMutation},
 	{"a separator that is briefly unusable does not take the open file away, and the next usable one brings it back",
 		"TestASeparatorThatIsBrieflyUnusableDoesNotTakeTheFileAway", "internal/gui/takeview", ByMutation},
-}
-
-// CountByProof returns how many guards are in each state.
-func CountByProof() map[ProofState]int {
-	counts := make(map[ProofState]int, 3)
-	for _, guard := range Guards {
-		counts[guard.Proof]++
-	}
-	return counts
 }

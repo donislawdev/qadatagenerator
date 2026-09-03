@@ -9,11 +9,14 @@ package screens
 
 // recipeStates are the states of the screen a recipe is written on.
 //
-// Split in two for the reason the screen next door was: the list outgrew the
-// hard limit on the length of a function, and the seam that costs nothing is
-// the one between what the screen SAYS and where the keyboard STANDS.
+// Split for the reason the screen next door was: the list outgrew the hard
+// limit on the length of a function, twice, and both seams cost nothing. The
+// first is between what the screen SAYS and where the keyboard STANDS. The
+// second, on 2026-09-03, is between what it says about a RECIPE and what it
+// says about the BUILD, which is the same picture whatever anybody types.
 func recipeStates() []State {
-	return append(recipeStatesOfTheAnswer(), recipeStatesOfTheKeyboard()...)
+	states := append(recipeStatesOfTheAnswer(), recipeStatesOfTheHints()...)
+	return append(states, recipeStatesOfTheKeyboard()...)
 }
 
 // recipeStatesOfTheAnswer are the answers this screen can give.
@@ -81,6 +84,26 @@ func recipeStatesOfTheAnswer() []State {
 	}
 }
 
+// recipeStatesOfTheHints are what this screen says to somebody who has never
+// seen a recipe.
+//
+// Separate from the answers above because it is not one. Every state there is
+// this screen judging what somebody wrote, and this one is the screen
+// describing the build: the same picture whatever is in the field, and the only
+// one that has to be opened before it shows anything.
+func recipeStatesOfTheHints() []State {
+	return []State{
+		{
+			Name: "recipe-generators",
+			Purpose: "the vocabulary this build carries, opened. It is the answer to the " +
+				"question an empty screen used to leave unanswered, and the three " +
+				"generators that cannot be filled in a locale say why rather than saying no",
+			Screen:     0,
+			Generators: true,
+		},
+	}
+}
+
 // recipeStatesOfTheKeyboard are the places the keyboard can stand on it.
 //
 // 🔴 The counts of Tab presses move whenever a screen is added to the window or
@@ -103,7 +126,21 @@ func recipeStatesOfTheKeyboard() []State {
 			Screen:   0,
 			Recipe:   CleanRecipe,
 			Into:     "a-directory",
-			Keyboard: Keyboard{Tabs: 11},
+			Keyboard: Keyboard{Tabs: 12},
+		},
+		{
+			Name: "recipe-focus-example",
+			Purpose: "the keyboard on the offer of a recipe that runs, which is on the empty " +
+				"screen and nowhere else",
+			Screen:   0,
+			Keyboard: Keyboard{Tabs: 7},
+		},
+		{
+			Name: "recipe-focus-generators",
+			Purpose: "the keyboard on the list of what this build can generate, which is a " +
+				"heading somebody opens rather than a wall of names nobody asked for",
+			Screen:   0,
+			Keyboard: Keyboard{Tabs: 8},
 		},
 		{
 			Name:     "recipe-focus-editor",

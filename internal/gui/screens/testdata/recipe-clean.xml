@@ -130,6 +130,16 @@
 											</widget>
 											<rectangle size="0x124"/>
 										</container>
+										<widget pos="0,272" size="1050x28" type="*widget.Accordion">
+											<widget size="1050x28" type="*widget.Button">
+												<rectangle radius="5" size="1050x28"/>
+												<rectangle size="1050x28"/>
+												<widget pos="32,4" size="306x20" type="*widget.RichText">
+													<text alignment="center" bold size="306x19">What this build can generate, 13 generators</text>
+												</widget>
+												<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
+											</widget>
+										</widget>
 									</container>
 								</widget>
 							</container>

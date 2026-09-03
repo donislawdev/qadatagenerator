@@ -276,6 +276,15 @@ const (
 	RecipeChecking    Key = "recipe.checking"
 	RecipeName        Key = "recipe.name"
 
+	// What this screen says to somebody who has never written a recipe: the
+	// offer of one that runs, and the vocabulary this build carries.
+	RecipeExample           Key = "recipe.example"
+	RecipeCanGenerate       Key = "recipe.can-generate"
+	RecipeGenerator         Key = "recipe.generator"
+	RecipeGenerators        Key = "recipe.generators"
+	RecipeNotIn             Key = "recipe.not-in"
+	RecipeNothingToDrawFrom Key = "recipe.nothing-to-draw-from"
+
 	RecipeHeadingRecipe   Key = "recipe.heading.recipe"
 	RecipeHeadingProblems Key = "recipe.heading.problems"
 
@@ -400,6 +409,8 @@ var Keys = []Key{
 	VerifyKindHole, VerifyKindOverzealous, VerifyKindSilent, VerifyKindMissing,
 
 	RecipeEmpty, RecipePlaceholder, RecipeChecking, RecipeName,
+	RecipeExample, RecipeCanGenerate, RecipeGenerator, RecipeGenerators,
+	RecipeNotIn, RecipeNothingToDrawFrom,
 	RecipeHeadingRecipe, RecipeHeadingProblems,
 	RecipeNoObjections, RecipeLine, RecipeAllowed, RecipeTry,
 	RecipeUnchecked, RecipeEntity, RecipeEntities, RecipeField, RecipeFields,

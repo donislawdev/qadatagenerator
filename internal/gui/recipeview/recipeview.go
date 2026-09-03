@@ -106,6 +106,13 @@ type View struct {
 	// blank window had been approved.
 	checked bool
 
+	// The two controls that answer what can be written here rather than what is
+	// written. They belong to the build and not to the recipe, so neither is
+	// rebuilt when the answer changes.
+	example    *parts.Button
+	exampleRow fyne.CanvasObject
+	generators *widget.Accordion
+
 	// asked counts the checks asked for, so that an answer which is no longer
 	// the latest question is dropped rather than drawn.
 	//
@@ -153,6 +160,7 @@ func New(text i18n.Catalogue, check Check, write Write, work background.Work,
 	// standing on the old one, which is unreachable today and one refactor away
 	// from being a bug. Built once, the question cannot arise.
 	view.answerPane = parts.NewKeyScroll(view.answerBox)
+	view.buildHints()
 	return view
 }
 
@@ -303,6 +311,14 @@ func (v *View) draw() {
 		v.drawCrash()
 	case !v.checked:
 		v.answerBox.Add(sentence(v.text.T(i18n.RecipeEmpty)))
+		// 🔴 The button belongs to the empty screen and to no other state. A
+		// control offering to replace what somebody has written is a control
+		// that has to ask first, and one sitting there disabled in every other
+		// state is a line of furniture that reads as text in this theme
+		// anyway (B-208). It leaves the screen when the field stops being
+		// empty, and pressing it is one of the ways that happens, which is why
+		// it puts the keyboard in the field afterwards.
+		v.answerBox.Add(v.exampleRow)
 	case len(v.answer.Report.Problems) > 0:
 		v.drawProblems()
 	case v.answer.Refused != nil:
@@ -317,6 +333,11 @@ func (v *View) draw() {
 	}
 	v.drawWillNotDo()
 	v.drawUnchecked()
+	// Last, and in every state, because it answers what can be written rather
+	// than anything about what is written. Closed until somebody opens it, and
+	// it stays open through the next answer because it is the same widget put
+	// back rather than a new one built.
+	v.answerBox.Add(v.generators)
 	v.answerBox.Refresh()
 	// The bar says what a run would do now, so it moves with every answer.
 	v.drawBar()

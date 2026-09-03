@@ -146,6 +146,10 @@ type State struct {
 	// editor's twin of Reading below, and separate for the same reason: the two
 	// screens are told to wait by different places of work.
 	Checking bool
+	// Generators opens the list of what this build can produce, which is closed
+	// until somebody asks for it and is therefore invisible in every other
+	// state. A list nobody can photograph is a list nobody reviews.
+	Generators bool
 	// Reading leaves the read of the file unanswered, which is the screen a
 	// person looks at while a large one is being walked.
 	//
@@ -439,6 +443,9 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	}
 	if state.Recipe != "" {
 		recipeScreen.SetRecipe(state.Recipe)
+	}
+	if state.Generators {
+		recipeScreen.ShowGenerators()
 	}
 	if state.NeedsManifest {
 		view.Open(data.Promised)

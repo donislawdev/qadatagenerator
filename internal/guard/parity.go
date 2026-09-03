@@ -55,6 +55,22 @@ type Claim struct {
 
 // WindowReach is what a person can do in the window today.
 var WindowReach = map[string]Claim{
+	// 🔴 No help screen, and that stays recorded rather than repaired. What the
+	// register waited for was the first control carrying a hint, and it says so
+	// where it waited: a window with no hints answers nothing. The recipe
+	// editor now carries the vocabulary this build can generate and an example
+	// that runs, which is the same question help answers on the other surface
+	// and the same answer qadg help generators prints there.
+	"help": {
+		Screen: "the recipe editor: the list of what this build can generate, with what each one " +
+			"produces and where it cannot be filled, and a recipe that runs for anybody meeting " +
+			"the format for the first time",
+		Test: "TestTheListNamesEveryGeneratorThisBuildHas",
+	},
+	"-h/--help": {
+		Screen: "the same as the verb above it",
+		Test:   "TestTheListSaysWhereAGeneratorCannotBeFilled",
+	},
 	"--version": {
 		Screen: "the About screen names the four versions this build speaks",
 		Test:   "TestTheScreenCarriesAllFourVersions",
@@ -157,8 +173,6 @@ var WindowReach = map[string]Claim{
 // surfaces, and the ceiling below is that distance written as a number so that
 // it cannot grow by accident.
 var NotYetInWindow = map[string]string{
-	"help":                "waits for the first control carrying a hint. No help screen is planned, and that is recorded, but a window with no hints answers nothing",
-	"-h/--help":           "the same as the verb above it",
 	"--json":              "waits for Save as JSON on the About screen. The reader here is a compliance scanner, so the window has to PRODUCE the file rather than show it",
 	"generate --seed":     "waits for the editor",
 	"generate --format":   "waits for the editor",
@@ -205,7 +219,11 @@ var MediumOnly = map[string]string{
 // says, and this screen edits the recipe. A control for them would be a second
 // place to say one thing, two lines apart, and the window would have to decide
 // which of the two it meant.
-const NotYetCeiling = 6
+// It stood at 6 until 2026-09-03, when the recipe editor gained the first
+// control in this window carrying a hint: the vocabulary this build can
+// generate, and an example that runs. Two went, the verb and its two flags,
+// because the entry for them said in its own words what it was waiting for.
+const NotYetCeiling = 4
 
 // MediumOnlyCeiling caps the exceptions for the same reason, one number lower
 // than nothing: three flags say how the output looks, and a fourth would be a

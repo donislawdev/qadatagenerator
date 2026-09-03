@@ -1,0 +1,153 @@
+<canvas padded size="1342x900">
+	<content>
+		<container pos="8,8" size="1326x884">
+			<container size="220x884">
+				<container size="220x884">
+					<widget size="220x28" type="*parts.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
+						<widget pos="100,4" size="46x20" type="*widget.RichText">
+							<text alignment="center" bold size="46x19">Recipe</text>
+						</widget>
+						<image fillMode="contain" pos="72,4" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
+					</widget>
+					<widget pos="0,36" size="220x28" type="*parts.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
+						<widget pos="50,4" size="118x19" type="*widget.RichText">
+							<text alignment="center" bold size="118x19">Take and corrupt</text>
+						</widget>
+					</widget>
+					<widget pos="0,72" size="220x28" type="*parts.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
+						<widget pos="48,4" size="122x19" type="*widget.RichText">
+							<text alignment="center" bold size="122x19">Manifest browser</text>
+						</widget>
+					</widget>
+					<widget pos="0,108" size="220x28" type="*parts.Button">
+						<rectangle fillColor="button" radius="5" size="220x28"/>
+						<rectangle size="220x28"/>
+						<widget pos="88,4" size="42x19" type="*widget.RichText">
+							<text alignment="center" bold size="42x19">About</text>
+						</widget>
+					</widget>
+				</container>
+			</container>
+			<container pos="228,0" size="1098x884">
+				<container size="1098x884">
+					<container pos="24,24" size="1050x836">
+						<widget size="1050x709" type="*container.Split">
+							<widget size="1050x352" type="*parts.Editor">
+								<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="1046x348"/>
+								<rectangle pos="1,1" radius="5" size="1047x349" strokeColor="inputBorder" strokeWidth="2"/>
+								<widget pos="0,2" size="1050x348" type="*widget.Scroll">
+									<widget size="1050x348" type="*widget.entryContent">
+										<widget size="1050x348" type="*widget.RichText">
+											<text color="disabled" monospace pos="4,2" size="143x16">A recipe, in YAML</text>
+										</widget>
+										<widget size="1050x348" type="*widget.RichText">
+											<text monospace pos="4,2" size="0x16"></text>
+										</widget>
+									</widget>
+								</widget>
+							</widget>
+							<widget pos="0,352" size="1050x5" type="*container.divider">
+								<rectangle fillColor="shadow" size="1050x5"/>
+								<rectangle fillColor="foreground" pos="509,0" size="32x4"/>
+							</widget>
+							<container pos="0,357" size="1050x352">
+								<rectangle size="1050x352" strokeWidth="2"/>
+								<widget size="1050x352" type="*parts.KeyScroll">
+									<container size="1050x352">
+										<widget size="1050x46" type="*widget.Label">
+											<widget size="1050x46" type="*widget.RichText">
+												<text pos="4,4" size="674x19">Write or paste a recipe here. It is checked as you type, and nothing is written to disk until you ask for it.</text>
+											</widget>
+										</widget>
+										<container pos="0,54" size="1050x28">
+											<widget size="164x28" type="*parts.Button">
+												<rectangle fillColor="button" radius="5" size="164x28"/>
+												<rectangle size="164x28"/>
+												<widget pos="4,4" size="156x19" type="*widget.RichText">
+													<text alignment="center" bold size="156x19">Start from an example</text>
+												</widget>
+											</widget>
+										</container>
+										<widget pos="0,90" size="1050x28" type="*widget.Accordion">
+											<widget size="1050x28" type="*widget.Button">
+												<rectangle fillColor="focus" radius="5" size="1050x28"/>
+												<rectangle size="1050x28"/>
+												<widget pos="32,4" size="306x20" type="*widget.RichText">
+													<text alignment="center" bold size="306x19">What this build can generate, 13 generators</text>
+												</widget>
+												<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
+											</widget>
+										</widget>
+									</container>
+								</widget>
+							</container>
+						</widget>
+						<container pos="0,717" size="1050x118">
+							<container size="1050x28">
+								<widget pos="68,0" size="902x28" type="*widget.Entry">
+									<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="898x24"/>
+									<rectangle pos="1,1" radius="5" size="900x25" strokeColor="inputBorder" strokeWidth="2"/>
+									<widget pos="0,2" size="902x24" type="*widget.Scroll">
+										<widget size="902x24" type="*widget.entryContent">
+											<widget size="902x24" type="*widget.RichText">
+												<text color="disabled" pos="4,2" size="151x19">Choose or paste a path</text>
+											</widget>
+											<widget size="902x24" type="*widget.RichText">
+												<text pos="4,2" size="0x19"></text>
+											</widget>
+										</widget>
+									</widget>
+								</widget>
+								<widget size="60x28" type="*widget.Label">
+									<widget size="60x28" type="*widget.RichText">
+										<text pos="4,4" size="52x19">Write to</text>
+									</widget>
+								</widget>
+								<widget pos="979,0" size="70x28" type="*parts.Button">
+									<rectangle fillColor="button" radius="5" size="70x28"/>
+									<rectangle size="70x28"/>
+									<widget pos="4,4" size="62x19" type="*widget.RichText">
+										<text alignment="center" bold size="62x19">Choose...</text>
+									</widget>
+								</widget>
+							</container>
+							<container pos="0,36" size="1050x28">
+								<widget pos="208,0" size="673x28" type="*widget.Label">
+									<widget size="673x28" type="*widget.RichText">
+										<text pos="4,4" size="0x19"></text>
+									</widget>
+								</widget>
+								<widget size="200x28" type="*widget.Check">
+									<circle pos="2,2" size="24x24"/>
+									<image pos="4,4" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+									<image pos="4,4" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+									<text pos="28,0" size="172x28">Replace files already there</text>
+								</widget>
+								<widget pos="890,0" size="159x28" type="*parts.Button">
+									<rectangle fillColor="button" radius="5" size="159x28"/>
+									<rectangle size="159x28"/>
+									<widget pos="4,4" size="151x19" type="*widget.RichText">
+										<text alignment="center" bold color="disabled" size="151x19">Generate this dataset</text>
+									</widget>
+								</widget>
+							</container>
+							<container pos="0,72" size="1050x46">
+								<widget size="1050x46" type="*widget.Label">
+									<widget size="1050x46" type="*widget.RichText">
+										<text pos="4,4" size="404x19">Write a recipe above, and this button writes what it describes.</text>
+									</widget>
+								</widget>
+							</container>
+						</container>
+					</container>
+				</container>
+			</container>
+		</container>
+	</content>
+</canvas>
