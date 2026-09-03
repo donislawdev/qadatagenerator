@@ -94,6 +94,26 @@ var postalRegistry = loadPostalRegistry()
 // postalByCode indexes the registry for lookup by code.
 var postalByCode = indexPostalByCode(postalRegistry)
 
+// loadPostalRegistry turns the embedded list into entries, once, while this
+// package is being loaded.
+//
+// 🔴 What the two panics below cost, written down rather than left to be found,
+// because the expensive half is not the obvious one. They happen before main,
+// so the recover in the command line never sees them, and Go ends a process on
+// a panic nobody recovers with exit code 2. Two is the code for a command that
+// was typed wrong. A pipeline branching on codes is therefore told the least
+// true thing available, which is that the person running it made a typing
+// mistake, and that is a wrong answer on a public contract rather than an ugly
+// message.
+//
+// It stays this way, decided on 2026-09-02 and recorded as B-222. An honest
+// code cannot be bought cheaply here: nothing runs before a package is loaded,
+// so reporting this through the command line would mean building the registry
+// on first use, which is what the paragraph above refuses for a reason that
+// outlives this one. What makes the trade bearable is reach rather than price.
+// The list arrives through go:embed, so a missing directory is a build failure
+// and never a panic, and a damaged file puts out every test in this package at
+// the first run.
 func loadPostalRegistry() []postalEntry {
 	lines, ok := corpus.Load(postalLocale, postalList)
 	if !ok {
