@@ -8,6 +8,7 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/produce"
@@ -208,7 +209,7 @@ func (v *View) runningWords() i18n.Key {
 func (v *View) said() string {
 	switch {
 	case v.failed != nil:
-		return v.failed.Error()
+		return fault.Says(v.failed)
 	case v.ran:
 		return v.wrote()
 	case !v.checked:

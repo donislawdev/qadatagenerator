@@ -11,7 +11,11 @@
 // contract.
 package fault
 
-import "errors"
+import (
+	"errors"
+	"unicode"
+	"unicode/utf8"
+)
 
 // Kind says what class of failure happened. It is deliberately small: a kind
 // exists only when somebody outside the program has to tell two failures
@@ -90,6 +94,10 @@ type Error struct {
 	kind    Kind
 	message string
 	wrapped error
+	// instead is what to do about this one, for the few that know it better
+	// than the surface can work it out. Empty for nearly all of them, which is
+	// what DoInstead below is about.
+	instead string
 }
 
 // New reports a failure that has no underlying cause worth keeping.
@@ -101,6 +109,63 @@ func New(kind Kind, message string) *Error {
 // original stays reachable through errors.Is and errors.As.
 func Wrap(kind Kind, wrapped error, message string) *Error {
 	return &Error{kind: kind, message: message, wrapped: wrapped}
+}
+
+// DoInstead attaches what to do about this failure and hands the failure back,
+// so that it reads as one expression at the place the failure is made.
+//
+// # Why the surface does not work this out on its own, as it does for the rest
+//
+// It answers by kind, and that is right nearly always: a path that cannot be
+// written needs different action from a recipe that cannot be satisfied, and
+// one sentence per kind is the only version that cannot fall out of step with
+// the messages. It is wrong where the kind is too coarse to say anything true.
+// A destination that is already taken is an IO failure, and the sentence for an
+// IO failure asks the reader to check that the path exists and that this
+// account may write there, which is the one thing that is not the matter. A
+// message whose last line contradicts its first is worse than one with no last
+// line.
+//
+// # Why these words may not be a surface's words
+//
+// They travel to every surface, so they have to be true on all of them. The
+// window has no flags and the command line has no tick boxes. What goes here
+// says what to do and not which control does it, and a surface with better
+// words of its own is free to use them.
+func (e *Error) DoInstead(instead string) *Error {
+	e.instead = instead
+	return e
+}
+
+// InsteadOf returns what to do about a failure when the failure carries it, and
+// nothing when it does not, which is the ordinary case.
+func InsteadOf(err error) string {
+	var carrier *Error
+	if errors.As(err, &carrier) {
+		return carrier.instead
+	}
+	return ""
+}
+
+// Says is the whole of what a failure has to say, as one piece of prose.
+//
+// It is for a surface that shows a failure in one place rather than in parts.
+// The command line shows the four parts of a refusal on lines of their own and
+// does not use this. The window shows one label, and a window showing only the
+// message would drop the sentence that message used to carry.
+func Says(err error) string {
+	if err == nil {
+		return ""
+	}
+	instead := InsteadOf(err)
+	if instead == "" {
+		return err.Error()
+	}
+	// The next move is written as a phrase rather than a sentence, because the
+	// command line puts it after a label of its own. A surface joining it to
+	// the message has to make a sentence of it.
+	first, width := utf8.DecodeRuneInString(instead)
+	return err.Error() + ". " + string(unicode.ToUpper(first)) + instead[width:]
 }
 
 func (e *Error) Error() string {

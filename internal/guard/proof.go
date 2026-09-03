@@ -834,6 +834,8 @@ var Guards = []Guard{
 	{"the report of what a run worked out stops growing with the file it describes, and what it leaves out is counted rather than dropped", "TestTheSchemaReportStopsGrowingWithTheFileItDescribes", "internal/cli", ByMutation},
 	{"a file of ordinary width has every one of its columns named, so the threshold never becomes a cut", "TestAFileOfOrdinaryWidthHasEveryColumnNamed", "internal/cli", ByMutation},
 	{"a dry run does not send its reader to a manifest it will not write", "TestADryRunDoesNotSendTheReaderToAManifestItWillNotWrite", "internal/cli", ByMutation},
+	{"a refusal that knows its own next move keeps it, rather than being given the sentence for its kind on top", "TestARefusalThatKnowsTheNextMoveDoesNotGetTheOneForItsKind", "internal/cli", ByMutation},
+	{"the verb that reports problems does not end its own refusal by telling the reader to run it", "TestValidateDoesNotSendTheReaderToValidate", "internal/cli", ByMutation},
 
 	{"one ordered defect asks the register for its mutator once, so the mutator that runs is the one whose existence was checked", "TestOneOrderedDefectAsksTheRegisterForItsMutatorOnce", "internal/app/corrupt", ByMutation},
 

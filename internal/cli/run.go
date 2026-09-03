@@ -557,8 +557,25 @@ func fail(out *streams, err error) int {
 		})
 		return int(code)
 	}
-	out.report(problem{what: err.Error(), instead: whatToDoAbout(kind, out.verb)})
+	out.report(problem{what: err.Error(), instead: nextMoveFor(err, kind, out.verb)})
 	return int(code)
+}
+
+// nextMoveFor is the fourth part of a refusal: what the failure itself says to
+// do about it when it says anything, and the sentence for its kind otherwise.
+//
+// 🔴 A failure gets to answer first because a handful of them know something
+// the kind cannot. A destination that is taken is an IO failure, and the
+// sentence for an IO failure sends the reader to check that the path exists and
+// that this account may write there, which is exactly what is not the matter:
+// the path exists, this account can write there, and something is standing
+// where the run wants to put a file. The reader was told which file to delete
+// on one line and to go and check their permissions on the next.
+func nextMoveFor(err error, kind fault.Kind, verb string) string {
+	if own := fault.InsteadOf(err); own != "" {
+		return own
+	}
+	return whatToDoAbout(kind, verb)
 }
 
 // whatToDoAbout returns the fourth part of a refusal, chosen by the kind the
@@ -610,6 +627,11 @@ func whatToDoAbout(kind fault.Kind, verb string) string {
 		return doAboutIO
 	case fault.Config:
 		switch {
+		// 🔴 The verb that reports problems cannot be sent to the verb that
+		// reports problems. Until 2026-09-03 it was, and on two different
+		// recipes, so it was the rule and not one case.
+		case verb == commandValidate:
+			return doAboutConfigValidate
 		case hasRecipe:
 			return doAboutConfig
 		case readsDocuments:

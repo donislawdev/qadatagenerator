@@ -12,6 +12,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/app/verify"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/domain/response"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
@@ -245,7 +246,7 @@ func (v *View) startReading(read func() func()) {
 
 // unreadable puts a failed read where the document would have been.
 func (v *View) unreadable(err error) {
-	v.show(sentence(v.text.T(i18n.ManifestUnreadable) + " " + err.Error()))
+	v.show(sentence(v.text.T(i18n.ManifestUnreadable) + " " + fault.Says(err)))
 }
 
 // freeze puts the two buttons out of reach for the length of a read.
@@ -274,7 +275,7 @@ func (v *View) thaw() {
 // should.
 func (v *View) pathOf(chosen fyne.URIReadCloser, err error) (string, bool) {
 	if err != nil {
-		v.show(sentence(v.text.T(i18n.ManifestUnreadable) + " " + err.Error()))
+		v.show(sentence(v.text.T(i18n.ManifestUnreadable) + " " + fault.Says(err)))
 		return "", false
 	}
 	if chosen == nil {

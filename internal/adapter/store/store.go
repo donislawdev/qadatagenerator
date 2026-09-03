@@ -115,8 +115,9 @@ func (s *Set) ownName(name, final string) error {
 	}
 	return fault.New(fault.Config, fmt.Sprintf(
 		"this run writes %s twice, because an entity is named after a file the run itself "+
-			"leaves beside the data. One of the two would replace the other and nothing would "+
-			"say so. Rename the entity", name))
+			"leaves beside the data. One of the two would replace the other and nothing "+
+			"would say so", name)).
+		DoInstead("rename the entity")
 }
 
 // marker is the hidden file that says a run holds this name.
@@ -163,8 +164,9 @@ func (s *Set) claim(name, final string) error {
 		return nil
 	}
 	if _, err := os.Stat(final); err == nil {
-		return fault.New(fault.IO, final+" already exists. Delete it, choose another directory, "+
-			"or pass the flag that allows overwriting. Nothing has been written")
+		return fault.New(fault.IO,
+			final+" already exists, and nothing has been written").
+			DoInstead("delete it, choose another directory, or allow replacing")
 	}
 
 	marker := s.marker(name)
@@ -172,8 +174,9 @@ func (s *Set) claim(name, final string) error {
 	if err != nil {
 		if os.IsExist(err) {
 			return fault.New(fault.IO, "another run is writing "+final+" right now, or one was "+
-				"stopped before it could tidy up. Wait for it to finish, or delete "+marker+
-				" if nothing is running. Nothing has been written")
+				"stopped before it could tidy up, and nothing has been written").
+				DoInstead("wait for that run to finish, or delete " + marker +
+					" if nothing is running")
 		}
 		return fault.Wrap(fault.IO, err, "cannot take the name "+final)
 	}

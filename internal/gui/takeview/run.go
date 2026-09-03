@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 )
@@ -351,7 +352,7 @@ func (v *View) outcome() fyne.CanvasObject {
 	case stageFailed:
 		return container.NewVBox(
 			v.told(i18n.TakeResultFailed, theme.WarningIcon()),
-			wrapped(v.failed.Error()),
+			wrapped(fault.Says(v.failed)),
 			wrapped(v.text.T(i18n.TakeResultFailedWhy)),
 		)
 	default:

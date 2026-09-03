@@ -70,8 +70,16 @@ func TestAnExistingFileStopsTheRunUnlessOverwritingIsAllowed(t *testing.T) {
 	if fault.KindOf(err) != fault.IO {
 		t.Errorf("the refusal carries the kind %v and a write failure is %v", fault.KindOf(err), fault.IO)
 	}
-	if !strings.Contains(err.Error(), "Nothing has been written") {
+	if !strings.Contains(err.Error(), "nothing has been written") {
 		t.Errorf("the refusal does not say the data is untouched: %v", err)
+	}
+	// What to do about it travels beside the message rather than inside it
+	// since 2026-09-03, so that a surface reporting this does not add a
+	// sentence of its own about checking permissions, which is the one thing
+	// that is not the matter.
+	if !strings.Contains(fault.InsteadOf(err), "allow replacing") {
+		t.Errorf("the refusal leaves the next move to whoever reports it: %q",
+			fault.InsteadOf(err))
 	}
 
 	allowing := store.New(dir, true)
@@ -155,10 +163,14 @@ func TestASecondRunCannotTakeANameTheFirstIsWriting(t *testing.T) {
 	if kind := fault.KindOf(err); kind != fault.IO {
 		t.Errorf("the refusal is of kind %v rather than an input output failure", kind)
 	}
-	// The message has to name the file to delete, or somebody meeting this
-	// after a killed run has no way forward.
-	if !strings.Contains(err.Error(), ".claim") {
-		t.Errorf("the refusal does not say which file is holding the name: %s", err)
+	// The refusal has to name the file to delete, or somebody meeting this
+	// after a killed run has no way forward. It says so as the next move rather
+	// than inside the message since 2026-09-03, and the reason is the same one:
+	// the sentence a surface adds for a write failure is about permissions, and
+	// this reader has all of them.
+	if !strings.Contains(fault.InsteadOf(err), ".claim") {
+		t.Errorf("the refusal does not say which file is holding the name: %s / %q",
+			err, fault.InsteadOf(err))
 	}
 
 	// A different name is still free, because the claim is per file rather

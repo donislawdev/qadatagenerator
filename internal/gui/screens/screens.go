@@ -23,8 +23,6 @@
 package screens
 
 import (
-	"errors"
-
 	"fyne.io/fyne/v2"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
@@ -34,6 +32,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/domain/response"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/about"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
@@ -521,7 +520,7 @@ func outcomeOf(ran Ran) background.Run {
 		case RanStopped:
 			done(take.Result{}, background.ErrStopped)
 		case RanFailed:
-			done(take.Result{}, errors.New(sampleFailure))
+			done(take.Result{}, fault.New(fault.IO, sampleFailure).DoInstead(sampleFailureInstead))
 		}
 	}
 }
@@ -539,8 +538,14 @@ const (
 	// sampleFailure is a failure of the kind the writer of files reports, in
 	// its own words, so that the state shows the length of message a person
 	// really gets rather than a short one chosen to fit.
-	sampleFailure = "out/contacts.corrupted.csv already exists. Delete it, choose another " +
-		"directory, or tick the setting that allows replacing. Nothing has been written"
+	//
+	// 🔴 It is built the way the writer builds it, with what went wrong and
+	// what to do about it apart, because that is what this state is a picture
+	// of. Until 2026-09-03 the two were one sentence, and the half of it that
+	// this window showed told the reader to pass a flag, which is a thing this
+	// window does not have.
+	sampleFailure        = "out/contacts.corrupted.csv already exists, and nothing has been written"
+	sampleFailureInstead = "delete it, choose another directory, or allow replacing"
 )
 
 // sampleRun is what a finished run left, with as many of the ordered defects

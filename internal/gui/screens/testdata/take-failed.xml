@@ -512,8 +512,8 @@
 												</container>
 												<widget pos="0,35" size="630x46" type="*widget.Label">
 													<widget size="630x46" type="*widget.RichText">
-														<text pos="4,4" size="576x19">out/contacts.corrupted.csv already exists. Delete it, choose another directory, or tick the</text>
-														<text pos="4,23" size="360x19">setting that allows replacing. Nothing has been written</text>
+														<text pos="4,4" size="587x19">out/contacts.corrupted.csv already exists, and nothing has been written. Delete it, choose</text>
+														<text pos="4,23" size="238x19">another directory, or allow replacing</text>
 													</widget>
 												</widget>
 												<widget pos="0,89" size="630x46" type="*widget.Label">

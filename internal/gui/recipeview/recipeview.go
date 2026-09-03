@@ -30,6 +30,7 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/produce"
@@ -328,7 +329,7 @@ func (v *View) draw() {
 // apart here.
 func (v *View) drawRefusal() {
 	v.answerBox.Add(heading(v.text.T(i18n.RecipeRefused)))
-	v.answerBox.Add(sentence(v.answer.Refused.Error()))
+	v.answerBox.Add(sentence(fault.Says(v.answer.Refused)))
 }
 
 // drawCrash says that this build came apart while reading the recipe.
@@ -338,7 +339,7 @@ func (v *View) drawRefusal() {
 // of ours, because that is how the failure was built, so the second line does
 // not have to argue it and can be the one thing a person can actually do.
 func (v *View) drawCrash() {
-	v.answerBox.Add(sentence(v.crashed.Error()))
+	v.answerBox.Add(sentence(fault.Says(v.crashed)))
 	v.answerBox.Add(sentence(v.text.T(i18n.RecipeCrashed)))
 }
 

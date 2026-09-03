@@ -276,11 +276,16 @@ const (
 	//
 	// One sentence per kind rather than per message. What went wrong is already
 	// in the message, and the kind is exactly what decides the next move.
-	doAboutIO      = "check the path exists and that this account may write there"
-	doAboutConfig  = "qadg validate <recipe> reports every problem the recipe has at once"
-	doAboutData    = "the recipe is valid and cannot be satisfied, so change what it asks for"
-	doAboutStopped = "nothing was left behind, so the same command can simply be run again"
-	doAboutRuntime = "this is a defect in the tool rather than in the recipe. Report it with the command that caused it"
+	doAboutIO     = "check the path exists and that this account may write there"
+	doAboutConfig = "qadg validate <recipe> reports every problem the recipe has at once"
+	// The same answer for the verb that is already that command. Telling a
+	// reader who has just run validate to run validate is a fourth part that
+	// costs a line and gives nothing, which is what the one above it does for
+	// every other verb with a recipe.
+	doAboutConfigValidate = "the message above is what this command found in the recipe. Change it there and run this again"
+	doAboutData           = "the recipe is valid and cannot be satisfied, so change what it asks for"
+	doAboutStopped        = "nothing was left behind, so the same command can simply be run again"
+	doAboutRuntime        = "this is a defect in the tool rather than in the recipe. Report it with the command that caused it"
 
 	// The same two, for the verb that has no recipe. A reader damaging a file
 	// somebody sent them has nothing to validate and nothing to rewrite, so the
