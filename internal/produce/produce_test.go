@@ -56,7 +56,7 @@ func wholeRun(t *testing.T, rec recipe.Recipe) map[string][][]string {
 		t.Fatalf("the whole run could not be planned: %v", err)
 	}
 	held := newHeld()
-	writer, err := format.For(held, rec)
+	writer, err := format.For(held, rec, generate.NeverStops{})
 	if err != nil {
 		t.Fatalf("the whole run has no writer: %v", err)
 	}

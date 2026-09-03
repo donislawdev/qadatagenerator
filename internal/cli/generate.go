@@ -242,7 +242,7 @@ func produce(built recipe.Recipe, plan generate.Plan, source values.Source,
 		}
 	}()
 
-	writer, err := format.For(fileMaker{files}, built)
+	writer, err := format.For(fileMaker{files}, built, stop)
 	if err != nil {
 		return nil, err
 	}

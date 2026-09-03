@@ -122,12 +122,14 @@ func Preview(rec recipe.Recipe, values generate.Values, rows int) (Sample, error
 	}
 
 	held := newHeld()
-	writer, err := format.For(held, rec)
+	// Nothing can ask this to stop. A run of ten rows a table is over before
+	// anybody could, and a port that answers `carry on` says that plainly. The
+	// writer is told the same thing as the run, because the one that writes at
+	// the end asks the question itself.
+	writer, err := format.For(held, rec, generate.NeverStops{})
 	if err != nil {
 		return Sample{}, err
 	}
-	// Nothing can ask this to stop. A run of ten rows a table is over before
-	// anybody could, and a port that answers `carry on` says that plainly.
 	if err := generate.Run(cut(plan, rows), rec, values, writer, generate.NeverStops{}); err != nil {
 		return Sample{}, err
 	}

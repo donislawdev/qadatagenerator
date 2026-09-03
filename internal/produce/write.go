@@ -47,7 +47,7 @@ func Write(rec recipe.Recipe, values generate.Values, into string, replace bool,
 
 	set := store.New(into, replace)
 	files := &named{set: set}
-	writer, err := format.For(files, rec)
+	writer, err := format.For(files, rec, stop)
 	if err != nil {
 		return Written{}, err
 	}

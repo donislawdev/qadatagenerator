@@ -402,6 +402,8 @@ var Guards = []Guard{
 	{"a value carrying a delimiter or a quote survives being written", "TestAValueCarryingTheDelimiterOrAQuoteSurvives", "internal/adapter/format", ByMutation},
 	{"a field asked to be unique never repeats a value", "TestAUniqueFieldNeverRepeatsAValue", "internal/adapter/format", ByMutation},
 	{"a uniqueness nothing can satisfy is refused with the number of rows that made it impossible", "TestAUniqueFieldWithTooFewValuesIsRefusedWithTheArithmetic", "internal/adapter/format", ByMutation},
+	{"a file the disk stopped taking is never reported as written, whether the refusal arrives at the flush or while the walk is still going", "TestAFileThatCouldNotBeWrittenIsNeverReportedAsWritten", "internal/adapter/format", ByMutation},
+	{"a run stopped while the objects are being written ends with the stop rather than with a finished file", "TestAStopWhileTheObjectsAreWrittenEndsTheRunRatherThanTheFile", "internal/adapter/format", ByMutation},
 
 	// --- where a value comes from -------------------------------------------
 	{"a Polish surname never reaches a woman in the masculine form", "TestAPolishSurnameNeverGivesAWomanTheMasculineForm", "internal/adapter/values", ByMutation},

@@ -91,7 +91,7 @@ func asCSV(files *held, rec recipe.Recipe) (generate.Writer, error) {
 }
 
 func asJSON(files *held, rec recipe.Recipe) (generate.Writer, error) {
-	return format.NewJSON(files, rec)
+	return format.NewJSON(files, rec, generate.NeverStops{})
 }
 
 // The whole of the first pillar in one test: a recipe goes in, files come out,
