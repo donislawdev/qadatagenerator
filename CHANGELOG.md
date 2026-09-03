@@ -156,6 +156,12 @@ repository once they are released.
   at all and damaging fewer rows changes nothing. It now says to damage fewer
   records or work on a narrower file.
 
+- **The window says it too.** Take and corrupt only warned about this on the
+  command line, so damaging a wide file in the window gave you your files, counts
+  that added up, and a refusal from the Manifest browser days later with nothing
+  connecting the two. The run now reports which files it wrote that this build
+  will not read back, and the screen says so directly under the files it wrote.
+
 - **A recipe whose relation and one of its fields want the same column is now
   refused by every verb that reads it.** An entity that belongs to `customer`
   and also has a field called `customer` cannot be written, because the column

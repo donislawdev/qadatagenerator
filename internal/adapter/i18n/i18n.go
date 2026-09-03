@@ -138,6 +138,8 @@ const (
 	TakeResultMissingWhy     Key = "take.result.missing.why"
 	TakeResultUnpartnered    Key = "take.result.unpartnered"
 	TakeResultUnpartneredWhy Key = "take.result.unpartnered.why"
+	TakeResultOversized      Key = "take.result.oversized"
+	TakeResultOversizedWhy   Key = "take.result.oversized.why"
 	TakeResultStopped        Key = "take.result.stopped"
 	TakeResultStoppedWhy     Key = "take.result.stopped.why"
 	TakeResultFailed         Key = "take.result.failed"
@@ -390,6 +392,7 @@ var Keys = []Key{
 	TakeResultWritten, TakeResultIn, TakeResultOrdered, TakeResultApplied,
 	TakeResultMissing, TakeResultMissingWhy,
 	TakeResultUnpartnered, TakeResultUnpartneredWhy,
+	TakeResultOversized, TakeResultOversizedWhy,
 	TakeResultStopped, TakeResultStoppedWhy,
 	TakeResultFailed, TakeResultFailedWhy,
 	TakeRefusalAllowed, TakeRefusalInstead,

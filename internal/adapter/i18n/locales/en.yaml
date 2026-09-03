@@ -154,6 +154,8 @@ take.result.ordered: Defects ordered
 take.result.applied: Of those, applied
 take.result.missing: Could not be applied
 take.result.missing.why: The manifest names the reason for every one of them. Open it on the Manifest browser screen.
+take.result.oversized: Too large to read back
+take.result.oversized.why: This run wrote a manifest larger than this build reads back, so the Manifest browser and verify will both refuse it. A manifest carries an entry for every record damaged and a description of every column, so damage fewer records or work on a narrower file.
 take.result.unpartnered: Never ordered at all
 take.result.unpartnered.why: Damage to the integrity of a set needs a second record to span, and this file has too few rows for it.
 take.result.stopped: You stopped this run

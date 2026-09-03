@@ -101,6 +101,11 @@ const (
 	RanStopped
 	// RanFailed is a run that ended on a failure.
 	RanFailed
+	// RanOversized is a run that succeeded and left a manifest this build will
+	// not read back. It is a separate state because nothing about it looks
+	// wrong: the files are written, the counts add up, and the only sign is a
+	// sentence this screen did not say until 2026-09-03.
+	RanOversized
 )
 
 // State is one screen in one condition, and how to get there.
@@ -178,7 +183,8 @@ func All() []State {
 // which is the screen with the most of them.
 func takeStates() []State {
 	states := append(takeStatesBeforeARun(), takeStatesOfTheKeyboard()...)
-	return append(states, takeStatesOfARun()...)
+	states = append(states, takeStatesOfARun()...)
+	return append(states, takeStatesOfWhatARunLeft()...)
 }
 
 // takeStatesBeforeARun are the states in which nothing has been written.
@@ -283,6 +289,17 @@ func takeStatesOfARun() []State {
 			Ran:         RanInFlight,
 			Keyboard:    Keyboard{Tabs: 7},
 		},
+	}
+}
+
+// takeStatesOfWhatARunLeft are the states of a run that is over.
+//
+// Split from the two above at the seam the screen itself has: while a run goes
+// on the settings are out of reach and the button stops it, and afterwards the
+// panel is a report of what happened. Splitting on that rather than on a line
+// count keeps each list about one thing.
+func takeStatesOfWhatARunLeft() []State {
+	return []State{
 		{
 			Name:        "take-written",
 			Purpose:     "a run that finished and carried out everything it ordered",
@@ -315,6 +332,15 @@ func takeStatesOfARun() []State {
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 			Ran:         RanFailed,
+		},
+		{
+			Name: "take-oversized",
+			Purpose: "a run that succeeded and left a manifest too large to read back, which " +
+				"nothing else about the screen shows",
+			Screen:      1,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+			Ran:         RanOversized,
 		},
 	}
 }
@@ -528,6 +554,12 @@ func outcomeOf(ran Ran) background.Run {
 			done(take.Result{}, background.ErrStopped)
 		case RanFailed:
 			done(take.Result{}, fault.New(fault.IO, sampleFailure).DoInstead(sampleFailureInstead))
+		case RanOversized:
+			result := sampleRun(sampleOrdered)
+			result.Oversized = []take.Oversize{
+				{Name: manifestjson.Name, Bytes: sampleOversizedBytes},
+			}
+			done(result, nil)
 		}
 	}
 }
@@ -551,6 +583,10 @@ const (
 	// of. Until 2026-09-03 the two were one sentence, and the half of it that
 	// this window showed told the reader to pass a flag, which is a thing this
 	// window does not have.
+	// sampleOversizedBytes is a manifest past what this build reads back. It is
+	// a real size from a measured run rather than a round number: a file of
+	// 260 000 columns produced this on 2026-09-03.
+	sampleOversizedBytes = 52_670_177
 	sampleFailure        = "out/contacts.corrupted.csv already exists, and nothing has been written"
 	sampleFailureInstead = "delete it, choose another directory, or allow replacing"
 )

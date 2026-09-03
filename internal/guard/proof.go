@@ -826,6 +826,12 @@ var Guards = []Guard{
 	// named one of the two things that make a manifest grow.
 	{"the warning about a manifest too large to read back names both causes", "TestTheWarningAboutAManifestTooLargeToReadBackNamesBothCauses", "internal/cli", ByMutation},
 	{"a manifest inside the limit is not warned about", "TestAManifestInsideTheLimitIsNotWarnedAbout", "internal/cli", ByMutation},
+	// 🔴 The same warning, moved to where both surfaces can reach it. It was
+	// worked out on the command line alone, so the window said nothing at all
+	// and somebody damaging a wide file there met the refusal days later on
+	// another screen with nothing connecting it to the run that caused it. The
+	// run now carries the fact and each surface words it.
+	{"a run says which of the files it wrote will not be read back", "TestARunSaysWhichFilesWillNotBeReadBack", "internal/take", ByMutation},
 	{"the vocabulary of generators can be asked for rather than stumbled into, and the list is the register in both directions", "TestHelpNamesEveryGeneratorThisBuildHasAndNothingElse", "internal/cli", ByMutation},
 	{"a generator that cannot be produced in a locale says why, rather than being a bare no", "TestHelpSaysWhereAGeneratorCannotBeProducedAndWhy", "internal/cli", ByMutation},
 	{"the verb that reports problems does not end its own refusal by telling the reader to run it", "TestValidateDoesNotSendTheReaderToValidate", "internal/cli", ByMutation},

@@ -25,12 +25,14 @@
 package take
 
 import (
+	"os"
 	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/infer"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/mutators"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/sourcecsv"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/store"
@@ -290,6 +292,19 @@ type Result struct {
 	Out string
 	// Counts is what the run did, as numbers.
 	Counts damage.Counts
+	// Oversized are the files this run wrote that this build will not read
+	// back, if any. It is a fact rather than a sentence, so that each surface
+	// says it in its own words.
+	Oversized []Oversize
+}
+
+// Oversize is one file a run wrote that is past what this build reads back.
+type Oversize struct {
+	// Name is the file, as it appears in Written.
+	Name string
+	// Bytes is how large it turned out to be. It is the measured size rather
+	// than an estimate, because the file exists by the time this is worked out.
+	Bytes int64
 }
 
 // Corrupt runs the engine over the file and puts everything on the disk, or
@@ -337,10 +352,47 @@ func (o *Opened) Corrupt(settings Settings, described catalog.Catalog,
 		return Result{}, err
 	}
 	committed = true
+	onDisk := append([]string{written}, damage.Files(settings.Manifest)...)
 	return Result{
-		Written: append([]string{written}, damage.Files(settings.Manifest)...),
-		Out:     settings.Out, Counts: run.Counts(),
+		Written:   onDisk,
+		Out:       settings.Out,
+		Counts:    run.Counts(),
+		Oversized: oversized(settings.Out, onDisk),
 	}, nil
+}
+
+// ReadBackLimit is how large a manifest this build reads back, which is the
+// number both surfaces have to state when they say a run wrote one too large.
+//
+// It is repeated here rather than reached for through the reader, so that a
+// screen saying it does not have to know which adapter holds it.
+const ReadBackLimit = manifestjson.MaxSize
+
+// oversized names the files a run wrote that this build will not read back.
+//
+// # Why this is worked out here and not on either surface
+//
+// It was worked out on the command line, which meant the window did not say it
+// at all: a person damaging a wide file in the window got a manifest, no
+// warning, and a refusal from the Manifest browser later with nothing
+// connecting the two. The size is the same fact on both surfaces, so it belongs
+// where both of them already look.
+//
+// A file that cannot be measured is left out rather than guessed at. A run that
+// has just succeeded must not fail on the way out over a warning about itself.
+func oversized(dir string, written []string) []Oversize {
+	var found []Oversize
+	for _, name := range written {
+		if filepath.Ext(name) != ".json" {
+			continue
+		}
+		info, err := os.Stat(filepath.Join(dir, name))
+		if err != nil || info.Size() <= ReadBackLimit {
+			continue
+		}
+		found = append(found, Oversize{Name: name, Bytes: info.Size()})
+	}
+	return found
 }
 
 // start assembles the writer, the engine and the manifest, and says what the

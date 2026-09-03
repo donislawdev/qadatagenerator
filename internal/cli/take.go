@@ -164,9 +164,11 @@ func writeDamaged(out *streams, opened *take.Opened, own *takeFlags,
 		out.note(line)
 	}
 	// This verb is the one that damages somebody else's file, so it is the one
-	// that reaches a manifest too large to read back first.
-	for _, line := range tooLargeToReadBack(result.Out, *own.manifest) {
-		out.note(line)
+	// that reaches a manifest too large to read back first. The run says which
+	// files those are rather than this surface measuring them again, because the
+	// window shows the same thing and neither can import the other.
+	for _, big := range result.Oversized {
+		out.note(tooLargeSentence(big.Name, big.Bytes))
 	}
 	return finish(out, codeOK)
 }

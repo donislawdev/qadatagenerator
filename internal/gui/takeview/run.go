@@ -377,9 +377,22 @@ func (v *View) written() fyne.CanvasObject {
 	lines := []fyne.CanvasObject{
 		wrappedPair(v.text.T(i18n.TakeResultWritten),
 			listOf(v.result.Written)+" "+v.text.T(i18n.TakeResultIn)+" "+v.result.Out),
-		pair(v.text.T(i18n.TakeResultOrdered), strconv.Itoa(counts.Requested)),
-		pair(v.text.T(i18n.TakeResultApplied), strconv.Itoa(counts.Applied)),
 	}
+	// 🔴 Directly under the files, because it is about those files rather than
+	// about the damage, and everything below this line counts defects. A
+	// manifest this build will not read back is the one thing a finished run can
+	// leave behind that shows up nowhere else: the files are written, the counts
+	// add up, and the refusal arrives days later on another screen with nothing
+	// connecting it to the run that caused it. The command line has said so
+	// since it learned to and this screen said nothing at all.
+	if len(v.result.Oversized) > 0 {
+		lines = append(lines,
+			pair(v.text.T(i18n.TakeResultOversized), listOf(namesOf(v.result.Oversized))),
+			v.notice(i18n.TakeResultOversizedWhy))
+	}
+	lines = append(lines,
+		pair(v.text.T(i18n.TakeResultOrdered), strconv.Itoa(counts.Requested)),
+		pair(v.text.T(i18n.TakeResultApplied), strconv.Itoa(counts.Applied)))
 	if missing := counts.Missing(); missing > 0 {
 		lines = append(lines,
 			pair(v.text.T(i18n.TakeResultMissing), strconv.Itoa(missing)),
@@ -391,6 +404,16 @@ func (v *View) written() fyne.CanvasObject {
 			wrapped(v.text.T(i18n.TakeResultUnpartneredWhy)))
 	}
 	return container.NewVBox(lines...)
+}
+
+// namesOf is the files of an oversized list, because the screen names them and
+// the sizes belong to the sentence rather than to the list.
+func namesOf(big []take.Oversize) []string {
+	names := make([]string, 0, len(big))
+	for _, one := range big {
+		names = append(names, one.Name)
+	}
+	return names
 }
 
 // told is a headline with a shape beside it.
