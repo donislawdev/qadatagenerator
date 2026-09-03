@@ -225,11 +225,20 @@ const (
 	// The blank line half was measured while writing the test: a line with
 	// nothing on it is not a record for a comma separated file, so it is
 	// stepped over and never written back.
-	noteRewritten        = "the output is written as UTF-8 with newline line endings and this tool's quoting, whatever the source used, and a line with nothing on it is not a record so it does not come back"
-	noteByteOrderMark    = "the source begins with a byte order mark and the output does not. That is a consequence of writing rather than damage that was ordered, so it is not in the manifest"
-	noteDryRunPolicy     = "the policy draws on "
-	noteDryRunWrites     = "a real run would write "
-	noteDryRunEveryOrder = "A real run writes one manifest entry per ordered defect, applied or not"
+	noteRewritten     = "the output is written as UTF-8 with newline line endings and this tool's quoting, whatever the source used, and a line with nothing on it is not a record so it does not come back"
+	noteByteOrderMark = "the source begins with a byte order mark and the output does not. That is a consequence of writing rather than damage that was ordered, so it is not in the manifest"
+	// 🔴 The three parts of the line that ends a shortened list. The count and
+	// the noun come first from the counter beside it, then what happened to
+	// them, then where the whole of it is. The last part is the one that
+	// differs by run: a dry run writes no manifest, so telling its reader to
+	// open one would be a message whose last line contradicts its first, which
+	// is a family of failure this project has already paid for.
+	noteRestWorkedOut            = " worked out the same way and not named here. "
+	noteRestInManifest           = "The manifest names every one."
+	noteRestInManifestOfARealRun = "Run this without --dry-run and the manifest names every one."
+	noteDryRunPolicy             = "the policy draws on "
+	noteDryRunWrites             = "a real run would write "
+	noteDryRunEveryOrder         = "A real run writes one manifest entry per ordered defect, applied or not"
 
 	// The two ways a run ends because something outside it said so. Both say
 	// what is on the disk afterwards, because that is the only thing the reader

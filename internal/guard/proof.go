@@ -830,6 +830,9 @@ var Guards = []Guard{
 	{"damaging a file where it sits leaves the source alone", "TestDamagingAFileInItsOwnDirectoryLeavesTheSourceAlone", "internal/cli", ByMutation},
 	{"the evidence for every column reaches the manifest", "TestTheManifestCarriesTheEvidenceForEveryColumn", "internal/cli", ByMutation},
 	{"the same file and seed give the same damage", "TestTheSameFileAndSeedGiveTheSameDamage", "internal/cli", ByMutation},
+	{"the report of what a run worked out stops growing with the file it describes, and what it leaves out is counted rather than dropped", "TestTheSchemaReportStopsGrowingWithTheFileItDescribes", "internal/cli", ByMutation},
+	{"a file of ordinary width has every one of its columns named, so the threshold never becomes a cut", "TestAFileOfOrdinaryWidthHasEveryColumnNamed", "internal/cli", ByMutation},
+	{"a dry run does not send its reader to a manifest it will not write", "TestADryRunDoesNotSendTheReaderToAManifestItWillNotWrite", "internal/cli", ByMutation},
 
 	// The mode itself, which both surfaces run one of.
 	//

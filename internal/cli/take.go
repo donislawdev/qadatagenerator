@@ -139,7 +139,7 @@ func corruptFile(out *streams, path string, own *takeFlags) int {
 	}
 	defer func() { _ = opened.Close() }()
 
-	sayWhatWasWorkedOut(out, opened)
+	sayWhatWasWorkedOut(out, opened, *own.dryRun)
 	if *own.dryRun {
 		sayWhatWouldHappen(out, opened, own, described)
 		return finish(out, codeOK)
@@ -267,35 +267,88 @@ func refusalOf(refusal take.Refusal) problem {
 	}
 }
 
+// columnsListed is how many worked out columns get a line of their own before
+// the log starts counting instead.
+//
+// # Why there is a number here at all
+//
+// There was not one, and the reason written down was that a column nothing was
+// recognised in is exactly the one somebody needs to know about. That reason is
+// true of a file with twenty columns and false of a file with five thousand,
+// where nobody reads any of it. Measured 2026-09-02 with tools/kanal_i_pamiec.py:
+// a file of 5000 columns and 86 670 bytes puts 804 476 bytes on the log channel
+// in 5005 lines, nine times the file being described. At 500 columns it is
+// 80 475 bytes and at 50 it is 8524, which is a screen and a bit.
+//
+// So the cut is between a list somebody reads and a list nobody does, and fifty
+// is the top of the first. Nothing is dropped: what is not named is counted,
+// and the manifest carries every column either way. Recorded as DEC-200.
+const columnsListed = 50
+
 // sayWhatWasWorkedOut puts the guesses on the log channel, where somebody
 // running this interactively sees them without opening the manifest.
 //
-// The manifest is where they live for good. This is the same information for
-// the person watching, and it is deliberately not shortened: a column nothing
-// was recognised in is exactly the one they need to know about, because that is
-// where the damage they ordered will have had nothing to work with.
-func sayWhatWasWorkedOut(out *streams, opened *take.Opened) {
+// The manifest is where they live for good, and it holds all of them however
+// many there are. This is the same information for the person watching, up to
+// the point where there is more of it than a person watching can read.
+func sayWhatWasWorkedOut(out *streams, opened *take.Opened, dryRun bool) {
 	table := opened.Table()
 	out.note(table.Entity + ": " + counted(table.Rows, "row") + ", " +
 		counted(len(table.Columns), "column") + ", nothing declared what any of them holds")
 	shape := opened.Shape()
-	for _, finding := range shape.Findings() {
+	findings := shape.Findings()
+	for _, finding := range findings[:named(len(findings))] {
 		out.detail(finding.Field + " taken for " + describeFinding(finding) + ", because " +
 			finding.Basis)
 	}
+	sayHowManyMore(out, len(findings), "column", dryRun)
 	// A relation is what damage contradicting a neighbouring column stands on,
 	// so it is said here beside the columns rather than left to the manifest.
 	// Somebody watching a run decide things about their file is the reader most
 	// able to say that a relation is wrong.
-	for _, relation := range shape.Relations() {
+	//
+	// It is counted separately from the columns rather than sharing one budget
+	// with them, because the two answer different questions and a file with many
+	// of one would otherwise hide the other entirely.
+	relations := shape.Relations()
+	for _, relation := range relations[:named(len(relations))] {
 		out.detail(relation.Field + " taken to agree with " + relation.With + " on " +
 			string(relation.Kind) + ", because " + relation.Basis)
 	}
+	sayHowManyMore(out, len(relations), "relation", dryRun)
 	if opened.HadByteOrderMark() {
 		out.warn(noteByteOrderMark)
 	}
 	out.detail(noteRewritten)
 	out.note(noteNotInferred)
+}
+
+// named is how many of a list get a line to themselves.
+func named(all int) int {
+	if all > columnsListed {
+		return columnsListed
+	}
+	return all
+}
+
+// sayHowManyMore counts what was left out, and says nothing at all when nothing
+// was.
+//
+// # Why a dry run is told something different
+//
+// It writes no manifest, so sending its reader to one would be the last line of
+// a message contradicting the line above it. What that reader can be told is
+// what to run to get the whole list, which is what somebody in the middle of a
+// dry run is deciding anyway.
+func sayHowManyMore(out *streams, all int, what string, dryRun bool) {
+	if all <= columnsListed {
+		return
+	}
+	where := noteRestInManifest
+	if dryRun {
+		where = noteRestInManifestOfARealRun
+	}
+	out.detail(counted(all-columnsListed, "more "+what) + noteRestWorkedOut + where)
 }
 
 // describeFinding names what a column was taken to hold, in words.
