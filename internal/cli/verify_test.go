@@ -239,3 +239,69 @@ func TestTheReportAlwaysSaysWhatItCouldNotSee(t *testing.T) {
 		t.Errorf("a clean report does not say what it could not see: %q", got.log)
 	}
 }
+
+// A file past the size this build reads back is refused with a move the reader
+// can actually make.
+//
+// 🔴 Both halves of this were live on 2026-09-03 and both are the family B-206
+// named. The manifest carried no move of its own, so it inherited the one for a
+// Data failure: change the file or the flags describing it. The file is one a
+// run wrote and no flag decides how large a manifest comes out, so the sentence
+// sent the reader looking for a control that does not exist. The response
+// record was worse. It carried a move inside its message and then took the
+// inherited one on top, so the reader was told to split the run and, on the
+// next line, to change the flags describing it.
+//
+// The files here are made by length rather than by content, because the
+// refusal is decided on the length and never reads them.
+func TestAFileTooLargeToReadBackIsRefusedWithAMoveThatCanBeMade(t *testing.T) {
+	for _, given := range []struct {
+		what     string
+		oversize func(t *testing.T, into string) (manifest, response string)
+		saying   string
+	}{
+		{"a manifest", func(t *testing.T, into string) (string, string) {
+			return tooLarge(t, into, "manifest.json"),
+				responseFor(t, into, `{"spec_version":"0.1","rows":[{"row":1,"verdict":"rejected"}]}`)
+		}, "fewer columns"},
+		{"a response record", func(t *testing.T, into string) (string, string) {
+			return manifestFor(t, into, catalog.Rejection, catalog.Hard),
+				tooLarge(t, into, "response.json")
+		}, "smaller datasets"},
+	} {
+		t.Run(given.what, func(t *testing.T) {
+			into := t.TempDir()
+			manifest, response := given.oversize(t, into)
+			got := run(commandVerify, manifest, response)
+
+			if got.code != int(codeData) {
+				t.Fatalf("%s over the limit ended with %d, want %d. It said %q",
+					given.what, got.code, codeData, got.log)
+			}
+			if strings.Contains(got.log, doAboutDataCorrupt) {
+				t.Errorf("the refusal for %s inherited the move for its kind, which points at "+
+					"flags that do not decide a file's size: %q", given.what, got.log)
+			}
+			if !strings.Contains(got.log, given.saying) {
+				t.Errorf("the refusal for %s carries no move the reader can make: %q",
+					given.what, got.log)
+			}
+		})
+	}
+}
+
+// tooLarge writes a file one byte past what this build reads back, by length
+// rather than by content, and hands back its path.
+func tooLarge(t *testing.T, into, name string) string {
+	t.Helper()
+	path := filepath.Join(into, name)
+	file, err := os.Create(path)
+	if err != nil {
+		t.Fatalf("cannot make the oversized file this test needs: %v", err)
+	}
+	defer func() { _ = file.Close() }()
+	if err := file.Truncate(manifestjson.MaxSize + 1); err != nil {
+		t.Fatalf("cannot give the oversized file its length: %v", err)
+	}
+	return path
+}

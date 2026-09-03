@@ -2,11 +2,12 @@ package manifestjson
 
 import (
 	"encoding/json"
-	"io"
+	"errors"
 	"os"
 	"strconv"
 	"strings"
 
+	"github.com/donislawdev/qadatagenerator/internal/adapter/boundedfile"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
@@ -102,14 +103,27 @@ func bytesOf(path string) ([]byte, error) {
 	}
 	defer func() { _ = handle.Close() }()
 
-	raw, err := io.ReadAll(io.LimitReader(handle, MaxSize+1))
-	if err != nil {
-		return nil, fault.Wrap(fault.IO, err, "cannot read the manifest "+path)
-	}
-	if len(raw) > MaxSize {
+	raw, err := boundedfile.Read(handle, MaxSize)
+	switch {
+	case errors.Is(err, boundedfile.ErrTooLarge):
+		// # Why this refusal carries its own next move
+		//
+		// The sentence for a Data failure sends the reader to change the file
+		// or the flags describing it. Neither is the move here: the file is one
+		// a run wrote, and no flag decides how large a manifest comes out. A
+		// manifest carries a description of every column of the dataset it came
+		// from, so the width of that dataset is the thing that can differ.
 		return nil, fault.New(fault.Data, path+" is larger than "+
 			strconv.Itoa(MaxSize/(1024*1024))+" MB, which is as much of a manifest as this build "+
-			"reads back at once")
+			"reads back at once").
+			DoInstead("compare against a manifest from a run over fewer columns, because a " +
+				"manifest describes every column of the dataset it came from")
+	case errors.Is(err, boundedfile.ErrChangedWhileRead):
+		return nil, fault.New(fault.Data, path+" grew past "+
+			strconv.Itoa(MaxSize/(1024*1024))+" MB while it was being read, so something else is "+
+			"writing it. Compare against a manifest that a run has finished writing")
+	case err != nil:
+		return nil, fault.Wrap(fault.IO, err, "cannot read the manifest "+path)
 	}
 	return raw, nil
 }

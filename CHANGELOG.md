@@ -117,6 +117,15 @@ repository once they are released.
 
 ### Changed
 
+- **Reading a manifest or a response record costs about half what it did, and
+  turning away one that is too large costs almost nothing.** Both files are read
+  in one piece and both are bounded at 48 MB, which has not changed. What
+  changed is that the length is now asked for before the buffer is made, so a
+  file just under the limit is held once instead of twice. Measured on a 38.6 MB
+  manifest, five runs each: a peak of 88.8 MB before and 46.6 MB after. A file
+  past the limit is refused on its length without being read at all, which took
+  the refusal from 126.6 MB to 15.6 MB.
+
 - **The window is built on Fyne 2.8.1.** A patch release of the toolkit the
   window uses, carrying its own performance work and fixes. What you see from
   here is the version `qadg --license` and the About screen report, and two
@@ -131,6 +140,21 @@ repository once they are released.
   dataset.
 
 ### Fixed
+
+- **A file too large to read back no longer sends you looking for a flag that
+  does not exist.** `qadg verify` refused an oversized manifest and then advised
+  changing the file or the flags describing it. The file is one a run wrote, and
+  no flag decides how large a manifest comes out. It now says to compare against
+  a manifest from a run over fewer columns. The refusal for an oversized
+  response record carried two pieces of advice, the second contradicting the
+  first, and now carries one.
+
+- **The warning about a manifest too large to read back names both of the things
+  that make one grow.** It told you to damage fewer rows. A manifest also
+  describes every column of the file, whether anything in that column was
+  damaged or not, so a wide file produces a large manifest with no entries in it
+  at all and damaging fewer rows changes nothing. It now says to damage fewer
+  records or work on a narrower file.
 
 - **A recipe whose relation and one of its fields want the same column is now
   refused by every verb that reads it.** An entity that belongs to `customer`

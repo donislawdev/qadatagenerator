@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/donislawdev/qadatagenerator/internal/adapter/boundedfile"
 	"github.com/donislawdev/qadatagenerator/internal/domain/response"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/version"
@@ -30,9 +31,19 @@ import (
 //
 // The number comes from a measurement rather than from a feeling: a record
 // carrying a verdict, a code and a message for one row runs about 120 bytes,
-// so this holds a run of roughly four hundred thousand rows. Beyond that the
-// answer is not a bigger number, it is reading the file a row at a time, and
-// that is recorded as B-145 with the measurement that would call for it.
+// so this holds a run of roughly four hundred thousand rows.
+//
+// # What was measured about reading a row at a time, and why it is not done
+//
+// This comment used to say that beyond the limit the answer was to read the
+// file a row at a time. That was written without a measurement and it is
+// wrong. Measured on a 38.6 MB document, five runs each with the first
+// discarded: reading it whole peaks at 46.6 MB, a json.Decoder walking the
+// same file peaks at 136.6 MB, and walking it token by token to skip what is
+// not wanted peaks at the same 136.6 MB. The decoder buffers the value it is
+// working through, so streaming this shape of file costs three times what
+// holding it costs. Raising the limit is therefore a question about memory,
+// not a question waiting on a streaming reader.
 const MaxSize = 48 * 1024 * 1024
 
 // document is the shape on disk, kept apart from the model so that a change to
@@ -62,18 +73,29 @@ func Load(path string) (response.Record, error) {
 	return read(handle, path)
 }
 
-func read(from io.Reader, path string) (response.Record, error) {
-	// One byte past the limit, so that a file exactly at it is accepted and a
-	// file over it is known to be over rather than guessed at.
-	raw, err := io.ReadAll(io.LimitReader(from, MaxSize+1))
-	if err != nil {
-		return response.Record{}, fault.Wrap(fault.IO, err, "cannot read the response record "+path)
-	}
-	if len(raw) > MaxSize {
+func read(from *os.File, path string) (response.Record, error) {
+	raw, err := boundedfile.Read(from, MaxSize)
+	switch {
+	case errors.Is(err, boundedfile.ErrTooLarge):
+		// # Why the next move left the message
+		//
+		// It used to be the second sentence of the message, which put two next
+		// moves in front of the reader: this one, and the one the command line
+		// adds for a Data failure, telling them to change the file or the flags
+		// describing it. The second contradicts the first, and no flag decides
+		// how large a record somebody else's application writes. One move, in
+		// the place the surfaces already look for it.
 		return response.Record{}, fault.New(fault.Data, path+" is larger than "+
 			strconv.Itoa(MaxSize/(1024*1024))+" MB, which is as much of a response record as this "+
-			"build reads at once. Split the run into smaller datasets, or report the rows that "+
-			"matter rather than every row")
+			"build reads at once").
+			DoInstead("split the run into smaller datasets, or report the rows that matter " +
+				"rather than every row")
+	case errors.Is(err, boundedfile.ErrChangedWhileRead):
+		return response.Record{}, fault.New(fault.Data, path+" grew past "+
+			strconv.Itoa(MaxSize/(1024*1024))+" MB while it was being read, so something else is "+
+			"writing it. Compare against a record the application has finished writing")
+	case err != nil:
+		return response.Record{}, fault.Wrap(fault.IO, err, "cannot read the response record "+path)
 	}
 
 	var read document

@@ -774,6 +774,24 @@ var Guards = []Guard{
 	// itself, which is said where the refusal is built.
 	{"a file replaced between the two readings is refused", "TestAFileReplacedBetweenTheTwoReadingsIsRefused", "internal/adapter/sourcecsv", ByMutation},
 
+	// 🔴 Reading a file within a limit, weighed rather than read.
+	//
+	// Both of these are about memory, so both are proved by weighing what the
+	// run allocates. A guard reading the contents back would pass either way,
+	// because what changed is not what comes out of the reader but what it
+	// costs to get it. Measured on a 38.6 MB manifest: 88.8 MB peak when the
+	// buffer grew by doubling against 46.6 MB when the length was asked for
+	// first, and 126.6 MB to refuse an oversized file against 15.6 MB once the
+	// refusal was decided on the length.
+	//
+	// The limit each caller carries is untouched by both. What changed is what
+	// staying under it, and being turned away by it, cost.
+	{"an oversized file is refused on its length rather than on its contents", "TestAnOversizedFileIsRefusedWithoutBeingRead", "internal/adapter/boundedfile", ByMutation},
+	{"an accepted file is held once rather than several times over", "TestAnAcceptedFileCostsItsOwnSizeRatherThanSeveral", "internal/adapter/boundedfile", ByMutation},
+	// A length is an optimisation and never the guard, so a source that cannot
+	// state one is still bounded by the read itself.
+	{"a source that cannot state its length is still bounded", "TestASourceThatCannotStateItsLengthIsStillBounded", "internal/adapter/boundedfile", ByMutation},
+
 	// The walk and the writer of a dataset that was read.
 	{"a run reading a file can be stopped between rows", "TestARunStoppedBetweenRowsLeavesTheTableUnfinished", "internal/app/corrupt", ByMutation},
 	{"a writer for a read dataset takes one table", "TestASecondTableIsRefused", "internal/adapter/format", ByMutation},
@@ -796,6 +814,18 @@ var Guards = []Guard{
 	{"a file of ordinary width has every one of its columns named, so the threshold never becomes a cut", "TestAFileOfOrdinaryWidthHasEveryColumnNamed", "internal/cli", ByMutation},
 	{"a dry run does not send its reader to a manifest it will not write", "TestADryRunDoesNotSendTheReaderToAManifestItWillNotWrite", "internal/cli", ByMutation},
 	{"a refusal that knows its own next move keeps it, rather than being given the sentence for its kind on top", "TestARefusalThatKnowsTheNextMoveDoesNotGetTheOneForItsKind", "internal/cli", ByMutation},
+	// 🔴 The same family, found where the report of 2026-09-02 said to look and
+	// left standing there. A file past the size this build reads back is the
+	// one refusal whose kind sends the reader to flags, and no flag decides how
+	// large a manifest a run writes or how large a record somebody else's
+	// application writes. The response record was carrying a move inside its
+	// message as well, so the reader got two, the second contradicting the
+	// first.
+	{"a file too large to read back is refused with a move the reader can make", "TestAFileTooLargeToReadBackIsRefusedWithAMoveThatCanBeMade", "internal/cli", ByMutation},
+	// The warning raised when a run writes one, which had no guard at all and
+	// named one of the two things that make a manifest grow.
+	{"the warning about a manifest too large to read back names both causes", "TestTheWarningAboutAManifestTooLargeToReadBackNamesBothCauses", "internal/cli", ByMutation},
+	{"a manifest inside the limit is not warned about", "TestAManifestInsideTheLimitIsNotWarnedAbout", "internal/cli", ByMutation},
 	{"the vocabulary of generators can be asked for rather than stumbled into, and the list is the register in both directions", "TestHelpNamesEveryGeneratorThisBuildHasAndNothingElse", "internal/cli", ByMutation},
 	{"a generator that cannot be produced in a locale says why, rather than being a bare no", "TestHelpSaysWhereAGeneratorCannotBeProducedAndWhy", "internal/cli", ByMutation},
 	{"the verb that reports problems does not end its own refusal by telling the reader to run it", "TestValidateDoesNotSendTheReaderToValidate", "internal/cli", ByMutation},

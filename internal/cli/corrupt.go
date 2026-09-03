@@ -227,9 +227,18 @@ func tooLargeToReadBack(dir, form string) []string {
 		if err != nil || info.Size() <= manifestjson.MaxSize {
 			continue
 		}
+		// 🔴 Both of the things that make a manifest grow are named, because
+		// only one of them was and it is not the one that reaches this line
+		// first. A manifest carries an entry for every record damaged and a
+		// description of every column of the file. Measured on 2026-09-03: a
+		// file of 200 000 columns and three rows produced a manifest of 38.6 MB
+		// with not one entry in it, so a reader told only to damage fewer rows
+		// was being pointed away from the whole of the cause.
 		lines = append(lines, fmt.Sprintf(
 			"%s is %d bytes, and this build reads a manifest of at most %d, so verify and the "+
-				"window will refuse it. Damage fewer rows, or split the run",
+				"window will refuse it. A manifest carries an entry for every record damaged "+
+				"and a description of every column, so damage fewer records or work on a "+
+				"narrower file",
 			name, info.Size(), manifestjson.MaxSize))
 	}
 	return lines
