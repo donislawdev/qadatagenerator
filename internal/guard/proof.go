@@ -835,6 +835,8 @@ var Guards = []Guard{
 	{"a file of ordinary width has every one of its columns named, so the threshold never becomes a cut", "TestAFileOfOrdinaryWidthHasEveryColumnNamed", "internal/cli", ByMutation},
 	{"a dry run does not send its reader to a manifest it will not write", "TestADryRunDoesNotSendTheReaderToAManifestItWillNotWrite", "internal/cli", ByMutation},
 
+	{"one ordered defect asks the register for its mutator once, so the mutator that runs is the one whose existence was checked", "TestOneOrderedDefectAsksTheRegisterForItsMutatorOnce", "internal/app/corrupt", ByMutation},
+
 	// The mode itself, which both surfaces run one of.
 	//
 	// 🔴 The second of these guards a failure that has no compiler behind it.

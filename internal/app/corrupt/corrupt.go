@@ -117,11 +117,22 @@ func (e Engine) Apply(order Order, field recipe.FieldInfo, value string, at seed
 		return value, undescribed(order)
 	}
 
-	if kind, why := e.refuse(entry, field); kind != "" {
+	// 🔴 Asked for once, here, and handed to the refusal below rather than
+	// asked for again after it.
+	//
+	// It used to be looked up twice, and the second one dropped the answer to
+	// whether there was anything to find. That was safe only because the
+	// refusal had asked the same question first, under the identifier of the
+	// entry rather than of the order, and those two are the same string only
+	// because the catalog holds every entry under its own identifier. That is a
+	// true invariant of a different package, relied on here without being
+	// named. One lookup removes the reliance and takes a second search out of
+	// the path walked once per ordered defect per row.
+	damage, implemented := e.mutators.Lookup(order.Mutator)
+	if kind, why := e.refuse(entry, field, implemented); kind != "" {
 		return value, refused(entry, order, kind, why)
 	}
 
-	damage, _ := e.mutators.Lookup(order.Mutator)
 	outcome := damage.Damage(mutator.Target{
 		Value:    value,
 		Field:    field,
@@ -152,13 +163,21 @@ func (e Engine) schemeOf(field recipe.FieldInfo) provider.Provider {
 	return found
 }
 
-// refuse asks the four questions that are answered from the entry rather than
-// from the mutator, and returns the kind and the sentence for the manifest.
+// refuse asks the four questions answered before any damage runs, and returns
+// the kind and the sentence for the manifest.
+//
+// Three of them are answered from the entry. The first is answered by the
+// caller, which has already asked the register for the mutator and hands the
+// answer in rather than having this ask the same question again. That is not
+// tidiness: the mutator that runs is then the one whose existence was checked,
+// rather than a second one found under a second identifier that happens to be
+// the same string.
 //
 // An empty kind means nothing here refuses, which is the one answer that lets
 // the caller go on to the mutator.
-func (e Engine) refuse(entry catalog.Entry, field recipe.FieldInfo) (manifest.FailureKind, string) {
-	if _, implemented := e.mutators.Lookup(entry.ID); !implemented {
+func (e Engine) refuse(entry catalog.Entry, field recipe.FieldInfo,
+	implemented bool) (manifest.FailureKind, string) {
+	if !implemented {
 		return manifest.Unimplemented,
 			"this build carries no implementation of this damage, only its description"
 	}

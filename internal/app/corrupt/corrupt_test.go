@@ -91,6 +91,42 @@ func numeric() recipe.FieldInfo { return recipe.FieldInfo{Name: "amount", Type: 
 
 func able() capability.Set { return capability.NewSet(capability.SchemaFieldType) }
 
+// counting is a register that remembers how often it was asked.
+type counting struct {
+	held  registry
+	asked int
+}
+
+func (c *counting) Lookup(id catalog.ID) (mutator.Mutator, bool) {
+	c.asked++
+	return c.held.Lookup(id)
+}
+
+// 🔴 The engine asked the register twice for one ordered defect, and the second
+// ask threw away the answer to whether there was anything to find. It was safe,
+// and only because the first ask had happened inside the refusal under the
+// identifier of the catalog entry while the second used the identifier of the
+// order. Those are the same string because the catalog holds every entry under
+// its own identifier, which is true, is guarded, and belongs to another package
+// entirely.
+//
+// So this holds the number rather than the reasoning. One ask means the mutator
+// that runs is the one whose existence was checked, and it takes a second
+// search out of the path walked once per ordered defect per row.
+func TestOneOrderedDefectAsksTheRegisterForItsMutatorOnce(t *testing.T) {
+	register := &counting{held: registry{damageID: stated{damageID, mutator.Done("n/a")}}}
+	engine := corrupt.New(described(t, entry()), register, noSchemes{}, able())
+
+	value, defect := engine.Apply(order(), numeric(), "1250", seed.Coordinate{})
+	if !defect.Applied || value != "n/a" {
+		t.Fatalf("the damage did not happen, so this says nothing about the asking: %s",
+			defect.FailureReason)
+	}
+	if register.asked != 1 {
+		t.Errorf("one ordered defect asked the register %d times", register.asked)
+	}
+}
+
 func TestDamageThatHappenedIsRecordedWithBothValues(t *testing.T) {
 	engine := corrupt.New(described(t, entry()),
 		registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able())
