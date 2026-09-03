@@ -74,6 +74,20 @@ func Load(path string) (response.Record, error) {
 }
 
 func read(from *os.File, path string) (response.Record, error) {
+	raw, err := bytesOf(from, path)
+	if err != nil {
+		return response.Record{}, err
+	}
+	return decode(raw, path)
+}
+
+// bytesOf reads the record whole, within the limit this build reads at once.
+//
+// Split out of read for the same reason the manifest reader split its own: read
+// says what a response record has to be, and this says how much of a file is
+// taken in. Two subjects in one function is also what pushed it past the hard
+// length limit the day each of its refusals gained a next move of its own.
+func bytesOf(from *os.File, path string) ([]byte, error) {
 	raw, err := boundedfile.Read(from, MaxSize)
 	switch {
 	case errors.Is(err, boundedfile.ErrTooLarge):
@@ -85,19 +99,24 @@ func read(from *os.File, path string) (response.Record, error) {
 		// describing it. The second contradicts the first, and no flag decides
 		// how large a record somebody else's application writes. One move, in
 		// the place the surfaces already look for it.
-		return response.Record{}, fault.New(fault.Data, path+" is larger than "+
+		return nil, fault.New(fault.Data, path+" is larger than "+
 			strconv.Itoa(MaxSize/(1024*1024))+" MB, which is as much of a response record as this "+
 			"build reads at once").
 			DoInstead("split the run into smaller datasets, or report the rows that matter " +
 				"rather than every row")
 	case errors.Is(err, boundedfile.ErrChangedWhileRead):
-		return response.Record{}, fault.New(fault.Data, path+" grew past "+
+		return nil, fault.New(fault.Data, path+" grew past "+
 			strconv.Itoa(MaxSize/(1024*1024))+" MB while it was being read, so something else is "+
-			"writing it. Compare against a record the application has finished writing")
+			"writing it").
+			DoInstead("compare against a record the application has finished writing")
 	case err != nil:
-		return response.Record{}, fault.Wrap(fault.IO, err, "cannot read the response record "+path)
+		return nil, fault.Wrap(fault.IO, err, "cannot read the response record "+path)
 	}
+	return raw, nil
+}
 
+// decode turns the bytes into a record this build can compare, or refuses them.
+func decode(raw []byte, path string) (response.Record, error) {
 	var read document
 	// Read straight from the bytes. Turning them into a string and the string
 	// back into a reader copied the whole record twice, which at the size this
@@ -128,8 +147,9 @@ func read(from *os.File, path string) (response.Record, error) {
 			fault.Shorten(built.SpecVersion)+" of the response format, and this build speaks "+
 			version.Response+". A different major version is one where what a field means has "+
 			"changed, so a comparison against it would be a verdict on your application drawn "+
-			"from a document this build cannot read. Write the record to a version this build "+
-			"speaks, or use a build that speaks that one")
+			"from a document this build cannot read").
+			DoInstead("write the record to a version this build speaks, or use a build that " +
+				"speaks the one it is written to")
 	}
 	return built, nil
 }

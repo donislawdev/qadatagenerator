@@ -47,7 +47,7 @@ var RefusalKinds = map[string]string{
 	"internal/adapter/format.usableDelimiter Config":         "the recipe gives a delimiter that is not one character. Measured 2026-08-17: the same value given as a FLAG never gets here, because the command line refuses it earlier as a wrong invocation, so this side of the boundary is the recipe alone",
 	"internal/adapter/format.usableEncoding Config":          "the recipe asks for an encoding this build does not write, which is a setting rather than a limit of the data",
 	"internal/adapter/manifestjson.Load Config":              "the manifest is not a manifest, is one this build would not have written, or names a major version it cannot read. All three are the document being wrong",
-	"internal/adapter/responsejson.read Config":              "the response record cannot be read as one, carries two documents, fails the model or names a major version this build does not speak",
+	"internal/adapter/responsejson.decode Config":            "the response record cannot be read as one, carries two documents, fails the model or names a major version this build does not speak. Split out of read on 2026-09-03, when giving each refusal a next move of its own took the function past the hard length limit",
 	"internal/adapter/store.usableName Config":               "the name comes from the recipe, and a name that cannot become a file is the recipe asking for something impossible before any data exists",
 	"internal/adapter/store.Set.ownName Config":              "an entity is named after a file the run itself leaves, so the recipe asks for two things under one name. The names this tool reserves are fixed, which makes the recipe the only end anybody can move",
 	"internal/adapter/values.Source.Produce Config":          "the recipe names a generator this build does not have, which is a spelling in a document rather than a limit of the data",
@@ -72,7 +72,7 @@ var RefusalKinds = map[string]string{
 
 	// --- Data: a valid document asks for something that cannot be done --------
 	"internal/adapter/manifestjson.bytesOf Data":             "the manifest is larger than this build reads back at once. The document is valid and this build cannot hold it, which is the other side of the boundary",
-	"internal/adapter/responsejson.read Data":                "the response record is larger than this build reads at once, for the same reason as the manifest above",
+	"internal/adapter/responsejson.bytesOf Data":             "the response record is larger than this build reads at once, or grew past that while being read, for the same reason as the manifest above",
 	"internal/adapter/sourcecsv.File.changedUnderneath Data": "the source file changed while it was being read. 🔴 The file is the DATA being worked on rather than a document telling this tool what to do, which is where DEC-172 draws the line",
 	"internal/adapter/sourcecsv.File.openAndReadHeader Data": "the source file is empty, and an empty file is data this mode cannot work with rather than an invalid instruction",
 	"internal/adapter/sourcecsv.File.readFailure Data":       "the source file cannot be read as comma separated data. Still the payload rather than a document of ours, so it stays on this side",

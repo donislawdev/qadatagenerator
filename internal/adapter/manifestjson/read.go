@@ -84,8 +84,9 @@ func Load(path string) (manifest.Manifest, error) {
 		return manifest.Manifest{}, fault.New(fault.Config, path+" is written to version "+
 			fault.Shorten(built.SpecVersion())+" of the manifest format, and this build speaks "+
 			version.Manifest+". A different major version is one where what a field means has "+
-			"changed, so reading it here would be guesswork. Use a build that speaks it, or "+
-			"produce the manifest again with this one")
+			"changed, so reading it here would be guesswork").
+			DoInstead("use a build that speaks that version, or produce the manifest again " +
+				"with this one")
 	}
 	return built, nil
 }
@@ -121,7 +122,8 @@ func bytesOf(path string) ([]byte, error) {
 	case errors.Is(err, boundedfile.ErrChangedWhileRead):
 		return nil, fault.New(fault.Data, path+" grew past "+
 			strconv.Itoa(MaxSize/(1024*1024))+" MB while it was being read, so something else is "+
-			"writing it. Compare against a manifest that a run has finished writing")
+			"writing it").
+			DoInstead("compare against a manifest that a run has finished writing")
 	case err != nil:
 		return nil, fault.Wrap(fault.IO, err, "cannot read the manifest "+path)
 	}

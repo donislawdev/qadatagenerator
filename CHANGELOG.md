@@ -117,6 +117,47 @@ repository once they are released.
 
 ### Changed
 
+- **A defect in the tool no longer blames a recipe you may not have.** When
+  something goes wrong inside `qadg` itself, the advice said the fault was in the
+  tool rather than in the recipe. `qadg corrupt` and `qadg verify` are run
+  against files rather than recipes, so that sentence sent people looking for a
+  document they never wrote. It now says the fault is in the tool rather than in
+  anything you gave it.
+
+- **Twenty refusals were telling you two different things to do.** A refusal
+  ends with a `try:` line saying what to do about it. Where the message above it
+  already carried advice, you got both, and the second was picked from the kind
+  of failure rather than from what actually went wrong: one told you to split the
+  run and then to change the flags describing the file, and another pointed at a
+  flag, which the window does not have. Each of them now says one thing, and
+  none of them names a control, so the same advice makes sense whichever surface
+  you are on.
+
+- **Take and corrupt stays quick on a wide file.** The panel saying what your
+  file holds described every column and built six things on screen for each one,
+  which at five thousand columns was 5.4 MB of interface before anything was
+  drawn. It now accounts for the same fifty columns the log does and says how
+  many it did not describe, so it costs about 55 kB however wide your file is. A
+  file of ordinary width looks exactly as it did, with every column described.
+
+- **`corrupt` no longer writes a manifest it cannot read back, and the manifest
+  now says how wide your file was.** The part describing a file nobody declared
+  wrote an entry per column, so a wide enough file produced a manifest `qadg
+  verify` refused, even when the run had damaged nothing. Measured: 260 000
+  columns produced 50.2 MB and was refused. The account now stops at 10 000
+  columns and the section settles at about 1.9 MB however wide the file is. A
+  file of ordinary width is unchanged.
+
+  `schema_inference` carries a new required member, `columns_total`, holding how
+  many columns your file has. When it is larger than the number of entries, the
+  entries cover the first columns of the file and nothing is claimed about the
+  rest. It is always written, so a complete account and a bounded one are never
+  confused for each other.
+
+  This narrows what `schema_inference.columns` promised. Nothing has been
+  released yet, so no manifest in anybody's repository changes meaning, and the
+  format is still a draft you should pin if you implement it.
+
 - **Reading a manifest or a response record costs about half what it did, and
   turning away one that is too large costs almost nothing.** Both files are read
   in one piece and both are bounded at 48 MB, which has not changed. What

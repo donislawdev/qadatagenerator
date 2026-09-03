@@ -89,6 +89,29 @@ func (i *Inference) problems() []string {
 		problems = append(problems, "the envelope infers a schema without saying what it does "+
 			"not infer, which would read as a complete account of the file")
 	}
+	problems = append(problems, i.countProblems()...)
+	return problems
+}
+
+// countProblems holds the count of columns to the same rule as the list.
+//
+// The count is what tells a truncated account from a complete one, so a count
+// that disagrees with the list it stands beside is worse than no count: it is
+// an arithmetic a reader would do and get a wrong answer from. Fewer columns
+// than entries means the file was narrower than what is described here, which
+// cannot happen and is therefore a producer getting it wrong.
+func (i *Inference) countProblems() []string {
+	var problems []string
+	switch {
+	case i.ColumnsTotal <= 0:
+		problems = append(problems, "the envelope infers a schema without saying how many "+
+			"columns the file has, so nothing tells an account of the whole file from an "+
+			"account of the part of it this build describes")
+	case i.ColumnsTotal < len(i.Columns):
+		problems = append(problems, fmt.Sprintf(
+			"the envelope says the file has %d columns and describes %d of them, which is "+
+				"more than there are", i.ColumnsTotal, len(i.Columns)))
+	}
 	return problems
 }
 

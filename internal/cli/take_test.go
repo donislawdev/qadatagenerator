@@ -14,6 +14,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 )
 
@@ -453,5 +454,28 @@ func TestTheSameFileAndSeedGiveTheSameDamage(t *testing.T) {
 func TestTheSchemesThisVerbLeansOnAreStillInThisBuild(t *testing.T) {
 	if (pl.PESEL{}).ID() != "PL.pesel" || (us.ABA{}).ID() != "US.aba" {
 		t.Fatal("the schemes these tests recognise columns by have been renamed")
+	}
+}
+
+// The sentence this verb inherits for a kind of failure never mentions a
+// recipe, whichever kind it is.
+//
+// 🔴 Written on 2026-09-03 because the guard above stopped being able to prove
+// this. It asks the verb for twelve real refusals and reads what comes out, and
+// every one of those refusals has since gained a next move of its own, so none
+// of them falls through to the sentence chosen by kind. That is a better state
+// for the person reading them and it leaves the rule itself unguarded: the
+// mutation that flips this verb into one that has a recipe now changes nothing
+// any of those twelve prints.
+//
+// So the rule is asked of the function that decides it. A refusal that gains
+// its own move stops depending on this, and one that loses it starts again.
+func TestNoSentenceThisVerbInheritsMentionsARecipe(t *testing.T) {
+	for _, kind := range []fault.Kind{fault.IO, fault.Config, fault.Data, fault.Runtime} {
+		said := whatToDoAbout(kind, commandCorrupt)
+		if strings.Contains(said, "recipe") {
+			t.Errorf("a %v failure of corrupt inherits %q, which sends somebody damaging "+
+				"a file they did not make to look for a recipe they do not have", kind, said)
+		}
 	}
 }

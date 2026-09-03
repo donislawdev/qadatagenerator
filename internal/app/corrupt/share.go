@@ -122,8 +122,9 @@ func shareOf(written string) (share, error) {
 	// answered the same way here rather than argued about again.
 	if math.IsNaN(value) || math.IsInf(value, 0) {
 		return share{}, fault.New(fault.Config, fmt.Sprintf(
-			"policy.rows says %q, which is not a number this build can count rows with. "+
-				"Write a plain number between 0 and 100 followed by a percent sign", written))
+			"policy.rows says %q, which is not a number this build can count rows with",
+			written)).
+			DoInstead("write a plain number between 0 and 100 followed by a percent sign")
 	}
 	if value < 0 || value > 100 {
 		return share{}, fault.New(fault.Config, fmt.Sprintf(

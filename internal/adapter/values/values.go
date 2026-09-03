@@ -317,9 +317,9 @@ func (s Source) fromType(req generate.Request) (string, error) {
 		return fmt.Sprintf("%d.%02d", whole, fraction), nil
 	default:
 		return "", fault.New(fault.Config, fmt.Sprintf(
-			"%s is declared as %s, and this build produces values for %s and %s only. "+
-				"Give the field a generator, or change the type",
-			req.At.Field, req.Type, TypeInteger, TypeDecimal))
+			"%s is declared as %s, and this build produces values for %s and %s only",
+			req.At.Field, req.Type, TypeInteger, TypeDecimal)).
+			DoInstead("give the field a generator, or change the type")
 	}
 }
 
@@ -478,7 +478,7 @@ func (s Source) birthDate(req generate.Request) (string, error) {
 // them.
 func (s Source) postalCode(req generate.Request) (string, error) {
 	if fine, why := postalRegister(s.locale); !fine {
-		return "", fault.New(fault.Config, why)
+		return "", fault.New(fault.Config, why).DoInstead(postalInstead)
 	}
 	return us.Postal{}.Generate(provider.Request{Source: s.seed, At: req.At})
 }
@@ -501,9 +501,18 @@ func postalRegister(locale string) (bool, string) {
 		return true, ""
 	}
 	return false, "this build has no register of postal codes for " + locale +
-		", so a postal code cannot be produced there. Generate the dataset for en-US " +
-		"or drop the field"
+		", so a postal code cannot be produced there"
 }
+
+// postalInstead is what to do about it, kept apart from the reason above.
+//
+// 🔴 The two used to be one string, which put them in two places at once: the
+// listing of what this build cannot fill showed the advice as part of the
+// reason, and the refusal took the advice into its message and then had the
+// sentence for its kind added underneath. Two next moves, and the second one
+// about a recipe that is not the matter here.
+const postalInstead = "generate the dataset for a locale this build carries a register for, " +
+	"or leave the field out"
 
 // fromLists answers whether every named list is carried for a locale.
 func fromLists(names ...string) func(string) (bool, string) {

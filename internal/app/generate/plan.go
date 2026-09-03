@@ -176,7 +176,8 @@ func planEntity(entity recipe.Entity, done map[string]dataset.Table, source seed
 	if name, collides := entity.ParentColumnCollision(); collides {
 		return dataset.Table{}, fault.New(fault.Config, "entities."+entity.Name+" has a field "+
 			"called "+name+" and also belongs to an entity of that name, so the relation and "+
-			"the field would need the same column. Rename the field")
+			"the field would need the same column").
+			DoInstead("rename the field")
 	}
 
 	parent := entity.Parents[0]
@@ -273,8 +274,10 @@ func reachable(entity recipe.Entity, parent recipe.Parent, parents int) error {
 	}
 	return fault.New(fault.Data, fmt.Sprintf(
 		"%s asks for %d rows and belongs to %s, which has %d rows at %d to %d each, "+
-			"so the count has to be between %d and %d. Change the count or the range",
-		entity.Name, entity.Count, parent.Entity, parents, parent.Min, parent.Max, lowest, highest))
+			"so the count has to be between %d and %d",
+		entity.Name, entity.Count, parent.Entity, parents, parent.Min, parent.Max,
+		lowest, highest)).
+		DoInstead("change the count, or the range of the relation")
 }
 
 // repair moves the drawn shares until they add up to the wanted count.

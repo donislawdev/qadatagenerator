@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/donislawdev/qadatagenerator/internal/take"
 )
 
 // wideFile writes a file of as many columns as asked for, with nothing in them
@@ -48,21 +50,21 @@ func TestTheSchemaReportStopsGrowingWithTheFileItDescribes(t *testing.T) {
 	}
 
 	lines := strings.Count(got.log, "\n")
-	if lines > columnsListed+10 {
+	if lines > take.ColumnsListed+10 {
 		t.Errorf("a file of %d columns put %d lines on the log, and the point of the "+
 			"threshold is that this number stops following that one", columns, lines)
 	}
 	named := strings.Count(got.log, prefixDetail+"c")
-	if named != columnsListed {
-		t.Errorf("%d columns were named and the threshold says %d", named, columnsListed)
+	if named != take.ColumnsListed {
+		t.Errorf("%d columns were named and the threshold says %d", named, take.ColumnsListed)
 	}
-	rest := strconv.Itoa(columns-columnsListed) + " more columns"
+	rest := strconv.Itoa(columns-take.ColumnsListed) + " more columns"
 	if !strings.Contains(got.log, rest) {
 		t.Errorf("the log does not count the ones it left out as %q: %q", rest, got.log)
 	}
 	if !strings.Contains(got.log, noteRestInManifest) {
 		t.Errorf("the log leaves out %d columns without saying where they are: %q",
-			columns-columnsListed, got.log)
+			columns-take.ColumnsListed, got.log)
 	}
 }
 

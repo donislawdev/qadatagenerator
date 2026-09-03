@@ -1,6 +1,8 @@
 package takeview
 
 import (
+	"strconv"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
@@ -8,6 +10,7 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/infer"
+	"github.com/donislawdev/qadatagenerator/internal/take"
 )
 
 // drawFile says what the file holds and how that was arrived at.
@@ -76,16 +79,45 @@ func (v *View) notice(key i18n.Key) fyne.CanvasObject {
 	return beside(theme.WarningIcon(), wrapped(v.text.T(key)))
 }
 
-// conclusions are what each column was taken to hold, with what that rests on.
+// conclusions are what each column was taken to hold, with what that rests on,
+// for as many columns as this surface accounts for.
+//
+// # Why it stops, and what it costs when it does not
+//
+// One column here is six objects, four of them carrying text, and the panel
+// they sit in lays out every one of them whether it is on screen or not.
+// Measured on 2026-09-03: 1088 bytes per column, so a file of 5000 columns is
+// 5.4 MB of widgets before anything is drawn and a file of 260 000 would be
+// about 283 MB. The log describing the same file stops at fifty for the reason
+// recorded as DEC-200, and this stops at the same number because it is the same
+// conclusions read by the same person. A different number would mean the two
+// surfaces disagreed about how much of a file they account for.
+//
+// 🔴 What is not described is counted rather than left out, which is the whole
+// of the difference between a bound and a cut. The scheme count still walks
+// every column, because a file where nothing was recognised is a file where
+// ordered damage had nothing to work with, and that is true of the columns
+// nobody is shown as much as of the ones they are.
 func (v *View) conclusions() []fyne.CanvasObject {
 	shape := v.opened.Shape()
+	findings := shape.Findings()
 	var drawn []fyne.CanvasObject
 	schemes := 0
-	for _, finding := range shape.Findings() {
+	for _, finding := range findings {
 		if finding.Scheme != "" {
 			schemes++
 		}
+	}
+	described := findings
+	if len(described) > take.ColumnsListed {
+		described = described[:take.ColumnsListed]
+	}
+	for _, finding := range described {
 		drawn = append(drawn, v.conclusion(finding))
+	}
+	if left := len(findings) - len(described); left > 0 {
+		drawn = append(drawn, wrapped(v.text.T(i18n.TakeFileMoreColumns)+": "+
+			strconv.Itoa(left)))
 	}
 	if schemes == 0 {
 		drawn = append(drawn, v.notice(i18n.TakeFileNothingRecognised))

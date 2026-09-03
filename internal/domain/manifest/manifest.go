@@ -246,6 +246,31 @@ type Run struct {
 	RowsMutated int
 }
 
+// ColumnsDescribed is how many columns of a file this build accounts for one by
+// one.
+//
+// # Where the number comes from
+//
+// An entry costs about 203 bytes, measured on 2026-09-03 from the slope between
+// two real runs: 50 000 columns produced 9.6 MB of manifest and 200 000
+// produced 38.6 MB, so 29 MiB bought 150 000 entries. At this limit the section
+// costs about 2 MB, a twentieth of what this build reads back, so the account
+// of the columns can never on its own be why a manifest is refused. Defects
+// still can, and that is a different question.
+//
+// # Why it is not the fifty the schema report uses
+//
+// That number bounds lines a person reads going past in a terminal, and this
+// bounds entries a machine archives and a person searches. Carrying the fifty
+// across because it stood next to this would have turned the limit into a cut
+// on files people really have: a few thousand columns is a feature matrix or a
+// run of sensor readings, and every column of one is described here.
+//
+// Above this width the file is machine made and nobody argues with it column by
+// column, which is what the entries are for. That sentence is a judgement and is
+// written down as one, because the arithmetic above does not reach it.
+const ColumnsDescribed = 10000
+
 // Inference is what a run decided about the shape of somebody else's data.
 //
 // # Why the evidence is part of the promise rather than a note beside it
@@ -277,6 +302,23 @@ type Inference struct {
 	// conclude that the rest was not there, and the rest is precisely where the
 	// damage they asked for did not happen.
 	NotInferred []string
+	// ColumnsTotal is how many columns the file has, which is not always how
+	// many Columns describes.
+	//
+	// # Why a count sits beside a list that used to be the whole of it
+	//
+	// An entry runs about two hundred bytes, so a file wide enough turns this
+	// section into a manifest larger than this build reads back: measured on
+	// 2026-09-03, 260 000 columns produced 50.2 MB and verify refused it, with
+	// not one defect entry in it. Beyond a width no person reads column by
+	// column, the account stops and this says how much of the file it covered.
+	//
+	// It is required rather than written only when something was left out. A
+	// truncated account with nothing beside it reads as a complete account of a
+	// narrower file, and there is no way to tell the two apart at the boundary.
+	// That is the same argument NotInferred rests on, applied to the count
+	// rather than to the kind of thing being reported.
+	ColumnsTotal int
 }
 
 // InferredColumn is one column and the evidence behind what it was taken for.

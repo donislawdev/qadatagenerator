@@ -138,6 +138,7 @@ const (
 	TakeResultMissingWhy     Key = "take.result.missing.why"
 	TakeResultUnpartnered    Key = "take.result.unpartnered"
 	TakeResultUnpartneredWhy Key = "take.result.unpartnered.why"
+	TakeFileMoreColumns      Key = "take.file.more.columns"
 	TakeResultOversized      Key = "take.result.oversized"
 	TakeResultOversizedWhy   Key = "take.result.oversized.why"
 	TakeResultStopped        Key = "take.result.stopped"
@@ -392,6 +393,7 @@ var Keys = []Key{
 	TakeResultWritten, TakeResultIn, TakeResultOrdered, TakeResultApplied,
 	TakeResultMissing, TakeResultMissingWhy,
 	TakeResultUnpartnered, TakeResultUnpartneredWhy,
+	TakeFileMoreColumns,
 	TakeResultOversized, TakeResultOversizedWhy,
 	TakeResultStopped, TakeResultStoppedWhy,
 	TakeResultFailed, TakeResultFailedWhy,

@@ -336,20 +336,24 @@ func usableName(name string) error {
 		return fault.New(fault.Config, "an entity with no name cannot become a file")
 	case strings.ContainsAny(name, forbidden):
 		return fault.New(fault.Config, fmt.Sprintf(
-			"%q cannot be a file name because of the characters %s. Rename the entity", name, forbidden))
+			"%q cannot be a file name because of the characters %s", name, forbidden)).
+			DoInstead("rename the entity")
 	case strings.ContainsRune(name, 0):
 		return fault.New(fault.Config, "a name carrying a zero byte cannot become a file")
 	case name != filepath.Base(name) || name == "." || name == "..":
 		return fault.New(fault.Config, fmt.Sprintf(
 			"%q is a path rather than a name, and a dataset never writes outside the directory "+
-				"it was given. Rename the entity", name))
+				"it was given", name)).
+			DoInstead("rename the entity")
 	case devices[strings.ToUpper(base)]:
 		return fault.New(fault.Config, fmt.Sprintf(
-			"%q is the name of a device rather than of a file. Rename the entity", name))
+			"%q is the name of a device rather than of a file", name)).
+			DoInstead("rename the entity")
 	case strings.HasSuffix(name, ".") || strings.HasSuffix(name, " "):
 		return fault.New(fault.Config, fmt.Sprintf(
 			"%q ends in a dot or a space, which some systems drop, so the file would end up under "+
-				"a different name than the one asked for. Rename the entity", name))
+				"a different name than the one asked for", name)).
+			DoInstead("rename the entity")
 	}
 	return nil
 }

@@ -113,8 +113,9 @@ func (s *Selector) somethingToDamage() error {
 	}
 	return fault.New(fault.Config, fmt.Sprintf(
 		"policy.exclude_fields leaves nothing to damage in %s, because it names every "+
-			"field %s. Remove a name from the list, or drop the policy",
-		strings.Join(emptied, ", "), held))
+			"field %s",
+		strings.Join(emptied, ", "), held)).
+		DoInstead("remove a name from the list, or drop the policy")
 }
 
 // everyFieldExcluded answers whether a policy has taken away everything an

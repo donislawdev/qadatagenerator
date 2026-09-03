@@ -71,14 +71,15 @@ A run that damages a file it did not produce has nothing declaring what the colu
   ],
   "not_inferred": [
     "maximum length, because the longest value in a file is not a declared limit"
-  ]
+  ],
+  "columns_total": 2
 }
 ```
 
 | Field | Required | Meaning |
 |---|---|---|
 | `method` | yes | how the shape was worked out, so that one way of looking is telling apart from another |
-| `columns` | yes | one entry per column of the dataset, in column order |
+| `columns` | yes | one entry per column of the dataset, in column order, up to the number of columns the producer accounts for |
 | `columns[].field` | yes | the column |
 | `columns[].type` | yes | what it was taken to hold |
 | `columns[].numbering_scheme` | no | the scheme it was taken to follow, absent when none was confirmed |
@@ -89,8 +90,15 @@ A run that damages a file it did not produce has nothing declaring what the colu
 | `relations[].kind` | yes | what agrees, such as the date or the gender the scheme encodes |
 | `relations[].basis` | yes | the evidence, as a sentence a person reads |
 | `not_inferred` | yes | the properties this way of looking never reads out of a file |
+| `columns_total` | yes | how many columns the dataset has, which is not always how many `columns` describes |
 
-**Every column gets an entry, including the ones nothing was concluded about.** A column with no entry would leave a reader unable to tell one that was examined from one that was overlooked, and the columns nothing was recognised in are exactly the ones where ordered damage had nothing to work with.
+**Every column of the dataset gets an entry, up to the width a producer accounts for.** A column with no entry would leave a reader unable to tell one that was examined from one that was overlooked, and the columns nothing was recognised in are exactly the ones where ordered damage had nothing to work with. That is why the entries go all the way down an ordinary file, and why a producer that stops has to say where.
+
+**A producer may stop the account at a width, and one that stops says so through `columns_total`.** An entry runs a couple of hundred bytes, so a file wide enough turns this member alone into a document larger than a consumer will read back. A producer that bounds the account writes every column up to its own limit and records the width of the file rather than the length of the list. `columns_total` greater than the number of entries therefore means the account covers the first `columns` of the dataset and nothing is claimed about the rest.
+
+🔴 **`columns_total` is required whether or not anything was left out, and a producer that omits it is not writing this format.** Written only when the account stopped, it would be missing from exactly the documents where a reader most needs it and present nowhere else, and at the boundary the two cases are indistinguishable: an account of ten thousand columns is either a complete account of a file that wide or the first part of an account of a wider one. This is the same argument `not_inferred` rests on, applied to how much of the file was covered rather than to what kind of thing was read out of it.
+
+*What this build does, as an example rather than as a rule:* it describes the first 10 000 columns, which costs about 2 MB, and records the true width beside them. The number is a property of a producer and not of the format.
 
 **`basis` is a sentence rather than a pair of counts.** Its reader is a person deciding whether the tool guessed right about their data. A reader handed `{"tested": 40, "passed": 40}` has to already know how much forty is worth.
 
@@ -364,6 +372,7 @@ A question the response record does not carry the evidence to answer is neither 
 ## Versioning and compatibility
 
 - The format evolves by **adding** fields. The meaning of an existing field never changes.
+- 🔴 **That rule was broken once, on purpose, before any release.** `schema_inference.columns` used to be one entry per column of the dataset with no exception, and it is now that up to a width the producer accounts for, with `columns_total` carrying the real one. Narrowing what an existing field promises is a major change and would be one after a release. It is recorded here rather than left for somebody to find, because a versioning rule with a silent exception in its own history is worse than one that names it.
 - **Mutator identifiers are permanent.** Manifests live for years inside other people's test repositories.
 - **Consumers must ignore unknown fields** rather than failing on them, so that a manifest from a newer producer stays readable.
 - A consumer that meets an unknown mutator identifier reports it as unknown instead of guessing.

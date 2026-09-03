@@ -8,6 +8,7 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/sourcecsv"
 	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
 // written puts a file on the disk exactly as given, bytes and all.
@@ -136,8 +137,12 @@ func TestAHeaderWithNoRecordsIsRefused(t *testing.T) {
 	if err == nil {
 		t.Fatal("a file of headings alone was accepted")
 	}
-	if !strings.Contains(err.Error(), "at least one row") {
-		t.Errorf("the refusal has to say what would work, and says %q", err)
+	// The move is asked for through fault.Says, which is the whole of what a
+	// refusal has to say. It used to be the second sentence of the message,
+	// which meant the reader also got the sentence for the failure's kind
+	// underneath it and had two next moves to choose between.
+	if !strings.Contains(fault.Says(err), "at least one row") {
+		t.Errorf("the refusal has to say what would work, and says %q", fault.Says(err))
 	}
 }
 

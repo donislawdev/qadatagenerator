@@ -88,6 +88,38 @@ const (
 	InferenceMethod = "values-validated"
 )
 
+// ColumnsListed is how many worked out columns get an account of their own on a
+// surface before it starts counting instead.
+//
+// # Why there is a number here at all
+//
+// There was not one, and the reason written down was that a column nothing was
+// recognised in is exactly the one somebody needs to know about. That reason is
+// true of a file with twenty columns and false of a file with five thousand,
+// where nobody reads any of it. Measured 2026-09-02 with tools/kanal_i_pamiec.py:
+// a file of 5000 columns and 86 670 bytes puts 804 476 bytes on the log channel
+// in 5005 lines, nine times the file being described. At 500 columns it is
+// 80 475 bytes and at 50 it is 8524, which is a screen and a bit. So the cut is
+// between a list somebody reads and a list nobody does, and fifty is the top of
+// the first. Recorded as DEC-200.
+//
+// # Why one number for both surfaces rather than one each
+//
+// The log and the panel show the same conclusions to the same person. Two
+// numbers would mean the surfaces disagreed about how much of a file they
+// account for, which is the rule about parity broken over an implementation
+// detail. The cost per column does differ between them, measured on 2026-09-03
+// as about 170 bytes of log against 1088 bytes of widgets, and that is a real
+// difference which does not bear on how much a person reads. The cost is what
+// each surface lives with and the count is shared.
+//
+// 🔴 The sentence that used to close this reasoning said the manifest carries
+// every column either way. That stopped being true on 2026-09-03: the manifest
+// stops at manifest.ColumnsDescribed and records the width of the file beside
+// it. Nothing is dropped in silence anywhere, and each of the three says how
+// much of the file it covered.
+const ColumnsListed = 50
+
 // Settings is what a run of this mode was asked for, as values rather than as
 // the flags or the fields somebody typed them into.
 type Settings struct {
@@ -446,9 +478,26 @@ func (o *Opened) envelope(settings Settings, run *damage.Run, at time.Time) mani
 }
 
 // inference turns what was worked out into what the manifest carries.
+//
+// # Why the columns stop and the count does not
+//
+// An entry costs about two hundred bytes, so a file wide enough turns this one
+// section into a manifest larger than this build reads back. The account stops
+// at manifest.ColumnsDescribed and the width of the file is recorded whole, so
+// that a reader of a truncated account can tell it from a complete one and work
+// out exactly how much is missing. A count that stopped with the list would
+// have made the two indistinguishable, which is the failure this guards.
 func (o *Opened) inference() *manifest.Inference {
-	record := &manifest.Inference{Method: InferenceMethod, NotInferred: infer.NotInferred()}
-	for _, finding := range o.shape.Findings() {
+	findings := o.shape.Findings()
+	record := &manifest.Inference{
+		Method:       InferenceMethod,
+		NotInferred:  infer.NotInferred(),
+		ColumnsTotal: len(findings),
+	}
+	if len(findings) > manifest.ColumnsDescribed {
+		findings = findings[:manifest.ColumnsDescribed]
+	}
+	for _, finding := range findings {
 		record.Columns = append(record.Columns, manifest.InferredColumn{
 			Field: finding.Field, Type: finding.Type,
 			Scheme: finding.Scheme, Basis: finding.Basis,

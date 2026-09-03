@@ -285,7 +285,7 @@ const (
 	doAboutConfigValidate = "the message above is what this command found in the recipe. Change it there and run this again"
 	doAboutData           = "the recipe is valid and cannot be satisfied, so change what it asks for"
 	doAboutStopped        = "nothing was left behind, so the same command can simply be run again"
-	doAboutRuntime        = "this is a defect in the tool rather than in the recipe. Report it with the command that caused it"
+	doAboutRuntime        = "this is a defect in the tool rather than in anything you gave it. Report it with the command that caused it"
 
 	// The same two, for the verb that has no recipe. A reader damaging a file
 	// somebody sent them has nothing to validate and nothing to rewrite, so the

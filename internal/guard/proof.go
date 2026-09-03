@@ -807,6 +807,16 @@ var Guards = []Guard{
 	// only sentence that became untrue when a second kind of run arrived. Both
 	// were found by running the binary rather than by reading it.
 	{"every refusal of corrupt is complete and names no recipe", "TestEveryRefusalOfThisVerbIsCompleteAndMentionsNoRecipe", "internal/cli", ByMutation},
+	// 🔴 The same rule asked of the function that decides it, because the guard
+	// above stopped being able to prove it on 2026-09-03. Every one of the
+	// twelve refusals it exercises has since gained a next move of its own, so
+	// none falls through to the sentence chosen by kind, and the mutation that
+	// turns this verb into one with a recipe changes nothing any of them print.
+	// Better for the reader and worse for the proof, so the proof moved. It
+	// found a real one on the first run: the sentence for a defect in the tool
+	// said it was a defect rather than one in the recipe, to a person who has
+	// no recipe.
+	{"no sentence corrupt inherits for a kind of failure mentions a recipe", "TestNoSentenceThisVerbInheritsMentionsARecipe", "internal/cli", ByMutation},
 	{"damaging a file where it sits leaves the source alone", "TestDamagingAFileInItsOwnDirectoryLeavesTheSourceAlone", "internal/cli", ByMutation},
 	{"the evidence for every column reaches the manifest", "TestTheManifestCarriesTheEvidenceForEveryColumn", "internal/cli", ByMutation},
 	{"the same file and seed give the same damage", "TestTheSameFileAndSeedGiveTheSameDamage", "internal/cli", ByMutation},
@@ -832,6 +842,35 @@ var Guards = []Guard{
 	// another screen with nothing connecting it to the run that caused it. The
 	// run now carries the fact and each surface words it.
 	{"a run says which of the files it wrote will not be read back", "TestARunSaysWhichFilesWillNotBeReadBack", "internal/take", ByMutation},
+	// 🔴 The account of the columns, bounded on one side and held open on the
+	// other. An entry costs about 203 bytes, so 260 000 columns produced a
+	// 50.2 MB manifest that verify refused, with not one defect entry in it. A
+	// limit that bit on files people really have would be a cut rather than a
+	// bound, so the guard checks both sides of it, and the count is what tells
+	// a bounded account from a complete one.
+	{"the account of the columns stops at a width and says how wide the file was", "TestTheAccountOfTheColumnsStopsAtAWidthAndSaysHowWideTheFileWas", "internal/take", ByMutation},
+	{"an account of the columns that cannot say how wide the file was is refused", "TestAnAccountOfTheColumnsThatCannotSayHowWideTheFileWasIsRefused", "internal/domain/manifest", ByMutation},
+	// 🔴 The same bound on the third surface, and the one where the medium is
+	// worst. A column is six objects there and the panel lays out every one of
+	// them on screen or not: measured 1088 bytes per column against about 170
+	// on the log, so five thousand columns was 5.4 MB of widgets. The count is
+	// shared with the log rather than chosen again, because two numbers would
+	// mean the surfaces disagreed about how much of a file they account for.
+	{"the panel about a file accounts for as many columns as this build lists and counts the rest", "TestThePanelAccountsForAsManyColumnsAsThisBuildListsAndCountsTheRest", "internal/gui/takeview", ByMutation},
+
+	// --- the fourth part of a refusal, counted rather than repaired ---------
+	//
+	// 🔴 The family of a refusal carrying its own next move inside its message
+	// was closed on 2026-09-02 on the two places somebody had looked at, and it
+	// was never counted. This guard was written on 2026-09-03 and found FIFTEEN
+	// more in the tree, including two put there earlier the same day by the
+	// repair of five others found by hand. A message advising gets the sentence
+	// for its kind added underneath, so the reader is handed two next moves and
+	// the second is chosen by the kind rather than by the failure.
+	{"no refusal advises inside its own message", "TestNoRefusalAdvisesInsideItsOwnMessage", "internal/guard", ByMutation},
+	{"the scanner sees a message that advises", "TestTheAdviceGuardSeesAMessageThatAdvises", "internal/guard", ByProbe},
+	{"the scanner leaves a statement alone", "TestTheAdviceGuardLeavesAStatementAlone", "internal/guard", ByProbe},
+	{"the scanner leaves a move handed over alone", "TestTheAdviceGuardLeavesAMoveHandedOverAlone", "internal/guard", ByProbe},
 	{"the vocabulary of generators can be asked for rather than stumbled into, and the list is the register in both directions", "TestHelpNamesEveryGeneratorThisBuildHasAndNothingElse", "internal/cli", ByMutation},
 	{"a generator that cannot be produced in a locale says why, rather than being a bare no", "TestHelpSaysWhereAGeneratorCannotBeProducedAndWhy", "internal/cli", ByMutation},
 	{"the verb that reports problems does not end its own refusal by telling the reader to run it", "TestValidateDoesNotSendTheReaderToValidate", "internal/cli", ByMutation},

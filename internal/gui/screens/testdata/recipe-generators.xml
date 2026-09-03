@@ -59,7 +59,7 @@
 							<container pos="0,357" size="1050x352">
 								<rectangle size="1050x352" strokeWidth="2"/>
 								<widget size="1050x352" type="*parts.KeyScroll">
-									<container size="1050x790">
+									<container size="1050x771">
 										<widget size="1050x27" type="*widget.Label">
 											<widget size="1050x27" type="*widget.RichText">
 												<text pos="4,4" size="674x19">Write or paste a recipe here. It is checked as you type, and nothing is written to disk until you ask for it.</text>
@@ -74,7 +74,7 @@
 												</widget>
 											</widget>
 										</container>
-										<widget pos="0,71" size="1050x719" type="*widget.Accordion">
+										<widget pos="0,71" size="1050x700" type="*widget.Accordion">
 											<widget size="1050x28" type="*widget.Button">
 												<rectangle radius="5" size="1050x28"/>
 												<rectangle size="1050x28"/>
@@ -83,7 +83,7 @@
 												</widget>
 												<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="iconInlineSize" themed="foreground"/>
 											</widget>
-											<container pos="0,36" size="1050x683">
+											<container pos="0,36" size="1050x664">
 												<widget size="1050x27" type="*widget.Label">
 													<widget size="1050x27" type="*widget.RichText">
 														<text pos="4,4" size="153x19">aba - identifier (US.aba)</text>
@@ -159,13 +159,12 @@
 														<text pos="4,4" size="400x19">city is not available in en-US: this build has no cities for en-US</text>
 													</widget>
 												</widget>
-												<widget pos="0,545" size="1050x84" type="*widget.Label">
-													<widget size="1050x84" type="*widget.RichText">
-														<text pos="4,4" size="1020x19">postal_code is not available in pl-PL: this build has no register of postal codes for pl-PL, so a postal code cannot be produced there. Generate the dataset for</text>
-														<text pos="4,23" size="149x19">en-US or drop the field</text>
+												<widget pos="0,545" size="1050x65" type="*widget.Label">
+													<widget size="1050x65" type="*widget.RichText">
+														<text pos="4,4" size="851x19">postal_code is not available in pl-PL: this build has no register of postal codes for pl-PL, so a postal code cannot be produced there</text>
 													</widget>
 												</widget>
-												<widget pos="0,637" size="1050x46" type="*widget.Label">
+												<widget pos="0,618" size="1050x46" type="*widget.Label">
 													<widget size="1050x46" type="*widget.RichText">
 														<text pos="4,4" size="436x19">region is not available in en-US: this build has no regions for en-US</text>
 													</widget>
@@ -177,8 +176,8 @@
 										<linearGradient endColor="shadow" pos="0,-8" size="1050x8"/>
 									</widget>
 									<widget pos="1044,0" size="6x352" type="*widget.scrollBarArea">
-										<widget pos="3,0" size="3x156" type="*widget.scrollBar">
-											<rectangle fillColor="scrollbar" radius="3" size="3x156"/>
+										<widget pos="3,0" size="3x160" type="*widget.scrollBar">
+											<rectangle fillColor="scrollbar" radius="3" size="3x160"/>
 										</widget>
 									</widget>
 								</widget>

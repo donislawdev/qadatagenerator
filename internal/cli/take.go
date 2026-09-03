@@ -269,24 +269,6 @@ func refusalOf(refusal take.Refusal) problem {
 	}
 }
 
-// columnsListed is how many worked out columns get a line of their own before
-// the log starts counting instead.
-//
-// # Why there is a number here at all
-//
-// There was not one, and the reason written down was that a column nothing was
-// recognised in is exactly the one somebody needs to know about. That reason is
-// true of a file with twenty columns and false of a file with five thousand,
-// where nobody reads any of it. Measured 2026-09-02 with tools/kanal_i_pamiec.py:
-// a file of 5000 columns and 86 670 bytes puts 804 476 bytes on the log channel
-// in 5005 lines, nine times the file being described. At 500 columns it is
-// 80 475 bytes and at 50 it is 8524, which is a screen and a bit.
-//
-// So the cut is between a list somebody reads and a list nobody does, and fifty
-// is the top of the first. Nothing is dropped: what is not named is counted,
-// and the manifest carries every column either way. Recorded as DEC-200.
-const columnsListed = 50
-
 // sayWhatWasWorkedOut puts the guesses on the log channel, where somebody
 // running this interactively sees them without opening the manifest.
 //
@@ -327,8 +309,8 @@ func sayWhatWasWorkedOut(out *streams, opened *take.Opened, dryRun bool) {
 
 // named is how many of a list get a line to themselves.
 func named(all int) int {
-	if all > columnsListed {
-		return columnsListed
+	if all > take.ColumnsListed {
+		return take.ColumnsListed
 	}
 	return all
 }
@@ -343,14 +325,14 @@ func named(all int) int {
 // what to run to get the whole list, which is what somebody in the middle of a
 // dry run is deciding anyway.
 func sayHowManyMore(out *streams, all int, what string, dryRun bool) {
-	if all <= columnsListed {
+	if all <= take.ColumnsListed {
 		return
 	}
 	where := noteRestInManifest
 	if dryRun {
 		where = noteRestInManifestOfARealRun
 	}
-	out.detail(counted(all-columnsListed, "more "+what) + noteRestWorkedOut + where)
+	out.detail(counted(all-take.ColumnsListed, "more "+what) + noteRestWorkedOut + where)
 }
 
 // describeFinding names what a column was taken to hold, in words.

@@ -198,6 +198,7 @@ func usableEncoding(encoding string) error {
 		return nil
 	default:
 		return fault.New(fault.Config, "this build writes UTF-8 and the recipe asks for "+
-			encoding+". Remove the setting or ask for utf-8")
+			encoding).
+			DoInstead("remove the setting, or ask for utf-8")
 	}
 }

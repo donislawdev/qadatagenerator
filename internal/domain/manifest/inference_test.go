@@ -20,7 +20,8 @@ func worked() manifest.Run {
 			{Field: "note", Type: "string",
 				Basis: "no numbering scheme this build carries accepted 40 values"},
 		},
-		NotInferred: []string{"maximum length", "required columns"},
+		NotInferred:  []string{"maximum length", "required columns"},
+		ColumnsTotal: 2,
 	}
 	return envelope
 }
@@ -117,5 +118,50 @@ func TestAWholeManifestRefusesAnUnusableInference(t *testing.T) {
 	_, problems := manifest.New("0.1", envelope, []manifest.Defect{applied()})
 	if len(problems) == 0 {
 		t.Fatal("a manifest carrying an inference the envelope refuses was built anyway")
+	}
+}
+
+// An account of the columns that does not say how wide the file was is refused.
+//
+// 🔴 This is the rule that makes a bounded account safe to publish. The account
+// stops at a width, so a manifest describing ten thousand columns is either a
+// complete account of a file that wide or the first part of an account of a
+// wider one, and nothing else in the document tells them apart. A count that
+// disagrees with the list is worse still, because it is arithmetic a reader
+// would do and get a wrong answer from.
+func TestAnAccountOfTheColumnsThatCannotSayHowWideTheFileWasIsRefused(t *testing.T) {
+	for _, given := range []struct {
+		what   string
+		total  int
+		saying string
+	}{
+		{"no count at all", 0, "how many columns"},
+		{"a negative count", -1, "how many columns"},
+		{"fewer columns than are described", 1, "more than there are"},
+	} {
+		t.Run(given.what, func(t *testing.T) {
+			envelope := worked()
+			envelope.Inference.ColumnsTotal = given.total
+
+			problems := envelope.Problems()
+
+			if len(problems) == 0 {
+				t.Fatalf("an inference with %s was accepted", given.what)
+			}
+			if !strings.Contains(strings.Join(problems, " "), given.saying) {
+				t.Errorf("the refusal for %s does not say why: %v", given.what, problems)
+			}
+		})
+	}
+}
+
+// A file wider than the account is described as far as the account goes, and
+// the width is the file's rather than the list's.
+func TestAnAccountOfPartOfTheColumnsIsAccepted(t *testing.T) {
+	envelope := worked()
+	envelope.Inference.ColumnsTotal = 260000
+
+	if problems := envelope.Problems(); len(problems) > 0 {
+		t.Fatalf("an account of part of a wide file was refused: %v", problems)
 	}
 }

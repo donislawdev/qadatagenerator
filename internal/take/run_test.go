@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
+	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 )
 
 // sourceRows is how many records the file every test here damages holds.
@@ -176,6 +177,98 @@ func TestARunSaysWhichFilesWillNotBeReadBack(t *testing.T) {
 					t.Errorf("said %s is %d bytes, and it is %d",
 						one.Name, one.Bytes, given.sizes[one.Name])
 				}
+			}
+		})
+	}
+}
+
+// wideFile writes a file of the given width, which is the thing the account of
+// the columns is bounded against.
+func wideFile(t *testing.T, dir string, columns int) string {
+	t.Helper()
+	var text strings.Builder
+	for column := range columns {
+		if column > 0 {
+			text.WriteByte(',')
+		}
+		text.WriteString("c" + strconv.Itoa(column))
+	}
+	text.WriteByte('\n')
+	for row := 1; row <= 3; row++ {
+		for column := range columns {
+			if column > 0 {
+				text.WriteByte(',')
+			}
+			text.WriteString("v" + strconv.Itoa(row) + "_" + strconv.Itoa(column))
+		}
+		text.WriteByte('\n')
+	}
+	path := filepath.Join(dir, "wide.csv")
+	if err := os.WriteFile(path, []byte(text.String()), 0o600); err != nil {
+		t.Fatalf("cannot write the wide file this test damages: %v", err)
+	}
+	return path
+}
+
+// The account of the columns stops at a width, and the width of the file is
+// recorded whole either way.
+//
+// 🔴 Both halves are the test. An entry costs about two hundred bytes, so a file
+// wide enough turned this one section into a manifest larger than this build
+// reads back: measured on 2026-09-03, 260 000 columns produced 50.2 MB and
+// verify refused it with not one defect entry in it. Bounding the account fixes
+// that and introduces the failure guarded on the other side: a limit that bit
+// on files people really have would be a cut rather than a bound, so a file
+// narrower than the limit has every one of its columns described.
+//
+// The count is what tells the two apart. Without it a truncated account reads
+// as a complete account of a narrower file and nothing in the document says
+// otherwise.
+func TestTheAccountOfTheColumnsStopsAtAWidthAndSaysHowWideTheFileWas(t *testing.T) {
+	for _, given := range []struct {
+		what     string
+		columns  int
+		describe int
+	}{
+		{"a file narrower than the limit has every column described",
+			8, 8},
+		{"a file exactly at the limit has every column described",
+			manifest.ColumnsDescribed, manifest.ColumnsDescribed},
+		{"a file one column wider stops at the limit",
+			manifest.ColumnsDescribed + 1, manifest.ColumnsDescribed},
+	} {
+		t.Run(given.what, func(t *testing.T) {
+			dir := t.TempDir()
+			settings := usable()
+			settings.Out = filepath.Join(dir, "out")
+
+			opened, err := Open(wideFile(t, dir, given.columns), settings)
+			if err != nil {
+				t.Fatalf("the file could not be read: %v", err)
+			}
+			defer func() { _ = opened.Close() }()
+
+			worked := opened.inference()
+
+			if worked.ColumnsTotal != given.columns {
+				t.Errorf("the manifest says the file has %d columns, and it has %d",
+					worked.ColumnsTotal, given.columns)
+			}
+			if len(worked.Columns) != given.describe {
+				t.Fatalf("the manifest describes %d columns, want %d",
+					len(worked.Columns), given.describe)
+			}
+			// A bound that dropped the count as well would leave a reader
+			// unable to tell this from a complete account, which is the whole
+			// reason the count is required. The envelope is asked rather than
+			// the section, because that is the road every manifest takes.
+			envelope := manifest.Run{
+				GeneratedAt: "2026-09-03T00:00:00Z", Seed: "s", Locale: "en-US",
+				CatalogVersion: "0.1", Source: "wide.csv", Inference: worked,
+				RowsTotal: 3, RowsMutated: 0,
+			}
+			for _, problem := range envelope.Problems() {
+				t.Errorf("the model refuses what this run produced: %s", problem)
 			}
 		})
 	}

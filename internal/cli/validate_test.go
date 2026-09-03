@@ -365,6 +365,13 @@ func TestQuietKeepsTheProblemsAndDropsTheSummary(t *testing.T) {
 // Found by running the binary, with every test green.
 func TestValidateRefusesARecipeGenerateWouldRefuse(t *testing.T) {
 	dir := t.TempDir()
+	// 🔴 TWO unknown generators, not one, and that is the whole strength of this
+	// guard. The engine refuses such a recipe as well, and it stops at the first
+	// problem, so with one generator a mutation removing this command's own
+	// check passed unnoticed: something else refused instead and the exit code
+	// was the same. Measured on 2026-09-03, on the full run that first reached
+	// this entry. What only this command does is answer for the whole document
+	// at once, which is the sentence its own refusal ends with.
 	body := `version: "0.1"
 seed: "s"
 entities:
@@ -372,11 +379,17 @@ entities:
     count: 3
     fields:
       imie: { generator: nosuchthing }
+      inne: { generator: alsomissing }
 `
 	path := recipeIn(t, dir, body)
 
 	checked := run(commandValidate, path)
 	produced := run(commandGenerate, path)
+
+	if !strings.Contains(checked.log, "alsomissing") {
+		t.Errorf("the report stops at the first problem, and this command exists to give "+
+			"every one of them at once: %s", checked.log)
+	}
 
 	if checked.code != int(codeConfig) {
 		t.Errorf("validate ended with %d and a recipe that cannot be used is %d: %s",

@@ -49,6 +49,11 @@ type inferenceDocument struct {
 	// the looking went whether or not it found anything.
 	Relations   []inferredRelationDocument `json:"relations,omitempty"`
 	NotInferred []string                   `json:"not_inferred"`
+	// ColumnsTotal is the width of the file, which is not always the length of
+	// Columns. It is never left out, for the same reason not_inferred is not: a
+	// truncated account with no count beside it reads as a complete account of
+	// a narrower file, and nothing in the document tells the two apart.
+	ColumnsTotal int `json:"columns_total"`
 }
 
 type inferredRelationDocument struct {
@@ -167,9 +172,10 @@ func inferenceOf(inferred *manifest.Inference) *inferenceDocument {
 		return nil
 	}
 	document := &inferenceDocument{
-		Method:      inferred.Method,
-		Columns:     make([]inferredColumnDocument, 0, len(inferred.Columns)),
-		NotInferred: append([]string{}, inferred.NotInferred...),
+		Method:       inferred.Method,
+		Columns:      make([]inferredColumnDocument, 0, len(inferred.Columns)),
+		NotInferred:  append([]string{}, inferred.NotInferred...),
+		ColumnsTotal: inferred.ColumnsTotal,
 	}
 	for _, column := range inferred.Columns {
 		document.Columns = append(document.Columns, inferredColumnDocument{

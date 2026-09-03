@@ -109,7 +109,8 @@ func parentColumn(entity recipe.Entity, planned dataset.Table) (string, error) {
 	if _, collides := entity.ParentColumnCollision(); collides {
 		return "", fault.New(fault.Config, "entities."+entity.Name+" has a field called "+
 			planned.Parent+" and also belongs to an entity of that name, so the relation and "+
-			"the field would share a column. Rename the field")
+			"the field would share a column").
+			DoInstead("rename the field")
 	}
 	return planned.Parent, nil
 }

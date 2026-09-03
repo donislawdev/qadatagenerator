@@ -167,8 +167,8 @@ func (f *File) changedUnderneath(what string) error {
 	return fault.New(fault.Data, f.path+" changed while it was being read: "+what+
 		". This mode reads the file twice, because the number of records and what the columns "+
 		"hold have to be known before the first record can be damaged, so a file that is still "+
-		"being written cannot be a source. Nothing was written. Run this again once whatever "+
-		"produces that file has finished")
+		"being written cannot be a source. Nothing was written").
+		DoInstead("run this again once whatever produces that file has finished")
 }
 
 // Close releases the handle of the second pass. It is safe to call more than
@@ -216,7 +216,8 @@ func (f *File) survey() error {
 	f.table.Rows = rows
 	if rows == 0 {
 		return fault.New(fault.Data, f.path+" has a header and no records. There is nothing to "+
-			"damage, so nothing was written. Give a file with at least one row of data")
+			"damage, so nothing was written").
+			DoInstead("give a file with at least one row of data")
 	}
 	return nil
 }
@@ -339,12 +340,14 @@ func usableHeader(header []string, path string) error {
 		if clean == "" {
 			return fault.New(fault.Data, path+" has a column with no name, at position "+
 				strconv.Itoa(at+1)+". Every column needs a name, because the manifest says which "+
-				"column each defect landed in. Add a header name and run this again")
+				"column each defect landed in").
+				DoInstead("add a header name and run this again")
 		}
 		if seen[clean] {
 			return fault.New(fault.Data, path+" has two columns called "+fault.Shorten(clean)+
 				". Names have to differ, because a manifest naming that column would point at "+
-				"either of them. Rename one of them and run this again")
+				"either of them").
+				DoInstead("rename one of them and run this again")
 		}
 		seen[clean] = true
 	}
@@ -359,9 +362,12 @@ func usableHeader(header []string, path string) error {
 func (f *File) readFailure(err error) error {
 	var badField *csv.ParseError
 	if errors.As(err, &badField) {
+		// 🔴 The move says what to do and never which control does it, because
+		// it travels to both surfaces and the window has no flags. It named one
+		// until 2026-09-03.
 		return fault.New(fault.Data, f.path+" cannot be read as comma separated data: "+
-			err.Error()+". Check the quoting on that line, or give the delimiter this file "+
-			"uses with the delimiter flag")
+			err.Error()).
+			DoInstead("check the quoting on that line, or say which delimiter this file uses")
 	}
 	return fault.Wrap(fault.IO, err, "cannot read "+f.path)
 }

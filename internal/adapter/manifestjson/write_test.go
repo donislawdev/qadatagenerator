@@ -179,7 +179,8 @@ func TestAnInferredRelationReachesTheFileWithItsBasis(t *testing.T) {
 		Relations: []manifest.InferredRelation{
 			{Field: "pesel", With: "sex", Kind: "gender", Basis: "every record agrees"},
 		},
-		NotInferred: []string{"maximum length"},
+		NotInferred:  []string{"maximum length"},
+		ColumnsTotal: 1,
 	}
 	writer.Add(anEntry("one"))
 	if err := writer.Finish(envelope, 1, 1); err != nil {
