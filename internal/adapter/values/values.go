@@ -135,6 +135,13 @@ func (s Source) Known(generator string) bool {
 	return found
 }
 
+// Locales are the locales this build carries word lists for, sorted.
+//
+// It is asked of this package rather than of the corpus directly, so that a
+// caller describing what this build can produce has one door to knock on. What
+// the answer means, and what it does not, is written where it comes from.
+func Locales() []string { return corpus.Locales() }
+
 // Names returns every generator this build has, sorted.
 func (s Source) Names() []string {
 	names := make([]string, 0, len(producers))

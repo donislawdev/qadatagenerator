@@ -87,6 +87,37 @@ var held sync.Map
 // copies of both lists.
 var joined sync.Map
 
+// Locales are the locales this build carries word lists for, sorted.
+//
+// # Why this is read from the files rather than written down
+//
+// A list here would be a second copy of what the embed directive above already
+// says, and the day a third locale arrived the two would part company without a
+// word. The answer instead comes from the same bytes the lists come from.
+//
+// 🔴 It is not the set of locales a recipe may name, and whoever prints it has
+// to say so. A generator that draws on no list at all, such as an identifier
+// built by arithmetic, is produced in any locale, so a recipe naming one this
+// build has no words for is refused per field rather than outright.
+func Locales() []string {
+	entries, err := fs.ReadDir(files, ".")
+	if err != nil {
+		// Unreachable: the directory is embedded in the binary, so reading its
+		// root cannot fail for a reason a caller could act on. Answering with
+		// nothing beats a panic in a function whose only job is to describe
+		// this build to a reader.
+		return nil
+	}
+	var locales []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			locales = append(locales, entry.Name())
+		}
+	}
+	sort.Strings(locales)
+	return locales
+}
+
 // Load returns one list, in the order it is stored.
 //
 // The second result says whether a usable list came back. There is no fallback

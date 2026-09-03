@@ -835,6 +835,8 @@ var Guards = []Guard{
 	{"a file of ordinary width has every one of its columns named, so the threshold never becomes a cut", "TestAFileOfOrdinaryWidthHasEveryColumnNamed", "internal/cli", ByMutation},
 	{"a dry run does not send its reader to a manifest it will not write", "TestADryRunDoesNotSendTheReaderToAManifestItWillNotWrite", "internal/cli", ByMutation},
 	{"a refusal that knows its own next move keeps it, rather than being given the sentence for its kind on top", "TestARefusalThatKnowsTheNextMoveDoesNotGetTheOneForItsKind", "internal/cli", ByMutation},
+	{"the vocabulary of generators can be asked for rather than stumbled into, and the list is the register in both directions", "TestHelpNamesEveryGeneratorThisBuildHasAndNothingElse", "internal/cli", ByMutation},
+	{"a generator that cannot be produced in a locale says why, rather than being a bare no", "TestHelpSaysWhereAGeneratorCannotBeProducedAndWhy", "internal/cli", ByMutation},
 	{"the verb that reports problems does not end its own refusal by telling the reader to run it", "TestValidateDoesNotSendTheReaderToValidate", "internal/cli", ByMutation},
 
 	{"one ordered defect asks the register for its mutator once, so the mutator that runs is the one whose existence was checked", "TestOneOrderedDefectAsksTheRegisterForItsMutatorOnce", "internal/app/corrupt", ByMutation},

@@ -298,8 +298,32 @@ const (
 	doAboutConfigDocument = "check that each file is the document it is meant to be. The message above names which one and what was wrong with it"
 	doAboutDataCorrupt    = "the file cannot be used as it stands, so change the file or the flags describing it"
 
-	problemHelpSubject        = "no command called "
-	problemHelpSubjectWhy     = "help describes a command this build has"
+	// subjectGenerators is the one thing help describes that is not a command.
+	//
+	// 🔴 It is a word a person types, so it is a public contract from the first
+	// release, exactly like a verb. It is not in the register of commands, and
+	// that is deliberate rather than an omission: putting it there would make it
+	// a verb of its own in the usage line, in the refusal for an unknown command
+	// and in the parity register, and it is none of those. It is an answer to
+	// the question help exists to answer.
+	subjectGenerators = "generators"
+
+	generatorsHeading        = "Generators this build can fill a field with."
+	generatorsUse            = "A recipe names one like this:   pesel: { generator: pesel }"
+	generatorsColumnName     = "generator"
+	generatorsColumnProduces = "produces"
+	generatorsYes            = "yes"
+	generatorsNo             = "no"
+	generatorsLocaleNote     = "The columns are the locales this build carries word lists for. A recipe may name\n" +
+		"another one, and then only the generators that need no list can be filled."
+	generatorsMissingIntro = "Where a column says no, this build has nothing to draw from:"
+
+	// 🔴 Both of these said command until 2026-09-03, and both stopped being
+	// true the day help gained a subject that is not one. A refusal naming the
+	// wrong kind of thing sends somebody looking for a verb that was never
+	// missing.
+	problemHelpSubject        = "no help for "
+	problemHelpSubjectWhy     = "help describes a command this build has, or the generators it can fill a field with"
 	problemHelpSubjectDo      = "qadg help"
 	problemHelpArguments      = "help describes one command at a time"
 	problemHelpArgumentsWhy   = "each command has its own flags and its own answer"
@@ -439,11 +463,12 @@ var commandDocs = []commandDoc{
 	},
 	{
 		name:      commandHelp,
-		summary:   "Print this text, or the help of one command.",
-		arguments: "[command]",
+		summary:   "Print this text, the help of one command, or what this build can generate.",
+		arguments: "[command|generators]",
 		what: "Answers the same as --help. A command named after it is described on its own, with the\n" +
-			"flags it takes.",
-		example: "qadg help generate",
+			"flags it takes. The word generators lists every value this build can fill a field with\n" +
+			"and says where each one can be produced.",
+		example: "qadg help generators",
 	},
 }
 

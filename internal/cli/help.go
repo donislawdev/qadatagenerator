@@ -2,8 +2,10 @@ package cli
 
 import (
 	"flag"
+	"fmt"
 	"strings"
 
+	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
@@ -34,15 +36,109 @@ func runHelp(out *streams, arguments []string) int {
 		})
 	}
 
+	// 🔴 One subject that is not a command, and the refusal below knows it.
+	// Until 2026-09-03 the only way to learn which generators this build has
+	// was to name one it does not have and read the refusal, on both surfaces.
+	// A vocabulary somebody can only reach by making a mistake is a vocabulary
+	// this tool keeps to itself.
+	if arguments[0] == subjectGenerators {
+		out.emit(renderGenerators())
+		return finish(out, codeOK)
+	}
+
 	doc, found := commandDocFor(arguments[0])
 	if !found {
 		refusal := unknownCommand(arguments[0])
 		refusal.what = problemHelpSubject + arguments[0]
 		refusal.why = problemHelpSubjectWhy
+		refusal.allowed = strings.Join(helpSubjects(), ", ")
+		refusal.instead = problemHelpSubjectDo
+		if near, close := nearestOf(arguments[0], helpSubjects()); close {
+			refusal.instead = problemHelpSubjectDo + " " + near
+		}
 		return usage(out, refusal)
 	}
 	out.emit(renderCommandHelp(doc))
 	return finish(out, codeOK)
+}
+
+// helpSubjects is everything help answers about: every command, and the one
+// word that is not one.
+//
+// The word comes last rather than in sorted order, because that is the order
+// the sentence above it uses and because it is a different kind of thing from
+// the five before it.
+func helpSubjects() []string { return append(knownCommands(), subjectGenerators) }
+
+// renderGenerators prints every generator this build carries, what it produces
+// and where it can be produced.
+//
+// # Why the locales are columns rather than a sentence
+//
+// Whether a generator can be filled depends on the locale, and the answer is
+// not the same for all of them: this build has no cities or regions for en-US
+// and no register of postal codes for pl-PL. A list without that column would
+// name three generators that produce nothing in the locale somebody is about to
+// write, which is the shape of an answer that is true and useless.
+//
+// # Why a reason under the table rather than in the cell
+//
+// The reason is a sentence with the way out in it, and a sentence does not fit
+// in a column. Every no gets one, so nothing is left as a bare no.
+func renderGenerators() string {
+	// The locale of this source decides nothing here: every question below
+	// names the locale it asks about. It exists because the register is reached
+	// through a source rather than as a package level table.
+	source := values.New("", "help")
+	locales := values.Locales()
+	names := source.Names()
+
+	width, produced := 0, 0
+	for _, name := range names {
+		width = max(width, len(name))
+		produced = max(produced, len(producedBy(source, name)))
+	}
+
+	// Every line is trimmed on the right before it is joined. A column padded to
+	// the width of its heading leaves spaces nobody can see and every diff can,
+	// and this output is the kind of thing people paste into a bug report.
+	var lines, missing []string
+	head := fmt.Sprintf("  %-*s   %-*s", width, generatorsColumnName, produced, generatorsColumnProduces)
+	for _, locale := range locales {
+		head += "   " + locale
+	}
+	lines = append(lines, head)
+	for _, name := range names {
+		row := fmt.Sprintf("  %-*s   %-*s", width, name, produced, producedBy(source, name))
+		for _, locale := range locales {
+			answer := generatorsYes
+			if fine, why := source.CanProduce(name, locale); !fine {
+				answer = generatorsNo
+				missing = append(missing, "  "+name+" in "+locale+": "+why)
+			}
+			row += fmt.Sprintf("   %-*s", len(locale), answer)
+		}
+		lines = append(lines, strings.TrimRight(row, " "))
+	}
+
+	var b strings.Builder
+	b.WriteString(generatorsHeading + "\n" + generatorsUse + "\n\n")
+	b.WriteString(strings.Join(lines, "\n"))
+	b.WriteString("\n\n" + generatorsLocaleNote)
+	if len(missing) > 0 {
+		b.WriteString("\n\n" + generatorsMissingIntro + "\n" + strings.Join(missing, "\n"))
+	}
+	return b.String()
+}
+
+// producedBy says what one generator makes, naming the numbering scheme behind
+// it when there is one.
+func producedBy(source values.Source, generator string) string {
+	kind, _ := source.TypeOf(generator)
+	if scheme, behind := source.ProviderOf(generator); behind {
+		return kind + " (" + scheme + ")"
+	}
+	return kind
 }
 
 // declareVerbHelp gives a command the two spellings of the help flag and

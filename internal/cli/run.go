@@ -251,9 +251,14 @@ func knownCommands() []string {
 // The threshold is deliberately mean. Suggesting a command for anything vaguely
 // similar turns a clear refusal into a misleading one, and somebody who typed a
 // word we simply do not have is better served by the list of what exists.
-func nearestCommand(typed string) (string, bool) {
+func nearestCommand(typed string) (string, bool) { return nearestOf(typed, knownCommands()) }
+
+// nearestOf is the same question asked of any list of words a person could have
+// meant. The dispatcher asks it about verbs and help asks it about its own
+// subjects, which are the verbs plus one word that is not one.
+func nearestOf(typed string, candidates []string) (string, bool) {
 	best, distance := "", -1
-	for _, candidate := range knownCommands() {
+	for _, candidate := range candidates {
 		measured := editDistance(strings.ToLower(typed), candidate)
 		if distance < 0 || measured < distance {
 			best, distance = candidate, measured
