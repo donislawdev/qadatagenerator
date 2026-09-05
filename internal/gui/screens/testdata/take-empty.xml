@@ -3,34 +3,50 @@
 		<container pos="8,8" size="1326x884">
 			<container size="220x884">
 				<container size="220x884">
-					<widget size="220x28" type="*parts.Button">
-						<rectangle fillColor="button" radius="5" size="220x28"/>
-						<rectangle size="220x28"/>
-						<widget pos="86,4" size="46x19" type="*widget.RichText">
-							<text alignment="center" bold size="46x19">Recipe</text>
-						</widget>
+					<widget size="220x28" type="*container.ThemeOverride">
+						<container size="220x28">
+							<widget size="220x28" type="*parts.Button">
+								<rectangle fillColor="button" radius="5" size="220x28"/>
+								<rectangle size="220x28"/>
+								<widget pos="86,4" size="46x19" type="*widget.RichText">
+									<text alignment="center" bold size="46x19">Recipe</text>
+								</widget>
+							</widget>
+						</container>
 					</widget>
-					<widget pos="0,36" size="220x28" type="*parts.Button">
-						<rectangle fillColor="button" radius="5" size="220x28"/>
-						<rectangle size="220x28"/>
-						<widget pos="64,4" size="118x20" type="*widget.RichText">
-							<text alignment="center" bold size="118x19">Take and corrupt</text>
-						</widget>
-						<image fillMode="contain" pos="36,4" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
+					<widget pos="0,36" size="220x28" type="*container.ThemeOverride">
+						<container size="220x28">
+							<widget size="220x28" type="*parts.Button">
+								<rectangle fillColor="button" radius="5" size="220x28"/>
+								<rectangle size="220x28"/>
+								<widget pos="64,4" size="118x20" type="*widget.RichText">
+									<text alignment="center" bold size="118x19">Take and corrupt</text>
+								</widget>
+								<image fillMode="contain" pos="36,4" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
+							</widget>
+						</container>
 					</widget>
-					<widget pos="0,72" size="220x28" type="*parts.Button">
-						<rectangle fillColor="button" radius="5" size="220x28"/>
-						<rectangle size="220x28"/>
-						<widget pos="48,4" size="122x19" type="*widget.RichText">
-							<text alignment="center" bold size="122x19">Manifest browser</text>
-						</widget>
+					<widget pos="0,72" size="220x28" type="*container.ThemeOverride">
+						<container size="220x28">
+							<widget size="220x28" type="*parts.Button">
+								<rectangle fillColor="button" radius="5" size="220x28"/>
+								<rectangle size="220x28"/>
+								<widget pos="48,4" size="122x19" type="*widget.RichText">
+									<text alignment="center" bold size="122x19">Manifest browser</text>
+								</widget>
+							</widget>
+						</container>
 					</widget>
-					<widget pos="0,108" size="220x28" type="*parts.Button">
-						<rectangle fillColor="button" radius="5" size="220x28"/>
-						<rectangle size="220x28"/>
-						<widget pos="88,4" size="42x19" type="*widget.RichText">
-							<text alignment="center" bold size="42x19">About</text>
-						</widget>
+					<widget pos="0,108" size="220x28" type="*container.ThemeOverride">
+						<container size="220x28">
+							<widget size="220x28" type="*parts.Button">
+								<rectangle fillColor="button" radius="5" size="220x28"/>
+								<rectangle size="220x28"/>
+								<widget pos="88,4" size="42x19" type="*widget.RichText">
+									<text alignment="center" bold size="42x19">About</text>
+								</widget>
+							</widget>
+						</container>
 					</widget>
 				</container>
 			</container>
@@ -39,12 +55,16 @@
 					<container pos="24,24" size="1050x836">
 						<container size="1050x346">
 							<container size="1050x28">
-								<widget size="96x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="96x28"/>
-									<rectangle size="96x28"/>
-									<widget pos="4,4" size="88x19" type="*widget.RichText">
-										<text alignment="center" bold size="88x19">Choose a file</text>
-									</widget>
+								<widget size="96x28" type="*container.ThemeOverride">
+									<container size="96x28">
+										<widget size="96x28" type="*parts.Button">
+											<rectangle fillColor="button" radius="5" size="96x28"/>
+											<rectangle size="96x28"/>
+											<widget pos="4,4" size="88x19" type="*widget.RichText">
+												<text alignment="center" bold size="88x19">Choose a file</text>
+											</widget>
+										</widget>
+									</container>
 								</widget>
 							</container>
 							<container pos="0,36" size="1050x310">

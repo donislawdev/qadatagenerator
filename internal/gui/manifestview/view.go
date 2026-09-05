@@ -105,7 +105,7 @@ func New(text i18n.Catalogue, window fyne.Window, read Readers, load background.
 // and the layout is told separately where each one goes. It draws the same and
 // it walks the way the eye does.
 func (v *View) Content() fyne.CanvasObject {
-	bar := container.NewHBox(v.open, v.respond)
+	bar := container.NewHBox(v.open.OnScreen(), v.respond.OnScreen())
 	return parts.Inset(container.New(layout.NewBorderLayout(bar, nil, nil, nil), bar, v.body))
 }
 

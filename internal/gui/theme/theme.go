@@ -53,6 +53,15 @@ const (
 	RoleSurface Role = "surface"
 	// RoleAuxiliary only helps the eye follow a row. The threshold is ours.
 	RoleAuxiliary Role = "auxiliary"
+	// RoleOnFill is read as text and answers to the same 4.5 to 1 of WCAG
+	// 1.4.3, but it is measured against the fill it is read on rather than
+	// against the window. MeasuredAgainst below names that fill.
+	//
+	// The role exists because the toolkit floods a whole control with one
+	// colour while the keyboard is on it, so a label there is never read
+	// against the window at all. Measuring it there would report a number
+	// nobody can see, and it would report it as a pass.
+	RoleOnFill Role = "on-fill"
 	// RoleBackground is what other colours are measured against, so it
 	// answers to no threshold of its own.
 	//
@@ -120,11 +129,37 @@ var Palette = []Color{
 	{"expect.not-applied", 0xC7, 0x92, 0xEA, RoleText, "a corruption that could not be applied, which is the ban on silence made visible"},
 	{"corrupted", 0xFF, 0x9E, 0x64, RoleText, "a corrupted value beside a correct one"},
 	{"focus", 0x4E, 0xC9, 0xF5, RoleSurface, "the focus indicator, WCAG 2.1.1"},
+	{"text.on-focus", 0x1B, 0x1B, 0x1B, RoleOnFill, "the label of a control the toolkit floods with the focus colour, where the ordinary text colour measures 1.56"},
 	{"control.chosen", 0x9E, 0xD8, 0xF0, RoleSurface, "a control that has been chosen, and the border of a text field the keyboard is in"},
 	{"border.active", 0x6E, 0x6E, 0x6E, RoleSurface, "the border of the active control"},
 	{"row.divider", 0x3A, 0x3A, 0x3A, RoleAuxiliary, "the line between rows, which stands in for the zebra stripe that was measured not to work here"},
 	{"row.hover", 0x30, 0x30, 0x30, RoleAuxiliary, "the row under the pointer"},
 	{"row.selected", 0x38, 0x50, 0x6B, RoleAuxiliary, "the selected row"},
+}
+
+// MeasuredAgainst names, for every entry that is read on top of another entry,
+// the entry it is read on.
+//
+// # Why a register beside the palette rather than a field in it
+//
+// Almost every colour here is measured against the window, and a field would
+// put an empty value on thirteen entries to say so. A register says the same
+// thing by being short, and it can be closed from both sides by a test: an
+// entry carrying RoleOnFill with no row here is a colour whose threshold
+// nobody can compute, and a row naming an entry that does not exist is a rule
+// about nothing.
+//
+// # Why this exists at all
+//
+// Measured on 2026-09-05 through the pixels of the render: the label of a
+// focused button arrived as #E8E8E8 on #4EC9F5, which is 1.56 where WCAG 1.4.3
+// asks for 4.5. The toolkit floods the whole control with the focus colour
+// rather than tinting it, because the blend it performs collapses to the
+// overlay when the overlay is opaque, and every entry here is opaque by
+// decision. So the label is read on the focus colour and has to be measured
+// there.
+var MeasuredAgainst = map[string]string{
+	NameTextOnFocus: NameFocus,
 }
 
 // The names a view refers to its values by.
@@ -143,6 +178,7 @@ const (
 	NameNotApplied    = "expect.not-applied"
 	NameCorrupted     = "corrupted"
 	NameFocus         = "focus"
+	NameTextOnFocus   = "text.on-focus"
 	NameControlChosen = "control.chosen"
 	NameBorderActive  = "border.active"
 	NameRowDivider    = "row.divider"
@@ -160,7 +196,8 @@ const (
 // from the side the constants are on.
 var ColorNames = []string{
 	NameSurface, NameText, NameTextSubdued, NameRejection, NameAcceptance,
-	NameWarning, NameNotApplied, NameCorrupted, NameFocus, NameControlChosen, NameBorderActive,
+	NameWarning, NameNotApplied, NameCorrupted, NameFocus, NameTextOnFocus,
+	NameControlChosen, NameBorderActive,
 	NameRowDivider, NameRowHover, NameRowSelected,
 }
 

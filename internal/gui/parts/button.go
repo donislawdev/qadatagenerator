@@ -8,6 +8,7 @@ package parts
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -33,6 +34,13 @@ import (
 // moves.
 type Button struct {
 	widget.Button
+
+	// keyboardIsHere is kept here rather than read from the canvas, because
+	// the canvas is wrong about it at exactly the moment it changes: a control
+	// redraws from inside FocusLost, before the focus manager has moved its
+	// own record.
+	keyboardIsHere bool
+	onScreen       *container.ThemeOverride
 }
 
 // NewButton builds a button that answers to both keys.
@@ -41,7 +49,40 @@ func NewButton(label string, tapped func()) *Button {
 	button.Text = label
 	button.OnTapped = tapped
 	button.ExtendBaseWidget(button)
+	button.onScreen = Flooded(button, button.hasKeyboard)
 	return button
+}
+
+// OnScreen is what a layout is given, rather than the button itself.
+//
+// The toolkit floods a focused control with the focus colour, so the label on
+// it has to change colour to stay readable, and a colour is resolved through
+// the theme of the scope a widget is in. Flooded above says why that scope can
+// only be a container. This is where a layout is handed it.
+//
+// A layout given the button instead still compiles, because a button is a
+// canvas object like any other. What refuses it is the guard that walks each
+// screen and the contrast measured on the render, which is the right place for
+// it: the mistake is invisible in the source and plain in the pixels.
+func (b *Button) OnScreen() fyne.CanvasObject { return b.onScreen }
+
+// hasKeyboard says whether the keyboard is on this button.
+func (b *Button) hasKeyboard() bool { return b.keyboardIsHere }
+
+// FocusGained notes that the keyboard arrived, then lets the toolkit redraw.
+//
+// The order matters and is the whole point: the toolkit's own FocusGained ends
+// in a Refresh, and that Refresh is what asks the theme for the colour of the
+// label. Setting the flag afterwards would paint one frame with the old answer.
+func (b *Button) FocusGained() {
+	b.keyboardIsHere = true
+	b.Button.FocusGained()
+}
+
+// FocusLost notes that the keyboard left, then lets the toolkit redraw.
+func (b *Button) FocusLost() {
+	b.keyboardIsHere = false
+	b.Button.FocusLost()
 }
 
 // TypedKey presses on Enter, and hands every other key to the toolkit.

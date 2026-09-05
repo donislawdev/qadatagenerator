@@ -934,4 +934,6 @@ var Guards = []Guard{
 		"TestAskingForTheWindowDuringARunStopsItFirst", "internal/gui/takeview", ByMutation},
 	{"a separator that is briefly unusable does not take the open file away, and the next usable one brings it back",
 		"TestASeparatorThatIsBrieflyUnusableDoesNotTakeTheFileAway", "internal/gui/takeview", ByMutation},
+	{"every control the toolkit floods with the focus colour stands inside a theme of its own, so its label stays readable while the keyboard is on it", "TestEveryFloodedControlKeepsItsLabelReadable", "internal/gui/screens", ByMutation},
+	{"a palette entry read on top of another entry names that entry, and the entry it names is one the palette has", "TestEveryColourReadOnAnotherSaysWhichOne", "internal/gui/theme", ByMutation},
 }

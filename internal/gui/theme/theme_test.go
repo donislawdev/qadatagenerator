@@ -117,10 +117,46 @@ func TestEveryEntryStatesWhatItIsFor(t *testing.T) {
 // The role decides which threshold the contrast is measured against, so an
 // unknown role would be measured against nothing at all.
 func TestEveryColourCarriesAKnownRole(t *testing.T) {
-	known := map[Role]bool{RoleText: true, RoleSurface: true, RoleAuxiliary: true, RoleBackground: true}
+	known := map[Role]bool{
+		RoleText: true, RoleSurface: true, RoleAuxiliary: true,
+		RoleOnFill: true, RoleBackground: true,
+	}
 	for _, entry := range append([]Color{Background}, Palette...) {
 		if !known[entry.Role] {
 			t.Errorf("%s carries the role %q, which no threshold answers to", entry.Name, entry.Role)
+		}
+	}
+}
+
+// TestEveryColourReadOnAnotherSaysWhichOne closes MeasuredAgainst from both
+// sides.
+//
+// One side alone answers half the question. An entry that carries RoleOnFill
+// and names no fill is a colour whose threshold cannot be computed at all, and
+// the bridge would have to either invent a reference or skip the entry. A row
+// naming an entry that is not in the palette is a rule about nothing, which
+// reads like a rule until somebody looks.
+func TestEveryColourReadOnAnotherSaysWhichOne(t *testing.T) {
+	for _, entry := range Palette {
+		if entry.Role != RoleOnFill {
+			continue
+		}
+		if _, named := MeasuredAgainst[entry.Name]; !named {
+			t.Errorf("%s is read on another entry and does not say which one", entry.Name)
+		}
+	}
+	for name, fill := range MeasuredAgainst {
+		read, found := Lookup(name)
+		if !found {
+			t.Errorf("MeasuredAgainst names %q, which the palette does not have", name)
+			continue
+		}
+		if read.Role != RoleOnFill {
+			t.Errorf("%s is measured against %s and carries the role %q rather than %q",
+				name, fill, read.Role, RoleOnFill)
+		}
+		if _, found := Lookup(fill); !found {
+			t.Errorf("%s is measured against %q, which the palette does not have", name, fill)
 		}
 	}
 }

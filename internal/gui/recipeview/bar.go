@@ -38,8 +38,8 @@ type Write func(recipe []byte, into string, replace bool,
 // a pane cannot be moved from the keyboard and every one of them is a debt.
 func (v *View) bar() fyne.CanvasObject {
 	where := container.NewBorder(nil, nil,
-		widget.NewLabel(v.text.T(i18n.RecipeWriteTo)), v.choose, v.out)
-	buttons := container.NewBorder(nil, nil, v.replace, v.run, widget.NewLabel(""))
+		widget.NewLabel(v.text.T(i18n.RecipeWriteTo)), v.choose.OnScreen(), v.out)
+	buttons := container.NewBorder(nil, nil, v.replace, v.run.OnScreen(), widget.NewLabel(""))
 	return container.NewVBox(where, buttons, v.status)
 }
 

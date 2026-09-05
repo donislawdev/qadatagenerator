@@ -122,13 +122,13 @@ type View struct {
 
 	layers    *widget.CheckGroup
 	share     *widget.Entry
-	perRow    *widget.Select
+	perRow    *parts.Select
 	exclude   *widget.Entry
 	delimiter *widget.Entry
 	locale    *widget.Entry
 	seed      *widget.Entry
 	out       *widget.Entry
-	manifest  *widget.Select
+	manifest  *parts.Select
 	overwrite *widget.Check
 
 	chooseFile *parts.Button
@@ -211,7 +211,7 @@ func (v *View) Content() fyne.CanvasObject {
 	v.answerScroll = parts.NewKeyScroll(answer)
 	split := container.NewHSplit(v.fileScroll.Framed(), v.answerScroll.Framed())
 	v.split = split
-	body := container.NewVBox(container.NewHBox(v.chooseFile), v.empty)
+	body := container.NewVBox(container.NewHBox(v.chooseFile.OnScreen()), v.empty)
 	// 🔴 Drawn again now that the split exists. The screen was first drawn while
 	// this was still being built, so the state with no file had hidden every box
 	// and left the split itself showing: two separator lines across an otherwise

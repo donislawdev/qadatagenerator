@@ -281,7 +281,7 @@ func (v *View) runContent() []fyne.CanvasObject {
 	if v.busy() {
 		return v.runningContent()
 	}
-	drawn := []fyne.CanvasObject{container.NewHBox(v.damage)}
+	drawn := []fyne.CanvasObject{container.NewHBox(v.damage.OnScreen())}
 	v.damage.Enable()
 	if v.refusedNow() || v.readingNow() {
 		// Disabled rather than absent, and the reason is directly above it in
@@ -333,7 +333,7 @@ func (v *View) runningContent() []fyne.CanvasObject {
 		v.stop.Disable()
 	}
 	return []fyne.CanvasObject{
-		container.NewHBox(v.stop),
+		container.NewHBox(v.stop.OnScreen()),
 		beside(theme.InfoIcon(), wrapped(v.text.T(said))),
 	}
 }

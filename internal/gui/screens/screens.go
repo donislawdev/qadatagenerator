@@ -236,6 +236,16 @@ func takeStatesOfTheKeyboard() []State {
 			Keyboard:    Keyboard{Tabs: 16},
 		},
 		{
+			Name: "take-focus-choice",
+			Purpose: "the keyboard on a chooser, which the toolkit floods with the focus " +
+				"colour exactly as it floods a button, and which no state here " +
+				"reached until that flooding was measured",
+			Screen:      1,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+			Keyboard:    Keyboard{Tabs: 17},
+		},
+		{
 			Name: "take-focus-pane",
 			Purpose: "the keyboard on the pane that says what the file holds, which the " +
 				"toolkit's own scrolling area never lets it reach",

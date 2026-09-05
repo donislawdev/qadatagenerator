@@ -163,7 +163,7 @@ func (s *Shell) Showing() (int, bool) {
 func (s *Shell) Content() fyne.CanvasObject {
 	names := make([]fyne.CanvasObject, 0, len(s.buttons))
 	for _, button := range s.buttons {
-		names = append(names, button)
+		names = append(names, button.OnScreen())
 	}
 	column := container.New(fixedWidth{width: palette.SidebarWidth}, container.NewVBox(names...))
 	return container.New(layout.NewBorderLayout(nil, nil, column, nil), column, s.body)

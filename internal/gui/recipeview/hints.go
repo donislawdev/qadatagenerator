@@ -3,7 +3,6 @@ package recipeview
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
@@ -76,9 +75,8 @@ func (v *View) buildHints() {
 	// render showed the offer of an example as a bar across the whole window.
 	// A button that wide reads as the main thing on the screen, and the main
 	// thing on this screen is the field above it.
-	v.exampleRow = container.NewHBox(v.example)
-	v.generators = widget.NewAccordion(widget.NewAccordionItem(
-		v.generatorsTitle(), v.generatorsList()))
+	v.exampleRow = container.NewHBox(v.example.OnScreen())
+	v.generators = parts.NewDisclosure(v.generatorsTitle(), v.generatorsList())
 }
 
 // ShowGenerators opens the list, for a caller with no keyboard.
@@ -87,7 +85,7 @@ func (v *View) buildHints() {
 // every screen draws and the probe that renders each state to a picture both
 // have to reach a state, and a list nobody can photograph is a list nobody
 // reviews.
-func (v *View) ShowGenerators() { v.generators.Open(0) }
+func (v *View) ShowGenerators() { v.generators.Open() }
 
 // startFromExample fills an empty field with a recipe that runs.
 //

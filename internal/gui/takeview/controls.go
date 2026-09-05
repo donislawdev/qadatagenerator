@@ -45,12 +45,12 @@ func (v *View) buildControls() {
 		v.reopen()
 	}
 
-	v.perRow = widget.NewSelect(take.PerRowChoices(), func(picked string) {
+	v.perRow = parts.NewSelect(take.PerRowChoices(), func(picked string) {
 		v.chosen.PerRow = picked
 		v.settingChanged()
 	})
 	v.perRow.SetSelected(perRowDefault)
-	v.manifest = widget.NewSelect(v.manifestChoices(), func(picked string) {
+	v.manifest = parts.NewSelect(v.manifestChoices(), func(picked string) {
 		v.chosen.Manifest = v.formNamed(picked)
 		v.settingChanged()
 	})
@@ -105,13 +105,13 @@ func (v *View) form() fyne.CanvasObject {
 	return widget.NewForm(
 		widget.NewFormItem(v.text.T(i18n.TakeSettingLayers), v.layers),
 		widget.NewFormItem(v.text.T(i18n.TakeSettingRows), v.share),
-		widget.NewFormItem(v.text.T(i18n.TakeSettingPerRow), v.perRow),
+		widget.NewFormItem(v.text.T(i18n.TakeSettingPerRow), v.perRow.OnScreen()),
 		widget.NewFormItem(v.text.T(i18n.TakeSettingExclude), v.exclude),
 		widget.NewFormItem(v.text.T(i18n.TakeSettingDelimiter), v.delimiter),
 		widget.NewFormItem(v.text.T(i18n.TakeSettingLocale), v.locale),
 		widget.NewFormItem(v.text.T(i18n.TakeSettingSeed), v.seed),
 		widget.NewFormItem(v.text.T(i18n.TakeSettingOut), v.out),
-		widget.NewFormItem(v.text.T(i18n.TakeSettingManifest), v.manifest),
+		widget.NewFormItem(v.text.T(i18n.TakeSettingManifest), v.manifest.OnScreen()),
 		widget.NewFormItem(v.text.T(i18n.TakeSettingOverwrite), v.overwrite),
 	)
 }

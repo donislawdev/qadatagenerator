@@ -111,7 +111,7 @@ type View struct {
 	// rebuilt when the answer changes.
 	example    *parts.Button
 	exampleRow fyne.CanvasObject
-	generators *widget.Accordion
+	generators *parts.Disclosure
 
 	// asked counts the checks asked for, so that an answer which is no longer
 	// the latest question is dropped rather than drawn.
@@ -337,7 +337,7 @@ func (v *View) draw() {
 	// than anything about what is written. Closed until somebody opens it, and
 	// it stays open through the next answer because it is the same widget put
 	// back rather than a new one built.
-	v.answerBox.Add(v.generators)
+	v.answerBox.Add(v.generators.OnScreen())
 	v.answerBox.Refresh()
 	// The bar says what a run would do now, so it moves with every answer.
 	v.drawBar()
