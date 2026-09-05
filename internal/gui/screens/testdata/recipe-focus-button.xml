@@ -68,6 +68,22 @@
 							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
 						</container>
 					</container>
+					<container pos="0,144" size="220x28">
+						<widget size="220x28" type="*container.ThemeOverride">
+							<container size="220x28">
+								<widget size="220x28" type="*parts.Button">
+									<rectangle fillColor="button" radius="5" size="220x28"/>
+									<rectangle size="220x28"/>
+									<widget pos="68,4" size="82x19" type="*widget.RichText">
+										<text alignment="center" bold size="82x19">Quick value</text>
+									</widget>
+								</widget>
+							</container>
+						</widget>
+						<container size="220x28">
+							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						</container>
+					</container>
 				</container>
 			</container>
 			<container pos="228,0" size="1098x884">
@@ -230,7 +246,7 @@
 									</widget>
 								</widget>
 								<widget size="200x28" type="*widget.Check">
-									<circle pos="2,2" size="24x24"/>
+									<circle fillColor="focus" pos="2,2" size="24x24"/>
 									<image pos="4,4" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
 									<image pos="4,4" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
 									<text pos="28,0" size="172x28">Replace files already there</text>
@@ -239,10 +255,10 @@
 									<widget size="159x28" type="*container.ThemeOverride">
 										<container size="159x28">
 											<widget size="159x28" type="*parts.Button">
-												<rectangle fillColor="focus" radius="5" size="159x28"/>
+												<rectangle fillColor="button" radius="5" size="159x28"/>
 												<rectangle size="159x28"/>
 												<widget pos="4,4" size="151x19" type="*widget.RichText">
-													<text alignment="center" bold color="headerBackground" size="151x19">Generate this dataset</text>
+													<text alignment="center" bold size="151x19">Generate this dataset</text>
 												</widget>
 											</widget>
 										</container>

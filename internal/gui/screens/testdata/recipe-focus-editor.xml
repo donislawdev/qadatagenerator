@@ -68,6 +68,22 @@
 							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
 						</container>
 					</container>
+					<container pos="0,144" size="220x28">
+						<widget size="220x28" type="*container.ThemeOverride">
+							<container size="220x28">
+								<widget size="220x28" type="*parts.Button">
+									<rectangle fillColor="focus" radius="5" size="220x28"/>
+									<rectangle size="220x28"/>
+									<widget pos="68,4" size="82x19" type="*widget.RichText">
+										<text alignment="center" bold color="headerBackground" size="82x19">Quick value</text>
+									</widget>
+								</widget>
+							</container>
+						</widget>
+						<container size="220x28">
+							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						</container>
+					</container>
 				</container>
 			</container>
 			<container pos="228,0" size="1098x884">
@@ -76,7 +92,7 @@
 						<widget size="1050x709" type="*container.Split">
 							<widget size="1050x352" type="*parts.Editor">
 								<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="1046x348"/>
-								<rectangle pos="1,1" radius="5" size="1047x349" strokeColor="primary" strokeWidth="2"/>
+								<rectangle pos="1,1" radius="5" size="1047x349" strokeColor="inputBorder" strokeWidth="2"/>
 								<widget pos="0,2" size="1050x348" type="*widget.Scroll">
 									<widget size="1050x348" type="*widget.entryContent">
 										<widget size="1050x348" type="*widget.RichText">
@@ -90,7 +106,6 @@
 											<text monospace pos="4,116" size="261x16">        generator: person.email</text>
 											<text monospace pos="4,132" size="0x16"></text>
 										</widget>
-										<rectangle fillColor="primary" pos="3,2" size="2x16"/>
 									</widget>
 								</widget>
 							</widget>

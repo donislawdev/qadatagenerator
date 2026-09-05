@@ -12,6 +12,24 @@ repository once they are released.
 
 ### Added
 
+- **One value, now: `qadg quick pesel`.** A sixth command that produces a single
+  value of the kind you name and writes nothing anywhere. No recipe, no output
+  directory, no manifest. It is the only command whose runs differ from each
+  other: without a seed it draws a new one every time, so asking twice gives two
+  values, and naming a seed makes it repeatable again. The seed it drew is
+  printed on the log channel, so the value can always be asked for a second time.
+
+  `--gender` and `--birth-date` bind the value to what it has to agree with, and
+  either one is refused for a value that takes no account of it rather than
+  being accepted and ignored. Which values take account of which depends on the
+  locale: a Polish surname reads a gender and an English one does not.
+
+- **The window has a Quick value screen**, which is the same thing on the other
+  surface. Choosing what kind of value you want produces it, with no button to
+  press, and Copy puts it in the clipboard and says that it did. The fields for
+  a gender and a date of birth appear only beside a value that takes account of
+  them.
+
 - **The window writes datasets.** The recipe editor has a bar along the bottom:
   a directory to write to with a chooser beside it, a tick box for replacing
   files already there, and a button. Above the button it says which files a run

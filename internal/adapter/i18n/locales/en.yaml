@@ -14,6 +14,7 @@ window.title: QA Data Generator
 screen.about: About
 screen.manifest: Manifest browser
 screen.take: Take and corrupt
+screen.quick: Quick value
 
 about.heading.versions: Versions
 about.heading.licenses: Licenses
@@ -255,3 +256,19 @@ recipe.file: file
 recipe.files: files
 recipe.run-stopped: You stopped this run. Nothing was written, because every file gets its real name only once a whole run has succeeded.
 recipe.run-failed: This run did not finish, and nothing that looks complete was left behind.
+
+# The Quick value screen. One value, no recipe, nothing written.
+quick.nothing-written: Nothing on this screen is written to a file.
+quick.label.value: Value
+quick.label.locale: Locale
+quick.label.seed: Seed
+quick.label.gender: Gender
+quick.label.born: Born
+quick.gender.any: any
+quick.copy: Copy
+quick.again: Again
+quick.copied: The value is in the clipboard.
+quick.refused.generator: This build cannot produce that value.
+quick.refused.role: That value takes no account of what was chosen beside it.
+quick.refused.gender: That is not a gender this screen takes.
+quick.refused.date: A date of birth is written as YYYY-MM-DD.

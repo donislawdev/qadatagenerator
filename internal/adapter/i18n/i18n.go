@@ -42,6 +42,7 @@ const (
 	ScreenManifest Key = "screen.manifest"
 	ScreenTake     Key = "screen.take"
 	ScreenRecipe   Key = "screen.recipe"
+	ScreenQuick    Key = "screen.quick"
 )
 
 // The keys of the About screen.
@@ -346,10 +347,40 @@ const (
 	RecipeRunFailed     Key = "recipe.run-failed"
 )
 
+// The keys of the Quick value screen.
+const (
+	QuickNothingWritten Key = "quick.nothing-written"
+	QuickLabelValue     Key = "quick.label.value"
+	QuickLabelLocale    Key = "quick.label.locale"
+	QuickLabelSeed      Key = "quick.label.seed"
+	QuickLabelGender    Key = "quick.label.gender"
+	QuickLabelBorn      Key = "quick.label.born"
+	QuickGenderAny      Key = "quick.gender.any"
+	QuickCopy           Key = "quick.copy"
+	QuickAgain          Key = "quick.again"
+	QuickCopied         Key = "quick.copied"
+
+	// The refusals this mode can produce, in the words of this surface.
+	//
+	// Two of the four cannot be reached from this screen, because a gender is
+	// chosen from a list and a field that is not read is not shown. They are
+	// worded anyway: the register is closed in both directions by a test, and
+	// a screen that met an unworded refusal would have nothing to say.
+	QuickRefusedGenerator Key = "quick.refused.generator"
+	QuickRefusedRole      Key = "quick.refused.role"
+	QuickRefusedGender    Key = "quick.refused.gender"
+	QuickRefusedDate      Key = "quick.refused.date"
+)
+
 // Keys is every key a screen may ask for, so a test can close the register
 // from the side the code is on.
 var Keys = []Key{
-	WindowTitle, ScreenAbout, ScreenManifest, ScreenTake, ScreenRecipe,
+	WindowTitle, ScreenAbout, ScreenManifest, ScreenTake, ScreenRecipe, ScreenQuick,
+
+	QuickNothingWritten, QuickLabelValue, QuickLabelGender, QuickLabelBorn,
+	QuickLabelLocale, QuickLabelSeed,
+	QuickGenderAny, QuickCopy, QuickAgain, QuickCopied,
+	QuickRefusedGenerator, QuickRefusedRole, QuickRefusedGender, QuickRefusedDate,
 
 	AboutHeadingVersions, AboutHeadingLicenses, AboutHeadingComponents,
 	AboutHeadingData, AboutHeadingNotices,

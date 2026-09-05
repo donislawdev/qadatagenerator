@@ -114,6 +114,28 @@ var WindowReach = map[string]Claim{
 		Screen: "the data locale, beside the interface language and never the same control",
 		Test:   "TestEverySettingOnTheScreenReachesTheRun",
 	},
+	"quick": {
+		Screen: "the Quick value screen: a value produced by choosing what kind it is, with " +
+			"nothing written anywhere and a button that puts it in the clipboard",
+		Test: "TestChoosingAValueProducesOneAndCopyingItReachesTheClipboard",
+	},
+	"quick --locale": {
+		Screen: "the data locale, beside the interface language and never the same control, " +
+			"which also decides which values take account of a gender",
+		Test: "TestEveryControlOnTheQuickScreenReachesTheValue",
+	},
+	"quick --seed": {
+		Screen: "the seed, as a field the screen fills with the one it drew when nobody said",
+		Test:   "TestEveryControlOnTheQuickScreenReachesTheValue",
+	},
+	"quick --gender": {
+		Screen: "the gender, shown only beside a value that takes account of one",
+		Test:   "TestEveryControlOnTheQuickScreenReachesTheValue",
+	},
+	"quick --birth-date": {
+		Screen: "the date of birth, shown only beside a value that takes account of one",
+		Test:   "TestEveryControlOnTheQuickScreenReachesTheValue",
+	},
 	"corrupt --seed": {
 		Screen: "the seed, which the screen fills with the one the mode uses when nobody says",
 		Test:   "TestEverySettingOnTheScreenReachesTheRun",

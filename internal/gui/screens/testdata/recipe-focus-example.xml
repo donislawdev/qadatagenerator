@@ -68,6 +68,22 @@
 							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
 						</container>
 					</container>
+					<container pos="0,144" size="220x28">
+						<widget size="220x28" type="*container.ThemeOverride">
+							<container size="220x28">
+								<widget size="220x28" type="*parts.Button">
+									<rectangle fillColor="button" radius="5" size="220x28"/>
+									<rectangle size="220x28"/>
+									<widget pos="68,4" size="82x19" type="*widget.RichText">
+										<text alignment="center" bold size="82x19">Quick value</text>
+									</widget>
+								</widget>
+							</container>
+						</widget>
+						<container size="220x28">
+							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						</container>
+					</container>
 				</container>
 			</container>
 			<container pos="228,0" size="1098x884">
@@ -93,7 +109,7 @@
 								<rectangle fillColor="foreground" pos="509,0" size="32x4"/>
 							</widget>
 							<container pos="0,357" size="1050x352">
-								<rectangle size="1050x352" strokeWidth="2"/>
+								<rectangle size="1050x352" strokeColor="focus" strokeWidth="2"/>
 								<widget size="1050x352" type="*parts.KeyScroll">
 									<container size="1050x352">
 										<widget size="1050x46" type="*widget.Label">
@@ -106,10 +122,10 @@
 												<widget size="164x28" type="*container.ThemeOverride">
 													<container size="164x28">
 														<widget size="164x28" type="*parts.Button">
-															<rectangle fillColor="focus" radius="5" size="164x28"/>
+															<rectangle fillColor="button" radius="5" size="164x28"/>
 															<rectangle size="164x28"/>
 															<widget pos="4,4" size="156x19" type="*widget.RichText">
-																<text alignment="center" bold color="headerBackground" size="156x19">Start from an example</text>
+																<text alignment="center" bold size="156x19">Start from an example</text>
 															</widget>
 														</widget>
 													</container>

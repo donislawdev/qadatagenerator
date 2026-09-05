@@ -68,6 +68,22 @@
 							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
 						</container>
 					</container>
+					<container pos="0,144" size="220x28">
+						<widget size="220x28" type="*container.ThemeOverride">
+							<container size="220x28">
+								<widget size="220x28" type="*parts.Button">
+									<rectangle fillColor="button" radius="5" size="220x28"/>
+									<rectangle size="220x28"/>
+									<widget pos="68,4" size="82x19" type="*widget.RichText">
+										<text alignment="center" bold size="82x19">Quick value</text>
+									</widget>
+								</widget>
+							</container>
+						</widget>
+						<container size="220x28">
+							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						</container>
+					</container>
 				</container>
 			</container>
 			<container pos="228,0" size="1098x884">

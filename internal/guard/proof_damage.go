@@ -479,4 +479,11 @@ var damageGuards = []Guard{
 	{"a palette entry read on top of another entry names that entry, and the entry it names is one the palette has", "TestEveryColourReadOnAnotherSaysWhichOne", "internal/gui/theme", ByMutation},
 	{"a button somebody can press carries an edge of its own, so it is a control rather than a word", "TestEveryPressableButtonDrawsItsOwnEdge", "internal/gui/screens", ByMutation},
 	{"the edge of a button is drawn inside it, on whole pixels, rather than half outside", "TestTheEdgeIsDrawnInsideTheControlItOutlines", "internal/gui/parts", ByMutation},
+	{"a register of which values take account of a consistency role says only what the values really do", "TestEveryGeneratorReadsExactlyTheRolesTheRegisterSays", "internal/adapter/values", ByMutation},
+	{"a role that register names is a role a recipe can bind", "TestARoleTheRegisterNamesIsARoleThatExists", "internal/adapter/values", ByMutation},
+	{"the screen that produces one value produces it by choosing, and copying it reaches the clipboard", "TestChoosingAValueProducesOneAndCopyingItReachesTheClipboard", "internal/gui/quickview", ByMutation},
+	{"every control on that screen reaches the value", "TestEveryControlOnTheQuickScreenReachesTheValue", "internal/gui/quickview", ByMutation},
+	{"a field is on that screen only beside a value that takes account of it", "TestAFieldIsShownOnlyBesideAValueThatReadsIt", "internal/gui/quickview", ByMutation},
+	{"one value is refused rather than produced when what was bound to it is not read, not a gender, or not a date", "TestQuickRefusesWhatItCannotProduce", "internal/quick", ByMutation},
+	{"the value one verb writes is the value a recipe of the same seed produces", "TestTheValueIsTheOneARecipeWouldProduce", "internal/quick", ByMutation},
 }

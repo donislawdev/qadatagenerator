@@ -204,6 +204,8 @@ func runCommand(out *streams, command []string, asked invocation) int {
 		return runCorrupt(out, command[1:], asked.global)
 	case commandVerify:
 		return runVerify(out, command[1:], asked.global)
+	case commandQuick:
+		return runQuick(out, command[1:], asked.global)
 	case commandHelp:
 		return runHelp(out, command[1:])
 	default:

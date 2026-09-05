@@ -36,6 +36,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/gui/about"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
+	"github.com/donislawdev/qadatagenerator/internal/gui/quickview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/recipeview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/shell"
 	"github.com/donislawdev/qadatagenerator/internal/gui/takeview"
@@ -57,6 +58,26 @@ type Data struct {
 	// would photograph a screen nobody can reach.
 	SourcePath string
 }
+
+// Quick is the state of the screen that produces one value.
+//
+// The seed is here and is never empty in a state that shows a value, and that
+// is the whole reason this type exists. Without a seed that screen draws a new
+// one every time, which is what it is for, and a stored picture of it would
+// differ from itself on every run.
+type Quick struct {
+	// Generator is what is chosen in the list.
+	Generator string
+	// Gender and Born are the two fields, as somebody typed or chose them.
+	Gender string
+	Born   string
+	// Seed fixes the value, so a picture of this screen is the same picture
+	// tomorrow.
+	Seed string
+}
+
+// Chosen reports whether this state asks for anything on that screen.
+func (q Quick) Chosen() bool { return q.Generator != "" }
 
 // Keyboard is a walk through the window, as a person would make it.
 //
@@ -146,6 +167,11 @@ type State struct {
 	// put somebody's home in a file this repository keeps and would differ
 	// between two machines running the same guard.
 	Into string
+	// Quick is what is chosen on the screen that produces one value. It is a
+	// struct rather than four fields of this one, because every field of it is
+	// meaningless on any other screen and a state naming one of them by
+	// accident would be drawing a screen nobody asked for.
+	Quick Quick
 	// Checking leaves the judging of the recipe unanswered, which is the screen
 	// a person looks at while a large one is being read. It is the recipe
 	// editor's twin of Reading below, and separate for the same reason: the two
@@ -166,268 +192,6 @@ type State struct {
 	// Keyboard is applied after the window exists, because focus with no canvas
 	// has nothing to land on.
 	Keyboard Keyboard
-}
-
-// All is every state this window can be put into, for both screens.
-//
-// One list for both screens on purpose. A list written for one screen stays a
-// list of one screen forever, and nobody notices, because it is green.
-func All() []State {
-	states := recipeStates()
-	states = append(states, takeStates()...)
-	states = append(states, browserStates()...)
-	return append(states, aboutStates()...)
-}
-
-// takeStates are the states of the screen that damages somebody else's file,
-// which is the screen with the most of them.
-func takeStates() []State {
-	states := append(takeStatesBeforeARun(), takeStatesOfTheKeyboard()...)
-	states = append(states, takeStatesOfARun()...)
-	return append(states, takeStatesOfWhatARunLeft()...)
-}
-
-// takeStatesBeforeARun are the states in which nothing has been written.
-func takeStatesBeforeARun() []State {
-	return []State{
-
-		{
-			Name:    "take-empty",
-			Purpose: "no file chosen, a sentence rather than an empty rectangle",
-			Screen:  1,
-		},
-		{
-			Name:        "take-refused",
-			Purpose:     "a file read and no kind of damage chosen, so the screen says why it would not run",
-			Screen:      1,
-			NeedsSource: true,
-		},
-		{
-			Name:        "take-plan",
-			Purpose:     "a file read and two kinds of damage chosen, so the screen says what a run would do",
-			Screen:      1,
-			NeedsSource: true,
-			Layers:      []string{"L2", "L3"},
-		},
-	}
-}
-
-// takeStatesOfTheKeyboard are the places on this screen the keyboard can stand,
-// which are worth a picture each because what marks them is a colour and a
-// shape rather than a word.
-func takeStatesOfTheKeyboard() []State {
-	return []State{
-		{
-			Name: "take-focus-file",
-			Purpose: "the keyboard on the button that chooses a file, which is the first " +
-				"thing on this screen it reaches and was for a while the last",
-			Screen:      1,
-			NeedsSource: true,
-			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 5},
-		},
-		{
-			Name: "take-focus-setting",
-			Purpose: "the keyboard in a text setting, which is the one control the toolkit " +
-				"marks with the chosen colour rather than the focus colour",
-			Screen:      1,
-			NeedsSource: true,
-			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 16},
-		},
-		{
-			Name: "take-focus-choice",
-			Purpose: "the keyboard on a chooser, which the toolkit floods with the focus " +
-				"colour exactly as it floods a button, and which no state here " +
-				"reached until that flooding was measured",
-			Screen:      1,
-			NeedsSource: true,
-			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 17},
-		},
-		{
-			Name: "take-focus-pane",
-			Purpose: "the keyboard on the pane that says what the file holds, which the " +
-				"toolkit's own scrolling area never lets it reach",
-			Screen:      1,
-			NeedsSource: true,
-			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 6},
-		},
-		{
-			Name: "take-focus-damage",
-			Purpose: "the keyboard at the far end of the screen, on the button that damages " +
-				"the file, having passed every setting of the run on the way",
-			Screen:      1,
-			NeedsSource: true,
-			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 25},
-		},
-		{
-			Name: "take-reading",
-			Purpose: "a file being read, which for a file this mode is for means walking " +
-				"all of it while the window stays answerable",
-			Screen:      1,
-			NeedsSource: true,
-			Reading:     true,
-		},
-	}
-}
-
-// takeStatesOfARun are the states a run puts the screen into.
-//
-// Every one of them ticks kinds of damage first, because a state pressing the
-// button without them would be a picture of the screen refusing the run rather
-// than of the run.
-func takeStatesOfARun() []State {
-	return []State{
-		{
-			Name:        "take-running",
-			Purpose:     "a run going on, with the settings out of reach and the way to stop it in reach",
-			Screen:      1,
-			NeedsSource: true,
-			Layers:      []string{"L2", "L3"},
-			Ran:         RanInFlight,
-		},
-		{
-			Name: "take-focus-stop",
-			Purpose: "the keyboard on the way to stop a run, which is the only thing on " +
-				"this screen it can reach while one is going on",
-			Screen:      1,
-			NeedsSource: true,
-			Layers:      []string{"L2", "L3"},
-			Ran:         RanInFlight,
-			Keyboard:    Keyboard{Tabs: 7},
-		},
-	}
-}
-
-// takeStatesOfWhatARunLeft are the states of a run that is over.
-//
-// Split from the two above at the seam the screen itself has: while a run goes
-// on the settings are out of reach and the button stops it, and afterwards the
-// panel is a report of what happened. Splitting on that rather than on a line
-// count keeps each list about one thing.
-func takeStatesOfWhatARunLeft() []State {
-	return []State{
-		{
-			Name:        "take-written",
-			Purpose:     "a run that finished and carried out everything it ordered",
-			Screen:      1,
-			NeedsSource: true,
-			Layers:      []string{"L2", "L3"},
-			Ran:         RanWritten,
-		},
-		{
-			Name: "take-partial",
-			Purpose: "a run that wrote its files with some of the ordered damage unapplied, " +
-				"which is the state a count of what was applied hides",
-			Screen:      1,
-			NeedsSource: true,
-			Layers:      []string{"L2", "L3"},
-			Ran:         RanPartial,
-		},
-		{
-			Name:        "take-stopped",
-			Purpose:     "a run somebody ended, which leaves nothing behind and says so",
-			Screen:      1,
-			NeedsSource: true,
-			Layers:      []string{"L2", "L3"},
-			Ran:         RanStopped,
-		},
-		{
-			Name:        "take-failed",
-			Purpose:     "a run that ended on a failure, with what failed and what that left",
-			Screen:      1,
-			NeedsSource: true,
-			Layers:      []string{"L2", "L3"},
-			Ran:         RanFailed,
-		},
-		{
-			Name: "take-oversized",
-			Purpose: "a run that succeeded and left a manifest too large to read back, which " +
-				"nothing else about the screen shows",
-			Screen:      1,
-			NeedsSource: true,
-			Layers:      []string{"L2", "L3"},
-			Ran:         RanOversized,
-		},
-	}
-}
-
-// browserStates are the states of the manifest browser.
-func browserStates() []State {
-	return []State{
-		{
-			Name:    "browser-empty",
-			Purpose: "no manifest open, a sentence rather than an empty rectangle",
-			Screen:  2,
-		},
-		{
-			Name:          "browser-promised",
-			Purpose:       "a manifest open, which is what a run promised about a dataset",
-			Screen:        2,
-			NeedsManifest: true,
-		},
-		{
-			Name:          "browser-compared",
-			Purpose:       "the same manifest beside what an application did about it",
-			Screen:        2,
-			NeedsManifest: true,
-			NeedsResponse: true,
-		},
-		{
-			Name:          "browser-focus-button",
-			Purpose:       "the keyboard on the button that opens a manifest",
-			Screen:        2,
-			NeedsManifest: true,
-			Keyboard:      Keyboard{Tabs: 5},
-		},
-		{
-			Name:          "browser-focus-cell",
-			Purpose:       "the keyboard inside the table, three rows down and one column across",
-			Screen:        2,
-			NeedsManifest: true,
-			Keyboard: Keyboard{
-				Tabs: 7,
-				Keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight},
-			},
-		},
-	}
-}
-
-// aboutStates are the states of the screen naming what this build is.
-func aboutStates() []State {
-	return []State{
-		{
-			Name:    "about",
-			Purpose: "versions, licences and every third party component",
-			Screen:  3,
-		},
-		{
-			Name:     "about-focus-name",
-			Purpose:  "the keyboard on the name of the screen being read",
-			Screen:   3,
-			Keyboard: Keyboard{Tabs: 4},
-		},
-		{
-			Name: "about-focus-body",
-			Purpose: "the keyboard in the text of the screen, which the toolkit's own " +
-				"scrolling area never allows it to reach",
-			Screen:   3,
-			Keyboard: Keyboard{Tabs: 5},
-		},
-		{
-			Name: "about-scrolled",
-			Purpose: "the same screen two pages further down, reached with the keyboard " +
-				"alone, which is three quarters of it that a mouse used to be needed for",
-			Screen: 3,
-			Keyboard: Keyboard{
-				Tabs: 5,
-				Keys: []fyne.KeyName{fyne.KeyPageDown, fyne.KeyPageDown},
-			},
-		},
-	}
 }
 
 // Buildable reports whether this state can be drawn from the data given, and
@@ -468,12 +232,20 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	// the screen's own package against a directory of its own.
 	recipeScreen := recipeview.New(text, recipeview.Checker(describedDamage()), nil,
 		background.Work{Read: readingFor(state.Checking)}, nil)
+	// The clipboard is nothing at all here, for the same reason the way to
+	// write is: a state of this list is a picture, and a picture that reached
+	// the clipboard of the machine taking it would change something outside
+	// itself. That the button really copies is held by a test in the screen's
+	// own package against a clipboard of its own.
+	quickScreen := quickview.New(text, nil)
 	frame := shell.New([]shell.Screen{
 		{Name: text.T(i18n.ScreenRecipe), Content: recipeScreen.Content()},
 		{Name: text.T(i18n.ScreenTake), Content: takeScreen.Content(), OnDropped: takeScreen.Dropped},
 		{Name: text.T(i18n.ScreenManifest), Content: view.Content()},
 		{Name: text.T(i18n.ScreenAbout), Content: about.Content(text, license.Current(), version.Current())},
+		{Name: text.T(i18n.ScreenQuick), Content: quickScreen.Content()},
 	})
+	settleQuick(quickScreen, state.Quick)
 	if state.Into != "" {
 		recipeScreen.SetOut(state.Into)
 	}
@@ -511,6 +283,24 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 // screen then landed on a branch whose state is on the first screen anyway. A
 // guard that had been green for a fortnight was quietly answering about
 // nothing.
+// settleQuick puts the screen that produces one value into the state asked for,
+// through the same calls a person makes.
+func settleQuick(screen *quickview.View, asked Quick) {
+	if !asked.Chosen() {
+		return
+	}
+	// The seed goes in first, so that choosing produces the value this state
+	// names rather than one value and then another.
+	screen.UseSeed(asked.Seed)
+	screen.Choose(asked.Generator)
+	if asked.Gender != "" {
+		screen.ChooseGender(asked.Gender)
+	}
+	if asked.Born != "" {
+		screen.SetBorn(asked.Born)
+	}
+}
+
 func settle(takeScreen *takeview.View, state State) {
 	// The failure is deliberately not swallowed into an empty screen: a state
 	// that says it needs a file and then draws one that has none is a picture

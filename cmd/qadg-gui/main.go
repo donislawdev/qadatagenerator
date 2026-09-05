@@ -30,6 +30,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
+	"github.com/donislawdev/qadatagenerator/internal/gui/quickview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/recipeview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/shell"
 	"github.com/donislawdev/qadatagenerator/internal/gui/takeview"
@@ -66,7 +67,7 @@ func main() {
 	text := i18n.English
 	window := application.NewWindow(text.T(i18n.WindowTitle))
 
-	frame := assemble(text, window)
+	frame := assemble(text, window, application.Clipboard())
 
 	// Dropping is a property of the window rather than of a control, so the
 	// frame is what receives it and hands it to whichever screen is open.
@@ -91,7 +92,7 @@ func main() {
 // Every screen is handed its readers and its places of work here rather than
 // reaching for them, which is what lets each of them be built in a test with no
 // disk and no goroutine.
-func assemble(text i18n.Catalogue, window fyne.Window) *shell.Shell {
+func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipboard) *shell.Shell {
 	browser := manifestview.New(text, window, manifestview.Readers{
 		Manifest: manifestjson.Load,
 		Response: responsejson.Load,
@@ -124,10 +125,17 @@ func assemble(text i18n.Catalogue, window fyne.Window) *shell.Shell {
 	// The editor is first, and that is the answer to why it was built: somebody
 	// who opened this window before it could generate nothing with it, and the
 	// screen a window opens on is the one it is judged by.
+	// The one screen that reaches outside this tool's own files and channels,
+	// and the way out is handed in rather than reached for, like every other
+	// screen here. A screen built to be read rather than shown has no
+	// application behind it, and the clipboard of the toolkit asks for one.
+	value := quickview.New(text, clipboard)
+
 	return shell.New([]shell.Screen{
 		{Name: text.T(i18n.ScreenRecipe), Content: editor.Content()},
 		{Name: text.T(i18n.ScreenTake), Content: damage.Content(), OnDropped: damage.Dropped},
 		{Name: text.T(i18n.ScreenManifest), Content: browser.Content()},
 		{Name: text.T(i18n.ScreenAbout), Content: about.Content(text, license.Current(), version.Current())},
+		{Name: text.T(i18n.ScreenQuick), Content: value.Content()},
 	})
 }

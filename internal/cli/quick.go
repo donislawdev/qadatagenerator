@@ -1,0 +1,222 @@
+package cli
+
+import (
+	"flag"
+	"io"
+	"strings"
+
+	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
+	"github.com/donislawdev/qadatagenerator/internal/quick"
+)
+
+// runQuick writes one value and nothing else.
+//
+// # Why this verb has no output beyond the value
+//
+// It is the one command whose whole answer is meant to be piped, pasted or read
+// off a terminal in a second. A note about what was produced, a manifest or a
+// summary would each be another line to skip past, and the run writes nothing
+// to a disk for any of them to describe.
+//
+// The seed is the exception to that silence and it is deliberate: a run that
+// drew its own seed says so on the log channel, because otherwise the one thing
+// somebody needs in order to ask for the same value again is the one thing they
+// cannot get. The log channel rather than the data channel, so a pipe reading
+// the value never sees it.
+func runQuick(out *streams, arguments []string, global crossCutting) int {
+	set := flag.NewFlagSet(commandQuick, flag.ContinueOnError)
+	set.SetOutput(io.Discard)
+	local := declareCrossCutting(set)
+	askedForHelp := declareVerbHelp(set)
+	locale := set.String("locale", "", "")
+	seed := set.String("seed", "", "")
+	gender := set.String("gender", "", "")
+	birthDate := set.String("birth-date", "", "")
+
+	// 🔴 The name is taken off the front before the flags are read, and this
+	// is not a stylistic choice. The flag package stops at the first argument
+	// that is not a flag, so qadg quick pesel --gender female would leave the
+	// two flags unparsed and the verb would refuse a command that looks right
+	// to everybody. Both documents describing this verb write the name first,
+	// and so does anybody typing it.
+	//
+	// Taking it only when it is genuinely first keeps the other order working
+	// too: with a flag in front, the flag package reads the flags and leaves
+	// the name behind as the one argument, which is where the code below looks
+	// for it. Scanning for the first argument that is not a flag would have
+	// been wrong, because the VALUE of a flag is not a flag either.
+	named := ""
+	if len(arguments) > 0 && !strings.HasPrefix(arguments[0], "-") {
+		named, arguments = arguments[0], arguments[1:]
+	}
+
+	if err := set.Parse(arguments); err != nil {
+		return usage(out, flagFailure(err, acceptedFlagsOf(commandQuick),
+			problemHelpSubjectDo+" "+commandQuick))
+	}
+	if askedForHelp() {
+		return printCommandHelp(out, commandQuick)
+	}
+	flags := global.merge(local)
+	if code, ok := applyVerbosity(out, flags); !ok {
+		return code
+	}
+
+	left := set.Args()
+	if named == "" && len(left) == 1 {
+		named, left = left[0], nil
+	}
+	if named == "" || len(left) > 0 {
+		return usage(out, problem{
+			what:    problemQuickArguments,
+			why:     problemQuickArgumentsWhy,
+			allowed: problemQuickArgumentsAllowed,
+			instead: problemQuickArgumentsDo,
+		})
+	}
+
+	return writeOneValue(out, *locale, *seed, named, boundBy(set, *gender, *birthDate))
+}
+
+// boundBy is what the two consistency flags said, and nothing for the ones that
+// were left out.
+//
+// A flag left out is not the same as a flag given empty, and the agreement
+// carries only what was actually said. Binding an empty gender would make the
+// run refuse a value nobody typed.
+func boundBy(set *flag.FlagSet, gender, birthDate string) map[string]string {
+	agrees := map[string]string{}
+	if isSet(set, "gender") {
+		agrees[provider.RoleGender] = gender
+	}
+	if isSet(set, "birth-date") {
+		agrees[provider.RoleBirthDate] = birthDate
+	}
+	return agrees
+}
+
+// quickRefusalSays is every refusal this mode can produce, in the words this
+// surface uses for it.
+//
+// A register rather than a switch, for the reason written beside the one next
+// door: a switch has a last branch, and a kind added to the mode and forgotten
+// here lands in it, producing a confident four part message about a different
+// refusal entirely. A register can be held against the list of kinds in both
+// directions, and the guard beside it does that.
+var quickRefusalSays = map[quick.RefusalKind]refusalWords{
+	quick.UnknownGenerator: {
+		what: problemQuickUnknownGenerator, why: problemQuickUnknownGeneratorWhy,
+		instead: problemQuickUnknownGeneratorDo,
+	},
+	quick.RoleNotRead: {
+		what: problemQuickRoleNotRead, why: problemQuickRoleNotReadWhy,
+		instead: problemQuickRoleNotReadDo,
+	},
+	quick.UnreadableGender: {
+		what: problemQuickGender, why: problemQuickGenderWhy,
+		instead: problemQuickGenderDo,
+	},
+	quick.UnreadableDate: {
+		what: problemQuickDate, why: problemQuickDateWhy,
+		allowed: problemQuickDateAllowed, instead: problemQuickDateDo,
+	},
+}
+
+// quickRefusalOf turns a refusal of the mode into the four parts a person reads.
+func quickRefusalOf(refusal quick.Refusal) problem {
+	words, known := quickRefusalSays[refusal.Kind]
+	if !known {
+		// Loud rather than a message about the wrong thing. A kind with no
+		// words here is a defect of ours, and the guard beside this register
+		// exists so that this branch stays unreachable.
+		return problem{
+			what:    problemQuickUnknownRefusal,
+			why:     problemQuickUnknownRefusalWhy,
+			instead: doAboutRuntime,
+		}
+	}
+	what := words.what + refusal.Value
+	if refusal.Kind == quick.RoleNotRead {
+		what += problemQuickRoleNotReadJoin + refusal.Role + inLocale(refusal.Locale)
+	}
+	// The register wins where it has an answer, because a refusal whose
+	// accepted values are a sentence rather than a list has no list to carry.
+	allowed := words.allowed
+	if allowed == "" {
+		allowed = strings.Join(refusal.Allowed, ", ")
+	}
+	return problem{
+		what:    what,
+		why:     words.why,
+		allowed: allowed,
+		instead: words.instead,
+	}
+}
+
+// inLocale names the locale only where it is what makes the answer no.
+//
+// A surname reads the gender in Polish and not in English, so a refusal leaving
+// the locale out would read as a rule of the tool rather than as a property of
+// the data somebody asked for.
+func inLocale(locale string) string {
+	if locale == "" {
+		return ""
+	}
+	return problemQuickInLocale + locale
+}
+
+// writeOneValue draws the value and puts it on the data channel.
+//
+// Split from reading the command line above it for the reason every other verb
+// here is split the same way: what was asked for and what is done about it are
+// two things, and the second one is what a test wants to reach.
+func writeOneValue(out *streams, locale, chosenSeed, generator string, agrees map[string]string) int {
+	drawn := chosenSeed
+	if drawn == "" {
+		fresh, err := quick.NewSeed()
+		if err != nil {
+			return fail(out, err)
+		}
+		drawn = fresh
+	}
+
+	asked := quick.Request{Generator: generator, Locale: locale, Seed: drawn, Agrees: agrees}
+	if refusal := quick.Check(asked); refusal.Refused() {
+		return usage(out, quickRefusalOf(refusal))
+	}
+
+	value, err := quick.Run(asked)
+	if err != nil {
+		return fail(out, err)
+	}
+
+	out.emit(value)
+	if chosenSeed == "" {
+		// note rather than info, and the difference is the whole point: info is
+		// silent unless somebody asked for progress detail, and this is not
+		// progress. It is the one thing needed to ask for the same value
+		// again, so it is silent only under --quiet, which asked for failures
+		// alone.
+		//
+		// Said after the value rather than before it, so that a person reading
+		// a terminal sees what they asked for first. The two channels are
+		// separate, so the order only matters to a pair of eyes.
+		out.note(quickSeedDrawn + drawn)
+	}
+	return finish(out, codeOK)
+}
+
+// isSet reports whether that flag was given on the command line.
+//
+// The flag package has no other way to tell an absent flag from one given its
+// zero value, and here the difference is the whole meaning: an absent gender
+// draws one, and an empty gender is a value no scheme can encode.
+func isSet(set *flag.FlagSet, name string) bool {
+	given := false
+	set.Visit(func(f *flag.Flag) {
+		if f.Name == name {
+			given = true
+		}
+	})
+	return given
+}

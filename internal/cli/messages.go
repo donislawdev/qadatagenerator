@@ -49,6 +49,10 @@ const (
 	// first time wants a line they can paste, and every widely used command
 	// line tool leads with one.
 	examplesBlock = `Examples:
+  qadg quick pesel
+      Produce one valid value and nothing else. The shortest thing this
+      tool does, and the only one whose runs differ from each other.
+
   qadg generate recipe.yaml
       Produce the dataset the recipe describes and write it beside a note
       saying what the run made.
@@ -95,6 +99,16 @@ const (
 	// has been in the table since the first day with nothing able to return it.
 	commandVerify = "verify"
 
+	// commandQuick is the name as typed, and a public contract for the same
+	// reason as the four above it.
+	//
+	// 🔴 It is the only verb whose default run is NOT repeatable. Somebody
+	// asking for an identifier twice wants two of them, so a run without a
+	// seed draws one. The seventh rule stays whole, because it says the same
+	// seed gives the same result, and naming one brings that back entirely.
+	// The help of this verb says so rather than leaving it to be found out.
+	commandQuick = "quick"
+
 	// commandHelp is the name as typed, and a public contract for the same
 	// reason as the two above it.
 	//
@@ -119,6 +133,42 @@ const (
 	// contract of the second pillar, and a name taken in passing is a name that
 	// stays for years.
 	runNoteName = "run-note.json"
+
+	problemQuickUnknownGenerator    = "no generator called "
+	problemQuickUnknownGeneratorWhy = "the value asked for is not one this build can produce"
+	problemQuickUnknownGeneratorDo  = "qadg help generators lists every one with what it produces"
+
+	// problemQuickRoleNotRead is a prefix in two parts, because the sentence
+	// names the generator and then the role, and the value of each arrives
+	// with the refusal rather than being known here.
+	problemQuickRoleNotRead     = "no account is taken of that value by "
+	problemQuickRoleNotReadJoin = ", which was given a "
+	problemQuickInLocale        = " in "
+	problemQuickRoleNotReadWhy  = "one value is asked for here, so a value bound to something this generator ignores has no other column to be for. It is refused rather than accepted and forgotten"
+	problemQuickRoleNotReadDo   = "leave the flag out, or ask for a value that does take account of it"
+
+	problemQuickGender    = "not a gender this command takes: "
+	problemQuickGenderWhy = "one value has one spelling here, and the spelling is what comes out in the data"
+	problemQuickGenderDo  = "qadg quick pesel --gender female"
+
+	problemQuickDate        = "not a date this command takes: "
+	problemQuickDateAllowed = "a calendar date written as YYYY-MM-DD"
+	problemQuickDateWhy     = "a date of birth is read as a calendar date, and the scheme carrying it accepts one way of writing one"
+	problemQuickDateDo      = "qadg quick pesel --birth-date 1980-05-05"
+
+	problemQuickUnknownRefusal    = "a refusal arrived with no words for it"
+	problemQuickUnknownRefusalWhy = "the mode refused this request and this surface has no sentence for that refusal, so the reason cannot be shown"
+
+	problemQuickArguments        = "quick takes one generator"
+	problemQuickArgumentsWhy     = "it produces a single value of the kind named, without a recipe and without writing anything"
+	problemQuickArgumentsAllowed = "one generator name, such as pesel"
+	problemQuickArgumentsDo      = "qadg quick pesel"
+
+	// quickSeedDrawn goes on the log channel after a run that chose its own
+	// seed, because the value is on the data channel and a pipe must not see
+	// this. Without it the one thing needed to ask for the same value again is
+	// the one thing nobody has.
+	quickSeedDrawn = "drawn from seed "
 
 	problemGenerateArguments        = "generate takes one recipe"
 	problemGenerateArgumentsWhy     = "it reads a recipe and writes the dataset that recipe describes"
@@ -460,6 +510,21 @@ var commandDocs = []commandDoc{
 			"what it did not check. A recipe that passes says what would be generated, not that the\n" +
 			"data exists.",
 		example: "qadg validate --json recipe.yaml",
+	},
+	{
+		name:      commandQuick,
+		summary:   "Produce one value, with no recipe and nothing written.",
+		arguments: "<generator>",
+		what: "Writes a single value of the kind named and nothing else. It is the only command\n" +
+			"whose runs differ from each other: without a seed it draws a new one every time, so\n" +
+			"asking twice gives two values, and naming a seed makes it repeatable again.",
+		example: "qadg quick pesel --gender female --birth-date 1980-05-05",
+		flags: []flagDoc{
+			{"--locale <name>", []string{"--locale"}, "Which locale to draw from. A generator that has no data for it is refused with the reason."},
+			{"--seed <text>", []string{"--seed"}, "Draw from this seed. Without it a fresh one is drawn and named on the log channel."},
+			{"--gender <female|male>", []string{"--gender"}, "The gender the value has to agree with. Refused for a generator that takes no account of it."},
+			{"--birth-date <YYYY-MM-DD>", []string{"--birth-date"}, "The date of birth the value has to agree with. Refused for a generator that takes no account of it."},
+		},
 	},
 	{
 		name:      commandHelp,

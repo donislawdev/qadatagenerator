@@ -129,6 +129,50 @@ func New(locale, from string) Source {
 	return Source{locale: locale, seed: seed.New(from)}
 }
 
+// everywhere is a generator that reads the same roles in every locale.
+func everywhere(roles ...string) func(string) []string {
+	return func(string) []string { return roles }
+}
+
+// whereSurnamesInflect is the gender, in the locales whose surnames carry it.
+//
+// Measured on 2026-09-05 rather than reasoned: binding two genders at one
+// address moves a Polish surname and leaves an English one alone, because the
+// Polish lists are split by inflection and the English one is not. The test of
+// the register does that measurement for every generator and every locale.
+func whereSurnamesInflect(locale string) []string {
+	if strings.HasPrefix(locale, "pl") {
+		return []string{provider.RoleGender}
+	}
+	return nil
+}
+
+// RolesRead are the consistency roles that generator takes account of, sorted.
+//
+// An unknown generator reads nothing, which is the same answer as a generator
+// that reads nothing, and that is deliberate: a caller asking this has already
+// been told whether the name exists, and answering twice would put the refusal
+// in two places.
+func (s Source) RolesRead(generator string) []string {
+	known, found := producers[generator]
+	if !found || known.reads == nil {
+		return nil
+	}
+	roles := append([]string(nil), known.reads(s.locale)...)
+	sort.Strings(roles)
+	return roles
+}
+
+// ReadsRole reports whether that generator takes account of that role.
+func (s Source) ReadsRole(generator, role string) bool {
+	for _, read := range s.RolesRead(generator) {
+		if read == role {
+			return true
+		}
+	}
+	return false
+}
+
 // Known reports whether this build has a generator of that name.
 func (s Source) Known(generator string) bool {
 	_, found := producers[generator]
@@ -380,25 +424,56 @@ type generator struct {
 	// needs answers whether this build can produce the value in a locale,
 	// before a row exists. A generator that works everywhere leaves it nil.
 	needs func(locale string) (bool, string)
+	// reads answers which roles of a consistency rule this generator takes
+	// account of, in a given locale. A generator that ignores every one of
+	// them in every locale leaves it nil.
+	//
+	// # Why the registry has to say this, when nothing else asks
+	//
+	// A recipe binds a role and a provider reads it or does not, and until
+	// 2026-09-05 nothing needed to know which. The verb that produces one
+	// value does: asked for a city with a gender beside it, it would either
+	// bind a value nothing reads and say nothing, or refuse. The first is
+	// silence in the shape this product refuses everywhere else, and the
+	// second needs this field.
+	//
+	// # Why a written list is honest here
+	//
+	// Nothing in a provider declares what it reads, so this cannot be derived
+	// from the code. What it CAN be is measured: bind two different values for
+	// a role at one address and see whether the produced value moves. A guard
+	// beside this file does exactly that for every generator and every role,
+	// so the list is closed from both sides by measurement rather than by
+	// somebody remembering to extend it.
+	//
+	// 🔴 It takes a locale for the same reason `needs` above it does, and the
+	// reason is measured rather than anticipated: a surname reads the gender
+	// in Polish, because Polish surnames inflect, and reads nothing in
+	// English. A register that answered without the locale would promise an
+	// influence that half the runs do not have.
+	reads func(locale string) []string
 }
 
 // producers is the registry. It is a map rather than a switch so that the list
 // of names and the list of implementations cannot drift apart.
 var producers = map[string]generator{
 	FirstName: {produce: Source.firstName, list: "first-names",
-		needs: fromLists("first-names-female", "first-names-male")},
-	LastName:   {produce: Source.lastName, list: "last-names", needs: surnameLists},
+		needs: fromLists("first-names-female", "first-names-male"),
+		reads: everywhere(provider.RoleGender)},
+	LastName: {produce: Source.lastName, list: "last-names", needs: surnameLists,
+		reads: whereSurnamesInflect},
 	Gender:     {produce: Source.gender},
 	BirthDate:  {produce: Source.birthDate},
 	City:       {produce: fromList("cities"), list: "cities", needs: fromLists("cities")},
 	Region:     {produce: fromList("regions"), list: "regions", needs: fromLists("regions")},
 	PostalCode: {produce: Source.postalCode, behind: us.Postal{}, needs: postalRegister},
-	Pesel:      {produce: fromProvider(pl.PESEL{}), behind: pl.PESEL{}},
-	Nip:        {produce: fromProvider(pl.NIP{}), behind: pl.NIP{}},
-	Regon:      {produce: fromProvider(pl.REGON{}), behind: pl.REGON{}},
-	SSN:        {produce: fromProvider(us.SSN{}), behind: us.SSN{}},
-	ABA:        {produce: fromProvider(us.ABA{}), behind: us.ABA{}},
-	IBAN:       {produce: fromProvider(intl.IBAN{}), behind: intl.IBAN{}},
+	Pesel: {produce: fromProvider(pl.PESEL{}), behind: pl.PESEL{},
+		reads: everywhere(provider.RoleBirthDate, provider.RoleGender)},
+	Nip:   {produce: fromProvider(pl.NIP{}), behind: pl.NIP{}},
+	Regon: {produce: fromProvider(pl.REGON{}), behind: pl.REGON{}},
+	SSN:   {produce: fromProvider(us.SSN{}), behind: us.SSN{}},
+	ABA:   {produce: fromProvider(us.ABA{}), behind: us.ABA{}},
+	IBAN:  {produce: fromProvider(intl.IBAN{}), behind: intl.IBAN{}},
 }
 
 // fromProvider adapts an identifier provider to this registry.

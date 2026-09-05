@@ -68,6 +68,22 @@
 							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
 						</container>
 					</container>
+					<container pos="0,144" size="220x28">
+						<widget size="220x28" type="*container.ThemeOverride">
+							<container size="220x28">
+								<widget size="220x28" type="*parts.Button">
+									<rectangle fillColor="button" radius="5" size="220x28"/>
+									<rectangle size="220x28"/>
+									<widget pos="68,4" size="82x19" type="*widget.RichText">
+										<text alignment="center" bold size="82x19">Quick value</text>
+									</widget>
+								</widget>
+							</container>
+						</widget>
+						<container size="220x28">
+							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						</container>
+					</container>
 				</container>
 			</container>
 			<container pos="228,0" size="1098x884">
@@ -98,7 +114,7 @@
 								<rectangle fillColor="foreground" pos="509,0" size="32x4"/>
 							</widget>
 							<container pos="0,357" size="1050x352">
-								<rectangle size="1050x352" strokeWidth="2"/>
+								<rectangle size="1050x352" strokeColor="focus" strokeWidth="2"/>
 								<widget size="1050x352" type="*parts.KeyScroll">
 									<container size="1050x352">
 										<widget size="1050x27" type="*widget.Label">
@@ -142,7 +158,6 @@
 												</widget>
 												<widget size="1042x124" type="*widget.clip">
 													<container size="0x0">
-														<rectangle fillColor="hover" pos="0,27" radius="3" size="96x27"/>
 														<widget pos="0,56" size="1042x4" type="*widget.Separator">
 															<rectangle fillColor="separator" size="1042x4"/>
 														</widget>

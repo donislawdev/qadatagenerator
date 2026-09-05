@@ -1,0 +1,239 @@
+<canvas padded size="1342x900">
+	<content>
+		<container pos="8,8" size="1326x884">
+			<container size="220x884">
+				<container size="220x884">
+					<container size="220x28">
+						<widget size="220x28" type="*container.ThemeOverride">
+							<container size="220x28">
+								<widget size="220x28" type="*parts.Button">
+									<rectangle fillColor="button" radius="5" size="220x28"/>
+									<rectangle size="220x28"/>
+									<widget pos="86,4" size="46x19" type="*widget.RichText">
+										<text alignment="center" bold size="46x19">Recipe</text>
+									</widget>
+								</widget>
+							</container>
+						</widget>
+						<container size="220x28">
+							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						</container>
+					</container>
+					<container pos="0,36" size="220x28">
+						<widget size="220x28" type="*container.ThemeOverride">
+							<container size="220x28">
+								<widget size="220x28" type="*parts.Button">
+									<rectangle fillColor="button" radius="5" size="220x28"/>
+									<rectangle size="220x28"/>
+									<widget pos="50,4" size="118x19" type="*widget.RichText">
+										<text alignment="center" bold size="118x19">Take and corrupt</text>
+									</widget>
+								</widget>
+							</container>
+						</widget>
+						<container size="220x28">
+							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						</container>
+					</container>
+					<container pos="0,72" size="220x28">
+						<widget size="220x28" type="*container.ThemeOverride">
+							<container size="220x28">
+								<widget size="220x28" type="*parts.Button">
+									<rectangle fillColor="button" radius="5" size="220x28"/>
+									<rectangle size="220x28"/>
+									<widget pos="48,4" size="122x19" type="*widget.RichText">
+										<text alignment="center" bold size="122x19">Manifest browser</text>
+									</widget>
+								</widget>
+							</container>
+						</widget>
+						<container size="220x28">
+							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						</container>
+					</container>
+					<container pos="0,108" size="220x28">
+						<widget size="220x28" type="*container.ThemeOverride">
+							<container size="220x28">
+								<widget size="220x28" type="*parts.Button">
+									<rectangle fillColor="button" radius="5" size="220x28"/>
+									<rectangle size="220x28"/>
+									<widget pos="88,4" size="42x19" type="*widget.RichText">
+										<text alignment="center" bold size="42x19">About</text>
+									</widget>
+								</widget>
+							</container>
+						</widget>
+						<container size="220x28">
+							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						</container>
+					</container>
+					<container pos="0,144" size="220x28">
+						<widget size="220x28" type="*container.ThemeOverride">
+							<container size="220x28">
+								<widget size="220x28" type="*parts.Button">
+									<rectangle fillColor="button" radius="5" size="220x28"/>
+									<rectangle size="220x28"/>
+									<widget pos="82,4" size="82x20" type="*widget.RichText">
+										<text alignment="center" bold size="82x19">Quick value</text>
+									</widget>
+									<image fillMode="contain" pos="54,4" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
+								</widget>
+							</container>
+						</widget>
+						<container size="220x28">
+							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						</container>
+					</container>
+				</container>
+			</container>
+			<container pos="228,0" size="1098x884">
+				<container size="1098x884">
+					<container pos="24,24" size="1050x836">
+						<widget size="1050x46" type="*widget.Label">
+							<widget size="1050x46" type="*widget.RichText">
+								<text color="disabled" pos="4,4" size="269x19">Nothing on this screen is written to a file.</text>
+							</widget>
+						</widget>
+						<container pos="0,54" size="1050x167">
+							<widget size="179x167" type="*widget.Form">
+								<container size="179x167">
+									<container size="179x167">
+										<widget size="59x27" type="*widget.RichText">
+											<text alignment="trailing" bold pos="16,4" size="39x19">Value</text>
+										</widget>
+										<widget pos="67,0" size="111x27" type="*container.ThemeOverride">
+											<container size="111x27">
+												<widget size="111x27" type="*parts.Select">
+													<rectangle fillColor="inputBackground" radius="5" size="0x0"/>
+													<rectangle size="0x0"/>
+													<widget size="0x0" type="*widget.RichText">
+														<text pos="-4,-4" size="11x19">…</text>
+													</widget>
+													<widget size="0x0" type="*widget.Icon">
+														<image fillMode="contain" rsc="menuDropDownIcon" size="0x0" themed="foreground"/>
+													</widget>
+												</widget>
+											</container>
+										</widget>
+										<widget pos="0,35" size="59x27" type="*widget.RichText">
+											<text alignment="trailing" bold pos="10,4" size="44x19">Locale</text>
+										</widget>
+										<widget pos="67,35" size="111x27" type="*container.ThemeOverride">
+											<container size="111x27">
+												<widget size="111x27" type="*parts.Select">
+													<rectangle fillColor="inputBackground" radius="5" size="0x0"/>
+													<rectangle size="0x0"/>
+													<widget size="0x0" type="*widget.RichText">
+														<text pos="-4,-4" size="11x19">…</text>
+													</widget>
+													<widget size="0x0" type="*widget.Icon">
+														<image fillMode="contain" rsc="menuDropDownIcon" size="0x0" themed="foreground"/>
+													</widget>
+												</widget>
+											</container>
+										</widget>
+										<widget pos="0,70" size="59x27" type="*widget.RichText">
+											<text alignment="trailing" bold pos="4,4" size="51x19">Gender</text>
+										</widget>
+										<widget pos="67,70" size="111x27" type="*container.ThemeOverride">
+											<container size="111x27">
+												<widget size="111x27" type="*parts.Select">
+													<rectangle fillColor="inputBackground" radius="5" size="0x0"/>
+													<rectangle size="0x0"/>
+													<widget size="0x0" type="*widget.RichText">
+														<text pos="-4,-4" size="11x19">…</text>
+													</widget>
+													<widget size="0x0" type="*widget.Icon">
+														<image fillMode="contain" rsc="menuDropDownIcon" size="0x0" themed="foreground"/>
+													</widget>
+												</widget>
+											</container>
+										</widget>
+										<widget pos="0,105" size="59x27" type="*widget.RichText">
+											<text alignment="trailing" bold pos="21,4" size="33x19">Born</text>
+										</widget>
+										<widget pos="67,105" size="111x27" type="*widget.Entry">
+											<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="107x23"/>
+											<rectangle pos="1,1" radius="5" size="109x24" strokeColor="inputBorder" strokeWidth="2"/>
+											<widget pos="0,2" size="111x23" type="*widget.Scroll">
+												<widget size="111x23" type="*widget.entryContent">
+													<widget size="111x23" type="*widget.RichText">
+														<text color="disabled" pos="4,2" size="86x19">YYYY-MM-DD</text>
+													</widget>
+													<widget size="111x23" type="*widget.RichText">
+														<text pos="4,2" size="0x19"></text>
+													</widget>
+												</widget>
+											</widget>
+										</widget>
+										<widget pos="0,140" size="59x27" type="*widget.RichText">
+											<text alignment="trailing" bold pos="21,4" size="33x19">Seed</text>
+										</widget>
+										<widget pos="67,140" size="111x27" type="*widget.Entry">
+											<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="107x23"/>
+											<rectangle pos="1,1" radius="5" size="109x24" strokeColor="inputBorder" strokeWidth="2"/>
+											<widget pos="0,2" size="111x23" type="*widget.Scroll">
+												<widget size="111x23" type="*widget.entryContent">
+													<widget size="111x23" type="*widget.RichText">
+														<text pos="4,2" size="95x19">for-the-picture</text>
+													</widget>
+												</widget>
+											</widget>
+										</widget>
+									</container>
+								</container>
+							</widget>
+							<spacer pos="187,0" size="870x167"/>
+						</container>
+						<container pos="0,229" size="1050x88">
+							<widget pos="0,32" size="1050x24" type="*widget.Label">
+								<widget size="1050x24" type="*widget.RichText">
+									<text bold monospace pos="4,4" size="92x16">63051025079</text>
+								</widget>
+							</widget>
+						</container>
+						<container pos="0,325" size="1050x28">
+							<container size="42x28">
+								<widget size="42x28" type="*container.ThemeOverride">
+									<container size="42x28">
+										<widget size="42x28" type="*parts.Button">
+											<rectangle fillColor="button" radius="5" size="42x28"/>
+											<rectangle size="42x28"/>
+											<widget pos="4,4" size="34x19" type="*widget.RichText">
+												<text alignment="center" bold size="34x19">Copy</text>
+											</widget>
+										</widget>
+									</container>
+								</widget>
+								<container size="42x28">
+									<rectangle pos="1,1" radius="5" size="40x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+								</container>
+							</container>
+							<container pos="50,0" size="48x28">
+								<widget size="48x28" type="*container.ThemeOverride">
+									<container size="48x28">
+										<widget size="48x28" type="*parts.Button">
+											<rectangle fillColor="button" radius="5" size="48x28"/>
+											<rectangle size="48x28"/>
+											<widget pos="4,4" size="40x19" type="*widget.RichText">
+												<text alignment="center" bold size="40x19">Again</text>
+											</widget>
+										</widget>
+									</container>
+								</widget>
+								<container size="48x28">
+									<rectangle pos="1,1" radius="5" size="46x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+								</container>
+							</container>
+						</container>
+						<widget pos="0,361" size="1050x27" type="*widget.Label">
+							<widget size="1050x27" type="*widget.RichText">
+								<text color="disabled" pos="4,4" size="0x19"></text>
+							</widget>
+						</widget>
+					</container>
+				</container>
+			</container>
+		</container>
+	</content>
+</canvas>
