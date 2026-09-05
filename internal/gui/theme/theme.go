@@ -132,6 +132,7 @@ var Palette = []Color{
 	{"text.on-focus", 0x1B, 0x1B, 0x1B, RoleOnFill, "the label of a control the toolkit floods with the focus colour, where the ordinary text colour measures 1.56"},
 	{"control.chosen", 0x9E, 0xD8, 0xF0, RoleSurface, "a control that has been chosen, and the border of a text field the keyboard is in"},
 	{"border.active", 0x6E, 0x6E, 0x6E, RoleSurface, "the border of the active control"},
+	{"control.outline", 0x72, 0x72, 0x72, RoleSurface, "the edge of a button, which is the only thing saying a button is a control rather than a word"},
 	{"row.divider", 0x3A, 0x3A, 0x3A, RoleAuxiliary, "the line between rows, which stands in for the zebra stripe that was measured not to work here"},
 	{"row.hover", 0x30, 0x30, 0x30, RoleAuxiliary, "the row under the pointer"},
 	{"row.selected", 0x38, 0x50, 0x6B, RoleAuxiliary, "the selected row"},
@@ -169,27 +170,28 @@ var MeasuredAgainst = map[string]string{
 // is checked against the palette from both sides by a test, so a constant
 // without an entry and an entry without a constant are both failures.
 const (
-	NameSurface       = "surface"
-	NameText          = "text"
-	NameTextSubdued   = "text.subdued"
-	NameRejection     = "expect.rejection"
-	NameAcceptance    = "expect.acceptance"
-	NameWarning       = "expect.warning"
-	NameNotApplied    = "expect.not-applied"
-	NameCorrupted     = "corrupted"
-	NameFocus         = "focus"
-	NameTextOnFocus   = "text.on-focus"
-	NameControlChosen = "control.chosen"
-	NameBorderActive  = "border.active"
-	NameRowDivider    = "row.divider"
-	NameRowHover      = "row.hover"
-	NameRowSelected   = "row.selected"
-	NameStepHairline  = "hairline"
-	NameStepTight     = "tight"
-	NameStepRelated   = "related"
-	NameStepGroup     = "group"
-	NameStepSection   = "section"
-	NameStepMajor     = "major"
+	NameSurface        = "surface"
+	NameText           = "text"
+	NameTextSubdued    = "text.subdued"
+	NameRejection      = "expect.rejection"
+	NameAcceptance     = "expect.acceptance"
+	NameWarning        = "expect.warning"
+	NameNotApplied     = "expect.not-applied"
+	NameCorrupted      = "corrupted"
+	NameFocus          = "focus"
+	NameTextOnFocus    = "text.on-focus"
+	NameControlChosen  = "control.chosen"
+	NameBorderActive   = "border.active"
+	NameControlOutline = "control.outline"
+	NameRowDivider     = "row.divider"
+	NameRowHover       = "row.hover"
+	NameRowSelected    = "row.selected"
+	NameStepHairline   = "hairline"
+	NameStepTight      = "tight"
+	NameStepRelated    = "related"
+	NameStepGroup      = "group"
+	NameStepSection    = "section"
+	NameStepMajor      = "major"
 )
 
 // ColorNames is every colour constant above, so a test can close the register
@@ -197,7 +199,7 @@ const (
 var ColorNames = []string{
 	NameSurface, NameText, NameTextSubdued, NameRejection, NameAcceptance,
 	NameWarning, NameNotApplied, NameCorrupted, NameFocus, NameTextOnFocus,
-	NameControlChosen, NameBorderActive,
+	NameControlChosen, NameBorderActive, NameControlOutline,
 	NameRowDivider, NameRowHover, NameRowSelected,
 }
 
@@ -261,7 +263,8 @@ func StepOf(name string) float32 {
 	return stepsByName[NameStepTight].Step
 }
 
-// BorderThickness is how thick the toolkit draws the outline of a text field.
+// BorderThickness is how thick an outline is: the one the toolkit draws
+// around a text field, and the one this window draws around a button.
 //
 // # Why this is not a step of the spacing scale
 //
@@ -288,6 +291,24 @@ func StepOf(name string) float32 {
 // What would change it: a toolkit that stops offsetting the outline by half its
 // width, or a display scale where 2 stops landing on whole pixels.
 const BorderThickness float32 = 2
+
+// OutlineInset is how far inside its own bounds the edge of a button is drawn.
+//
+// # Why an inset is needed at all
+//
+// The toolkit centres a stroke on the edge of the rectangle it is given, so a
+// rectangle the size of the button would have half of its stroke outside the
+// button and half over the button's own fill. That is the same half pixel trap
+// BorderThickness above is about, and it has the same answer: the toolkit
+// insets its own outline of a text field by half the stroke and shrinks it by
+// the whole stroke, which is what the stored tree of the recipe editor shows
+// at pos 1,1 with a stroke of 2. Doing the same here puts the whole stroke
+// inside the button, on whole pixels, in the colour it was given.
+//
+// It is derived rather than typed, because the two are one decision: a
+// thickness changed without the inset changing would put the stroke back on
+// the boundary.
+const OutlineInset float32 = BorderThickness / 2
 
 // StartWidth and StartHeight are the size a window opens at.
 //

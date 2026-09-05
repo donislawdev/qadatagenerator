@@ -936,4 +936,6 @@ var Guards = []Guard{
 		"TestASeparatorThatIsBrieflyUnusableDoesNotTakeTheFileAway", "internal/gui/takeview", ByMutation},
 	{"every control the toolkit floods with the focus colour stands inside a theme of its own, so its label stays readable while the keyboard is on it", "TestEveryFloodedControlKeepsItsLabelReadable", "internal/gui/screens", ByMutation},
 	{"a palette entry read on top of another entry names that entry, and the entry it names is one the palette has", "TestEveryColourReadOnAnotherSaysWhichOne", "internal/gui/theme", ByMutation},
+	{"a button somebody can press carries an edge of its own, so it is a control rather than a word", "TestEveryPressableButtonDrawsItsOwnEdge", "internal/gui/screens", ByMutation},
+	{"the edge of a button is drawn inside it, on whole pixels, rather than half outside", "TestTheEdgeIsDrawnInsideTheControlItOutlines", "internal/gui/parts", ByMutation},
 }

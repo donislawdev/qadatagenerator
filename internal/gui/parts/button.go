@@ -8,7 +8,7 @@ package parts
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -40,7 +40,13 @@ type Button struct {
 	// redraws from inside FocusLost, before the focus manager has moved its
 	// own record.
 	keyboardIsHere bool
-	onScreen       *container.ThemeOverride
+	onScreen       fyne.CanvasObject
+
+	// edge is the rectangle that says this is a control rather than a word.
+	// It is held here rather than looked up in the tree, because whether it
+	// shows depends on two things only the button knows, and both of them
+	// change while the window is running.
+	edge *canvas.Rectangle
 }
 
 // NewButton builds a button that answers to both keys.
@@ -49,7 +55,8 @@ func NewButton(label string, tapped func()) *Button {
 	button.Text = label
 	button.OnTapped = tapped
 	button.ExtendBaseWidget(button)
-	button.onScreen = Flooded(button, button.hasKeyboard)
+	button.onScreen, button.edge = Outlined(Flooded(button, button.hasKeyboard))
+	button.markEdge()
 	return button
 }
 
@@ -64,7 +71,58 @@ func NewButton(label string, tapped func()) *Button {
 // canvas object like any other. What refuses it is the guard that walks each
 // screen and the contrast measured on the render, which is the right place for
 // it: the mistake is invisible in the source and plain in the pixels.
-func (b *Button) OnScreen() fyne.CanvasObject { return b.onScreen }
+//
+// The edge Outlined draws is settled here as well as at build time, because a
+// caller sets Importance between the two and the toolkit gives no hook for it.
+func (b *Button) OnScreen() fyne.CanvasObject {
+	b.markEdge()
+	return b.onScreen
+}
+
+// Refresh settles the edge, then lets the toolkit redraw.
+//
+// # Why this is the place, and what it does not reach
+//
+// DisableableWidget.Disable and Enable at widget/widget.go:180 and 165 end in
+// impl.Refresh, where impl is this type, so becoming pressable and stopping
+// being pressable both arrive here. SetIcon and SetText do NOT: they call
+// BaseWidget.Refresh, which goes straight to the renderer and never to this
+// method. That is why the edge is also settled in NewButton and in OnScreen,
+// and why the guard walking every screen is what actually holds the rule.
+func (b *Button) Refresh() {
+	b.markEdge()
+	b.Button.Refresh()
+}
+
+// markEdge shows the edge on a button somebody can press, and hides it
+// otherwise.
+//
+// # The two cases that get no edge, and why each
+//
+// A DISABLED button is not a control to find, and the edge is what says a
+// control is there. Leaving it on would make the one thing a person cannot use
+// the most visible thing on the screen. It also gives the disabled state a mark
+// of its own, which until now it did not have: the label went quiet and nothing
+// else changed.
+//
+// A LOW IMPORTANCE button is a heading rather than a slab, which is what the
+// toolkit itself says by leaving the fill off one. There is one in this window,
+// the heading of the list of generators, and it is as wide as its pane, so an
+// edge around it would read as a box drawn round a section. What makes it
+// findable is the arrow beside its words, which is a themed resource and takes
+// the same colour they do. The owner chose this on 2026-09-05, with the number
+// beside it: that heading measures 1.00 against the panel, which is the worst
+// in the window, and the arrow is the answer to it.
+func (b *Button) markEdge() {
+	if b.edge == nil {
+		return
+	}
+	if b.Disabled() || b.Importance == widget.LowImportance {
+		b.edge.Hide()
+		return
+	}
+	b.edge.Show()
+}
 
 // hasKeyboard says whether the keyboard is on this button.
 func (b *Button) hasKeyboard() bool { return b.keyboardIsHere }
