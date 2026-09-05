@@ -123,6 +123,19 @@ desktop.ini
 .env
 
 # ---------------------------------------------------------------------------
+# Output of the internal tooling
+# ---------------------------------------------------------------------------
+# Backups left behind by a mutation run that was interrupted. The next run
+# finds them and puts the original files back, so they are recovered rather
+# than deleted, and they are never committed.
+#
+# The suffix is not English because it is not a name given here. The file is
+# written by tools/mutacje.py, which lives outside this repository on the
+# Polish side of the language rule, so this pattern has to match the name that
+# script actually writes. Translating it would stop it matching anything.
+*.mutacja-bak
+
+# ---------------------------------------------------------------------------
 # Deliberately NOT ignored, so that nobody adds them later by reflex
 # ---------------------------------------------------------------------------
 # testdata/     Go treats it as committed fixture data and the determinism
@@ -130,7 +143,3 @@ desktop.ini
 #               the test that protects the most important invariant.
 # go.sum        Required for reproducible builds.
 # spec/         Public specifications. The whole point of the repository.
-
-# Kopie zapasowe zostawione przez przerwany przebieg mutacji (tools/mutacje.py).
-# Odzyskiwane przy nastepnym uruchomieniu, nigdy commitowane.
-*.mutacja-bak
