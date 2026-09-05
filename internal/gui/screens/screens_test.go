@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -60,6 +61,14 @@ func TestMain(m *testing.M) {
 //     cell the keyboard stands on is HALF invisible to this guard. The other
 //     half is held by the guard that renders and counts pixels, and that is why
 //     that one exists rather than being replaced by this file.
+//   - 🔴 On macOS, whether a panel has grown past what it can show. Measured
+//     there on 2026-09-05, the first time these trees ran on that system:
+//     twenty three states out of thirty nine differed and every one of them
+//     differed in the same thing, a scroll bar the toolkit draws on Windows and
+//     Linux and does not draw there. The bar is dropped from both sides of the
+//     comparison on that system alone, so the other two keep the whole tree and
+//     with it the size of the bar, which is the only thing here that says a
+//     panel started overflowing.
 func TestEveryScreenStillDrawsWhatItDrewBefore(t *testing.T) {
 	data := sampleWithSource(t)
 	for _, state := range All() {
@@ -67,6 +76,15 @@ func TestEveryScreenStillDrawsWhatItDrewBefore(t *testing.T) {
 			drawn := render(t, data, state)
 			stored := filepath.Join("testdata", state.Name+".xml")
 			if *update {
+				// 🔴 Refused rather than allowed to write a weaker tree. A file
+				// written where no scroll bar is drawn has none in it, and it
+				// would then match everywhere, quietly taking the overflow out
+				// of every state for the two systems that can still see it.
+				if runtime.GOOS == "darwin" {
+					t.Fatal("stored trees cannot be written on macOS, because the toolkit draws no " +
+						"scroll bar there and the file would lose one for every system. Write them on " +
+						"Windows or Linux")
+				}
 				if err := os.MkdirAll("testdata", 0o755); err != nil {
 					t.Fatal(err)
 				}
@@ -80,11 +98,12 @@ func TestEveryScreenStillDrawsWhatItDrewBefore(t *testing.T) {
 				t.Fatalf("no stored tree for this state: %v.\nRun the test with -update to write one, "+
 					"then read what it wrote before committing it", err)
 			}
-			if drawn != string(want) {
+			here, before := asComparedHere(drawn), asComparedHere(string(want))
+			if here != before {
 				t.Errorf("%s draws differently than it did.\n%s\nIf the change was meant, run this test "+
 					"with -update and READ the diff, because the diff is the review.\nIf it was not, the "+
 					"cause is in the screen rather than in this file",
-					state.Name, firstDifference(drawn, string(want)))
+					state.Name, firstDifference(here, before))
 			}
 		})
 	}
@@ -120,6 +139,114 @@ func lineAt(lines []string, i int) string {
 		return "(this tree ends here)"
 	}
 	return lines[i]
+}
+
+// asComparedHere is the tree in the form this system is entitled to be judged on.
+//
+// 🔴 It is the identity everywhere except macOS, and that is the point. The
+// toolkit draws no scroll bar there, so a stored tree written on Windows carries
+// one that can never appear, and twenty three of thirty nine states were red for
+// that single reason on 2026-09-05. Dropping the bar on every system would have
+// been simpler and would have cost the only thing in these trees that says a
+// panel has more in it than it can show, on the two systems that can still say
+// it. So the loss is taken once, where it is forced, and written into the list
+// above of what this guard cannot see.
+//
+// The area the bar sits in is kept. It is drawn on all three systems and its
+// size is the panel, so removing it would take a real measurement along with a
+// toolkit's decision.
+func asComparedHere(tree string) string {
+	if runtime.GOOS != "darwin" {
+		return tree
+	}
+	return withoutScrollBars(tree)
+}
+
+// withoutScrollBars drops each scroll bar element together with what is inside it.
+func withoutScrollBars(tree string) string {
+	kept := make([]string, 0, strings.Count(tree, "\n")+1)
+	closing := ""
+	for _, line := range strings.Split(tree, "\n") {
+		switch {
+		case closing != "":
+			if line == closing {
+				closing = ""
+			}
+		case strings.Contains(line, `type="*widget.scrollBar">`):
+			closing = indentationOf(line) + "</widget>"
+		default:
+			kept = append(kept, line)
+		}
+	}
+	return strings.Join(kept, "\n")
+}
+
+// indentationOf is the tabs a line opens with, which is how its closing tag is
+// recognised. The markup is written with one tab per level and nothing else.
+func indentationOf(line string) string {
+	return line[:len(line)-len(strings.TrimLeft(line, "\t"))]
+}
+
+const (
+	barOpens     = `type="*widget.scrollBar">`
+	barPaints    = `fillColor="scrollbar"`
+	barSitsIn    = `type="*widget.scrollBarArea">`
+	linesPerBar  = 3 // it opens, it paints one rectangle, it closes
+	whatWentWith = "something other than a scroll bar came out of %s: %d lines for %d bars"
+)
+
+// Nothing but the scroll bars comes out of a tree, and every stored tree agrees.
+//
+// 🔴 This runs on every system although the removal only happens on one. A
+// helper exercised on macOS alone is a helper nobody here has ever run, and that
+// arrangement is exactly what hid the difference this was written for until the
+// runners came back. It reads the real stored trees rather than a sample,
+// because the shape being relied on is the toolkit's and not ours.
+func TestNothingButTheScrollBarsComesOutOfAStoredTree(t *testing.T) {
+	files, err := filepath.Glob(filepath.Join("testdata", "*.xml"))
+	if err != nil || len(files) == 0 {
+		t.Fatalf("no stored trees to read: %v", err)
+	}
+	found := 0
+	for _, file := range files {
+		before := readTree(t, file)
+		bars := strings.Count(before, barOpens)
+		found += bars
+		after := withoutScrollBars(before)
+		if bars == 0 {
+			if after != before {
+				t.Errorf("%s has no scroll bar and was changed anyway", file)
+			}
+			continue
+		}
+		checkBarsRemoved(t, file, before, after, bars)
+	}
+	if found == 0 {
+		t.Error("not one stored tree carries a scroll bar, so this proves nothing about removing them")
+	}
+}
+
+func checkBarsRemoved(t *testing.T, file, before, after string, bars int) {
+	t.Helper()
+	if strings.Contains(after, barOpens) || strings.Contains(after, barPaints) {
+		t.Errorf("a scroll bar survived in %s", file)
+	}
+	if strings.Count(after, barSitsIn) != strings.Count(before, barSitsIn) {
+		t.Errorf("the area a bar sits in went with the bar in %s, and it is drawn on every system", file)
+	}
+	removed := strings.Count(before, "\n") - strings.Count(after, "\n")
+	if removed != bars*linesPerBar {
+		t.Errorf(whatWentWith, file, removed, bars)
+	}
+}
+
+func readTree(t *testing.T, file string) string {
+	t.Helper()
+	content, err := os.ReadFile(file)
+	if err != nil {
+		t.Fatalf("cannot read %s: %v", file, err)
+	}
+	return string(content)
 }
 
 // Every state on the list can actually be built from the sample.
