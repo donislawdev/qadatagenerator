@@ -2,8 +2,10 @@ package screens
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -79,12 +81,45 @@ func TestEveryScreenStillDrawsWhatItDrewBefore(t *testing.T) {
 					"then read what it wrote before committing it", err)
 			}
 			if drawn != string(want) {
-				t.Errorf("%s draws differently than it did.\nIf the change was meant, run this test with "+
-					"-update and READ the diff, because the diff is the review.\nIf it was not, the cause "+
-					"is in the screen rather than in this file", state.Name)
+				t.Errorf("%s draws differently than it did.\n%s\nIf the change was meant, run this test "+
+					"with -update and READ the diff, because the diff is the review.\nIf it was not, the "+
+					"cause is in the screen rather than in this file",
+					state.Name, firstDifference(drawn, string(want)))
 			}
 		})
 	}
+}
+
+// firstDifference names the line the two trees stop agreeing on.
+//
+// 🔴 Written on 2026-09-05, when this guard failed on twenty three states on
+// the macOS runner and said nothing except that they differed. The instruction
+// it gave, to run with -update and read the diff, is an instruction nobody here
+// can carry out: the only machine that disagrees is the one this project does
+// not have. A guard that fails where its own advice cannot be followed reports
+// that something is wrong and withholds what.
+//
+// One line rather than a whole diff on purpose. These trees run to hundreds of
+// lines and a failing matrix would print all of them for every state, which is
+// the shape of output people stop reading.
+func firstDifference(drawn, want string) string {
+	got, stored := strings.Split(drawn, "\n"), strings.Split(want, "\n")
+	for i := 0; i < len(got) || i < len(stored); i++ {
+		if lineAt(got, i) == lineAt(stored, i) {
+			continue
+		}
+		return fmt.Sprintf("first difference at line %d of %d stored lines:\n  stored: %s\n  drawn:  %s",
+			i+1, len(stored), lineAt(stored, i), lineAt(got, i))
+	}
+	return "the trees differ in something the lines do not show, such as a final newline"
+}
+
+// lineAt says so when one tree has run out rather than reading past its end.
+func lineAt(lines []string, i int) string {
+	if i >= len(lines) {
+		return "(this tree ends here)"
+	}
+	return lines[i]
 }
 
 // Every state on the list can actually be built from the sample.

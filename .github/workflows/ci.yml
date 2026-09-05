@@ -242,9 +242,18 @@ jobs:
         shell: bash
         # Printed on every run, passing or not. A gate that only speaks when it
         # is angry teaches people to read it only then.
+        #
+        # head is deliberately not in the pipe. This shell runs with pipefail,
+        # so head closing the pipe after ten lines makes sort fail on a broken
+        # pipe and the step ends with an error while printing the right answer.
+        # It is a race against how fast sort finishes writing, which is why it
+        # only appeared once the file had enough functions in it, and it was
+        # invisible for a month because the step before this one always failed
+        # first. Measured on 2026-09-05: sort: write failed, broken pipe.
         run: |
           echo "the ten least covered functions:"
-          go tool cover -func=coverage.out | sort -k3 -n | head -10
+          go tool cover -func=coverage.out | sort -k3 -n > "${RUNNER_TEMP}/least-covered.txt"
+          head -10 "${RUNNER_TEMP}/least-covered.txt"
 
   cross:
     name: cross build from one machine
