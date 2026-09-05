@@ -6,8 +6,17 @@ package guard
 // hard ceiling on the length of a file. The ceiling may only be lowered, so the
 // answer is to divide rather than to raise it, and this is the seam that costs
 // nothing: what a guard IS does not change when one is added, and the register
-// changes every time it does. It also leaves the register as the whole of the
-// file two of the tools read, which they find by that path.
+// changes every time it does.
+//
+// # What changed on 2026-09-05, and why the last sentence here had to go
+//
+// This file used to end by saying that the split left the register as the whole
+// of one file, which the tools find by that path. Two entries later the ceiling
+// was reached again and the register itself had to be cut, so that sentence
+// stopped being true. The tools now recognise an entry by its shape and scan
+// every source of this package, which is why a third file may be added here
+// without telling anything about it. Nothing outside depends on a filename any
+// more, and that is the point.
 
 // ProofState is how we know a guard can go red.
 type ProofState string
