@@ -1,0 +1,84 @@
+# The race detector, moved out of the ordinary build on 2026-09-05.
+#
+# It ran on every push until then and answered the same question every time.
+# Almost nothing in this repository can carry a data race, because a guard in
+# internal/guard refuses a goroutine, a channel or a synchronisation import in
+# any file other than the three named below. A push that renames a message or
+# adds a table column cannot introduce one, and paying for the detector to say
+# so is how a check becomes noise.
+#
+# So it runs on three triggers instead of one.
+#
+# On a push, only when a file that can carry a race changed. That list is the
+# register in internal/guard/concurrency.go plus the register itself, because
+# adding a fourth entry there is how new concurrency legally arrives. The list
+# is not left to memory: tools/audyt.py compares it against the register in
+# both directions, so a file that moves makes the audit red rather than making
+# this workflow quietly narrower.
+#
+# On a schedule, once a week, because the push filter has a hole that cannot be
+# closed by widening it. A race needs a test to exercise it, those tests live
+# in the packages that use the three files rather than beside them, and a
+# change to shared code called from a goroutine carries no concurrency of its
+# own. Listing every file that could be reached from a goroutine would be the
+# whole repository, which is where this started.
+#
+# On request, so that a change to this file can be tried without waiting.
+#
+# What makes the hole affordable rather than merely admitted: go test -race
+# over the whole module already runs locally in tools/brama.py before every
+# commit, including the quick run. This job is a second opinion from another
+# operating system, not the only reading.
+name: race
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - internal/cli/signals.go
+      - internal/gui/background/background.go
+      - internal/adapter/provider/corpus/corpus.go
+      - internal/guard/concurrency.go
+      - go.mod
+      - go.sum
+      - .github/workflows/race.yml
+      - .github/actions/window-libraries/action.yml
+  schedule:
+    # Tuesday, away from the fuzz run on Monday and Thursday, at a time nobody
+    # is waiting on a result.
+    - cron: "23 4 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: race-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GOTOOLCHAIN: go1.26.6
+  # The detector is built on cgo and does not work without it, and the window
+  # in this module needs cgo to compile at all. Both reasons point the same
+  # way here. The promise that the shipped command line binary needs no C
+  # toolchain is measured in ci.yml and is not touched by a test tool.
+  CGO_ENABLED: "1"
+
+jobs:
+  race:
+    name: race detector
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.6"
+
+      - uses: ./.github/actions/window-libraries
+
+      - name: test with the race detector
+        # One system is enough. A data race is a property of the code rather
+        # than of the operating system, so running this three times would cost
+        # three times as much and find the same thing.
+        run: go test -count=1 -race ./...

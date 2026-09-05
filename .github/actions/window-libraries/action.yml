@@ -1,0 +1,27 @@
+name: window libraries
+description: Installs the system libraries the window needs in order to compile on Linux.
+
+# Only Linux needs a step of its own. macOS carries OpenGL with the system and
+# the Windows runner ships both a C toolchain and opengl32, so the same job on
+# those two runs without this.
+#
+# The list is read from the toolkit's own prerequisites rather than written
+# from memory, at https://docs.fyne.io/started/quick on 2026-09-05. A build
+# dependency is a property of the toolkit version, so this is read again
+# whenever that version moves rather than carried forward as knowledge.
+#
+# Measured on 2026-09-03, which is what this file was written to answer: the
+# race job had cgo switched on and still failed, first on a missing gl.pc and
+# then on wayland-client-core.h. Switching cgo on is half of what the window
+# needs on Linux and the headers are the other half.
+#
+# It exists as an action rather than as four copies of one apt line, because
+# four copies of a list go out of step the first time the list changes and
+# nothing says which copy is the current one.
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev xorg-dev libwayland-dev libxkbcommon-dev

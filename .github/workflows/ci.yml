@@ -7,7 +7,9 @@
 #
 # What this cannot check, said out loud rather than left to be discovered: the
 # document guards live outside the repository, so nothing here reads them. The
-# consistency of the documents with the code stays a local step.
+# consistency of the documents with the code stays a local step. The race
+# detector is not here either. It moved to a file of its own on 2026-09-05 and
+# the reason is written there.
 name: ci
 
 on:
@@ -31,9 +33,20 @@ env:
   # rule here, so the toolchain that produced a result is part of what has to
   # be reproducible.
   GOTOOLCHAIN: go1.26.6
-  # The command line binary has to build without a C toolchain, which is what
-  # keeps it cross compilable from one machine. Only the window needs CGO.
-  CGO_ENABLED: "0"
+  # This was off until 2026-09-05 and the whole file failed because of it.
+  # Until 2026-08-12 the entire product built without a C toolchain, so off was
+  # the right default. Since that day there is a second binary, cmd/qadg-gui,
+  # and the window library excludes every one of its own files when cgo is off,
+  # so every job walking ./... stopped compiling. Measured on the runner: build
+  # constraints exclude all Go files in go-gl, and cmd/qadg-gui fails to set up
+  # before a single test runs.
+  #
+  # The promise that no C toolchain is needed did not disappear. It narrowed to
+  # the command line binary, which is what the two jobs below switch cgo off
+  # for themselves to keep. The same split was made locally on 2026-08-12 in
+  # the gate that runs before every commit, and this file is three weeks late
+  # to it because nothing here was starting at the time.
+  CGO_ENABLED: "1"
 
 jobs:
   test:
@@ -55,6 +68,12 @@ jobs:
           # recipe because YAML reads 1.0 as a number, and the same reader is
           # reading this file.
           go-version: "1.26.6"
+
+      # Linux only. The condition is on the step rather than in the action,
+      # because a step that runs on three systems and does nothing on two of
+      # them reads as though it might.
+      - uses: ./.github/actions/window-libraries
+        if: runner.os == 'Linux'
 
       - name: build
         run: go build ./...
@@ -83,6 +102,11 @@ jobs:
   dependencies:
     name: nothing in the binary can reach the network
     runs-on: ubuntu-latest
+    env:
+      # Off here, against the default above, because the question is about the
+      # binary that ships. That one is built without a C toolchain, so the
+      # graph walked below has to be the graph it really has.
+      CGO_ENABLED: "0"
     steps:
       - uses: actions/checkout@v7
 
@@ -119,32 +143,6 @@ jobs:
           fi
           echo "the build graph of the command line binary contains no network package"
 
-  race:
-    name: race detector
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-go@v7
-        with:
-          go-version: "1.26.6"
-
-      - name: test with the race detector
-        # CGO_ENABLED is 1 here and 0 everywhere else in this file, which looks
-        # like a contradiction and is not. The promise that the command line
-        # binary builds without a C toolchain is about the PRODUCT, and it is
-        # kept by the matrix above and by the cross build below. The race
-        # detector is a test tool that needs cgo to work at all, so refusing it
-        # here would mean giving up the only mechanical guard against a data
-        # race in order to protect a promise it does not touch.
-        #
-        # One system is enough. A data race is a property of the code rather
-        # than of the operating system, so running this three times would cost
-        # three times as much and find the same thing.
-        env:
-          CGO_ENABLED: "1"
-        run: go test -count=1 -race ./...
-
   lint:
     name: lint
     runs-on: ubuntu-latest
@@ -154,6 +152,11 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.6"
+
+      # The linter type checks every package, so it needs what the compiler
+      # needs. Measured on 2026-09-03: without this it reported the window as
+      # could not import go-gl and said nothing about our own code.
+      - uses: ./.github/actions/window-libraries
 
       # The nearest thing this project has to a reviewer who reads every line.
       # The owner does not read the code and there is no second author, so a
@@ -172,6 +175,8 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.6"
+
+      - uses: ./.github/actions/window-libraries
 
       # Reports only the vulnerabilities our code can actually reach, rather
       # than every advisory that mentions a module we happen to require. That
@@ -205,6 +210,8 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version: "1.26.6"
+
+      - uses: ./.github/actions/window-libraries
 
       - name: measure and compare against the floor
         shell: bash
@@ -242,6 +249,12 @@ jobs:
   cross:
     name: cross build from one machine
     runs-on: ubuntu-latest
+    env:
+      # Off here, against the default above, and this job is where the promise
+      # is actually measured. Everything else in this file has cgo on because
+      # the window is in the module, so without this line the sentence below
+      # would be a sentence and not a check.
+      CGO_ENABLED: "0"
     steps:
       - uses: actions/checkout@v7
 
