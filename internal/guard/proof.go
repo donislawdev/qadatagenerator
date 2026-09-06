@@ -486,4 +486,10 @@ var toolGuards = []Guard{
 	// count is the only thing that can tell.
 	{"the licence document carries every registry row", "TestTheMachineReadableLicenseCarriesWhatTheReadableOneDoes", "internal/cli", ByMutation},
 	{"both forms of the licence report name the same projects", "TestBothLicenseFormsNameTheSameProjects", "internal/cli", ByMutation},
+	{"the calculation the regulation works out itself comes out the same here", "TestTheCalculationWorkedByTheRegulationComesOutTheSameHere", "internal/adapter/provider/intl", ByMutation},
+	{"the residue that does not fit in a digit is written as the letter X", "TestTheEleventhResidueIsWrittenAsTheLetterX", "internal/adapter/provider/intl", ByMutation},
+	{"the three letters the regulation leaves out of the alphabet are refused", "TestTheThreeLettersTheRegulationLeavesOutAreRefused", "internal/adapter/provider/intl", ByMutation},
+	{"a generated number ends in the digits the regulation requires there", "TestEveryGeneratedNumberEndsInTheDigitsTheRegulationRequires", "internal/adapter/provider/intl", ByMutation},
+	{"a generated number carries a model year the table can read back", "TestEveryGeneratedNumberCarriesAModelYearThatCanBeRead", "internal/adapter/provider/intl", ByMutation},
+	{"every generator says what kind of value it produces", "TestEveryGeneratorSaysWhatKindOfValueItProduces", "internal/adapter/values", ByMutation},
 }

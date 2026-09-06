@@ -1,0 +1,92 @@
+[
+  {
+    "seed": "release-2026-09",
+    "entity": "vehicle",
+    "row": 0,
+    "field": "chassis",
+    "purpose": "value",
+    "value": "XZYCP28C8CWC17865",
+    "broken": "XZYCP28C9CWC17865"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "vehicle",
+    "row": 1,
+    "field": "chassis",
+    "purpose": "value",
+    "value": "RA0SHHKN4AC590080",
+    "broken": "RA0SHHKN5AC590080"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "vehicle",
+    "row": 2,
+    "field": "chassis",
+    "purpose": "value",
+    "value": "YZX9BLTV564L20518",
+    "broken": "YZX9BLTV664L20518"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "vehicle",
+    "row": 7,
+    "field": "chassis",
+    "purpose": "value",
+    "value": "SMC4WXXE66WM53525",
+    "broken": "SMC4WXXE76WM53525"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "vehicle",
+    "row": 42,
+    "field": "chassis",
+    "purpose": "value",
+    "value": "6JHX73XV15HK04467",
+    "broken": "6JHX73XV25HK04467"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "vehicle",
+    "row": 999,
+    "field": "chassis",
+    "purpose": "value",
+    "value": "02C2FB9Z8KLL04965",
+    "broken": "02C2FB9Z9KLL04965"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "vehicle",
+    "row": 1000000,
+    "field": "chassis",
+    "purpose": "value",
+    "value": "YTYYER455K4Y04164",
+    "broken": "YTYYER456K4Y04164"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "vehicle",
+    "row": 0,
+    "field": "chassis",
+    "purpose": "value",
+    "value": "772Z7UKN4K9G57440",
+    "broken": "772Z7UKN5K9G57440"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "vehicle",
+    "row": 1,
+    "field": "chassis",
+    "purpose": "value",
+    "value": "C8TECH9051XC88471",
+    "broken": "C8TECH9061XC88471"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "vehicle",
+    "row": 5,
+    "field": "chassis",
+    "purpose": "value",
+    "value": "BJKPKEK045YE99719",
+    "broken": "BJKPKEK055YE99719"
+  }
+]

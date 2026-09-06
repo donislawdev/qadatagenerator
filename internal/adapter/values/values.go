@@ -47,6 +47,7 @@ const (
 	SSN        = "ssn"
 	ABA        = "aba"
 	IBAN       = "iban"
+	VIN        = "vin"
 )
 
 // roles maps a generator onto the role it plays in a consistency rule.
@@ -106,6 +107,7 @@ var types = map[string]string{
 	SSN:        TypeIdentifier,
 	ABA:        TypeIdentifier,
 	IBAN:       TypeIdentifier,
+	VIN:        TypeIdentifier,
 }
 
 // Source produces values for one locale.
@@ -474,6 +476,7 @@ var producers = map[string]generator{
 	SSN:   {produce: fromProvider(us.SSN{}), behind: us.SSN{}},
 	ABA:   {produce: fromProvider(us.ABA{}), behind: us.ABA{}},
 	IBAN:  {produce: fromProvider(intl.IBAN{}), behind: intl.IBAN{}},
+	VIN:   {produce: fromProvider(intl.VIN{}), behind: intl.VIN{}},
 }
 
 // fromProvider adapts an identifier provider to this registry.

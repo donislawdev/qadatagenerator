@@ -47,7 +47,7 @@ can say its own output could not belong to anybody.
 | Scheme | Safe block | What that means |
 |---|---|---|
 | `US.ssn` | yes, the area the administration never assigns | a value outside it would be a defect worth reporting |
-| `PL.pesel`, `PL.nip`, `PL.regon`, `US.aba`, `iban` | **none** | the registrar issues, or reserves the right to issue, across the whole space |
+| `PL.pesel`, `PL.nip`, `PL.regon`, `US.aba`, `iban`, `vin` | **none** | the registrar issues, or reserves the right to issue, across the whole space |
 
 For the schemes with none, a correct value **cannot be shown not to belong to
 somebody**, and that is a property of the numbering scheme rather than a flaw in

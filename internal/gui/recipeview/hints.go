@@ -15,10 +15,14 @@ import (
 //
 // The screen was ordered so that a person could produce test data without
 // learning a file format first, and until 2026-09-03 it opened as an empty box
-// saying "A recipe, in YAML". The register carries thirteen generators and not
-// one of their names appeared anywhere in the window, so the only way to learn
-// them was to guess one wrong and read the refusal. A vocabulary reachable only
-// by making a mistake is a vocabulary this tool keeps to itself.
+// saying "A recipe, in YAML". The register carried thirteen generators then and
+// not one of their names appeared anywhere in the window, so the only way to
+// learn them was to guess one wrong and read the refusal. A vocabulary
+// reachable only by making a mistake is a vocabulary this tool keeps to itself.
+//
+// The count is written in the past tense on purpose. It was thirteen on the day
+// this screen was built and it is read from the register at every draw, so a
+// sentence claiming a number today would be a sentence going stale on its own.
 //
 // # Why this is not the form DEC-13 refused
 //

@@ -272,6 +272,28 @@ var Anchors = []Anchor{
 			"only divisor above one is 97",
 	},
 
+	// --- vin ----------------------------------------------------------------
+	//
+	// The only scheme here whose source answers all three questions a source
+	// can be asked. The shape is stated, the arithmetic is stated, and the
+	// document works an example of it. Four official documents describe the
+	// shape of a REGON and none of them states its arithmetic, which is why
+	// that one rests on a measurement and this one does not.
+	{
+		Rule:     "the seventeen character shape, the set of characters a value may hold with I, O and Q left out, and the check digit sitting in position nine",
+		Provider: "vin",
+		Source:   "49 CFR 565.13, read at ecfr.gov on 2026-09-06, title 49 up to date as of 2026-09-03. A work of the federal government of the United States and therefore free of copyright under 17 U.S.C. 105",
+		State:    ByQuotedSentence,
+		Detail:   "the alphabet is held as the regulation brackets it in internal/oracle/vin.go, and the provider holds the same set as a plain string, so a character dropped from one is not dropped from the other",
+	},
+	{
+		Rule:     "the transliteration of letters to values, the weight of each position, the divisor of eleven, and the letter X for the residue that does not fit in a digit",
+		Provider: "vin",
+		Source:   "49 CFR 565.15(c) with Tables III, IV and V, and the calculation worked in Table VI, read at ecfr.gov on 2026-09-06",
+		State:    ByWorkedExample,
+		Detail:   "TestTheCalculationWorkedByTheRegulationComesOutTheSameHere",
+	},
+
 	// --- PL.regon ----------------------------------------------------------
 	{
 		Rule:     "the nine digit shape and the ban on any digit carrying meaning",
