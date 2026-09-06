@@ -496,7 +496,12 @@ func fromList(name string) producer {
 // from one of them, because picking a side quietly would make every dataset
 // without a gender column read as one sex.
 func (s Source) firstName(req generate.Request) (string, error) {
-	switch bound, _ := req.Agrees.Value(provider.RoleGender); provider.Gender(bound) {
+	// 🔴 The bound value is PARSED rather than compared. Until 2026-09-06 this
+	// compared it against the word female itself, while the scheme behind a
+	// PESEL accepted eleven spellings, so a recipe binding f got a PESEL of a
+	// woman beside a name drawn from both lists AND NOTHING SAID SO. One row,
+	// one declared rule, two answers.
+	switch bound, _ := req.Agrees.Value(provider.RoleGender); genderOf(bound) {
 	case provider.Female:
 		return s.draw("first-names-female", req)
 	case provider.Male:
@@ -504,6 +509,21 @@ func (s Source) firstName(req generate.Request) (string, error) {
 	default:
 		return s.drawEither("first-names-female", "first-names-male", req)
 	}
+}
+
+// genderOf reads a bound gender the way the whole product reads one.
+//
+// An unreadable value answers Unknown rather than failing, and the difference
+// from the scheme next door is deliberate: a name drawn without a gender is an
+// ordinary name, while an identifier that cannot encode what it was told to
+// encode is a value nobody asked for. The scheme refuses, a word list draws
+// from both, and the run is refused by the scheme either way whenever both are
+// in the same rule.
+func genderOf(bound string) provider.Gender {
+	if gender, known := provider.ParseGender(bound); known {
+		return gender
+	}
+	return provider.Unknown
 }
 
 // lastName draws a surname, and in Polish that depends on the gender of the
@@ -517,7 +537,7 @@ func (s Source) lastName(req generate.Request) (string, error) {
 	if !strings.HasPrefix(s.locale, "pl") {
 		return s.draw("last-names", req)
 	}
-	if bound, _ := req.Agrees.Value(provider.RoleGender); provider.Gender(bound) == provider.Male {
+	if bound, _ := req.Agrees.Value(provider.RoleGender); genderOf(bound) == provider.Male {
 		return s.drawEither("last-names-male", "last-names-unisex", req)
 	}
 	return s.draw("last-names-unisex", req)

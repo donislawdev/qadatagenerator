@@ -14,8 +14,8 @@ import (
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
-// TestEveryPressableButtonDrawsItsOwnEdge walks every state of every screen and
-// asks each button whether the thing that makes it visible is on screen with it.
+// TestEveryPressableControlDrawsItsOwnEdge walks every state of every screen and
+// asks each control whether the thing that makes it visible is on screen with it.
 //
 // # Why the question is about the tree and not about the colour
 //
@@ -39,7 +39,7 @@ import (
 // without, everything else has one, and a button that quietly loses its edge
 // because somebody set an importance fails here rather than on somebody's
 // screen.
-func TestEveryPressableButtonDrawsItsOwnEdge(t *testing.T) {
+func TestEveryPressableControlDrawsItsOwnEdge(t *testing.T) {
 	data := sampleWithSource(t)
 	want := rgba(palette.Named(palette.NameControlOutline).NRGBA())
 
@@ -51,8 +51,8 @@ func TestEveryPressableButtonDrawsItsOwnEdge(t *testing.T) {
 			if !isGroup {
 				return
 			}
-			button, name := buttonDressedIn(group)
-			if button == nil {
+			control, name := controlDressedIn(group)
+			if control == nil {
 				return
 			}
 			found++
@@ -75,12 +75,15 @@ func TestEveryPressableButtonDrawsItsOwnEdge(t *testing.T) {
 					state.Name, name, edge.StrokeWidth, palette.BorderThickness)
 			}
 
-			quiet := button.Disabled() || button.Importance == widget.LowImportance
+			// 🔴 A chooser has no notion of importance, so the quiet cases are
+			// asked of the control rather than assumed of a button. Reading
+			// Importance off something that has none would have been a
+			// compile error here and a wrong rule anywhere it was not.
+			quiet := control.quiet()
 			if edge.Visible() == quiet {
-				t.Errorf("%s: %s shows its edge %v while disabled is %v and low importance is %v. "+
-					"An edge says a control can be pressed, so those two go without one",
-					state.Name, name, edge.Visible(),
-					button.Disabled(), button.Importance == widget.LowImportance)
+				t.Errorf("%s: %s shows its edge %v where it should be %v. "+
+					"An edge says a control can be used, so a disabled one and a heading go without",
+					state.Name, name, edge.Visible(), !quiet)
 			}
 		})
 		if found == 0 {
@@ -90,29 +93,58 @@ func TestEveryPressableButtonDrawsItsOwnEdge(t *testing.T) {
 	}
 }
 
-// buttonDressedIn is the button this container was built around, if it was.
+// outlined is a control this window draws an edge around, asked whether this
+// is one of its quiet moments.
+//
+// An interface rather than a type switch at the call site, because the two
+// controls answer that question from different fields: a button is quiet when
+// it is disabled or a heading, and a chooser has no notion of importance at
+// all.
+type outlined interface {
+	quiet() bool
+}
+
+// controlDressedIn is the control this container was built around, if it was.
 //
 // Only the direct children are read. A container holding such a container
 // somewhere below it is an ordinary layout and owes nothing, and reading the
-// whole subtree would make every ancestor of every button a finding.
-func buttonDressedIn(group *fyne.Container) (*parts.Button, string) {
+// whole subtree would make every ancestor of every control a finding.
+func controlDressedIn(group *fyne.Container) (outlined, string) {
 	for _, child := range group.Objects {
 		dressed, own := child.(*container.ThemeOverride)
 		if !own {
 			continue
 		}
-		var button *parts.Button
+		var found outlined
+		var name string
 		walkTree(dressed, false, func(object fyne.CanvasObject, _ bool) {
-			if found, is := object.(*parts.Button); is && button == nil {
-				button = found
+			if found != nil {
+				return
+			}
+			switch typed := object.(type) {
+			case *parts.Button:
+				found, name = quietButton{typed}, fmt.Sprintf("the button %q", typed.Text)
+			case *parts.Select:
+				found, name = quietSelect{typed}, fmt.Sprintf("the chooser %q", typed.Selected)
 			}
 		})
-		if button != nil {
-			return button, fmt.Sprintf("the button %q", button.Text)
+		if found != nil {
+			return found, name
 		}
 	}
 	return nil, ""
 }
+
+// quietButton and quietSelect say when each control goes without an edge.
+type quietButton struct{ *parts.Button }
+
+func (b quietButton) quiet() bool {
+	return b.Disabled() || b.Importance == widget.LowImportance
+}
+
+type quietSelect struct{ *parts.Select }
+
+func (s quietSelect) quiet() bool { return s.Disabled() }
 
 // edgeIn is the outlining rectangle of this container.
 //

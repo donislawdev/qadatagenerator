@@ -74,16 +74,20 @@ func (r Refusal) Refused() bool { return r.Kind != NotRefused }
 // would answer a question nobody asked and say nothing about it, which is the
 // silence this product refuses everywhere else.
 //
-// # Why the gender is narrowed here rather than passed through
+// # Why the gender is checked here at all
 //
-// Measured on 2026-09-05: the scheme behind a PESEL takes female, f, woman, k,
-// kobieta, 2 and their male counterparts, while the generator behind a first
-// name compares the bound value against the word female itself. So a recipe
-// binding f gets a PESEL of a woman beside a first name of nobody in
-// particular, and nothing says a word. That is a defect of the first pillar and
-// it is recorded as one. What this mode does is not inherit it: a new verb with
-// one spelling can widen later without breaking anybody, and one accepting
-// spellings half its own generators ignore could never narrow again.
+// The vocabulary is the domain's and every reader of a gender shares it, so
+// this is not a second opinion about what the words mean. What it adds is WHEN
+// the answer comes: a word this product has no meaning for is refused before
+// anything is drawn, with the accepted spellings named, rather than reaching a
+// scheme that refuses it in its own words or a word list that quietly draws
+// from both.
+//
+// 🔴 This mode took two spellings until 2026-09-06, and the reason was that a
+// first name compared the bound value against the word female itself while a
+// PESEL took all twelve, so a narrower verb was one that did not inherit the
+// disagreement. DEC-214 removed the disagreement, so the narrowness lost its
+// reason and went with it.
 func Check(req Request) Refusal {
 	source := values.New(req.Locale, req.Seed)
 	if !source.Known(req.Generator) {
@@ -97,9 +101,11 @@ func Check(req Request) Refusal {
 			}
 		}
 	}
-	if bound, ok := req.Agrees[provider.RoleGender]; ok && !acceptedGender(bound) {
-		return Refusal{Kind: UnreadableGender, Value: bound, Role: provider.RoleGender,
-			Allowed: Genders()}
+	if bound, ok := req.Agrees[provider.RoleGender]; ok {
+		if _, known := provider.ParseGender(bound); !known {
+			return Refusal{Kind: UnreadableGender, Value: bound, Role: provider.RoleGender,
+				Allowed: AcceptedGenders()}
+		}
 	}
 	if bound, ok := req.Agrees[provider.RoleBirthDate]; ok {
 		if _, err := time.Parse(DateLayout, bound); err != nil {
@@ -123,15 +129,6 @@ func readersOf(source values.Source, role string) []string {
 		}
 	}
 	return readers
-}
-
-func acceptedGender(value string) bool {
-	for _, accepted := range Genders() {
-		if value == accepted {
-			return true
-		}
-	}
-	return false
 }
 
 func sortedRoles(agrees map[string]string) []string {

@@ -70,21 +70,31 @@ type Request struct {
 	Agrees map[string]string
 }
 
-// Genders are the spellings this mode accepts for the gender role, sorted.
+// Genders are the two spellings a surface OFFERS, sorted.
 //
-// # Why two spellings and not the eleven a PESEL takes
+// # Why offering two and accepting twelve is not an inconsistency
 //
-// Measured on 2026-09-05, and it is the reason this list exists at all. The
-// scheme behind a PESEL accepts female, f, woman, k, kobieta, 2 and their male
-// counterparts, while the generator behind a first name compares the bound
-// value against the word female itself. So a recipe binding f gets a PESEL of a
-// woman beside a first name of nobody in particular, and nothing says a word.
+// A recipe may write a gender twelve ways, because a column of test data is
+// often copied out of a system that already had one and the digits of ISO 5218
+// are what a database export gives. Everything that reads a gender reads all
+// twelve, through one vocabulary in the domain, which is what DEC-214 settled.
 //
-// That is a defect of the first pillar and it is recorded as one. What this
-// mode does is not inherit it: a new verb with one spelling can widen later
-// without breaking anybody, and a verb accepting spellings that half of its own
-// generators ignore could not narrow again.
-func Genders() []string { return []string{string(provider.Female), string(provider.Male)} }
+// A list on a screen is a different question. It is a choice being offered
+// rather than a value being read, and offering k, kobieta, 2 and female as four
+// separate things to pick would suggest they differ. They do not.
+//
+// 🔴 Until 2026-09-06 this list was also what this mode ACCEPTED, and the
+// reason recorded here was that a first name compared the bound value against
+// the word female itself while a PESEL took all twelve. That defect is gone,
+// so that reason is gone with it, and this list now means only what its name
+// says.
+func Genders() []string {
+	return []string{string(provider.Female), string(provider.Male)}
+}
+
+// AcceptedGenders is every spelling a request may carry, sorted, for a refusal
+// that has to name what it would have taken.
+func AcceptedGenders() []string { return provider.GenderSpellings() }
 
 // DateLayout is how a bound date of birth is written, which is what the scheme
 // reading it accepts. DateShape is the same thing as a person writes it,

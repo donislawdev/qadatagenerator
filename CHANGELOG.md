@@ -10,6 +10,16 @@ repository once they are released.
 
 ## [Unreleased]
 
+### Fixed
+
+- **A gender written the short way now reaches every value that reads one.**
+  A recipe binding a gender as f, k or the digits an export gives was understood
+  by a PESEL and ignored by the generator of first names, so one row could carry
+  a woman's identifier beside a name drawn without regard to it, under a rule
+  that said they had to agree, and nothing said so. Every value that reads a
+  gender now reads the same twelve spellings. Data produced from recipes binding
+  female or male is unchanged.
+
 ### Added
 
 - **One value, now: `qadg quick pesel`.** A sixth command that produces a single
@@ -29,6 +39,11 @@ repository once they are released.
   press, and Copy puts it in the clipboard and says that it did. The fields for
   a gender and a date of birth appear only beside a value that takes account of
   them.
+
+- **Every control you can use has a visible edge.** Buttons and choosers were
+  drawn without one, so on this dark theme they read as words rather than as
+  things to press. A disabled control still has none, which is now the clearest
+  way to tell that it cannot be used.
 
 - **The window writes datasets.** The recipe editor has a bar along the bottom:
   a directory to write to with a chooser beside it, a tick box for replacing

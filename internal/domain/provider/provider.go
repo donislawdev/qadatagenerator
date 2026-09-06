@@ -32,6 +32,7 @@ package provider
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
@@ -52,6 +53,73 @@ const (
 	// or the value is malformed. It is never a thing to generate.
 	Unknown Gender = "unknown"
 )
+
+// genderSpellings is every way a recipe may write a gender.
+//
+// # Why a recipe is allowed more than two words
+//
+// A recipe is written by a person, and a column of test data is often copied
+// out of a system that already had one. The digits are the codes of ISO 5218,
+// which is how a great many databases store this: a tester exporting a column
+// from one gets 1 and 2 rather than words, and refusing those would be refusing
+// the most machine like input there is. The standard's 0 and 9, meaning not
+// known and not applicable, are deliberately absent, because they say the value
+// is unknown, which is not something a number encoding a sex can be made to
+// agree with.
+//
+// Everything is compared after trimming and lowercasing, so Kobieta, KOBIETA
+// and " k " are the same entry.
+//
+// 🔴 # Why this lives in the domain rather than beside the scheme that reads it
+//
+// It lived beside the PESEL until 2026-09-06, and being there is what made it
+// half a rule. The scheme accepted eleven spellings while the generator of
+// first names compared the bound value against the word female itself, so a
+// recipe binding f produced a PESEL of a woman beside a name of nobody in
+// particular AND SAID NOTHING. One row, one declared rule, two answers.
+//
+// A vocabulary two things have to agree on cannot live inside one of them.
+// This is the domain because that is what the domain is for: the words a
+// recipe may use are a fact about the product rather than about any one
+// scheme, and every reader of a gender now asks the same question here.
+var genderSpellings = map[string]Gender{
+	"female":    Female,
+	"f":         Female,
+	"woman":     Female,
+	"k":         Female,
+	"kobieta":   Female,
+	"2":         Female,
+	"male":      Male,
+	"m":         Male,
+	"man":       Male,
+	"mężczyzna": Male,
+	"mezczyzna": Male,
+	"1":         Male,
+}
+
+// ParseGender reads a gender the way a recipe may have written it.
+//
+// The second result is false for a value this product has no meaning for, which
+// is a refusal rather than a default: defaulting would make every unreadable
+// value one sex and hide the mistake in data that looks fine.
+func ParseGender(written string) (Gender, bool) {
+	gender, known := genderSpellings[strings.ToLower(strings.TrimSpace(written))]
+	return gender, known
+}
+
+// GenderSpellings is every accepted spelling, sorted, for a refusal that has to
+// name what it would have taken.
+//
+// Sorted because Go randomises map iteration on purpose, and a message worded
+// differently on two runs is a message somebody cannot search their logs for.
+func GenderSpellings() []string {
+	spellings := make([]string, 0, len(genderSpellings))
+	for spelling := range genderSpellings {
+		spellings = append(spellings, spelling)
+	}
+	sort.Strings(spellings)
+	return spellings
+}
 
 // Place is a settlement a postal code belongs to.
 //

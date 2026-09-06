@@ -111,8 +111,16 @@ func TestQuickRefusesWhatItCannotProduce(t *testing.T) {
 			Request{Generator: "ssn", Agrees: map[string]string{RoleGender: "female"}}, RoleNotRead},
 		{"a date of birth beside a value that takes no account of one",
 			Request{Generator: "ssn", Agrees: map[string]string{RoleBirthDate: "1980-05-05"}}, RoleNotRead},
-		{"a gender spelled a way this mode does not take",
-			Request{Generator: "pesel", Agrees: map[string]string{RoleGender: "f"}}, UnreadableGender},
+		// 🔴 A word with no meaning, not a short spelling. Until DEC-214 the
+		// short ones were refused here, because a first name ignored them while
+		// a PESEL took them. They are taken now, everywhere, so the case that
+		// belongs in this list is the one that is not a gender at all.
+		{"a word that is not a gender in any spelling",
+			Request{Generator: "pesel", Agrees: map[string]string{RoleGender: "yes"}}, UnreadableGender},
+		{"a gender written the short way, which every reader takes",
+			Request{Generator: "pesel", Agrees: map[string]string{RoleGender: "f"}}, NotRefused},
+		{"a gender written as the digit a database export gives",
+			Request{Generator: "pesel", Agrees: map[string]string{RoleGender: "2"}}, NotRefused},
 		{"a date of birth nobody can read",
 			Request{Generator: "pesel", Agrees: map[string]string{RoleBirthDate: "05-05-1980"}}, UnreadableDate},
 		{"a request with nothing wrong with it",

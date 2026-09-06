@@ -148,7 +148,7 @@ const (
 	problemQuickRoleNotReadDo   = "leave the flag out, or ask for a value that does take account of it"
 
 	problemQuickGender    = "not a gender this command takes: "
-	problemQuickGenderWhy = "one value has one spelling here, and the spelling is what comes out in the data"
+	problemQuickGenderWhy = "a gender may be written several ways, including the digits a database export gives, and this is not one of them"
 	problemQuickGenderDo  = "qadg quick pesel --gender female"
 
 	problemQuickDate        = "not a date this command takes: "

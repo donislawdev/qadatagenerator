@@ -9,7 +9,6 @@ package pl
 import (
 	"errors"
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
@@ -412,42 +411,7 @@ func (PESEL) deriveDate(req provider.Request) provider.Date {
 // would refuse ordinary data, and the alternative to a wide list is not a
 // narrow list, it is the silent draw this used to do.
 //
-// The digits are the codes of ISO 5218, which is how a great many databases
-// store this. A tester exporting a column from one gets 1 and 2 rather than
-// words, and refusing those would be refusing the most machine like input there
-// is. The standard's 0 and 9, meaning not known and not applicable, are
-// deliberately absent: they say the value is unknown, which is not something a
-// number encoding a sex can be made to agree with.
-//
-// Everything is compared after trimming and lowercasing, so Kobieta, KOBIETA
-// and " k " are the same entry.
-var genderSpellings = map[string]provider.Gender{
-	"female":    provider.Female,
-	"f":         provider.Female,
-	"woman":     provider.Female,
-	"k":         provider.Female,
-	"kobieta":   provider.Female,
-	"2":         provider.Female,
-	"male":      provider.Male,
-	"m":         provider.Male,
-	"man":       provider.Male,
-	"mężczyzna": provider.Male,
-	"mezczyzna": provider.Male,
-	"1":         provider.Male,
-}
-
-// acceptedGenders lists the spellings for the refusal, sorted so that two runs
-// word it the same way. Go randomises map iteration on purpose.
-func acceptedGenders() string {
-	spellings := make([]string, 0, len(genderSpellings))
-	for spelling := range genderSpellings {
-		spellings = append(spellings, spelling)
-	}
-	sort.Strings(spellings)
-	return strings.Join(spellings, ", ")
-}
-
-// genderFor takes the bound gender, or derives one.
+// / genderFor takes the bound gender, or derives one.
 //
 // # Why an unreadable value is a failure rather than a draw
 //
@@ -470,10 +434,15 @@ func (PESEL) genderFor(req provider.Request) (provider.Gender, error) {
 	if !ok {
 		return provider.Unknown, nil
 	}
-	if gender, known := genderSpellings[strings.ToLower(strings.TrimSpace(bound))]; known {
+	// The vocabulary is asked of the domain rather than held here. It lived in
+	// this file until 2026-09-06, and being here is what let the generator of
+	// first names disagree with it silently: a recipe binding f produced a
+	// PESEL of a woman beside a name of nobody in particular.
+	if gender, known := provider.ParseGender(bound); known {
 		return gender, nil
 	}
-	return provider.Unknown, fmt.Errorf("pesel: %s is not a gender this scheme can encode, which are %s", provider.Show(bound), acceptedGenders())
+	return provider.Unknown, fmt.Errorf("pesel: %s is not a gender this scheme can encode, which are %s",
+		provider.Show(bound), strings.Join(provider.GenderSpellings(), ", "))
 }
 
 // genderDigit picks the tenth digit, carrying the gender.

@@ -380,20 +380,25 @@
 														<widget pos="0,70" size="193x27" type="*widget.RichText">
 															<text alignment="trailing" bold pos="60,4" size="128x19">Defects per record</text>
 														</widget>
-														<widget pos="201,70" size="429x27" type="*container.ThemeOverride">
+														<container pos="201,70" size="429x27">
+															<widget size="429x27" type="*container.ThemeOverride">
+																<container size="429x27">
+																	<widget size="429x27" type="*parts.Select">
+																		<rectangle fillColor="inputBackground" radius="5" size="0x0"/>
+																		<rectangle size="0x0"/>
+																		<widget size="0x0" type="*widget.RichText">
+																			<text pos="-4,-4" size="11x19">…</text>
+																		</widget>
+																		<widget size="0x0" type="*widget.Icon">
+																			<image fillMode="contain" rsc="menuDropDownIcon" size="0x0" themed="foreground"/>
+																		</widget>
+																	</widget>
+																</container>
+															</widget>
 															<container size="429x27">
-																<widget size="429x27" type="*parts.Select">
-																	<rectangle fillColor="inputBackground" radius="5" size="0x0"/>
-																	<rectangle size="0x0"/>
-																	<widget size="0x0" type="*widget.RichText">
-																		<text pos="-4,-4" size="11x19">…</text>
-																	</widget>
-																	<widget size="0x0" type="*widget.Icon">
-																		<image fillMode="contain" rsc="menuDropDownIcon" size="0x0" themed="foreground"/>
-																	</widget>
-																</widget>
+																<rectangle pos="1,1" radius="5" size="427x25" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
 															</container>
-														</widget>
+														</container>
 														<widget pos="0,105" size="193x27" type="*widget.RichText">
 															<text alignment="trailing" bold pos="26,4" size="162x19">Columns to leave alone</text>
 														</widget>
@@ -470,20 +475,25 @@
 														<widget pos="0,280" size="193x27" type="*widget.RichText">
 															<text alignment="trailing" bold pos="48,4" size="140x19">Extra manifest form</text>
 														</widget>
-														<widget pos="201,280" size="429x27" type="*container.ThemeOverride">
+														<container pos="201,280" size="429x27">
+															<widget size="429x27" type="*container.ThemeOverride">
+																<container size="429x27">
+																	<widget size="429x27" type="*parts.Select">
+																		<rectangle fillColor="inputBackground" radius="5" size="0x0"/>
+																		<rectangle size="0x0"/>
+																		<widget size="0x0" type="*widget.RichText">
+																			<text pos="-4,-4" size="11x19">…</text>
+																		</widget>
+																		<widget size="0x0" type="*widget.Icon">
+																			<image fillMode="contain" rsc="menuDropDownIcon" size="0x0" themed="foreground"/>
+																		</widget>
+																	</widget>
+																</container>
+															</widget>
 															<container size="429x27">
-																<widget size="429x27" type="*parts.Select">
-																	<rectangle fillColor="inputBackground" radius="5" size="0x0"/>
-																	<rectangle size="0x0"/>
-																	<widget size="0x0" type="*widget.RichText">
-																		<text pos="-4,-4" size="11x19">…</text>
-																	</widget>
-																	<widget size="0x0" type="*widget.Icon">
-																		<image fillMode="contain" rsc="menuDropDownIcon" size="0x0" themed="foreground"/>
-																	</widget>
-																</widget>
+																<rectangle pos="1,1" radius="5" size="427x25" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
 															</container>
-														</widget>
+														</container>
 														<widget pos="0,315" size="193x27" type="*widget.RichText">
 															<text alignment="trailing" bold pos="4,4" size="185x19">Replace files already there</text>
 														</widget>

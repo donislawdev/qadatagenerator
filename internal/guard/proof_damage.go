@@ -477,7 +477,7 @@ var damageGuards = []Guard{
 		"TestASeparatorThatIsBrieflyUnusableDoesNotTakeTheFileAway", "internal/gui/takeview", ByMutation},
 	{"every control the toolkit floods with the focus colour stands inside a theme of its own, so its label stays readable while the keyboard is on it", "TestEveryFloodedControlKeepsItsLabelReadable", "internal/gui/screens", ByMutation},
 	{"a palette entry read on top of another entry names that entry, and the entry it names is one the palette has", "TestEveryColourReadOnAnotherSaysWhichOne", "internal/gui/theme", ByMutation},
-	{"a button somebody can press carries an edge of its own, so it is a control rather than a word", "TestEveryPressableButtonDrawsItsOwnEdge", "internal/gui/screens", ByMutation},
+	{"a control somebody can use carries an edge of its own, so it is a control rather than a word", "TestEveryPressableControlDrawsItsOwnEdge", "internal/gui/screens", ByMutation},
 	{"the edge of a button is drawn inside it, on whole pixels, rather than half outside", "TestTheEdgeIsDrawnInsideTheControlItOutlines", "internal/gui/parts", ByMutation},
 	{"a register of which values take account of a consistency role says only what the values really do", "TestEveryGeneratorReadsExactlyTheRolesTheRegisterSays", "internal/adapter/values", ByMutation},
 	{"a role that register names is a role a recipe can bind", "TestARoleTheRegisterNamesIsARoleThatExists", "internal/adapter/values", ByMutation},
@@ -486,4 +486,6 @@ var damageGuards = []Guard{
 	{"a field is on that screen only beside a value that takes account of it", "TestAFieldIsShownOnlyBesideAValueThatReadsIt", "internal/gui/quickview", ByMutation},
 	{"one value is refused rather than produced when what was bound to it is not read, not a gender, or not a date", "TestQuickRefusesWhatItCannotProduce", "internal/quick", ByMutation},
 	{"the value one verb writes is the value a recipe of the same seed produces", "TestTheValueIsTheOneARecipeWouldProduce", "internal/quick", ByMutation},
+	{"every spelling of a gender produces the value the canonical one does, in every reader of it", "TestEverySpellingOfAGenderProducesTheValueTheCanonicalOneDoes", "internal/adapter/values", ByMutation},
+	{"a gender nobody can read is refused by the scheme and drawn around by a word list, which is the one place the readers differ", "TestAnUnreadableGenderIsRefusedByTheSchemeAndDrawnAroundByAWordList", "internal/adapter/values", ByMutation},
 }
