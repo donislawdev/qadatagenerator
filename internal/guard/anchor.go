@@ -294,6 +294,40 @@ var Anchors = []Anchor{
 		Detail:   "TestTheCalculationWorkedByTheRegulationComesOutTheSameHere",
 	},
 
+	// --- ean ----------------------------------------------------------------
+	//
+	// The only scheme here anchored on two first party documents that were
+	// written independently of each other. GS1 publishes the standard itself,
+	// and the International ISBN Agency states the same arithmetic for the
+	// prefixes 978 and 979, which are GTIN-13s carrying books. Each works its
+	// own example, so the two can be held against one another rather than
+	// merely believed in turn.
+	//
+	// The third row is the rare one. Every other scheme in this register either
+	// has no safe harbour or, in the single case of the social security number,
+	// has one named by the body that issues the numbers. This is the second.
+	{
+		Rule:     "the thirteen digit shape, numeric throughout, with the check digit in the last position",
+		Provider: "ean",
+		Source:   "GS1 General Specifications, Release 26.0 ratified January 2026, Table 7-8, downloaded from ref.gs1.org on 2026-09-06",
+		State:    ByQuotedSentence,
+		Detail:   "the published weight row and the field lengths are held as the standard prints them in internal/oracle/ean.go, while the provider holds the alternation as a rule, so a weight misread in one is not misread the same way in the other",
+	},
+	{
+		Rule:     "the two multipliers anchored at the right hand end of the body, the divisor of ten, and the computed ten written as nought",
+		Provider: "ean",
+		Source:   "GS1 General Specifications Release 26.0 Table 7-8 with the calculation worked in Table 7-9, and the ISBN Users' Manual of the International ISBN Agency, sixth edition 2012, Appendix A1.1, which works a second example of the same arithmetic",
+		State:    ByWorkedExample,
+		Detail:   "TestTheExamplesTheStandardsWorkComeOutTheSameHere",
+	},
+	{
+		Rule:     "the prefix 952 is set aside for demonstrations and examples, so nothing generated there can belong to a real article",
+		Provider: "ean",
+		Source:   "GS1 General Specifications Release 26.0, Table 1-4 and Table 1-5, downloaded from ref.gs1.org on 2026-09-06. The same carve out is present in releases 23.0.0 and 25.0.0 and absent from 21.0.1",
+		State:    ByQuotedSentence,
+		Detail:   "the row is held as the standard writes it in internal/oracle/ean.go. What it does not establish is whether a company prefix was issued in 952 before the carve out, and docs/05 carries that limit in the same words rather than leaving it to this field",
+	},
+
 	// --- PL.regon ----------------------------------------------------------
 	{
 		Rule:     "the nine digit shape and the ban on any digit carrying meaning",

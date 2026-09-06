@@ -127,17 +127,17 @@
 												<text pos="4,4" size="567x19">entities.customer.fields.email (line 7): this build has no generator called "person.email"</text>
 											</widget>
 										</widget>
-										<widget pos="0,89" size="1050x46" type="*widget.Label">
-											<widget size="1050x46" type="*widget.RichText">
-												<text color="disabled" pos="4,4" size="736x19">allowed: aba, birth_date, city, first_name, gender, iban, last_name, nip, pesel, postal_code, region, regon, ssn, vin</text>
+										<widget pos="0,89" size="1050x65" type="*widget.Label">
+											<widget size="1050x65" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="768x19">allowed: aba, birth_date, city, ean, first_name, gender, iban, last_name, nip, pesel, postal_code, region, regon, ssn, vin</text>
 											</widget>
 										</widget>
-										<widget pos="0,143" size="1050x46" type="*widget.Label">
+										<widget pos="0,162" size="1050x46" type="*widget.Label">
 											<widget size="1050x46" type="*widget.RichText">
 												<text color="disabled" pos="4,4" size="525x19">try: pick one of the names above, or drop the generator and give the field a type</text>
 											</widget>
 										</widget>
-										<container pos="0,197" size="1050x28">
+										<container pos="0,216" size="1050x28">
 											<container size="1050x28">
 												<widget size="1050x28" type="*container.ThemeOverride">
 													<container size="1050x28">
@@ -145,7 +145,7 @@
 															<rectangle radius="5" size="1050x28"/>
 															<rectangle size="1050x28"/>
 															<widget pos="32,4" size="306x20" type="*widget.RichText">
-																<text alignment="center" bold size="306x19">What this build can generate, 14 generators</text>
+																<text alignment="center" bold size="306x19">What this build can generate, 15 generators</text>
 															</widget>
 															<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
 														</widget>

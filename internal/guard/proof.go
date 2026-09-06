@@ -492,4 +492,7 @@ var toolGuards = []Guard{
 	{"a generated number ends in the digits the regulation requires there", "TestEveryGeneratedNumberEndsInTheDigitsTheRegulationRequires", "internal/adapter/provider/intl", ByMutation},
 	{"a generated number carries a model year the table can read back", "TestEveryGeneratedNumberCarriesAModelYearThatCanBeRead", "internal/adapter/provider/intl", ByMutation},
 	{"every generator says what kind of value it produces", "TestEveryGeneratorSaysWhatKindOfValueItProduces", "internal/adapter/values", ByMutation},
+	{"every generated article number sits in the prefix GS1 sets aside for demonstrations, so it cannot belong to a real article", "TestEveryGeneratedArticleNumberSitsInTheDemonstrationPrefix", "internal/adapter/provider/intl", ByMutation},
+	{"the check digit weights are anchored at the right hand end of the value, as the standard prints them", "TestTheExamplesTheStandardsWorkComeOutTheSameHere", "internal/adapter/provider/intl", ByMutation},
+	{"the independent validator takes its multipliers from the row the standard prints, so it is not a second copy of the rule the provider applies", "TestEveryGeneratedArticleNumberSatisfiesTheIndependentValidator", "internal/adapter/provider/intl", ByMutation},
 }

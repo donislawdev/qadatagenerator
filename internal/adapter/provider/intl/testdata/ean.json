@@ -1,0 +1,92 @@
+[
+  {
+    "seed": "release-2026-09",
+    "entity": "catalogue",
+    "row": 0,
+    "field": "barcode",
+    "purpose": "value",
+    "value": "9524582667044",
+    "broken": "9524582667045"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "catalogue",
+    "row": 1,
+    "field": "barcode",
+    "purpose": "value",
+    "value": "9522178322377",
+    "broken": "9522178322378"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "catalogue",
+    "row": 2,
+    "field": "barcode",
+    "purpose": "value",
+    "value": "9524482999351",
+    "broken": "9524482999352"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "catalogue",
+    "row": 7,
+    "field": "barcode",
+    "purpose": "value",
+    "value": "9523040034206",
+    "broken": "9523040034207"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "catalogue",
+    "row": 42,
+    "field": "barcode",
+    "purpose": "value",
+    "value": "9523089301468",
+    "broken": "9523089301469"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "catalogue",
+    "row": 999,
+    "field": "barcode",
+    "purpose": "value",
+    "value": "9525554472406",
+    "broken": "9525554472407"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "catalogue",
+    "row": 1000000,
+    "field": "barcode",
+    "purpose": "value",
+    "value": "9529419951778",
+    "broken": "9529419951779"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "catalogue",
+    "row": 0,
+    "field": "barcode",
+    "purpose": "value",
+    "value": "9526916929804",
+    "broken": "9526916929805"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "catalogue",
+    "row": 1,
+    "field": "barcode",
+    "purpose": "value",
+    "value": "9525990573866",
+    "broken": "9525990573867"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "catalogue",
+    "row": 5,
+    "field": "barcode",
+    "purpose": "value",
+    "value": "9521085288967",
+    "broken": "9521085288968"
+  }
+]

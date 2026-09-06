@@ -47,6 +47,7 @@ can say its own output could not belong to anybody.
 | Scheme | Safe block | What that means |
 |---|---|---|
 | `US.ssn` | yes, the area the administration never assigns | a value outside it would be a defect worth reporting |
+| `ean` | yes, the prefix 952, which GS1 sets aside for demonstrations and examples of its own system | a value outside it would be a defect worth reporting. What has not been established is whether a company prefix was issued there before GS1 carved it out, so a resemblance to a real article number is possible and is worth telling us about |
 | `PL.pesel`, `PL.nip`, `PL.regon`, `US.aba`, `iban`, `vin` | **none** | the registrar issues, or reserves the right to issue, across the whole space |
 
 For the schemes with none, a correct value **cannot be shown not to belong to
