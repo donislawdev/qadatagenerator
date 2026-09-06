@@ -488,4 +488,11 @@ var damageGuards = []Guard{
 	{"the value one verb writes is the value a recipe of the same seed produces", "TestTheValueIsTheOneARecipeWouldProduce", "internal/quick", ByMutation},
 	{"every spelling of a gender produces the value the canonical one does, in every reader of it", "TestEverySpellingOfAGenderProducesTheValueTheCanonicalOneDoes", "internal/adapter/values", ByMutation},
 	{"a gender nobody can read is refused by the scheme and drawn around by a word list, which is the one place the readers differ", "TestAnUnreadableGenderIsRefusedByTheSchemeAndDrawnAroundByAWordList", "internal/adapter/values", ByMutation},
+	{"a field the producer did not read back is not a field that survived", "TestAFieldNobodyReadBackIsNotAFieldThatSurvived", "internal/domain/response", ByMutation},
+	{"a whole parameter is read from each of the three types it can arrive as", "TestAWholeNumberIsReadFromEachOfTheThreeTypesItCanArriveAs", "internal/domain/mutator", ByMutation},
+	{"a run counts the records carrying damage as the manifest describes them", "TestWhatTheRunCountedAgreesWithWhatItWroteToTheManifest", "internal/adapter/corrupted", ByMutation},
+	{"every manifest document of one run is handed every entry", "TestEverySinkIsHandedEveryEntryInTheOrderTheSinksWereGiven", "internal/adapter/corrupted", ByMutation},
+	{"the shortfall of a run is what was ordered less what reached the data", "TestTheShortfallIsWhatWasOrderedLessWhatReachedTheData", "internal/damage", ByMutation},
+	{"every kind of refused damage keeps a sentence a person can read", "TestTheShortfallIsBrokenDownByKindAndAccountsForEveryOrderThatFailed", "internal/adapter/corrupted", ByMutation},
+	{"a run exporting a manifest form announces the file it writes", "TestEveryFormThisBuildExportsIsNamedAmongTheFilesARunWrites", "internal/damage", ByMutation},
 }

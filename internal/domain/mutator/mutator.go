@@ -73,8 +73,15 @@ type Target struct {
 	// registry of damage behind a port, and this is the second one through the
 	// same door.
 	Provider provider.Provider
-	// Params are the knobs, with the catalog's defaults already applied and
-	// the policy's overrides on top.
+	// Params are the knobs, with the catalog's defaults already applied.
+	//
+	// The catalog is the only thing that fills them. This said "and the
+	// policy's overrides on top" until 2026-09-06, and nothing in this build
+	// does that: a policy carries the layers to attack, the share of rows, the
+	// columns to leave alone and the condition a row has to meet, and it has
+	// nowhere to put a knob. A sentence promising a setting nobody can write
+	// is worse than no sentence, because it reads as a feature to whoever goes
+	// looking for one.
 	Params Parameters
 }
 
