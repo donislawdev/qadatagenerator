@@ -142,7 +142,7 @@
 															<rectangle radius="5" size="1050x28"/>
 															<rectangle size="1050x28"/>
 															<widget pos="32,4" size="306x20" type="*widget.RichText">
-																<text alignment="center" bold size="306x19">What this build can generate, 16 generators</text>
+																<text alignment="center" bold size="306x19">What this build can generate, 17 generators</text>
 															</widget>
 															<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
 														</widget>

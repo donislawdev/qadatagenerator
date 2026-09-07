@@ -22,12 +22,26 @@ repository once they are released.
 
 ### Added
 
-- **Three more kinds of identifier: `vin`, `ean` and `imei`.** A vehicle
+- **Four more kinds of identifier: `vin`, `ean`, `imei` and `isbn`.** A vehicle
   identification number of seventeen characters, a thirteen digit article
-  number, and a fifteen digit mobile equipment identity. Each one carries a
-  correct check digit, each is checked against the published rules rather than
-  against the way this tool happens to build them, and each can be damaged by
-  the corruption catalog like the identifiers that were already here.
+  number, a fifteen digit mobile equipment identity, and a thirteen digit book
+  number. Each one carries a correct check digit, each is checked against the
+  published rules rather than against the way this tool happens to build them,
+  and each can be damaged by the corruption catalog like the identifiers that
+  were already here.
+
+  `isbn` produces the thirteen digit form only. The ten character form that
+  books carried until the end of 2006 is not generated, because the
+  International ISBN Agency does not publish its calculation in either edition
+  of its manual and states that an ISBN now always consists of thirteen digits.
+
+  Two of these narrow what they write without promising anything about it.
+  `imei` writes only inside the block reserved for test equipment, and `isbn`
+  only inside the one window the agency currently leaves without a registration
+  group, so a generated value is not one a real device or a real book carries
+  today. Neither is described as a safe range, because the bodies that issue
+  those numbers can issue inside those spaces. `SECURITY.md` says which schemes
+  have a genuinely safe range and which do not.
 
   **Two of them keep a promise the others cannot.** An article number is
   generated only inside the prefix GS1 sets aside for demonstrations of its own

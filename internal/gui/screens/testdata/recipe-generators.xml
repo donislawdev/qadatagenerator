@@ -111,7 +111,7 @@
 							<container pos="0,357" size="1050x352">
 								<rectangle size="1050x352" strokeWidth="2"/>
 								<widget size="1050x352" type="*parts.KeyScroll">
-									<container size="1050x800">
+									<container size="1050x835">
 										<widget size="1050x27" type="*widget.Label">
 											<widget size="1050x27" type="*widget.RichText">
 												<text pos="4,4" size="674x19">Write or paste a recipe here. It is checked as you type, and nothing is written to disk until you ask for it.</text>
@@ -135,7 +135,7 @@
 												</container>
 											</container>
 										</container>
-										<container pos="0,71" size="1050x729">
+										<container pos="0,71" size="1050x764">
 											<container size="1050x28">
 												<widget size="1050x28" type="*container.ThemeOverride">
 													<container size="1050x28">
@@ -143,7 +143,7 @@
 															<rectangle radius="5" size="1050x28"/>
 															<rectangle size="1050x28"/>
 															<widget pos="32,4" size="306x20" type="*widget.RichText">
-																<text alignment="center" bold size="306x19">What this build can generate, 16 generators</text>
+																<text alignment="center" bold size="306x19">What this build can generate, 17 generators</text>
 															</widget>
 															<image fillMode="contain" pos="4,4" rsc="menuDropUpIcon" size="iconInlineSize" themed="foreground"/>
 														</widget>
@@ -152,7 +152,7 @@
 												<container size="1050x28">
 												</container>
 											</container>
-											<container pos="0,36" size="1050x693">
+											<container pos="0,36" size="1050x728">
 												<widget size="1050x27" type="*widget.Label">
 													<widget size="1050x27" type="*widget.RichText">
 														<text pos="4,4" size="153x19">aba - identifier (US.aba)</text>
@@ -195,60 +195,65 @@
 												</widget>
 												<widget pos="0,280" size="1050x27" type="*widget.Label">
 													<widget size="1050x27" type="*widget.RichText">
-														<text pos="4,4" size="117x19">last_name - string</text>
+														<text pos="4,4" size="138x19">isbn - identifier (isbn)</text>
 													</widget>
 												</widget>
 												<widget pos="0,315" size="1050x27" type="*widget.Label">
 													<widget size="1050x27" type="*widget.RichText">
-														<text pos="4,4" size="144x19">nip - identifier (PL.nip)</text>
+														<text pos="4,4" size="117x19">last_name - string</text>
 													</widget>
 												</widget>
 												<widget pos="0,350" size="1050x27" type="*widget.Label">
 													<widget size="1050x27" type="*widget.RichText">
-														<text pos="4,4" size="172x19">pesel - identifier (PL.pesel)</text>
+														<text pos="4,4" size="144x19">nip - identifier (PL.nip)</text>
 													</widget>
 												</widget>
 												<widget pos="0,385" size="1050x27" type="*widget.Label">
 													<widget size="1050x27" type="*widget.RichText">
-														<text pos="4,4" size="242x19">postal_code - postal_code (US.postal)</text>
+														<text pos="4,4" size="172x19">pesel - identifier (PL.pesel)</text>
 													</widget>
 												</widget>
 												<widget pos="0,420" size="1050x27" type="*widget.Label">
 													<widget size="1050x27" type="*widget.RichText">
-														<text pos="4,4" size="92x19">region - string</text>
+														<text pos="4,4" size="242x19">postal_code - postal_code (US.postal)</text>
 													</widget>
 												</widget>
 												<widget pos="0,456" size="1050x27" type="*widget.Label">
 													<widget size="1050x27" type="*widget.RichText">
-														<text pos="4,4" size="181x19">regon - identifier (PL.regon)</text>
+														<text pos="4,4" size="92x19">region - string</text>
 													</widget>
 												</widget>
 												<widget pos="0,491" size="1050x27" type="*widget.Label">
 													<widget size="1050x27" type="*widget.RichText">
-														<text pos="4,4" size="149x19">ssn - identifier (US.ssn)</text>
+														<text pos="4,4" size="181x19">regon - identifier (PL.regon)</text>
 													</widget>
 												</widget>
 												<widget pos="0,526" size="1050x27" type="*widget.Label">
 													<widget size="1050x27" type="*widget.RichText">
-														<text pos="4,4" size="122x19">vin - identifier (vin)</text>
+														<text pos="4,4" size="149x19">ssn - identifier (US.ssn)</text>
 													</widget>
 												</widget>
 												<widget pos="0,561" size="1050x27" type="*widget.Label">
 													<widget size="1050x27" type="*widget.RichText">
-														<text bold pos="4,4" size="297x19">Where this build has nothing to draw from</text>
+														<text pos="4,4" size="122x19">vin - identifier (vin)</text>
 													</widget>
 												</widget>
 												<widget pos="0,596" size="1050x27" type="*widget.Label">
 													<widget size="1050x27" type="*widget.RichText">
-														<text pos="4,4" size="400x19">city is not available in en-US: this build has no cities for en-US</text>
+														<text bold pos="4,4" size="297x19">Where this build has nothing to draw from</text>
 													</widget>
 												</widget>
 												<widget pos="0,631" size="1050x27" type="*widget.Label">
 													<widget size="1050x27" type="*widget.RichText">
-														<text pos="4,4" size="851x19">postal_code is not available in pl-PL: this build has no register of postal codes for pl-PL, so a postal code cannot be produced there</text>
+														<text pos="4,4" size="400x19">city is not available in en-US: this build has no cities for en-US</text>
 													</widget>
 												</widget>
 												<widget pos="0,666" size="1050x27" type="*widget.Label">
+													<widget size="1050x27" type="*widget.RichText">
+														<text pos="4,4" size="851x19">postal_code is not available in pl-PL: this build has no register of postal codes for pl-PL, so a postal code cannot be produced there</text>
+													</widget>
+												</widget>
+												<widget pos="0,701" size="1050x27" type="*widget.Label">
 													<widget size="1050x27" type="*widget.RichText">
 														<text pos="4,4" size="436x19">region is not available in en-US: this build has no regions for en-US</text>
 													</widget>
@@ -260,8 +265,8 @@
 										<linearGradient endColor="shadow" pos="0,-8" size="1050x8"/>
 									</widget>
 									<widget pos="1044,0" size="6x352" type="*widget.scrollBarArea">
-										<widget pos="3,0" size="3x154" type="*widget.scrollBar">
-											<rectangle fillColor="scrollbar" radius="3" size="3x154"/>
+										<widget pos="3,0" size="3x148" type="*widget.scrollBar">
+											<rectangle fillColor="scrollbar" radius="3" size="3x148"/>
 										</widget>
 									</widget>
 								</widget>

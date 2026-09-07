@@ -354,6 +354,46 @@ var Anchors = []Anchor{
 		Detail:   "TestTheExampleTheSpecificationWorksComesOutTheSameHere",
 	},
 
+	// --- isbn ---------------------------------------------------------------
+	//
+	// The arithmetic is the one the article number already stands on, because an
+	// ISBN-13 is a GTIN-13 carrying the prefix 978 or 979. It is anchored again
+	// here rather than cross referenced, because the manual states it from the
+	// other end and the provider follows the manual. Two statements of one rule,
+	// counted as the one document each of them is.
+	//
+	// The edition matters and is the reason this block exists at all. The article
+	// number cites the sixth edition of 2012. The seventh of 2017 is the current
+	// one, it works a different example, and the two agree, which is what turns
+	// the older citation into a corroborated one rather than a stale one.
+	//
+	// There is no harbour row. This scheme has none, and the candidate that
+	// looked like one is disqualified by prior allocation, which is set out in
+	// the provider and in docs/05 rather than being anchored as a rule that does
+	// not exist. The ten character form has no row either, for a plainer reason:
+	// it is not implemented, because the agency does not publish its algorithm.
+	{
+		Rule:     "the thirteen digit shape, numeric throughout, carrying the prefix 978 or 979 with the check digit in the last position",
+		Provider: "isbn",
+		Source:   "ISBN Users' Manual, International ISBN Agency, seventh edition London 2017, section 5.5 and appendix A1.1, downloaded from isbn-international.org on 2026-09-07, with the agency's own statement of the length on its What is an ISBN page",
+		State:    ByQuotedSentence,
+		Detail:   "the agency's sentence about the length is held in internal/oracle/isbn.go and the thirteen is read out of it rather than typed a second time",
+	},
+	{
+		Rule:     "the twelve digits alternately multiplied by one and three counted from the left, the divisor of ten, and a computed ten written as nought",
+		Provider: "isbn",
+		Source:   "ISBN Users' Manual seventh edition, appendix A1.1, which works 978-92-95055-12-? and prints all twelve individual products, the sum 126 and the remainder 6 before reaching the check digit 4. That value is the manual's own ISBN. The sixth edition of 2012 works a different example, 978-0-11-000222-4 with the sum 56, and reaches the same rule",
+		State:    ByWorkedExample,
+		Detail:   "TestTheExampleTheManualWorksComesOutTheSameHere",
+	},
+	{
+		Rule:     "a value beginning 9790 is a music number rather than a book number, so this scheme refuses it instead of validating it",
+		Provider: "isbn",
+		Source:   "International ISMN Agency, read at ismn-international.org on 2026-09-07. The ISBN range file of the same date leaves that window with no registration group, which is the same fact seen from the other standard",
+		State:    ByQuotedSentence,
+		Detail:   "the music agency's sentence is held in internal/oracle/isbn.go and the prefix is read out of it, so the refusal is compared against the other agency's words rather than against a constant typed beside it",
+	},
+
 	// --- PL.regon ----------------------------------------------------------
 	{
 		Rule:     "the nine digit shape and the ban on any digit carrying meaning",

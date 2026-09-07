@@ -1,0 +1,92 @@
+[
+  {
+    "seed": "release-2026-09",
+    "entity": "library",
+    "row": 0,
+    "field": "isbn",
+    "purpose": "value",
+    "value": "9786872087479",
+    "broken": "9786872087470"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "library",
+    "row": 1,
+    "field": "isbn",
+    "purpose": "value",
+    "value": "9786829947252",
+    "broken": "9786829947253"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "library",
+    "row": 2,
+    "field": "isbn",
+    "purpose": "value",
+    "value": "9786914057316",
+    "broken": "9786914057317"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "library",
+    "row": 7,
+    "field": "isbn",
+    "purpose": "value",
+    "value": "9786757216703",
+    "broken": "9786757216704"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "library",
+    "row": 42,
+    "field": "isbn",
+    "purpose": "value",
+    "value": "9786858420955",
+    "broken": "9786858420956"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "library",
+    "row": 999,
+    "field": "isbn",
+    "purpose": "value",
+    "value": "9786769056038",
+    "broken": "9786769056039"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "library",
+    "row": 1000000,
+    "field": "isbn",
+    "purpose": "value",
+    "value": "9786976636542",
+    "broken": "9786976636543"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "library",
+    "row": 0,
+    "field": "isbn",
+    "purpose": "value",
+    "value": "9786897906519",
+    "broken": "9786897906510"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "library",
+    "row": 1,
+    "field": "isbn",
+    "purpose": "value",
+    "value": "9786758536695",
+    "broken": "9786758536696"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "library",
+    "row": 5,
+    "field": "isbn",
+    "purpose": "value",
+    "value": "9786823222775",
+    "broken": "9786823222776"
+  }
+]
