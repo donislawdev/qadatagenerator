@@ -48,7 +48,14 @@ can say its own output could not belong to anybody.
 |---|---|---|
 | `US.ssn` | yes, the area the administration never assigns | a value outside it would be a defect worth reporting |
 | `ean` | yes, the prefix 952, which GS1 sets aside for demonstrations and examples of its own system | a value outside it would be a defect worth reporting. What has not been established is whether a company prefix was issued there before GS1 carved it out, so a resemblance to a real article number is possible and is worth telling us about |
-| `PL.pesel`, `PL.nip`, `PL.regon`, `US.aba`, `iban`, `vin` | **none** | the registrar issues, or reserves the right to issue, across the whole space |
+| `PL.pesel`, `PL.nip`, `PL.regon`, `US.aba`, `iban`, `vin`, `imei` | **none** | the registrar issues, or reserves the right to issue, across the whole space |
+
+`imei` is the one worth a sentence of its own. Every value is generated inside
+the block the GSM Association gives to test equipment, which cannot be supplied
+to the market, so nothing this tool writes can be a device somebody owns. That
+is deliberately not called a safe block, because codes inside it are issued to
+named manufacturers, so a value there can still resemble a real prototype. It
+narrows what the tool writes without claiming anything about it.
 
 For the schemes with none, a correct value **cannot be shown not to belong to
 somebody**, and that is a property of the numbering scheme rather than a flaw in

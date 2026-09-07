@@ -1,0 +1,92 @@
+[
+  {
+    "seed": "release-2026-09",
+    "entity": "handset",
+    "row": 0,
+    "field": "imei",
+    "purpose": "value",
+    "value": "007019100299646",
+    "broken": "007019100299647"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "handset",
+    "row": 1,
+    "field": "imei",
+    "purpose": "value",
+    "value": "005844684632256",
+    "broken": "005844684632257"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "handset",
+    "row": 2,
+    "field": "imei",
+    "purpose": "value",
+    "value": "003263747407782",
+    "broken": "003263747407783"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "handset",
+    "row": 7,
+    "field": "imei",
+    "purpose": "value",
+    "value": "009885921986449",
+    "broken": "009885921986440"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "handset",
+    "row": 42,
+    "field": "imei",
+    "purpose": "value",
+    "value": "008897148899579",
+    "broken": "008897148899570"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "handset",
+    "row": 999,
+    "field": "imei",
+    "purpose": "value",
+    "value": "003834111662358",
+    "broken": "003834111662359"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "handset",
+    "row": 1000000,
+    "field": "imei",
+    "purpose": "value",
+    "value": "002060242500496",
+    "broken": "002060242500497"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "handset",
+    "row": 0,
+    "field": "imei",
+    "purpose": "value",
+    "value": "001970785074132",
+    "broken": "001970785074133"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "handset",
+    "row": 1,
+    "field": "imei",
+    "purpose": "value",
+    "value": "005656447033428",
+    "broken": "005656447033429"
+  },
+  {
+    "seed": "release-2026-09",
+    "entity": "handset",
+    "row": 5,
+    "field": "imei",
+    "purpose": "value",
+    "value": "004652865340651",
+    "broken": "004652865340652"
+  }
+]

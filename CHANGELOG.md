@@ -22,6 +22,30 @@ repository once they are released.
 
 ### Added
 
+- **Three more kinds of identifier: `vin`, `ean` and `imei`.** A vehicle
+  identification number of seventeen characters, a thirteen digit article
+  number, and a fifteen digit mobile equipment identity. Each one carries a
+  correct check digit, each is checked against the published rules rather than
+  against the way this tool happens to build them, and each can be damaged by
+  the corruption catalog like the identifiers that were already here.
+
+  **Two of them keep a promise the others cannot.** An article number is
+  generated only inside the prefix GS1 sets aside for demonstrations of its own
+  system, so it cannot belong to a real article. An equipment identity is
+  generated only inside the block reserved for test equipment, which cannot be
+  supplied to the market, so it cannot be a device somebody owns - though unlike
+  the article number that block does have codes issued inside it, so this is a
+  narrower promise and SECURITY.md says which schemes make which. A vehicle
+  number has no such block at all and its values sit in the space that is
+  actually issued.
+
+  **Checking is deliberately wider than generating for all three.** A correct
+  value from outside those blocks is somebody's real one, and reporting it as
+  wrong would be a defect in your data that is not there. One case is worth
+  naming: a sixteen digit equipment identity carries a software version number
+  and has no check digit at all, so it is reported as recognised and not checked
+  rather than as valid or wrong, and no check digit damage is aimed at it.
+
 - **One value, now: `qadg quick pesel`.** A sixth command that produces a single
   value of the kind you name and writes nothing anywhere. No recipe, no output
   directory, no manifest. It is the only command whose runs differ from each

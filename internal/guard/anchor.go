@@ -328,6 +328,32 @@ var Anchors = []Anchor{
 		Detail:   "the row is held as the standard writes it in internal/oracle/ean.go. What it does not establish is whether a company prefix was issued in 952 before the carve out, and docs/05 carries that limit in the same words rather than leaving it to this field",
 	},
 
+	// --- imei ---------------------------------------------------------------
+	//
+	// One document, and it is worth saying why it is not counted as two. ETSI
+	// republishes this specification and its republication carries the annex
+	// word for word, so reading both is one text read twice. The article
+	// number above really does stand on two independently written documents
+	// and this one does not.
+	//
+	// There is no third row here. This scheme has no safe harbour, and the
+	// reason is set out where it can be acted on, in the provider and in
+	// docs/05, rather than as an anchor for a rule that does not exist.
+	{
+		Rule:     "the fifteen digit shape, an eight digit allocation code and a six digit serial number, with the check digit last and numeric throughout",
+		Provider: "imei",
+		Source:   "ETSI TS 123 003 version 19.7.0 clause 6.2.1, the transposition of 3GPP TS 23.003 published by ETSI, downloaded on 2026-09-06. The newer 3GPP text of version 20.0.0 was read as well and says the same, and it is not the one cited because it states that it shall not be implemented and points at the publications offices, of which ETSI is one",
+		State:    ByQuotedSentence,
+		Detail:   "the element lengths are held as the specification writes them in internal/oracle/imei.go and are read back out of that sentence, so the fourteen the check digit covers is taken from the source rather than typed as a number in two places",
+	},
+	{
+		Rule:     "the digits labelled D14 down to D1, the odd labelled ones doubled, the individual digits of those results added, and the total taken up to the next number ending in nought",
+		Provider: "imei",
+		Source:   "ETSI TS 123 003 version 19.7.0 annex B, which is normative and works its own example in B.3, printing the seven products of step 1 and the total 53 of step 2 before arriving at the check digit 7. The 3GPP text of version 20.0.0 carries the annex word for word",
+		State:    ByWorkedExample,
+		Detail:   "TestTheExampleTheSpecificationWorksComesOutTheSameHere",
+	},
+
 	// --- PL.regon ----------------------------------------------------------
 	{
 		Rule:     "the nine digit shape and the ban on any digit carrying meaning",

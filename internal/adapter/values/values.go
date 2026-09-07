@@ -49,6 +49,7 @@ const (
 	IBAN       = "iban"
 	VIN        = "vin"
 	EAN        = "ean"
+	IMEI       = "imei"
 )
 
 // roles maps a generator onto the role it plays in a consistency rule.
@@ -110,6 +111,7 @@ var types = map[string]string{
 	IBAN:       TypeIdentifier,
 	VIN:        TypeIdentifier,
 	EAN:        TypeIdentifier,
+	IMEI:       TypeIdentifier,
 }
 
 // Source produces values for one locale.
@@ -480,6 +482,7 @@ var producers = map[string]generator{
 	IBAN:  {produce: fromProvider(intl.IBAN{}), behind: intl.IBAN{}},
 	VIN:   {produce: fromProvider(intl.VIN{}), behind: intl.VIN{}},
 	EAN:   {produce: fromProvider(intl.EAN{}), behind: intl.EAN{}},
+	IMEI:  {produce: fromProvider(intl.IMEI{}), behind: intl.IMEI{}},
 }
 
 // fromProvider adapts an identifier provider to this registry.
