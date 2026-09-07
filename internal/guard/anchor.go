@@ -342,7 +342,7 @@ var Anchors = []Anchor{
 	{
 		Rule:     "the fifteen digit shape, an eight digit allocation code and a six digit serial number, with the check digit last and numeric throughout",
 		Provider: "imei",
-		Source:   "ETSI TS 123 003 version 19.7.0 clause 6.2.1, the transposition of 3GPP TS 23.003 published by ETSI, downloaded on 2026-09-06. The newer 3GPP text of version 20.0.0 was read as well and says the same, and it is not the one cited because it states that it shall not be implemented and points at the publications offices, of which ETSI is one",
+		Source:   "ETSI TS 123 003 version 19.7.0 clause 6.2.1, the transposition of 3GPP TS 23.003 published by ETSI, downloaded on 2026-09-07. The newer 3GPP text of version 20.0.0 was read as well and says the same, and it is not the one cited because it states that it shall not be implemented and points at the publications offices, of which ETSI is one",
 		State:    ByQuotedSentence,
 		Detail:   "the element lengths are held as the specification writes them in internal/oracle/imei.go and are read back out of that sentence, so the fourteen the check digit covers is taken from the source rather than typed as a number in two places",
 	},
