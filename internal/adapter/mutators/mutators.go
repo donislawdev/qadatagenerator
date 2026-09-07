@@ -28,13 +28,14 @@ import (
 // instead of a value quietly filed in the wrong place. A test holds the two to
 // each other.
 var registry = map[catalog.ID]mutator.Mutator{
-	stringInNumericID:       stringInNumeric{},
-	checksumOffByOneID:      checksumOffByOne{},
-	nationalIDVsGenderID:    nationalIDVsGender{},
-	nationalIDVsBirthdateID: nationalIDVsBirthdate{},
-	rangeUnassignedID:       rangeUnassigned{},
-	exceedsMaxLengthID:      exceedsMaxLength{},
-	stringEmptyID:           stringEmpty{},
+	stringInNumericID:          stringInNumeric{},
+	checksumOffByOneID:         checksumOffByOne{},
+	checksumTransposedDigitsID: checksumTransposedDigits{},
+	nationalIDVsGenderID:       nationalIDVsGender{},
+	nationalIDVsBirthdateID:    nationalIDVsBirthdate{},
+	rangeUnassignedID:          rangeUnassigned{},
+	exceedsMaxLengthID:         exceedsMaxLength{},
+	stringEmptyID:              stringEmpty{},
 }
 
 // Lookup returns the mutator for an identifier and whether this build has one.

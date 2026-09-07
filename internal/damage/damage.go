@@ -145,7 +145,11 @@ func Files(form string) []string {
 // neither a dataset nor a manifest, rather than a manifest describing records
 // nobody will find.
 func Start(ask Ask) (*Run, error) {
-	selector, err := corrupt.NewSelector(ask.Policy, ask.Described, ask.Schema, seed.New(ask.Seed))
+	// One source for both, because they are two draws about one run. Building
+	// it twice would let the two calls part company the day either of them
+	// took its seed from somewhere else.
+	source := seed.New(ask.Seed)
+	selector, err := corrupt.NewSelector(ask.Policy, ask.Described, ask.Schema, source)
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +157,7 @@ func Start(ask Ask) (*Run, error) {
 	if err != nil {
 		return nil, err
 	}
-	engine := corrupt.New(ask.Described, mutatorRegistry{}, schemeRegistry{ask.Schemes}, ask.Can)
+	engine := corrupt.New(ask.Described, mutatorRegistry{}, schemeRegistry{ask.Schemes}, ask.Can, source)
 	wrapped := corrupted.New(ask.Next, engine, &selector, sinks.all, ask.Schema)
 	return &Run{
 		writer: wrapped, entries: sinks.canonical, selector: &selector,

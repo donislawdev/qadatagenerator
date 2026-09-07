@@ -495,4 +495,11 @@ var damageGuards = []Guard{
 	{"the shortfall of a run is what was ordered less what reached the data", "TestTheShortfallIsWhatWasOrderedLessWhatReachedTheData", "internal/damage", ByMutation},
 	{"every kind of refused damage keeps a sentence a person can read", "TestTheShortfallIsBrokenDownByKindAndAccountsForEveryOrderThatFailed", "internal/adapter/corrupted", ByMutation},
 	{"a run exporting a manifest form announces the file it writes", "TestEveryFormThisBuildExportsIsNamedAmongTheFilesARunWrites", "internal/damage", ByMutation},
+	{"a transposition is never reported as damage over a value its scheme still accepts", "TestNoSchemeIsEverToldToRejectAValueItStillAccepts", "internal/adapter/mutators", ByMutation},
+	{"a value that was already broken is not credited to a swap", "TestWhatThisRefusesAndTheSentenceItRefusesWith", "internal/adapter/mutators", ByMutation},
+	{"the run seed reaches the mutator that draws a pair with it", "TestOneSeedDrawsOnePairAndDifferentSeedsDoNotAllDrawTheSameOne", "internal/adapter/mutators", ByMutation},
+	{"a pair holding one digit twice is left out of the draw rather than drawn and refused", "TestAPairHoldingOneDigitTwiceIsNeverWhatGetsDrawn", "internal/adapter/mutators", ByMutation},
+	{"a value in a form its scheme does not check is passed over rather than damaged", "TestAFormTheSchemeDoesNotCheckIsNotDamagedInTheFirstPlace", "internal/adapter/mutators", ByMutation},
+	{"a swap landing in a form the scheme does not check is not called a rejection", "TestASwapLandingInAFormTheSchemeDoesNotCheckIsNotCalledARejection", "internal/adapter/mutators", ByMutation},
+	{"the randomness a run was seeded with reaches the mutator that draws with it", "TestTheRunSeedReachesTheMutator", "internal/app/corrupt", ByMutation},
 }

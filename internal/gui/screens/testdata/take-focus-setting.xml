@@ -538,7 +538,7 @@
 													</widget>
 													<widget pos="244,0" size="54x27" type="*widget.Label">
 														<widget size="54x27" type="*widget.RichText">
-															<text pos="4,4" size="46x19">5 kinds</text>
+															<text pos="4,4" size="46x19">6 kinds</text>
 														</widget>
 													</widget>
 												</container>

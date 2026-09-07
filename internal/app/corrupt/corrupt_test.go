@@ -115,7 +115,7 @@ func (c *counting) Lookup(id catalog.ID) (mutator.Mutator, bool) {
 // search out of the path walked once per ordered defect per row.
 func TestOneOrderedDefectAsksTheRegisterForItsMutatorOnce(t *testing.T) {
 	register := &counting{held: registry{damageID: stated{damageID, mutator.Done("n/a")}}}
-	engine := corrupt.New(described(t, entry()), register, noSchemes{}, able())
+	engine := corrupt.New(described(t, entry()), register, noSchemes{}, able(), seed.New("corrupt test"))
 
 	value, defect := engine.Apply(order(), numeric(), "1250", seed.Coordinate{})
 	if !defect.Applied || value != "n/a" {
@@ -129,7 +129,7 @@ func TestOneOrderedDefectAsksTheRegisterForItsMutatorOnce(t *testing.T) {
 
 func TestDamageThatHappenedIsRecordedWithBothValues(t *testing.T) {
 	engine := corrupt.New(described(t, entry()),
-		registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able())
+		registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able(), seed.New("corrupt test"))
 
 	value, defect := engine.Apply(order(), numeric(), "1250", seed.Coordinate{})
 	if value != "n/a" {
@@ -158,7 +158,7 @@ func TestIrreversibleDamageDoesNotCarryTheOriginal(t *testing.T) {
 	oneWay := entry()
 	oneWay.Reversible = false
 	engine := corrupt.New(described(t, oneWay),
-		registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able())
+		registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able(), seed.New("corrupt test"))
 
 	_, defect := engine.Apply(order(), numeric(), "1250", seed.Coordinate{})
 	if defect.HasValueBefore || defect.ValueBefore != "" {
@@ -178,16 +178,16 @@ func TestEveryWayDamageCanFailStillProducesAnEntry(t *testing.T) {
 		says   string
 	}{
 		{"the catalog does not describe it",
-			corrupt.New(described(t, entry()), registry{}, noSchemes{}, able()), "no entry in the corruption catalog"},
+			corrupt.New(described(t, entry()), registry{}, noSchemes{}, able(), seed.New("corrupt test")), "no entry in the corruption catalog"},
 		{"this build has no implementation",
-			corrupt.New(described(t, entry()), registry{}, noSchemes{}, able()), "carries no implementation"},
+			corrupt.New(described(t, entry()), registry{}, noSchemes{}, able(), seed.New("corrupt test")), "carries no implementation"},
 		{"the run cannot do what it needs",
 			corrupt.New(described(t, entry()),
-				registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, capability.NewSet()),
+				registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, capability.NewSet(), seed.New("corrupt test")),
 			"this run cannot schema.field-type"},
 		{"the mutator declined",
 			corrupt.New(described(t, entry()),
-				registry{damageID: stated{damageID, mutator.Skipped("the value is already n/a")}}, noSchemes{}, able()),
+				registry{damageID: stated{damageID, mutator.Skipped("the value is already n/a")}}, noSchemes{}, able(), seed.New("corrupt test")),
 			"the value is already n/a"},
 	}
 
@@ -222,7 +222,7 @@ func TestEveryWayDamageCanFailStillProducesAnEntry(t *testing.T) {
 // aimed at a name is refused here rather than inside every mutator.
 func TestDamageAimedAtAFieldItDoesNotCoverIsRefusedWithBothSides(t *testing.T) {
 	engine := corrupt.New(described(t, entry()),
-		registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able())
+		registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able(), seed.New("corrupt test"))
 
 	_, defect := engine.Apply(order(), recipe.FieldInfo{Name: "surname", Type: "string"}, "Nowak", seed.Coordinate{})
 	if defect.Applied {
@@ -255,7 +255,7 @@ func identifierEntry() catalog.Entry {
 // manifest would report a failure that is ours rather than theirs.
 func TestDamageAimedAtASchemeItDoesNotCoverIsRefusedWithBothSides(t *testing.T) {
 	engine := corrupt.New(described(t, identifierEntry()),
-		registry{damageID: stated{damageID, mutator.Done("666123457")}}, noSchemes{}, able())
+		registry{damageID: stated{damageID, mutator.Done("666123457")}}, noSchemes{}, able(), seed.New("corrupt test"))
 
 	_, defect := engine.Apply(order(),
 		recipe.FieldInfo{Name: "ssn", Type: "identifier", Scheme: "US.ssn"},
@@ -276,7 +276,7 @@ func TestDamageAimedAtASchemeItDoesNotCoverIsRefusedWithBothSides(t *testing.T) 
 // string.
 func TestAFieldFollowingNoSchemeIsRefusedInWords(t *testing.T) {
 	engine := corrupt.New(described(t, identifierEntry()),
-		registry{damageID: stated{damageID, mutator.Done("x")}}, noSchemes{}, able())
+		registry{damageID: stated{damageID, mutator.Done("x")}}, noSchemes{}, able(), seed.New("corrupt test"))
 
 	_, defect := engine.Apply(order(),
 		recipe.FieldInfo{Name: "reference", Type: "identifier"}, "1234563218", seed.Coordinate{})
@@ -303,7 +303,7 @@ func TestACapabilityThatBelongsToAColumnIsAskedOfTheColumn(t *testing.T) {
 	needsLimit.Requires = []capability.Name{capability.SchemaMaxLength}
 	engine := corrupt.New(described(t, needsLimit),
 		registry{damageID: stated{damageID, mutator.Done("Nowakkkkkk")}}, noSchemes{},
-		capability.NewSet(capability.SchemaMaxLength))
+		capability.NewSet(capability.SchemaMaxLength), seed.New("corrupt test"))
 
 	// The run can do it, because some other column declares a limit. This one
 	// does not.
@@ -332,7 +332,7 @@ func TestACapabilityThatBelongsToAColumnIsAskedOfTheColumn(t *testing.T) {
 // rather than naming an empty string.
 func TestAFieldWithNoDeclaredTypeIsRefusedInWords(t *testing.T) {
 	engine := corrupt.New(described(t, entry()),
-		registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able())
+		registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able(), seed.New("corrupt test"))
 
 	_, defect := engine.Apply(order(), recipe.FieldInfo{Name: "amount"}, "1250", seed.Coordinate{})
 	if !strings.Contains(defect.FailureReason, "of no declared type") {
@@ -357,26 +357,26 @@ func TestEveryRefusalCarriesTheKindThatMatches(t *testing.T) {
 		want   manifest.FailureKind
 	}{
 		{"the catalog does not describe it",
-			corrupt.New(described(t, entry()), registry{}, noSchemes{}, able()),
+			corrupt.New(described(t, entry()), registry{}, noSchemes{}, able(), seed.New("corrupt test")),
 			numeric(), manifest.Undescribed},
 		{"this build has no implementation",
-			corrupt.New(described(t, entry()), registry{}, noSchemes{}, able()),
+			corrupt.New(described(t, entry()), registry{}, noSchemes{}, able(), seed.New("corrupt test")),
 			numeric(), manifest.Unimplemented},
 		{"the run cannot do what it needs",
 			corrupt.New(described(t, entry()),
-				registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, capability.NewSet()),
+				registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, capability.NewSet(), seed.New("corrupt test")),
 			numeric(), manifest.RunLacksCapability},
 		{"the entry does not cover this field type",
 			corrupt.New(described(t, entry()),
-				registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able()),
+				registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able(), seed.New("corrupt test")),
 			recipe.FieldInfo{Name: "surname", Type: "string"}, manifest.FieldTypeNotCovered},
 		{"the entry does not cover this scheme",
 			corrupt.New(described(t, scheme),
-				registry{damageID: stated{damageID, mutator.Done("x")}}, noSchemes{}, able()),
+				registry{damageID: stated{damageID, mutator.Done("x")}}, noSchemes{}, able(), seed.New("corrupt test")),
 			recipe.FieldInfo{Name: "ssn", Type: "identifier", Scheme: "US.ssn"}, manifest.SchemeNotCovered},
 		{"the mutator declined",
 			corrupt.New(described(t, entry()),
-				registry{damageID: stated{damageID, mutator.Skipped("nothing to do here")}}, noSchemes{}, able()),
+				registry{damageID: stated{damageID, mutator.Skipped("nothing to do here")}}, noSchemes{}, able(), seed.New("corrupt test")),
 			numeric(), manifest.DeclinedByMutator},
 	}
 
@@ -409,10 +409,10 @@ func TestEveryRefusalCarriesTheKindThatMatches(t *testing.T) {
 func TestNoEntryThisEngineProducesIsOneTheManifestWouldRefuse(t *testing.T) {
 	engines := map[string]corrupt.Engine{
 		"applied": corrupt.New(described(t, entry()),
-			registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able()),
+			registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, able(), seed.New("corrupt test")),
 		"declined": corrupt.New(described(t, entry()),
-			registry{damageID: stated{damageID, mutator.Skipped("nothing to do here")}}, noSchemes{}, able()),
-		"unimplemented": corrupt.New(described(t, entry()), registry{}, noSchemes{}, able()),
+			registry{damageID: stated{damageID, mutator.Skipped("nothing to do here")}}, noSchemes{}, able(), seed.New("corrupt test")),
+		"unimplemented": corrupt.New(described(t, entry()), registry{}, noSchemes{}, able(), seed.New("corrupt test")),
 	}
 
 	for what, engine := range engines {
@@ -433,7 +433,7 @@ func TestNoEntryThisEngineProducesIsOneTheManifestWouldRefuse(t *testing.T) {
 // because the manifest refuses an entry without one and the identifier carries
 // it in front.
 func TestDamageNobodyDescribedStillCarriesAReadableLayer(t *testing.T) {
-	engine := corrupt.New(described(t, entry()), registry{}, noSchemes{}, able())
+	engine := corrupt.New(described(t, entry()), registry{}, noSchemes{}, able(), seed.New("corrupt test"))
 	asked := order()
 	asked.Mutator = "L4.invented.by_nobody"
 
@@ -452,7 +452,7 @@ func TestTheCatalogsDefaultsReachTheMutator(t *testing.T) {
 	}
 	var seen mutator.Parameters
 	engine := corrupt.New(described(t, withKnob),
-		registry{damageID: watching{damageID, &seen}}, noSchemes{}, able())
+		registry{damageID: watching{damageID, &seen}}, noSchemes{}, able(), seed.New("corrupt test"))
 
 	engine.Apply(order(), numeric(), "1250", seed.Coordinate{})
 	if written, ok := seen.Text("value"); !ok || written != "n/a" {
@@ -484,7 +484,7 @@ func TestTheSchemeBehindAColumnReachesTheMutator(t *testing.T) {
 	var seen provider.Provider
 	engine := corrupt.New(described(t, identifierEntry()),
 		registry{damageID: peeking{damageID, &seen}},
-		schemes{"PL.pesel": aScheme{"PL.pesel"}}, able())
+		schemes{"PL.pesel": aScheme{"PL.pesel"}}, able(), seed.New("corrupt test"))
 
 	engine.Apply(order(), recipe.FieldInfo{
 		Name: "pesel", Type: "identifier", Scheme: "PL.pesel",
@@ -504,7 +504,7 @@ func TestTheSchemeBehindAColumnReachesTheMutator(t *testing.T) {
 func TestAColumnWhoseSchemeThisBuildLacksHandsTheMutatorNothing(t *testing.T) {
 	var seen provider.Provider
 	engine := corrupt.New(described(t, identifierEntry()),
-		registry{damageID: peeking{damageID, &seen}}, schemes{}, able())
+		registry{damageID: peeking{damageID, &seen}}, schemes{}, able(), seed.New("corrupt test"))
 
 	engine.Apply(order(), recipe.FieldInfo{
 		Name: "pesel", Type: "identifier", Scheme: "PL.pesel",
@@ -526,4 +526,45 @@ func (p peeking) ID() catalog.ID { return p.id }
 func (p peeking) Damage(target mutator.Target) mutator.Outcome {
 	*p.seen = target.Provider
 	return mutator.Done("85011412352")
+}
+
+// listening is a mutator that keeps the randomness it was handed.
+type listening struct {
+	id   catalog.ID
+	seen *seed.Source
+}
+
+func (l listening) ID() catalog.ID { return l.id }
+
+func (l listening) Damage(target mutator.Target) mutator.Outcome {
+	*l.seen = target.Source
+	return mutator.Done("n/a")
+}
+
+// 🔴 The run seed reaches the mutator that draws with it.
+//
+// This is the half of the wiring that fails silently. A mutator handed no
+// source at all still works: the zero value of a source is a real one, built
+// on an empty seed, so every draw keeps answering and keeps answering the same
+// way for one place. What stops is the seed mattering, and a run whose damage
+// ignored the seed it was given would look exactly like a run whose damage
+// honoured it.
+//
+// So the question is asked as a difference rather than as a presence. Two
+// engines built on two seeds have to hand their mutator randomness that draws
+// apart, which cannot happen if the field is left behind or filled from
+// anywhere but the run.
+func TestTheRunSeedReachesTheMutator(t *testing.T) {
+	handed := func(withSeed string) uint64 {
+		var seen seed.Source
+		engine := corrupt.New(described(t, entry()),
+			registry{damageID: listening{damageID, &seen}}, noSchemes{}, able(),
+			seed.New(withSeed))
+		engine.Apply(order(), numeric(), "1250", seed.Coordinate{})
+		return seen.Uint64(seed.Coordinate{Entity: "any", Field: "any"})
+	}
+	if first, second := handed("one"), handed("two"); first == second {
+		t.Fatal("two runs on different seeds handed their mutator randomness that draws the " +
+			"same number, so the seed is not reaching the damage")
+	}
 }

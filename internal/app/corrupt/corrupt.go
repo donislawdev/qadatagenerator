@@ -98,12 +98,22 @@ type Engine struct {
 	// can is what this run is able to do, gathered from the writer, the
 	// schema, the providers and the corpus taking part in it.
 	can capability.Set
+	// source is the run's randomness, handed on to a mutator that has to
+	// choose between several pieces of damage that are all correct.
+	//
+	// The engine holds it for the same reason the selector does: which rows
+	// are damaged and which of several swaps is made are both draws about this
+	// run, and both have to give the same answer twice for one seed. A mutator
+	// cannot hold one, because it is a value in a map built once and shared by
+	// every run in the process.
+	source seed.Source
 }
 
 // New assembles an engine.
 func New(described catalog.Catalog, implementations Mutators, schemes Providers,
-	can capability.Set) Engine {
-	return Engine{catalog: described, mutators: implementations, providers: schemes, can: can}
+	can capability.Set, source seed.Source) Engine {
+	return Engine{catalog: described, mutators: implementations, providers: schemes,
+		can: can, source: source}
 }
 
 // Apply carries out one ordered damage and returns the entry describing it.
@@ -137,6 +147,7 @@ func (e Engine) Apply(order Order, field recipe.FieldInfo, value string, at seed
 		Value:    value,
 		Field:    field,
 		At:       at,
+		Source:   e.source,
 		Params:   parametersOf(entry),
 		Provider: e.schemeOf(field),
 	})

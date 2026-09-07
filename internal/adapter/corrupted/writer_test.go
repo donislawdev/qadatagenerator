@@ -128,7 +128,7 @@ func damaged(t *testing.T) (*corrupted.Writer, *recorder) {
 		t.Fatalf("the fixture policy was refused: %v", err)
 	}
 	engine := corrupt.New(described, implementations, noSchemes{},
-		capability.NewSet(capability.SchemaFieldType))
+		capability.NewSet(capability.SchemaFieldType), seed.New("corrupt test"))
 
 	log := []string{}
 	written := &recorder{name: "first", log: &log}

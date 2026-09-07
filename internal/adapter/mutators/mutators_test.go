@@ -31,25 +31,44 @@ func TestEveryImplementedMutatorHasACatalogEntry(t *testing.T) {
 	}
 }
 
-// implementedFloor is a ratchet. It may only be raised.
+// implementedCount is how many kinds of damage this build carries out.
 //
 // 🔴 It is the half of the closure that can exist while the catalog is ahead of
 // the engine. The architecture asks for the two sets to be equal, and they are
-// not: fifty two kinds of damage are described and this build carries two of
-// them. A test declaring equality with a list of fifty exceptions would be green
-// against a build with no mechanism at all, which is the shape that once left
-// this project with three guards defending nothing.
+// not: fifty two kinds of damage are described and this build carries eight of
+// them. A test declaring equality with a list of forty four exceptions would be
+// green against a build with no mechanism at all, which is the shape that once
+// left this project with three guards defending nothing.
 //
-// What is checkable today is the direction that can fail. Damage that quietly
+// The direction that can fail on its own is downwards. Damage that quietly
 // stopped being carried out would leave every other test green: the engine
 // answers for what nobody implemented with an entry saying so, which is correct
 // behaviour and indistinguishable from a build that lost a mutator.
-const implementedFloor = 7
+//
+// 🔴 # Why it fails upwards as well, since 2026-09-07
+//
+// It was written as a floor and compared with less than, which made it a
+// ratchet somebody had to remember to raise. The eighth mutator arrived without
+// that happening, and the floor of seven then accepted a build of seven, so the
+// guard was disabled by a change that never touched it. Nothing said so for the
+// rest of the day: every test stayed green and only a full mutation run found
+// it, by removing a mutator this was supposed to notice.
+//
+// A number that fails in both directions cannot be left behind. Raising it is
+// one line and it is part of adding damage, which is exactly when somebody is
+// looking at this file anyway.
+const implementedCount = 8
 
 func TestThisBuildHasNotLostAMutator(t *testing.T) {
-	if got := len(mutators.IDs()); got < implementedFloor {
+	got := len(mutators.IDs())
+	if got < implementedCount {
 		t.Errorf("this build carries %d kinds of damage and carried %d before: %v",
-			got, implementedFloor, mutators.IDs())
+			got, implementedCount, mutators.IDs())
+	}
+	if got > implementedCount {
+		t.Errorf("this build carries %d kinds of damage and %d are written down here, so "+
+			"raise implementedCount to %d as part of adding one: %v",
+			got, implementedCount, got, mutators.IDs())
 	}
 }
 

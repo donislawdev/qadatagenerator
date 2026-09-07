@@ -228,7 +228,7 @@ The full catalog is larger. This is the set an implementation should support fir
 
 `L3.range.unassigned` is the only entry here that applies to the US national person identifier and not to the Polish one, so without it a US dataset gets no `L3` defect on that field at all. It carries an `applicability_condition`, because generated valid data already sits inside reserved ranges wherever they exist.
 
-`L3.checksum.transposed_digits` swaps two adjacent digits, which is the most common human typing mistake. Some check digit algorithms do not detect it, and that is worth testing too.
+`L3.checksum.transposed_digits` swaps two adjacent digits, which is the most common human typing mistake. Some check digit algorithms do not detect it, and which transpositions they miss depends on the two digits rather than on where they sit. A mutator therefore has to check after itself and record the damage as not applied wherever the value is still correct. The expectation above stays hard because an entry that was not applied carries nothing for a test to send.
 
 ### `L4` business rules
 

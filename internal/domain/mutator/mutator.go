@@ -50,6 +50,23 @@ type Target struct {
 	// mutator that chooses between variants chooses the same one every time
 	// for one seed.
 	At seed.Coordinate
+	// Source is the run's randomness, which At is an address into.
+	//
+	// # Why this arrived later than the sentence above it
+	//
+	// The sentence above promised a derivation this struct could not carry
+	// out. A coordinate is where to draw, and a source is what to draw from,
+	// and for as long as there was no mutator that chose between variants
+	// nothing noticed that only half of the pair was here. The first one that
+	// chooses is the transposition, whose entry declares a random position and
+	// means it: the pair of digits it swaps has to differ between two seeds
+	// and be the same between two runs of one seed.
+	//
+	// Deriving from the coordinate alone would have satisfied the second half
+	// and quietly failed the first, which is the worse of the two failures. A
+	// run would then produce the same swap in the same row whatever seed it
+	// was given, and nothing about the output would say so.
+	Source seed.Source
 	// Provider is the numbering scheme behind the column, nil when the column
 	// follows none or when this build has no implementation of the one it
 	// names.

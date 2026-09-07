@@ -610,10 +610,13 @@ mutators:
       before: "1234563218"
       after: "1234653218"
       note: >-
-        Some check digit algorithms do not detect a transposition at all. When
-        that happens the value stays valid, the manifest still records the
-        defect, and the interesting question moves to whether the application
-        catches it any other way.
+        Some check digit algorithms do not detect a transposition at all, and
+        which transpositions they miss depends on the two digits rather than on
+        where they sit. A mutator therefore has to check after itself. It swaps
+        the pair, asks the scheme whether the value is still correct, and where
+        it still is, puts the value back and records the damage as not applied
+        with a reason. That is what keeps the expectation above from being
+        promised over a value that is arithmetically sound.
 
   - id: L3.national_id.impossible_date
     layer: L3

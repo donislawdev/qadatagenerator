@@ -22,6 +22,18 @@ repository once they are released.
 
 ### Added
 
+- **Damage that swaps two adjacent digits, and says when the swap was invisible.**
+  Transposing a pair of neighbouring digits is the mistake people make most
+  often when copying a number, and it is now one of the kinds of damage this
+  tool can do to an identifier. Not every scheme can see one. An article number
+  and a book number miss exactly the pairs differing by five, and a mobile
+  equipment identity misses nought against nine. Rather than promise a rejection
+  that will not happen, the run swaps the pair, asks the scheme whether the
+  value is still correct, and where it is, puts the value back and records the
+  damage in the manifest as not applied, with a sentence naming the two
+  positions and saying the scheme still accepts the result. The pair is drawn
+  from the seed, so a run repeats exactly and two seeds differ.
+
 - **Four more kinds of identifier: `vin`, `ean`, `imei` and `isbn`.** A vehicle
   identification number of seventeen characters, a thirteen digit article
   number, a fifteen digit mobile equipment identity, and a thirteen digit book
