@@ -375,29 +375,6 @@ func isbnStrangeCharacter(value string) (int, bool) {
 	return 0, false
 }
 
-// isbnInUnallocatedWindow reports whether a value sits where this scheme
-// generates.
-//
-// This is not a claim that the value is safe and no capability rests on it. It
-// exists so a test can hold the generator to the window the type describes,
-// which is the only promise actually made.
-func isbnInUnallocatedWindow(value string) bool {
-	if len(value) != isbnLength {
-		return false
-	}
-	if _, strange := isbnStrangeCharacter(value); strange {
-		return false
-	}
-	if value[:isbnPrefixLength] != isbnBookPrefix {
-		return false
-	}
-	window := 0
-	for at := isbnPrefixLength; at < isbnPrefixLength+isbnUnallocatedWidth; at++ {
-		window = window*10 + int(value[at]-'0')
-	}
-	return window >= isbnUnallocatedFirst && window <= isbnUnallocatedLast
-}
-
 // isbnAt is the address the draw is derived from.
 //
 // It carries its own purpose, so this value cannot come out of the same number
