@@ -12,6 +12,13 @@ repository once they are released.
 
 ### Fixed
 
+- **The Quick value screen now tells you why it turned a request down.** Asking
+  for a value it could not produce showed the line it shows before you have
+  chosen anything, so a date of birth written the wrong way round answered with
+  a request to choose a kind you had already chosen. It now says a date of birth
+  is written as YYYY-MM-DD, and a kind this build carries no data for in the
+  chosen locale says that instead.
+
 - **Every list you pick from now shows what is picked.** The chooser controls on
   the Quick value and Take and corrupt screens drew as empty boxes: the kind of
   value, the locale, the gender and the settings all had their text missing,
