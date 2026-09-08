@@ -57,8 +57,14 @@ type View struct {
 	work      background.Work
 
 	chosen take.Settings
-	opened *take.Opened
-	path   string
+	// clipboard is where the line that would do this in a terminal goes, or
+	// nothing when this screen is being rendered rather than shown.
+	clipboard Clipboard
+	// command is that line, and the button beside it copies it.
+	command     *widget.Label
+	copyCommand *parts.Button
+	opened      *take.Opened
+	path        string
 
 	// reading is the file being read right now, and nothing while none is.
 	//
@@ -136,17 +142,25 @@ type View struct {
 	stop       *parts.Button
 }
 
+// Clipboard is the one thing this screen puts outside itself that is not a
+// file, and it is an interface so that a render can be handed nothing.
+type Clipboard interface{ SetContent(string) }
+
 // New builds the screen.
 //
 // The window is what a file chooser has to appear over and what a run takes
 // over while it is going on. The work is where a run happens, where a file is
 // read and how the system asking this program to stop reaches here, all handed
 // in so that every state of this screen can be reached without a goroutine.
+// The clipboard is handed in like everything else, and may be nothing at all.
+// A screen built to be rendered rather than shown has no application behind it,
+// and a picture that reached the clipboard of the machine taking it would
+// change something outside itself.
 func New(text i18n.Catalogue, window fyne.Window, described catalog.Catalog,
-	openFile Opener, work background.Work) *View {
+	openFile Opener, work background.Work, clipboard Clipboard) *View {
 	view := &View{
 		text: text, window: window, described: described, openFile: openFile,
-		work: work, chosen: take.Defaults(),
+		work: work, clipboard: clipboard, chosen: take.Defaults(),
 		empty: container.NewVBox(), fileBox: container.NewVBox(),
 		settingsBox: container.NewVBox(), planBox: container.NewVBox(),
 		runBox: container.NewVBox(),
@@ -211,7 +225,34 @@ func (v *View) Content() fyne.CanvasObject {
 	v.answerScroll = parts.NewKeyScroll(answer)
 	split := container.NewHSplit(v.fileScroll.Framed(), v.answerScroll.Framed())
 	v.split = split
-	body := container.NewVBox(container.NewHBox(v.chooseFile.OnScreen()), v.empty)
+	// The purpose comes before the control, because somebody opening this
+	// window for the first time reads the name in the column, learns that the
+	// screen is called Take and corrupt, and still does not know whether it is
+	// about to write over the file they are about to choose.
+	purpose := wrapped(v.text.T(i18n.PurposeTake))
+	purpose.Importance = widget.LowImportance
+	// 🔴 What the screen says before a file is chosen stays UNDER the button and
+	// is not centred in the space below it. Tried on 2026-09-08 and turned down
+	// by measurement, which is written here because the idea is an obvious one
+	// and the next session will have it again.
+	//
+	// The screen with no file is three lines in the top left of a window the
+	// owner runs at 1670 by 1210, so putting them in the middle of what is left
+	// looks like the answer. Spacers above and below made it WORSE: rendered,
+	// the first sentence came out as a label 1366 by 122 for a single line of
+	// text 19 high, and the two sentences ended up 131 apart.
+	//
+	// The cause is that a wrapping label reports a MinSize computed against
+	// whatever width it has at the time of asking, and in a column it is asked
+	// before it has been given one. A column then reserves that wrong height.
+	// It happens not to bite in the border edge above, because there the label
+	// is given the width first.
+	//
+	// So vertical centring of wrapping text is not a thing to reach for here.
+	// The emptiness on this screen is a shortage of CONTENT before a file is
+	// chosen, and the answer to it is showing something, not moving three lines
+	// into the middle of the nothing.
+	body := container.NewVBox(purpose, container.NewHBox(v.chooseFile.OnScreen()), v.empty)
 	// 🔴 Drawn again now that the split exists. The screen was first drawn while
 	// this was still being built, so the state with no file had hidden every box
 	// and left the split itself showing: two separator lines across an otherwise
@@ -490,8 +531,16 @@ func wrappedPair(label, value string) fyne.CanvasObject {
 	return container.NewBorder(nil, nil, name, nil, wrapped(value))
 }
 
+// heading names one part of this screen, with the rule the accepted drawing
+// puts under it.
+//
+// Five of them, and every one is a section rather than a line of emphasis: what
+// the file holds, what to damage, what would happen, the result, and the
+// terminal line. Until 2026-09-08 they were bold text and nothing else, so
+// nothing said where one part of this screen stopped and the next began, which
+// on the busiest screen in the window is where it hurts most.
 func heading(words string) fyne.CanvasObject {
-	return widget.NewLabelWithStyle(words, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	return parts.Section(words)
 }
 
 // counted writes a number with the thing it counts, in the singular where there

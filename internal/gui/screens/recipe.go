@@ -31,24 +31,24 @@ func recipeStatesOfTheAnswer() []State {
 		{
 			Name:    "recipe-empty",
 			Purpose: "nothing written yet, a sentence saying what to do rather than an empty rectangle",
-			Screen:  0,
+			Screen:  screenRecipe,
 		},
 		{
 			Name:    "recipe-problems",
 			Purpose: "a recipe that cannot be used, each problem at the line it was written on",
-			Screen:  0,
+			Screen:  screenRecipe,
 			Recipe:  BrokenRecipe,
 		},
 		{
 			Name:    "recipe-clean",
 			Purpose: "a recipe that can be used, with what was read of it, so approval is not bare",
-			Screen:  0,
+			Screen:  screenRecipe,
 			Recipe:  CleanRecipe,
 		},
 		{
 			Name:     "recipe-checking",
 			Purpose:  "a recipe being judged, which for a large one means the screen says so and stays answerable",
-			Screen:   0,
+			Screen:   screenRecipe,
 			Recipe:   CleanRecipe,
 			Checking: true,
 		},
@@ -56,14 +56,14 @@ func recipeStatesOfTheAnswer() []State {
 			Name: "recipe-preview-related",
 			Purpose: "the rows a recipe with a relation would produce, cut to the sample, " +
 				"with the column naming the parent that comes from the writer rather than the recipe",
-			Screen: 0,
+			Screen: screenRecipe,
 			Recipe: RelatedRecipe,
 		},
 		{
 			Name: "recipe-ready",
 			Purpose: "a recipe that can be used with somewhere to write it, which is the " +
 				"one state where the button is not the thing saying what is missing",
-			Screen: 0,
+			Screen: screenRecipe,
 			Recipe: CleanRecipe,
 			Into:   "a-directory",
 		},
@@ -71,14 +71,14 @@ func recipeStatesOfTheAnswer() []State {
 			Name: "recipe-no-rows",
 			Purpose: "a recipe that can be used and produces nothing, which is a sentence " +
 				"rather than a heading with an empty rectangle under it",
-			Screen: 0,
+			Screen: screenRecipe,
 			Recipe: EmptyRecipe,
 		},
 		{
 			Name: "recipe-refused",
 			Purpose: "a recipe that reads correctly and cannot be run, which the validator " +
 				"cannot see and only the plan can say",
-			Screen: 0,
+			Screen: screenRecipe,
 			Recipe: RefusedRecipe,
 		},
 	}
@@ -98,7 +98,7 @@ func recipeStatesOfTheHints() []State {
 			Purpose: "the vocabulary this build carries, opened. It is the answer to the " +
 				"question an empty screen used to leave unanswered, and the three " +
 				"generators that cannot be filled in a locale say why rather than saying no",
-			Screen:     0,
+			Screen:     screenRecipe,
 			Generators: true,
 		},
 	}
@@ -115,46 +115,46 @@ func recipeStatesOfTheKeyboard() []State {
 		{
 			Name:     "recipe-focus-table",
 			Purpose:  "the keyboard on the preview itself, which is where the arrow keys move a cell at a time",
-			Screen:   0,
+			Screen:   screenRecipe,
 			Recipe:   CleanRecipe,
-			Keyboard: Keyboard{Tabs: 7},
+			Keyboard: Keyboard{Tabs: 8},
 		},
 		{
 			Name: "recipe-focus-button",
 			Purpose: "the keyboard on the button that writes, which is the last stop of the " +
 				"walk because the bar is read last",
-			Screen:   0,
+			Screen:   screenRecipe,
 			Recipe:   CleanRecipe,
 			Into:     "a-directory",
-			Keyboard: Keyboard{Tabs: 12},
+			Keyboard: Keyboard{Tabs: 13},
 		},
 		{
 			Name: "recipe-focus-example",
 			Purpose: "the keyboard on the offer of a recipe that runs, which is on the empty " +
 				"screen and nowhere else",
-			Screen:   0,
+			Screen:   screenRecipe,
 			Keyboard: Keyboard{Tabs: 7},
 		},
 		{
 			Name: "recipe-focus-generators",
 			Purpose: "the keyboard on the list of what this build can generate, which is a " +
 				"heading somebody opens rather than a wall of names nobody asked for",
-			Screen:   0,
-			Keyboard: Keyboard{Tabs: 8},
+			Screen:   screenRecipe,
+			Keyboard: Keyboard{Tabs: 9},
 		},
 		{
 			Name:     "recipe-focus-editor",
 			Purpose:  "the keyboard in the field the recipe is written in, which it can also leave",
-			Screen:   0,
+			Screen:   screenRecipe,
 			Recipe:   BrokenRecipe,
-			Keyboard: Keyboard{Tabs: 5},
+			Keyboard: Keyboard{Tabs: 6},
 		},
 		{
 			Name:     "recipe-focus-answer",
 			Purpose:  "the keyboard on the pane holding the answer, which the toolkit's own scrolling area never lets it reach",
-			Screen:   0,
+			Screen:   screenRecipe,
 			Recipe:   BrokenRecipe,
-			Keyboard: Keyboard{Tabs: 6},
+			Keyboard: Keyboard{Tabs: 7},
 		},
 	}
 }

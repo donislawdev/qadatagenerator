@@ -2,6 +2,7 @@ package quickview
 
 import (
 	"os"
+	"strings"
 	"testing"
 
 	"fyne.io/fyne/v2/test"
@@ -162,5 +163,50 @@ func TestAFieldIsShownOnlyBesideAValueThatReadsIt(t *testing.T) {
 					generator, role, view.Shows(role), reads)
 			}
 		}
+	}
+}
+
+// The line this screen offers reproduces the value it is showing.
+//
+// 🔴 THE SEED IS WHAT THIS IS ABOUT. Without one the command line draws a
+// fresh seed and says so on the log channel, so a line copied from here
+// without the seed would hand somebody a DIFFERENT value from the one they
+// were looking at when they copied it. A bridge between two surfaces that
+// quietly changes the answer on the way across is worse than no bridge, and
+// nothing else here would notice: the line looks right, runs, and produces a
+// perfectly good value that is not the one on screen.
+func TestTheCommandOfferedReproducesTheValueOnScreen(t *testing.T) {
+	view := New(i18n.English, &heldClipboard{})
+	view.UseSeed("for-the-test")
+	view.Choose("pesel")
+	view.ChooseGender("female")
+	view.SetBorn("1980-05-05")
+
+	line := view.command.Text
+	for _, wanted := range []string{
+		"qadg quick", "pesel", "--seed", "for-the-test",
+		"--gender", "female", "--birth-date", "1980-05-05",
+	} {
+		if !strings.Contains(line, wanted) {
+			t.Errorf("the line offered is %q and it does not name %q, so pasting it does not "+
+				"produce what this screen is showing", line, wanted)
+		}
+	}
+}
+
+// A setting nobody touched is not written into the line.
+//
+// A flag carrying an empty value is not the same request as no flag at all,
+// and the command line refuses the first. Writing them out anyway would hand
+// somebody a line their own tool turns down.
+func TestASettingLeftAloneIsNotWrittenIntoTheCommand(t *testing.T) {
+	view := New(i18n.English, &heldClipboard{})
+	view.UseSeed("for-the-test")
+	view.Choose("last_name")
+
+	if line := view.command.Text; strings.Contains(line, "--gender") ||
+		strings.Contains(line, "--birth-date") {
+		t.Errorf("the line offered is %q and it names a setting this value takes no account "+
+			"of, which is a flag the command line refuses for this generator", line)
 	}
 }

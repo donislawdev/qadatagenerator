@@ -12,6 +12,8 @@
 package about
 
 import (
+	"encoding/json"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
@@ -22,14 +24,57 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/version"
 )
 
+// Saver writes the machine readable report where a person chooses to put it.
+//
+// It is handed in rather than reached for, and it may be nothing: a screen
+// being rendered into a picture has no window to open a chooser over, and a
+// picture that wrote a file would leave one behind.
+type Saver func(contents []byte)
+
+// saveButton offers the report in the form a machine reads.
+//
+// # Why a file rather than a panel showing the same thing
+//
+// DEC-30 names the reader and it is a compliance department, whose tool reads
+// documents rather than paragraphs. Everything on this screen is already here
+// for a person to read, so showing the same facts again as JSON would answer
+// nobody. The register of what the window cannot do says this in its own
+// words: the window has to PRODUCE the file.
+//
+// What is written is exactly what `qadg --license --json` writes, because both
+// encode the same report with the same tags. That report carries the version of
+// this build, so the one file answers which build as well as under what terms.
+func saveButton(text i18n.Catalogue, report license.Report, save Saver) *parts.Button {
+	button := parts.NewButton(text.T(i18n.AboutSaveJSON), func() {
+		encoded, err := json.Marshal(report)
+		if err != nil {
+			// Nothing in the report is unencodable, so this cannot fire. It is
+			// dropped rather than reported for the one reason a silence is
+			// allowed here: the same call at the other surface says the same
+			// thing on a channel this screen does not have.
+			return
+		}
+		save(encoded)
+	})
+	// A screen with no way to write is a screen where this button would do
+	// nothing at all, and a control that does nothing is a promise. Disabled,
+	// it also loses its edge, which is what says a control is there.
+	if save == nil {
+		button.Disable()
+	}
+	return button
+}
+
 // Content is the whole screen, built from what this build carries.
 //
 // It takes the report and the versions rather than reading them itself, so the
 // screen can be rendered in a test against a build that carries something else
 // entirely. A view that fetches its own facts can only ever be checked against
 // the one set of facts it fetches.
-func Content(text i18n.Catalogue, report license.Report, versions version.Set) fyne.CanvasObject {
+func Content(text i18n.Catalogue, report license.Report, versions version.Set,
+	save Saver) fyne.CanvasObject {
 	sections := []fyne.CanvasObject{
+		container.NewHBox(saveButton(text, report, save).OnScreen()),
 		heading(text, i18n.AboutHeadingVersions),
 		versionList(text, versions),
 		widget.NewSeparator(),

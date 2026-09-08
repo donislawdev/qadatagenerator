@@ -24,11 +24,19 @@ const perRowDefault = "exactly_one"
 // control that loses what they typed and where their keyboard was standing.
 func (v *View) buildControls() {
 	v.chosen.PerRow = perRowDefault
-	v.layers = widget.NewCheckGroup(take.LayersIn(v.described), func(chosen []string) {
-		v.chosen.Layers = chosen
+	v.buildCommand()
+	v.layers = widget.NewCheckGroup(v.layerLabels(), func(chosen []string) {
+		v.chosen.Layers = v.codesOfLabels(chosen)
 		v.settingChanged()
 	})
-	v.layers.Horizontal = true
+	// 🔴 Down the pane rather than across it, changed on 2026-09-08 with the
+	// names. Across was right while the labels were L0 and L1: eight of them
+	// fitted in one row. Named for a person they are five times as long, and
+	// eight of those in a row asked for 1998 pixels inside a window of 1342,
+	// which took a third of the width off the description of the file beside
+	// them. A row gives each thing the width it asks for, so the widest thing
+	// in it decides how wide the whole pane is.
+	v.layers.Horizontal = false
 
 	v.share = v.entry(v.chosen.Rows, func(typed string) { v.chosen.Rows = typed })
 	v.exclude = v.entry("", func(typed string) { v.chosen.ExcludeFields = take.NamesIn(typed) })
@@ -45,11 +53,11 @@ func (v *View) buildControls() {
 		v.reopen()
 	}
 
-	v.perRow = parts.NewSelect(take.PerRowChoices(), func(picked string) {
-		v.chosen.PerRow = picked
+	v.perRow = parts.NewSelect(v.perRowLabels(), func(picked string) {
+		v.chosen.PerRow = v.valueOfPerRowLabel(picked)
 		v.settingChanged()
 	})
-	v.perRow.SetSelected(perRowDefault)
+	v.perRow.SetSelected(v.labelOfPerRow(perRowDefault))
 	v.manifest = parts.NewSelect(v.manifestChoices(), func(picked string) {
 		v.chosen.Manifest = v.formNamed(picked)
 		v.settingChanged()
@@ -82,8 +90,12 @@ func (v *View) buildControls() {
 // probe rendering them. Setting the settings directly would reach a state the
 // controls cannot produce, so this ticks the boxes and lets the same callback
 // run that a click runs.
+// The kinds arrive as the catalogue names them, because that is what a caller
+// outside a window has: a layer code, the same string --layers takes. The tick
+// boxes are labelled for a person since 2026-09-08, so the codes are turned
+// into those labels here rather than at every caller.
 func (v *View) ChooseLayers(kinds []string) {
-	v.layers.SetSelected(kinds)
+	v.layers.SetSelected(v.labelsOfCodes(kinds))
 }
 
 // entry is a text setting that answers as it is typed into.
@@ -191,6 +203,7 @@ func (v *View) reopen() {
 func (v *View) drawPlan() {
 	v.planBox.Objects = []fyne.CanvasObject{
 		heading(v.text.T(i18n.TakeHeadingPlan)), v.planContent(),
+		heading(v.text.T(i18n.CommandHeading)), v.commandContent(),
 	}
 	v.planBox.Refresh()
 }

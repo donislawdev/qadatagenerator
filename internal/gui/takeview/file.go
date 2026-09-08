@@ -112,9 +112,7 @@ func (v *View) conclusions() []fyne.CanvasObject {
 	if len(described) > take.ColumnsListed {
 		described = described[:take.ColumnsListed]
 	}
-	for _, finding := range described {
-		drawn = append(drawn, v.conclusion(finding))
-	}
+	drawn = append(drawn, v.grouped(described)...)
 	if left := len(findings) - len(described); left > 0 {
 		drawn = append(drawn, wrapped(v.text.T(i18n.TakeFileMoreColumns)+": "+
 			strconv.Itoa(left)))
@@ -130,20 +128,64 @@ func (v *View) conclusions() []fyne.CanvasObject {
 	return drawn
 }
 
-// conclusion is one column, what it was taken to hold and why.
+// grouped draws the columns, saying each reason once however many columns
+// share it.
+//
+// # Why this is not one drawing per column
+//
+// Seen on a real window on 2026-09-08, and named in the accepted drawing as one
+// of the three things wrong with this screen: every column carried its own copy
+// of why it was taken for what it was taken for, and for a column with no
+// numbering scheme behind it that sentence is the SAME sentence. On the owner's
+// file it stood three times in five columns. On a file of twenty three columns
+// it stood twenty three times, and a reader scrolling past the same line
+// twenty three times stops reading any of them.
+//
+// # Why grouped by reason rather than the reason simply dropped
+//
+// Because the reason is the point. This screen exists to say that nothing
+// declared what these columns hold and that it worked them out by looking, and
+// dropping the sentence would leave a bare claim about somebody's data. Said
+// once over the columns it covers, it is the same information and one line.
+//
+// The order the columns arrived in is kept, by the group's first appearance.
+// They are the columns of somebody's file and shuffling them into an order of
+// ours would make the list harder to check against the file it describes.
+func (v *View) grouped(findings []infer.Finding) []fyne.CanvasObject {
+	var order []string
+	together := map[string][]infer.Finding{}
+	for _, finding := range findings {
+		if _, seen := together[finding.Basis]; !seen {
+			order = append(order, finding.Basis)
+		}
+		together[finding.Basis] = append(together[finding.Basis], finding)
+	}
+	var drawn []fyne.CanvasObject
+	for _, basis := range order {
+		for _, finding := range together[basis] {
+			drawn = append(drawn, v.column(finding))
+		}
+		// The reason under the columns it explains, once. An empty one is not
+		// drawn at all rather than drawn as the word "because" with nothing
+		// after it, which is what a finding with no basis would produce.
+		if basis != "" {
+			drawn = append(drawn, wrapped(v.text.T(i18n.TakeFileBecause)+" "+basis))
+		}
+	}
+	return drawn
+}
+
+// column is one column and what it was taken to hold.
 //
 // The name of the column and the name of what it holds are data rather than
 // interface text, so neither is a key. They are what somebody pastes into a
 // report and they read the same in every language.
-func (v *View) conclusion(finding infer.Finding) fyne.CanvasObject {
+func (v *View) column(finding infer.Finding) fyne.CanvasObject {
 	held := finding.Type
 	if finding.Scheme != "" {
 		held = finding.Scheme
 	}
 	name := widget.NewLabelWithStyle(finding.Field, fyne.TextAlignLeading,
 		fyne.TextStyle{Bold: true})
-	return container.NewVBox(
-		container.NewHBox(name, widget.NewLabel(v.text.T(i18n.TakeFileTakenFor)+" "+held)),
-		wrapped(v.text.T(i18n.TakeFileBecause)+" "+finding.Basis),
-	)
+	return container.NewHBox(name, widget.NewLabel(v.text.T(i18n.TakeFileTakenFor)+" "+held))
 }

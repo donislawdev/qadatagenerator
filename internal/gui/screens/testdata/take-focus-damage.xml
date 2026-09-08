@@ -1,161 +1,188 @@
 <canvas padded size="1342x900">
 	<content>
 		<container pos="8,8" size="1326x884">
-			<container size="220x884">
+			<container size="232x884">
 				<container size="220x884">
-					<container size="220x28">
-						<widget size="220x28" type="*container.ThemeOverride">
-							<container size="220x28">
-								<widget size="220x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="220x28"/>
-									<rectangle size="220x28"/>
-									<widget pos="86,4" size="46x19" type="*widget.RichText">
-										<text alignment="center" bold size="46x19">Recipe</text>
-									</widget>
-								</widget>
-							</container>
+					<container size="220x884">
+						<widget size="220x22" type="*widget.RichText">
+							<text color="disabled" pos="4,4" size="59x14" textSize="11">MAKE DATA</text>
 						</widget>
-						<container size="220x28">
-							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						<container pos="0,30" size="220x28">
+							<widget size="220x28" type="*container.ThemeOverride">
+								<container size="220x28">
+									<widget size="220x28" type="*parts.Button">
+										<rectangle radius="5" size="220x28"/>
+										<rectangle size="220x28"/>
+										<widget pos="4,4" size="82x19" type="*widget.RichText">
+											<text alignment="center" bold size="82x19">Quick value</text>
+										</widget>
+									</widget>
+								</container>
+							</widget>
+							<container size="220x28">
+							</container>
 						</container>
-					</container>
-					<container pos="0,36" size="220x28">
-						<widget size="220x28" type="*container.ThemeOverride">
-							<container size="220x28">
-								<widget size="220x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="220x28"/>
-									<rectangle size="220x28"/>
-									<widget pos="64,4" size="118x20" type="*widget.RichText">
-										<text alignment="center" bold size="118x19">Take and corrupt</text>
+						<container pos="0,66" size="220x28">
+							<widget size="220x28" type="*container.ThemeOverride">
+								<container size="220x28">
+									<widget size="220x28" type="*parts.Button">
+										<rectangle radius="5" size="220x28"/>
+										<rectangle size="220x28"/>
+										<widget pos="32,4" size="118x20" type="*widget.RichText">
+											<text alignment="center" bold size="118x19">Take and corrupt</text>
+										</widget>
+										<image fillMode="contain" pos="4,4" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
 									</widget>
-									<image fillMode="contain" pos="36,4" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
-								</widget>
+								</container>
+							</widget>
+							<container size="220x28">
 							</container>
-						</widget>
-						<container size="220x28">
-							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
 						</container>
-					</container>
-					<container pos="0,72" size="220x28">
-						<widget size="220x28" type="*container.ThemeOverride">
-							<container size="220x28">
-								<widget size="220x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="220x28"/>
-									<rectangle size="220x28"/>
-									<widget pos="48,4" size="122x19" type="*widget.RichText">
-										<text alignment="center" bold size="122x19">Manifest browser</text>
+						<container pos="0,102" size="220x28">
+							<widget size="220x28" type="*container.ThemeOverride">
+								<container size="220x28">
+									<widget size="220x28" type="*parts.Button">
+										<rectangle radius="5" size="220x28"/>
+										<rectangle size="220x28"/>
+										<widget pos="4,4" size="46x19" type="*widget.RichText">
+											<text alignment="center" bold size="46x19">Recipe</text>
+										</widget>
 									</widget>
-								</widget>
+								</container>
+							</widget>
+							<container size="220x28">
 							</container>
-						</widget>
-						<container size="220x28">
-							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
 						</container>
-					</container>
-					<container pos="0,108" size="220x28">
-						<widget size="220x28" type="*container.ThemeOverride">
-							<container size="220x28">
-								<widget size="220x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="220x28"/>
-									<rectangle size="220x28"/>
-									<widget pos="88,4" size="42x19" type="*widget.RichText">
-										<text alignment="center" bold size="42x19">About</text>
-									</widget>
-								</widget>
-							</container>
+						<widget pos="0,138" size="220x22" type="*widget.RichText">
+							<text color="disabled" pos="4,4" size="86x14" textSize="11">CHECK A RESULT</text>
 						</widget>
-						<container size="220x28">
-							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						<container pos="0,169" size="220x28">
+							<widget size="220x28" type="*container.ThemeOverride">
+								<container size="220x28">
+									<widget size="220x28" type="*parts.Button">
+										<rectangle radius="5" size="220x28"/>
+										<rectangle size="220x28"/>
+										<widget pos="4,4" size="122x19" type="*widget.RichText">
+											<text alignment="center" bold size="122x19">Manifest browser</text>
+										</widget>
+									</widget>
+								</container>
+							</widget>
+							<container size="220x28">
+							</container>
 						</container>
-					</container>
-					<container pos="0,144" size="220x28">
-						<widget size="220x28" type="*container.ThemeOverride">
-							<container size="220x28">
-								<widget size="220x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="220x28"/>
-									<rectangle size="220x28"/>
-									<widget pos="68,4" size="82x19" type="*widget.RichText">
-										<text alignment="center" bold size="82x19">Quick value</text>
-									</widget>
-								</widget>
-							</container>
+						<spacer pos="0,205" size="220x638"/>
+						<widget pos="0,844" size="220x4" type="*widget.Separator">
+							<rectangle fillColor="separator" size="220x4"/>
 						</widget>
-						<container size="220x28">
-							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						<container pos="0,856" size="220x28">
+							<widget size="220x28" type="*container.ThemeOverride">
+								<container size="220x28">
+									<widget size="220x28" type="*parts.Button">
+										<rectangle radius="5" size="220x28"/>
+										<rectangle size="220x28"/>
+										<widget pos="4,4" size="42x19" type="*widget.RichText">
+											<text alignment="center" bold size="42x19">About</text>
+										</widget>
+									</widget>
+								</container>
+							</widget>
+							<container size="220x28">
+							</container>
 						</container>
 					</container>
 				</container>
+				<widget pos="228,0" size="4x884" type="*widget.Separator">
+					<rectangle fillColor="separator" size="4x884"/>
+				</widget>
 			</container>
-			<container pos="228,0" size="1098x884">
-				<container size="1098x884">
-					<container pos="24,24" size="1050x836">
-						<container size="1050x28">
-							<container size="1050x28">
-								<container size="96x28">
-									<widget size="96x28" type="*container.ThemeOverride">
-										<container size="96x28">
-											<widget size="96x28" type="*parts.Button">
-												<rectangle fillColor="button" radius="5" size="96x28"/>
-												<rectangle size="96x28"/>
-												<widget pos="4,4" size="88x19" type="*widget.RichText">
-													<text alignment="center" bold size="88x19">Choose a file</text>
-												</widget>
-											</widget>
-										</container>
+			<container pos="240,0" size="1086x884">
+				<container size="1086x56">
+					<widget pos="24,24" size="1038x32" type="*widget.Label">
+						<widget size="1038x32" type="*widget.RichText">
+							<text bold pos="4,4" size="152x24" textSize="18">Take and corrupt</text>
+						</widget>
+					</widget>
+				</container>
+				<container pos="0,64" size="1086x819">
+					<container size="1086x819">
+						<container pos="24,24" size="1038x771">
+							<container size="1038x82">
+								<widget size="1038x46" type="*widget.Label">
+									<widget size="1038x46" type="*widget.RichText">
+										<text color="disabled" pos="4,4" size="918x19">See how your import behaves when the data is not perfect. The file you choose is never changed, and the damaged copy is written beside it.</text>
 									</widget>
+								</widget>
+								<container pos="0,54" size="1038x28">
 									<container size="96x28">
-										<rectangle pos="1,1" radius="5" size="94x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+										<widget size="96x28" type="*container.ThemeOverride">
+											<container size="96x28">
+												<widget size="96x28" type="*parts.Button">
+													<rectangle fillColor="button" radius="5" size="96x28"/>
+													<rectangle size="96x28"/>
+													<widget pos="4,4" size="88x19" type="*widget.RichText">
+														<text alignment="center" bold size="88x19">Choose a file</text>
+													</widget>
+												</widget>
+											</container>
+										</widget>
+										<container size="96x28">
+											<rectangle pos="1,1" radius="5" size="94x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+										</container>
 									</container>
 								</container>
 							</container>
-						</container>
-						<widget pos="0,36" size="1050x800" type="*container.Split">
-							<container size="415x800">
-								<rectangle size="415x800" strokeWidth="2"/>
-								<widget size="415x800" type="*parts.KeyScroll">
-									<container size="415x988">
-										<widget size="415x27" type="*widget.Label">
-											<widget size="415x27" type="*widget.RichText">
-												<text bold pos="4,4" size="134x19">What this file holds</text>
-											</widget>
-										</widget>
-										<widget pos="0,35" size="415x27" type="*widget.Label">
-											<widget size="415x27" type="*widget.RichText">
-												<text bold pos="4,4" size="59x19">contacts</text>
-											</widget>
-										</widget>
-										<container pos="0,70" size="415x27">
-											<widget size="63x27" type="*widget.Label">
-												<widget size="63x27" type="*widget.RichText">
-													<text bold pos="4,4" size="55x19">Records</text>
+							<widget pos="0,90" size="1038x681" type="*container.Split">
+								<container size="516x681">
+									<rectangle size="516x681" strokeWidth="2"/>
+									<widget size="516x681" type="*parts.KeyScroll">
+										<container size="516x797">
+											<container size="516x39">
+												<widget size="516x27" type="*widget.Label">
+													<widget size="516x27" type="*widget.RichText">
+														<text bold pos="4,4" size="134x19">What this file holds</text>
+													</widget>
+												</widget>
+												<widget pos="0,35" size="516x4" type="*widget.Separator">
+													<rectangle fillColor="separator" size="516x4"/>
+												</widget>
+											</container>
+											<widget pos="0,47" size="516x27" type="*widget.Label">
+												<widget size="516x27" type="*widget.RichText">
+													<text bold pos="4,4" size="59x19">contacts</text>
 												</widget>
 											</widget>
-											<widget pos="71,0" size="77x27" type="*widget.Label">
-												<widget size="77x27" type="*widget.RichText">
-													<text pos="4,4" size="69x19">12 records</text>
+											<container pos="0,82" size="516x27">
+												<widget size="63x27" type="*widget.Label">
+													<widget size="63x27" type="*widget.RichText">
+														<text bold pos="4,4" size="55x19">Records</text>
+													</widget>
+												</widget>
+												<widget pos="71,0" size="77x27" type="*widget.Label">
+													<widget size="77x27" type="*widget.RichText">
+														<text pos="4,4" size="69x19">12 records</text>
+													</widget>
+												</widget>
+											</container>
+											<container pos="0,117" size="516x27">
+												<widget size="68x27" type="*widget.Label">
+													<widget size="68x27" type="*widget.RichText">
+														<text bold pos="4,4" size="60x19">Columns</text>
+													</widget>
+												</widget>
+												<widget pos="76,0" size="75x27" type="*widget.Label">
+													<widget size="75x27" type="*widget.RichText">
+														<text pos="4,4" size="67x19">5 columns</text>
+													</widget>
+												</widget>
+											</container>
+											<widget pos="0,152" size="516x46" type="*widget.Label">
+												<widget size="516x46" type="*widget.RichText">
+													<text pos="4,4" size="496x19">Nothing declared what these columns hold, so it was worked out by looking</text>
+													<text pos="4,23" size="87x19">at the values.</text>
 												</widget>
 											</widget>
-										</container>
-										<container pos="0,105" size="415x27">
-											<widget size="68x27" type="*widget.Label">
-												<widget size="68x27" type="*widget.RichText">
-													<text bold pos="4,4" size="60x19">Columns</text>
-												</widget>
-											</widget>
-											<widget pos="76,0" size="75x27" type="*widget.Label">
-												<widget size="75x27" type="*widget.RichText">
-													<text pos="4,4" size="67x19">5 columns</text>
-												</widget>
-											</widget>
-										</container>
-										<widget pos="0,140" size="415x46" type="*widget.Label">
-											<widget size="415x46" type="*widget.RichText">
-												<text pos="4,4" size="399x19">Nothing declared what these columns hold, so it was worked</text>
-												<text pos="4,23" size="184x19">out by looking at the values.</text>
-											</widget>
-										</widget>
-										<container pos="0,194" size="415x81">
-											<container size="415x27">
+											<container pos="0,206" size="516x27">
 												<widget size="21x27" type="*widget.Label">
 													<widget size="21x27" type="*widget.RichText">
 														<text bold pos="4,4" size="13x19">id</text>
@@ -167,15 +194,7 @@
 													</widget>
 												</widget>
 											</container>
-											<widget pos="0,35" size="415x46" type="*widget.Label">
-												<widget size="415x46" type="*widget.RichText">
-													<text pos="4,4" size="401x19">because no numbering scheme this build carries accepted 12</text>
-													<text pos="4,23" size="139x19">values of this column</text>
-												</widget>
-											</widget>
-										</container>
-										<container pos="0,283" size="415x81">
-											<container size="415x27">
+											<container pos="0,241" size="516x27">
 												<widget size="82x27" type="*widget.Label">
 													<widget size="82x27" type="*widget.RichText">
 														<text bold pos="4,4" size="74x19">first_name</text>
@@ -187,57 +206,7 @@
 													</widget>
 												</widget>
 											</container>
-											<widget pos="0,35" size="415x46" type="*widget.Label">
-												<widget size="415x46" type="*widget.RichText">
-													<text pos="4,4" size="401x19">because no numbering scheme this build carries accepted 12</text>
-													<text pos="4,23" size="139x19">values of this column</text>
-												</widget>
-											</widget>
-										</container>
-										<container pos="0,372" size="415x100">
-											<container size="415x27">
-												<widget size="44x27" type="*widget.Label">
-													<widget size="44x27" type="*widget.RichText">
-														<text bold pos="4,4" size="36x19">pesel</text>
-													</widget>
-												</widget>
-												<widget pos="52,0" size="125x27" type="*widget.Label">
-													<widget size="125x27" type="*widget.RichText">
-														<text pos="4,4" size="117x19">taken for PL.pesel</text>
-													</widget>
-												</widget>
-											</container>
-											<widget pos="0,35" size="415x65" type="*widget.Label">
-												<widget size="415x65" type="*widget.RichText">
-													<text pos="4,4" size="393x19">because every one of 12 values of this column was accepted</text>
-													<text pos="4,23" size="395x19">by the PL.pesel validator, and by no other scheme carrying a</text>
-													<text pos="4,42" size="70x19">check digit</text>
-												</widget>
-											</widget>
-										</container>
-										<container pos="0,481" size="415x100">
-											<container size="415x27">
-												<widget size="33x27" type="*widget.Label">
-													<widget size="33x27" type="*widget.RichText">
-														<text bold pos="4,4" size="25x19">aba</text>
-													</widget>
-												</widget>
-												<widget pos="41,0" size="117x27" type="*widget.Label">
-													<widget size="117x27" type="*widget.RichText">
-														<text pos="4,4" size="109x19">taken for US.aba</text>
-													</widget>
-												</widget>
-											</container>
-											<widget pos="0,35" size="415x65" type="*widget.Label">
-												<widget size="415x65" type="*widget.RichText">
-													<text pos="4,4" size="393x19">because every one of 12 values of this column was accepted</text>
-													<text pos="4,23" size="386x19">by the US.aba validator, and by no other scheme carrying a</text>
-													<text pos="4,42" size="70x19">check digit</text>
-												</widget>
-											</widget>
-										</container>
-										<container pos="0,589" size="415x81">
-											<container size="415x27">
+											<container pos="0,276" size="516x27">
 												<widget size="40x27" type="*widget.Label">
 													<widget size="40x27" type="*widget.RichText">
 														<text bold pos="4,4" size="32x19">note</text>
@@ -249,344 +218,432 @@
 													</widget>
 												</widget>
 											</container>
-											<widget pos="0,35" size="415x46" type="*widget.Label">
-												<widget size="415x46" type="*widget.RichText">
-													<text pos="4,4" size="401x19">because no numbering scheme this build carries accepted 12</text>
-													<text pos="4,23" size="139x19">values of this column</text>
+											<widget pos="0,311" size="516x46" type="*widget.Label">
+												<widget size="516x46" type="*widget.RichText">
+													<text pos="4,4" size="491x19">because no numbering scheme this build carries accepted 12 values of this</text>
+													<text pos="4,23" size="49x19">column</text>
 												</widget>
 											</widget>
-										</container>
-										<widget pos="0,678" size="415x65" type="*widget.Label">
-											<widget size="415x65" type="*widget.RichText">
-												<text pos="4,4" size="402x19">Looking at values cannot establish these. Damage that needs</text>
-												<text pos="4,23" size="384x19">them is still ordered, and the manifest carries the reason it</text>
-												<text pos="4,42" size="138x19">could not be applied.</text>
-											</widget>
-										</widget>
-										<widget pos="0,752" size="415x236" type="*widget.Label">
-											<widget size="415x236" type="*widget.RichText">
-												<text pos="4,4" size="393x19">maximum length, because the longest value in a file is not a</text>
-												<text pos="4,23" size="391x19">declared limit, required columns, because a column with no</text>
-												<text pos="4,42" size="356x19">blanks in it was not declared to need one, uniqueness,</text>
-												<text pos="4,61" size="395x19">because values that happen not to repeat were not declared</text>
-												<text pos="4,80" size="393x19">unique, the set of allowed values of an enumerated column,</text>
-												<text pos="4,99" size="388x19">which a file never carries, the primary key, and with it every</text>
-												<text pos="4,118" size="361x19">defect about the identity of a record, relations between</text>
-												<text pos="4,137" size="360x19">columns beyond the date and the gender a numbering</text>
-												<text pos="4,156" size="383x19">scheme encodes, which are the only two a value can prove</text>
-												<text pos="4,175" size="403x19">without being told, relations between tables, because one file</text>
-												<text pos="4,194" size="367x19">is one table and numeric, date and postal column types,</text>
-												<text pos="4,213" size="359x19">because a column of digits is not a column of numbers</text>
-											</widget>
-										</widget>
-									</container>
-									<widget pos="0,800" size="415x0" type="*widget.Shadow">
-										<linearGradient endColor="shadow" pos="0,-8" size="415x8"/>
-									</widget>
-									<widget pos="409,0" size="6x800" type="*widget.scrollBarArea">
-										<widget pos="3,0" size="3x647" type="*widget.scrollBar">
-											<rectangle fillColor="scrollbar" radius="3" size="3x647"/>
-										</widget>
-									</widget>
-								</widget>
-							</container>
-							<widget pos="415,0" size="5x800" type="*container.divider">
-								<rectangle fillColor="shadow" size="5x800"/>
-								<rectangle fillColor="foreground" pos="0,384" size="4x32"/>
-							</widget>
-							<container pos="420,0" size="630x800">
-								<rectangle size="630x800" strokeWidth="2"/>
-								<widget size="630x800" type="*parts.KeyScroll">
-									<container size="630x800">
-										<container size="630x377">
-											<widget size="630x27" type="*widget.Label">
-												<widget size="630x27" type="*widget.RichText">
-													<text bold pos="4,4" size="115x19">What to damage</text>
+											<container pos="0,365" size="516x27">
+												<widget size="44x27" type="*widget.Label">
+													<widget size="44x27" type="*widget.RichText">
+														<text bold pos="4,4" size="36x19">pesel</text>
+													</widget>
 												</widget>
-											</widget>
-											<widget pos="0,35" size="630x342" type="*widget.Form">
-												<container size="630x342">
-													<container size="630x342">
-														<widget size="193x27" type="*widget.RichText">
-															<text alignment="trailing" bold pos="72,4" size="116x19">Kinds of damage</text>
-														</widget>
-														<widget pos="201,0" size="429x27" type="*widget.CheckGroup">
-															<widget size="53x27" type="*widget.Check">
-																<circle pos="2,1" size="24x24"/>
-																<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-																<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-																<text pos="28,0" size="25x27">L0</text>
-															</widget>
-															<widget pos="53,0" size="53x27" type="*widget.Check">
-																<circle pos="2,1" size="24x24"/>
-																<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-																<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-																<text pos="28,0" size="25x27">L1</text>
-															</widget>
-															<widget pos="107,0" size="53x27" type="*widget.Check">
-																<circle pos="2,1" size="24x24"/>
-																<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
-																<image pos="4,3" rsc="checkButtonCheckedIcon" size="iconInlineSize" themed="primary"/>
-																<text pos="28,0" size="25x27">L2</text>
-															</widget>
-															<widget pos="160,0" size="53x27" type="*widget.Check">
-																<circle pos="2,1" size="24x24"/>
-																<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
-																<image pos="4,3" rsc="checkButtonCheckedIcon" size="iconInlineSize" themed="primary"/>
-																<text pos="28,0" size="25x27">L3</text>
-															</widget>
-															<widget pos="214,0" size="53x27" type="*widget.Check">
-																<circle pos="2,1" size="24x24"/>
-																<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-																<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-																<text pos="28,0" size="25x27">L4</text>
-															</widget>
-															<widget pos="268,0" size="53x27" type="*widget.Check">
-																<circle pos="2,1" size="24x24"/>
-																<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-																<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-																<text pos="28,0" size="25x27">L5</text>
-															</widget>
-															<widget pos="321,0" size="53x27" type="*widget.Check">
-																<circle pos="2,1" size="24x24"/>
-																<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-																<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-																<text pos="28,0" size="25x27">REV</text>
-															</widget>
-															<widget pos="375,0" size="53x27" type="*widget.Check">
-																<circle pos="2,1" size="24x24"/>
-																<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-																<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-																<text pos="28,0" size="25x27">UNI</text>
-															</widget>
-														</widget>
-														<widget pos="0,35" size="193x27" type="*widget.RichText">
-															<text alignment="trailing" bold pos="75,4" size="113x19">Share of records</text>
-														</widget>
-														<widget pos="201,35" size="429x27" type="*widget.Entry">
-															<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="425x23"/>
-															<rectangle pos="1,1" radius="5" size="426x24" strokeColor="inputBorder" strokeWidth="2"/>
-															<widget pos="0,2" size="429x23" type="*widget.Scroll">
-																<widget size="429x23" type="*widget.entryContent">
-																	<widget size="429x23" type="*widget.RichText">
-																		<text color="disabled" pos="4,2" size="0x19"></text>
-																	</widget>
-																	<widget size="429x23" type="*widget.RichText">
-																		<text pos="4,2" size="0x19"></text>
-																	</widget>
-																</widget>
-															</widget>
-														</widget>
-														<widget pos="0,70" size="193x27" type="*widget.RichText">
-															<text alignment="trailing" bold pos="60,4" size="128x19">Defects per record</text>
-														</widget>
-														<container pos="201,70" size="429x27">
-															<widget size="429x27" type="*container.ThemeOverride">
-																<container size="429x27">
-																	<widget size="429x27" type="*parts.Select">
-																		<rectangle fillColor="inputBackground" radius="5" size="0x0"/>
-																		<rectangle size="0x0"/>
-																		<widget size="0x0" type="*widget.RichText">
-																			<text pos="-4,-4" size="11x19">…</text>
-																		</widget>
-																		<widget size="0x0" type="*widget.Icon">
-																			<image fillMode="contain" rsc="menuDropDownIcon" size="0x0" themed="foreground"/>
-																		</widget>
-																	</widget>
-																</container>
-															</widget>
-															<container size="429x27">
-																<rectangle pos="1,1" radius="5" size="427x25" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
-															</container>
-														</container>
-														<widget pos="0,105" size="193x27" type="*widget.RichText">
-															<text alignment="trailing" bold pos="26,4" size="162x19">Columns to leave alone</text>
-														</widget>
-														<widget pos="201,105" size="429x27" type="*widget.Entry">
-															<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="425x23"/>
-															<rectangle pos="1,1" radius="5" size="426x24" strokeColor="inputBorder" strokeWidth="2"/>
-															<widget pos="0,2" size="429x23" type="*widget.Scroll">
-																<widget size="429x23" type="*widget.entryContent">
-																	<widget size="429x23" type="*widget.RichText">
-																		<text color="disabled" pos="4,2" size="0x19"></text>
-																	</widget>
-																	<widget size="429x23" type="*widget.RichText">
-																		<text pos="4,2" size="0x19"></text>
-																	</widget>
-																</widget>
-															</widget>
-														</widget>
-														<widget pos="0,140" size="193x27" type="*widget.RichText">
-															<text alignment="trailing" bold pos="83,4" size="105x19">Field separator</text>
-														</widget>
-														<widget pos="201,140" size="429x27" type="*widget.Entry">
-															<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="425x23"/>
-															<rectangle pos="1,1" radius="5" size="426x24" strokeColor="inputBorder" strokeWidth="2"/>
-															<widget pos="0,2" size="429x23" type="*widget.Scroll">
-																<widget size="429x23" type="*widget.entryContent">
-																	<widget size="429x23" type="*widget.RichText">
-																		<text pos="4,2" size="3x19">,</text>
-																	</widget>
-																</widget>
-															</widget>
-														</widget>
-														<widget pos="0,175" size="193x27" type="*widget.RichText">
-															<text alignment="trailing" bold pos="110,4" size="78x19">Data locale</text>
-														</widget>
-														<widget pos="201,175" size="429x27" type="*widget.Entry">
-															<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="425x23"/>
-															<rectangle pos="1,1" radius="5" size="426x24" strokeColor="inputBorder" strokeWidth="2"/>
-															<widget pos="0,2" size="429x23" type="*widget.Scroll">
-																<widget size="429x23" type="*widget.entryContent">
-																	<widget size="429x23" type="*widget.RichText">
-																		<text pos="4,2" size="38x19">en-US</text>
-																	</widget>
-																</widget>
-															</widget>
-														</widget>
-														<widget pos="0,210" size="193x27" type="*widget.RichText">
-															<text alignment="trailing" bold pos="155,4" size="33x19">Seed</text>
-														</widget>
-														<widget pos="201,210" size="429x27" type="*widget.Entry">
-															<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="425x23"/>
-															<rectangle pos="1,1" radius="5" size="426x24" strokeColor="inputBorder" strokeWidth="2"/>
-															<widget pos="0,2" size="429x23" type="*widget.Scroll">
-																<widget size="429x23" type="*widget.entryContent">
-																	<widget size="429x23" type="*widget.RichText">
-																		<text pos="4,2" size="8x19">0</text>
-																	</widget>
-																</widget>
-															</widget>
-														</widget>
-														<widget pos="0,245" size="193x27" type="*widget.RichText">
-															<text alignment="trailing" bold pos="132,4" size="56x19">Write to</text>
-														</widget>
-														<widget pos="201,245" size="429x27" type="*widget.Entry">
-															<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="425x23"/>
-															<rectangle pos="1,1" radius="5" size="426x24" strokeColor="inputBorder" strokeWidth="2"/>
-															<widget pos="0,2" size="429x23" type="*widget.Scroll">
-																<widget size="429x23" type="*widget.entryContent">
-																	<widget size="429x23" type="*widget.RichText">
-																		<text pos="4,2" size="3x19">.</text>
-																	</widget>
-																</widget>
-															</widget>
-														</widget>
-														<widget pos="0,280" size="193x27" type="*widget.RichText">
-															<text alignment="trailing" bold pos="48,4" size="140x19">Extra manifest form</text>
-														</widget>
-														<container pos="201,280" size="429x27">
-															<widget size="429x27" type="*container.ThemeOverride">
-																<container size="429x27">
-																	<widget size="429x27" type="*parts.Select">
-																		<rectangle fillColor="inputBackground" radius="5" size="0x0"/>
-																		<rectangle size="0x0"/>
-																		<widget size="0x0" type="*widget.RichText">
-																			<text pos="-4,-4" size="11x19">…</text>
-																		</widget>
-																		<widget size="0x0" type="*widget.Icon">
-																			<image fillMode="contain" rsc="menuDropDownIcon" size="0x0" themed="foreground"/>
-																		</widget>
-																	</widget>
-																</container>
-															</widget>
-															<container size="429x27">
-																<rectangle pos="1,1" radius="5" size="427x25" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
-															</container>
-														</container>
-														<widget pos="0,315" size="193x27" type="*widget.RichText">
-															<text alignment="trailing" bold pos="4,4" size="185x19">Replace files already there</text>
-														</widget>
-														<widget pos="201,315" size="429x27" type="*widget.Check">
-															<circle pos="2,1" size="24x24"/>
-															<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-															<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-															<text pos="28,0" size="401x27"></text>
-														</widget>
-													</container>
-												</container>
-											</widget>
-										</container>
-										<widget pos="0,385" size="630x4" type="*widget.Separator">
-											<rectangle fillColor="separator" size="630x4"/>
-										</widget>
-										<container pos="0,397" size="630x167">
-											<widget size="630x27" type="*widget.Label">
-												<widget size="630x27" type="*widget.RichText">
-													<text bold pos="4,4" size="140x19">What would happen</text>
-												</widget>
-											</widget>
-											<container pos="0,35" size="630x132">
-												<container size="630x27">
-													<widget size="183x27" type="*widget.Label">
-														<widget size="183x27" type="*widget.RichText">
-															<text bold pos="4,4" size="175x19">Kinds of damage ordered</text>
-														</widget>
-													</widget>
-													<widget pos="191,0" size="62x27" type="*widget.Label">
-														<widget size="62x27" type="*widget.RichText">
-															<text pos="4,4" size="54x19">16 kinds</text>
-														</widget>
-													</widget>
-												</container>
-												<container pos="0,35" size="630x27">
-													<widget size="236x27" type="*widget.Label">
-														<widget size="236x27" type="*widget.RichText">
-															<text bold pos="4,4" size="228x19">Of those, this build can carry out</text>
-														</widget>
-													</widget>
-													<widget pos="244,0" size="54x27" type="*widget.Label">
-														<widget size="54x27" type="*widget.RichText">
-															<text pos="4,4" size="46x19">6 kinds</text>
-														</widget>
-													</widget>
-												</container>
-												<container pos="0,70" size="630x27">
-													<widget pos="164,0" size="465x27" type="*widget.Label">
-														<widget size="465x27" type="*widget.RichText">
-															<text pos="4,4" size="374x19">contacts.corrupted.csv and expectation-manifest.json in .</text>
-														</widget>
-													</widget>
-													<widget size="156x27" type="*widget.Label">
-														<widget size="156x27" type="*widget.RichText">
-															<text bold pos="4,4" size="148x19">Files this would write</text>
-														</widget>
-													</widget>
-												</container>
-												<widget pos="0,105" size="630x27" type="*widget.Label">
-													<widget size="630x27" type="*widget.RichText">
-														<text pos="4,4" size="502x19">A real run writes one manifest entry for every ordered defect, applied or not.</text>
+												<widget pos="52,0" size="125x27" type="*widget.Label">
+													<widget size="125x27" type="*widget.RichText">
+														<text pos="4,4" size="117x19">taken for PL.pesel</text>
 													</widget>
 												</widget>
 											</container>
+											<widget pos="0,400" size="516x46" type="*widget.Label">
+												<widget size="516x46" type="*widget.RichText">
+													<text pos="4,4" size="496x19">because every one of 12 values of this column was accepted by the PL.pesel</text>
+													<text pos="4,23" size="367x19">validator, and by no other scheme carrying a check digit</text>
+												</widget>
+											</widget>
+											<container pos="0,455" size="516x27">
+												<widget size="33x27" type="*widget.Label">
+													<widget size="33x27" type="*widget.RichText">
+														<text bold pos="4,4" size="25x19">aba</text>
+													</widget>
+												</widget>
+												<widget pos="41,0" size="117x27" type="*widget.Label">
+													<widget size="117x27" type="*widget.RichText">
+														<text pos="4,4" size="109x19">taken for US.aba</text>
+													</widget>
+												</widget>
+											</container>
+											<widget pos="0,490" size="516x46" type="*widget.Label">
+												<widget size="516x46" type="*widget.RichText">
+													<text pos="4,4" size="487x19">because every one of 12 values of this column was accepted by the US.aba</text>
+													<text pos="4,23" size="367x19">validator, and by no other scheme carrying a check digit</text>
+												</widget>
+											</widget>
+											<widget pos="0,544" size="516x46" type="*widget.Label">
+												<widget size="516x46" type="*widget.RichText">
+													<text pos="4,4" size="480x19">Looking at values cannot establish these. Damage that needs them is still</text>
+													<text pos="4,23" size="447x19">ordered, and the manifest carries the reason it could not be applied.</text>
+												</widget>
+											</widget>
+											<widget pos="0,598" size="516x198" type="*widget.Label">
+												<widget size="516x198" type="*widget.RichText">
+													<text pos="4,4" size="490x19">maximum length, because the longest value in a file is not a declared limit,</text>
+													<text pos="4,23" size="501x19">required columns, because a column with no blanks in it was not declared to</text>
+													<text pos="4,42" size="487x19">need one, uniqueness, because values that happen not to repeat were not</text>
+													<text pos="4,61" size="507x19">declared unique, the set of allowed values of an enumerated column, which a</text>
+													<text pos="4,80" size="499x19">file never carries, the primary key, and with it every defect about the identity</text>
+													<text pos="4,99" size="483x19">of a record, relations between columns beyond the date and the gender a</text>
+													<text pos="4,118" size="460x19">numbering scheme encodes, which are the only two a value can prove</text>
+													<text pos="4,137" size="482x19">without being told, relations between tables, because one file is one table</text>
+													<text pos="4,156" size="507x19">and numeric, date and postal column types, because a column of digits is not</text>
+													<text pos="4,175" size="140x19">a column of numbers</text>
+												</widget>
+											</widget>
 										</container>
-										<widget pos="0,573" size="630x4" type="*widget.Separator">
-											<rectangle fillColor="separator" size="630x4"/>
+										<widget pos="0,681" size="516x0" type="*widget.Shadow">
+											<linearGradient endColor="shadow" pos="0,-8" size="516x8"/>
 										</widget>
-										<container pos="0,585" size="630x28">
-											<container size="630x28">
-												<container size="122x28">
-													<widget size="122x28" type="*container.ThemeOverride">
-														<container size="122x28">
-															<widget size="122x28" type="*parts.Button">
-																<rectangle fillColor="focus" radius="5" size="122x28"/>
-																<rectangle size="122x28"/>
-																<widget pos="4,4" size="114x19" type="*widget.RichText">
-																	<text alignment="center" bold color="headerBackground" size="114x19">Damage this file</text>
+										<widget pos="510,0" size="6x681" type="*widget.scrollBarArea">
+											<widget pos="3,0" size="3x581" type="*widget.scrollBar">
+												<rectangle fillColor="scrollbar" radius="3" size="3x581"/>
+											</widget>
+										</widget>
+									</widget>
+								</container>
+								<widget pos="516,0" size="5x681" type="*container.divider">
+									<rectangle fillColor="shadow" size="5x681"/>
+									<rectangle fillColor="foreground" pos="0,324" size="4x32"/>
+								</widget>
+								<container pos="521,0" size="516x681">
+									<rectangle size="516x681" strokeWidth="2"/>
+									<widget size="516x681" type="*parts.KeyScroll">
+										<container size="516x961">
+											<container size="516x579">
+												<container size="516x39">
+													<widget size="516x27" type="*widget.Label">
+														<widget size="516x27" type="*widget.RichText">
+															<text bold pos="4,4" size="115x19">What to damage</text>
+														</widget>
+													</widget>
+													<widget pos="0,35" size="516x4" type="*widget.Separator">
+														<rectangle fillColor="separator" size="516x4"/>
+													</widget>
+												</container>
+												<widget pos="0,47" size="516x532" type="*widget.Form">
+													<container size="516x532">
+														<container size="516x532">
+															<widget size="193x216" type="*widget.RichText">
+																<text alignment="trailing" bold pos="72,4" size="116x19">Kinds of damage</text>
+															</widget>
+															<widget pos="201,0" size="315x216" type="*widget.CheckGroup">
+																<widget size="224x27" type="*widget.Check">
+																	<circle pos="2,1" size="24x24"/>
+																	<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+																	<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+																	<text pos="28,0" size="196x27">File bytes (L0)</text>
+																</widget>
+																<widget pos="0,27" size="224x27" type="*widget.Check">
+																	<circle pos="2,1" size="24x24"/>
+																	<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+																	<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+																	<text pos="28,0" size="196x27">File structure (L1)</text>
+																</widget>
+																<widget pos="0,54" size="224x27" type="*widget.Check">
+																	<circle pos="2,1" size="24x24"/>
+																	<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+																	<image pos="4,3" rsc="checkButtonCheckedIcon" size="iconInlineSize" themed="primary"/>
+																	<text pos="28,0" size="196x27">Field format (L2)</text>
+																</widget>
+																<widget pos="0,81" size="224x27" type="*widget.Check">
+																	<circle pos="2,1" size="24x24"/>
+																	<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="background"/>
+																	<image pos="4,3" rsc="checkButtonCheckedIcon" size="iconInlineSize" themed="primary"/>
+																	<text pos="28,0" size="196x27">Value meaning (L3)</text>
+																</widget>
+																<widget pos="0,108" size="224x27" type="*widget.Check">
+																	<circle pos="2,1" size="24x24"/>
+																	<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+																	<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+																	<text pos="28,0" size="196x27">Rules between fields (L4)</text>
+																</widget>
+																<widget pos="0,135" size="224x27" type="*widget.Check">
+																	<circle pos="2,1" size="24x24"/>
+																	<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+																	<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+																	<text pos="28,0" size="196x27">Rules across the set (L5)</text>
+																</widget>
+																<widget pos="0,162" size="224x27" type="*widget.Check">
+																	<circle pos="2,1" size="24x24"/>
+																	<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+																	<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+																	<text pos="28,0" size="196x27">Valid but unusual values (REV)</text>
+																</widget>
+																<widget pos="0,189" size="224x27" type="*widget.Check">
+																	<circle pos="2,1" size="24x24"/>
+																	<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+																	<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+																	<text pos="28,0" size="196x27">Unicode characters (UNI)</text>
 																</widget>
 															</widget>
+															<widget pos="0,224" size="193x27" type="*widget.RichText">
+																<text alignment="trailing" bold pos="75,4" size="113x19">Share of records</text>
+															</widget>
+															<widget pos="201,224" size="315x27" type="*widget.Entry">
+																<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="311x23"/>
+																<rectangle pos="1,1" radius="5" size="313x24" strokeColor="inputBorder" strokeWidth="2"/>
+																<widget pos="0,2" size="315x23" type="*widget.Scroll">
+																	<widget size="315x23" type="*widget.entryContent">
+																		<widget size="315x23" type="*widget.RichText">
+																			<text color="disabled" pos="4,2" size="0x19"></text>
+																		</widget>
+																		<widget size="315x23" type="*widget.RichText">
+																			<text pos="4,2" size="0x19"></text>
+																		</widget>
+																	</widget>
+																</widget>
+															</widget>
+															<widget pos="0,259" size="193x27" type="*widget.RichText">
+																<text alignment="trailing" bold pos="60,4" size="128x19">Defects per record</text>
+															</widget>
+															<container pos="201,259" size="315x27">
+																<widget size="315x27" type="*container.ThemeOverride">
+																	<container size="315x27">
+																		<widget size="315x27" type="*parts.Select">
+																			<rectangle fillColor="inputBackground" radius="5" size="0x0"/>
+																			<rectangle size="0x0"/>
+																			<widget size="0x0" type="*widget.RichText">
+																				<text pos="-4,-4" size="11x19">…</text>
+																			</widget>
+																			<widget size="0x0" type="*widget.Icon">
+																				<image fillMode="contain" rsc="menuDropDownIcon" size="0x0" themed="foreground"/>
+																			</widget>
+																		</widget>
+																	</container>
+																</widget>
+																<container size="315x27">
+																	<rectangle pos="1,1" radius="5" size="313x25" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+																</container>
+															</container>
+															<widget pos="0,294" size="193x27" type="*widget.RichText">
+																<text alignment="trailing" bold pos="26,4" size="162x19">Columns to leave alone</text>
+															</widget>
+															<widget pos="201,294" size="315x27" type="*widget.Entry">
+																<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="311x23"/>
+																<rectangle pos="1,1" radius="5" size="313x24" strokeColor="inputBorder" strokeWidth="2"/>
+																<widget pos="0,2" size="315x23" type="*widget.Scroll">
+																	<widget size="315x23" type="*widget.entryContent">
+																		<widget size="315x23" type="*widget.RichText">
+																			<text color="disabled" pos="4,2" size="0x19"></text>
+																		</widget>
+																		<widget size="315x23" type="*widget.RichText">
+																			<text pos="4,2" size="0x19"></text>
+																		</widget>
+																	</widget>
+																</widget>
+															</widget>
+															<widget pos="0,329" size="193x27" type="*widget.RichText">
+																<text alignment="trailing" bold pos="83,4" size="105x19">Field separator</text>
+															</widget>
+															<widget pos="201,329" size="315x27" type="*widget.Entry">
+																<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="311x23"/>
+																<rectangle pos="1,1" radius="5" size="313x24" strokeColor="inputBorder" strokeWidth="2"/>
+																<widget pos="0,2" size="315x23" type="*widget.Scroll">
+																	<widget size="315x23" type="*widget.entryContent">
+																		<widget size="315x23" type="*widget.RichText">
+																			<text pos="4,2" size="3x19">,</text>
+																		</widget>
+																	</widget>
+																</widget>
+															</widget>
+															<widget pos="0,364" size="193x27" type="*widget.RichText">
+																<text alignment="trailing" bold pos="110,4" size="78x19">Data locale</text>
+															</widget>
+															<widget pos="201,364" size="315x27" type="*widget.Entry">
+																<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="311x23"/>
+																<rectangle pos="1,1" radius="5" size="313x24" strokeColor="inputBorder" strokeWidth="2"/>
+																<widget pos="0,2" size="315x23" type="*widget.Scroll">
+																	<widget size="315x23" type="*widget.entryContent">
+																		<widget size="315x23" type="*widget.RichText">
+																			<text pos="4,2" size="38x19">en-US</text>
+																		</widget>
+																	</widget>
+																</widget>
+															</widget>
+															<widget pos="0,400" size="193x27" type="*widget.RichText">
+																<text alignment="trailing" bold pos="155,4" size="33x19">Seed</text>
+															</widget>
+															<widget pos="201,400" size="315x27" type="*widget.Entry">
+																<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="311x23"/>
+																<rectangle pos="1,1" radius="5" size="313x24" strokeColor="inputBorder" strokeWidth="2"/>
+																<widget pos="0,2" size="315x23" type="*widget.Scroll">
+																	<widget size="315x23" type="*widget.entryContent">
+																		<widget size="315x23" type="*widget.RichText">
+																			<text pos="4,2" size="8x19">0</text>
+																		</widget>
+																	</widget>
+																</widget>
+															</widget>
+															<widget pos="0,435" size="193x27" type="*widget.RichText">
+																<text alignment="trailing" bold pos="132,4" size="56x19">Write to</text>
+															</widget>
+															<widget pos="201,435" size="315x27" type="*widget.Entry">
+																<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="311x23"/>
+																<rectangle pos="1,1" radius="5" size="313x24" strokeColor="inputBorder" strokeWidth="2"/>
+																<widget pos="0,2" size="315x23" type="*widget.Scroll">
+																	<widget size="315x23" type="*widget.entryContent">
+																		<widget size="315x23" type="*widget.RichText">
+																			<text pos="4,2" size="3x19">.</text>
+																		</widget>
+																	</widget>
+																</widget>
+															</widget>
+															<widget pos="0,470" size="193x27" type="*widget.RichText">
+																<text alignment="trailing" bold pos="48,4" size="140x19">Extra manifest form</text>
+															</widget>
+															<container pos="201,470" size="315x27">
+																<widget size="315x27" type="*container.ThemeOverride">
+																	<container size="315x27">
+																		<widget size="315x27" type="*parts.Select">
+																			<rectangle fillColor="inputBackground" radius="5" size="0x0"/>
+																			<rectangle size="0x0"/>
+																			<widget size="0x0" type="*widget.RichText">
+																				<text pos="-4,-4" size="11x19">…</text>
+																			</widget>
+																			<widget size="0x0" type="*widget.Icon">
+																				<image fillMode="contain" rsc="menuDropDownIcon" size="0x0" themed="foreground"/>
+																			</widget>
+																		</widget>
+																	</container>
+																</widget>
+																<container size="315x27">
+																	<rectangle pos="1,1" radius="5" size="313x25" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+																</container>
+															</container>
+															<widget pos="0,505" size="193x27" type="*widget.RichText">
+																<text alignment="trailing" bold pos="4,4" size="185x19">Replace files already there</text>
+															</widget>
+															<widget pos="201,505" size="315x27" type="*widget.Check">
+																<circle pos="2,1" size="24x24"/>
+																<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+																<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+																<text pos="28,0" size="287x27"></text>
+															</widget>
 														</container>
+													</container>
+												</widget>
+											</container>
+											<widget pos="0,587" size="516x4" type="*widget.Separator">
+												<rectangle fillColor="separator" size="516x4"/>
+											</widget>
+											<container pos="0,599" size="516x313">
+												<container size="516x39">
+													<widget size="516x27" type="*widget.Label">
+														<widget size="516x27" type="*widget.RichText">
+															<text bold pos="4,4" size="140x19">What would happen</text>
+														</widget>
 													</widget>
+													<widget pos="0,35" size="516x4" type="*widget.Separator">
+														<rectangle fillColor="separator" size="516x4"/>
+													</widget>
+												</container>
+												<container pos="0,47" size="516x151">
+													<container size="516x27">
+														<widget size="183x27" type="*widget.Label">
+															<widget size="183x27" type="*widget.RichText">
+																<text bold pos="4,4" size="175x19">Kinds of damage ordered</text>
+															</widget>
+														</widget>
+														<widget pos="191,0" size="62x27" type="*widget.Label">
+															<widget size="62x27" type="*widget.RichText">
+																<text pos="4,4" size="54x19">16 kinds</text>
+															</widget>
+														</widget>
+													</container>
+													<container pos="0,35" size="516x27">
+														<widget size="236x27" type="*widget.Label">
+															<widget size="236x27" type="*widget.RichText">
+																<text bold pos="4,4" size="228x19">Of those, this build can carry out</text>
+															</widget>
+														</widget>
+														<widget pos="244,0" size="54x27" type="*widget.Label">
+															<widget size="54x27" type="*widget.RichText">
+																<text pos="4,4" size="46x19">6 kinds</text>
+															</widget>
+														</widget>
+													</container>
+													<container pos="0,70" size="516x46">
+														<widget pos="164,0" size="351x46" type="*widget.Label">
+															<widget size="351x46" type="*widget.RichText">
+																<text pos="4,4" size="177x19">contacts.corrupted.csv and</text>
+																<text pos="4,23" size="193x19">expectation-manifest.json in .</text>
+															</widget>
+														</widget>
+														<widget size="156x46" type="*widget.Label">
+															<widget size="156x46" type="*widget.RichText">
+																<text bold pos="4,4" size="148x19">Files this would write</text>
+															</widget>
+														</widget>
+													</container>
+													<widget pos="0,124" size="516x27" type="*widget.Label">
+														<widget size="516x27" type="*widget.RichText">
+															<text pos="4,4" size="502x19">A real run writes one manifest entry for every ordered defect, applied or not.</text>
+														</widget>
+													</widget>
+												</container>
+												<container pos="0,206" size="516x39">
+													<widget size="516x27" type="*widget.Label">
+														<widget size="516x27" type="*widget.RichText">
+															<text bold pos="4,4" size="160x19">The same in a terminal</text>
+														</widget>
+													</widget>
+													<widget pos="0,35" size="516x4" type="*widget.Separator">
+														<rectangle fillColor="separator" size="516x4"/>
+													</widget>
+												</container>
+												<container pos="0,253" size="516x60">
+													<widget size="516x24" type="*widget.Label">
+														<widget size="516x24" type="*widget.RichText">
+															<text monospace pos="4,4" size="505x16">qadg corrupt --layers L2,L3 --per-row exactly_one --delimit…</text>
+														</widget>
+													</widget>
+													<container pos="0,32" size="516x28">
+														<container size="115x28">
+															<widget size="115x28" type="*container.ThemeOverride">
+																<container size="115x28">
+																	<widget size="115x28" type="*parts.Button">
+																		<rectangle fillColor="focus" radius="5" size="115x28"/>
+																		<rectangle size="115x28"/>
+																		<widget pos="4,4" size="107x19" type="*widget.RichText">
+																			<text alignment="center" bold color="headerBackground" size="107x19">Copy command</text>
+																		</widget>
+																	</widget>
+																</container>
+															</widget>
+															<container size="115x28">
+																<rectangle pos="1,1" radius="5" size="113x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+															</container>
+														</container>
+														<spacer pos="123,0" size="400x28"/>
+													</container>
+												</container>
+											</container>
+											<widget pos="0,921" size="516x4" type="*widget.Separator">
+												<rectangle fillColor="separator" size="516x4"/>
+											</widget>
+											<container pos="0,933" size="516x28">
+												<container size="516x28">
 													<container size="122x28">
-														<rectangle pos="1,1" radius="5" size="120x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+														<widget size="122x28" type="*container.ThemeOverride">
+															<container size="122x28">
+																<widget size="122x28" type="*parts.Button">
+																	<rectangle fillColor="button" radius="5" size="122x28"/>
+																	<rectangle size="122x28"/>
+																	<widget pos="4,4" size="114x19" type="*widget.RichText">
+																		<text alignment="center" bold size="114x19">Damage this file</text>
+																	</widget>
+																</widget>
+															</container>
+														</widget>
+														<container size="122x28">
+															<rectangle pos="1,1" radius="5" size="120x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+														</container>
 													</container>
 												</container>
 											</container>
 										</container>
-									</container>
-								</widget>
-							</container>
-						</widget>
+										<widget pos="0,681" size="516x0" type="*widget.Shadow">
+											<linearGradient endColor="shadow" pos="0,-8" size="516x8"/>
+										</widget>
+										<widget pos="510,0" size="6x681" type="*widget.scrollBarArea">
+											<widget pos="3,0" size="3x482" type="*widget.scrollBar">
+												<rectangle fillColor="scrollbar" radius="3" size="3x482"/>
+											</widget>
+										</widget>
+									</widget>
+								</container>
+							</widget>
+						</container>
 					</container>
 				</container>
 			</container>

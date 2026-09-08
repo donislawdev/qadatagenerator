@@ -70,7 +70,7 @@ func screenOn(t *testing.T, window fyne.Window) (*View, *held) {
 	// happens is its own port, and the tests for that one hold it up on purpose.
 	view := New(i18n.English, window, described, take.Open, background.Work{
 		Run: runs.background, Read: background.ReadHere,
-	})
+	}, nil)
 	// The tree is built the way the shell builds it, so that everything a test
 	// reads is what a person would be looking at.
 	view.Content()

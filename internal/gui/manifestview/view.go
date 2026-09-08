@@ -105,8 +105,16 @@ func New(text i18n.Catalogue, window fyne.Window, read Readers, load background.
 // and the layout is told separately where each one goes. It draws the same and
 // it walks the way the eye does.
 func (v *View) Content() fyne.CanvasObject {
-	bar := container.NewHBox(v.open.OnScreen(), v.respond.OnScreen())
-	return parts.Inset(container.New(layout.NewBorderLayout(bar, nil, nil, nil), bar, v.body))
+	// The purpose stands above the buttons for the reason it does on the screen
+	// that damages files: the column says this screen is called Manifest
+	// browser, and a name is not a purpose. This one is the harder of the two,
+	// because a person who has never run this tool does not yet know what a
+	// manifest is.
+	purpose := widget.NewLabel(v.text.T(i18n.PurposeManifest))
+	purpose.Wrapping = fyne.TextWrapWord
+	purpose.Importance = widget.LowImportance
+	top := container.NewVBox(purpose, container.NewHBox(v.open.OnScreen(), v.respond.OnScreen()))
+	return parts.Inset(container.New(layout.NewBorderLayout(top, nil, nil, nil), top, v.body))
 }
 
 // Open puts a manifest on the screen, with everything that goes with it.
@@ -153,6 +161,14 @@ func (v *View) show(content fyne.CanvasObject) {
 // A sentence rather than an empty panel, which is point eight of the GUI
 // checklist. An empty rectangle reads as a fault in the program, and a person
 // meeting one has no way to tell it from a screen that is still loading.
+//
+// 🔴 NOT centred in the space below it, and that was tried and measured on
+// 2026-09-08 rather than merely not thought of. A wrapping label reports a
+// MinSize worked out against whatever width it happens to have when asked, so a
+// column holding one reserves a height that has nothing to do with the text: on
+// the screen next door the same trick gave a label 1366 by 122 for one line 19
+// high. The emptiness of this screen is a shortage of content before a file is
+// open, and moving one sentence into the middle of it does not add any.
 func sentence(words string) fyne.CanvasObject {
 	label := widget.NewLabel(words)
 	label.Wrapping = fyne.TextWrapWord
@@ -453,8 +469,15 @@ func (v *View) foot(screen Screen) fyne.CanvasObject {
 	return panel(container.NewVBox(parts...))
 }
 
+// heading names one part of this screen, with the rule under it that every
+// other screen's headings have carried since 2026-09-08.
+//
+// Written out rather than called through, because a function elsewhere in this
+// file names a local slice "parts" and shadows the package of the same name.
+// Reaching the package from inside one function and not from inside another is
+// the kind of difference nobody notices, so this one place answers for it.
 func heading(words string) fyne.CanvasObject {
-	return widget.NewLabelWithStyle(words, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	return parts.Section(words)
 }
 
 func lines(all []Line) fyne.CanvasObject {

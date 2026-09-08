@@ -51,7 +51,7 @@ func screenThatCanBeAskedToStop(t *testing.T, window fyne.Window) (*View, *held,
 	runs, watch := &held{}, &heldWatch{}
 	view := New(i18n.English, window, described, take.Open, background.Work{
 		Run: runs.background, Read: background.ReadHere, Watch: watch.watch,
-	})
+	}, nil)
 	view.Content()
 	return view, runs, watch
 }

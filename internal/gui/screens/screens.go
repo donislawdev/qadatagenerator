@@ -220,10 +220,13 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	// the time the call returns. Nothing is watching for a signal either: these
 	// screens belong to a test and to a probe rather than to a process somebody
 	// can ask to stop.
+	// The clipboard is nothing at all, for the same reason the way to write is:
+	// a state of this list is a picture, and a picture that reached the
+	// clipboard of the machine taking it would change something outside itself.
 	takeScreen := takeview.New(text, nil, describedDamage(), take.Open, background.Work{
 		Run:  outcomeOf(state.Ran),
 		Read: readingFor(state.Reading),
-	})
+	}, nil)
 	// 🔴 The way to write is handed in as nothing at all. A state of this list
 	// is a picture, and a picture that wrote a dataset would leave it either in
 	// this repository or in a directory whose name then appears in every stored
@@ -238,13 +241,28 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	// itself. That the button really copies is held by a test in the screen's
 	// own package against a clipboard of its own.
 	quickScreen := quickview.New(text, nil)
-	frame := shell.New([]shell.Screen{
-		{Name: text.T(i18n.ScreenRecipe), Content: recipeScreen.Content()},
-		{Name: text.T(i18n.ScreenTake), Content: takeScreen.Content(), OnDropped: takeScreen.Dropped},
-		{Name: text.T(i18n.ScreenManifest), Content: view.Content()},
-		{Name: text.T(i18n.ScreenAbout), Content: about.Content(text, license.Current(), version.Current())},
-		{Name: text.T(i18n.ScreenQuick), Content: quickScreen.Content()},
-	})
+	// The order is the one the window itself uses, and it has to stay that way:
+	// these pictures are of the window, so a list in a different order here
+	// would record a window nobody opens. The reason for the order is at the
+	// only place that decides it, which is cmd/qadg-gui. That the two agree is
+	// held by TestEveryNamedScreenIsWhereItsNameSays below.
+	// Placed BY THE NAME each state uses rather than written out in order, so
+	// that the two cannot drift apart. Written as a list, a reorder here moves
+	// every state onto a different screen and nothing goes red, which is
+	// exactly what happened on 2026-09-08 and is written up at the constants.
+	making, checking := text.T(i18n.SidebarGroupMake), text.T(i18n.SidebarGroupCheck)
+	column := make([]shell.Screen, 5)
+	column[screenQuick] = shell.Screen{Name: text.T(i18n.ScreenQuick), Group: making,
+		Content: quickScreen.Content()}
+	column[screenTake] = shell.Screen{Name: text.T(i18n.ScreenTake), Group: making,
+		Content: takeScreen.Content(), OnDropped: takeScreen.Dropped}
+	column[screenRecipe] = shell.Screen{Name: text.T(i18n.ScreenRecipe), Group: making,
+		Content: recipeScreen.Content()}
+	column[screenManifest] = shell.Screen{Name: text.T(i18n.ScreenManifest), Group: checking,
+		Content: view.Content()}
+	column[screenAbout] = shell.Screen{Name: text.T(i18n.ScreenAbout),
+		Content: about.Content(text, license.Current(), version.Current(), nil)}
+	frame := shell.New(column)
 	settleQuick(quickScreen, state.Quick)
 	if state.Into != "" {
 		recipeScreen.SetOut(state.Into)

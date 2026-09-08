@@ -174,6 +174,10 @@ func (v *View) setControls(usable bool) {
 // can do nothing here has to say what to do instead, and "disabled" is not that
 // sentence.
 func (v *View) drawBar() {
+	// The terminal line moves with the settings beside it, so it is written
+	// here rather than once when the screen is built. A bridge showing the
+	// directory somebody typed two edits ago is worse than none.
+	v.command.SetText(v.commandLine())
 	v.status.Objects = nil
 	if v.running() {
 		v.run.SetText(v.text.T(i18n.RecipeStopRun))

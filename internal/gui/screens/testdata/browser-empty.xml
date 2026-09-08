@@ -1,135 +1,161 @@
 <canvas padded size="1342x900">
 	<content>
 		<container pos="8,8" size="1326x884">
-			<container size="220x884">
+			<container size="232x884">
 				<container size="220x884">
-					<container size="220x28">
-						<widget size="220x28" type="*container.ThemeOverride">
-							<container size="220x28">
-								<widget size="220x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="220x28"/>
-									<rectangle size="220x28"/>
-									<widget pos="86,4" size="46x19" type="*widget.RichText">
-										<text alignment="center" bold size="46x19">Recipe</text>
-									</widget>
-								</widget>
-							</container>
+					<container size="220x884">
+						<widget size="220x22" type="*widget.RichText">
+							<text color="disabled" pos="4,4" size="59x14" textSize="11">MAKE DATA</text>
 						</widget>
-						<container size="220x28">
-							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						<container pos="0,30" size="220x28">
+							<widget size="220x28" type="*container.ThemeOverride">
+								<container size="220x28">
+									<widget size="220x28" type="*parts.Button">
+										<rectangle radius="5" size="220x28"/>
+										<rectangle size="220x28"/>
+										<widget pos="4,4" size="82x19" type="*widget.RichText">
+											<text alignment="center" bold size="82x19">Quick value</text>
+										</widget>
+									</widget>
+								</container>
+							</widget>
+							<container size="220x28">
+							</container>
 						</container>
-					</container>
-					<container pos="0,36" size="220x28">
-						<widget size="220x28" type="*container.ThemeOverride">
-							<container size="220x28">
-								<widget size="220x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="220x28"/>
-									<rectangle size="220x28"/>
-									<widget pos="50,4" size="118x19" type="*widget.RichText">
-										<text alignment="center" bold size="118x19">Take and corrupt</text>
+						<container pos="0,66" size="220x28">
+							<widget size="220x28" type="*container.ThemeOverride">
+								<container size="220x28">
+									<widget size="220x28" type="*parts.Button">
+										<rectangle radius="5" size="220x28"/>
+										<rectangle size="220x28"/>
+										<widget pos="4,4" size="118x19" type="*widget.RichText">
+											<text alignment="center" bold size="118x19">Take and corrupt</text>
+										</widget>
 									</widget>
-								</widget>
+								</container>
+							</widget>
+							<container size="220x28">
 							</container>
-						</widget>
-						<container size="220x28">
-							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
 						</container>
-					</container>
-					<container pos="0,72" size="220x28">
-						<widget size="220x28" type="*container.ThemeOverride">
-							<container size="220x28">
-								<widget size="220x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="220x28"/>
-									<rectangle size="220x28"/>
-									<widget pos="62,4" size="122x20" type="*widget.RichText">
-										<text alignment="center" bold size="122x19">Manifest browser</text>
+						<container pos="0,102" size="220x28">
+							<widget size="220x28" type="*container.ThemeOverride">
+								<container size="220x28">
+									<widget size="220x28" type="*parts.Button">
+										<rectangle radius="5" size="220x28"/>
+										<rectangle size="220x28"/>
+										<widget pos="4,4" size="46x19" type="*widget.RichText">
+											<text alignment="center" bold size="46x19">Recipe</text>
+										</widget>
 									</widget>
-									<image fillMode="contain" pos="34,4" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
-								</widget>
+								</container>
+							</widget>
+							<container size="220x28">
 							</container>
-						</widget>
-						<container size="220x28">
-							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
 						</container>
-					</container>
-					<container pos="0,108" size="220x28">
-						<widget size="220x28" type="*container.ThemeOverride">
-							<container size="220x28">
-								<widget size="220x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="220x28"/>
-									<rectangle size="220x28"/>
-									<widget pos="88,4" size="42x19" type="*widget.RichText">
-										<text alignment="center" bold size="42x19">About</text>
-									</widget>
-								</widget>
-							</container>
+						<widget pos="0,138" size="220x22" type="*widget.RichText">
+							<text color="disabled" pos="4,4" size="86x14" textSize="11">CHECK A RESULT</text>
 						</widget>
-						<container size="220x28">
-							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						<container pos="0,169" size="220x28">
+							<widget size="220x28" type="*container.ThemeOverride">
+								<container size="220x28">
+									<widget size="220x28" type="*parts.Button">
+										<rectangle radius="5" size="220x28"/>
+										<rectangle size="220x28"/>
+										<widget pos="32,4" size="122x20" type="*widget.RichText">
+											<text alignment="center" bold size="122x19">Manifest browser</text>
+										</widget>
+										<image fillMode="contain" pos="4,4" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
+									</widget>
+								</container>
+							</widget>
+							<container size="220x28">
+							</container>
 						</container>
-					</container>
-					<container pos="0,144" size="220x28">
-						<widget size="220x28" type="*container.ThemeOverride">
-							<container size="220x28">
-								<widget size="220x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="220x28"/>
-									<rectangle size="220x28"/>
-									<widget pos="68,4" size="82x19" type="*widget.RichText">
-										<text alignment="center" bold size="82x19">Quick value</text>
-									</widget>
-								</widget>
-							</container>
+						<spacer pos="0,205" size="220x638"/>
+						<widget pos="0,844" size="220x4" type="*widget.Separator">
+							<rectangle fillColor="separator" size="220x4"/>
 						</widget>
-						<container size="220x28">
-							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						<container pos="0,856" size="220x28">
+							<widget size="220x28" type="*container.ThemeOverride">
+								<container size="220x28">
+									<widget size="220x28" type="*parts.Button">
+										<rectangle radius="5" size="220x28"/>
+										<rectangle size="220x28"/>
+										<widget pos="4,4" size="42x19" type="*widget.RichText">
+											<text alignment="center" bold size="42x19">About</text>
+										</widget>
+									</widget>
+								</container>
+							</widget>
+							<container size="220x28">
+							</container>
 						</container>
 					</container>
 				</container>
+				<widget pos="228,0" size="4x884" type="*widget.Separator">
+					<rectangle fillColor="separator" size="4x884"/>
+				</widget>
 			</container>
-			<container pos="228,0" size="1098x884">
-				<container size="1098x884">
-					<container pos="24,24" size="1050x836">
-						<container size="1050x28">
-							<container size="123x28">
-								<widget size="123x28" type="*container.ThemeOverride">
-									<container size="123x28">
-										<widget size="123x28" type="*parts.Button">
-											<rectangle fillColor="button" radius="5" size="123x28"/>
-											<rectangle size="123x28"/>
-											<widget pos="4,4" size="115x19" type="*widget.RichText">
-												<text alignment="center" bold size="115x19">Open manifest...</text>
-											</widget>
-										</widget>
-									</container>
-								</widget>
-								<container size="123x28">
-									<rectangle pos="1,1" radius="5" size="121x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
-								</container>
-							</container>
-							<container pos="131,0" size="206x28">
-								<widget size="206x28" type="*container.ThemeOverride">
-									<container size="206x28">
-										<widget size="206x28" type="*parts.Button">
-											<rectangle fillColor="button" radius="5" size="206x28"/>
-											<rectangle size="206x28"/>
-											<widget pos="4,4" size="198x19" type="*widget.RichText">
-												<text alignment="center" bold color="disabled" size="198x19">Open application response...</text>
-											</widget>
-										</widget>
-									</container>
-								</widget>
-								<container size="206x28">
-								</container>
-							</container>
-						</container>
-						<container pos="0,36" size="1050x800">
-							<widget size="1050x800" type="*widget.Scroll">
-								<widget size="1050x800" type="*widget.Label">
-									<widget size="1050x800" type="*widget.RichText">
-										<text pos="4,4" size="895x19">No manifest is open. Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data.</text>
+			<container pos="240,0" size="1086x884">
+				<container size="1086x56">
+					<widget pos="24,24" size="1038x32" type="*widget.Label">
+						<widget size="1038x32" type="*widget.RichText">
+							<text bold pos="4,4" size="157x24" textSize="18">Manifest browser</text>
+						</widget>
+					</widget>
+				</container>
+				<container pos="0,64" size="1086x819">
+					<container size="1086x819">
+						<container pos="24,24" size="1038x771">
+							<container size="1038x120">
+								<widget size="1038x84" type="*widget.Label">
+									<widget size="1038x84" type="*widget.RichText">
+										<text color="disabled" pos="4,4" size="984x19">A manifest says what to expect from every record a run damaged. Add the answer your application gave, and this screen says where the two disagree.</text>
 									</widget>
 								</widget>
-							</widget>
+								<container pos="0,92" size="1038x28">
+									<container size="123x28">
+										<widget size="123x28" type="*container.ThemeOverride">
+											<container size="123x28">
+												<widget size="123x28" type="*parts.Button">
+													<rectangle fillColor="button" radius="5" size="123x28"/>
+													<rectangle size="123x28"/>
+													<widget pos="4,4" size="115x19" type="*widget.RichText">
+														<text alignment="center" bold size="115x19">Open manifest...</text>
+													</widget>
+												</widget>
+											</container>
+										</widget>
+										<container size="123x28">
+											<rectangle pos="1,1" radius="5" size="121x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+										</container>
+									</container>
+									<container pos="131,0" size="206x28">
+										<widget size="206x28" type="*container.ThemeOverride">
+											<container size="206x28">
+												<widget size="206x28" type="*parts.Button">
+													<rectangle fillColor="button" radius="5" size="206x28"/>
+													<rectangle size="206x28"/>
+													<widget pos="4,4" size="198x19" type="*widget.RichText">
+														<text alignment="center" bold color="disabled" size="198x19">Open application response...</text>
+													</widget>
+												</widget>
+											</container>
+										</widget>
+										<container size="206x28">
+										</container>
+									</container>
+								</container>
+							</container>
+							<container pos="0,128" size="1038x643">
+								<widget size="1038x643" type="*widget.Scroll">
+									<widget size="1038x643" type="*widget.Label">
+										<widget size="1038x643" type="*widget.RichText">
+											<text pos="4,4" size="895x19">No manifest is open. Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data.</text>
+										</widget>
+									</widget>
+								</widget>
+							</container>
 						</container>
 					</container>
 				</container>

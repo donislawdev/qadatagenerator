@@ -55,6 +55,16 @@ type Claim struct {
 
 // WindowReach is what a person can do in the window today.
 var WindowReach = map[string]Claim{
+	// Closed on 2026-09-08. The register waited for the window to PRODUCE the
+	// file rather than show it, because the reader DEC-30 names is a compliance
+	// scanner and a scanner reads documents rather than paragraphs. The About
+	// screen now writes exactly what the flag writes, since both encode the
+	// same report with the same tags.
+	"--json": {
+		Screen: "the About screen: a control that writes the licence report where a person " +
+			"chooses, in the form a machine reads",
+		Test: "TestTheScreenOffersTheReportInTheFormAMachineReads",
+	},
 	// 🔴 No help screen, and that stays recorded rather than repaired. What the
 	// register waited for was the first control carrying a hint, and it says so
 	// where it waited: a window with no hints answers nothing. The recipe
@@ -195,7 +205,6 @@ var WindowReach = map[string]Claim{
 // surfaces, and the ceiling below is that distance written as a number so that
 // it cannot grow by accident.
 var NotYetInWindow = map[string]string{
-	"--json":              "waits for Save as JSON on the About screen. The reader here is a compliance scanner, so the window has to PRODUCE the file rather than show it",
 	"generate --seed":     "waits for the editor",
 	"generate --format":   "waits for the editor",
 	"generate --manifest": "waits for the editor",
@@ -245,7 +254,7 @@ var MediumOnly = map[string]string{
 // control in this window carrying a hint: the vocabulary this build can
 // generate, and an example that runs. Two went, the verb and its two flags,
 // because the entry for them said in its own words what it was waiting for.
-const NotYetCeiling = 4
+const NotYetCeiling = 3
 
 // MediumOnlyCeiling caps the exceptions for the same reason, one number lower
 // than nothing: three flags say how the output looks, and a fourth would be a

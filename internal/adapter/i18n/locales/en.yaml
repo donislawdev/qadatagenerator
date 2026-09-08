@@ -11,6 +11,11 @@
 
 window.title: QA Data Generator
 
+# The headings the column groups the screen names under. They name what a
+# person came to do, which is why the screens sit in the order they do.
+sidebar.group.make: Make data
+sidebar.group.check: Check a result
+
 screen.about: About
 screen.manifest: Manifest browser
 screen.take: Take and corrupt
@@ -125,6 +130,25 @@ take.file.byte-order-mark: This file begins with a byte order mark. The damaged 
 take.file.not-inferred: Looking at values cannot establish these. Damage that needs them is still ordered, and the manifest carries the reason it could not be applied.
 take.file.one-column: This file was read as a single column. A file written by a European spreadsheet separates its fields with a semicolon rather than a comma, so check the field separator before damaging it.
 take.file.nothing-recognised: No column was recognised as carrying a numbering scheme, so damage aimed at one has nothing to work with in this file.
+
+# The kinds of damage. The name says what a person would see in the data, and
+# the code beside it is the one the --layers flag takes and the manifest
+# reports, so the window and the terminal stay one product.
+take.layer.bytes: File bytes
+take.layer.structure: File structure
+take.layer.format: Field format
+take.layer.meaning: Value meaning
+take.layer.between: Rules between fields
+take.layer.across: Rules across the set
+take.layer.unicode: Unicode characters
+take.layer.unusual: Valid but unusual values
+take.layer.code: "%s (%s)"
+take.layers.note: The code beside each name is what --layers takes on the command line.
+
+# How many defects one record may carry. The engine takes exactly_one and any,
+# and those two spellings are not a choice anybody can make from a window.
+take.per-row.exactly-one: Exactly one
+take.per-row.any: Any number
 
 take.setting.layers: Kinds of damage
 take.setting.rows: Share of records
@@ -241,6 +265,9 @@ recipe.write-to: Write to
 recipe.choose-dir: Choose...
 recipe.replace: Replace files already there
 recipe.generate: Generate this dataset
+recipe.heading.save: Save
+recipe.command.file: your-recipe.yaml
+recipe.command.example: The file name above is an example. This window does not write the recipe file, so save the recipe beside your tests and use its name in the command.
 recipe.stop-run: Stop this run
 recipe.would-write: Would write
 recipe.nothing-yet: Nothing has been written yet.
@@ -257,9 +284,26 @@ recipe.files: files
 recipe.run-stopped: You stopped this run. Nothing was written, because every file gets its real name only once a whole run has succeeded.
 recipe.run-failed: This run did not finish, and nothing that looks complete was left behind.
 
+# The line that does the same thing in a terminal, shown on every screen that
+# produces something. It is what keeps the window and the command line one
+# product rather than two that happen to share a name.
+command.heading: The same in a terminal
+command.copy: Copy command
+command.copied: Command copied
+
+# One line at the top of each screen saying what it is for. The column gives a
+# screen its name, and a name is not a purpose.
+purpose.take: See how your import behaves when the data is not perfect. The file you choose is never changed, and the damaged copy is written beside it.
+purpose.recipe: A recipe is a file you keep beside your tests. The same recipe and the same seed produce the same data on every machine.
+about.save.json: Save the licence report as JSON
+
+purpose.manifest: A manifest says what to expect from every record a run damaged. Add the answer your application gave, and this screen says where the two disagree.
+
 # The Quick value screen. One value, no recipe, nothing written.
 quick.nothing-written: Nothing on this screen is written to a file.
-quick.label.value: Value
+quick.label.value: Kind
+quick.heading.value: Value
+quick.nothing-yet: Choose a kind above, and the value appears here.
 quick.label.locale: Locale
 quick.label.seed: Seed
 quick.label.gender: Gender

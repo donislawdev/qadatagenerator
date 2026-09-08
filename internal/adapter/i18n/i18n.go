@@ -43,6 +43,12 @@ const (
 	ScreenTake     Key = "screen.take"
 	ScreenRecipe   Key = "screen.recipe"
 	ScreenQuick    Key = "screen.quick"
+
+	// The headings the column groups its names under, added on 2026-09-08 with
+	// DEC-225. They say what a person came to do rather than what the screens
+	// are, which is the whole point of the order they now sit in.
+	SidebarGroupMake  Key = "sidebar.group.make"
+	SidebarGroupCheck Key = "sidebar.group.check"
 )
 
 // The keys of the About screen.
@@ -117,6 +123,28 @@ const (
 	TakeSettingManifest  Key = "take.setting.manifest"
 	TakeSettingOverwrite Key = "take.setting.overwrite"
 	TakeSettingNone      Key = "take.setting.none"
+
+	// The kinds of damage, said the way a person would rather than by the code
+	// the catalogue files them under. Added 2026-09-08 with DEC-225: the codes
+	// were the labels, and "L2" tells somebody opening this window nothing.
+	// The code stays beside the name, because it is what the --layers flag
+	// takes and what the manifest reports.
+	TakeLayerBytes     Key = "take.layer.bytes"
+	TakeLayerStructure Key = "take.layer.structure"
+	TakeLayerFormat    Key = "take.layer.format"
+	TakeLayerMeaning   Key = "take.layer.meaning"
+	TakeLayerBetween   Key = "take.layer.between"
+	TakeLayerAcross    Key = "take.layer.across"
+	TakeLayerUnicode   Key = "take.layer.unicode"
+	TakeLayerUnusual   Key = "take.layer.unusual"
+	TakeLayerCode      Key = "take.layer.code"
+	TakeLayersNote     Key = "take.layers.note"
+
+	// How many defects one record may carry, said in words. The engine takes
+	// exactly_one and any, and a list offering those two spellings asks a
+	// person to read a setting file to use a window.
+	TakePerRowExactlyOne Key = "take.per-row.exactly-one"
+	TakePerRowAny        Key = "take.per-row.any"
 
 	TakePlanKinds       Key = "take.plan.kinds"
 	TakePlanImplemented Key = "take.plan.implemented"
@@ -326,39 +354,55 @@ const (
 	// because a disabled button that says only that it is disabled sends
 	// somebody looking for what they did wrong. Each of them names the one
 	// thing to do next.
-	RecipeWriteTo       Key = "recipe.write-to"
-	RecipeChooseDir     Key = "recipe.choose-dir"
-	RecipeReplace       Key = "recipe.replace"
-	RecipeGenerate      Key = "recipe.generate"
-	RecipeStopRun       Key = "recipe.stop-run"
-	RecipeWouldWrite    Key = "recipe.would-write"
-	RecipeNothingYet    Key = "recipe.nothing-yet"
-	RecipeNeedRecipe    Key = "recipe.need-recipe"
-	RecipeNeedFix       Key = "recipe.need-fix"
-	RecipeNeedDirectory Key = "recipe.need-directory"
-	RecipeDirHint       Key = "recipe.dir-hint"
-	RecipeWriting       Key = "recipe.writing"
-	RecipeStopping      Key = "recipe.stopping"
-	RecipeWrote         Key = "recipe.wrote"
-	RecipeIn            Key = "recipe.in"
-	RecipeFile          Key = "recipe.file"
-	RecipeFiles         Key = "recipe.files"
-	RecipeRunStopped    Key = "recipe.run-stopped"
-	RecipeRunFailed     Key = "recipe.run-failed"
+	RecipeWriteTo   Key = "recipe.write-to"
+	RecipeChooseDir Key = "recipe.choose-dir"
+	RecipeReplace   Key = "recipe.replace"
+	RecipeGenerate  Key = "recipe.generate"
+	// The heading over the controls that write, and the two keys of the
+	// terminal line beneath them. The file name is an example rather than a
+	// path, because this window does not write the recipe file.
+	RecipeHeadingSave    Key = "recipe.heading.save"
+	RecipeCommandFile    Key = "recipe.command.file"
+	RecipeCommandExample Key = "recipe.command.example"
+	RecipeStopRun        Key = "recipe.stop-run"
+	RecipeWouldWrite     Key = "recipe.would-write"
+	RecipeNothingYet     Key = "recipe.nothing-yet"
+	RecipeNeedRecipe     Key = "recipe.need-recipe"
+	RecipeNeedFix        Key = "recipe.need-fix"
+	RecipeNeedDirectory  Key = "recipe.need-directory"
+	RecipeDirHint        Key = "recipe.dir-hint"
+	RecipeWriting        Key = "recipe.writing"
+	RecipeStopping       Key = "recipe.stopping"
+	RecipeWrote          Key = "recipe.wrote"
+	RecipeIn             Key = "recipe.in"
+	RecipeFile           Key = "recipe.file"
+	RecipeFiles          Key = "recipe.files"
+	RecipeRunStopped     Key = "recipe.run-stopped"
+	RecipeRunFailed      Key = "recipe.run-failed"
 )
 
 // The keys of the Quick value screen.
 const (
 	QuickNothingWritten Key = "quick.nothing-written"
 	QuickLabelValue     Key = "quick.label.value"
-	QuickLabelLocale    Key = "quick.label.locale"
-	QuickLabelSeed      Key = "quick.label.seed"
-	QuickLabelGender    Key = "quick.label.gender"
-	QuickLabelBorn      Key = "quick.label.born"
-	QuickGenderAny      Key = "quick.gender.any"
-	QuickCopy           Key = "quick.copy"
-	QuickAgain          Key = "quick.again"
-	QuickCopied         Key = "quick.copied"
+	// QuickValueHeading names the part of the screen the value appears in,
+	// which is not the same thing as the label on the list that chooses which
+	// KIND of value. Both read "Value" until 2026-09-08, on one screen, and
+	// the accepted drawing names the list "Kind" for exactly that reason.
+	QuickValueHeading Key = "quick.heading.value"
+	// What stands where the value will be, before there is one. The drawing
+	// this screen was built from only ever shows a value, so the state this
+	// screen opens in was never drawn at all, and it opened as an empty box
+	// with a border round it.
+	QuickNothingYet  Key = "quick.nothing-yet"
+	QuickLabelLocale Key = "quick.label.locale"
+	QuickLabelSeed   Key = "quick.label.seed"
+	QuickLabelGender Key = "quick.label.gender"
+	QuickLabelBorn   Key = "quick.label.born"
+	QuickGenderAny   Key = "quick.gender.any"
+	QuickCopy        Key = "quick.copy"
+	QuickAgain       Key = "quick.again"
+	QuickCopied      Key = "quick.copied"
 
 	// The refusals this mode can produce, in the words of this surface.
 	//
@@ -370,17 +414,41 @@ const (
 	QuickRefusedRole      Key = "quick.refused.role"
 	QuickRefusedGender    Key = "quick.refused.gender"
 	QuickRefusedDate      Key = "quick.refused.date"
+
+	// The line a person can paste into a terminal to get the same thing.
+	// docs/08 asks for this on every screen that produces something, and says
+	// why: without it the window and the terminal stop being one product.
+	CommandHeading Key = "command.heading"
+	CommandCopy    Key = "command.copy"
+	CommandCopied  Key = "command.copied"
+
+	// One line at the top of each screen saying what it is for. The column
+	// gives a screen its name, and a name is not a purpose: somebody opening
+	// this window for the first time reads "Take and corrupt" and learns
+	// nothing about what it would do to their file.
+	PurposeTake     Key = "purpose.take"
+	PurposeRecipe   Key = "purpose.recipe"
+	PurposeManifest Key = "purpose.manifest"
+
+	// The machine readable form of what this screen says. DEC-30 names the
+	// reader and it is a compliance scanner, which reads documents rather than
+	// paragraphs, so the window has to PRODUCE the file rather than show it.
+	AboutSaveJSON Key = "about.save.json"
 )
 
 // Keys is every key a screen may ask for, so a test can close the register
 // from the side the code is on.
 var Keys = []Key{
 	WindowTitle, ScreenAbout, ScreenManifest, ScreenTake, ScreenRecipe, ScreenQuick,
+	SidebarGroupMake, SidebarGroupCheck,
 
-	QuickNothingWritten, QuickLabelValue, QuickLabelGender, QuickLabelBorn,
+	QuickNothingWritten, QuickLabelValue, QuickValueHeading, QuickNothingYet,
+	QuickLabelGender, QuickLabelBorn,
 	QuickLabelLocale, QuickLabelSeed,
 	QuickGenderAny, QuickCopy, QuickAgain, QuickCopied,
 	QuickRefusedGenerator, QuickRefusedRole, QuickRefusedGender, QuickRefusedDate,
+	CommandHeading, CommandCopy, CommandCopied,
+	PurposeTake, PurposeRecipe, PurposeManifest, AboutSaveJSON,
 
 	AboutHeadingVersions, AboutHeadingLicenses, AboutHeadingComponents,
 	AboutHeadingData, AboutHeadingNotices,
@@ -415,6 +483,10 @@ var Keys = []Key{
 	TakeFileTakenFor, TakeFileBecause, TakeFileAgreesWith,
 	TakeFileByteOrderMark, TakeFileNotInferred,
 	TakeFileOneColumn, TakeFileNothingRecognised,
+	TakeLayerBytes, TakeLayerStructure, TakeLayerFormat, TakeLayerMeaning,
+	TakeLayerBetween, TakeLayerAcross, TakeLayerUnicode, TakeLayerUnusual,
+	TakeLayerCode, TakeLayersNote, TakePerRowExactlyOne, TakePerRowAny,
+
 	TakeSettingLayers, TakeSettingRows, TakeSettingPerRow, TakeSettingExclude,
 	TakeSettingDelimiter, TakeSettingLocale, TakeSettingSeed, TakeSettingOut,
 	TakeSettingManifest, TakeSettingOverwrite, TakeSettingNone,
@@ -453,6 +525,7 @@ var Keys = []Key{
 	RecipeShowing, RecipeOf, RecipeRow, RecipeRows, RecipeNoRows, RecipeNoFields,
 	RecipeAsText, RecipeParentOutside, RecipeRefused, RecipeCrashed, RecipeWillNotDo,
 	RecipeWriteTo, RecipeChooseDir, RecipeReplace, RecipeGenerate, RecipeStopRun,
+	RecipeHeadingSave, RecipeCommandFile, RecipeCommandExample,
 	RecipeWouldWrite, RecipeNothingYet, RecipeNeedRecipe, RecipeNeedFix,
 	RecipeNeedDirectory, RecipeDirHint, RecipeWriting, RecipeStopping, RecipeWrote, RecipeIn,
 	RecipeFile, RecipeFiles, RecipeRunStopped, RecipeRunFailed,

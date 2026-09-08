@@ -152,6 +152,22 @@ func TestTheKeyboardMeetsTheNamesBeforeTheScreen(t *testing.T) {
 	}
 }
 
+// importancePaints is every importance that gives a button a colour of its
+// own, and the colour it gives.
+//
+// 🔴 Read out of the toolkit rather than remembered, at widget/button.go:383
+// in fyne v2.8.0, where buttonColorNames turns an importance into a pair of
+// theme colours. Medium and Low are absent on purpose: Low leaves the label on
+// the ordinary foreground and asks for a background only while the focus or
+// the pointer is on it, and that background is the button colour rather than
+// any colour carrying meaning here.
+var importancePaints = map[widget.Importance]string{
+	widget.HighImportance:    "in the primary colour",
+	widget.DangerImportance:  "in the error colour",
+	widget.WarningImportance: "in the warning colour",
+	widget.SuccessImportance: "in the success colour",
+}
+
 // The screen a person is on is marked by a shape, not by a colour alone.
 //
 // 🔴 Colour alone was what it used to be, and it collided with the one other
@@ -159,6 +175,15 @@ func TestTheKeyboardMeetsTheNamesBeforeTheScreen(t *testing.T) {
 // measured value, so on a real window the mark of the open screen and the mark
 // of focus were the same picture. docs/17 asks for a shape beside any colour
 // carrying meaning, and this is that shape.
+//
+// 🔴 The check on importance asked for exactly MediumImportance until
+// 2026-09-08, which was BROADER THAN ITS OWN REASON and wrong about the fact
+// it stated: it reported that importance 2 paints the name in the colour
+// belonging to focus, and importance 2 is Low, which paints nothing. High is
+// the one that does. So the check refused a value for a reason that was not
+// true of it, and let Danger, Warning and Success through, which do exactly
+// what it was written to stop. It now names the importances that paint, and
+// the register above says where that list was read.
 func TestTheOpenScreenIsMarkedByAShapeRatherThanByColourAlone(t *testing.T) {
 	all := screens()
 	frame := New(all)
@@ -175,9 +200,10 @@ func TestTheOpenScreenIsMarkedByAShapeRatherThanByColourAlone(t *testing.T) {
 				t.Errorf("screen %d is not open and its name carries the mark, so two names claim to be current",
 					at)
 			}
-			if button.Importance != widget.MediumImportance {
-				t.Errorf("the name of screen %d asks for importance %v, and importance here paints the name in "+
-					"the colour that belongs to focus", at, button.Importance)
+			if colour, painted := importancePaints[button.Importance]; painted {
+				t.Errorf("the name of screen %d asks for importance %v, which paints the button %s, and a "+
+					"name marked by a colour is a mark somebody who does not separate hues cannot see",
+					at, button.Importance, colour)
 			}
 		}
 	}

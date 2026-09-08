@@ -314,3 +314,45 @@ func render(t *testing.T, data Data, state State) string {
 	window.Resize(size)
 	return test.RenderToMarkup(window.Canvas())
 }
+
+// A state opens the screen its name says it opens.
+//
+// 🔴 WRITTEN AFTER THE FAILURE IT GUARDS, on 2026-09-08. The column was
+// reordered that day, every state carried a bare number into it, and all
+// forty-eight of them silently moved onto a different screen. Nothing went
+// red. The stored trees regenerated without complaint, so the picture named
+// for the recipe editor became a picture of the screen that produces one
+// value, and it took reading the diff to notice that a hundred and fifty-three
+// strings of recipe text had stopped appearing.
+//
+// # Why the name rather than a second list
+//
+// Every state is already named after the screen it belongs to, so the pairing
+// exists and nobody has to keep a copy of it in step. A guard reading a second
+// list would be a second thing to forget, which is the shape of the problem it
+// is meant to solve.
+func TestEveryStateOpensTheScreenItsNameSays(t *testing.T) {
+	screenOfPrefix := map[string]int{
+		"quick":   screenQuick,
+		"take":    screenTake,
+		"recipe":  screenRecipe,
+		"browser": screenManifest,
+		"about":   screenAbout,
+	}
+	for _, state := range All() {
+		prefix, _, split := strings.Cut(state.Name, "-")
+		if !split {
+			prefix = state.Name
+		}
+		wanted, named := screenOfPrefix[prefix]
+		if !named {
+			t.Errorf("state %q begins with %q, which names no screen, so nothing here can say "+
+				"which screen it meant to open", state.Name, prefix)
+			continue
+		}
+		if state.Screen != wanted {
+			t.Errorf("state %q opens screen %d and its name says screen %d, so the picture it "+
+				"stores is of a screen it was not written for", state.Name, state.Screen, wanted)
+		}
+	}
+}

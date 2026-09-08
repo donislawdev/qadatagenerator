@@ -113,6 +113,11 @@ type View struct {
 	exampleRow fyne.CanvasObject
 	generators *parts.Disclosure
 
+	// The line that would do this in a terminal, and the button beside it.
+	// Built once for the reason everything else focusable here is.
+	command     *widget.Label
+	copyCommand *parts.Button
+
 	// asked counts the checks asked for, so that an answer which is no longer
 	// the latest question is dropped rather than drawn.
 	//
@@ -161,6 +166,7 @@ func New(text i18n.Catalogue, check Check, write Write, work background.Work,
 	// from being a bug. Built once, the question cannot arise.
 	view.answerPane = parts.NewKeyScroll(view.answerBox)
 	view.buildHints()
+	view.buildCommand()
 	return view
 }
 
@@ -181,12 +187,40 @@ func New(text i18n.Catalogue, check Check, write Write, work background.Work,
 // edges after its middle and this project has twice paid for the walk that
 // comes out of that.
 func (v *View) Content() fyne.CanvasObject {
-	// 🔴 The vertical split rather than a fixed division, so that a person
-	// reading a long recipe can take the room from the answer and a person
-	// reading eleven problems can take it back. Neither of the two is the one
-	// that always deserves more.
-	split := container.NewVSplit(v.editor, v.answerPane.Framed())
-	bar := v.bar()
+	// 🔴 A split rather than a fixed division, so that a person reading a long
+	// recipe can take the room from the answer and a person reading eleven
+	// problems can take it back. Neither of the two is the one that always
+	// deserves more.
+	//
+	// # Why it turned sideways on 2026-09-08
+	//
+	// It ran the other way until then, and the reason recorded here was
+	// measured: at a window of 900 the content was 680, half of it was 340, and
+	// the longest line of the documented recipe is 93 characters, which does
+	// not fit in 340. The window is now 1120, so the halves are about 425, and
+	// 93 monospace characters still do not fit in 425. The measurement did not
+	// stop being true.
+	//
+	// What changed is that it stopped being the whole question. The accepted
+	// drawing puts the recipe on the left and everything it CAUSES on the
+	// right, and the reason is what a person does here: they write, then read
+	// what came of it, then write again. Stacked, the answer to what they wrote
+	// begins below the fold, and the render showed exactly that - the verdict,
+	// the preview and the controls that write were cut off at the bottom edge.
+	// Side by side, a keystroke and its consequence are visible at once.
+	//
+	// The 93 character line is answered by the divider rather than by the
+	// layout. It belongs to a person, it is where it was left, and somebody
+	// editing a long line pulls it right. That is the same argument this
+	// comment always made, pointed at the axis the drawing asks for.
+	split := container.NewHSplit(v.writing(), v.reading())
+	// The purpose stands at the top, above the recipe rather than beside it.
+	// Somebody landing here sees a text field and no hint that what goes in it
+	// is a file they are meant to keep, which is the whole point of writing one
+	// rather than clicking through a form.
+	purpose := widget.NewLabel(v.text.T(i18n.PurposeRecipe))
+	purpose.Wrapping = fyne.TextWrapWord
+	purpose.Importance = widget.LowImportance
 	// 🔴 No share is set here, and the empty line is the decision. Giving the
 	// recipe the larger half reads as obviously right and is a number nobody
 	// measured, and the guard over values in the window said so: the view holds
@@ -196,12 +230,58 @@ func (v *View) Content() fyne.CanvasObject {
 	// and the divider belongs to the person, who is the only one here who knows
 	// whether they are reading the recipe or the answer.
 	v.draw()
-	// 🔴 The split is named before the bar, because the layout walks its objects
-	// in the order they are given and a person reads this screen downwards. The
-	// bar is drawn along the bottom either way, so the two orders differ only in
-	// where the keyboard goes, and this project has twice paid for the walk that
-	// comes out of taking the drawing for the order.
-	return parts.Inset(container.New(layout.NewBorderLayout(nil, bar, nil, nil), split, bar))
+	// 🔴 The purpose is named before the split, because the layout walks its
+	// objects in the order they are given and a person reads this screen
+	// downwards. This project has twice paid for the walk that comes out of
+	// taking the drawing for the order.
+	return parts.Inset(container.New(layout.NewBorderLayout(purpose, nil, nil, nil),
+		purpose, split))
+}
+
+// writing is the left half: the recipe, and the offer of one to start from.
+//
+// The offer sits UNDER the field rather than inside the answer beside it, which
+// is where it was until 2026-09-08. It is about what goes IN the field, so it
+// belongs with the field. In the answer it was competing with the verdict for
+// the same column, which the accepted drawing calls out by name as the thing
+// wrong with this screen.
+//
+// 🔴 The list of generators did NOT come with it, and the reason is measured
+// rather than a matter of taste. It was moved here too at first, and rendering
+// the state where it is open ended the process: a border gives its bottom edge
+// the height that edge asks for and the middle whatever is left, an open list
+// of seventeen names asks for more than the screen is tall, and the field above
+// it was therefore laid out at a height of minus 171. The toolkit painted a
+// rectangle of that height and the rasterizer took a slice of negative length.
+//
+// So what is placed here is only what has a height that cannot grow. Anything
+// that can belongs in the answer pane beside it, which scrolls, and the list is
+// back there for that reason as well as the one already written where it is
+// drawn.
+func (v *View) writing() fyne.CanvasObject {
+	// The field takes what is left, and the offer takes the one row it asks
+	// for. A column would share the height between them and leave the recipe
+	// short.
+	return container.New(layout.NewBorderLayout(nil, v.exampleRow, nil, nil),
+		v.editor, v.exampleRow)
+}
+
+// reading is the right half: what the recipe turned out to be, and what to do
+// with it.
+//
+// In the order somebody meets them. The answer is first and takes the room,
+// because it is what changes as they type. The controls that write come after
+// it, because writing is what happens once the answer is one they wanted, and
+// the terminal line comes last for the reason it comes last everywhere: it
+// answers a question asked after somebody has what they came for.
+func (v *View) reading() fyne.CanvasObject {
+	below := container.NewVBox(
+		parts.Section(v.text.T(i18n.RecipeHeadingSave)),
+		v.bar(),
+		v.commandContent(),
+	)
+	return container.New(layout.NewBorderLayout(nil, below, nil, nil),
+		v.answerPane.Framed(), below)
 }
 
 // SetRecipe puts a recipe on the screen and judges it, without anybody typing.
@@ -311,14 +391,6 @@ func (v *View) draw() {
 		v.drawCrash()
 	case !v.checked:
 		v.answerBox.Add(sentence(v.text.T(i18n.RecipeEmpty)))
-		// 🔴 The button belongs to the empty screen and to no other state. A
-		// control offering to replace what somebody has written is a control
-		// that has to ask first, and one sitting there disabled in every other
-		// state is a line of furniture that reads as text in this theme
-		// anyway (B-208). It leaves the screen when the field stops being
-		// empty, and pressing it is one of the ways that happens, which is why
-		// it puts the keyboard in the field afterwards.
-		v.answerBox.Add(v.exampleRow)
 	case len(v.answer.Report.Problems) > 0:
 		v.drawProblems()
 	case v.answer.Refused != nil:
@@ -333,10 +405,28 @@ func (v *View) draw() {
 	}
 	v.drawWillNotDo()
 	v.drawUnchecked()
+	// 🔴 The offer of an example belongs to the empty screen and to no other
+	// state. A control offering to replace what somebody has written is a
+	// control that has to ask first, and one sitting there disabled in every
+	// other state is a line of furniture that reads as text in this theme
+	// anyway (B-208). It leaves the screen when the field stops being empty,
+	// and pressing it is one of the ways that happens, which is why it puts the
+	// keyboard in the field afterwards.
+	//
+	// Hidden rather than taken out of a column, because it moved to the half
+	// this screen is written in on 2026-09-08 and that half is built once. The
+	// list of generators beside it is NOT hidden in any state, because it
+	// answers what can be written rather than anything about what is written.
+	if v.checked || v.checking {
+		v.exampleRow.Hide()
+	} else {
+		v.exampleRow.Show()
+	}
 	// Last, and in every state, because it answers what can be written rather
 	// than anything about what is written. Closed until somebody opens it, and
 	// it stays open through the next answer because it is the same widget put
-	// back rather than a new one built.
+	// back rather than a new one built. It stays in THIS pane because this one
+	// scrolls, which is what an open list of seventeen names needs.
 	v.answerBox.Add(v.generators.OnScreen())
 	v.answerBox.Refresh()
 	// The bar says what a run would do now, so it moves with every answer.
@@ -379,7 +469,9 @@ func (v *View) drawWillNotDo() {
 	if len(v.answer.Sample.Notes) == 0 {
 		return
 	}
-	v.answerBox.Add(widget.NewSeparator())
+	// No rule of its own is added here any more. The heading carries one under
+	// itself since 2026-09-08, and a rule above plus a rule below draws a box
+	// around the two words rather than separating anything.
 	v.answerBox.Add(heading(v.text.T(i18n.RecipeWillNotDo) + " (" +
 		strconv.Itoa(len(v.answer.Sample.Notes)) + ")"))
 	for _, note := range v.answer.Sample.Notes {
@@ -443,7 +535,6 @@ func (v *View) drawUnchecked() {
 	if !v.checked || len(v.answer.Report.Unchecked) == 0 {
 		return
 	}
-	v.answerBox.Add(widget.NewSeparator())
 	v.answerBox.Add(heading(v.text.T(i18n.RecipeUnchecked) + " (" +
 		strconv.Itoa(len(v.answer.Report.Unchecked)) + ")"))
 	for _, skipped := range v.answer.Report.Unchecked {

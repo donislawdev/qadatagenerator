@@ -1,12 +1,15 @@
 package about
 
 import (
+	"encoding/json"
+	"os"
 	"regexp"
 	"strings"
 	"testing"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
@@ -14,6 +17,16 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/license"
 	"github.com/donislawdev/qadatagenerator/internal/version"
 )
+
+// TestMain starts an application, because a control laid out without one is a
+// nil dereference rather than a quiet no operation. This screen carried none
+// until 2026-09-08, when it gained its first control: everything on it before
+// that was a label, and a label does not ask the running application how wide
+// it is.
+func TestMain(m *testing.M) {
+	test.NewApp()
+	os.Exit(m.Run())
+}
 
 // texts walks the built screen and collects every string a person would read.
 //
@@ -44,7 +57,7 @@ func texts(object fyne.CanvasObject) []string {
 
 func screen(t *testing.T) []string {
 	t.Helper()
-	return texts(Content(i18n.English, license.Current(), version.Current()))
+	return texts(Content(i18n.English, license.Current(), version.Current(), nil))
 }
 
 func has(all []string, want string) bool {
@@ -148,8 +161,87 @@ func TestNoLabelRendersAsItsOwnKey(t *testing.T) {
 // show an empty space, which reads as a layout fault.
 func TestAnEmptyRegisterIsStatedRatherThanLeftBlank(t *testing.T) {
 	empty := license.Report{}
-	all := texts(Content(i18n.English, empty, version.Current()))
+	all := texts(Content(i18n.English, empty, version.Current(), nil))
 	if !has(all, i18n.English.T(i18n.AboutEmptyComponents)) {
 		t.Error("a build with no linked module shows nothing where the sentence saying so belongs")
+	}
+}
+
+// buttons walks the built screen and collects every control on it.
+func buttons(object fyne.CanvasObject) []*parts.Button {
+	switch typed := object.(type) {
+	case *parts.Button:
+		return []*parts.Button{typed}
+	case *fyne.Container:
+		var found []*parts.Button
+		for _, child := range typed.Objects {
+			found = append(found, buttons(child)...)
+		}
+		return found
+	case *container.Scroll:
+		return buttons(typed.Content)
+	case *parts.KeyScroll:
+		return buttons(typed.Content)
+	case *container.ThemeOverride:
+		// A control is handed to a layout wrapped, never bare: the toolkit
+		// floods a focused one with the focus colour and the label on it has to
+		// change colour to stay readable, which only a container can answer
+		// for. A walk that stops at this type finds nothing and says the screen
+		// has no controls, which is a green answer about an empty room.
+		return buttons(typed.Content)
+	}
+	return nil
+}
+
+// The screen offers the report in the form a machine reads.
+//
+// 🔴 This is the test the parity register names for --json, and naming one is
+// the register's own condition: a claim that the window can do something, with
+// no test behind it, is a sentence rather than a guarantee. DEC-30 names the
+// reader and it is a compliance department, whose tool reads documents rather
+// than paragraphs, so showing the same facts on screen answers nobody.
+//
+// What is checked is that the bytes are the report, not merely that a button
+// exists. A button writing an empty file would satisfy every weaker version of
+// this and hand a scanner nothing.
+func TestTheScreenOffersTheReportInTheFormAMachineReads(t *testing.T) {
+	var written []byte
+	screen := Content(i18n.English, license.Current(), version.Current(),
+		func(contents []byte) { written = contents })
+
+	var save *parts.Button
+	for _, button := range buttons(screen) {
+		if button.Text == i18n.English.T(i18n.AboutSaveJSON) {
+			save = button
+		}
+	}
+	if save == nil {
+		t.Fatalf("no control on this screen offers the report as JSON, so the reader named in "+
+			"DEC-30 has nothing to read. The label looked for was %q",
+			i18n.English.T(i18n.AboutSaveJSON))
+	}
+	save.OnTapped()
+
+	var read license.Report
+	if err := json.Unmarshal(written, &read); err != nil {
+		t.Fatalf("what the button wrote is not JSON: %v", err)
+	}
+	if read.Tool != license.Current().Tool || read.Code.License != license.Current().Code.License {
+		t.Errorf("the file says tool %q under %q and this build is %q under %q, so the report "+
+			"describes something other than what produced it",
+			read.Tool, read.Code.License, license.Current().Tool, license.Current().Code.License)
+	}
+}
+
+// A screen with no way to write says so by being unable to be pressed.
+//
+// A control that does nothing is a promise, and this one is handed nothing to
+// do whenever the screen is being rendered rather than shown.
+func TestWithNoWayToWriteTheControlIsNotPressable(t *testing.T) {
+	for _, button := range buttons(Content(i18n.English, license.Current(), version.Current(), nil)) {
+		if button.Text == i18n.English.T(i18n.AboutSaveJSON) && !button.Disabled() {
+			t.Error("the control offering the report can be pressed on a screen with no way to " +
+				"write, so pressing it does nothing and says nothing")
+		}
 	}
 }

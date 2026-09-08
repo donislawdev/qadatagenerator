@@ -1,124 +1,148 @@
 <canvas padded size="1342x900">
 	<content>
 		<container pos="8,8" size="1326x884">
-			<container size="220x884">
+			<container size="232x884">
 				<container size="220x884">
-					<container size="220x28">
-						<widget size="220x28" type="*container.ThemeOverride">
-							<container size="220x28">
-								<widget size="220x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="220x28"/>
-									<rectangle size="220x28"/>
-									<widget pos="86,4" size="46x19" type="*widget.RichText">
-										<text alignment="center" bold size="46x19">Recipe</text>
-									</widget>
-								</widget>
-							</container>
+					<container size="220x884">
+						<widget size="220x22" type="*widget.RichText">
+							<text color="disabled" pos="4,4" size="59x14" textSize="11">MAKE DATA</text>
 						</widget>
-						<container size="220x28">
-							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						<container pos="0,30" size="220x28">
+							<widget size="220x28" type="*container.ThemeOverride">
+								<container size="220x28">
+									<widget size="220x28" type="*parts.Button">
+										<rectangle radius="5" size="220x28"/>
+										<rectangle size="220x28"/>
+										<widget pos="4,4" size="82x19" type="*widget.RichText">
+											<text alignment="center" bold size="82x19">Quick value</text>
+										</widget>
+									</widget>
+								</container>
+							</widget>
+							<container size="220x28">
+							</container>
 						</container>
-					</container>
-					<container pos="0,36" size="220x28">
-						<widget size="220x28" type="*container.ThemeOverride">
-							<container size="220x28">
-								<widget size="220x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="220x28"/>
-									<rectangle size="220x28"/>
-									<widget pos="64,4" size="118x20" type="*widget.RichText">
-										<text alignment="center" bold size="118x19">Take and corrupt</text>
+						<container pos="0,66" size="220x28">
+							<widget size="220x28" type="*container.ThemeOverride">
+								<container size="220x28">
+									<widget size="220x28" type="*parts.Button">
+										<rectangle radius="5" size="220x28"/>
+										<rectangle size="220x28"/>
+										<widget pos="32,4" size="118x20" type="*widget.RichText">
+											<text alignment="center" bold size="118x19">Take and corrupt</text>
+										</widget>
+										<image fillMode="contain" pos="4,4" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
 									</widget>
-									<image fillMode="contain" pos="36,4" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
-								</widget>
+								</container>
+							</widget>
+							<container size="220x28">
 							</container>
-						</widget>
-						<container size="220x28">
-							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
 						</container>
-					</container>
-					<container pos="0,72" size="220x28">
-						<widget size="220x28" type="*container.ThemeOverride">
-							<container size="220x28">
-								<widget size="220x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="220x28"/>
-									<rectangle size="220x28"/>
-									<widget pos="48,4" size="122x19" type="*widget.RichText">
-										<text alignment="center" bold size="122x19">Manifest browser</text>
+						<container pos="0,102" size="220x28">
+							<widget size="220x28" type="*container.ThemeOverride">
+								<container size="220x28">
+									<widget size="220x28" type="*parts.Button">
+										<rectangle radius="5" size="220x28"/>
+										<rectangle size="220x28"/>
+										<widget pos="4,4" size="46x19" type="*widget.RichText">
+											<text alignment="center" bold size="46x19">Recipe</text>
+										</widget>
 									</widget>
-								</widget>
+								</container>
+							</widget>
+							<container size="220x28">
 							</container>
-						</widget>
-						<container size="220x28">
-							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
 						</container>
-					</container>
-					<container pos="0,108" size="220x28">
-						<widget size="220x28" type="*container.ThemeOverride">
-							<container size="220x28">
-								<widget size="220x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="220x28"/>
-									<rectangle size="220x28"/>
-									<widget pos="88,4" size="42x19" type="*widget.RichText">
-										<text alignment="center" bold size="42x19">About</text>
-									</widget>
-								</widget>
-							</container>
+						<widget pos="0,138" size="220x22" type="*widget.RichText">
+							<text color="disabled" pos="4,4" size="86x14" textSize="11">CHECK A RESULT</text>
 						</widget>
-						<container size="220x28">
-							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						<container pos="0,169" size="220x28">
+							<widget size="220x28" type="*container.ThemeOverride">
+								<container size="220x28">
+									<widget size="220x28" type="*parts.Button">
+										<rectangle radius="5" size="220x28"/>
+										<rectangle size="220x28"/>
+										<widget pos="4,4" size="122x19" type="*widget.RichText">
+											<text alignment="center" bold size="122x19">Manifest browser</text>
+										</widget>
+									</widget>
+								</container>
+							</widget>
+							<container size="220x28">
+							</container>
 						</container>
-					</container>
-					<container pos="0,144" size="220x28">
-						<widget size="220x28" type="*container.ThemeOverride">
-							<container size="220x28">
-								<widget size="220x28" type="*parts.Button">
-									<rectangle fillColor="button" radius="5" size="220x28"/>
-									<rectangle size="220x28"/>
-									<widget pos="68,4" size="82x19" type="*widget.RichText">
-										<text alignment="center" bold size="82x19">Quick value</text>
-									</widget>
-								</widget>
-							</container>
+						<spacer pos="0,205" size="220x638"/>
+						<widget pos="0,844" size="220x4" type="*widget.Separator">
+							<rectangle fillColor="separator" size="220x4"/>
 						</widget>
-						<container size="220x28">
-							<rectangle pos="1,1" radius="5" size="218x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+						<container pos="0,856" size="220x28">
+							<widget size="220x28" type="*container.ThemeOverride">
+								<container size="220x28">
+									<widget size="220x28" type="*parts.Button">
+										<rectangle radius="5" size="220x28"/>
+										<rectangle size="220x28"/>
+										<widget pos="4,4" size="42x19" type="*widget.RichText">
+											<text alignment="center" bold size="42x19">About</text>
+										</widget>
+									</widget>
+								</container>
+							</widget>
+							<container size="220x28">
+							</container>
 						</container>
 					</container>
 				</container>
+				<widget pos="228,0" size="4x884" type="*widget.Separator">
+					<rectangle fillColor="separator" size="4x884"/>
+				</widget>
 			</container>
-			<container pos="228,0" size="1098x884">
-				<container size="1098x884">
-					<container pos="24,24" size="1050x836">
-						<container size="1050x346">
-							<container size="1050x28">
-								<container size="96x28">
-									<widget size="96x28" type="*container.ThemeOverride">
-										<container size="96x28">
-											<widget size="96x28" type="*parts.Button">
-												<rectangle fillColor="button" radius="5" size="96x28"/>
-												<rectangle size="96x28"/>
-												<widget pos="4,4" size="88x19" type="*widget.RichText">
-													<text alignment="center" bold size="88x19">Choose a file</text>
-												</widget>
-											</widget>
-										</container>
+			<container pos="240,0" size="1086x884">
+				<container size="1086x56">
+					<widget pos="24,24" size="1038x32" type="*widget.Label">
+						<widget size="1038x32" type="*widget.RichText">
+							<text bold pos="4,4" size="152x24" textSize="18">Take and corrupt</text>
+						</widget>
+					</widget>
+				</container>
+				<container pos="0,64" size="1086x819">
+					<container size="1086x819">
+						<container pos="24,24" size="1038x771">
+							<container size="1038x362">
+								<widget size="1038x141" type="*widget.Label">
+									<widget size="1038x141" type="*widget.RichText">
+										<text color="disabled" pos="4,4" size="918x19">See how your import behaves when the data is not perfect. The file you choose is never changed, and the damaged copy is written beside it.</text>
 									</widget>
+								</widget>
+								<container pos="0,149" size="1038x28">
 									<container size="96x28">
-										<rectangle pos="1,1" radius="5" size="94x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+										<widget size="96x28" type="*container.ThemeOverride">
+											<container size="96x28">
+												<widget size="96x28" type="*parts.Button">
+													<rectangle fillColor="button" radius="5" size="96x28"/>
+													<rectangle size="96x28"/>
+													<widget pos="4,4" size="88x19" type="*widget.RichText">
+														<text alignment="center" bold size="88x19">Choose a file</text>
+													</widget>
+												</widget>
+											</container>
+										</widget>
+										<container size="96x28">
+											<rectangle pos="1,1" radius="5" size="94x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+										</container>
 									</container>
 								</container>
-							</container>
-							<container pos="0,36" size="1050x310">
-								<widget size="1050x217" type="*widget.Label">
-									<widget size="1050x217" type="*widget.RichText">
-										<text pos="4,4" size="758x19">Choose a file this tool did not make. Nothing is read until you choose one, and nothing is written until you ask for it.</text>
+								<container pos="0,185" size="1038x176">
+									<widget size="1038x122" type="*widget.Label">
+										<widget size="1038x122" type="*widget.RichText">
+											<text pos="4,4" size="758x19">Choose a file this tool did not make. Nothing is read until you choose one, and nothing is written until you ask for it.</text>
+										</widget>
 									</widget>
-								</widget>
-								<widget pos="0,225" size="1050x84" type="*widget.Label">
-									<widget size="1050x84" type="*widget.RichText">
-										<text pos="4,4" size="271x19">You can also drop a file onto this window.</text>
+									<widget pos="0,130" size="1038x46" type="*widget.Label">
+										<widget size="1038x46" type="*widget.RichText">
+											<text pos="4,4" size="271x19">You can also drop a file onto this window.</text>
+										</widget>
 									</widget>
-								</widget>
+								</container>
 							</container>
 						</container>
 					</container>

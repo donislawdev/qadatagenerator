@@ -3,6 +3,8 @@ package recipeview
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
+
+	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 )
 
 // The three shapes of text this screen writes. They are here rather than
@@ -23,9 +25,15 @@ func sentence(words string) fyne.CanvasObject {
 	return label
 }
 
-// heading names the part of the answer under it.
+// heading names the part of the answer under it, with the rule the accepted
+// drawing puts under a section.
+//
+// The rule is what separates the verdict from the preview and the preview from
+// what was not looked at. Before 2026-09-08 these were bold text and the parts
+// of the answer ran together, which matters here more than elsewhere because
+// this pane can hold four of them at once.
 func heading(words string) fyne.CanvasObject {
-	return widget.NewLabelWithStyle(words, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	return parts.Section(words)
 }
 
 // detail is what hangs under a problem: what would have been accepted, what to

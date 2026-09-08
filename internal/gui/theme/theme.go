@@ -133,6 +133,8 @@ var Palette = []Color{
 	{"control.chosen", 0x9E, 0xD8, 0xF0, RoleSurface, "a control that has been chosen, and the border of a text field the keyboard is in"},
 	{"border.active", 0x6E, 0x6E, 0x6E, RoleSurface, "the border of the active control"},
 	{"control.outline", 0x72, 0x72, 0x72, RoleSurface, "the edge of a button, which is the only thing saying a button is a control rather than a word"},
+	{"action.primary", 0x8A, 0x8A, 0x8A, RoleSurface, "the fill of the one action a screen is for, which is the only thing carrying hierarchy once elevation and hue were both measured unavailable here"},
+	{"text.on-primary", 0x1B, 0x1B, 0x1B, RoleOnFill, "the label on that fill, which is the same ink as text.on-focus read on a different fill and so a different measurement"},
 	{"row.divider", 0x3A, 0x3A, 0x3A, RoleAuxiliary, "the line between rows, which stands in for the zebra stripe that was measured not to work here"},
 	{"row.hover", 0x30, 0x30, 0x30, RoleAuxiliary, "the row under the pointer"},
 	{"row.selected", 0x38, 0x50, 0x6B, RoleAuxiliary, "the selected row"},
@@ -160,7 +162,8 @@ var Palette = []Color{
 // decision. So the label is read on the focus colour and has to be measured
 // there.
 var MeasuredAgainst = map[string]string{
-	NameTextOnFocus: NameFocus,
+	NameTextOnFocus:   NameFocus,
+	NameTextOnPrimary: NameActionPrimary,
 }
 
 // The names a view refers to its values by.
@@ -183,6 +186,8 @@ const (
 	NameControlChosen  = "control.chosen"
 	NameBorderActive   = "border.active"
 	NameControlOutline = "control.outline"
+	NameActionPrimary  = "action.primary"
+	NameTextOnPrimary  = "text.on-primary"
 	NameRowDivider     = "row.divider"
 	NameRowHover       = "row.hover"
 	NameRowSelected    = "row.selected"
@@ -200,6 +205,7 @@ var ColorNames = []string{
 	NameSurface, NameText, NameTextSubdued, NameRejection, NameAcceptance,
 	NameWarning, NameNotApplied, NameCorrupted, NameFocus, NameTextOnFocus,
 	NameControlChosen, NameBorderActive, NameControlOutline,
+	NameActionPrimary, NameTextOnPrimary,
 	NameRowDivider, NameRowHover, NameRowSelected,
 }
 
@@ -324,17 +330,35 @@ const OutlineInset float32 = BorderThickness / 2
 //
 // # Why these two numbers
 //
-// They are a choice with a reason rather than a measurement, and are written
-// as such. The width fits the longest line the About screen has, which is a
-// module path beside its version, without wrapping it. The height shows two
-// sections at once, so that the first thing a person sees is that the screen
-// continues rather than a single heading that looks like the whole window.
+// They stood at 900 by 700 from the first window until 2026-09-08, chosen so
+// that the About screen fits a module path beside its version without
+// wrapping. The comment there recorded what would change them: the first
+// screen whose natural content is wider. That screen arrived, so they changed.
 //
-// What would change them: the first screen whose natural content is wider, or
-// a measurement on a display where this is too large to open comfortably.
+// # Why 1120 by 780, which is arithmetic rather than taste
+//
+// A settings column puts a label beside the control it names. At 900, with a
+// sidebar of 220 and a margin of 24 on each side, the content is 616 wide, two
+// columns are 292 each, and a label of 140 plus a gap of 16 leaves 136 for the
+// control itself. A directory path does not fit in 136. Asking instead for a
+// control of 220 puts the column at 376, the content at 784 and the window at
+// 1084, so 1120 is the first round number above it. The height follows the
+// same screen: Take and corrupt shows the kinds of damage, the settings and
+// what the run would do, and 780 is where the primary action stops falling
+// below the fold.
+//
+// Two ways out were measured and rejected in DEC-225. Putting the label above
+// the control frees the full 292 at 900, and doubles the height of every row
+// on a screen that already does not fit vertically, so it moves the problem
+// rather than solving it. A layout that folds two columns into one below a
+// threshold is the best answer for a person on a small display and the most
+// expensive to build, and it waits for someone who actually has one.
+//
+// What would change them again: a measurement on a display where this is too
+// large to open comfortably, which is the case the folding layout is for.
 const (
-	StartWidth  float32 = 900
-	StartHeight float32 = 700
+	StartWidth  float32 = 1120
+	StartHeight float32 = 780
 )
 
 // SidebarWidth is how wide the column naming the screens is.

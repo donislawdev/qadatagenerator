@@ -50,7 +50,7 @@ func screenWaitingOnAFile(t *testing.T, window fyne.Window) (*View, *heldReads, 
 	reads, runs := &heldReads{}, &held{}
 	view := New(i18n.English, window, described, take.Open, background.Work{
 		Run: runs.background, Read: reads.read,
-	})
+	}, nil)
 	view.Content()
 	return view, reads, runs
 }
