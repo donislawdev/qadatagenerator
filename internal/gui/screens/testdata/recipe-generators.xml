@@ -152,9 +152,9 @@
 									<rectangle fillColor="foreground" pos="0,342" size="4x32"/>
 								</widget>
 								<container pos="521,0" size="516x717">
-									<container size="516x343">
-										<rectangle size="516x343" strokeWidth="2"/>
-										<widget size="516x343" type="*parts.KeyScroll">
+									<container size="516x250">
+										<rectangle size="516x250" strokeWidth="2"/>
+										<widget size="516x250" type="*parts.KeyScroll">
 											<container size="516x849">
 												<widget size="516x46" type="*widget.Label">
 													<widget size="516x46" type="*widget.RichText">
@@ -294,146 +294,150 @@
 													</container>
 												</container>
 											</container>
-											<widget pos="0,343" size="516x0" type="*widget.Shadow">
+											<widget pos="0,250" size="516x0" type="*widget.Shadow">
 												<linearGradient endColor="shadow" pos="0,-8" size="516x8"/>
 											</widget>
-											<widget pos="510,0" size="6x343" type="*widget.scrollBarArea">
-												<widget pos="3,0" size="3x138" type="*widget.scrollBar">
-													<rectangle fillColor="scrollbar" radius="3" size="3x138"/>
+											<widget pos="510,0" size="6x250" type="*widget.scrollBarArea">
+												<widget pos="3,0" size="3x73" type="*widget.scrollBar">
+													<rectangle fillColor="scrollbar" radius="3" size="3x73"/>
 												</widget>
 											</widget>
 										</widget>
 									</container>
-									<container pos="0,351" size="516x365">
-										<container size="516x39">
-											<widget size="516x27" type="*widget.Label">
-												<widget size="516x27" type="*widget.RichText">
-													<text bold pos="4,4" size="32x19">Save</text>
-												</widget>
-											</widget>
-											<widget pos="0,35" size="516x4" type="*widget.Separator">
-												<rectangle fillColor="separator" size="516x4"/>
-											</widget>
-										</container>
-										<container pos="0,47" size="516x118">
-											<container size="516x28">
-												<widget pos="68,0" size="369x28" type="*widget.Entry">
-													<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="365x24"/>
-													<rectangle pos="1,1" radius="5" size="366x25" strokeColor="inputBorder" strokeWidth="2"/>
-													<widget pos="0,2" size="369x24" type="*widget.Scroll">
-														<widget size="369x24" type="*widget.entryContent">
-															<widget size="369x24" type="*widget.RichText">
-																<text color="disabled" pos="4,2" size="151x19">Choose or paste a path</text>
+									<container pos="0,258" size="516x458">
+										<container size="516x209">
+											<rectangle fillColor="background" radius="5" size="516x209" strokeColor="separator" strokeWidth="2"/>
+											<container size="516x209">
+												<container pos="0,68" size="516x141">
+													<container pos="12,12" size="492x117">
+														<container size="492x28">
+															<widget pos="68,0" size="345x28" type="*widget.Entry">
+																<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="341x24"/>
+																<rectangle pos="1,1" radius="5" size="342x25" strokeColor="inputBorder" strokeWidth="2"/>
+																<widget pos="0,2" size="345x24" type="*widget.Scroll">
+																	<widget size="345x24" type="*widget.entryContent">
+																		<widget size="345x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,2" size="151x19">Choose or paste a path</text>
+																		</widget>
+																		<widget size="345x24" type="*widget.RichText">
+																			<text pos="4,2" size="0x19"></text>
+																		</widget>
+																	</widget>
+																</widget>
 															</widget>
-															<widget size="369x24" type="*widget.RichText">
-																<text pos="4,2" size="0x19"></text>
+															<widget size="60x28" type="*widget.Label">
+																<widget size="60x28" type="*widget.RichText">
+																	<text pos="4,4" size="52x19">Write to</text>
+																</widget>
+															</widget>
+															<container pos="421,0" size="70x28">
+																<widget size="70x28" type="*container.ThemeOverride">
+																	<container size="70x28">
+																		<widget size="70x28" type="*parts.Button">
+																			<rectangle fillColor="button" radius="5" size="70x28"/>
+																			<rectangle size="70x28"/>
+																			<widget pos="4,4" size="62x19" type="*widget.RichText">
+																				<text alignment="center" bold size="62x19">Choose...</text>
+																			</widget>
+																		</widget>
+																	</container>
+																</widget>
+																<container size="70x28">
+																	<rectangle pos="1,1" radius="5" size="68x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+																</container>
+															</container>
+														</container>
+														<container pos="0,36" size="492x27">
+															<widget pos="208,0" size="108x27" type="*widget.Label">
+																<widget size="108x27" type="*widget.RichText">
+																	<text pos="4,4" size="0x19"></text>
+																</widget>
+															</widget>
+															<widget size="200x27" type="*widget.Check">
+																<circle pos="2,1" size="24x24"/>
+																<image pos="4,3" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
+																<image pos="4,3" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
+																<text pos="28,0" size="172x27">Replace files already there</text>
+															</widget>
+															<widget pos="324,0" size="167x27" type="*parts.PrimaryButton">
+																<rectangle radius="5" size="167x27"/>
+																<rectangle pos="2,2" radius="3" size="163x23" strokeWidth="2"/>
+																<text alignment="center" bold color="disabled" pos="0,4" size="167x19">Generate this dataset</text>
+															</widget>
+														</container>
+														<container pos="0,71" size="492x46">
+															<widget size="492x46" type="*widget.Label">
+																<widget size="492x46" type="*widget.RichText">
+																	<text pos="4,4" size="404x19">Write a recipe above, and this button writes what it describes.</text>
+																</widget>
+															</widget>
+														</container>
+													</container>
+												</container>
+												<container size="516x60">
+													<container size="516x51">
+														<widget pos="12,12" size="492x27" type="*widget.Label">
+															<widget size="492x27" type="*widget.RichText">
+																<text bold pos="4,4" size="32x19">Save</text>
 															</widget>
 														</widget>
-													</widget>
-												</widget>
-												<widget size="60x28" type="*widget.Label">
-													<widget size="60x28" type="*widget.RichText">
-														<text pos="4,4" size="52x19">Write to</text>
-													</widget>
-												</widget>
-												<container pos="445,0" size="70x28">
-													<widget size="70x28" type="*container.ThemeOverride">
-														<container size="70x28">
-															<widget size="70x28" type="*parts.Button">
-																<rectangle fillColor="button" radius="5" size="70x28"/>
-																<rectangle size="70x28"/>
-																<widget pos="4,4" size="62x19" type="*widget.RichText">
-																	<text alignment="center" bold size="62x19">Choose...</text>
-																</widget>
-															</widget>
-														</container>
-													</widget>
-													<container size="70x28">
-														<rectangle pos="1,1" radius="5" size="68x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
 													</container>
+													<rectangle fillColor="separator" pos="0,59" size="516x1"/>
 												</container>
-											</container>
-											<container pos="0,36" size="516x28">
-												<widget pos="208,0" size="140x28" type="*widget.Label">
-													<widget size="140x28" type="*widget.RichText">
-														<text pos="4,4" size="0x19"></text>
-													</widget>
-												</widget>
-												<widget size="200x28" type="*widget.Check">
-													<circle pos="2,2" size="24x24"/>
-													<image pos="4,4" rsc="checkButtonFillIcon" size="iconInlineSize" themed="inputBackground"/>
-													<image pos="4,4" rsc="checkButtonIcon" size="iconInlineSize" themed="inputBorder"/>
-													<text pos="28,0" size="172x28">Replace files already there</text>
-												</widget>
-												<container pos="356,0" size="159x28">
-													<widget size="159x28" type="*container.ThemeOverride">
-														<container size="159x28">
-															<widget size="159x28" type="*parts.Button">
-																<rectangle fillColor="button" radius="5" size="159x28"/>
-																<rectangle size="159x28"/>
-																<widget pos="4,4" size="151x19" type="*widget.RichText">
-																	<text alignment="center" bold color="disabled" size="151x19">Generate this dataset</text>
-																</widget>
-															</widget>
-														</container>
-													</widget>
-													<container size="159x28">
-													</container>
-												</container>
-											</container>
-											<container pos="0,72" size="516x46">
-												<widget size="516x46" type="*widget.Label">
-													<widget size="516x46" type="*widget.RichText">
-														<text pos="4,4" size="404x19">Write a recipe above, and this button writes what it describes.</text>
-													</widget>
-												</widget>
 											</container>
 										</container>
-										<container pos="0,173" size="516x192">
-											<container size="516x39">
-												<widget size="516x27" type="*widget.Label">
-													<widget size="516x27" type="*widget.RichText">
-														<text bold pos="4,4" size="160x19">The same in a terminal</text>
-													</widget>
-												</widget>
-												<widget pos="0,35" size="516x4" type="*widget.Separator">
-													<rectangle fillColor="separator" size="516x4"/>
-												</widget>
-											</container>
-											<container pos="0,47" size="516x48">
-												<rectangle fillColor="background" radius="5" size="516x48" strokeColor="separator" strokeWidth="2"/>
-												<container size="516x48">
-													<widget pos="12,12" size="492x24" type="*widget.Label">
-														<widget size="492x24" type="*widget.RichText">
-															<text monospace pos="4,4" size="252x16">qadg generate your-recipe.yaml</text>
-														</widget>
-													</widget>
-												</container>
-											</container>
-											<container pos="0,103" size="516x28">
-												<container size="115x28">
-													<widget size="115x28" type="*container.ThemeOverride">
-														<container size="115x28">
-															<widget size="115x28" type="*parts.Button">
-																<rectangle fillColor="button" radius="5" size="115x28"/>
-																<rectangle size="115x28"/>
-																<widget pos="4,4" size="107x19" type="*widget.RichText">
-																	<text alignment="center" bold color="disabled" size="107x19">Copy command</text>
+										<container pos="0,221" size="516x237">
+											<rectangle fillColor="background" radius="5" size="516x237" strokeColor="separator" strokeWidth="2"/>
+											<container size="516x237">
+												<container pos="0,68" size="516x169">
+													<container pos="12,12" size="492x145">
+														<container size="492x48">
+															<rectangle fillColor="background" radius="5" size="492x48" strokeColor="separator" strokeWidth="2"/>
+															<container size="492x48">
+																<widget pos="12,12" size="468x24" type="*widget.Label">
+																	<widget size="468x24" type="*widget.RichText">
+																		<text monospace pos="4,4" size="252x16">qadg generate your-recipe.yaml</text>
+																	</widget>
 																</widget>
-															</widget>
+															</container>
 														</container>
-													</widget>
-													<container size="115x28">
+														<container pos="0,56" size="492x28">
+															<container size="115x28">
+																<widget size="115x28" type="*container.ThemeOverride">
+																	<container size="115x28">
+																		<widget size="115x28" type="*parts.Button">
+																			<rectangle fillColor="button" radius="5" size="115x28"/>
+																			<rectangle size="115x28"/>
+																			<widget pos="4,4" size="107x19" type="*widget.RichText">
+																				<text alignment="center" bold color="disabled" size="107x19">Copy command</text>
+																			</widget>
+																		</widget>
+																	</container>
+																</widget>
+																<container size="115x28">
+																</container>
+															</container>
+															<spacer pos="123,0" size="376x28"/>
+														</container>
+														<widget pos="0,92" size="492x52" type="*widget.Label">
+															<widget size="492x52" type="*widget.RichText">
+																<text color="disabled" pos="4,4" size="461x14" textSize="11">The file name above is an example. This window does not write the recipe file, so save the</text>
+																<text color="disabled" pos="4,18" size="303x14" textSize="11">recipe beside your tests and use its name in the command.</text>
+															</widget>
+														</widget>
 													</container>
 												</container>
-												<spacer pos="123,0" size="400x28"/>
+												<container size="516x60">
+													<container size="516x51">
+														<widget pos="12,12" size="492x27" type="*widget.Label">
+															<widget size="492x27" type="*widget.RichText">
+																<text bold pos="4,4" size="160x19">The same in a terminal</text>
+															</widget>
+														</widget>
+													</container>
+													<rectangle fillColor="separator" pos="0,59" size="516x1"/>
+												</container>
 											</container>
-											<widget pos="0,139" size="516x52" type="*widget.Label">
-												<widget size="516x52" type="*widget.RichText">
-													<text color="disabled" pos="4,4" size="495x14" textSize="11">The file name above is an example. This window does not write the recipe file, so save the recipe</text>
-													<text color="disabled" pos="4,18" size="269x14" textSize="11">beside your tests and use its name in the command.</text>
-												</widget>
-											</widget>
 										</container>
 									</container>
 								</container>

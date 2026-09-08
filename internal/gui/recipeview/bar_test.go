@@ -79,17 +79,17 @@ func TestADisabledButtonSaysWhichOfTheThreeThingsIsMissing(t *testing.T) {
 		background.Work{Read: background.ReadHere, Produce: produceHere}, nil)
 	view.Content()
 
-	if drawn := rendered(t, view); !strings.Contains(drawn, i18n.English.T(i18n.RecipeNeedRecipe)) {
+	if drawn := spoken(rendered(t, view)); !strings.Contains(drawn, i18n.English.T(i18n.RecipeNeedRecipe)) {
 		t.Error("an empty screen does not say that a recipe comes first")
 	}
 
 	view.SetRecipe(screens.BrokenRecipe)
-	if drawn := rendered(t, view); !strings.Contains(drawn, i18n.English.T(i18n.RecipeNeedFix)) {
+	if drawn := spoken(rendered(t, view)); !strings.Contains(drawn, i18n.English.T(i18n.RecipeNeedFix)) {
 		t.Error("a recipe with problems does not say that they come first")
 	}
 
 	view.SetRecipe(screens.CleanRecipe)
-	if drawn := rendered(t, view); !strings.Contains(drawn, i18n.English.T(i18n.RecipeNeedDirectory)) {
+	if drawn := spoken(rendered(t, view)); !strings.Contains(drawn, i18n.English.T(i18n.RecipeNeedDirectory)) {
 		t.Error("a screen with nowhere to write does not say so")
 	}
 

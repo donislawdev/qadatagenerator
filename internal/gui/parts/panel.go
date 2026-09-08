@@ -38,6 +38,22 @@ import (
 // stale when the toolkit moves, and the guard that refuses a rebuilt piece of
 // the toolkit has nothing to object to.
 func Panel(inner fyne.CanvasObject) fyne.CanvasObject {
+	// The text is held off the edge of its own box by the step the scale keeps
+	// for things read together. Without it the words start where the line is,
+	// which reads as text that has overflowed rather than text in a box.
+	room := palette.StepOf(palette.NameStepRelated)
+	padded := container.New(layout.NewCustomPaddedLayout(room, room, room, room), inner)
+	return container.NewStack(boxGround(), padded)
+}
+
+// boxGround is the quieter ground with a line around it that both boxed things
+// in this window stand on.
+//
+// Panel and Card are two different arrangements on ONE surface. Kept apart they
+// would be two rectangles a shade or a radius from each other, and a screen
+// showing both would have the difference read as meaning something. The
+// arrangement is what differs between them and the ground is what does not.
+func boxGround() *canvas.Rectangle {
 	ground := canvas.NewRectangle(palette.Named(palette.NameSurface).NRGBA())
 	ground.StrokeColor = palette.Named(palette.NameRowDivider).NRGBA()
 	ground.StrokeWidth = palette.BorderThickness
@@ -45,10 +61,5 @@ func Panel(inner fyne.CanvasObject) fyne.CanvasObject {
 	// same curve as the fields and the buttons beside it. A radius of our own
 	// would show as one corner disagreeing with every other on the screen.
 	ground.CornerRadius = beneath().Size(toolkit.SizeNameInputRadius)
-	// The text is held off the edge of its own box by the step the scale keeps
-	// for things read together. Without it the words start where the line is,
-	// which reads as text that has overflowed rather than text in a box.
-	room := palette.StepOf(palette.NameStepRelated)
-	padded := container.New(layout.NewCustomPaddedLayout(room, room, room, room), inner)
-	return container.NewStack(ground, padded)
+	return ground
 }

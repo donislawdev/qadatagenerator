@@ -191,9 +191,11 @@ func TestTheScreenSaysThatItIsChecking(t *testing.T) {
 // times over.
 func TestTheDrawnAnswerCarriesThePlaceAndTheLine(t *testing.T) {
 	view := here(t, real(t))
+	// About words, so the spoken line rather than the markup: this sentence
+	// carries a path, a line number and a reason, and it wraps.
 	view.SetRecipe(screens.BrokenRecipe)
 
-	drawn := rendered(t, view)
+	drawn := spoken(rendered(t, view))
 	report, _ := view.Report()
 	found := report.Problems[0]
 	// 🔴 The whole sentence rather than the words of it one at a time. Looked
@@ -270,7 +272,8 @@ func TestACheckThatComesApartIsDrawnAsADefectOfThisBuildRatherThanARefusal(t *te
 
 	view.SetRecipe(screens.CleanRecipe)
 
-	drawn := rendered(t, view)
+	// Four checks and every one of them is about words.
+	drawn := spoken(rendered(t, view))
 	if !strings.Contains(drawn, fault.Crashed) {
 		t.Errorf("the screen does not say the build came apart, so somebody is left "+
 			"looking at a window that answered nothing.\n%s", drawn)

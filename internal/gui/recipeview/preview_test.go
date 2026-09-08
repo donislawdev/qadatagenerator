@@ -80,9 +80,11 @@ func TestAValueIsNotCutWhenItsColumnHasRoomForIt(t *testing.T) {
 func TestATableWithNoRowsIsASentenceRatherThanAnEmptyTable(t *testing.T) {
 	view := here(t, real(t))
 	view.SetRecipe(screens.EmptyRecipe)
+	// Two questions here and each gets its own instrument: whether the screen
+	// SAYS there are no rows, and whether it drew a table anyway.
 	drawn := rendered(t, view)
 
-	if !strings.Contains(drawn, i18n.English.T(i18n.RecipeNoRows)) {
+	if !strings.Contains(spoken(rendered(t, view)), i18n.English.T(i18n.RecipeNoRows)) {
 		t.Error("a table with no rows does not say so")
 	}
 	if strings.Contains(drawn, "parts.KeyTable") {

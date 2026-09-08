@@ -39,7 +39,11 @@ type Write func(recipe []byte, into string, replace bool,
 func (v *View) bar() fyne.CanvasObject {
 	where := container.NewBorder(nil, nil,
 		widget.NewLabel(v.text.T(i18n.RecipeWriteTo)), v.choose.OnScreen(), v.out)
-	buttons := container.NewBorder(nil, nil, v.replace, v.run.OnScreen(), widget.NewLabel(""))
+	// The primary button goes to the layout itself rather than through
+	// OnScreen. OnScreen exists to hand over the container Outlined builds,
+	// and this control draws its own fill and its own focus ring, so there is
+	// no edge beside it to hand over.
+	buttons := container.NewBorder(nil, nil, v.replace, v.run, widget.NewLabel(""))
 	return container.NewVBox(where, buttons, v.status)
 }
 
@@ -59,7 +63,10 @@ func (v *View) buildBar() {
 	v.out.OnChanged = func(string) { v.drawBar() }
 	v.choose = parts.NewButton(v.text.T(i18n.RecipeChooseDir), v.chooseDirectory)
 	v.replace = widget.NewCheck(v.text.T(i18n.RecipeReplace), func(bool) {})
-	v.run = parts.NewButton(v.text.T(i18n.RecipeGenerate), v.Start)
+	// The one action this screen is for, and the only filled button on it. Its
+	// fill stands 4.99 against the window ground, so unlike every outlined
+	// button beside it, it needs nothing added to be found.
+	v.run = parts.NewPrimaryButton(v.text.T(i18n.RecipeGenerate), v.Start)
 	v.status = container.NewVBox()
 }
 

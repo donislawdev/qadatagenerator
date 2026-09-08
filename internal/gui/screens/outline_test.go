@@ -39,6 +39,15 @@ import (
 // without, everything else has one, and a button that quietly loses its edge
 // because somebody set an importance fails here rather than on somebody's
 // screen.
+//
+// # The third case, which this walk cannot see, and where it is held instead
+//
+// parts.PrimaryButton has no edge either, and it never reaches this walk at
+// all: it is handed to a layout bare rather than through the container Outlined
+// builds, so controlDressedIn never finds it. That is deliberate and it is why
+// the guard below exists. A control this one silently passes over is a control
+// the promise in this name is no longer true of, and an exception nobody checks
+// is the same thing as no rule.
 func TestEveryPressableControlDrawsItsOwnEdge(t *testing.T) {
 	data := sampleWithSource(t)
 	want := rgba(palette.Named(palette.NameControlOutline).NRGBA())
@@ -169,4 +178,79 @@ func edgeIn(group *fyne.Container) *canvas.Rectangle {
 		}
 	}
 	return nil
+}
+
+// TestTheFilledActionIsTheNamedExceptionToTheEdgeRule holds the one pressable
+// control that goes without an edge on purpose.
+//
+// # Why it needs a guard of its own rather than a sentence
+//
+// The walk above finds controls by looking for the container Outlined builds.
+// parts.PrimaryButton is handed to a layout bare, so that walk passes over it
+// without a word and stays green whatever happens to it. A rule with an
+// exception nobody checks is a rule that has quietly stopped covering the thing
+// it names, which in this repository has already happened to a register of
+// generators and to a register of guards.
+//
+// # What is actually asked here
+//
+// Two things, and both of them are about the exception rather than about the
+// colour. Whether the slab is painted from the palette is asked next door in
+// parts, where the renderer can be reached.
+//
+//   - that a filled action exists somewhere, because an exception describing
+//     nothing is worth deleting rather than keeping
+//   - that no filled action is ALSO dressed in an outline. The fill is what
+//     makes this control findable, standing 4.99 against the window ground
+//     where 3.0 is asked. An edge around it as well would put two marks on one
+//     control and say that the loudest thing on the screen needed help being
+//     seen.
+func TestTheFilledActionIsTheNamedExceptionToTheEdgeRule(t *testing.T) {
+	data := sampleWithSource(t)
+	slabs := 0
+
+	for _, state := range All() {
+		content := Assemble(i18n.English, data, state)
+
+		walkTree(content, false, func(object fyne.CanvasObject, _ bool) {
+			if _, filled := object.(*parts.PrimaryButton); filled {
+				slabs++
+			}
+		})
+
+		walkTree(content, false, func(object fyne.CanvasObject, _ bool) {
+			group, isGroup := object.(*fyne.Container)
+			if !isGroup {
+				return
+			}
+			// 🔴 Direct children only, and that is the whole correctness of
+			// this check. edgeIn answers about any rectangle among a
+			// container's children or grandchildren, which is exactly right
+			// where it was written, right after a container has been
+			// identified as one Outlined built. Asked of any container at all
+			// it also answers yes for the ground of a Card, and the first
+			// version here did ask that and reported four states that were
+			// perfectly correct. What Outlined actually produces is a stack
+			// holding the control and the edge as SIBLINGS, so that is what is
+			// looked for.
+			var slab *parts.PrimaryButton
+			for _, child := range group.Objects {
+				if filled, is := child.(*parts.PrimaryButton); is {
+					slab = filled
+					break
+				}
+			}
+			if slab == nil || edgeIn(group) == nil {
+				return
+			}
+			t.Errorf("%s: the filled action %q stands beside an outline of its own, "+
+				"so one control carries two marks saying it is a control",
+				state.Name, slab.Text)
+		})
+	}
+
+	if slabs == 0 {
+		t.Error("no filled action stands on any screen, so the exception this file names describes nothing. " +
+			"Either a screen lost its one action or parts.PrimaryButton is unused, and the second is what the palette entry was added to stop")
+	}
 }

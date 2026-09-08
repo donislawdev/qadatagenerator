@@ -33,6 +33,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
+	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/produce"
 )
 
@@ -137,7 +138,7 @@ type View struct {
 	out      *widget.Entry
 	choose   *parts.Button
 	replace  *widget.Check
-	run      *parts.Button
+	run      *parts.PrimaryButton
 	status   *fyne.Container
 	halt     *background.Stopper
 	stopping bool
@@ -275,9 +276,13 @@ func (v *View) writing() fyne.CanvasObject {
 // the terminal line comes last for the reason it comes last everywhere: it
 // answers a question asked after somebody has what they came for.
 func (v *View) reading() fyne.CanvasObject {
-	below := container.NewVBox(
-		parts.Section(v.text.T(i18n.RecipeHeadingSave)),
-		v.bar(),
+	// Two cards rather than two headings with rows under them. Boxed, each
+	// group says where it stops, which is what the pane did not say when it
+	// was read on a window of 1670 by 1210 on 2026-09-08 and nothing separated
+	// the settings that write from the line that would write the same thing in
+	// a terminal.
+	below := parts.Column(palette.NameStepRelated,
+		parts.Card(v.text.T(i18n.RecipeHeadingSave), nil, v.bar()),
 		v.commandContent(),
 	)
 	return container.New(layout.NewBorderLayout(nil, below, nil, nil),

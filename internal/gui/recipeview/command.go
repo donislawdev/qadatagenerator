@@ -57,12 +57,16 @@ func (v *View) buildCommand() {
 // answer it knows to be wrong. Saying which part is the example is what turns a
 // line nobody can run into a line somebody can finish.
 func (v *View) commandContent() fyne.CanvasObject {
-	return container.NewVBox(
-		parts.Section(v.text.T(i18n.CommandHeading)),
+	// The Panel stays inside the Card, which is a box inside a box and is meant
+	// to be. The card says that this group is one thing and names it, and the
+	// panel says that the line inside it is there to be TAKEN rather than read,
+	// which is the same thing a block of code in a page of text says by having
+	// a ground of its own. The two are not saying the same thing twice.
+	return parts.Card(v.text.T(i18n.CommandHeading), nil, container.NewVBox(
 		parts.Panel(v.command),
 		container.NewHBox(v.copyCommand.OnScreen(), layout.NewSpacer()),
 		parts.Detail(v.text.T(i18n.RecipeCommandExample)),
-	)
+	))
 }
 
 // commandLine writes out what a terminal would be asked for.

@@ -78,9 +78,21 @@ func Title(words string) *widget.Label {
 // boxes were turned down in the redesign, so a heading with a line under it is
 // what says where one part of a screen stops and the next begins.
 func Section(words string) fyne.CanvasObject {
+	return container.NewVBox(headingLabel(words), widget.NewSeparator())
+}
+
+// headingLabel is what the words of a heading look like, in one place.
+//
+// Section and Card both name a group and have to name it the same way, and
+// they cannot share the whole heading because they draw the line under it
+// differently: Section draws a separator beneath itself, and Card draws a rule
+// that reaches the edges of the box. Sharing the words alone is what keeps one
+// spelling of a heading rather than two that drift apart the first time either
+// changes.
+func headingLabel(words string) *widget.Label {
 	label := widget.NewLabel(words)
 	label.TextStyle = fyne.TextStyle{Bold: true}
-	return container.NewVBox(label, widget.NewSeparator())
+	return label
 }
 
 // Sentence is a paragraph that follows the width it is given rather than
