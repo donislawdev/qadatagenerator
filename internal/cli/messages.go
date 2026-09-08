@@ -160,9 +160,25 @@ const (
 	problemQuickUnknownRefusalWhy = "the mode refused this request and this surface has no sentence for that refusal, so the reason cannot be shown"
 
 	problemQuickArguments        = "quick takes one generator"
-	problemQuickArgumentsWhy     = "it produces a single value of the kind named, without a recipe and without writing anything"
+	problemQuickArgumentsWhy     = "it produces values of the kind named, without a recipe and without writing anything"
 	problemQuickArgumentsAllowed = "one generator name, such as pesel"
 	problemQuickArgumentsDo      = "qadg quick pesel"
+
+	// The shape of the number and its meaning are refused in different
+	// places, and each says so in its own words. This one is about the text:
+	// it never reached a number at all.
+	problemQuickCountShape    = "not a number of values: "
+	problemQuickCountShapeWhy = "how many values to produce is written as a whole number, in ordinary digits and with nothing around them"
+	problemQuickCountShapeDo  = "qadg quick pesel --count 10"
+
+	problemQuickCountRange    = "more values than this build can count to: "
+	problemQuickCountRangeWhy = "the number given is larger than a whole number this machine holds, so it was never a number of values that could be produced"
+	problemQuickCountRangeDo  = "ask for a number of values a machine could actually write"
+
+	problemQuickCount        = "not a number of values this command takes: "
+	problemQuickCountAllowed = "one or more"
+	problemQuickCountWhy     = "this command answers a request for a value, and a run producing none cannot be told apart from one that failed without printing anything"
+	problemQuickCountDo      = "qadg quick pesel --count 10"
 
 	// quickSeedDrawn goes on the log channel after a run that chose its own
 	// seed, because the value is on the data channel and a pipe must not see
@@ -513,13 +529,14 @@ var commandDocs = []commandDoc{
 	},
 	{
 		name:      commandQuick,
-		summary:   "Produce one value, with no recipe and nothing written.",
+		summary:   "Produce values, with no recipe and nothing written.",
 		arguments: "<generator>",
-		what: "Writes a single value of the kind named and nothing else. It is the only command\n" +
-			"whose runs differ from each other: without a seed it draws a new one every time, so\n" +
-			"asking twice gives two values, and naming a seed makes it repeatable again.",
-		example: "qadg quick pesel --gender female --birth-date 1980-05-05",
+		what: "Writes values of the kind named, one to a line, and nothing else. It is the only\n" +
+			"command whose runs differ from each other: without a seed it draws a new one every\n" +
+			"time, so asking twice gives different values, and naming a seed makes it repeatable.",
+		example: "qadg quick pesel --count 10 --gender female",
 		flags: []flagDoc{
+			{"--count <number>", []string{"--count"}, "How many values to produce, one to a line. They are drawn rather than dealt, so with a short list of data behind them some may repeat."},
 			{"--locale <name>", []string{"--locale"}, "Which locale to draw from. A generator that has no data for it is refused with the reason."},
 			{"--seed <text>", []string{"--seed"}, "Draw from this seed. Without it a fresh one is drawn and named on the log channel."},
 			{"--gender <female|male>", []string{"--gender"}, "The gender the value has to agree with. Refused for a generator that takes no account of it."},

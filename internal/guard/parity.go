@@ -129,6 +129,14 @@ var WindowReach = map[string]Claim{
 			"nothing written anywhere and a button that puts it in the clipboard",
 		Test: "TestChoosingAValueProducesOneAndCopyingItReachesTheClipboard",
 	},
+	"quick --count": {
+		Screen: "how many values to produce, as a list of four rather than a field. The " +
+			"window offers less than the mode accepts, which is the distinction the " +
+			"gender list already makes: what a command line takes and what a screen " +
+			"offers are different questions, and the command shown on the screen " +
+			"carries the number for anybody wanting more",
+		Test: "TestEveryControlOnTheQuickScreenReachesTheValue",
+	},
 	"quick --locale": {
 		Screen: "the data locale, beside the interface language and never the same control, " +
 			"which also decides which values take account of a gender",

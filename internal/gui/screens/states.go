@@ -72,6 +72,13 @@ func quickStates() []State {
 			Quick:  Quick{Generator: "pesel", Seed: "for-the-picture"},
 		},
 		{
+			Name: "quick-many",
+			Purpose: "ten values at once, which is what somebody filling a form over and " +
+				"over actually needs, and the limit that comes with them",
+			Screen: screenQuick,
+			Quick:  Quick{Generator: "pesel", Seed: "for-the-picture", HowMany: "10"},
+		},
+		{
 			Name: "quick-agreed",
 			Purpose: "the same value bound to a gender and a date of birth, which the " +
 				"first six digits and the tenth one carry",
@@ -119,11 +126,18 @@ func quickStatesOfTheKeyboard() []State {
 			Keyboard: Keyboard{Tabs: 6},
 		},
 		{
-			Name:     "quick-focus-copy",
-			Purpose:  "the keyboard on the button that puts the value in the clipboard",
-			Screen:   screenQuick,
-			Quick:    Quick{Generator: "pesel", Seed: "for-the-picture"},
-			Keyboard: Keyboard{Tabs: 11},
+			Name:    "quick-focus-copy",
+			Purpose: "the keyboard on the button that puts the value in the clipboard",
+			Screen:  screenQuick,
+			Quick:   Quick{Generator: "pesel", Seed: "for-the-picture"},
+			// 🔴 Twelve rather than eleven since the count arrived, because the
+			// list of how many stands second and every stop after it moved by
+			// one. Taken from tools/klawiatura rather than counted here: at
+			// eleven the keyboard landed on the seed field, which marks focus
+			// with a border rather than a fill, so the stored tree simply lost
+			// its focus fill and the pattern would have blessed that as the
+			// picture of a focused button.
+			Keyboard: Keyboard{Tabs: 12},
 		},
 	}
 }

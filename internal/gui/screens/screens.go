@@ -74,6 +74,9 @@ type Quick struct {
 	// Seed fixes the value, so a picture of this screen is the same picture
 	// tomorrow.
 	Seed string
+	// HowMany is the count as it is chosen in the list, left empty for a state
+	// that says nothing about it and therefore shows what the screen opens on.
+	HowMany string
 }
 
 // Chosen reports whether this state asks for anything on that screen.
@@ -316,6 +319,9 @@ func settleQuick(screen *quickview.View, asked Quick) {
 	}
 	if asked.Born != "" {
 		screen.SetBorn(asked.Born)
+	}
+	if asked.HowMany != "" {
+		screen.ChooseCount(asked.HowMany)
 	}
 }
 

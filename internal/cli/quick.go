@@ -1,8 +1,10 @@
 package cli
 
 import (
+	"errors"
 	"flag"
 	"io"
+	"strconv"
 	"strings"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
@@ -32,6 +34,10 @@ func runQuick(out *streams, arguments []string, global crossCutting) int {
 	seed := set.String("seed", "", "")
 	gender := set.String("gender", "", "")
 	birthDate := set.String("birth-date", "", "")
+	// A string rather than set.Int, as every other flag of this tool is, so
+	// that a number nobody could read is refused in the four parts this
+	// project writes rather than in the flag package's own one line.
+	count := set.String("count", "1", "")
 
 	// 🔴 The name is taken off the front before the flags are read, and this
 	// is not a stylistic choice. The flag package stops at the first argument
@@ -75,7 +81,46 @@ func runQuick(out *streams, arguments []string, global crossCutting) int {
 		})
 	}
 
-	return writeOneValue(out, *locale, *seed, named, boundBy(set, *gender, *birthDate))
+	wanted, shape := wholeCount(*count)
+	if shape.what != "" {
+		return usage(out, shape)
+	}
+
+	return writeValues(out, *locale, *seed, named, wanted, boundBy(set, *gender, *birthDate))
+}
+
+// wholeCount reads how many values were asked for, and says which way the text
+// failed rather than that it failed.
+//
+// 🔴 # Why only the SHAPE is decided here
+//
+// A count below one is refused too, and not here: it is refused by the mode,
+// which is where the reason lives, so that the window and the command line
+// cannot come to disagree about it. What cannot be asked of the mode is text
+// that never became a number, because the mode takes an int. So this answers
+// "is this a number" and the mode answers "is this a number of values".
+//
+// strconv.Atoi is base ten whatever the digits look like, which matters here
+// for a reason this project has already paid for: a count of 010 in a recipe
+// once produced eight rows, because the reader it went through read a leading
+// nought as octal. Atoi reads 010 as ten, and the guard beside this says so.
+func wholeCount(text string) (int, problem) {
+	number, err := strconv.Atoi(text)
+	if err == nil {
+		return number, problem{}
+	}
+	if errors.Is(err, strconv.ErrRange) {
+		return 0, problem{
+			what:    problemQuickCountRange + text,
+			why:     problemQuickCountRangeWhy,
+			instead: problemQuickCountRangeDo,
+		}
+	}
+	return 0, problem{
+		what:    problemQuickCountShape + text,
+		why:     problemQuickCountShapeWhy,
+		instead: problemQuickCountShapeDo,
+	}
 }
 
 // boundBy is what the two consistency flags said, and nothing for the ones that
@@ -119,6 +164,10 @@ var quickRefusalSays = map[quick.RefusalKind]refusalWords{
 	quick.UnreadableDate: {
 		what: problemQuickDate, why: problemQuickDateWhy,
 		allowed: problemQuickDateAllowed, instead: problemQuickDateDo,
+	},
+	quick.CountNotPositive: {
+		what: problemQuickCount, why: problemQuickCountWhy,
+		allowed: problemQuickCountAllowed, instead: problemQuickCountDo,
 	},
 }
 
@@ -170,7 +219,7 @@ func inLocale(locale string) string {
 // Split from reading the command line above it for the reason every other verb
 // here is split the same way: what was asked for and what is done about it are
 // two things, and the second one is what a test wants to reach.
-func writeOneValue(out *streams, locale, chosenSeed, generator string, agrees map[string]string) int {
+func writeValues(out *streams, locale, chosenSeed, generator string, count int, agrees map[string]string) int {
 	drawn := chosenSeed
 	if drawn == "" {
 		fresh, err := quick.NewSeed()
@@ -180,17 +229,24 @@ func writeOneValue(out *streams, locale, chosenSeed, generator string, agrees ma
 		drawn = fresh
 	}
 
-	asked := quick.Request{Generator: generator, Locale: locale, Seed: drawn, Agrees: agrees}
+	asked := quick.Request{
+		Generator: generator, Locale: locale, Seed: drawn, Agrees: agrees, Count: count,
+	}
 	if refusal := quick.Check(asked); refusal.Refused() {
 		return usage(out, quickRefusalOf(refusal))
 	}
 
-	value, err := quick.Run(asked)
+	produced, err := quick.Run(asked)
 	if err != nil {
 		return fail(out, err)
 	}
 
-	out.emit(value)
+	// One value to a line, and nothing around them. A count, a heading or a
+	// blank line between them would each be something for a pipe to strip, and
+	// this is the one verb whose whole answer is meant to be piped.
+	for _, value := range produced {
+		out.emit(value)
+	}
 	if chosenSeed == "" {
 		// note rather than info, and the difference is the whole point: info is
 		// silent unless somebody asked for progress detail, and this is not

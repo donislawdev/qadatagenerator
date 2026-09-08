@@ -47,11 +47,22 @@ import (
 // that rather than trusting the sentence.
 const Entity = "quick"
 
-// Row and Purpose complete the address. The row is the first one, and the
-// purpose is the one the engine uses for a value.
+// FirstRow and Purpose complete the address. The rows are counted from the
+// first one, and the purpose is the one the engine uses for a value.
+//
+// 🔴 # Why more than one value is a ROW rather than a repeated draw
+//
+// Every value in this tool has an address of four parts, and the row is the
+// part that means "another one of the same kind". Asking the engine twice at
+// the same address would give the same value twice, and drawing from a fresh
+// seed each time would break the promise the seed flag makes. Counting the row
+// up is neither: it is the address a recipe of that many rows would use, so a
+// run of ten here and a recipe of ten rows produce the same ten values, in the
+// same order. The guard beside this package holds that rather than trusting
+// this sentence.
 const (
-	Row     = 0
-	Purpose = "value"
+	FirstRow = 0
+	Purpose  = "value"
 )
 
 // Request is one question.
@@ -68,6 +79,11 @@ type Request struct {
 	// by the role each plays. A role the chosen generator does not read is
 	// refused rather than ignored.
 	Agrees map[string]string
+	// Count is how many values are wanted. It has no default here on purpose:
+	// a zero that WORKS is worse than one that is refused, because a surface
+	// that forgot to say would go on producing one value and nobody would find
+	// out. Check refuses anything below one, so forgetting is loud.
+	Count int
 }
 
 // Genders are the two spellings a surface OFFERS, sorted.
@@ -164,18 +180,34 @@ func Reads(generator, role, locale string) bool {
 	return values.New(locale, "").ReadsRole(generator, role)
 }
 
-// Run produces the one value the request asks for.
+// Run produces the values the request asks for, in order.
 //
 // Check above has to have passed. A request that would be refused reaches the
 // engine here and is answered by whatever the engine says about it, which is a
 // worse message than the refusal beside it and, for an unknown generator, a
 // different exit code. The two surfaces both ask first, and the test beside
 // this package holds that they cannot stop.
-func Run(req Request) (string, error) {
+//
+// # Why the values are not promised to differ from each other
+//
+// They are drawn, not dealt. Ten values of a generator whose data is a short
+// list will repeat, and that is the same thing a recipe of ten rows does with
+// the same seed. Uniqueness is a promise a recipe makes with a rule of its own,
+// and making it quietly here would be a second spelling of it that nobody
+// asked for. Both surfaces say so where it can be read.
+func Run(req Request) ([]string, error) {
 	source := values.New(req.Locale, req.Seed)
-	return source.Produce(generate.Request{
-		Generator: req.Generator,
-		At:        seed.Coordinate{Entity: Entity, Row: Row, Field: req.Generator, Purpose: Purpose},
-		Agrees:    provider.NewAgreement(req.Agrees),
-	})
+	produced := make([]string, 0, req.Count)
+	for row := int64(FirstRow); row < int64(FirstRow)+int64(req.Count); row++ {
+		value, err := source.Produce(generate.Request{
+			Generator: req.Generator,
+			At:        seed.Coordinate{Entity: Entity, Row: row, Field: req.Generator, Purpose: Purpose},
+			Agrees:    provider.NewAgreement(req.Agrees),
+		})
+		if err != nil {
+			return nil, err
+		}
+		produced = append(produced, value)
+	}
+	return produced, nil
 }

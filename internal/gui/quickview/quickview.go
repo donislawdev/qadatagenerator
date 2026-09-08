@@ -17,6 +17,9 @@
 package quickview
 
 import (
+	"strconv"
+	"strings"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
@@ -56,6 +59,15 @@ type View struct {
 	chooser *parts.Select
 	locales *parts.Select
 	gender  *parts.Select
+	// howMany chooses how many values to produce.
+	//
+	// 🔴 A list rather than a field, and the mode ACCEPTS more than this list
+	// offers. That is the same distinction Genders() writes about a few files
+	// away: what a command line takes and what a screen offers are different
+	// questions, and a box a person can type any number into invites one that
+	// fills the window with a wall nobody reads. The command this screen shows
+	// carries the number, so anybody wanting more has the line to paste.
+	howMany *parts.Select
 	born    *widget.Entry
 	seedBox *widget.Entry
 	copy    *parts.Button
@@ -120,6 +132,7 @@ func (v *View) build() {
 		v.draw()
 	})
 	v.gender = parts.NewSelect(v.genderChoices(), func(string) { v.draw() })
+	v.howMany = parts.NewSelect(countChoices, func(string) { v.draw() })
 	v.born = widget.NewEntry()
 	// The shape of the date is on the field rather than only in the refusal
 	// that follows getting it wrong, which is the same reason the seed field
@@ -200,6 +213,10 @@ func (v *View) build() {
 	// because nothing else on this screen calls its own callback while being
 	// built.
 	v.gender.SetSelected(v.text.T(i18n.QuickGenderAny))
+	// Before the locale, because choosing a locale draws, and a draw before
+	// the count has a choice would ask the mode for nought values and be
+	// refused for something nobody touched.
+	v.howMany.SetSelected(opensOn)
 	v.locales.SetSelected(quick.DefaultLocale)
 }
 
@@ -342,6 +359,13 @@ func (v *View) Choose(generator string) { v.chooser.SetSelected(generator) }
 // ChooseGender picks a gender, for the same reason.
 func (v *View) ChooseGender(gender string) { v.gender.SetSelected(gender) }
 
+// ChooseCount picks how many values to produce, for the same reason.
+func (v *View) ChooseCount(howMany string) { v.howMany.SetSelected(howMany) }
+
+// CountChoices is what this screen offers, so that a guard walks the list the
+// screen has rather than a copy of it written in a test.
+func CountChoices() []string { return append([]string(nil), countChoices...) }
+
 // SetBorn types a date of birth, for the same reason.
 func (v *View) SetBorn(date string) { v.born.SetText(date) }
 
@@ -424,14 +448,38 @@ func (v *View) produce() {
 		v.told.SetText(err.Error())
 		return
 	}
-	v.value.SetText(produced)
+	// One to a line, which is the same shape the command line writes, so a
+	// person comparing the two screens sees one answer rather than two.
+	v.value.SetText(strings.Join(produced, "\n"))
+	// Said only where it can happen. One value cannot repeat, and a warning
+	// standing beside a screen it does not apply to is how a person learns to
+	// stop reading warnings.
+	if len(produced) > 1 {
+		v.told.SetText(v.text.T(i18n.QuickMayRepeat))
+	}
 }
 
 // request is what the person on this screen asked for.
 func (v *View) request(generator string) quick.Request {
 	return quick.Request{
 		Generator: generator, Locale: v.locale, Seed: v.seed, Agrees: v.bindings(),
+		Count: v.wanted(),
 	}
+}
+
+// wanted is how many values were chosen, as a number.
+//
+// The list holds text because a chooser does, and the one place it becomes a
+// number is here. A choice that is not a number cannot arrive from a list this
+// screen built, so it falls back to the head of that list rather than to a
+// number written here: a nought would be refused by the mode and a person
+// would see a refusal about something they never touched.
+func (v *View) wanted() int {
+	number, err := strconv.Atoi(v.howMany.Selected)
+	if err != nil {
+		number, _ = strconv.Atoi(opensOn)
+	}
+	return number
 }
 
 // bindings are the values the two fields carry, with an unchosen gender
@@ -458,6 +506,11 @@ func (v *View) bindings() map[string]string {
 func (v *View) showRows(generator string) {
 	rows := []*widget.FormItem{
 		widget.NewFormItem(v.text.T(i18n.QuickLabelValue), v.chooser.OnScreen()),
+		// Second, and above the settings that only some generators read,
+		// because how many is asked of every generator alike. The rows below
+		// it come and go with what was chosen, so a row that never leaves
+		// belongs above the ones that do.
+		widget.NewFormItem(v.text.T(i18n.QuickLabelCount), v.howMany.OnScreen()),
 		widget.NewFormItem(v.text.T(i18n.QuickLabelLocale), v.locales.OnScreen()),
 	}
 	if quick.Reads(generator, quick.RoleGender, v.locale) {
@@ -524,7 +577,15 @@ func (v *View) putInClipboard() {
 // the one on screen, which is the one thing this bridge must not do.
 func (v *View) commandFor(generator string) string {
 	bound := v.bindings()
+	// The count is written only where it differs from what the verb does
+	// without it. A line carrying --count 1 would say something the verb
+	// already does, and every flag on this line is one more thing to read.
+	asked := ""
+	if v.howMany.Selected != commandDefault {
+		asked = v.howMany.Selected
+	}
 	return commandline.New(commandline.Quick).
+		Flag(commandline.Count, asked).
 		Flag(commandline.Locale, v.locale).
 		Flag(commandline.Gender, bound[quick.RoleGender]).
 		Flag(commandline.BirthDate, bound[quick.RoleBirthDate]).
@@ -542,6 +603,37 @@ func (v *View) putCommandInClipboard() {
 	v.clipboard.SetContent(v.command.Text)
 	v.told.SetText(v.text.T(i18n.CommandCopied))
 }
+
+// countChoices are how many values this screen offers to produce.
+//
+// A ladder rather than a range, because it is read off a list, and the top of
+// it is where a person stops reading values and starts piping them, which is
+// the point at which the command beside it is the better tool. The mode itself
+// has no upper limit, and the recipe reader says why: a number chosen today
+// with no measurement behind it would become a contract.
+var countChoices = []string{"1", "10", "25", "50"}
+
+// 🔴 opensOn and commandDefault are both "how many by default" and they are
+// NOT the same number. Holding them under one name is the mistake this pair is
+// written out to avoid.
+//
+// opensOn is what this SCREEN starts with. It is ten rather than one because
+// of what a person sees when the window opens, which is the state no drawing
+// ever shows: with one value the screen stood 57.5% empty at the size the
+// window is actually kept, measured with tools/pustka.py, and ten brings that
+// to 36.8%. A tester filling the same form over and over wants a handful, and
+// the one who wants exactly one takes the top of the list.
+//
+// commandDefault is what the COMMAND LINE does when the flag is left out, and
+// that stays one: it is the older behaviour, the verb is the one whose answer
+// is meant to be piped, and changing it would alter what an existing script
+// produces. The command shown on this screen therefore carries --count
+// whenever the screen differs from it, which with the setting above is from
+// the moment the window opens.
+const (
+	opensOn        = "10"
+	commandDefault = "1"
+)
 
 // genderChoices are the spellings the mode takes, with the absence of a choice
 // named rather than left blank.
@@ -561,6 +653,7 @@ var refusedSays = map[quick.RefusalKind]i18n.Key{
 	quick.RoleNotRead:      i18n.QuickRefusedRole,
 	quick.UnreadableGender: i18n.QuickRefusedGender,
 	quick.UnreadableDate:   i18n.QuickRefusedDate,
+	quick.CountNotPositive: i18n.QuickRefusedCount,
 }
 
 func subdued(text string) fyne.CanvasObject {

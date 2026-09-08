@@ -2,6 +2,7 @@ package quick
 
 import (
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
@@ -36,6 +37,15 @@ const (
 	UnreadableGender
 	// UnreadableDate is a date of birth that is not written as YYYY-MM-DD.
 	UnreadableDate
+	// CountNotPositive asks for fewer than one value.
+	//
+	// 🔴 A recipe ACCEPTS a count of nought and this refuses it, which is not
+	// an inconsistency for the same reason maxLength refuses a nought that
+	// count allows: no rows of an entity is a smaller dataset, and somebody
+	// may mean it. No values here is a run that produces nothing at all, and
+	// on a channel carrying only values it is indistinguishable from a failure
+	// that printed nothing. This verb exists to answer "give me a value".
+	CountNotPositive
 )
 
 // Refusal is why a value will not be produced, with what it needs to be said
@@ -92,6 +102,12 @@ func Check(req Request) Refusal {
 	source := values.New(req.Locale, req.Seed)
 	if !source.Known(req.Generator) {
 		return Refusal{Kind: UnknownGenerator, Value: req.Generator, Allowed: source.Names()}
+	}
+	// Before the generator is asked anything, because how many were wanted is
+	// a question about the request rather than about the value, and a run of
+	// nought values would otherwise be refused by nothing at all.
+	if req.Count < 1 {
+		return Refusal{Kind: CountNotPositive, Value: strconv.Itoa(req.Count)}
 	}
 	for _, role := range sortedRoles(req.Agrees) {
 		if !source.ReadsRole(req.Generator, role) {

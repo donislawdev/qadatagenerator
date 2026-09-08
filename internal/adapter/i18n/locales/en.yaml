@@ -308,11 +308,14 @@ quick.label.locale: Locale
 quick.label.seed: Seed
 quick.label.gender: Gender
 quick.label.born: Born
+quick.label.count: How many
 quick.gender.any: any
 quick.copy: Copy
 quick.again: Again
-quick.copied: The value is in the clipboard.
+quick.copied: The values are in the clipboard.
+quick.may-repeat: Values are drawn rather than dealt, so some may repeat.
 quick.refused.generator: This build cannot produce that value.
 quick.refused.role: That value takes no account of what was chosen beside it.
 quick.refused.gender: That is not a gender this screen takes.
 quick.refused.date: A date of birth is written as YYYY-MM-DD.
+quick.refused.count: This screen asks for at least one value.

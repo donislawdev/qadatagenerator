@@ -38,6 +38,7 @@ const (
 // The flags those verbs take.
 const (
 	BirthDate     = "--birth-date"
+	Count         = "--count"
 	Delimiter     = "--delimiter"
 	DryRun        = "--dry-run"
 	ExcludeFields = "--exclude-fields"
@@ -59,7 +60,7 @@ var Verbs = []string{Quick, Generate, Corrupt}
 
 // Flags is every flag named above, for the same reason.
 var Flags = []string{
-	BirthDate, Delimiter, DryRun, ExcludeFields, Format, Gender, Layers,
+	BirthDate, Count, Delimiter, DryRun, ExcludeFields, Format, Gender, Layers,
 	Locale, Manifest, Out, Overwrite, PerRow, Rows, Seed,
 }
 

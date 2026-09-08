@@ -403,6 +403,18 @@ const (
 	QuickCopy        Key = "quick.copy"
 	QuickAgain       Key = "quick.again"
 	QuickCopied      Key = "quick.copied"
+	// QuickLabelCount names the list that chooses how many values to produce,
+	// and QuickMayRepeat is the limit that goes with it. A person asking for
+	// fifty of something drawn from a short list of data will see repeats, and
+	// this screen says so rather than letting them be found out. The engine
+	// makes no promise of uniqueness, because that is a promise a recipe makes
+	// with a rule of its own.
+	QuickLabelCount Key = "quick.label.count"
+	QuickMayRepeat  Key = "quick.may-repeat"
+	// QuickRefusedCount is a refusal this screen cannot reach, because the
+	// number comes from a list. It is worded for the reason the other two
+	// unreachable ones are: the register is closed in both directions.
+	QuickRefusedCount Key = "quick.refused.count"
 
 	// The refusals this mode can produce, in the words of this surface.
 	//
@@ -446,7 +458,9 @@ var Keys = []Key{
 	QuickLabelGender, QuickLabelBorn,
 	QuickLabelLocale, QuickLabelSeed,
 	QuickGenderAny, QuickCopy, QuickAgain, QuickCopied,
+	QuickLabelCount, QuickMayRepeat,
 	QuickRefusedGenerator, QuickRefusedRole, QuickRefusedGender, QuickRefusedDate,
+	QuickRefusedCount,
 	CommandHeading, CommandCopy, CommandCopied,
 	PurposeTake, PurposeRecipe, PurposeManifest, AboutSaveJSON,
 

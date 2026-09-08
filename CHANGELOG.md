@@ -22,6 +22,23 @@ repository once they are released.
 
 ### Added
 
+- **Ask for more than one value at a time.** `qadg quick pesel --count 10`
+  writes ten values, one to a line and nothing else, so a line of them can be
+  piped or pasted straight into a form. Without the flag it writes one, exactly
+  as before. The values are the ones a recipe of that many rows would produce
+  from the same seed, in the same order, so asking for more never changes the
+  ones already there. They are drawn rather than dealt, so a kind of value with
+  a short list of data behind it may repeat.
+  The Quick value screen opens showing ten, with a list to change how many.
+
+### Fixed
+
+- **Every list you pick from now shows what is picked.** The chooser controls on
+  the Quick value and Take and corrupt screens drew as empty boxes: the kind of
+  value, the locale, the gender and the settings all had their text missing,
+  with a stray mark in the corner where it should have been. They report what
+  you chose and act on it correctly again.
+
 - **Damage that swaps two adjacent digits, and says when the swap was invisible.**
   Transposing a pair of neighbouring digits is the mistake people make most
   often when copying a number, and it is now one of the kinds of damage this

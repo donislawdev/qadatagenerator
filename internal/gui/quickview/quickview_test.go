@@ -2,6 +2,7 @@ package quickview
 
 import (
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -51,6 +52,18 @@ func TestChoosingAValueProducesOneAndCopyingItReachesTheClipboard(t *testing.T) 
 	view.UseSeed("for-the-test")
 	view.Choose("pesel")
 
+	// 🔴 What the screen OPENS on is asked before anything is changed, because
+	// it is the one state no drawing ever shows and the first one a person
+	// sees. It is ten rather than one by measurement rather than by taste, and
+	// the constant beside it says which number is the command line's.
+	if got := len(strings.Split(view.Value(), "\n")); got != 10 {
+		t.Errorf("the window opens showing %d value(s) where it is meant to open on ten, "+
+			"which is the state a person meets first", got)
+	}
+
+	// One value from here down, so that what Copy carries is a single thing
+	// and this test goes on being about the clipboard.
+	view.ChooseCount("1")
 	produced := view.Value()
 	if produced == "" {
 		t.Fatal("choosing a value produced nothing, so this screen needs a button the design says it must not have")
@@ -61,12 +74,12 @@ func TestChoosingAValueProducesOneAndCopyingItReachesTheClipboard(t *testing.T) 
 	// only asked whether something appeared.
 	expected, err := quick.Run(quick.Request{
 		Generator: "pesel", Locale: quick.DefaultLocale, Seed: "for-the-test",
-		Agrees: map[string]string{},
+		Agrees: map[string]string{}, Count: 1,
 	})
 	if err != nil {
 		t.Fatalf("the mode refused the same request this screen made: %v", err)
 	}
-	if produced != expected {
+	if produced != strings.Join(expected, "\n") {
 		t.Errorf("the screen shows %q where the mode produces %q for the same request",
 			produced, expected)
 	}
@@ -140,6 +153,81 @@ func TestEveryControlOnTheQuickScreenReachesTheValue(t *testing.T) {
 	if !view.Shows(quick.RoleGender) {
 		t.Error("a surname in Polish takes account of a gender and the field is not on screen, " +
 			"so the screen hides a choice that would work")
+	}
+
+	// 🔴 The count is checked apart from the three above, and it has to be:
+	// every one of them moves the VALUE, and this one does not. It moves how
+	// many there are, and the test written by pattern would have asked whether
+	// the value changed, found that it had not, and reported a control that
+	// reaches nothing while it reached everything it was for.
+	view.Choose("pesel")
+	for _, howMany := range CountChoices() {
+		view.ChooseCount(howMany)
+		wanted, err := strconv.Atoi(howMany)
+		if err != nil {
+			t.Fatalf("this screen offers %q as a number of values and it is not one", howMany)
+		}
+		got := len(strings.Split(view.Value(), "\n"))
+		if got != wanted {
+			t.Errorf("%s was chosen and %d value(s) are on screen, so the list of how many "+
+				"reaches the screen without deciding what it shows", howMany, got)
+		}
+	}
+}
+
+// 🔴 TestAskingForMoreValuesLeavesTheOnesAlreadyThereAlone holds the property
+// that makes a count safe to change while somebody is reading.
+//
+// The values are addressed by row, counting up from the first, so asking for
+// more can only ADD to what was there. A mode that drew them some other way
+// would reshuffle everything on screen each time somebody asked for one more,
+// and the person reading the value they came for would watch it move.
+//
+// This is the same property the guard beside the mode holds against a recipe,
+// asked here of the screen: it is the one that decides whether the address is
+// counted or invented.
+func TestAskingForMoreValuesLeavesTheOnesAlreadyThereAlone(t *testing.T) {
+	view := New(i18n.English, &heldClipboard{})
+	view.UseSeed("for-the-test")
+	view.Choose("pesel")
+
+	view.ChooseCount("1")
+	one := strings.Split(view.Value(), "\n")
+
+	view.ChooseCount("10")
+	ten := strings.Split(view.Value(), "\n")
+
+	if len(ten) <= len(one) {
+		t.Fatalf("asking for ten gave %d values against %d for one", len(ten), len(one))
+	}
+	if ten[0] != one[0] {
+		t.Errorf("the first value was %q when one was asked for and %q when ten were, so "+
+			"asking for more reshuffles what somebody is already reading", one[0], ten[0])
+	}
+}
+
+// TestManyValuesSayTheyMayRepeatAndOneDoesNot holds a limit this screen has to
+// state, and holds it in both directions.
+//
+// The values are drawn rather than dealt, so a generator with a short list of
+// data behind it repeats, and somebody counting on fifty distinct values would
+// find that out from the data instead. Saying so beside one value would be the
+// other failure: a warning about something that cannot happen is how a person
+// learns to stop reading them.
+func TestManyValuesSayTheyMayRepeatAndOneDoesNot(t *testing.T) {
+	view := New(i18n.English, &heldClipboard{})
+	view.UseSeed("for-the-test")
+	view.Choose("pesel")
+
+	view.ChooseCount("1")
+	if view.told.Text == i18n.English.T(i18n.QuickMayRepeat) {
+		t.Error("one value is said to possibly repeat, and one value has nothing to repeat with")
+	}
+
+	view.ChooseCount("10")
+	if view.told.Text != i18n.English.T(i18n.QuickMayRepeat) {
+		t.Errorf("ten values are on screen and the limit on them is not said. It says %q",
+			view.told.Text)
 	}
 }
 
