@@ -60,9 +60,22 @@ func All() []State {
 func quickStates() []State {
 	return []State{
 		{
-			Name:    "quick-empty",
-			Purpose: "the screen before anything is chosen, which is what it opens as",
-			Screen:  screenQuick,
+			// 🔴 The state named quick-empty stood here until 2026-09-08 and is
+			// gone rather than renamed, because there is no longer a state it
+			// could photograph: this screen chooses a kind while it is being
+			// built, so it opens on values. A stored picture of a state nobody
+			// can reach is a guard over something that cannot break, and it
+			// would have been an exact copy of the state below it.
+			Name: "quick-opens",
+			Purpose: "what this screen opens as, which is the first thing anybody sees " +
+				"of this product and the one state no drawing ever showed",
+			Screen: screenQuick,
+			// Only a seed, and no kind. The kind is the one the screen chooses
+			// for itself, so naming it here would photograph a state somebody
+			// reached rather than the state it opens in. The seed has to be
+			// named because the real one is drawn at random, and a picture of it
+			// would differ every time it was taken.
+			Quick: Quick{Seed: "for-the-picture"},
 		},
 		{
 			Name: "quick-value",

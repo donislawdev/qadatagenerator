@@ -422,7 +422,6 @@ const (
 	// this screen was built from only ever shows a value, so the state this
 	// screen opens in was never drawn at all, and it opened as an empty box
 	// with a border round it.
-	QuickNothingYet  Key = "quick.nothing-yet"
 	QuickLabelLocale Key = "quick.label.locale"
 	QuickLabelSeed   Key = "quick.label.seed"
 	QuickLabelGender Key = "quick.label.gender"
@@ -482,7 +481,7 @@ var Keys = []Key{
 	WindowTitle, ScreenAbout, ScreenManifest, ScreenTake, ScreenRecipe, ScreenQuick,
 	SidebarGroupMake, SidebarGroupCheck,
 
-	QuickNothingWritten, QuickLabelValue, QuickValueHeading, QuickNothingYet,
+	QuickNothingWritten, QuickLabelValue, QuickValueHeading,
 	QuickLabelGender, QuickLabelBorn,
 	QuickLabelLocale, QuickLabelSeed,
 	QuickGenderAny, QuickCopy, QuickAgain, QuickCopied,

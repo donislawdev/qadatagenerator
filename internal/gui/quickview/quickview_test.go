@@ -43,23 +43,33 @@ func TestChoosingAValueProducesOneAndCopyingItReachesTheClipboard(t *testing.T) 
 	clipboard := &heldClipboard{}
 	view := New(i18n.English, clipboard)
 
-	// Nothing is chosen, so there is nothing to show. A screen that produced a
-	// value before being asked would be answering a question nobody put.
-	if view.Value() != "" {
-		t.Errorf("the screen shows %q before anything was chosen", view.Value())
-	}
-
-	view.UseSeed("for-the-test")
-	view.Choose("pesel")
-
-	// 🔴 What the screen OPENS on is asked before anything is changed, because
-	// it is the one state no drawing ever shows and the first one a person
-	// sees. It is ten rather than one by measurement rather than by taste, and
-	// the constant beside it says which number is the command line's.
+	// 🔴 What the screen OPENS on, asked before anything is touched, because it
+	// is the one state no drawing ever shows and the first one a person sees.
+	//
+	// This used to assert the opposite: that nothing is shown before anything is
+	// chosen, on the argument that a screen producing a value unasked answers a
+	// question nobody put. That argument lost to a measurement on 2026-09-08.
+	// The window opens on this screen, so an empty form was the first thing
+	// anybody saw of this product, and at the size the window is kept it was
+	// 76.9 per cent black. A screen whose whole promise is a value in under five
+	// seconds can afford to have produced one already.
+	//
+	// It is ten values rather than one, and of the kind named by opensWith,
+	// both by measurement rather than by taste. Nothing is read from a disk and
+	// nothing is written, so this is not the surface acting on its own that
+	// DEC-35 forbids.
 	if got := len(strings.Split(view.Value(), "\n")); got != 10 {
 		t.Errorf("the window opens showing %d value(s) where it is meant to open on ten, "+
 			"which is the state a person meets first", got)
 	}
+	if !strings.HasPrefix(view.command.Text, "qadg quick") ||
+		!strings.Contains(view.command.Text, opensWith) {
+		t.Errorf("the window opens showing %q, which does not reproduce the values beside it",
+			view.command.Text)
+	}
+
+	view.UseSeed("for-the-test")
+	view.Choose("pesel")
 
 	// One value from here down, so that what Copy carries is a single thing
 	// and this test goes on being about the clipboard.
@@ -271,10 +281,10 @@ func TestARefusalIsShownRatherThanHiddenWithTheValue(t *testing.T) {
 			if !view.told.Visible() {
 				t.Errorf("the screen says %q and does not show it", view.told.Text)
 			}
-			if view.nothingYet.Visible() {
-				t.Error("a refusal is on screen beside the sentence for a screen " +
-					"nobody has chosen anything on yet")
-			}
+			// The sentence for a screen nobody has chosen anything on used to be
+			// checked here too, and it is gone rather than dropped: this screen
+			// chooses a kind while it is built, so that state cannot be reached
+			// and the line describing it was removed with it.
 			if view.produced.Visible() {
 				t.Error("a refusal is on screen beside the box that holds a value")
 			}

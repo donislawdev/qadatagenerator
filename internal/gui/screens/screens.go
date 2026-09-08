@@ -307,11 +307,24 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 // settleQuick puts the screen that produces one value into the state asked for,
 // through the same calls a person makes.
 func settleQuick(screen *quickview.View, asked Quick) {
+	// 🔴 The seed is set even when this state names no generator, and that is
+	// not tidiness. From 2026-09-08 the screen chooses a kind while it is being
+	// built, so it has produced values before this function is reached, and the
+	// seed it used was drawn at random. A state photographing what the window
+	// OPENS as would therefore carry ten different values every time it was
+	// rendered, and the stored tree guarding it would be red at random.
+	//
+	// Caught by looking at the render: the seed field held a hex string that
+	// changed between runs. The test that guards these trees confirmed it in one
+	// run, and would otherwise have started failing on somebody else's change.
+	if asked.Seed != "" {
+		screen.UseSeed(asked.Seed)
+	}
 	if !asked.Chosen() {
 		return
 	}
-	// The seed goes in first, so that choosing produces the value this state
-	// names rather than one value and then another.
+	// The seed goes in before the kind, so that choosing produces the value this
+	// state names rather than one value and then another.
 	screen.UseSeed(asked.Seed)
 	screen.Choose(asked.Generator)
 	if asked.Gender != "" {

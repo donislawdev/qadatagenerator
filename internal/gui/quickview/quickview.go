@@ -85,13 +85,11 @@ type View struct {
 	value *widget.Label
 	told  *widget.Label
 
-	// The parts of the right column that have nothing in them until this
-	// screen has produced something, and the sentence that stands where they
-	// would be. Held here because settle shows and hides them, and a screen
-	// built once cannot reach them any other way.
-	produced   *fyne.Container
-	terminal   *fyne.Container
-	nothingYet fyne.CanvasObject
+	// The parts of the right column that stand there only once this screen has
+	// something to put in them. Held here because settle shows and hides them,
+	// and a screen built once cannot reach them any other way.
+	produced *fyne.Container
+	terminal *fyne.Container
 
 	// command is the line that would do this in a terminal, and the button
 	// beside it puts that line in the clipboard.
@@ -218,6 +216,10 @@ func (v *View) build() {
 	// refused for something nobody touched.
 	v.howMany.SetSelected(opensOn)
 	v.locales.SetSelected(quick.DefaultLocale)
+	// Last, because choosing a kind is what draws, and everything the drawing
+	// reads has to be in place before it runs. This is the call that makes the
+	// window open on a value rather than on an empty form.
+	v.chooser.SetSelected(opensWith)
 }
 
 // lay puts the controls on the screen, apart from making them.
@@ -242,12 +244,18 @@ func (v *View) lay() {
 	// on the recipe screen is a different case and says so there.
 	settings := parts.Column(palette.NameStepGroup, v.form)
 
-	// 🔴 What stands here before a value exists. Until 2026-09-08 the answer
-	// was an empty box with a border round it and two buttons under it that
-	// copied nothing, because the drawing this screen was built from only ever
-	// shows a screen that has already produced something. The state the screen
-	// OPENS in was never drawn, and it is the state a person sees first.
-	v.nothingYet = subdued(v.text.T(i18n.QuickNothingYet))
+	// 🔴 There is no longer a sentence standing here before a value exists,
+	// because there is no longer a moment when none does. The screen opens on a
+	// kind, so it opens on values, and the two states left are a value and a
+	// refusal. The sentence that used to say "choose a kind above" went with the
+	// state it described rather than being left as a line nothing can reach.
+	//
+	// What it looked like before is worth keeping written down, because it was
+	// two rounds of the same mistake: first an empty bordered box with buttons
+	// under it that copied nothing, then that sentence on 76.9 per cent black.
+	// Both came from a drawing that only ever showed a screen which had already
+	// produced something, so the state this screen OPENS in was never drawn,
+	// and it is the one a person meets first.
 	v.produced = parts.Column(palette.NameStepRelated,
 		parts.Panel(v.value),
 		parts.Row(palette.NameStepRelated, v.copy.OnScreen(), v.again.OnScreen()),
@@ -282,7 +290,6 @@ func (v *View) lay() {
 	// being drawn.
 	answer := parts.Column(palette.NameStepSection,
 		parts.Section(v.text.T(i18n.QuickValueHeading)),
-		v.nothingYet,
 		v.produced,
 		v.told,
 		v.terminal,
@@ -350,14 +357,6 @@ func (v *View) settle() {
 		v.told.Show()
 	} else {
 		v.told.Hide()
-	}
-	// The sentence for a screen that has done nothing yet, and only then. It
-	// used to appear whenever there was no value, which put it under a refusal
-	// telling somebody to do the thing they had just done.
-	if produced || said {
-		v.nothingYet.Hide()
-	} else {
-		v.nothingYet.Show()
 	}
 	if v.command.Text == "" {
 		v.terminal.Hide()
@@ -667,6 +666,31 @@ const (
 	opensOn        = "10"
 	commandDefault = "1"
 )
+
+// opensWith is the kind of value this SCREEN starts on, and it belongs to the
+// pair above rather than beside it: it is a third answer to "what does the
+// window do before anybody has said anything", and the command line has no
+// counterpart at all, since naming a generator there is required.
+//
+// 🔴 Until 2026-09-08 this screen opened on nothing chosen, and it is the
+// screen the window itself opens on, so that was the first thing anybody saw of
+// this product: an empty form and, at the size the window is kept, 76.9 per
+// cent black. Measured with tools/pustka.py. Opening on a value fills that with
+// the product rather than with anything written to fill it.
+//
+// # Why this one
+//
+// It agrees with the locale this screen also opens on, which is en-US, so the
+// first thing on screen is not an identifier of a country the locale beside it
+// does not name. It has a reserved range, so the values shown before anybody
+// has chosen anything cannot belong to a real person, which is rule nine and
+// matters most exactly here, where the values appear without being asked for.
+// And it is recognisable, which the first screen of a tool has to be.
+//
+// Nothing is read from a disk and nothing is written, so DEC-35 does not reach
+// this: what it forbids is a surface that ACTS on opening, and producing a
+// value in memory is what this screen is.
+const opensWith = "ssn"
 
 // genderChoices are the spellings the mode takes, with the absence of a choice
 // named rather than left blank.

@@ -316,7 +316,6 @@ purpose.manifest: A manifest says what to expect from every record a run damaged
 quick.nothing-written: Nothing on this screen is written to a file.
 quick.label.value: Kind
 quick.heading.value: Value
-quick.nothing-yet: Choose a kind above, and the value appears here.
 quick.label.locale: Locale
 quick.label.seed: Seed
 quick.label.gender: Gender
