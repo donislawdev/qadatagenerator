@@ -28,6 +28,13 @@ repository once they are released.
 
 ### Added
 
+- **The manifest browser says what it will show you before you open anything.**
+  It used to open on one sentence and an empty screen. It now lists the fields
+  every manifest carries about the run that wrote it, and the six columns each
+  ordered damage arrives in, with a line saying what each one holds. The button
+  for an application response also says why it cannot be pressed until a
+  manifest is open.
+
 - **Ask for more than one value at a time.** `qadg quick pesel --count 10`
   writes ten values, one to a line and nothing else, so a line of them can be
   piped or pasted straight into a form. Without the flag it writes one, exactly
