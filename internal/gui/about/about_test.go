@@ -1,6 +1,7 @@
 package about
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 	"regexp"
@@ -13,6 +14,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/gui/assets"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/license"
 	"github.com/donislawdev/qadatagenerator/internal/version"
@@ -57,7 +59,7 @@ func texts(object fyne.CanvasObject) []string {
 
 func screen(t *testing.T) []string {
 	t.Helper()
-	return texts(Content(i18n.English, license.Current(), version.Current(), nil))
+	return texts(Content(i18n.English, license.Current(), version.Current(), nil, assets.Notice))
 }
 
 func has(all []string, want string) bool {
@@ -161,7 +163,7 @@ func TestNoLabelRendersAsItsOwnKey(t *testing.T) {
 // show an empty space, which reads as a layout fault.
 func TestAnEmptyRegisterIsStatedRatherThanLeftBlank(t *testing.T) {
 	empty := license.Report{}
-	all := texts(Content(i18n.English, empty, version.Current(), nil))
+	all := texts(Content(i18n.English, empty, version.Current(), nil, assets.Notice))
 	if !has(all, i18n.English.T(i18n.AboutEmptyComponents)) {
 		t.Error("a build with no linked module shows nothing where the sentence saying so belongs")
 	}
@@ -207,7 +209,7 @@ func buttons(object fyne.CanvasObject) []*parts.Button {
 func TestTheScreenOffersTheReportInTheFormAMachineReads(t *testing.T) {
 	var written []byte
 	screen := Content(i18n.English, license.Current(), version.Current(),
-		func(contents []byte) { written = contents })
+		func(contents []byte) { written = contents }, assets.Notice)
 
 	var save *parts.Button
 	for _, button := range buttons(screen) {
@@ -238,10 +240,72 @@ func TestTheScreenOffersTheReportInTheFormAMachineReads(t *testing.T) {
 // A control that does nothing is a promise, and this one is handed nothing to
 // do whenever the screen is being rendered rather than shown.
 func TestWithNoWayToWriteTheControlIsNotPressable(t *testing.T) {
-	for _, button := range buttons(Content(i18n.English, license.Current(), version.Current(), nil)) {
+	for _, button := range buttons(Content(i18n.English, license.Current(), version.Current(), nil, assets.Notice)) {
 		if button.Text == i18n.English.T(i18n.AboutSaveJSON) && !button.Disabled() {
 			t.Error("the control offering the report can be pressed on a screen with no way to " +
 				"write, so pressing it does nothing and says nothing")
+		}
+	}
+}
+
+// The notices are the one thing on this screen whose absence is a licence
+// breach rather than a missing feature.
+//
+// 🔴 Why this asks for the BYTES rather than for a button
+//
+// Measured on 2026-09-08: the embed directive alone put nothing in the built
+// binary, because the linker drops an embedded set that no reachable code
+// reads, and the tests beside the asset package stayed green throughout since a
+// test binary reads them. A test that only found a control would have stayed
+// green as well. What makes this one hold the rule is that it presses the
+// control and reads what came out, which is the same code path the built binary
+// links.
+func TestTheScreenWritesTheNoticesOfWhatItEmbeds(t *testing.T) {
+	var written []byte
+	screen := Content(i18n.English, license.Current(), version.Current(),
+		func(contents []byte) { written = contents }, assets.Notice)
+
+	var save *parts.Button
+	for _, button := range buttons(screen) {
+		if button.Text == i18n.English.T(i18n.AboutSaveNotices) {
+			save = button
+		}
+	}
+	if save == nil {
+		t.Fatalf("no control on this screen offers the licence notices, so a person who "+
+			"received the binary cannot read the terms of what travelled inside it. "+
+			"The label looked for was %q", i18n.English.T(i18n.AboutSaveNotices))
+	}
+	save.OnTapped()
+
+	if len(license.Embedded) == 0 {
+		t.Fatal("the register names no embedded asset, so this test proves nothing about a " +
+			"build that carries a typeface and an icon set")
+	}
+	for _, asset := range license.Embedded {
+		body, carried := assets.Notice(asset.Notice)
+		if !carried {
+			t.Errorf("this build does not carry the notice %q that the register names", asset.Notice)
+			continue
+		}
+		if !bytes.Contains(written, []byte(body)) {
+			t.Errorf("the file this screen writes does not contain the licence text of %s, "+
+				"so the notice does not reach whoever received the binary", asset.Asset)
+		}
+		if !bytes.Contains(written, []byte(asset.Asset)) {
+			t.Errorf("the file this screen writes does not name %s above its licence text, "+
+				"so a reader cannot tell which notice covers which files", asset.Asset)
+		}
+	}
+}
+
+// With nothing to write the control says so by being unable to be pressed,
+// which is the rule already stated for the report beside it.
+func TestWithNoWayToWriteTheNoticeControlIsNotPressable(t *testing.T) {
+	for _, button := range buttons(Content(i18n.English, license.Current(), version.Current(), nil, assets.Notice)) {
+		if button.Text == i18n.English.T(i18n.AboutSaveNotices) && !button.Disabled() {
+			t.Error("the control offering the licence notices can be pressed on a screen with " +
+				"no way to write, so pressing it does nothing and says nothing")
 		}
 	}
 }

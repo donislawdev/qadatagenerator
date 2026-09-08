@@ -13,6 +13,7 @@ package about
 
 import (
 	"encoding/json"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -30,6 +31,31 @@ import (
 // being rendered into a picture has no window to open a chooser over, and a
 // picture that wrote a file would leave one behind.
 type Saver func(contents []byte)
+
+// Notices hands over the licence text of one embedded asset, and says whether
+// this build carries it at all.
+//
+// # Why the text arrives through a port rather than being read here
+//
+// The same reason the report does. This screen is rendered in tests against a
+// build that carries something else entirely, and a register naming a notice
+// that this binary does not embed is a legitimate state there rather than a
+// fault. Reaching into the asset package would make that state a panic.
+//
+// # 🔴 Why anything reads these bytes at all, which is the whole point
+//
+// Measured on 2026-09-08 on the built binaries, after the embed directive was
+// added and the tests beside it went green: the notices were STILL not in
+// qadg-gui.exe. A go:embed variable that no reachable code reads is pruned by
+// the linker, so the directive alone ships nothing. The tests passed because a
+// test binary reads them, and a test binary is not the artefact anybody
+// receives.
+//
+// One reachable read is enough for the whole set, which was measured the same
+// way: with a single notice read, both appear in the binary. So this port is
+// not a convenience on top of the fix. It IS the fix, and the register and the
+// printed section are what describe it.
+type Notices func(name string) (string, bool)
 
 // saveButton offers the report in the form a machine reads.
 //
@@ -72,9 +98,11 @@ func saveButton(text i18n.Catalogue, report license.Report, save Saver) *parts.B
 // entirely. A view that fetches its own facts can only ever be checked against
 // the one set of facts it fetches.
 func Content(text i18n.Catalogue, report license.Report, versions version.Set,
-	save Saver) fyne.CanvasObject {
+	save Saver, notices Notices) fyne.CanvasObject {
 	sections := []fyne.CanvasObject{
-		container.NewHBox(saveButton(text, report, save).OnScreen()),
+		container.NewHBox(
+			saveButton(text, report, save).OnScreen(),
+			noticeButton(text, report, save, notices).OnScreen()),
 		heading(text, i18n.AboutHeadingVersions),
 		versionList(text, versions),
 		widget.NewSeparator(),
@@ -83,6 +111,13 @@ func Content(text i18n.Catalogue, report license.Report, versions version.Set,
 		widget.NewSeparator(),
 		heading(text, i18n.AboutHeadingComponents),
 		componentList(text, report),
+		widget.NewSeparator(),
+		// The fonts and the icons, which are neither modules nor reference
+		// lists and were named on neither surface until 2026-09-08. This
+		// section is the window's half of the pair, and the command line
+		// prints the same facts under a heading of its own.
+		heading(text, i18n.AboutHeadingEmbedded),
+		embeddedList(text, report),
 		widget.NewSeparator(),
 		heading(text, i18n.AboutHeadingNotices),
 		noticeList(report),
@@ -176,3 +211,99 @@ func noticeList(report license.Report) fyne.CanvasObject {
 	synthetic.Wrapping = fyne.TextWrapWord
 	return container.NewVBox(generated, synthetic)
 }
+
+// embeddedList names the typeface and the icon set this build carries.
+//
+// The shape follows componentRow above rather than inventing a second one: the
+// asset leads because it is what somebody scans for, the terms follow on the
+// same line, and the day they were read stays beside them because a licence is
+// a property of a version rather than of a project.
+func embeddedList(text i18n.Catalogue, report license.Report) fyne.CanvasObject {
+	if len(report.Embedded) == 0 {
+		return widget.NewLabel(text.T(i18n.AboutEmptyEmbedded))
+	}
+	rows := make([]fyne.CanvasObject, 0, len(report.Embedded))
+	for _, asset := range report.Embedded {
+		name := widget.NewLabelWithStyle(asset.Asset, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+		terms := widget.NewLabel(asset.Version + "   " + asset.License)
+
+		source := widget.NewLabel(asset.Source)
+		source.Importance = widget.LowImportance
+		checked := widget.NewLabel(text.T(i18n.AboutColumnChecked) + " " + asset.Checked)
+		checked.Importance = widget.LowImportance
+
+		rows = append(rows, container.NewVBox(
+			container.NewHBox(name, terms),
+			container.NewHBox(source, checked),
+		))
+	}
+	return container.NewVBox(rows...)
+}
+
+// noticeButton offers the licence texts of the embedded assets as one file.
+//
+// # Why a file rather than the text on this screen
+//
+// The Open Font License and ISC both ask the same thing, that the notice is
+// kept with what it covers and reaches whoever received it. Several kilobytes
+// of licence laid into this column would satisfy that and bury everything else
+// on the screen, and somebody who wants the text wants to keep it rather than
+// scroll it. It is the same argument that put the machine readable report
+// behind a button beside this one.
+//
+// # Why it is disabled rather than hidden when there is nothing to write
+//
+// A control that is not there says nothing about why. A control that cannot be
+// pressed says the build carries no notices, which is a fact worth showing, and
+// it loses its edge as every disabled control here does.
+func noticeButton(text i18n.Catalogue, report license.Report, save Saver,
+	notices Notices) *parts.Button {
+	document := noticeDocument(text, report, notices)
+	button := parts.NewButton(text.T(i18n.AboutSaveNotices), func() {
+		save([]byte(document))
+	})
+	if save == nil || document == "" {
+		button.Disable()
+	}
+	return button
+}
+
+// noticeDocument is every notice this build carries, under the facts about the
+// asset it covers.
+//
+// An asset the register names and this build does not carry is left out rather
+// than written as a heading with nothing under it. A heading over an absent
+// licence reads as a licence somebody deleted, and the register is closed
+// against the embedded set by a test, so in this build the case cannot arise.
+func noticeDocument(text i18n.Catalogue, report license.Report, notices Notices) string {
+	if notices == nil {
+		return ""
+	}
+	var out strings.Builder
+	for _, asset := range report.Embedded {
+		body, carried := notices(asset.Notice)
+		if !carried {
+			continue
+		}
+		if out.Len() == 0 {
+			out.WriteString(text.T(i18n.AboutNoticesHeader) + "\n")
+		}
+		out.WriteString("\n" + noticeRule + "\n")
+		out.WriteString(asset.Asset + " " + asset.Version + "\n")
+		out.WriteString(asset.License + "  " + asset.Source + "\n")
+		out.WriteString(noticeRule + "\n\n")
+		out.WriteString(body)
+		if !strings.HasSuffix(body, "\n") {
+			out.WriteString("\n")
+		}
+	}
+	return out.String()
+}
+
+// noticeRule separates one notice from the next in that file.
+//
+// A row of characters rather than a blank line, because a licence text is
+// itself full of blank lines and a reader scrolling one has to be able to see
+// where the next begins. It is not interface text and is not translated: it
+// carries no words.
+const noticeRule = "----------------------------------------------------------------"

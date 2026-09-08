@@ -29,6 +29,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/responsejson"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/about"
+	"github.com/donislawdev/qadatagenerator/internal/gui/assets"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
@@ -200,6 +201,7 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 		{Name: text.T(i18n.ScreenTake), Group: making, Content: damage.Content(), OnDropped: damage.Dropped},
 		{Name: text.T(i18n.ScreenRecipe), Group: making, Content: editor.Content()},
 		{Name: text.T(i18n.ScreenManifest), Group: checking, Content: browser.Content()},
-		{Name: text.T(i18n.ScreenAbout), Content: about.Content(text, license.Current(), version.Current(), saveReport(window))},
+		{Name: text.T(i18n.ScreenAbout), Content: about.Content(text, license.Current(), version.Current(),
+			saveReport(window), assets.Notice)},
 	})
 }

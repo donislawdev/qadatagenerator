@@ -136,6 +136,97 @@ var Data = []DataSource{
 	{"pl-PL/regions", "joke2k/faker", "v40.36.0", "MIT", "https://github.com/joke2k/faker", "2026-08-02"},
 }
 
+// Asset is one collection of data compiled into a binary of this project that
+// is neither code nor a list of reference values.
+//
+// # Why a third kind rather than a line on one of the two lists above
+//
+// Component answers what outside CODE runs in this binary and is derived from
+// go.mod, so a typeface has no way to arrive there at all. DataSource answers
+// which reference COLLECTIONS the values are drawn from, and it is held to the
+// embedded corpora in both directions by a test beside the corpus package, so
+// a typeface written there would turn a working guard red for describing
+// something true.
+//
+// A face and an icon set are neither. What they have in common with both is
+// the only thing that matters here: they are handed to whoever receives the
+// binary, and their terms ask for the notice to travel with them. That is the
+// question this register exists to answer, so they get a list rather than an
+// exception.
+//
+// # What this list obliges, said once so a later entry inherits it
+//
+// Anything added here is inside the released file, so the sieve of rule 15
+// applies at the RUNTIME rigour: the terms are read at the pinned version, the
+// day is written down, and the notice is embedded rather than left in the
+// repository. A second face, a sound set or a built in dictionary all land
+// here.
+type Asset struct {
+	// Asset is what it is, in the words its own project uses.
+	Asset string `json:"asset"`
+	// Project is where it was taken from.
+	Project string `json:"project"`
+	// Version is the exact release or tag embedded.
+	Version string `json:"version"`
+	// License is the SPDX identifier, or an expression where one identifier
+	// does not cover the whole of it. See the note on the same field of
+	// DataSource for why a plain statement is allowed at all.
+	License string `json:"license"`
+	// Source is where the terms and the original can be read.
+	Source string `json:"source"`
+	// Notice is the file carrying the licence text, as it is called inside
+	// the package that embeds it.
+	//
+	// It is a file name rather than the text itself, because the text is a
+	// few kilobytes and this register is read by the command line binary,
+	// which embeds none of these assets. Naming the file is what lets a test
+	// close the register against what is actually embedded.
+	Notice string `json:"notice_file"`
+	// Checked is the day those terms were read at that address, as
+	// YYYY-MM-DD. See the note on the same field of DataSource.
+	Checked string `json:"license_checked"`
+}
+
+// Embedded lists every asset of that kind inside this build.
+//
+// A test beside the package that embeds them closes this list against the
+// notice files in both directions, so an asset described here with no notice
+// embedded fails, and a notice embedded with nothing describing it fails too.
+//
+// 🔴 These reach the WINDOW binary and not the command line one, which is the
+// same thing already true of fyne.io/fyne/v2 on the list below and is noted
+// there. This register answers what the product ships under what terms, and
+// the two binaries are released together. What it must not become is a list
+// where nobody can tell which half of the product an entry belongs to, which
+// is why each of these three notes says so in its own words rather than being
+// left to the reader.
+var Embedded = []Asset{
+	{
+		Asset:   "IBM Plex Sans and IBM Plex Mono",
+		Project: "IBM/plex",
+		Version: "1.1.0",
+		License: "OFL-1.1",
+		Source:  "https://github.com/IBM/plex",
+		Notice:  "LICENSE-IBM-Plex-OFL.txt",
+		Checked: "2026-09-08",
+	},
+	{
+		Asset:   "Lucide icons",
+		Project: "lucide-icons/lucide",
+		Version: "1.43.0",
+		// Two identifiers rather than one, and it is not a hedge. The
+		// project is ISC, and its own notice carries a second licence for
+		// the icons it inherited from Feather. This build embeds several of
+		// those, check and search and info among them, so MIT genuinely
+		// applies to part of what ships and dropping it would understate
+		// somebody else's terms.
+		License: "ISC AND MIT",
+		Source:  "https://github.com/lucide-icons/lucide",
+		Notice:  "LICENSE-lucide-ISC.txt",
+		Checked: "2026-09-08",
+	},
+}
+
 // Component is one external module compiled into this binary.
 //
 // This list is the strictest of the three ways outside code reaches this
@@ -496,7 +587,13 @@ type Report struct {
 	Spec       Terms        `json:"spec"`
 	Components []Component  `json:"components"`
 	Data       []DataSource `json:"data"`
-	Notices    Notices      `json:"notices"`
+	// Embedded is added rather than folded into either list above, which is
+	// what the rule on this shape allows: a field may appear, and a consumer
+	// that does not know it ignores it. A scanner written against the older
+	// shape therefore keeps working and simply learns nothing about the
+	// faces, which is exactly what it knew before.
+	Embedded []Asset `json:"embedded"`
+	Notices  Notices `json:"notices"`
 }
 
 // Terms is one license and what it covers.
@@ -525,6 +622,8 @@ func Current() Report {
 	copy(components, ThirdParty)
 	data := make([]DataSource, len(Data))
 	copy(data, Data)
+	embedded := make([]Asset, len(Embedded))
+	copy(embedded, Embedded)
 	return Report{
 		// The version is here because a compliance answer is about one build,
 		// not about a project. Reading this package is allowed to reach the
@@ -535,6 +634,7 @@ func Current() Report {
 		Spec:       Terms{License: Spec, Scope: SpecScope},
 		Components: components,
 		Data:       data,
+		Embedded:   embedded,
 		Notices: Notices{
 			GeneratedData: GeneratedDataNotice,
 			SyntheticData: SyntheticDataNotice,

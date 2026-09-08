@@ -36,6 +36,7 @@ package assets
 import (
 	"embed"
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -44,6 +45,29 @@ var fonts embed.FS
 
 //go:embed icons/*.svg
 var icons embed.FS
+
+// notices are the licence texts of everything else in this package.
+//
+// 🔴 Why this directive exists at all, and it is a defect rather than a
+// feature. The two directives above name .ttf and .svg, and the licence files
+// sitting beside those match neither, so until 2026-09-08 the notices were in
+// the repository and NOT in the binary. Distributing the source was fine,
+// because the files are there to read. Distributing the binary without them is
+// the one thing both the Open Font License and ISC forbid, and it is what a
+// release would have done.
+//
+// It could not be seen by reading either directive: each one is correct about
+// the files it names, and nothing names the files it leaves out. What sees it
+// is the pair of tests beside this file, which close the set of notices here
+// against the register in internal/license in both directions.
+//
+// A pattern rather than two names on purpose. Named individually, a third
+// asset arriving with its own notice would embed nothing and say nothing. With
+// a pattern the file is picked up, and the register is what then has to
+// describe it.
+//
+//go:embed fonts/LICENSE-*.txt icons/LICENSE-*.txt
+var notices embed.FS
 
 // Where the embedded files sit and what an icon file is called.
 //
@@ -55,6 +79,11 @@ const (
 	fontDir       = "fonts"
 	iconDir       = "icons"
 	iconExtension = ".svg"
+	// noticePrefix is what a licence text is called, whichever directory it
+	// sits in. It is the same word in the embed pattern above, for the same
+	// reason the directories are: the compiler reads that pattern before any
+	// constant exists.
+	noticePrefix = "LICENSE-"
 )
 
 // Font names, as the files are called. They are the four weights the window
@@ -123,5 +152,51 @@ func IconNames() []string {
 			names = append(names, trimmed)
 		}
 	}
+	return names
+}
+
+// Notice returns one embedded licence text, and whether this build carries it.
+//
+// # Why this answers rather than panicking, where Font and Icon panic
+//
+// Their names are constants in this file, so a miss there is our own typo. A
+// notice name arrives from the register in internal/license, which describes
+// what a build ships, and a screen may be rendered against a register that
+// belongs to another build entirely. "This one is not here" is a legitimate
+// answer to that question rather than a fault, and a panic would turn the
+// legitimate case into a crash.
+//
+// For THIS build the case cannot arise, and that is held by a test rather than
+// by hope: the register and this set are closed against each other in both
+// directions.
+func Notice(name string) (string, bool) {
+	for _, dir := range []string{fontDir, iconDir} {
+		if b, err := notices.ReadFile(dir + "/" + name); err == nil {
+			return string(b), true
+		}
+	}
+	return "", false
+}
+
+// NoticeNames lists every embedded licence text, sorted, so a test can compare
+// the set against the register that describes them.
+//
+// The directory a notice sits in is dropped, because a notice belongs to the
+// asset it covers rather than to a folder, and the register names it the way a
+// person would write it down.
+func NoticeNames() []string {
+	var names []string
+	for _, dir := range []string{fontDir, iconDir} {
+		entries, err := notices.ReadDir(dir)
+		if err != nil {
+			panic(fmt.Sprintf("embedded notices under %q are missing: %v", dir, err))
+		}
+		for _, entry := range entries {
+			if name := entry.Name(); strings.HasPrefix(name, noticePrefix) {
+				names = append(names, name)
+			}
+		}
+	}
+	sort.Strings(names)
 	return names
 }

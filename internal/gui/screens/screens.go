@@ -264,7 +264,7 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	column[screenManifest] = shell.Screen{Name: text.T(i18n.ScreenManifest), Group: checking,
 		Content: view.Content()}
 	column[screenAbout] = shell.Screen{Name: text.T(i18n.ScreenAbout),
-		Content: about.Content(text, license.Current(), version.Current(), nil)}
+		Content: about.Content(text, license.Current(), version.Current(), nil, nil)}
 	frame := shell.New(column)
 	settleQuick(quickScreen, state.Quick)
 	if state.Into != "" {

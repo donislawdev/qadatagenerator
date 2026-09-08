@@ -74,6 +74,22 @@ const (
 
 	AboutEmptyComponents Key = "about.empty.components"
 	AboutEmptyData       Key = "about.empty.data"
+
+	// The typeface and the icon set, which are neither code nor reference
+	// values and were named nowhere until 2026-09-08.
+	AboutHeadingEmbedded Key = "about.heading.embedded"
+	AboutEmptyEmbedded   Key = "about.empty.embedded"
+	// AboutSaveNotices offers the licence texts of those as a file.
+	//
+	// A button rather than the text on the screen, and the reason is what
+	// the terms actually ask for: the notice has to travel with the binary
+	// and be available to whoever received it. Several kilobytes of licence
+	// laid into a column would bury the four facts above it, and a person
+	// who wants the text wants it as a file they can keep.
+	AboutSaveNotices Key = "about.save.notices"
+	// AboutNoticesHeader is the first line of that file, so a file found on
+	// a disk a year later still says what it belongs to.
+	AboutNoticesHeader Key = "about.notices.header"
 )
 
 // The keys of the take and corrupt screen.
@@ -497,6 +513,7 @@ var Keys = []Key{
 	AboutLicenseCode, AboutLicenseSpec,
 	AboutColumnChecked,
 	AboutEmptyComponents, AboutEmptyData,
+	AboutHeadingEmbedded, AboutEmptyEmbedded, AboutSaveNotices, AboutNoticesHeader,
 
 	ManifestOpen, ManifestOpenResponse, ManifestEmpty, ManifestUnreadable,
 	ManifestReading,

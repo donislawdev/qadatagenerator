@@ -109,7 +109,7 @@
 						<container pos="24,24" size="1038x771">
 							<rectangle size="1038x771" strokeColor="focus" strokeWidth="2"/>
 							<widget size="1038x771" type="*parts.KeyScroll">
-								<container pos="0,-1478" size="1038x3083">
+								<container pos="0,-1478" size="1038x3271">
 									<container size="1038x28">
 										<container size="225x28">
 											<widget size="225x28" type="*container.ThemeOverride">
@@ -124,6 +124,21 @@
 												</container>
 											</widget>
 											<container size="225x28">
+											</container>
+										</container>
+										<container pos="233,0" size="223x28">
+											<widget size="223x28" type="*container.ThemeOverride">
+												<container size="223x28">
+													<widget size="223x28" type="*parts.Button">
+														<rectangle fillColor="button" radius="5" size="223x28"/>
+														<rectangle size="223x28"/>
+														<widget pos="4,4" size="215x19" type="*widget.RichText">
+															<text alignment="center" bold color="disabled" size="215x19">Save the font and icon licences</text>
+														</widget>
+													</widget>
+												</container>
+											</widget>
+											<container size="223x28">
 											</container>
 										</container>
 									</container>
@@ -1172,10 +1187,72 @@
 									</widget>
 									<widget pos="0,2948" size="1038x27" type="*widget.Label">
 										<widget size="1038x27" type="*widget.RichText">
+											<text bold pos="4,4" size="108x19">Fonts and icons</text>
+										</widget>
+									</widget>
+									<container pos="0,2983" size="1038x132">
+										<container size="1038x62">
+											<container size="1038x27">
+												<widget size="242x27" type="*widget.Label">
+													<widget size="242x27" type="*widget.RichText">
+														<text bold pos="4,4" size="234x19">IBM Plex Sans and IBM Plex Mono</text>
+													</widget>
+												</widget>
+												<widget pos="250,0" size="100x27" type="*widget.Label">
+													<widget size="100x27" type="*widget.RichText">
+														<text pos="4,4" size="92x19">1.1.0   OFL-1.1</text>
+													</widget>
+												</widget>
+											</container>
+											<container pos="0,35" size="1038x27">
+												<widget size="195x27" type="*widget.Label">
+													<widget size="195x27" type="*widget.RichText">
+														<text color="disabled" pos="4,4" size="187x19">https://github.com/IBM/plex</text>
+													</widget>
+												</widget>
+												<widget pos="203,0" size="187x27" type="*widget.Label">
+													<widget size="187x27" type="*widget.RichText">
+														<text color="disabled" pos="4,4" size="179x19">License read on 2026-09-08</text>
+													</widget>
+												</widget>
+											</container>
+										</container>
+										<container pos="0,70" size="1038x62">
+											<container size="1038x27">
+												<widget size="93x27" type="*widget.Label">
+													<widget size="93x27" type="*widget.RichText">
+														<text bold pos="4,4" size="85x19">Lucide icons</text>
+													</widget>
+												</widget>
+												<widget pos="101,0" size="142x27" type="*widget.Label">
+													<widget size="142x27" type="*widget.RichText">
+														<text pos="4,4" size="134x19">1.43.0   ISC AND MIT</text>
+													</widget>
+												</widget>
+											</container>
+											<container pos="0,35" size="1038x27">
+												<widget size="258x27" type="*widget.Label">
+													<widget size="258x27" type="*widget.RichText">
+														<text color="disabled" pos="4,4" size="250x19">https://github.com/lucide-icons/lucide</text>
+													</widget>
+												</widget>
+												<widget pos="266,0" size="187x27" type="*widget.Label">
+													<widget size="187x27" type="*widget.RichText">
+														<text color="disabled" pos="4,4" size="179x19">License read on 2026-09-08</text>
+													</widget>
+												</widget>
+											</container>
+										</container>
+									</container>
+									<widget pos="0,3123" size="1038x4" type="*widget.Separator">
+										<rectangle fillColor="separator" size="1038x4"/>
+									</widget>
+									<widget pos="0,3135" size="1038x27" type="*widget.Label">
+										<widget size="1038x27" type="*widget.RichText">
 											<text bold pos="4,4" size="213x19">What this means for your data</text>
 										</widget>
 									</widget>
-									<container pos="0,2983" size="1038x100">
+									<container pos="0,3170" size="1038x100">
 										<widget size="1038x27" type="*widget.Label">
 											<widget size="1038x27" type="*widget.RichText">
 												<text pos="4,4" size="747x19">Data generated with this tool belongs to you. It is not a derived work, and the license of this tool does not cover it.</text>
@@ -1197,8 +1274,8 @@
 									<linearGradient endColor="shadow" pos="0,-8" size="1038x8"/>
 								</widget>
 								<widget pos="1032,0" size="6x771" type="*widget.scrollBarArea">
-									<widget pos="3,370" size="3x192" type="*widget.scrollBar">
-										<rectangle fillColor="scrollbar" radius="3" size="3x192"/>
+									<widget pos="3,348" size="3x181" type="*widget.scrollBar">
+										<rectangle fillColor="scrollbar" radius="3" size="3x181"/>
 									</widget>
 								</widget>
 							</widget>

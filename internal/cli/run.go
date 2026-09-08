@@ -728,6 +728,20 @@ func printLicense(out *streams, machineReadable bool) {
 		}
 	}
 
+	// The faces and the icons ship inside the window binary, and the licence
+	// of each asks for its notice to be kept with it. Naming them here is
+	// what makes this report answer for the whole product rather than for
+	// the half of it this flag happens to run in.
+	out.emit("")
+	out.emit(licenseHeadingEmbedded)
+	if len(license.Embedded) == 0 {
+		out.emit(licenseNoEmbedded)
+	}
+	for _, asset := range license.Embedded {
+		out.emit("  " + asset.Asset + " " + asset.Version)
+		out.emit("    " + asset.License + "  " + asset.Source)
+	}
+
 	out.emit("")
 	out.emit(license.GeneratedDataNotice)
 	out.emit("")

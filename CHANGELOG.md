@@ -10,6 +10,21 @@ repository once they are released.
 
 ## [Unreleased]
 
+### Added
+
+- **`--license` now names the typeface and the icon set built into the window.**
+  The report listed the modules this tool links and the reference data it
+  carries, and said nothing about the font and the icons, which travel in the
+  window binary and are kept on the condition that their licence travels with
+  them. The About screen shows the same two entries, and a button there writes
+  their full licence texts to a file you can keep.
+
+### Fixed
+
+- **The licence texts of the font and the icons are now inside the program.**
+  They were in the source tree, which covers anybody who builds this tool, and
+  they were missing from the built program, which is what most people receive.
+
 ### Fixed
 
 - **Every heading of the manifest table is now readable.** The column saying how

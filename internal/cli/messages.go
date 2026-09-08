@@ -417,6 +417,17 @@ const (
 	licenseHeadingData = "Reference data built into this binary:"
 	licenseNoData      = "  None. This build carries no reference lists."
 
+	// licenseHeadingEmbedded introduces the typeface and the icon set. Both
+	// travel inside the window binary, and the terms of both ask for the
+	// notice to travel with them, which is why they are named here rather
+	// than only in the repository.
+	//
+	// The heading says which binary, because this flag runs on the command
+	// line one and that binary carries neither. A heading claiming otherwise
+	// would be a false statement in the one place a compliance reader looks.
+	licenseHeadingEmbedded = "Fonts and icons built into the window binary:"
+	licenseNoEmbedded      = "  None. This build embeds no typeface or icon set."
+
 	// versionLabelTool and the three below label the human readable version
 	// report. A machine reads --json instead.
 	versionLabelTool     = "qadg"
