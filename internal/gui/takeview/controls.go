@@ -74,7 +74,7 @@ func (v *View) buildControls() {
 	})
 
 	v.chooseFile = parts.NewButton(v.text.T(i18n.TakeChoose), v.choose)
-	v.damage = parts.NewButton(v.text.T(i18n.TakeRun), v.Start)
+	v.damage = parts.NewPrimaryButton(v.text.T(i18n.TakeRun), v.Start)
 	v.stop = parts.NewButton(v.text.T(i18n.TakeStop), v.Stop)
 	// The sentence saying why the settings are dead sits between the heading
 	// and the form, and is hidden the moment a file arrives. Held on the view

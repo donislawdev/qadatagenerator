@@ -55,7 +55,7 @@ type View struct {
 	body *fyne.Container
 	// The two buttons are kept rather than built where they are drawn, because
 	// a read puts them out of reach and something has to hold them to do it.
-	open    *parts.Button
+	open    *parts.PrimaryButton
 	respond *parts.Button
 	// reading is what the screen says while a document is being read, and
 	// nothing while none is. It is a state of its own because point eight of
@@ -84,7 +84,7 @@ type View struct {
 // is where a document is read.
 func New(text i18n.Catalogue, window fyne.Window, read Readers, load background.Read) *View {
 	view := &View{text: text, window: window, read: read, load: load, body: container.NewStack()}
-	view.open = parts.NewButton(text.T(i18n.ManifestOpen), view.chooseManifest)
+	view.open = parts.NewPrimaryButton(text.T(i18n.ManifestOpen), view.chooseManifest)
 	view.respond = parts.NewButton(text.T(i18n.ManifestOpenResponse), view.chooseResponse)
 	// Nothing to compare a response against until a manifest is open, and a
 	// control that cannot do anything yet says so by being unavailable rather
@@ -113,7 +113,7 @@ func (v *View) Content() fyne.CanvasObject {
 	purpose := widget.NewLabel(v.text.T(i18n.PurposeManifest))
 	purpose.Wrapping = fyne.TextWrapWord
 	purpose.Importance = widget.LowImportance
-	top := container.NewVBox(purpose, container.NewHBox(v.open.OnScreen(), v.respond.OnScreen()))
+	top := container.NewVBox(purpose, container.NewHBox(v.open, v.respond.OnScreen()))
 	return parts.Inset(container.New(layout.NewBorderLayout(top, nil, nil, nil), top, v.body))
 }
 

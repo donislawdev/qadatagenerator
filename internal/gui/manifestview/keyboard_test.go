@@ -153,17 +153,38 @@ func TestTheKeyboardMeetsTheButtonsBeforeTheEntries(t *testing.T) {
 
 	canvas := window.Canvas()
 	canvas.FocusNext()
-	button, ok := canvas.Focused().(*parts.Button)
+	// 🔴 Asked by its LABEL rather than by its Go type. This asserted
+	// *parts.Button until 2026-09-08 and went red the day the button that opens
+	// a manifest became the filled one, which is a change of appearance and not
+	// of order. A guard about what the keyboard reaches first has no business
+	// knowing which of two button types draws it.
+	label, ok := labelOf(canvas.Focused())
 	if !ok {
 		t.Fatalf("the first thing the keyboard reaches is %T rather than a button", canvas.Focused())
 	}
-	if button.Text != i18n.English.T(i18n.ManifestOpen) {
+	if label != i18n.English.T(i18n.ManifestOpen) {
 		t.Errorf("the first thing the keyboard reaches is %q rather than the button that opens a manifest",
-			button.Text)
+			label)
 	}
 
 	canvas.FocusNext()
 	if _, isTable := canvas.Focused().(*parts.KeyTable); !isTable {
 		t.Errorf("after the button the keyboard reaches %T rather than the entries", canvas.Focused())
 	}
+}
+
+// labelOf is the words on whatever button the keyboard is standing on.
+//
+// Two kinds of button carry a label in this window and neither is a subtype of
+// the other: the ordinary one wraps the toolkit's, and the filled one is drawn
+// here from primitives. A guard about ORDER should not have to be edited every
+// time one of them becomes the other, which is exactly what happened.
+func labelOf(focused fyne.Focusable) (string, bool) {
+	switch button := focused.(type) {
+	case *parts.Button:
+		return button.Text, true
+	case *parts.PrimaryButton:
+		return button.Text, true
+	}
+	return "", false
 }

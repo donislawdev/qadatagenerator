@@ -298,7 +298,7 @@
 								<container pos="521,0" size="516x700">
 									<rectangle size="516x700" strokeWidth="2"/>
 									<widget size="516x700" type="*parts.KeyScroll">
-										<container size="516x961">
+										<container size="516x960">
 											<container size="516x579">
 												<container size="516x39">
 													<widget size="516x27" type="*widget.Label">
@@ -611,24 +611,13 @@
 											<widget pos="0,921" size="516x4" type="*widget.Separator">
 												<rectangle fillColor="separator" size="516x4"/>
 											</widget>
-											<container pos="0,933" size="516x28">
-												<container size="516x28">
-													<container size="122x28">
-														<widget size="122x28" type="*container.ThemeOverride">
-															<container size="122x28">
-																<widget size="122x28" type="*parts.Button">
-																	<rectangle fillColor="button" radius="5" size="122x28"/>
-																	<rectangle size="122x28"/>
-																	<widget pos="4,4" size="114x19" type="*widget.RichText">
-																		<text alignment="center" bold size="114x19">Damage this file</text>
-																	</widget>
-																</widget>
-															</container>
-														</widget>
-														<container size="122x28">
-															<rectangle pos="1,1" radius="5" size="120x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
-														</container>
-													</container>
+											<container pos="0,933" size="516x27">
+												<container size="516x27">
+													<widget size="130x27" type="*parts.PrimaryButton">
+														<rectangle fillColor="rgba(138,138,138,255)" radius="5" size="130x27"/>
+														<rectangle pos="2,2" radius="3" size="126x23" strokeWidth="2"/>
+														<text alignment="center" bold color="headerBackground" pos="0,4" size="130x19">Damage this file</text>
+													</widget>
 												</container>
 											</container>
 										</container>

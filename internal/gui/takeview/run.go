@@ -326,7 +326,7 @@ func (v *View) runContent() []fyne.CanvasObject {
 	if v.busy() {
 		return v.runningContent()
 	}
-	drawn := []fyne.CanvasObject{container.NewHBox(v.damage.OnScreen())}
+	drawn := []fyne.CanvasObject{container.NewHBox(v.damage)}
 	v.damage.Enable()
 	if v.refusedNow() || v.readingNow() {
 		// Disabled rather than absent, and the reason is directly above it in

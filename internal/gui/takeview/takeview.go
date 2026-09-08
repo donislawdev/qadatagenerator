@@ -149,7 +149,7 @@ type View struct {
 	overwrite *widget.Check
 
 	chooseFile *parts.Button
-	damage     *parts.Button
+	damage     *parts.PrimaryButton
 	stop       *parts.Button
 }
 

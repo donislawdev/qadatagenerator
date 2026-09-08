@@ -70,7 +70,7 @@ type View struct {
 	howMany *parts.Select
 	born    *widget.Entry
 	seedBox *widget.Entry
-	copy    *parts.Button
+	copy    *parts.PrimaryButton
 	again   *parts.Button
 
 	// form carries every setting, and its rows are rebuilt rather than hidden.
@@ -150,7 +150,7 @@ func (v *View) build() {
 		v.draw()
 	}
 
-	v.copy = parts.NewButton(v.text.T(i18n.QuickCopy), v.putInClipboard)
+	v.copy = parts.NewPrimaryButton(v.text.T(i18n.QuickCopy), v.putInClipboard)
 	v.again = parts.NewButton(v.text.T(i18n.QuickAgain), v.drawAgain)
 
 	// Monospace, because this is a line to be read character by character and
@@ -258,7 +258,7 @@ func (v *View) lay() {
 	// and it is the one a person meets first.
 	v.produced = parts.Column(palette.NameStepRelated,
 		parts.Panel(v.value),
-		parts.Row(palette.NameStepRelated, v.copy.OnScreen(), v.again.OnScreen()),
+		parts.Row(palette.NameStepRelated, v.copy, v.again.OnScreen()),
 	)
 	// The bridge to the other surface, and it comes last because it answers a
 	// question somebody asks after they have what they came for: how do I put

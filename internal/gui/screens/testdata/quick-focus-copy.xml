@@ -273,23 +273,12 @@
 												</container>
 											</container>
 											<container pos="0,323" size="483x28">
-												<container size="42x28">
-													<widget size="42x28" type="*container.ThemeOverride">
-														<container size="42x28">
-															<widget size="42x28" type="*parts.Button">
-																<rectangle fillColor="focus" radius="5" size="42x28"/>
-																<rectangle size="42x28"/>
-																<widget pos="4,4" size="34x19" type="*widget.RichText">
-																	<text alignment="center" bold color="headerBackground" size="34x19">Copy</text>
-																</widget>
-															</widget>
-														</container>
-													</widget>
-													<container size="42x28">
-														<rectangle pos="1,1" radius="5" size="40x26" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
-													</container>
-												</container>
-												<container pos="54,0" size="48x28">
+												<widget size="50x28" type="*parts.PrimaryButton">
+													<rectangle fillColor="rgba(138,138,138,255)" radius="5" size="50x28"/>
+													<rectangle pos="2,2" radius="3" size="46x24" strokeColor="headerBackground" strokeWidth="2"/>
+													<text alignment="center" bold color="headerBackground" pos="0,4" size="50x19">Copy</text>
+												</widget>
+												<container pos="62,0" size="48x28">
 													<widget size="48x28" type="*container.ThemeOverride">
 														<container size="48x28">
 															<widget size="48x28" type="*parts.Button">
