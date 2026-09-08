@@ -77,7 +77,7 @@ func TestTheScreenDrawsInBothStates(t *testing.T) {
 // down, which is the same bargain the row makes about its cells.
 func TestAColumnWithNoHeadingIsEmptyRatherThanFatal(t *testing.T) {
 	view := New(i18n.English, nil, Readers{}, background.ReadHere)
-	for _, absent := range []int{-1, len(columnNames)} {
+	for _, absent := range []int{-1, len(columns)} {
 		if got := view.columnName(absent); got != "" {
 			t.Errorf("column %d is headed %q", absent, got)
 		}

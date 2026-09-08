@@ -51,6 +51,17 @@ manifest.heading.entries: Ordered damage
 manifest.heading.unsettled: Not settled
 manifest.heading.limits: What this comparison could not see
 
+manifest.run.wait: These are the fields every manifest carries about the run that wrote it. They fill in once one is open.
+manifest.entries.wait: One line per damage a run ordered, in the order it attempted them. Each line carries these six things.
+
+manifest.wait.mutator: The identifier of what was done, the same one the catalogue and the command line use.
+manifest.wait.place: The record and the column it landed in.
+manifest.wait.expect: What a correct application should do with that record.
+manifest.wait.confidence: Whether that is a hard expectation or one that depends on the rules of your own application.
+manifest.wait.status: Whether the run managed to apply the damage at all.
+manifest.wait.detail: The value before and after, or the reason the damage could not be applied.
+manifest.response.wait: Open a manifest first. A record of what your application did is judged against what a run promised, so until then there is nothing to judge it against.
+
 manifest.run.generated: Generated
 manifest.run.seed: Seed
 manifest.run.locale: Data locale

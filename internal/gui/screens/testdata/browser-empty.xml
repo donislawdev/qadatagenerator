@@ -148,13 +148,132 @@
 								</container>
 							</container>
 							<container pos="0,71" size="1038x700">
-								<widget size="1038x700" type="*widget.Scroll">
-									<widget size="1038x700" type="*widget.Label">
-										<widget size="1038x700" type="*widget.RichText">
-											<text pos="4,4" size="895x19">No manifest is open. Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data.</text>
-										</widget>
-									</widget>
-								</widget>
+								<container size="1038x700">
+									<container size="1038x696">
+										<container size="1038x66">
+											<widget size="1038x27" type="*widget.RichText">
+												<text pos="4,4" size="895x19">No manifest is open. Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data.</text>
+											</widget>
+											<widget pos="0,39" size="1038x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="968x19">Open a manifest first. A record of what your application did is judged against what a run promised, so until then there is nothing to judge it against.</text>
+											</widget>
+										</container>
+										<container pos="0,90" size="1038x273">
+											<container size="1038x39">
+												<widget size="1038x27" type="*widget.Label">
+													<widget size="1038x27" type="*widget.RichText">
+														<text bold pos="4,4" size="56x19">This run</text>
+													</widget>
+												</widget>
+												<widget pos="0,35" size="1038x4" type="*widget.Separator">
+													<rectangle fillColor="separator" size="1038x4"/>
+												</widget>
+											</container>
+											<widget pos="0,51" size="1038x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="647x19">These are the fields every manifest carries about the run that wrote it. They fill in once one is open.</text>
+											</widget>
+											<container pos="0,90" size="1038x183">
+												<rectangle fillColor="background" size="1038x183"/>
+												<container size="1038x183">
+													<container pos="8,8" size="1022x167">
+														<container size="131x167">
+															<widget size="131x27" type="*widget.RichText">
+																<text color="disabled" pos="4,4" size="69x19">Generated</text>
+															</widget>
+															<widget pos="0,35" size="131x27" type="*widget.RichText">
+																<text color="disabled" pos="4,4" size="32x19">Seed</text>
+															</widget>
+															<widget pos="0,70" size="131x27" type="*widget.RichText">
+																<text color="disabled" pos="4,4" size="72x19">Data locale</text>
+															</widget>
+															<widget pos="0,105" size="131x27" type="*widget.RichText">
+																<text color="disabled" pos="4,4" size="123x19">Corruption catalog</text>
+															</widget>
+															<widget pos="0,140" size="131x27" type="*widget.RichText">
+																<text color="disabled" pos="4,4" size="105x19">Manifest format</text>
+															</widget>
+														</container>
+														<container pos="163,0" size="103x167">
+															<widget size="103x27" type="*widget.RichText">
+																<text color="disabled" pos="4,4" size="34x19">Rows</text>
+															</widget>
+															<widget pos="0,35" size="103x27" type="*widget.RichText">
+																<text color="disabled" pos="4,4" size="95x19">Rows changed</text>
+															</widget>
+															<widget pos="0,70" size="103x27" type="*widget.RichText">
+																<text color="disabled" pos="4,4" size="54x19">Ordered</text>
+															</widget>
+															<widget pos="0,105" size="103x27" type="*widget.RichText">
+																<text color="disabled" pos="4,4" size="49x19">Applied</text>
+															</widget>
+															<widget pos="0,140" size="103x27" type="*widget.RichText">
+																<text color="disabled" pos="4,4" size="76x19">Not applied</text>
+															</widget>
+														</container>
+													</container>
+												</container>
+											</container>
+										</container>
+										<container pos="0,387" size="1038x308">
+											<container size="1038x39">
+												<widget size="1038x27" type="*widget.Label">
+													<widget size="1038x27" type="*widget.RichText">
+														<text bold pos="4,4" size="117x19">Ordered damage</text>
+													</widget>
+												</widget>
+												<widget pos="0,35" size="1038x4" type="*widget.Separator">
+													<rectangle fillColor="separator" size="1038x4"/>
+												</widget>
+											</container>
+											<widget pos="0,51" size="1038x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="664x19">One line per damage a run ordered, in the order it attempted them. Each line carries these six things.</text>
+											</widget>
+											<container pos="0,90" size="1038x218">
+												<rectangle fillColor="background" size="1038x218"/>
+												<container size="1038x218">
+													<container pos="8,8" size="1022x202">
+														<widget size="175x27" type="*widget.RichText">
+															<text bold pos="4,4" size="58x19">Damage</text>
+														</widget>
+														<widget pos="183,0" size="838x27" type="*widget.RichText">
+															<text color="disabled" pos="4,4" size="579x19">The identifier of what was done, the same one the catalogue and the command line use.</text>
+														</widget>
+														<widget pos="0,35" size="175x27" type="*widget.RichText">
+															<text bold pos="4,4" size="45x19">Where</text>
+														</widget>
+														<widget pos="183,35" size="838x27" type="*widget.RichText">
+															<text color="disabled" pos="4,4" size="258x19">The record and the column it landed in.</text>
+														</widget>
+														<widget pos="0,70" size="175x27" type="*widget.RichText">
+															<text bold pos="4,4" size="63x19">Expected</text>
+														</widget>
+														<widget pos="183,70" size="838x27" type="*widget.RichText">
+															<text color="disabled" pos="4,4" size="353x19">What a correct application should do with that record.</text>
+														</widget>
+														<widget pos="0,105" size="175x27" type="*widget.RichText">
+															<text bold pos="4,4" size="65x19">Certainty</text>
+														</widget>
+														<widget pos="183,105" size="838x27" type="*widget.RichText">
+															<text color="disabled" pos="4,4" size="609x19">Whether that is a hard expectation or one that depends on the rules of your own application.</text>
+														</widget>
+														<widget pos="0,140" size="175x27" type="*widget.RichText">
+															<text bold pos="4,4" size="64x19">Outcome</text>
+														</widget>
+														<widget pos="183,140" size="838x27" type="*widget.RichText">
+															<text color="disabled" pos="4,4" size="353x19">Whether the run managed to apply the damage at all.</text>
+														</widget>
+														<widget pos="0,175" size="175x27" type="*widget.RichText">
+															<text bold pos="4,4" size="167x19">Why, and what changed</text>
+														</widget>
+														<widget pos="183,175" size="838x27" type="*widget.RichText">
+															<text color="disabled" pos="4,4" size="493x19">The value before and after, or the reason the damage could not be applied.</text>
+														</widget>
+													</container>
+												</container>
+											</container>
+										</container>
+									</container>
+								</container>
 							</container>
 						</container>
 					</container>

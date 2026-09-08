@@ -234,6 +234,51 @@ func countFields(text i18n.Catalogue, promised manifest.Manifest) []Field {
 	}
 }
 
+// Waiting is the envelope before any manifest is open: the field names, with no
+// value beside any of them.
+//
+// 🔴 # Why the values are absent rather than a placeholder
+//
+// The first attempt put a hyphen where each value goes, so that the waiting
+// screen kept the two column shape of the state that has a manifest. Rendered
+// on 2026-09-08 it read wrong: a form column is only as wide as what is in it,
+// so a column of single characters closed up and the eye paired the name on the
+// right with the hyphen on its left. "Generated - Rows" is a sentence about
+// nothing. A name on its own cannot be misread that way, and the sentence above
+// the list already says the values arrive with a file.
+//
+// # Why this is not Build of an empty manifest
+//
+// An empty manifest is a manifest, so Build would answer with a run whose seed
+// is the empty string and whose counts are all zero. Those are values, and they
+// would be values about a file nobody has chosen. This says the same thing the
+// settings on the screen next door say while they are dead: here is what will
+// stand here.
+//
+// # Why only the fields every manifest carries
+//
+// runFields drops an optional field when the run carried none, so a source
+// file, a recipe, a policy and a tag are on the screen for some manifests and
+// absent for others. Naming them here would promise rows that the file somebody
+// is about to open may not have. What is listed is what the format requires,
+// which makes this the shape of every manifest rather than the shape of one.
+func Waiting(text i18n.Catalogue) Screen {
+	waiting := func(names ...i18n.Key) []Field {
+		fields := make([]Field, 0, len(names))
+		for _, name := range names {
+			fields = append(fields, Field{Label: text.T(name)})
+		}
+		return fields
+	}
+	return Screen{
+		Run: waiting(i18n.ManifestRunGenerated, i18n.ManifestRunSeed, i18n.ManifestRunLocale,
+			i18n.ManifestRunCatalog, i18n.ManifestRunSpec,
+			i18n.ManifestRunRowsTotal, i18n.ManifestRunRowsMutated),
+		Counts: waiting(i18n.ManifestCountRequested, i18n.ManifestCountApplied,
+			i18n.ManifestCountNotApplied),
+	}
+}
+
 func rowsOf(text i18n.Catalogue, promised manifest.Manifest, comparison *Comparison) []Row {
 	defects := promised.Defects()
 	rows := make([]Row, 0, len(defects))

@@ -88,8 +88,8 @@ func TestEveryPartOfAnEntryReachesTheColumnItsHeadingNames(t *testing.T) {
 	if len(cells) != palette.EntryColumns() {
 		t.Fatalf("an entry hands out %d cells and the table has %d columns", len(cells), palette.EntryColumns())
 	}
-	if len(columnNames) != palette.EntryColumns() {
-		t.Fatalf("%d columns are named and the table has %d", len(columnNames), palette.EntryColumns())
+	if len(columns) != palette.EntryColumns() {
+		t.Fatalf("%d columns are named and the table has %d", len(columns), palette.EntryColumns())
 	}
 	if len(palette.EntryColumnWidths) != palette.EntryColumns() {
 		t.Fatalf("%d widths are set and the table has %d columns",
@@ -110,11 +110,18 @@ func TestEveryPartOfAnEntryReachesTheColumnItsHeadingNames(t *testing.T) {
 			t.Errorf("no column of the table carries %q", want)
 		}
 	}
-	// Every heading resolves to a sentence rather than to its own key.
-	for column := range columnNames {
+	// Every heading resolves to a sentence rather than to its own key, and so
+	// does the sentence saying what that column holds. Both, because the state
+	// with no manifest shows the second one and nothing else would notice a
+	// column added with a heading and no explanation of it.
+	for column := range columns {
 		view := &View{text: i18n.English}
 		if name := view.columnName(column); name == "" || strings.Contains(name, ".") {
 			t.Errorf("column %d is headed %q", column, name)
+		}
+		holds := i18n.English.T(columns[column].Holds)
+		if holds == "" || strings.Contains(holds, ".wait.") {
+			t.Errorf("column %d does not say what it holds, it says %q", column, holds)
 		}
 	}
 }

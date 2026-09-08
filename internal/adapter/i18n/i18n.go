@@ -246,6 +246,26 @@ const (
 	ManifestHeadingUnsettled Key = "manifest.heading.unsettled"
 	ManifestHeadingLimits    Key = "manifest.heading.limits"
 
+	// The sentences of the state before a manifest is open. They name what each
+	// part of the screen will hold, which is the question somebody meeting this
+	// screen has and the one an empty screen answers with silence.
+	ManifestRunWait     Key = "manifest.run.wait"
+	ManifestEntriesWait Key = "manifest.entries.wait"
+	// Why the second button cannot be pressed yet. A control that is dead
+	// without saying why reads as a fault in the program.
+	ManifestResponseWait Key = "manifest.response.wait"
+
+	// What each column of the entries table holds, said once in the state that
+	// has no entries to say it with. A heading on its own is a word, and
+	// "Certainty" or "Outcome" is not a word somebody meeting this tool can
+	// work out.
+	ManifestWaitMutator    Key = "manifest.wait.mutator"
+	ManifestWaitPlace      Key = "manifest.wait.place"
+	ManifestWaitExpect     Key = "manifest.wait.expect"
+	ManifestWaitConfidence Key = "manifest.wait.confidence"
+	ManifestWaitStatus     Key = "manifest.wait.status"
+	ManifestWaitDetail     Key = "manifest.wait.detail"
+
 	ManifestRunGenerated   Key = "manifest.run.generated"
 	ManifestRunSeed        Key = "manifest.run.seed"
 	ManifestRunLocale      Key = "manifest.run.locale"
@@ -483,6 +503,9 @@ var Keys = []Key{
 	ManifestReading,
 	ManifestHeadingRun, ManifestHeadingEntries, ManifestHeadingUnsettled,
 	ManifestHeadingLimits,
+	ManifestRunWait, ManifestEntriesWait, ManifestResponseWait,
+	ManifestWaitMutator, ManifestWaitPlace, ManifestWaitExpect,
+	ManifestWaitConfidence, ManifestWaitStatus, ManifestWaitDetail,
 	ManifestRunGenerated, ManifestRunSeed, ManifestRunLocale, ManifestRunCatalog,
 	ManifestRunSpec, ManifestRunRecipe, ManifestRunPolicy, ManifestRunTag,
 	ManifestRunSource, ManifestRunRowsTotal, ManifestRunRowsMutated,

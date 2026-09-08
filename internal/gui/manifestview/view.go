@@ -90,7 +90,7 @@ func New(text i18n.Catalogue, window fyne.Window, read Readers, load background.
 	// control that cannot do anything yet says so by being unavailable rather
 	// than by failing after the fact.
 	view.respond.Disable()
-	view.show(sentence(text.T(i18n.ManifestEmpty)))
+	view.show(view.waiting())
 	return view
 }
 
@@ -156,19 +156,26 @@ func (v *View) show(content fyne.CanvasObject) {
 	v.body.Refresh()
 }
 
-// sentence is the screen when there is nothing to show.
+// sentence is the screen for the two states that are about a single file and
+// nothing else: one being read, and one that could not be.
 //
 // A sentence rather than an empty panel, which is point eight of the GUI
 // checklist. An empty rectangle reads as a fault in the program, and a person
 // meeting one has no way to tell it from a screen that is still loading.
+//
+// The state where no manifest has been chosen used to be drawn this way too and
+// is not any more, because a sentence was all it had and 79.5 per cent of it
+// was black. That one is waiting, and waiting has a shape worth showing. These
+// two are not: a read that is running has one thing to say, and a read that
+// failed has one thing to say, and putting the shape of a manifest around
+// either would be drawing a file that is not going to arrive.
 //
 // 🔴 NOT centred in the space below it, and that was tried and measured on
 // 2026-09-08 rather than merely not thought of. A wrapping label reports a
 // MinSize worked out against whatever width it happens to have when asked, so a
 // column holding one reserves a height that has nothing to do with the text: on
 // the screen next door the same trick gave a label 1366 by 122 for one line 19
-// high. The emptiness of this screen is a shortage of content before a file is
-// open, and moving one sentence into the middle of it does not add any.
+// high.
 func sentence(words string) fyne.CanvasObject {
 	label := widget.NewLabel(words)
 	label.Wrapping = fyne.TextWrapWord
@@ -305,6 +312,63 @@ func (v *View) pathOf(chosen fyne.URIReadCloser, err error) (string, bool) {
 	return chosen.URI().Path(), true
 }
 
+// waiting is the screen before any manifest is open.
+//
+// 🔴 # Why the whole shape rather than one sentence on a black field
+//
+// Measured on 2026-09-08 with tools/pustka.py at the size the window is kept,
+// 1670 by 1210: this state stood 79.5 per cent empty, the emptiest in the
+// window, and carried something on 6.0 per cent of its rows. It is also the
+// state the screen OPENS in, so it is the first thing a person meets and the
+// one no drawing ever shows. What it said about this tool was that the tool has
+// almost nothing to give.
+//
+// # The rule this follows, which is the one the screen next door produced
+//
+// What is true before there is a file stays. What describes a particular file
+// waits. The names of the envelope fields and the headings of the table are
+// true of every manifest, so they are the shape and they are drawn. The values
+// and the entries belong to one file, so there is nothing to draw for them yet
+// and the two sentences say so.
+//
+// Nothing here is content invented to fill the space. Every name on this screen
+// is one the state with a manifest also shows, and the sentences name what each
+// part will hold, which is the question somebody opening this screen has.
+func (v *View) waiting() fyne.CanvasObject {
+	screen := Waiting(v.text)
+	// Three groups with a section between them and a small gap inside each,
+	// rather than one distance between everything. A screen whose parts all
+	// sit the same distance apart groups nothing with anything, which is what
+	// the first draft of this state did and what it looked like.
+	//
+	// The two sentences of the first group are a pair: the first says what to
+	// do, the second says why the button beside it cannot be pressed yet. A
+	// dead control that gives no reason reads as a fault in the program, and
+	// this one is dead for a reason a person can act on.
+	head := parts.Column(palette.NameStepSection,
+		parts.Column(palette.NameStepRelated,
+			wrapped(Line{Text: v.text.T(i18n.ManifestEmpty)}),
+			wrapped(Line{Text: v.text.T(i18n.ManifestResponseWait), Color: palette.NameTextSubdued}),
+		),
+		parts.Column(palette.NameStepRelated,
+			heading(v.text.T(i18n.ManifestHeadingRun)),
+			wrapped(Line{Text: v.text.T(i18n.ManifestRunWait), Color: palette.NameTextSubdued}),
+			panel(names(append(append([]Field{}, screen.Run...), screen.Counts...))),
+		),
+		parts.Column(palette.NameStepRelated,
+			heading(v.text.T(i18n.ManifestHeadingEntries)),
+			wrapped(Line{Text: v.text.T(i18n.ManifestEntriesWait), Color: palette.NameTextSubdued}),
+			panel(v.columnGuide()),
+		),
+	)
+	// No table and no legend here, which are the two things the state with a
+	// manifest puts around them. The table would be a frame around nothing, and
+	// the legend explains the mark in a column whose own sentence above already
+	// says the same thing. A screen that says one thing twice in the state
+	// where it has the least to say is the worst place to say it twice.
+	return container.New(layout.NewBorderLayout(head, nil, nil, nil), head)
+}
+
 // rendered draws a screen value.
 func (v *View) rendered(screen Screen) fyne.CanvasObject {
 	head := container.NewVBox(
@@ -371,17 +435,49 @@ func (v *View) table(rows []Row) fyne.CanvasObject {
 	return entries
 }
 
-// columnNames are the headings, in column order, matching Row.Cells.
-var columnNames = []i18n.Key{
-	i18n.ManifestColumnMutator, i18n.ManifestColumnPlace, i18n.ManifestColumnExpect,
-	i18n.ManifestColumnConfidence, i18n.ManifestColumnStatus, i18n.ManifestColumnDetail,
+// columns are the headings, in column order, matching Row.Cells, each with the
+// sentence that says what it holds.
+//
+// 🔴 One list rather than two, and that is the lesson of the register that let
+// a fourteenth generator in without a type: two lists kept in the same order by
+// hand are two lists that come apart the first time somebody adds to one of
+// them, quietly and without anything going red. Here the pair is the entry, so
+// a seventh column cannot be added without saying what it holds.
+var columns = []struct{ Name, Holds i18n.Key }{
+	{i18n.ManifestColumnMutator, i18n.ManifestWaitMutator},
+	{i18n.ManifestColumnPlace, i18n.ManifestWaitPlace},
+	{i18n.ManifestColumnExpect, i18n.ManifestWaitExpect},
+	{i18n.ManifestColumnConfidence, i18n.ManifestWaitConfidence},
+	{i18n.ManifestColumnStatus, i18n.ManifestWaitStatus},
+	{i18n.ManifestColumnDetail, i18n.ManifestWaitDetail},
 }
 
 func (v *View) columnName(column int) string {
-	if column < 0 || column >= len(columnNames) {
+	if column < 0 || column >= len(columns) {
 		return ""
 	}
-	return v.text.T(columnNames[column])
+	return v.text.T(columns[column].Name)
+}
+
+// columnGuide is the six columns of the entries table with what each one holds,
+// for the state where there are no entries to show them with.
+//
+// 🔴 This stands where the empty table stood in the first draft, and the
+// difference was measured rather than argued. An entries table with headings
+// and no rows took 40 per cent of the height of the render and 46 per cent of
+// the real window, and what a person meets on opening this screen should not be
+// a frame around nothing. The headings carry six words, and a word is not an
+// answer: "Certainty" and "Outcome" mean nothing to somebody who has never run
+// this tool, which is exactly who this state is drawn for.
+func (v *View) columnGuide() fyne.CanvasObject {
+	cells := make([]fyne.CanvasObject, 0, len(columns)*palette.EnvelopeColumns)
+	for _, column := range columns {
+		cells = append(cells, plain(Line{Text: v.text.T(column.Name)}, true))
+		cells = append(cells, wrapped(Line{
+			Text: v.text.T(column.Holds), Color: palette.NameTextSubdued,
+		}))
+	}
+	return container.New(layout.NewFormLayout(), cells...)
 }
 
 // panel lifts what it holds off the background.
@@ -416,6 +512,24 @@ func fields(run, counts []Field) fyne.CanvasObject {
 	all := append(append([]Field{}, run...), counts...)
 	half := (len(all) + 1) / palette.EnvelopeColumns
 	return container.NewHBox(form(all[:half]), form(all[half:]))
+}
+
+// names lists field names in the same two columns the envelope uses, for the
+// state where no value has arrived yet.
+//
+// Split down the middle the way fields splits, so that the waiting screen and
+// the screen with a manifest break their list at the same place.
+func names(all []Field) fyne.CanvasObject {
+	half := (len(all) + 1) / palette.EnvelopeColumns
+	return parts.Row(palette.NameStepMajor, nameColumn(all[:half]), nameColumn(all[half:]))
+}
+
+func nameColumn(fields []Field) fyne.CanvasObject {
+	drawn := make([]fyne.CanvasObject, 0, len(fields))
+	for _, field := range fields {
+		drawn = append(drawn, plain(Line{Text: field.Label, Color: palette.NameTextSubdued}, false))
+	}
+	return parts.Column(palette.NameStepTight, drawn...)
 }
 
 // form is one column of label and value pairs.
