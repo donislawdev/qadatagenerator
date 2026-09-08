@@ -123,8 +123,19 @@ type View struct {
 	answerScroll *parts.KeyScroll
 
 	settingsBox *fyne.Container
-	planBox     *fyne.Container
-	runBox      *fyne.Container
+	// settingsWait says why the settings are dead, and stands only while they are.
+	settingsWait *widget.Label
+	planBox      *fyne.Container
+	runBox       *fyne.Container
+	// 🔴 The rules between the three boxes above are held rather than left in
+	// the column, because a rule outlives what it divides. The first version of
+	// the empty state hid every box and left the split showing, which drew two
+	// separators across a half screen dividing nothing from nothing. Hiding a
+	// box now hides the rule with it.
+	answerRules []*widget.Separator
+	// fileWait says what the left pane will hold, so that a person sees the
+	// shape of this screen before choosing anything rather than a blank half.
+	fileWait *widget.Label
 
 	layers    *widget.CheckGroup
 	share     *widget.Entry
@@ -202,11 +213,12 @@ func (v *View) Content() fyne.CanvasObject {
 	// The toolkit's own split is used rather than a layout of ours. It also
 	// gives a person the divider, so a wide description can be given room
 	// without this screen deciding for them how much it deserves.
+	v.answerRules = []*widget.Separator{widget.NewSeparator(), widget.NewSeparator()}
 	answer := container.NewVBox(
 		v.settingsBox,
-		widget.NewSeparator(),
+		v.answerRules[0],
 		v.planBox,
-		widget.NewSeparator(),
+		v.answerRules[1],
 		v.runBox,
 	)
 	// 🔴 Both panes scroll with the keyboard rather than with the toolkit's own
@@ -458,10 +470,23 @@ func (v *View) showUnreadable(err error) {
 func (v *View) redraw() {
 	if v.opened == nil {
 		v.empty.Show()
-		v.hideSplit()
+		v.showWaiting()
 		return
 	}
 	v.empty.Hide()
+	v.settingsWait.Hide()
+	v.fileWait.Hide()
+	for _, rule := range v.answerRules {
+		rule.Show()
+	}
+	// Given back, because the state above took them away. Guarded by the run
+	// in flight rather than left to where this happens to be called from: no
+	// caller today redraws during a run, and a rule that holds only while
+	// nobody adds a caller is not a rule. Thawing mid run would put the
+	// settings of the next run under the fingers of somebody watching this one.
+	if !v.busy() {
+		v.thaw()
+	}
 	// Put back what the empty box says, because a read that has just answered
 	// left the sentence about reading in it. It is hidden from here on, so this
 	// is not about what anybody sees: it is about the box holding what it
@@ -495,9 +520,54 @@ func (v *View) hideSplit() {
 	v.settingsBox.Hide()
 	v.planBox.Hide()
 	v.runBox.Hide()
+	for _, rule := range v.answerRules {
+		rule.Hide()
+	}
 	if v.split != nil {
 		v.split.Hide()
 	}
+}
+
+// showWaiting is the screen before a file is chosen: the shape of it, with the
+// settings in place and dead, and each half saying what will stand there.
+//
+// 🔴 # Why the whole shape rather than a bare button
+//
+// Measured on 2026-09-08 with tools/pustka.py at the size the window is kept:
+// this screen stood 64.0 per cent empty in the state it OPENS in, and the state
+// a program opens in is the one no drawing shows and the first a person meets.
+// What it said about this tool was that the tool does almost nothing.
+//
+// Nothing here is new content invented to fill space. The settings existed and
+// were hidden, and what the two sentences add is the name of what each half is
+// for, which is the question somebody opening this screen actually has.
+//
+// # What stays away, and why it is not the same answer
+//
+// The plan and the result describe a PARTICULAR file: what a run would do to it
+// and what a run of it produced. With no file each is a heading over nothing,
+// which is the box somebody forgot to fill rather than a screen that is
+// waiting. The settings differ because they are true before there is a file:
+// they are what a run WOULD use, and they are what somebody wants to set while
+// looking for one.
+func (v *View) showWaiting() {
+	if v.split == nil {
+		// Called once from New, before Content has built the split. There is
+		// nothing on screen yet to put into a state.
+		v.hideSplit()
+		return
+	}
+	v.split.Show()
+	v.fileBox.Show()
+	v.fileWait.Show()
+	v.settingsBox.Show()
+	v.settingsWait.Show()
+	v.planBox.Hide()
+	v.runBox.Hide()
+	for _, rule := range v.answerRules {
+		rule.Hide()
+	}
+	v.previewSettings()
 }
 
 // wrapped is a paragraph that follows the width of the window rather than

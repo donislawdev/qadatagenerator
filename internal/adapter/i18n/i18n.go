@@ -90,8 +90,16 @@ const (
 // today from one that becomes reachable the day somebody swaps a list for a
 // text field.
 const (
-	TakeChoose     Key = "take.choose"
-	TakeEmpty      Key = "take.empty"
+	TakeChoose Key = "take.choose"
+	TakeEmpty  Key = "take.empty"
+	// TakeSettingsWait says why the settings below it cannot be touched yet.
+	// They are on screen before a file is chosen so that the screen shows what
+	// it does before it is asked to do it, and a row of dead controls with no
+	// reason beside them reads as a broken screen rather than as a waiting one.
+	TakeSettingsWait Key = "take.settings.wait"
+	// TakeFileWait names what the left half will hold, so that the half is
+	// waiting rather than blank before a file is chosen.
+	TakeFileWait   Key = "take.file.wait"
 	TakeDrop       Key = "take.drop"
 	TakeUnreadable Key = "take.unreadable"
 	TakeReading    Key = "take.reading"
@@ -491,7 +499,7 @@ var Keys = []Key{
 	ManifestFailureRunLacksCapability, ManifestFailureFieldTypeNotCovered,
 	ManifestFailureSchemeNotCovered, ManifestFailureDeclinedByMutator,
 
-	TakeChoose, TakeEmpty, TakeDrop, TakeUnreadable, TakeReading,
+	TakeChoose, TakeEmpty, TakeSettingsWait, TakeFileWait, TakeDrop, TakeUnreadable, TakeReading,
 	TakeHeadingFile, TakeHeadingSettings, TakeHeadingPlan, TakeHeadingResult,
 	TakeFileRows, TakeFileColumns, TakeFileNothingDeclared,
 	TakeFileTakenFor, TakeFileBecause, TakeFileAgreesWith,

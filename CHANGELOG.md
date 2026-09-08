@@ -12,6 +12,12 @@ repository once they are released.
 
 ### Fixed
 
+- **Every list you pick from now shows what is picked.** The chooser controls on
+  the Quick value and Take and corrupt screens drew as empty boxes: the kind of
+  value, the locale, the gender and the settings all had their text missing,
+  with a stray mark in the corner where it should have been. They report what
+  you chose and act on it correctly again.
+
 - **A gender written the short way now reaches every value that reads one.**
   A recipe binding a gender as f, k or the digits an export gives was understood
   by a PESEL and ignored by the generator of first names, so one row could carry
@@ -31,13 +37,11 @@ repository once they are released.
   a short list of data behind it may repeat.
   The Quick value screen opens showing ten, with a list to change how many.
 
-### Fixed
-
-- **Every list you pick from now shows what is picked.** The chooser controls on
-  the Quick value and Take and corrupt screens drew as empty boxes: the kind of
-  value, the locale, the gender and the settings all had their text missing,
-  with a stray mark in the corner where it should have been. They report what
-  you chose and act on it correctly again.
+- **The Take and corrupt screen now shows what it does before you choose a
+  file.** The settings a run would use are on screen from the start, greyed
+  out until a file is chosen, and each half of the screen says what will
+  appear in it. It used to open as one button and two sentences with an
+  otherwise empty window.
 
 - **Damage that swaps two adjacent digits, and says when the swap was invisible.**
   Transposing a pair of neighbouring digits is the mistake people make most

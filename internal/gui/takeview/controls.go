@@ -76,8 +76,15 @@ func (v *View) buildControls() {
 	v.chooseFile = parts.NewButton(v.text.T(i18n.TakeChoose), v.choose)
 	v.damage = parts.NewButton(v.text.T(i18n.TakeRun), v.Start)
 	v.stop = parts.NewButton(v.text.T(i18n.TakeStop), v.Stop)
+	// The sentence saying why the settings are dead sits between the heading
+	// and the form, and is hidden the moment a file arrives. Held on the view
+	// because redraw shows and hides it, and a screen built once cannot reach
+	// it any other way.
+	v.settingsWait = wrapped(v.text.T(i18n.TakeSettingsWait))
+	v.fileWait = wrapped(v.text.T(i18n.TakeFileWait))
+	v.fileBox.Objects = []fyne.CanvasObject{v.fileWait}
 	v.settingsBox.Objects = []fyne.CanvasObject{
-		heading(v.text.T(i18n.TakeHeadingSettings)), v.form(),
+		heading(v.text.T(i18n.TakeHeadingSettings)), v.settingsWait, v.form(),
 	}
 }
 

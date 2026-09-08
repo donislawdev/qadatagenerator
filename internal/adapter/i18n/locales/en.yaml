@@ -112,6 +112,8 @@ verify.kind.missing: the application never answered for this row
 take.choose: Choose a file
 take.empty: Choose a file this tool did not make. Nothing is read until you choose one, and nothing is written until you ask for it.
 take.drop: You can also drop a file onto this window.
+take.settings.wait: These are the settings a run would use. They come alive once a file is chosen.
+take.file.wait: What the file holds appears here. How many records it has, what each column was taken for, and what this tool could not work out.
 take.unreadable: This file could not be read.
 take.reading: This file is being read, which means walking all of it. Nothing is written while that goes on, and the screen answers again as soon as it knows what the file holds.
 

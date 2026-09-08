@@ -258,17 +258,62 @@ func (v *View) freeze() { v.setControls(false) }
 func (v *View) thaw() { v.setControls(true) }
 
 func (v *View) setControls(usable bool) {
-	controls := []fyne.Disableable{
-		v.layers, v.share, v.perRow, v.exclude, v.delimiter, v.locale, v.seed,
-		v.out, v.manifest, v.overwrite, v.chooseFile,
-	}
-	for _, control := range controls {
+	for _, control := range append(v.settingControls(), v.chooseFile) {
 		if usable {
 			control.Enable()
 			continue
 		}
 		control.Disable()
 	}
+}
+
+// settingControls is every setting of a run, WITHOUT the button that chooses
+// the file.
+//
+// 🔴 The separation exists because the two states that disable these want
+// opposite things from that button. A run in flight disables it as well: the
+// file is being read from, and choosing another one halfway would damage one
+// file and describe another. A screen with no file yet must leave it the one
+// live thing on the screen, because it is the only way forward and a screen
+// where nothing at all can be pressed reads as broken rather than as waiting.
+func (v *View) settingControls() []fyne.Disableable {
+	return []fyne.Disableable{
+		v.layers, v.share, v.perRow, v.exclude, v.delimiter, v.locale, v.seed,
+		v.out, v.manifest, v.overwrite,
+	}
+}
+
+// previewSettings leaves the settings on screen for somebody who has chosen no
+// file, disabled, so that the screen says what it does before it is asked to do
+// it.
+//
+// 🔴 # Why they are shown at all before there is a file
+//
+// Measured on 2026-09-08 with tools/pustka.py at the size the window is
+// actually kept: this screen stood 64.0 per cent empty in the state it OPENS
+// in, with a heading, two sentences and one button in the top third and
+// nothing under them. The state a program opens in is the one nobody draws and
+// the first one a person meets, and what it said about this tool was that the
+// tool does almost nothing.
+//
+// Everything under here already existed and was hidden. Showing it costs no new
+// content and answers the question somebody opening this screen actually has,
+// which is what this thing is going to do to their file.
+//
+// # Why disabled rather than live
+//
+// Every one of them describes a run of a file, and there is no file. A live
+// control that silently governs nothing is the worse of the two, and this
+// screen already answers a run in flight the same way: disabled beside its
+// reason rather than absent, because a control that vanishes leaves a person
+// looking for it.
+func (v *View) previewSettings() {
+	for _, control := range v.settingControls() {
+		control.Disable()
+	}
+	// Live, and it is the only one. Everything else on this screen is waiting
+	// for what this button produces.
+	v.chooseFile.Enable()
 }
 
 // drawRun draws the button that starts a run, and whatever the last one left.
