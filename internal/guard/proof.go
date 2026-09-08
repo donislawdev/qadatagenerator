@@ -120,6 +120,24 @@ var toolGuards = []Guard{
 	{"the background is the reference of the measurement and never one of its subjects", "TestEveryNameInThePaletteIsUsedOnce", "internal/gui/theme", ByMutation},
 	{"a colour constant and a palette entry answer to each other", "TestEveryColourNameAndEntryAnswerToEachOther", "internal/gui/theme", ByMutation},
 
+	// --- the visual system: the ladders, the tokens and the icon loader -----
+	//
+	// The register above guards the palette measured for the first window.
+	// These guard the ladders that DEC-232 added beside it, and the thing they
+	// really guard is the pair a token carries: the threshold it answers to and
+	// the grounds it stands on. Every one below was proved by putting a
+	// measured fault of the accepted drawing back in and watching it fail.
+	{"every token reaches its threshold on every ground it is drawn on", "TestEveryTokenReachesItsThresholdOnEveryGroundItStandsOn", "internal/gui/theme", ByMutation},
+	{"a ladder rises step by step, which is what makes a step one step", "TestEveryLadderRisesStepByStep", "internal/gui/theme", ByMutation},
+	{"a token constant and a token entry answer to each other", "TestEveryTokenNameAndEntryAnswerToEachOther", "internal/gui/theme", ByMutation},
+	{"a token is either a ground or is measured against one", "TestATokenIsEitherAGroundOrIsMeasuredAgainstOne", "internal/gui/theme", ByMutation},
+	{"no rung of the type ladder is large text, so one threshold answers for all of them", "TestNoRungOfTheTypeLadderIsLargeTextByWCAG", "internal/gui/theme", ByMutation},
+	{"an icon carries our colour rather than the black the decoder would leave", "TestTheLoaderLeavesNeitherSourceValueBehind", "internal/gui/paint", ByMutation},
+	{"the same icon twice is the same resource, so a stored tree does not move on its own", "TestTheSameIconTwiceIsTheSameResource", "internal/gui/paint", ByMutation},
+	{"an icon holds its stroke width on screen rather than scaling it away", "TestTheStrokeRisesAsTheIconGetsSmaller", "internal/gui/paint", ByMutation},
+	{"an icon name and an embedded file answer to each other", "TestEveryIconNameAndFileAnswerToEachOther", "internal/gui/paint", ByMutation},
+	{"every embedded icon carries what the loader rewrites, so no substitution misses in silence", "TestEveryEmbeddedIconCarriesWhatTheLoaderRewrites", "internal/gui/paint", ByMutation},
+
 	// --- the window never asks the toolkit to leave this machine ------------
 	//
 	// The import scan answers about our own packages. The toolkit is one
