@@ -12,6 +12,11 @@ repository once they are released.
 
 ### Fixed
 
+- **Every heading of the manifest table is now readable.** The column saying how
+  certain an expectation is had nine times the room its two words need, and the
+  last column, the one carrying the explanation, was cut through the middle of
+  its own heading. The table is narrower and all six headings fit.
+
 - **The Quick value screen now tells you why it turned a request down.** Asking
   for a value it could not produce showed the line it shows before you have
   chosen anything, so a date of birth written the wrong way round answered with
