@@ -216,8 +216,8 @@
 												<rectangle fillColor="separator" size="483x4"/>
 											</widget>
 										</container>
-										<widget pos="0,63" size="483x65" type="*widget.Label">
-											<widget size="483x65" type="*widget.RichText">
+										<widget pos="0,63" size="483x27" type="*widget.Label">
+											<widget size="483x27" type="*widget.RichText">
 												<text color="disabled" pos="4,4" size="326x19">Choose a kind above, and the value appears here.</text>
 											</widget>
 										</widget>

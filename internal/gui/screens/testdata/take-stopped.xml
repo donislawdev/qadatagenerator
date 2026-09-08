@@ -107,13 +107,13 @@
 				<container pos="0,64" size="1086x819">
 					<container size="1086x819">
 						<container pos="24,24" size="1038x771">
-							<container size="1038x82">
-								<widget size="1038x46" type="*widget.Label">
-									<widget size="1038x46" type="*widget.RichText">
+							<container size="1038x63">
+								<widget size="1038x27" type="*widget.Label">
+									<widget size="1038x27" type="*widget.RichText">
 										<text color="disabled" pos="4,4" size="918x19">See how your import behaves when the data is not perfect. The file you choose is never changed, and the damaged copy is written beside it.</text>
 									</widget>
 								</widget>
-								<container pos="0,54" size="1038x28">
+								<container pos="0,35" size="1038x28">
 									<container size="96x28">
 										<widget size="96x28" type="*container.ThemeOverride">
 											<container size="96x28">
@@ -132,10 +132,10 @@
 									</container>
 								</container>
 							</container>
-							<widget pos="0,90" size="1038x681" type="*container.Split">
-								<container size="516x681">
-									<rectangle size="516x681" strokeWidth="2"/>
-									<widget size="516x681" type="*parts.KeyScroll">
+							<widget pos="0,71" size="1038x700" type="*container.Split">
+								<container size="516x700">
+									<rectangle size="516x700" strokeWidth="2"/>
+									<widget size="516x700" type="*parts.KeyScroll">
 										<container size="516x797">
 											<container size="516x39">
 												<widget size="516x27" type="*widget.Label">
@@ -281,23 +281,23 @@
 												</widget>
 											</widget>
 										</container>
-										<widget pos="0,681" size="516x0" type="*widget.Shadow">
+										<widget pos="0,700" size="516x0" type="*widget.Shadow">
 											<linearGradient endColor="shadow" pos="0,-8" size="516x8"/>
 										</widget>
-										<widget pos="510,0" size="6x681" type="*widget.scrollBarArea">
-											<widget pos="3,0" size="3x581" type="*widget.scrollBar">
-												<rectangle fillColor="scrollbar" radius="3" size="3x581"/>
+										<widget pos="510,0" size="6x700" type="*widget.scrollBarArea">
+											<widget pos="3,0" size="3x614" type="*widget.scrollBar">
+												<rectangle fillColor="scrollbar" radius="3" size="3x614"/>
 											</widget>
 										</widget>
 									</widget>
 								</container>
-								<widget pos="516,0" size="5x681" type="*container.divider">
-									<rectangle fillColor="shadow" size="5x681"/>
-									<rectangle fillColor="foreground" pos="0,324" size="4x32"/>
+								<widget pos="516,0" size="5x700" type="*container.divider">
+									<rectangle fillColor="shadow" size="5x700"/>
+									<rectangle fillColor="foreground" pos="0,334" size="4x32"/>
 								</widget>
-								<container pos="521,0" size="516x681">
-									<rectangle size="516x681" strokeWidth="2"/>
-									<widget size="516x681" type="*parts.KeyScroll">
+								<container pos="521,0" size="516x700">
+									<rectangle size="516x700" strokeWidth="2"/>
+									<widget size="516x700" type="*parts.KeyScroll">
 										<container size="516x1097">
 											<container size="516x579">
 												<container size="516x39">
@@ -660,12 +660,12 @@
 												</container>
 											</container>
 										</container>
-										<widget pos="0,681" size="516x0" type="*widget.Shadow">
+										<widget pos="0,700" size="516x0" type="*widget.Shadow">
 											<linearGradient endColor="shadow" pos="0,-8" size="516x8"/>
 										</widget>
-										<widget pos="510,0" size="6x681" type="*widget.scrollBarArea">
-											<widget pos="3,0" size="3x422" type="*widget.scrollBar">
-												<rectangle fillColor="scrollbar" radius="3" size="3x422"/>
+										<widget pos="510,0" size="6x700" type="*widget.scrollBarArea">
+											<widget pos="3,0" size="3x446" type="*widget.scrollBar">
+												<rectangle fillColor="scrollbar" radius="3" size="3x446"/>
 											</widget>
 										</widget>
 									</widget>

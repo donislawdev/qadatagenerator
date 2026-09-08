@@ -112,8 +112,8 @@
 									<text color="disabled" pos="4,4" size="269x19">Nothing on this screen is written to a file.</text>
 								</widget>
 							</widget>
-							<container pos="0,51" size="1038x291">
-								<container size="515x291">
+							<container pos="0,51" size="1038x253">
+								<container size="515x253">
 									<widget size="515x202" type="*widget.Form">
 										<container size="515x202">
 											<container size="515x202">
@@ -237,8 +237,8 @@
 										</container>
 									</widget>
 								</container>
-								<container pos="523,0" size="515x291">
-									<container pos="32,0" size="483x291">
+								<container pos="523,0" size="515x253">
+									<container pos="32,0" size="483x253">
 										<container size="483x39">
 											<widget size="483x27" type="*widget.Label">
 												<widget size="483x27" type="*widget.RichText">
@@ -249,12 +249,12 @@
 												<rectangle fillColor="separator" size="483x4"/>
 											</widget>
 										</container>
-										<widget pos="0,63" size="483x65" type="*widget.Label">
-											<widget size="483x65" type="*widget.RichText">
+										<widget pos="0,63" size="483x27" type="*widget.Label">
+											<widget size="483x27" type="*widget.RichText">
 												<text color="disabled" pos="4,4" size="326x19">Choose a kind above, and the value appears here.</text>
 											</widget>
 										</widget>
-										<container pos="0,152" size="483x139">
+										<container pos="0,114" size="483x139">
 											<container size="483x39">
 												<widget size="483x27" type="*widget.Label">
 													<widget size="483x27" type="*widget.RichText">

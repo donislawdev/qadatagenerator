@@ -107,13 +107,13 @@
 				<container pos="0,64" size="1086x819">
 					<container size="1086x819">
 						<container pos="24,24" size="1038x771">
-							<container size="1038x190">
-								<widget size="1038x65" type="*widget.Label">
-									<widget size="1038x65" type="*widget.RichText">
+							<container size="1038x133">
+								<widget size="1038x27" type="*widget.Label">
+									<widget size="1038x27" type="*widget.RichText">
 										<text color="disabled" pos="4,4" size="918x19">See how your import behaves when the data is not perfect. The file you choose is never changed, and the damaged copy is written beside it.</text>
 									</widget>
 								</widget>
-								<container pos="0,73" size="1038x28">
+								<container pos="0,35" size="1038x28">
 									<container size="96x28">
 										<widget size="96x28" type="*container.ThemeOverride">
 											<container size="96x28">
@@ -131,24 +131,24 @@
 										</container>
 									</container>
 								</container>
-								<container pos="0,109" size="1038x81">
-									<widget size="1038x46" type="*widget.Label">
-										<widget size="1038x46" type="*widget.RichText">
+								<container pos="0,71" size="1038x62">
+									<widget size="1038x27" type="*widget.Label">
+										<widget size="1038x27" type="*widget.RichText">
 											<text pos="4,4" size="758x19">Choose a file this tool did not make. Nothing is read until you choose one, and nothing is written until you ask for it.</text>
 										</widget>
 									</widget>
-									<widget pos="0,54" size="1038x27" type="*widget.Label">
+									<widget pos="0,35" size="1038x27" type="*widget.Label">
 										<widget size="1038x27" type="*widget.RichText">
 											<text pos="4,4" size="271x19">You can also drop a file onto this window.</text>
 										</widget>
 									</widget>
 								</container>
 							</container>
-							<widget pos="0,198" size="1038x573" type="*container.Split">
-								<container size="516x573">
-									<rectangle size="516x573" strokeWidth="2"/>
-									<widget size="516x573" type="*parts.KeyScroll">
-										<container size="516x573">
+							<widget pos="0,141" size="1038x630" type="*container.Split">
+								<container size="516x630">
+									<rectangle size="516x630" strokeWidth="2"/>
+									<widget size="516x630" type="*parts.KeyScroll">
+										<container size="516x630">
 											<widget size="516x46" type="*widget.Label">
 												<widget size="516x46" type="*widget.RichText">
 													<text pos="4,4" size="457x19">What the file holds appears here. How many records it has, what each</text>
@@ -158,14 +158,14 @@
 										</container>
 									</widget>
 								</container>
-								<widget pos="516,0" size="5x573" type="*container.divider">
-									<rectangle fillColor="shadow" size="5x573"/>
-									<rectangle fillColor="foreground" pos="0,270" size="4x32"/>
+								<widget pos="516,0" size="5x630" type="*container.divider">
+									<rectangle fillColor="shadow" size="5x630"/>
+									<rectangle fillColor="foreground" pos="0,299" size="4x32"/>
 								</widget>
-								<container pos="521,0" size="516x573">
-									<rectangle size="516x573" strokeWidth="2"/>
-									<widget size="516x573" type="*parts.KeyScroll">
-										<container size="516x614">
+								<container pos="521,0" size="516x630">
+									<rectangle size="516x630" strokeWidth="2"/>
+									<widget size="516x630" type="*parts.KeyScroll">
+										<container size="516x630">
 											<container size="516x614">
 												<container size="516x39">
 													<widget size="516x27" type="*widget.Label">
@@ -384,14 +384,6 @@
 												</widget>
 											</container>
 										</container>
-										<widget pos="0,573" size="516x0" type="*widget.Shadow">
-											<linearGradient endColor="shadow" pos="0,-8" size="516x8"/>
-										</widget>
-										<widget pos="510,0" size="6x573" type="*widget.scrollBarArea">
-											<widget pos="3,0" size="3x534" type="*widget.scrollBar">
-												<rectangle fillColor="scrollbar" radius="3" size="3x534"/>
-											</widget>
-										</widget>
 									</widget>
 								</container>
 							</widget>

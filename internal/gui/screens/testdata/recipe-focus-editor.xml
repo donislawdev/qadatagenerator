@@ -107,19 +107,19 @@
 				<container pos="0,64" size="1086x819">
 					<container size="1086x819">
 						<container pos="24,24" size="1038x771">
-							<widget size="1038x46" type="*widget.Label">
-								<widget size="1038x46" type="*widget.RichText">
+							<widget size="1038x27" type="*widget.Label">
+								<widget size="1038x27" type="*widget.RichText">
 									<text color="disabled" pos="4,4" size="803x19">A recipe is a file you keep beside your tests. The same recipe and the same seed produce the same data on every machine.</text>
 								</widget>
 							</widget>
-							<widget pos="0,54" size="1038x717" type="*container.Split">
-								<container size="516x717">
-									<widget size="516x717" type="*parts.Editor">
-										<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="512x713"/>
-										<rectangle pos="1,1" radius="5" size="514x714" strokeColor="primary" strokeWidth="2"/>
-										<widget pos="0,2" size="516x713" type="*widget.Scroll">
-											<widget size="516x713" type="*widget.entryContent">
-												<widget size="516x713" type="*widget.RichText">
+							<widget pos="0,35" size="1038x736" type="*container.Split">
+								<container size="516x736">
+									<widget size="516x736" type="*parts.Editor">
+										<rectangle fillColor="inputBackground" pos="2,2" radius="5" size="512x732"/>
+										<rectangle pos="1,1" radius="5" size="514x733" strokeColor="primary" strokeWidth="2"/>
+										<widget pos="0,2" size="516x732" type="*widget.Scroll">
+											<widget size="516x732" type="*widget.entryContent">
+												<widget size="516x732" type="*widget.RichText">
 													<text monospace pos="4,2" size="117x16">version: "0.1"</text>
 													<text monospace pos="4,18" size="117x16">seed: "sample"</text>
 													<text monospace pos="4,34" size="75x16">entities:</text>
@@ -135,15 +135,15 @@
 										</widget>
 									</widget>
 								</container>
-								<widget pos="516,0" size="5x717" type="*container.divider">
-									<rectangle fillColor="shadow" size="5x717"/>
-									<rectangle fillColor="foreground" pos="0,342" size="4x32"/>
+								<widget pos="516,0" size="5x736" type="*container.divider">
+									<rectangle fillColor="shadow" size="5x736"/>
+									<rectangle fillColor="foreground" pos="0,352" size="4x32"/>
 								</widget>
-								<container pos="521,0" size="516x717">
-									<container size="516x250">
-										<rectangle size="516x250" strokeWidth="2"/>
-										<widget size="516x250" type="*parts.KeyScroll">
-											<container size="516x250">
+								<container pos="521,0" size="516x736">
+									<container size="516x284">
+										<rectangle size="516x284" strokeWidth="2"/>
+										<widget size="516x284" type="*parts.KeyScroll">
+											<container size="516x284">
 												<container size="516x39">
 													<widget size="516x27" type="*widget.Label">
 														<widget size="516x27" type="*widget.RichText">
@@ -193,7 +193,7 @@
 											</container>
 										</widget>
 									</container>
-									<container pos="0,258" size="516x458">
+									<container pos="0,292" size="516x443">
 										<container size="516x209">
 											<rectangle fillColor="background" radius="5" size="516x209" strokeColor="separator" strokeWidth="2"/>
 											<container size="516x209">
@@ -276,11 +276,11 @@
 												</container>
 											</container>
 										</container>
-										<container pos="0,221" size="516x237">
-											<rectangle fillColor="background" radius="5" size="516x237" strokeColor="separator" strokeWidth="2"/>
-											<container size="516x237">
-												<container pos="0,68" size="516x169">
-													<container pos="12,12" size="492x145">
+										<container pos="0,221" size="516x222">
+											<rectangle fillColor="background" radius="5" size="516x222" strokeColor="separator" strokeWidth="2"/>
+											<container size="516x222">
+												<container pos="0,68" size="516x154">
+													<container pos="12,12" size="492x130">
 														<container size="492x48">
 															<rectangle fillColor="background" radius="5" size="492x48" strokeColor="separator" strokeWidth="2"/>
 															<container size="492x48">
@@ -309,8 +309,8 @@
 															</container>
 															<spacer pos="123,0" size="376x28"/>
 														</container>
-														<widget pos="0,92" size="492x52" type="*widget.Label">
-															<widget size="492x52" type="*widget.RichText">
+														<widget pos="0,92" size="492x37" type="*widget.Label">
+															<widget size="492x37" type="*widget.RichText">
 																<text color="disabled" pos="4,4" size="461x14" textSize="11">The file name above is an example. This window does not write the recipe file, so save the</text>
 																<text color="disabled" pos="4,18" size="303x14" textSize="11">recipe beside your tests and use its name in the command.</text>
 															</widget>

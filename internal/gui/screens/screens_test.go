@@ -307,10 +307,24 @@ func render(t *testing.T, data Data, state State) string {
 	// a canvas has nothing to land on, and a state built before the window is a
 	// state photographed before it happened.
 	Walk(window.Canvas(), state)
-	// 🔴 Laid out twice on purpose. A wrapping label reports a height for the
-	// width it knows about, and on the first pass that is not the width it ends
-	// up with, so it reserves a line it then does not use. Measured in the
-	// neighbouring project as gaps of 24, 24 and then 43 pixels.
+	// 🔴 Laid out twice on purpose, and the second time at a DIFFERENT size. A
+	// wrapping label reports a height for the width it knows about, and on the
+	// first pass that is not the width it ends up with, so it reserves a line it
+	// then does not use.
+	//
+	// 🔴 This was window.Resize(size) twice in a row, and the second call did
+	// nothing at all. A window compares the size it is given against the size it
+	// has and returns when they match, so the second pass never happened and
+	// every stored tree since the first one has carried inflated heights for
+	// every wrapping sentence in this window. Measured on 2026-09-08 on a
+	// sentence that fits one line 19 pixels high: one resize leaves the label
+	// 321 pixels tall, a second resize at the same size leaves it 321, and a
+	// resize to another size followed by the target gives 35.
+	//
+	// The sentence this replaces cited a measurement from the neighbouring
+	// project rather than one taken here, which is the whole of how it survived:
+	// there was a number, so it read as checked.
+	window.Resize(fyne.NewSize(size.Width-1, size.Height))
 	window.Resize(size)
 	return test.RenderToMarkup(window.Canvas())
 }

@@ -107,13 +107,13 @@
 				<container pos="0,64" size="1086x819">
 					<container size="1086x819">
 						<container pos="24,24" size="1038x771">
-							<container size="1038x120">
-								<widget size="1038x84" type="*widget.Label">
-									<widget size="1038x84" type="*widget.RichText">
+							<container size="1038x63">
+								<widget size="1038x27" type="*widget.Label">
+									<widget size="1038x27" type="*widget.RichText">
 										<text color="disabled" pos="4,4" size="984x19">A manifest says what to expect from every record a run damaged. Add the answer your application gave, and this screen says where the two disagree.</text>
 									</widget>
 								</widget>
-								<container pos="0,92" size="1038x28">
+								<container pos="0,35" size="1038x28">
 									<container size="123x28">
 										<widget size="123x28" type="*container.ThemeOverride">
 											<container size="123x28">
@@ -147,10 +147,10 @@
 									</container>
 								</container>
 							</container>
-							<container pos="0,128" size="1038x643">
-								<widget size="1038x643" type="*widget.Scroll">
-									<widget size="1038x643" type="*widget.Label">
-										<widget size="1038x643" type="*widget.RichText">
+							<container pos="0,71" size="1038x700">
+								<widget size="1038x700" type="*widget.Scroll">
+									<widget size="1038x700" type="*widget.Label">
+										<widget size="1038x700" type="*widget.RichText">
 											<text pos="4,4" size="895x19">No manifest is open. Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data.</text>
 										</widget>
 									</widget>

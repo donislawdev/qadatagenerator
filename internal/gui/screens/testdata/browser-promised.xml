@@ -107,13 +107,13 @@
 				<container pos="0,64" size="1086x819">
 					<container size="1086x819">
 						<container pos="24,24" size="1038x771">
-							<container size="1038x101">
-								<widget size="1038x65" type="*widget.Label">
-									<widget size="1038x65" type="*widget.RichText">
+							<container size="1038x63">
+								<widget size="1038x27" type="*widget.Label">
+									<widget size="1038x27" type="*widget.RichText">
 										<text color="disabled" pos="4,4" size="984x19">A manifest says what to expect from every record a run damaged. Add the answer your application gave, and this screen says where the two disagree.</text>
 									</widget>
 								</widget>
-								<container pos="0,73" size="1038x28">
+								<container pos="0,35" size="1038x28">
 									<container size="123x28">
 										<widget size="123x28" type="*container.ThemeOverride">
 											<container size="123x28">
@@ -148,8 +148,8 @@
 									</container>
 								</container>
 							</container>
-							<container pos="0,109" size="1038x662">
-								<container size="1038x662">
+							<container pos="0,71" size="1038x700">
+								<container size="1038x700">
 									<container size="1038x273">
 										<container size="1038x218">
 											<rectangle fillColor="background" size="1038x218"/>
@@ -241,18 +241,18 @@
 											</widget>
 										</container>
 									</container>
-									<container pos="0,581" size="1038x81">
-										<rectangle fillColor="background" size="1038x81"/>
-										<container size="1038x81">
-											<container pos="8,8" size="1022x65">
-												<widget size="1022x65" type="*widget.RichText">
+									<container pos="0,638" size="1038x62">
+										<rectangle fillColor="background" size="1038x62"/>
+										<container size="1038x62">
+											<container pos="8,8" size="1022x46">
+												<widget size="1022x46" type="*widget.RichText">
 													<text color="disabled" pos="4,4" size="995x19">A soft expectation is marked ~ and means the right answer depends on the rules of your application rather than on the data, so a disagreement there is</text>
 													<text color="disabled" pos="4,23" size="191x19">reported and never failed on.</text>
 												</widget>
 											</container>
 										</container>
 									</container>
-									<widget pos="0,281" size="1038x291" type="*parts.KeyTable">
+									<widget pos="0,281" size="1038x348" type="*parts.KeyTable">
 										<widget size="1038x27" type="*widget.clip">
 											<container size="0x0">
 												<rectangle fillColor="headerBackground" size="1038x27"/>
@@ -270,7 +270,7 @@
 												</widget>
 											</container>
 										</widget>
-										<widget pos="0,27" size="0x264" type="*widget.clip">
+										<widget pos="0,27" size="0x321" type="*widget.clip">
 											<container size="0x0">
 											</container>
 										</widget>
@@ -279,16 +279,16 @@
 												<rectangle fillColor="headerBackground" size="23x27"/>
 											</container>
 										</widget>
-										<widget size="1038x291" type="*widget.clip">
+										<widget size="1038x348" type="*widget.clip">
 											<container size="0x0">
-												<widget pos="282,0" size="4x291" type="*widget.Separator">
-													<rectangle fillColor="separator" size="4x291"/>
+												<widget pos="282,0" size="4x348" type="*widget.Separator">
+													<rectangle fillColor="separator" size="4x348"/>
 												</widget>
-												<widget pos="530,0" size="4x291" type="*widget.Separator">
-													<rectangle fillColor="separator" size="4x291"/>
+												<widget pos="530,0" size="4x348" type="*widget.Separator">
+													<rectangle fillColor="separator" size="4x348"/>
 												</widget>
-												<widget pos="758,0" size="4x291" type="*widget.Separator">
-													<rectangle fillColor="separator" size="4x291"/>
+												<widget pos="758,0" size="4x348" type="*widget.Separator">
+													<rectangle fillColor="separator" size="4x348"/>
 												</widget>
 												<widget pos="0,56" size="1038x4" type="*widget.Separator">
 													<rectangle fillColor="separator" size="1038x4"/>
@@ -307,8 +307,8 @@
 												</widget>
 											</container>
 										</widget>
-										<widget pos="0,27" size="1038x264" type="*widget.Scroll">
-											<widget size="1980x264" type="*widget.tableCells">
+										<widget pos="0,27" size="1038x321" type="*widget.Scroll">
+											<widget size="1980x321" type="*widget.tableCells">
 												<widget size="280x27" type="*widget.RichText">
 													<text pos="4,4" size="159x19">L3.checksum.off_by_one</text>
 												</widget>
@@ -382,10 +382,10 @@
 													<text color="disabled" pos="4,4" size="36x19">~ soft</text>
 												</widget>
 											</widget>
-											<widget pos="1038,0" size="0x264" type="*widget.Shadow">
-												<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x264"/>
+											<widget pos="1038,0" size="0x321" type="*widget.Shadow">
+												<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x321"/>
 											</widget>
-											<widget pos="0,258" size="1038x6" type="*widget.scrollBarArea">
+											<widget pos="0,315" size="1038x6" type="*widget.scrollBarArea">
 												<widget pos="0,3" size="544x3" type="*widget.scrollBar">
 													<rectangle fillColor="scrollbar" radius="3" size="544x3"/>
 												</widget>
