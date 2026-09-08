@@ -40,6 +40,13 @@ repository once they are released.
 
 ### Added
 
+- **The window opens showing values.** The Quick value screen, which is the one
+  the window opens on, used to start as an empty form with nothing chosen. It
+  now starts on a kind and shows ten values, the line that reproduces them in a
+  terminal, and the seed they came from. The kind it starts on draws from a
+  range reserved for testing, so nothing shown before you have asked for
+  anything can belong to a real person.
+
 - **The manifest browser says what it will show you before you open anything.**
   It used to open on one sentence and an empty screen. It now lists the fields
   every manifest carries about the run that wrote it, and the six columns each
