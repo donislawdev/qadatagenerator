@@ -15,7 +15,76 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/domain/response"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
+	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
+
+// Every column of the entries table is wide enough for its heading and for the
+// widest value it can ever hold.
+//
+// 🔴 WRITTEN AFTER THE DEFECT IT GUARDS, measured on 2026-09-08. The column for
+// the certainty of an expectation had 340 pixels to hold one of two words, the
+// wider of which renders 36 across, while the column beside it had 220 to hold a
+// phrase that renders 210. Ten pixels of room on the longest fixed phrase in the
+// table, next to two hundred and seventy five spare on the shortest, on a table
+// already wider than the window it sits in.
+//
+// The comment above those numbers described the proportion correctly in words
+// and had done since the day it was written. Prose was checked and arithmetic
+// was not, which is the thing this asks about.
+//
+// # Why only these three columns
+//
+// They are the ones whose values come from a closed set, so the widest value is
+// a fact rather than a sample. What a damage is called and what changed in a
+// value are as long as somebody's data, and a column for those is a judgement
+// about how much to show rather than a size that can be right or wrong. Every
+// heading is checked, because there are six of those and they are all fixed.
+func TestEveryColumnOfTheEntriesTableFitsWhatItCanHold(t *testing.T) {
+	// Room to spare rather than merely fitting. Text touching the edge of its
+	// cell reads as text that was cut, so a column that fits to the pixel is one
+	// nobody can tell from a column that does not.
+	spare := palette.StepOf(palette.NameStepTight)
+
+	// 🔴 Measured with the text that does NOT trim itself, and the first version
+	// of this used the one that does. A cell of this table trims, so it reports
+	// the width it can be squeezed to rather than the width of what is in it,
+	// and asking it how wide a phrase is answers a different question in a
+	// perfectly plausible number. That version was green against the very
+	// widths it was written to catch, which only came out because it was run
+	// with the defect put back.
+	fits := func(t *testing.T, column int, what, words string) {
+		t.Helper()
+		width := plain(Line{Text: words}, false).MinSize().Width
+		if width+spare > palette.EntryColumnWidths[column] {
+			t.Errorf("column %d is %.0f wide and %s renders %.0f, which leaves %.0f "+
+				"of room where %.0f is asked for", column,
+				palette.EntryColumnWidths[column], what, width,
+				palette.EntryColumnWidths[column]-width, spare)
+		}
+	}
+
+	for column := range columns {
+		fits(t, column, "its heading", i18n.English.T(columns[column].Name))
+	}
+
+	// The closed sets, each named by the column it belongs to, taken from the
+	// catalogue rather than written out here so that a phrase reworded in the
+	// catalogue is measured in its new wording.
+	for _, held := range []struct {
+		column int
+		keys   []i18n.Key
+	}{
+		{2, []i18n.Key{i18n.ManifestExpectationRejection, i18n.ManifestExpectationAcceptance,
+			i18n.ManifestExpectationWarning}},
+		{3, []i18n.Key{i18n.ManifestConfidenceHard, i18n.ManifestConfidenceSoft}},
+		{4, []i18n.Key{i18n.ManifestEntryApplied, i18n.ManifestEntryNotApplied}},
+	} {
+		for _, key := range held.keys {
+			words := i18n.English.T(key)
+			fits(t, held.column, "the value "+words, words)
+		}
+	}
+}
 
 // chosenFile stands in for what a file chooser hands back.
 //

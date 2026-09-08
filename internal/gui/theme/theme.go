@@ -407,7 +407,28 @@ const SidebarWidth float32 = 220
 // Every value is a multiple of the spacing module for the reason recorded with
 // that module: a desktop scales the interface by a factor the user picks, and
 // these land on whole numbers at the common ones.
-var EntryColumnWidths = []float32{280, 240, 220, 340, 140, 720}
+//
+// 🔴 The fourth and third were 340 and 220 until 2026-09-08, and measuring them
+// is what settled the change rather than looking at them.
+//
+// The fourth column holds one of two words, hard or "~ soft", the wider of which
+// renders 36 pixels across against a heading of 65. It had 340, which is nine
+// times its widest value and two hundred and seventy five pixels of nothing, on
+// a table already too wide for the window it sits in. The third holds one of
+// three phrases, the longest rendering 210 across, and it had 220. Ten pixels of
+// room on the column carrying the longest fixed phrase, beside two hundred and
+// seventy five spare on the column carrying the shortest, is the proportion
+// reversed rather than a margin chosen.
+//
+// The paragraph above this one had it right in words the whole time and the
+// numbers under it did not match: one of three phrases, then one of two. The
+// prose was checked and the arithmetic was not, which is why there is now a
+// guard that renders every value each column can hold and asks whether it fits.
+//
+// Ten pixels also fails on the first translation of this window, since a phrase
+// of the same meaning in another language is longer as often as not. The third
+// column now has thirty, and the table is 1740 rather than 1980.
+var EntryColumnWidths = []float32{280, 240, 240, 120, 140, 720}
 
 // EntryColumns is how many columns one entry is laid out in.
 func EntryColumns() int { return len(EntryColumnWidths) }
