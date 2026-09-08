@@ -251,7 +251,7 @@
 										</container>
 										<widget pos="0,63" size="483x27" type="*widget.Label">
 											<widget size="483x27" type="*widget.RichText">
-												<text color="disabled" pos="4,4" size="326x19">Choose a kind above, and the value appears here.</text>
+												<text color="disabled" pos="4,4" size="270x19">A date of birth is written as YYYY-MM-DD.</text>
 											</widget>
 										</widget>
 										<container pos="0,114" size="483x139">

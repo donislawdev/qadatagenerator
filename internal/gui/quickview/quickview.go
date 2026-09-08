@@ -251,7 +251,6 @@ func (v *View) lay() {
 	v.produced = parts.Column(palette.NameStepRelated,
 		parts.Panel(v.value),
 		parts.Row(palette.NameStepRelated, v.copy.OnScreen(), v.again.OnScreen()),
-		v.told,
 	)
 	// The bridge to the other surface, and it comes last because it answers a
 	// question somebody asks after they have what they came for: how do I put
@@ -266,10 +265,26 @@ func (v *View) lay() {
 	// right, because the toolkit walks the objects in the order they were given
 	// and not in the order they are drawn. The screen next door paid for that
 	// once: the button at the top of it was the last stop.
+	// 🔴 What the screen has to SAY stands beside what it produced rather than
+	// inside it, and that was a defect until 2026-09-08 rather than a choice.
+	//
+	// It lived inside v.produced, and settle hides v.produced whenever there is
+	// no value. A refusal is exactly the case where there is no value, so every
+	// refusal this screen can give was hidden by the same call that hid the
+	// empty box it belongs to, and what a person saw instead was the sentence
+	// for a screen nobody has chosen anything on yet. Rendered: a date written
+	// the wrong way round answered "Choose a kind above, and the value appears
+	// here" with a kind chosen two lines above it.
+	//
+	// Found by measuring emptiness rather than by any test. The two refusal
+	// states were the emptiest on this screen after the state that opens it,
+	// and they were empty because the one sentence they exist to show was not
+	// being drawn.
 	answer := parts.Column(palette.NameStepSection,
 		parts.Section(v.text.T(i18n.QuickValueHeading)),
 		v.nothingYet,
 		v.produced,
+		v.told,
 		v.terminal,
 	)
 
@@ -318,13 +333,31 @@ func (v *View) lay() {
 // down may still want to show that request to somebody else. So the terminal
 // row follows the command and the value follows the value, and a refusal shows
 // the line that caused it with no value above it.
+// 🔴 Three states rather than two, corrected on 2026-09-08. Asking only whether
+// there is a value cannot tell a screen nobody has used yet from one that
+// answered no, and those are the two things a person most needs told apart.
+// What the screen has to say is shown whenever it has something to say, which
+// covers both a refusal standing alone and the warning that stands under a list
+// of values.
 func (v *View) settle() {
-	if v.value.Text == "" {
-		v.produced.Hide()
-		v.nothingYet.Show()
-	} else {
+	produced, said := v.value.Text != "", v.told.Text != ""
+	if produced {
 		v.produced.Show()
+	} else {
+		v.produced.Hide()
+	}
+	if said {
+		v.told.Show()
+	} else {
+		v.told.Hide()
+	}
+	// The sentence for a screen that has done nothing yet, and only then. It
+	// used to appear whenever there was no value, which put it under a refusal
+	// telling somebody to do the thing they had just done.
+	if produced || said {
 		v.nothingYet.Hide()
+	} else {
+		v.nothingYet.Show()
 	}
 	if v.command.Text == "" {
 		v.terminal.Hide()

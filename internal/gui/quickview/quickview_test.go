@@ -231,6 +231,57 @@ func TestManyValuesSayTheyMayRepeatAndOneDoesNot(t *testing.T) {
 	}
 }
 
+// A refusal is on the screen, and the sentence for a screen nobody has used is
+// not on it at the same time.
+//
+// 🔴 WRITTEN AFTER THE DEFECT IT GUARDS, found on 2026-09-08 by measuring
+// emptiness rather than by any test. What this screen says lived inside the
+// block holding the value, and that block is hidden whenever there is no value.
+// A refusal is exactly the case where there is no value, so every refusal this
+// screen can give was hidden by the call that hid the empty box beside it, and
+// what stood there instead told somebody to choose a kind they had chosen two
+// lines above. Both refusals rendered that way and every test here was green,
+// because a test reads the text of a label and a person sees whether it is
+// drawn.
+//
+// It asks about VISIBILITY rather than about the text, because the text was
+// right the whole time. Both refusals are covered rather than one: one comes
+// from this screen judging what was typed, the other from the mode judging what
+// this build carries, and they travel by different paths to the same label.
+func TestARefusalIsShownRatherThanHiddenWithTheValue(t *testing.T) {
+	for _, refusal := range []struct {
+		name      string
+		generator string
+		born      string
+	}{
+		{"a date this screen cannot read", "pesel", "05-05-1980"},
+		{"a value this build has no data for", "city", ""},
+	} {
+		t.Run(refusal.name, func(t *testing.T) {
+			view := New(i18n.English, &heldClipboard{})
+			view.UseSeed("for-the-test")
+			view.Choose(refusal.generator)
+			if refusal.born != "" {
+				view.SetBorn(refusal.born)
+			}
+
+			if view.told.Text == "" {
+				t.Fatal("nothing was said about a request that was turned down")
+			}
+			if !view.told.Visible() {
+				t.Errorf("the screen says %q and does not show it", view.told.Text)
+			}
+			if view.nothingYet.Visible() {
+				t.Error("a refusal is on screen beside the sentence for a screen " +
+					"nobody has chosen anything on yet")
+			}
+			if view.produced.Visible() {
+				t.Error("a refusal is on screen beside the box that holds a value")
+			}
+		})
+	}
+}
+
 // TestAFieldIsShownOnlyBesideAValueThatReadsIt holds the rule the design of this
 // screen states, against the measurement rather than against the sentence.
 //

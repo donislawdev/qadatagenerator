@@ -112,8 +112,8 @@
 									<text color="disabled" pos="4,4" size="269x19">Nothing on this screen is written to a file.</text>
 								</widget>
 							</widget>
-							<container pos="0,51" size="1038x616">
-								<container size="515x616">
+							<container pos="0,51" size="1038x628">
+								<container size="515x628">
 									<widget size="515x202" type="*widget.Form">
 										<container size="515x202">
 											<container size="515x202">
@@ -237,8 +237,8 @@
 										</container>
 									</widget>
 								</container>
-								<container pos="523,0" size="515x616">
-									<container pos="32,0" size="483x616">
+								<container pos="523,0" size="515x628">
+									<container pos="32,0" size="483x628">
 										<container size="483x39">
 											<widget size="483x27" type="*widget.Label">
 												<widget size="483x27" type="*widget.RichText">
@@ -249,7 +249,7 @@
 												<rectangle fillColor="separator" size="483x4"/>
 											</widget>
 										</container>
-										<container pos="0,63" size="483x390">
+										<container pos="0,63" size="483x351">
 											<container size="483x311">
 												<rectangle fillColor="background" radius="5" size="483x311" strokeColor="separator" strokeWidth="2"/>
 												<container size="483x311">
@@ -303,13 +303,13 @@
 													</container>
 												</container>
 											</container>
-											<widget pos="0,363" size="483x27" type="*widget.Label">
-												<widget size="483x27" type="*widget.RichText">
-													<text color="disabled" pos="4,4" size="372x19">Values are drawn rather than dealt, so some may repeat.</text>
-												</widget>
-											</widget>
 										</container>
-										<container pos="0,477" size="483x139">
+										<widget pos="0,438" size="483x27" type="*widget.Label">
+											<widget size="483x27" type="*widget.RichText">
+												<text color="disabled" pos="4,4" size="372x19">Values are drawn rather than dealt, so some may repeat.</text>
+											</widget>
+										</widget>
+										<container pos="0,489" size="483x139">
 											<container size="483x39">
 												<widget size="483x27" type="*widget.Label">
 													<widget size="483x27" type="*widget.RichText">
