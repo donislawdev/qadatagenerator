@@ -64,15 +64,38 @@ type Select struct {
 // NewSelect builds a chooser whose value can be read while the keyboard is on
 // it.
 //
-// The toolkit's own constructor is called and its result copied, rather than
-// the fields being set here one by one. It sets a placeholder from a string
-// the toolkit does not export, and a copy of that string here would be a
-// second source that drifts the first time the toolkit changes its wording.
-// The copy is of a widget that has never been drawn, so there is nothing in it
-// yet but the fields that constructor set, and ExtendBaseWidget below points
-// the widget at this type rather than at the one thrown away.
+// # 🔴 Why the toolkit's constructor is read from rather than copied
+//
+// Until 2026-09-08 this line was `&Select{Select: *widget.NewSelect(...)}`, and
+// the comment above it said ExtendBaseWidget would point the widget at this
+// type rather than at the one thrown away. That sentence was false, and it cost
+// every chooser in the window its value.
+//
+// widget.NewSelect ends in s.ExtendBaseWidget(s), so the struct it returns
+// already carries an impl pointing at ITSELF. Copying the struct copies that
+// pointer. ExtendBaseWidget is `if w.super() != nil { return }`
+// (widget/widget.go), so the call below was a no-op, and impl went on naming
+// the discarded widget. BaseWidget.Resize then ends in
+// cache.Renderer(impl).Layout(size) - the size lands on this widget, and the
+// LAYOUT lands on the renderer of the one nobody draws. Measured: every child
+// of the drawn renderer stays 0x0 while the widget itself reports 611x27, so
+// the value is truncated to an ellipsis and drawn at -4,-4. 54 choosers across
+// 22 screen states, on both screens that have one.
+//
+// KeyTable in this same package sets its fields by hand and says why in a
+// sentence that describes this exact trap. A rule written beside a neighbour
+// does not protect the neighbour.
+//
+// The placeholder is READ from a throwaway chooser rather than spelled again
+// here, which keeps the original reason for the copy: the toolkit does not
+// export that string, and a second copy of it would drift the first time the
+// toolkit changed its wording. Reading it costs one widget that is never drawn
+// and never resized, so no impl of ours is involved.
 func NewSelect(options []string, changed func(string)) *Select {
-	chooser := &Select{Select: *widget.NewSelect(options, changed)}
+	chooser := &Select{}
+	chooser.Options = options
+	chooser.OnChanged = changed
+	chooser.PlaceHolder = widget.NewSelect(nil, nil).PlaceHolder
 	chooser.ExtendBaseWidget(chooser)
 	chooser.onScreen, chooser.edge = Outlined(Flooded(chooser, chooser.hasKeyboard))
 	chooser.markEdge()

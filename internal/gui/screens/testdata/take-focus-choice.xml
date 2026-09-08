@@ -390,13 +390,13 @@
 																<widget size="315x27" type="*container.ThemeOverride">
 																	<container size="315x27">
 																		<widget size="315x27" type="*parts.Select">
-																			<rectangle fillColor="inputBackground" radius="5" size="0x0"/>
+																			<rectangle fillColor="focus" radius="5" size="315x27"/>
 																			<rectangle size="0x0"/>
-																			<widget size="0x0" type="*widget.RichText">
-																				<text pos="-4,-4" size="11x19">…</text>
+																			<widget pos="8,8" size="283x11" type="*widget.RichText">
+																				<text color="headerBackground" pos="-4,-4" size="74x19">Exactly one</text>
 																			</widget>
-																			<widget size="0x0" type="*widget.Icon">
-																				<image fillMode="contain" rsc="menuDropDownIcon" size="0x0" themed="foreground"/>
+																			<widget pos="291,3" size="20x20" type="*widget.Icon">
+																				<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
 																			</widget>
 																		</widget>
 																	</container>
@@ -485,13 +485,13 @@
 																<widget size="315x27" type="*container.ThemeOverride">
 																	<container size="315x27">
 																		<widget size="315x27" type="*parts.Select">
-																			<rectangle fillColor="inputBackground" radius="5" size="0x0"/>
+																			<rectangle fillColor="inputBackground" radius="5" size="315x27"/>
 																			<rectangle size="0x0"/>
-																			<widget size="0x0" type="*widget.RichText">
-																				<text pos="-4,-4" size="11x19">…</text>
+																			<widget pos="8,8" size="283x11" type="*widget.RichText">
+																				<text pos="-4,-4" size="33x19">none</text>
 																			</widget>
-																			<widget size="0x0" type="*widget.Icon">
-																				<image fillMode="contain" rsc="menuDropDownIcon" size="0x0" themed="foreground"/>
+																			<widget pos="291,3" size="20x20" type="*widget.Icon">
+																				<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
 																			</widget>
 																		</widget>
 																	</container>

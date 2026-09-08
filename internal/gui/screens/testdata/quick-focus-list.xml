@@ -124,13 +124,13 @@
 													<widget size="447x27" type="*container.ThemeOverride">
 														<container size="447x27">
 															<widget size="447x27" type="*parts.Select">
-																<rectangle fillColor="inputBackground" radius="5" size="0x0"/>
+																<rectangle fillColor="focus" radius="5" size="447x27"/>
 																<rectangle size="0x0"/>
-																<widget size="0x0" type="*widget.RichText">
-																	<text pos="-4,-4" size="11x19">…</text>
+																<widget pos="8,8" size="415x11" type="*widget.RichText">
+																	<text color="headerBackground" pos="-4,-4" size="34x19">pesel</text>
 																</widget>
-																<widget size="0x0" type="*widget.Icon">
-																	<image fillMode="contain" rsc="menuDropDownIcon" size="0x0" themed="foreground"/>
+																<widget pos="423,3" size="20x20" type="*widget.Icon">
+																	<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
 																</widget>
 															</widget>
 														</container>
@@ -146,13 +146,13 @@
 													<widget size="447x27" type="*container.ThemeOverride">
 														<container size="447x27">
 															<widget size="447x27" type="*parts.Select">
-																<rectangle fillColor="inputBackground" radius="5" size="0x0"/>
+																<rectangle fillColor="inputBackground" radius="5" size="447x27"/>
 																<rectangle size="0x0"/>
-																<widget size="0x0" type="*widget.RichText">
-																	<text pos="-4,-4" size="11x19">…</text>
+																<widget pos="8,8" size="415x11" type="*widget.RichText">
+																	<text pos="-4,-4" size="38x19">en-US</text>
 																</widget>
-																<widget size="0x0" type="*widget.Icon">
-																	<image fillMode="contain" rsc="menuDropDownIcon" size="0x0" themed="foreground"/>
+																<widget pos="423,3" size="20x20" type="*widget.Icon">
+																	<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
 																</widget>
 															</widget>
 														</container>
@@ -168,13 +168,13 @@
 													<widget size="447x27" type="*container.ThemeOverride">
 														<container size="447x27">
 															<widget size="447x27" type="*parts.Select">
-																<rectangle fillColor="inputBackground" radius="5" size="0x0"/>
+																<rectangle fillColor="inputBackground" radius="5" size="447x27"/>
 																<rectangle size="0x0"/>
-																<widget size="0x0" type="*widget.RichText">
-																	<text pos="-4,-4" size="11x19">…</text>
+																<widget pos="8,8" size="415x11" type="*widget.RichText">
+																	<text pos="-4,-4" size="23x19">any</text>
 																</widget>
-																<widget size="0x0" type="*widget.Icon">
-																	<image fillMode="contain" rsc="menuDropDownIcon" size="0x0" themed="foreground"/>
+																<widget pos="423,3" size="20x20" type="*widget.Icon">
+																	<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
 																</widget>
 															</widget>
 														</container>
