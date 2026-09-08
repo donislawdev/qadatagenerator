@@ -40,6 +40,11 @@ repository once they are released.
 
 ### Added
 
+- **Each screen now shows which button it is for.** Every button looked the
+  same, so nothing said which one you came for. Damage this file, Copy on the
+  Quick value screen, and Open manifest are now filled. Stop, Again, Choose a
+  file and the buttons that copy a command stay as they were.
+
 - **The window opens showing values.** The Quick value screen, which is the one
   the window opens on, used to start as an empty form with nothing chosen. It
   now starts on a kind and shows ten values, the line that reproduces them in a
