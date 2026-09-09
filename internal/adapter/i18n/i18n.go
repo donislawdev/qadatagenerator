@@ -491,6 +491,21 @@ const (
 	QuickCopy        Key = "quick.copy"
 	QuickAgain       Key = "quick.again"
 	QuickCopied      Key = "quick.copied"
+	// QuickGenerate names the one action this screen is for.
+	//
+	// It exists because a field somebody TYPES into stopped producing on every
+	// keystroke (DEC-235), so there has to be something that says when what was
+	// typed should take effect. Choosing from a list still produces at once.
+	QuickGenerate Key = "quick.generate"
+	// QuickRefusedCountShape is text asked for as a number that never became
+	// one, and QuickRefusedCountMany is more values than this SCREEN shows.
+	//
+	// 🔴 The second one is a limit of the window and of nothing else, so it
+	// names the line at the foot of the screen, which carries no limit at all.
+	// A screen that refuses without saying where the thing it refused can be
+	// had is a screen that made somebody's problem its own.
+	QuickRefusedCountShape Key = "quick.refused.count-shape"
+	QuickRefusedCountMany  Key = "quick.refused.count-many"
 	// QuickLabelCount names the list that chooses how many values to produce,
 	// and QuickMayRepeat is the limit that goes with it. A person asking for
 	// fifty of something drawn from a short list of data will see repeats, and
@@ -549,10 +564,10 @@ var Keys = []Key{
 	QuickAboutHarbour, QuickAboutUnavailable,
 	QuickLabelGender, QuickLabelBorn,
 	QuickLabelLocale, QuickLabelSeed,
-	QuickGenderAny, QuickCopy, QuickAgain, QuickCopied,
+	QuickGenderAny, QuickCopy, QuickAgain, QuickCopied, QuickGenerate,
 	QuickLabelCount, QuickMayRepeat,
 	QuickRefusedGenerator, QuickRefusedRole, QuickRefusedGender, QuickRefusedDate,
-	QuickRefusedCount,
+	QuickRefusedCount, QuickRefusedCountShape, QuickRefusedCountMany,
 	CommandHeading, CommandCopy, CommandCopied,
 	PurposeTake, PurposeRecipe, PurposeManifest, AboutSaveJSON,
 

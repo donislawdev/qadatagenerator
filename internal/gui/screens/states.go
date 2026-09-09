@@ -160,6 +160,24 @@ func quickStatesOfTheKeyboard() []State {
 			// with a border rather than a fill, so the stored tree simply lost
 			// its focus fill and the pattern would have blessed that as the
 			// picture of a focused button.
+			//
+			// 🔴 Thirteen rather than twelve since DEC-235, because Generate
+			// stands after the seed and before the buttons over the card, so
+			// every stop after it moved by one. Taken from tools/klawiatura
+			// again rather than counted here, for the reason above: at twelve
+			// the keyboard now lands on Generate, and the pattern would have
+			// blessed a picture of the wrong button under this name.
+			Keyboard: Keyboard{Tabs: 13},
+		},
+		{
+			Name: "quick-focus-generate",
+			// The one action this screen is for gets a state of its own, for
+			// the reason every other primary action on this window has one: a
+			// filled button marks focus with a ring drawn INSIDE it, and that
+			// ring is a thing only a picture can check.
+			Purpose:  "the keyboard on the button that produces, which is the one action this screen is for",
+			Screen:   screenQuick,
+			Quick:    Quick{Generator: "pesel", Seed: "for-the-picture"},
 			Keyboard: Keyboard{Tabs: 12},
 		},
 	}

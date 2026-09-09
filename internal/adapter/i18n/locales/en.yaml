@@ -344,9 +344,12 @@ quick.gender.any: any
 quick.copy: Copy
 quick.again: Again
 quick.copied: The values are in the clipboard.
+quick.generate: Generate
 quick.may-repeat: Values are drawn rather than dealt, so some may repeat.
 quick.refused.generator: This build cannot produce that value.
 quick.refused.role: That value takes no account of what was chosen beside it.
 quick.refused.gender: That is not a gender this screen takes.
 quick.refused.date: A date of birth is written as YYYY-MM-DD.
 quick.refused.count: This screen asks for at least one value.
+quick.refused.count-shape: How many is a whole number, such as 10.
+quick.refused.count-many: values is the most this screen shows at once. The command line below takes any number.

@@ -46,7 +46,80 @@ const (
 	// on a channel carrying only values it is indistinguishable from a failure
 	// that printed nothing. This verb exists to answer "give me a value".
 	CountNotPositive
+	// CountNotWhole is text asked for as a number of values that never became
+	// one.
+	//
+	// 🔴 It lives here rather than on each surface, and that is the whole
+	// reason it exists. The mode takes an int, so until 2026-09-09 the
+	// question "is this text a number" could only be answered by whoever held
+	// the text - the command line answered it in wholeCount and the window had
+	// no field to ask about. The moment the window offers a field somebody
+	// types into (DEC-235), a second answer would be written, and two answers
+	// to one question are how two surfaces come to disagree about the same
+	// value.
+	CountNotWhole
 )
+
+// MostShownAtOnce is the largest number of values a SCREEN draws at once.
+//
+// 🔴 It is NOT a limit of this mode and Check does not apply it. Run will
+// produce a million values if asked, and the command line asks for them - the
+// number here exists because a window has to build a row for each one on the
+// thread that draws, and that is a cost the command line does not have.
+//
+// It lives in the mode for the same reason DateShape does: a fact a surface
+// needs, kept where both surfaces can see it, so that the window is not the
+// only place it is written down. The guard beside this file holds the other
+// half - that asking Check for this many values is not a refusal.
+//
+// # Why twenty thousand
+//
+// Measured on the card that draws them, three runs of ten at each size, median:
+//
+//	   500 values     0.52 ms     0.57 MB     11 761 allocations
+//	 5 000 values     5.7  ms     5.7  MB    119 762 allocations
+//	20 000 values    27.4  ms    22.8  MB    479 765 allocations
+//	50 000 values    99    ms    57.0  MB  1 199 768 allocations
+//
+// Building is linear and cheap - about 1.1 microseconds and 1.14 kB a value -
+// so the first number tried, five hundred, was picked to sound safe rather than
+// measured, which is the thing the list of four counts was replaced for. Twenty
+// thousand rather than fifty: at fifty the spread opens to 77 against 133 ms,
+// so the measurement has stopped being stable, and the memory is the card alone,
+// rebuilt whole on every draw.
+//
+// 🔴 What it is NOT measured against: painting. The benchmark builds the card
+// and asks its size, which is what blocks the drawing thread. How long the
+// toolkit then spends painting half a million objects a frame is not measured,
+// so this number carries the margin of that ignorance. Verified by hand at the
+// size the window is kept: twenty thousand values are on screen and it answers.
+const MostShownAtOnce = 20000
+
+// CountFrom reads how many values were asked for out of the text somebody
+// typed or passed on a flag.
+//
+// 🔴 strconv.Atoi is base ten whatever the digits look like, and that matters
+// here for a reason this project has already paid for: a count of 010 in a
+// recipe once produced EIGHT rows, because the reader it went through read a
+// leading nought as octal (DEC-170). Atoi reads 010 as ten.
+//
+// It answers the SHAPE only. Whether the number is a number of values - at
+// least one - is Refused's business, so that the two questions keep their two
+// answers and neither surface has to remember both.
+//
+// 🔴 It does NOT trim, and that is deliberate rather than an omission. A flag
+// carries what somebody passed and a padded number is a mistake worth naming,
+// while a field carries what somebody pasted and a seed copied out of a log
+// brings its spaces with it. So the window trims before asking and the command
+// line does not - loosening this here would have quietly widened what an
+// already published flag accepts.
+func CountFrom(text string) (int, Refusal) {
+	number, err := strconv.Atoi(text)
+	if err != nil {
+		return 0, Refusal{Kind: CountNotWhole, Value: text}
+	}
+	return number, Refusal{}
+}
 
 // Refusal is why a value will not be produced, with what it needs to be said
 // properly.

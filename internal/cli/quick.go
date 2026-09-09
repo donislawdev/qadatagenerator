@@ -105,10 +105,15 @@ func runQuick(out *streams, arguments []string, global crossCutting) int {
 // once produced eight rows, because the reader it went through read a leading
 // nought as octal. Atoi reads 010 as ten, and the guard beside this says so.
 func wholeCount(text string) (int, problem) {
-	number, err := strconv.Atoi(text)
-	if err == nil {
+	// 🔴 The reading is the mode's since 2026-09-09, so that the window's field
+	// and this flag cannot come to disagree about what 010 means. What stays
+	// here is the WORDING: this surface says what, why and instead, and the
+	// window says one sentence out of a catalogue.
+	number, refused := quick.CountFrom(text)
+	if refused.Kind == quick.NotRefused {
 		return number, problem{}
 	}
+	_, err := strconv.Atoi(text)
 	if errors.Is(err, strconv.ErrRange) {
 		return 0, problem{
 			what:    problemQuickCountRange + text,

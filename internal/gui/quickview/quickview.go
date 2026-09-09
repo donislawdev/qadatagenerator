@@ -9,11 +9,14 @@
 // been less work and would have hidden the first thing this product promises
 // inside a panel that persona has no reason to open.
 //
-// # Why the value appears without a button being pressed
+// # Why choosing produces and typing does not
 //
-// The promise is under five seconds. A screen that asks somebody to choose a
-// generator and then press Produce has one step too many for that, so choosing
-// is what produces, and the button beside it is for asking again.
+// The promise is under five seconds, so a screen that asks somebody to choose a
+// generator and then press a button has one step too many: choosing is what
+// produces. A field somebody TYPES into is the other half, and it waits for
+// Generate (DEC-235) - because a field that produced on every keystroke made a
+// thirty two character seed regenerate the set thirty two times, and would make
+// a typed count of five hundred do it at 5, at 50 and at 500.
 package quickview
 
 import (
@@ -59,19 +62,27 @@ type View struct {
 	chooser *parts.Select
 	locales *parts.Select
 	gender  *parts.Select
-	// howMany chooses how many values to produce.
+	// howMany is how many values to produce, typed rather than chosen.
 	//
-	// 🔴 A list rather than a field, and the mode ACCEPTS more than this list
-	// offers. That is the same distinction Genders() writes about a few files
-	// away: what a command line takes and what a screen offers are different
-	// questions, and a box a person can type any number into invites one that
-	// fills the window with a wall nobody reads. The command this screen shows
-	// carries the number, so anybody wanting more has the line to paste.
-	howMany *parts.Select
+	// 🔴 It was a list of four until 2026-09-09, on the argument that a box
+	// somebody can type any number into invites one that fills the window with
+	// a wall nobody reads. The owner overruled it in one sentence: a list
+	// LIMITS the number, and the limit was four arbitrary points rather than a
+	// measurement. What replaces the argument is a measured ceiling and a
+	// refusal that names the command line, which has none - so the wall is
+	// still refused and the number is no longer somebody's guess.
+	howMany *widget.Entry
 	born    *widget.Entry
 	seedBox *widget.Entry
-	copy    *parts.PrimaryButton
+	copy    *parts.Button
 	again   *parts.Button
+	// generate is the one action this screen is for, and the only filled
+	// button on it (DEC-235).
+	//
+	// It took that role from copy, which held it from 2026-09-08 only because
+	// it was then the sole thing here anybody presses on purpose. Copying is
+	// what a person does AFTER they have what they came for.
+	generate *parts.PrimaryButton
 
 	// settings holds whichever fields the chosen kind actually reads, and it is
 	// refilled rather than hidden.
@@ -147,27 +158,40 @@ func (v *View) build() {
 		v.draw()
 	})
 	v.gender = parts.NewSelect(v.genderChoices(), func(string) { v.draw() })
-	v.howMany = parts.NewSelect(countChoices, func(string) { v.draw() })
+	// Typed, so it waits for the button like the seed does (DEC-235). Without
+	// that, typing 500 would produce at 5, at 50 and at 500.
+	v.howMany = widget.NewEntry()
+	v.howMany.OnSubmitted = func(string) { v.draw() }
 	v.born = widget.NewEntry()
 	// The shape of the date is on the field rather than only in the refusal
 	// that follows getting it wrong, which is the same reason the seed field
 	// shows the seed that was used.
 	v.born.SetPlaceHolder(quick.DateShape)
-	v.born.OnChanged = func(string) { v.draw() }
+	// A date is typed, so it waits like the seed does (DEC-235). Half a date is
+	// a refusal, and a refusal shown while somebody is still typing the year is
+	// the screen arguing with a person mid sentence.
+	v.born.OnSubmitted = func(string) { v.draw() }
 	// The seed is a field rather than a line of text, and that is what makes
 	// this screen able to do what the flag does. The screen fills it with the
 	// one it used when nobody said, so asking for the same value again is
 	// reading it off the screen rather than out of a log.
 	v.seedBox = widget.NewEntry()
-	v.seedBox.OnChanged = func(typed string) {
-		if typed == v.seed {
-			return
-		}
-		v.seed = typed
-		v.draw()
-	}
+	// 🔴 NOTHING happens while somebody types, and that is DEC-235.
+	//
+	// Until 2026-09-09 this produced on every keystroke, so a thirty two
+	// character seed regenerated the set thirty two times and a person watched
+	// values from seeds they never asked for go by. With a list of four counts
+	// that was merely odd. The moment the count becomes a field somebody types
+	// a number into, typing 10000 would regenerate at 1, 10, 100, 1000 and
+	// 10000, on the thread that draws - so the button is what makes that
+	// change safe rather than a decoration beside it.
+	//
+	// Enter does the same as the button, because a person who typed a seed
+	// has their hands on the keyboard.
+	v.seedBox.OnSubmitted = func(string) { v.draw() }
 
-	v.copy = parts.NewPrimaryButton(v.text.T(i18n.QuickCopy), v.putInClipboard)
+	v.copy = parts.NewButton(v.text.T(i18n.QuickCopy), v.putInClipboard)
+	v.generate = parts.NewPrimaryButton(v.text.T(i18n.QuickGenerate), v.draw)
 	v.again = parts.NewButton(v.text.T(i18n.QuickAgain), v.drawAgain)
 	v.again.ShowIcon(paint.IconAgain)
 
@@ -228,7 +252,7 @@ func (v *View) build() {
 	// Before the locale, because choosing a locale draws, and a draw before
 	// the count has a choice would ask the mode for nought values and be
 	// refused for something nobody touched.
-	v.howMany.SetSelected(opensOn)
+	v.howMany.SetText(opensOn)
 	v.locales.SetSelected(quick.DefaultLocale)
 	// Last, because choosing a kind is what draws, and everything the drawing
 	// reads has to be in place before it runs. This is the call that makes the
@@ -334,24 +358,60 @@ func (v *View) UseLocale(locale string) { v.locales.SetSelected(locale) }
 // one the controls cannot produce.
 func (v *View) Choose(generator string) { v.chooser.SetSelected(generator) }
 
+// Generate presses the button, the way a person with a typed seed would.
+//
+// It goes through the control rather than calling draw, so a button wired to
+// nothing fails the guard that uses this instead of passing it.
+func (v *View) Generate() { v.generate.Tapped(nil) }
+
+// TypeSeed puts characters in the seed field WITHOUT applying them, which is
+// what a person typing does. Generate is the second half.
+//
+// It exists so that a guard can tell the two halves apart. Everything else in
+// this file that sets a field also produces, and a test using those could not
+// see the difference DEC-235 makes.
+func (v *View) TypeSeed(seed string) { v.seedBox.SetText(seed) }
+
 // ChooseGender picks a gender, for the same reason.
 func (v *View) ChooseGender(gender string) { v.gender.SetSelected(gender) }
 
 // ChooseCount picks how many values to produce, for the same reason.
-func (v *View) ChooseCount(howMany string) { v.howMany.SetSelected(howMany) }
+func (v *View) ChooseCount(howMany string) {
+	v.howMany.SetText(howMany)
+	v.draw()
+}
 
-// CountChoices is what this screen offers, so that a guard walks the list the
-// screen has rather than a copy of it written in a test.
-func CountChoices() []string { return append([]string(nil), countChoices...) }
+// Told is what this screen currently says beside the values, or instead of
+// them. A guard reads it rather than looking for a sentence in the tree.
+func (v *View) Told() string { return v.told.Text }
 
-// SetBorn types a date of birth, for the same reason.
-func (v *View) SetBorn(date string) { v.born.SetText(date) }
+// MostShown is the largest number of values this screen draws at once, so that
+// a guard asks the screen rather than repeating the number.
+//
+// It replaces CountChoices, which handed out the four options the list used to
+// offer. There is no list any more: the field takes a number and the ceiling is
+// the only thing left that a guard could disagree with.
+func MostShown() int { return mostShown }
+
+// SetBorn types a date of birth and applies it, which is two acts since
+// DEC-235: a typed field no longer produces on its own, so this is the field
+// plus the button rather than the field alone.
+func (v *View) SetBorn(date string) {
+	v.born.SetText(date)
+	v.draw()
+}
 
 // UseSeed fixes the seed, so that a picture of this screen is the same picture
 // tomorrow. Without it every render would draw a different value and the stored
 // screens would never match.
+// 🔴 It puts the seed in the FIELD and then produces, rather than setting the
+// value behind it. Since DEC-235 the field is the request and produce reads it
+// there, so setting only the field behind would be overwritten by the empty box
+// on the next line - every render would have drawn a random seed and the stored
+// screens would have stopped matching, which is exactly what this method exists
+// to prevent.
 func (v *View) UseSeed(seed string) {
-	v.seed = seed
+	v.seedBox.SetText(seed)
 	v.draw()
 }
 
@@ -396,6 +456,11 @@ func (v *View) produce() {
 	}
 	v.showRows(chosen)
 
+	// What the field holds is the request, and it is read HERE rather than as
+	// somebody types (DEC-235). Trimmed, because a seed pasted out of a log
+	// carries the spaces around it and a person cannot see them.
+	v.seed = strings.TrimSpace(v.seedBox.Text)
+
 	if v.seed == "" {
 		drawn, err := quick.NewSeed()
 		if err != nil {
@@ -418,7 +483,19 @@ func (v *View) produce() {
 	// somebody wants to show it to somebody else.
 	v.command.SetText(v.commandFor(chosen))
 
-	asked := v.request(chosen)
+	// 🔴 Asked BEFORE the request is built, because a request carries an int
+	// and the field carries text. The two questions - is this a number, and is
+	// this a number of values - keep their two answers: the first is the mode's
+	// CountFrom, the second is the mode's Check a few lines below, and only the
+	// ceiling in between belongs to this screen.
+	wanted, saidAboutCount := v.countAsked()
+	if saidAboutCount != "" {
+		v.values = nil
+		v.told.SetText(saidAboutCount)
+		return
+	}
+
+	asked := v.request(chosen, wanted)
 	if refusal := quick.Check(asked); refusal.Refused() {
 		v.values = nil
 		v.told.SetText(v.text.T(refusedSays[refusal.Kind]))
@@ -442,26 +519,40 @@ func (v *View) produce() {
 }
 
 // request is what the person on this screen asked for.
-func (v *View) request(generator string) quick.Request {
+func (v *View) request(generator string, count int) quick.Request {
 	return quick.Request{
 		Generator: generator, Locale: v.locale, Seed: v.seed, Agrees: v.bindings(),
-		Count: v.wanted(),
+		Count: count,
 	}
 }
 
-// wanted is how many values were chosen, as a number.
+// countAsked is how many values were asked for, or the sentence saying why the
+// screen will not ask for them. An empty sentence means the number is good.
 //
-// The list holds text because a chooser does, and the one place it becomes a
-// number is here. A choice that is not a number cannot arrive from a list this
-// screen built, so it falls back to the head of that list rather than to a
-// number written here: a nought would be refused by the mode and a person
-// would see a refusal about something they never touched.
-func (v *View) wanted() int {
-	number, err := strconv.Atoi(v.howMany.Selected)
-	if err != nil {
-		number, _ = strconv.Atoi(opensOn)
+// # What is decided here and what is not
+//
+// Only the CEILING, which is a limit of this screen and of nothing else. Whether
+// the text is a number at all is quick.CountFrom, so the field and the flag read
+// 010 the same way. Whether the number is a number of VALUES - at least one - is
+// quick.Check further down, so a nought is refused by the same rule on both
+// surfaces. Writing either of those here would be a second answer to a question
+// that already has one.
+func (v *View) countAsked() (int, string) {
+	// Trimmed, because a field is pasted into and a person cannot see the
+	// spaces they brought with them. The flag is NOT trimmed, and the reason is
+	// written beside CountFrom.
+	wanted, refused := quick.CountFrom(strings.TrimSpace(v.howMany.Text))
+	if refused.Refused() {
+		return 0, v.text.T(i18n.QuickRefusedCountShape)
 	}
-	return number
+	if wanted > mostShown {
+		// The number is put into the sentence here rather than into the
+		// catalogue, the same way the heading of the card carries its count:
+		// a translated sentence must not have to be edited when a measurement
+		// moves the ceiling.
+		return 0, strconv.Itoa(mostShown) + " " + v.text.T(i18n.QuickRefusedCountMany)
+	}
+	return wanted, ""
 }
 
 // bindings are the values the two fields carry, with an unchosen gender
@@ -500,7 +591,8 @@ func (v *View) showRows(generator string) {
 		// because how many is asked of every generator alike. The fields below
 		// it come and go with what was chosen, so a field that never leaves
 		// belongs before the ones that do.
-		labelled(v.text.T(i18n.QuickLabelCount), v.howMany.OnScreen()),
+		labelled(v.text.T(i18n.QuickLabelCount),
+			paint.AtLeast(paint.FieldWidth(countSample), 0, parts.Standing(v.howMany))),
 		labelled(v.text.T(i18n.QuickLabelLocale), v.locales.OnScreen()),
 	}
 	showing := map[string]bool{}
@@ -539,13 +631,69 @@ func (v *View) showRows(generator string) {
 	// shape() in this package warns about exactly that, and it was written one
 	// function before this one was got wrong, which is the whole argument for
 	// deriving these numbers from tools/klawiatura rather than from reading.
+	// 🔴 The seed stands IN the row with the others and is as wide as a seed,
+	// not as wide as whatever is left over.
+	//
+	// It was the CENTRE of a border layout until 2026-09-09, and a centre is
+	// handed every pixel the edges did not want - so the field ran to the edge
+	// of the window and the owner called it giga long. He was describing
+	// arithmetic: its width was the window minus four controls, whatever that
+	// happened to be. Measured from the face rather than written down, so it
+	// follows the type ladder.
 	settings := paint.Row(palette.NameStepRelated, fixed...)
+	// 🔴 The seed takes what is left BETWEEN the fields and the button, which is
+	// bounded on both sides - and that is the third arrangement this row has had
+	// today, each one refuted by a measurement.
+	//
+	// It was the centre of a border with nothing on its right, so it ran to the
+	// edge of the window: giga long, said the owner. Given a width of its own
+	// instead, measured from the face of a thirty two character seed, it stopped
+	// fitting: the row is handed what the button leaves it, the sum of five
+	// fields asking for their own widths was 98 px more than that, and Fyne does
+	// not clip - so the field drew UNDER Generate in six states out of ten and
+	// nothing fell over. tools/wylewa.py --poziom found it, and only because the
+	// gap probe reported an ink distance of MINUS ninety eight.
+	//
+	// A centre cannot overflow the room it is given. The button on the right is
+	// what stops it running away, which is what a width of its own was for.
 	seed := labelled(v.text.T(i18n.QuickLabelSeed), parts.Standing(v.seedBox))
+	withSeed := container.New(layout.NewBorderLayout(nil, nil, settings, nil),
+		settings, paint.PadLeft(palette.NameStepRelated, seed))
+
+	// The button stands beside the fields rather than under a label of its own,
+	// so it has to drop by the height of the label it does not have. The drop
+	// is read off the type ladder and the scale, not chosen.
+	action := container.NewVBox(
+		paint.Space(0, palette.TypeSize(palette.TypeLabel)+palette.StepOf(palette.NameStepHairline)),
+		v.generate)
+
+	// 🔴 Objects in READING order, which is not the order container.NewBorder
+	// would produce. That helper appends the centre first, so the keyboard
+	// would reach Generate before the settings it acts on. This package has
+	// been caught by that once already, one function above.
+	// 🔴 ONE object, named, and given to the layout twice.
+	//
+	// It was built twice for as long as it took to look at the window: the edge
+	// the layout was told about and the object in the list were two different
+	// containers holding the same button. A border layout finds its edges by
+	// COMPARING the objects it was given, so it recognised neither as the right
+	// edge, laid the button out as a second centre, and it drew across the whole
+	// band over the four fields. Nothing fell over, because Fyne does not clip.
+	//
+	// Neither the gap probe nor the overflow probe saw it: overlapping siblings
+	// stop being adjacent, so the gap count went DOWN, and a child drawing over
+	// its siblings is still inside its parent. The stored tree blessed it,
+	// because a pattern records what happened. The owner saw it.
+	padded := paint.PadLeft(palette.NameStepGroup, action)
 	v.settings.Objects = []fyne.CanvasObject{
-		container.New(layout.NewBorderLayout(nil, nil, settings, nil), settings, seed),
+		container.New(layout.NewBorderLayout(nil, nil, nil, padded), withSeed, padded),
 	}
 	v.settings.Refresh()
 }
+
+// countSample is the SHAPE of the largest count this screen takes, used to size
+// the field that holds one. The guard beside this file keeps the two in step.
+var countSample = strconv.Itoa(quick.MostShownAtOnce)
 
 // labelled names a control, above it rather than beside it.
 //
@@ -603,8 +751,8 @@ func (v *View) commandFor(generator string) string {
 	// without it. A line carrying --count 1 would say something the verb
 	// already does, and every flag on this line is one more thing to read.
 	asked := ""
-	if v.howMany.Selected != commandDefault {
-		asked = v.howMany.Selected
+	if strings.TrimSpace(v.howMany.Text) != commandDefault {
+		asked = strings.TrimSpace(v.howMany.Text)
 	}
 	return commandline.New(commandline.Quick).
 		Flag(commandline.Count, asked).
@@ -626,14 +774,16 @@ func (v *View) putCommandInClipboard() {
 	v.told.SetText(v.text.T(i18n.CommandCopied))
 }
 
-// countChoices are how many values this screen offers to produce.
+// mostShown is the largest number of values this screen draws at once.
 //
-// A ladder rather than a range, because it is read off a list, and the top of
-// it is where a person stops reading values and starts piping them, which is
-// the point at which the command beside it is the better tool. The mode itself
-// has no upper limit, and the recipe reader says why: a number chosen today
-// with no measurement behind it would become a contract.
-var countChoices = []string{"1", "10", "25", "50"}
+// 🔴 It is the mode's number rather than one written here, and that move was
+// forced by a guard rather than chosen: the register of literals in
+// internal/guard refuses any bare number inside the window, because a number
+// there is almost always a distance and distances come from the scale. This one
+// is a COUNT and the guard has no way to tell the two apart - so the honest
+// place for it is beside the mode that produces the values, where the
+// measurement behind it is written out in full.
+const mostShown = quick.MostShownAtOnce
 
 // 🔴 opensOn and commandDefault are both "how many by default" and they are
 // NOT the same number. Holding them under one name is the mistake this pair is

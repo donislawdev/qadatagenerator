@@ -202,3 +202,59 @@ func TestASeedIsDrawnAfreshEveryTime(t *testing.T) {
 			once, twice)
 	}
 }
+
+// 🔴 The other half of MostShownAtOnce: this mode does NOT enforce it.
+//
+// The constant lives here so that both surfaces can see one number, and a
+// constant sitting in a package is an invitation to start applying it. The day
+// somebody does, the command line stops being able to produce a million values
+// and nothing in the window would notice - so the claim that it is a limit of
+// DRAWING and not of producing is held by a test rather than by the paragraph
+// beside it.
+func TestTheModeDoesNotApplyTheCeilingTheScreenDraws(t *testing.T) {
+	asked := Request{
+		Generator: "pesel", Locale: DefaultLocale, Seed: "for-the-test",
+		Agrees: map[string]string{}, Count: MostShownAtOnce * 50,
+	}
+	if refusal := Check(asked); refusal.Refused() {
+		t.Errorf("asking for %d values was refused as %v, so the ceiling the SCREEN "+
+			"draws has become a limit of the mode and the command line lost with it",
+			asked.Count, refusal.Kind)
+	}
+}
+
+// A count below one is still the mode's business, so that both surfaces refuse
+// it for the same reason and neither has to remember why.
+func TestFewerThanOneValueIsStillTheModesRefusal(t *testing.T) {
+	asked := Request{
+		Generator: "pesel", Locale: DefaultLocale, Seed: "for-the-test",
+		Agrees: map[string]string{}, Count: 0,
+	}
+	if refusal := Check(asked); refusal.Kind != CountNotPositive {
+		t.Errorf("a count of nought was answered with %v rather than CountNotPositive",
+			refusal.Kind)
+	}
+}
+
+// CountFrom answers the SHAPE of the text, and 010 is ten rather than eight -
+// which is the trap DEC-170 cost this project once, in a recipe reader that
+// read a leading nought as octal.
+func TestCountFromReadsBaseTenAndRefusesWhatIsNotANumber(t *testing.T) {
+	for text, wanted := range map[string]int{"1": 1, "010": 10, "20000": 20000} {
+		got, refused := CountFrom(text)
+		if refused.Refused() {
+			t.Errorf("%q was refused and it is a number", text)
+			continue
+		}
+		if got != wanted {
+			t.Errorf("%q was read as %d rather than %d", text, got, wanted)
+		}
+	}
+	// 🔴 Padding is refused HERE and trimmed by the window before it asks.
+	// Loosening this would have widened a flag that is already published.
+	for _, text := range []string{"", "ten", "1.5", " 10 ", "10x"} {
+		if _, refused := CountFrom(text); !refused.Refused() {
+			t.Errorf("%q was taken as a number of values", text)
+		}
+	}
+}

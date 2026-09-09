@@ -56,8 +56,21 @@ func (v *View) aside(generator string) fyne.CanvasObject {
 		blocks = append(blocks, v.unavailable(about))
 	}
 
-	return paint.AtLeast(palette.AsideWidth, 0,
-		paint.Card(palette.NameStepGroup, paint.Column(palette.NameStepGroup, blocks...)))
+	// 🔴 The gap to the values beside it is drawn HERE rather than around the
+	// stack this goes into, and the difference is a state nobody would look at:
+	// the panel is nothing at all when no kind is chosen, and a margin around
+	// an empty stack is an empty strip of window with no reason to exist.
+	//
+	// The step is the one the accepted drawing uses for it, read out of
+	// tools/makieta rather than picked to taste. Before this the two stood at
+	// ZERO, in all nine states of this screen, which is what the owner saw and
+	// what nothing measured until tools/odstepy.py existed: the toolkit's own
+	// padding is nought in this theme by decision, so a stock border layout
+	// puts two regions edge to edge and says nothing.
+	return paint.Pad(palette.NameStepHairline, palette.NameStepHairline,
+		palette.NameStepSection, palette.NameStepHairline,
+		paint.AtLeast(palette.AsideWidth, 0,
+			paint.Card(palette.NameStepGroup, paint.Column(palette.NameStepGroup, blocks...))))
 }
 
 // produces is what this kind makes, and the scheme behind it where there is one.

@@ -1,6 +1,8 @@
 package paint
 
 import (
+	"math"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
@@ -328,6 +330,36 @@ func ChooserWidth(values ...string) float32 {
 		}
 	}
 	return ChooserFace(ChooserLook{Value: wideEnough}).MinSize().Width
+}
+
+// FieldWidth is how wide a field has to be to show that text without cutting it.
+//
+// # Why a field is given a width at all
+//
+// A field with none takes whatever the layout has left over, and that is how
+// the seed on the quick screen came to run to the edge of the window: it stood
+// as the CENTRE of a border layout, so it was handed every pixel the settings
+// beside it did not want. The owner called it giga long, and he was describing
+// arithmetic rather than taste - the field was as wide as the window minus four
+// controls, whatever that happened to be.
+//
+// # Why measured rather than written down
+//
+// Same reason as ChooserWidth next door. A number written at the one place it
+// is used is a number nobody can hold to anything, and it goes wrong the day
+// the type ladder moves. This asks the face how wide it would be, so the answer
+// follows the font and the padding of the day it is asked.
+//
+// The caller passes the WIDEST thing the field has to hold rather than the
+// thing it holds right now: a seed of thirty two characters, not the empty
+// string it starts as.
+func FieldWidth(sample string) float32 {
+	// 🔴 Rounded UP to a whole number, because the face measures a string and a
+	// string measures fractionally. A width of 61.6 makes the layout round its
+	// neighbour's position, and the gap beside it comes out 13 where the scale
+	// says 12 - which tools/odstepy.py reports as a distance nobody chose,
+	// correctly, and which nothing else would ever have noticed.
+	return float32(math.Ceil(float64(FieldFace(sample, theme.TypeBody, 0).MinSize().Width)))
 }
 
 // SearchFace is the look of the field a list is filtered with: the field face

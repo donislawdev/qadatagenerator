@@ -178,7 +178,7 @@ func valueRow(number, digits int, value string, banded bool) fyne.CanvasObject {
 // what somebody would say out loud and "Values (10)" is what a form would say.
 func (v *View) heading(count int) fyne.CanvasObject {
 	return paint.SectionHeading(v.countedValues(count),
-		paint.Row(palette.NameStepTight, v.copy, v.again.OnScreen()))
+		paint.Row(palette.NameStepTight, v.copy.OnScreen(), v.again.OnScreen()))
 }
 
 // countedValues is the heading of the card, which says how many are under it.

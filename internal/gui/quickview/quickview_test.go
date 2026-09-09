@@ -24,6 +24,38 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
+// BenchmarkTheCardOfValues is what the ceiling on this screen is measured
+// against, and it is here rather than in a comment because a constant that says
+// it was measured has to be re-measurable.
+//
+// What it measures is the half that is NOT cheap. Producing is: a hundred
+// thousand PESELs leave the command line in 402 ms including starting the
+// process. Drawing them is another matter - every value is a row of several
+// canvas objects built on the thread that draws, and nothing hands control back
+// to the window while that happens.
+//
+// Run it as:
+//
+//	go test ./internal/gui/quickview/ -run x -bench Card -benchtime 20x
+func BenchmarkTheCardOfValues(b *testing.B) {
+	for _, howMany := range []int{500, 5000, 20000, 50000} {
+		values := make([]string, howMany)
+		for at := range values {
+			values[at] = "66685370" + strconv.Itoa(at%10)
+		}
+		view := New(i18n.English, &heldClipboard{})
+		b.Run(strconv.Itoa(howMany), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				card := view.valuesCard(values)
+				// MinSize forces the layout to happen, which is where the cost
+				// is. Building the objects without measuring them would time
+				// the cheap half and call it the answer.
+				card.MinSize()
+			}
+		})
+	}
+}
+
 // heldClipboard is a clipboard of this test, so that pressing Copy can be
 // checked without touching the clipboard of the machine running it.
 type heldClipboard struct{ content string }
@@ -105,15 +137,64 @@ func TestChoosingAValueProducesOneAndCopyingItReachesTheClipboard(t *testing.T) 
 	}
 }
 
-// TestEveryControlOnTheQuickScreenReachesTheValue holds the other half of the
-// parity claim: that each control is connected to what it appears to control.
+// 🔴 The guard for DEC-235, and it asks about the DIFFERENCE rather than about
+// the button.
 //
-// # Why every control is moved rather than the code being read
+// Asking only "does Generate produce" would stay green with the old behaviour
+// still in place, because a screen that produces on every keystroke also
+// produces when a button is pressed. The two halves have to be checked apart:
+// typing alone must NOT move the value, and pressing alone must.
 //
-// A control wired to nothing looks exactly like a control wired to something,
-// in the source and in a stored tree alike. What tells them apart is changing
-// it and seeing the value move, and this project has already paid for the
-// difference on the screen next door.
+// What this stops coming back: the field produced on every keystroke until
+// 2026-09-09, so a thirty two character seed regenerated the set thirty two
+// times. That is only odd until the count becomes a field somebody types a
+// number into, and then it is a wall of work on the thread that draws.
+func TestATypedFieldWaitsForTheButtonAndAChoiceDoesNot(t *testing.T) {
+	view := New(i18n.English, &heldClipboard{})
+	view.UseSeed("for-the-test")
+	view.Choose("pesel")
+
+	before := view.Value()
+	if before == "" {
+		t.Fatal("nothing was produced, so nothing below proves anything")
+	}
+
+	view.TypeSeed("typed-and-not-applied")
+	if view.Value() != before {
+		t.Error("the value moved while somebody was still typing the seed, so the field " +
+			"produces on every keystroke and the button beside it decides nothing")
+	}
+
+	view.Generate()
+	if view.Value() == before {
+		t.Error("the seed was typed and the button pressed and the value did not move, " +
+			"so what a person types reaches nothing")
+	}
+
+	// The other half of the decision: a CHOICE still produces at once, because
+	// one tap and a result is the promise this verb makes in its first line.
+	chosen := view.Value()
+	view.Choose("nip")
+	if view.Value() == chosen {
+		t.Error("a kind was chosen and nothing was produced, so the screen now asks for " +
+			"two acts where DEC-213 promised one")
+	}
+}
+
+// 🔴 The sample the count field is sized from has to be the shape of the
+// largest count the screen takes, or the field is measured against a number
+// nobody can type into it.
+//
+// It replaces the same guard for the seed, whose object stopped existing: the
+// seed field takes the room between the fields and the button now, because
+// giving it a width of its own made it draw under that button.
+func TestTheCountFieldIsSizedForTheLargestCountItTakes(t *testing.T) {
+	if countSample != strconv.Itoa(quick.MostShownAtOnce) {
+		t.Errorf("the field is sized for %q while the screen takes up to %d, so the "+
+			"widest number it accepts may not fit in it", countSample, quick.MostShownAtOnce)
+	}
+}
+
 func TestEveryControlOnTheQuickScreenReachesTheValue(t *testing.T) {
 	view := New(i18n.English, &heldClipboard{})
 	view.UseSeed("for-the-test")
@@ -133,8 +214,10 @@ func TestEveryControlOnTheQuickScreenReachesTheValue(t *testing.T) {
 		named      string
 		one, other func()
 	}{
-		{"the seed", func() { view.seedBox.SetText("one-seed") },
-			func() { view.seedBox.SetText("another-seed") }},
+		// Typed AND applied, which is two acts since DEC-235. The guard below
+		// is the one that watches the halves apart.
+		{"the seed", func() { view.UseSeed("one-seed") },
+			func() { view.UseSeed("another-seed") }},
 		{"the gender", func() { view.ChooseGender("female") },
 			func() { view.ChooseGender("male") }},
 		{"the date of birth", func() { view.SetBorn("1950-01-31") },
@@ -170,18 +253,85 @@ func TestEveryControlOnTheQuickScreenReachesTheValue(t *testing.T) {
 	// many there are, and the test written by pattern would have asked whether
 	// the value changed, found that it had not, and reported a control that
 	// reaches nothing while it reached everything it was for.
+	// 🔴 The numbers below are not a list the screen offers, because since the
+	// field replaced the chooser there is no such list. They are the EDGES of
+	// what it takes: one, a middling number, and the ceiling itself - which is
+	// the value most likely to be off by one and the one no chooser ever
+	// reached.
 	view.Choose("pesel")
-	for _, howMany := range CountChoices() {
+	for _, howMany := range []string{"1", "7", strconv.Itoa(MostShown())} {
 		view.ChooseCount(howMany)
 		wanted, err := strconv.Atoi(howMany)
 		if err != nil {
-			t.Fatalf("this screen offers %q as a number of values and it is not one", howMany)
+			t.Fatalf("this test asks for %q values and that is not a number", howMany)
 		}
 		got := len(strings.Split(view.Value(), "\n"))
 		if got != wanted {
-			t.Errorf("%s was chosen and %d value(s) are on screen, so the list of how many "+
+			t.Errorf("%s was asked for and %d value(s) are on screen, so how many "+
 				"reaches the screen without deciding what it shows", howMany, got)
 		}
+	}
+}
+
+// 🔴 The guard for the ceiling, and it asks about the EDGE rather than about a
+// big number.
+//
+// A test asking for a million would pass against any ceiling at all, including
+// one written by accident as ten. Asking for the ceiling and for one more than
+// the ceiling is the only pair that pins the number itself, and the refusal has
+// to NAME the command line - a screen that stops at no makes its limit the
+// person's problem.
+func TestTheCeilingIsRefusedByOneAndSaysWhereToGetMore(t *testing.T) {
+	view := New(i18n.English, &heldClipboard{})
+	view.UseSeed("for-the-test")
+	view.Choose("pesel")
+
+	view.ChooseCount(strconv.Itoa(MostShown()))
+	if got := len(strings.Split(view.Value(), "\n")); got != MostShown() {
+		t.Fatalf("the ceiling itself was refused: asked for %d and got %d",
+			MostShown(), got)
+	}
+
+	view.ChooseCount(strconv.Itoa(MostShown() + 1))
+	if view.Value() != "" {
+		t.Errorf("one more than the ceiling produced %d value(s), so the ceiling is not "+
+			"where the constant says it is", len(strings.Split(view.Value(), "\n")))
+	}
+	said := view.Told()
+	if !strings.Contains(said, strconv.Itoa(MostShown())) {
+		t.Errorf("the refusal is %q and does not say what the limit IS, so a person "+
+			"has to guess how far down to count", said)
+	}
+	if !strings.Contains(strings.ToLower(said), "command line") {
+		t.Errorf("the refusal is %q and does not point at the line under it, which is "+
+			"the thing that has no limit", said)
+	}
+}
+
+// A count that never became a number is refused by its own sentence rather than
+// by the one about asking for fewer than one value.
+func TestTextThatIsNotANumberIsRefusedAsAShape(t *testing.T) {
+	view := New(i18n.English, &heldClipboard{})
+	view.UseSeed("for-the-test")
+	view.Choose("pesel")
+
+	view.ChooseCount("ten")
+	if view.Value() != "" {
+		t.Error("a count of \"ten\" produced values, so the field takes text as a number")
+	}
+	if said := view.Told(); said != i18n.English.T(i18n.QuickRefusedCountShape) {
+		t.Errorf("the refusal is %q where it should be the one about the shape of a "+
+			"number, so the screen blames the wrong thing", said)
+	}
+
+	// 🔴 The trap DEC-170 cost this project once: a leading nought must be TEN,
+	// not eight. It is checked on this surface as well as on the flag, because
+	// the two read the text with the same call and a guard on one of them would
+	// not notice the day that stopped being true.
+	view.ChooseCount("010")
+	if got := len(strings.Split(view.Value(), "\n")); got != 10 {
+		t.Errorf("a count of 010 produced %d values, so the field reads a leading "+
+			"nought as octal", got)
 	}
 }
 

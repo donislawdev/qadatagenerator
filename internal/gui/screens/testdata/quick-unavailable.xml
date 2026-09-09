@@ -246,115 +246,121 @@
 										<text color="disabled" size="1054x16">Nothing on this screen is written to a file.</text>
 										<container pos="0,32" size="1054x52">
 											<container size="1054x52">
-												<container size="376x52">
-													<container size="118x52">
-														<text color="disabled" size="118x14" textSize="11">Kind</text>
-														<widget pos="0,18" size="118x34" type="*parts.Select">
-															<container size="118x34">
+												<container size="966x52">
+													<container size="322x52">
+														<container size="118x52">
+															<text color="disabled" size="118x14" textSize="11">Kind</text>
+															<widget pos="0,18" size="118x34" type="*parts.Select">
 																<container size="118x34">
-																	<rectangle size="118x34"/>
 																	<container size="118x34">
+																		<rectangle size="118x34"/>
 																		<container size="118x34">
-																			<rectangle fillColor="button" pos="1,1" radius="6" size="116x32" strokeColor="inputBorder" strokeWidth="2"/>
-																		</container>
-																		<container size="118x34">
-																			<container pos="12,4" size="98x26">
-																				<container size="71x26">
-																					<spacer size="71x4"/>
-																					<text pos="0,4" size="71x16">city</text>
-																					<spacer pos="0,21" size="71x4"/>
-																				</container>
-																				<container pos="71,0" size="27x26">
-																					<container pos="8,4" size="15x18">
-																						<spacer size="15x1"/>
-																						<image fillMode="contain" pos="0,1" rsc="chevron-down-b4b1a9-15.svg" size="15x15"/>
-																						<spacer pos="0,16" size="15x1"/>
+																			<container size="118x34">
+																				<rectangle fillColor="button" pos="1,1" radius="6" size="116x32" strokeColor="inputBorder" strokeWidth="2"/>
+																			</container>
+																			<container size="118x34">
+																				<container pos="12,4" size="98x26">
+																					<container size="71x26">
+																						<spacer size="71x4"/>
+																						<text pos="0,4" size="71x16">city</text>
+																						<spacer pos="0,21" size="71x4"/>
+																					</container>
+																					<container pos="71,0" size="27x26">
+																						<container pos="8,4" size="15x18">
+																							<spacer size="15x1"/>
+																							<image fillMode="contain" pos="0,1" rsc="chevron-down-b4b1a9-15.svg" size="15x15"/>
+																							<spacer pos="0,16" size="15x1"/>
+																						</container>
 																					</container>
 																				</container>
 																			</container>
 																		</container>
 																	</container>
 																</container>
+															</widget>
+														</container>
+														<container pos="130,0" size="63x52">
+															<text color="disabled" size="63x14" textSize="11">How many</text>
+															<container pos="0,18" size="63x34">
+																<rectangle size="63x34"/>
+																<container size="63x34">
+																	<rectangle size="63x34"/>
+																	<widget size="63x34" type="*widget.Entry">
+																		<rectangle fillColor="button" pos="2,2" radius="6" size="59x30"/>
+																		<rectangle pos="1,1" radius="6" size="60x31" strokeColor="inputBorder" strokeWidth="2"/>
+																		<widget pos="0,2" size="63x30" type="*widget.Scroll">
+																			<widget size="63x30" type="*widget.entryContent">
+																				<widget size="63x30" type="*widget.RichText">
+																					<text pos="4,2" size="15x16">10</text>
+																				</widget>
+																			</widget>
+																		</widget>
+																	</widget>
+																</container>
 															</container>
-														</widget>
-													</container>
-													<container pos="130,0" size="117x52">
-														<text color="disabled" size="117x14" textSize="11">How many</text>
-														<widget pos="0,18" size="117x34" type="*parts.Select">
-															<container size="117x34">
+														</container>
+														<container pos="205,0" size="117x52">
+															<text color="disabled" size="117x14" textSize="11">Locale</text>
+															<widget pos="0,18" size="117x34" type="*parts.Select">
 																<container size="117x34">
-																	<rectangle size="117x34"/>
 																	<container size="117x34">
+																		<rectangle size="117x34"/>
 																		<container size="117x34">
-																			<rectangle fillColor="button" pos="1,1" radius="6" size="115x32" strokeColor="inputBorder" strokeWidth="2"/>
-																		</container>
-																		<container size="117x34">
-																			<container pos="12,4" size="97x26">
-																				<container size="70x26">
-																					<spacer size="70x4"/>
-																					<text pos="0,4" size="70x16">10</text>
-																					<spacer pos="0,21" size="70x4"/>
-																				</container>
-																				<container pos="70,0" size="27x26">
-																					<container pos="8,4" size="15x18">
-																						<spacer size="15x1"/>
-																						<image fillMode="contain" pos="0,1" rsc="chevron-down-b4b1a9-15.svg" size="15x15"/>
-																						<spacer pos="0,16" size="15x1"/>
+																			<container size="117x34">
+																				<rectangle fillColor="button" pos="1,1" radius="6" size="115x32" strokeColor="inputBorder" strokeWidth="2"/>
+																			</container>
+																			<container size="117x34">
+																				<container pos="12,4" size="97x26">
+																					<container size="70x26">
+																						<spacer size="70x4"/>
+																						<text pos="0,4" size="70x16">en-US</text>
+																						<spacer pos="0,21" size="70x4"/>
+																					</container>
+																					<container pos="70,0" size="27x26">
+																						<container pos="8,4" size="15x18">
+																							<spacer size="15x1"/>
+																							<image fillMode="contain" pos="0,1" rsc="chevron-down-b4b1a9-15.svg" size="15x15"/>
+																							<spacer pos="0,16" size="15x1"/>
+																						</container>
 																					</container>
 																				</container>
 																			</container>
 																		</container>
 																	</container>
 																</container>
-															</container>
-														</widget>
+															</widget>
+														</container>
 													</container>
-													<container pos="259,0" size="117x52">
-														<text color="disabled" size="117x14" textSize="11">Locale</text>
-														<widget pos="0,18" size="117x34" type="*parts.Select">
-															<container size="117x34">
-																<container size="117x34">
-																	<rectangle size="117x34"/>
-																	<container size="117x34">
-																		<container size="117x34">
-																			<rectangle fillColor="button" pos="1,1" radius="6" size="115x32" strokeColor="inputBorder" strokeWidth="2"/>
-																		</container>
-																		<container size="117x34">
-																			<container pos="12,4" size="97x26">
-																				<container size="70x26">
-																					<spacer size="70x4"/>
-																					<text pos="0,4" size="70x16">en-US</text>
-																					<spacer pos="0,21" size="70x4"/>
-																				</container>
-																				<container pos="70,0" size="27x26">
-																					<container pos="8,4" size="15x18">
-																						<spacer size="15x1"/>
-																						<image fillMode="contain" pos="0,1" rsc="chevron-down-b4b1a9-15.svg" size="15x15"/>
-																						<spacer pos="0,16" size="15x1"/>
-																					</container>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</widget>
-													</container>
-												</container>
-												<container pos="376,0" size="677x52">
-													<text color="disabled" size="677x14" textSize="11">Seed</text>
-													<container pos="0,18" size="677x34">
-														<rectangle size="677x34"/>
-														<widget size="677x34" type="*widget.Entry">
-															<rectangle fillColor="button" pos="2,2" radius="6" size="673x30"/>
-															<rectangle pos="1,1" radius="6" size="675x31" strokeColor="inputBorder" strokeWidth="2"/>
-															<widget pos="0,2" size="677x30" type="*widget.Scroll">
-																<widget size="677x30" type="*widget.entryContent">
-																	<widget size="677x30" type="*widget.RichText">
-																		<text pos="4,2" size="86x16">for-the-picture</text>
+													<container pos="322,0" size="644x52">
+														<container pos="12,0" size="632x52">
+															<text color="disabled" size="632x14" textSize="11">Seed</text>
+															<container pos="0,18" size="632x34">
+																<rectangle size="632x34"/>
+																<widget size="632x34" type="*widget.Entry">
+																	<rectangle fillColor="button" pos="2,2" radius="6" size="628x30"/>
+																	<rectangle pos="1,1" radius="6" size="629x31" strokeColor="inputBorder" strokeWidth="2"/>
+																	<widget pos="0,2" size="632x30" type="*widget.Scroll">
+																		<widget size="632x30" type="*widget.entryContent">
+																			<widget size="632x30" type="*widget.RichText">
+																				<text pos="4,2" size="86x16">for-the-picture</text>
+																			</widget>
+																		</widget>
 																	</widget>
 																</widget>
-															</widget>
+															</container>
+														</container>
+													</container>
+												</container>
+												<container pos="966,0" size="87x52">
+													<container pos="16,0" size="71x52">
+														<container size="71x15">
+															<rectangle size="71x15"/>
+															<rectangle size="71x15"/>
+														</container>
+														<widget pos="0,15" size="71x34" type="*parts.PrimaryButton">
+															<rectangle fillColor="rgba(112,89,214,255)" radius="5" size="71x34"/>
+															<rectangle pos="2,2" radius="3" size="67x30" strokeWidth="2"/>
+															<text alignment="center" bold color="foregroundOnPrimary" pos="0,8" size="71x16">Generate</text>
 														</widget>
 													</container>
 												</container>
@@ -367,47 +373,49 @@
 						</container>
 						<container pos="0,118" size="1118x667">
 							<container pos="32,24" size="1054x619">
-								<container size="724x619">
-									<container size="724x619">
-										<widget size="724x24" type="*widget.Label">
-											<widget size="724x24" type="*widget.RichText">
+								<container size="696x619">
+									<container size="696x619">
+										<widget size="696x24" type="*widget.Label">
+											<widget size="696x24" type="*widget.RichText">
 												<text color="disabled" pos="4,4" size="187x16">this build has no cities for en-US</text>
 											</widget>
 										</widget>
 									</container>
 								</container>
-								<container pos="724,0" size="330x619">
-									<container size="330x160">
-										<container size="330x160">
-											<rectangle size="330x160"/>
-											<container size="330x160">
-												<rectangle fillColor="menuBackground" radius="10" size="330x160" strokeColor="separator" strokeWidth="2"/>
+								<container pos="696,0" size="358x619">
+									<container size="358x168">
+										<container size="358x168">
+											<container pos="24,4" size="330x160">
+												<rectangle size="330x160"/>
 												<container size="330x160">
-													<container pos="16,16" size="298x128">
-														<container size="298x18">
-															<container size="17x18">
-																<spacer size="17x0"/>
-																<image fillMode="contain" rsc="zap-a594ff-17.svg" size="17x17"/>
-																<spacer pos="0,17" size="17x0"/>
+													<rectangle fillColor="menuBackground" radius="10" size="330x160" strokeColor="separator" strokeWidth="2"/>
+													<container size="330x160">
+														<container pos="16,16" size="298x128">
+															<container size="298x18">
+																<container size="17x18">
+																	<spacer size="17x0"/>
+																	<image fillMode="contain" rsc="zap-a594ff-17.svg" size="17x17"/>
+																	<spacer pos="0,17" size="17x0"/>
+																</container>
+																<container pos="25,0" size="23x18">
+																	<spacer size="23x0"/>
+																	<text bold size="23x18" textSize="14">city</text>
+																	<spacer pos="0,18" size="23x0"/>
+																</container>
 															</container>
-															<container pos="25,0" size="23x18">
-																<spacer size="23x0"/>
-																<text bold size="23x18" textSize="14">city</text>
-																<spacer pos="0,18" size="23x0"/>
+															<container pos="0,34" size="298x35">
+																<text bold color="disabled" size="298x14" textSize="11">PRODUCES</text>
+																<text monospace pos="0,18" size="298x16">string</text>
 															</container>
-														</container>
-														<container pos="0,34" size="298x35">
-															<text bold color="disabled" size="298x14" textSize="11">PRODUCES</text>
-															<text monospace pos="0,18" size="298x16">string</text>
-														</container>
-														<container pos="0,85" size="298x43">
-															<text bold color="disabled" size="298x14" textSize="11">NOT AVAILABLE IN THIS LOCALE</text>
-															<container pos="0,18" size="298x24">
-																<widget size="298x24" type="*widget.Label">
-																	<widget size="298x24" type="*widget.RichText">
-																		<text color="disabled" pos="4,4" size="187x16">this build has no cities for en-US</text>
+															<container pos="0,85" size="298x43">
+																<text bold color="disabled" size="298x14" textSize="11">NOT AVAILABLE IN THIS LOCALE</text>
+																<container pos="0,18" size="298x24">
+																	<widget size="298x24" type="*widget.Label">
+																		<widget size="298x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="187x16">this build has no cities for en-US</text>
+																		</widget>
 																	</widget>
-																</widget>
+																</container>
 															</container>
 														</container>
 													</container>

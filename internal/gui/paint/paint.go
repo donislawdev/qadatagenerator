@@ -139,6 +139,24 @@ func PadAll(step string, content fyne.CanvasObject) *fyne.Container {
 	return Pad(step, step, step, step, content)
 }
 
+// PadLeft puts a named step on the LEFT and nothing anywhere else.
+//
+// # Why this exists when Pad takes four names
+//
+// Because the scale has no step meaning none, and it must not gain one: a
+// distance of nought is not a distance, and a seventh entry called "zero" is
+// how a closed scale stops being closed. Pad therefore cannot express "a gap on
+// this side only", and the case is common enough to have already cost a defect.
+//
+// The one that produced it: the seed field on the quick screen stands as the
+// centre of a border layout so that it can never overflow the row, and a centre
+// touches its edge with nothing between, because the padding of this theme is
+// nought by decision. Padding all four sides instead would have moved the field
+// down by the same step and taken it out of line with the four beside it.
+func PadLeft(step string, content fyne.CanvasObject) *fyne.Container {
+	return container.New(layout.NewCustomPaddedLayout(0, 0, theme.StepOf(step), 0), content)
+}
+
 // On stacks content over a ground, which is how every card, band and row in
 // this window is built: a rectangle underneath and the content over it.
 //
