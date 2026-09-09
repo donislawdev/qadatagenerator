@@ -479,6 +479,8 @@ var damageGuards = []Guard{
 	{"a chooser is outlined in the colour and the thickness the tokens say", "TestTheChooserIsOutlinedFromTheTokens", "internal/gui/parts", ByMutation},
 	{"every screen in the sidebar carries an icon, in BOTH copies of that list, since only one of them is the one anybody runs", "TestEverySidebarScreenCarriesAnIcon", "internal/guard", ByMutation},
 	{"the edge a face draws lands wholly inside its control, rather than half of it on whatever the control stands on", "TestTheEdgeOfAFaceIsDrawnInsideTheControl", "internal/gui/parts", ByMutation},
+	{"a card of rows never asks for more height than the layout was given, since nothing here clips a child that does", "TestACardOfRowsNeverGrowsPastTheRoomItWasGiven", "internal/gui/paint", ByMutation},
+	{"a card of rows still spends spare height on its rows, up to the ceiling the scale sets", "TestACardOfRowsStillGrowsWithTheWindow", "internal/gui/paint", ByMutation},
 	{"a chooser nobody can use draws no edge, since an edge says a control can be used", "TestADisabledChooserShowsNoEdge", "internal/gui/parts", ByMutation},
 	{"a chooser with the keyboard on it gains a mark that is not its resting edge", "TestTheKeyboardOnTheChooserIsVisible", "internal/gui/parts", ByMutation},
 	{"a chooser keeps its width when something is chosen, so the row it stands in does not move", "TestTheChooserDoesNotChangeWidthWhenSomethingIsChosen", "internal/gui/parts", ByMutation},

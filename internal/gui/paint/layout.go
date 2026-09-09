@@ -82,6 +82,24 @@ func (l fitHeight) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		perRow = l.ceiling
 	}
 	height := perRow*float32(l.rows) + l.chrome
+	// 🔴 Never taller than the room this layout was given, and that line is the
+	// whole of a fault the owner saw before any test did.
+	//
+	// Raising a short row to the floor raises the total with it, and when the
+	// window is short the total lands ABOVE the height offered. Fyne does not
+	// clip children, so the card then drew over the band of chrome below it,
+	// with its last row sliced in half and nothing failing anywhere. Measured
+	// at the size the owner's machine really gives this screen: ten rows
+	// overflowed by 16 pixels, fifty by 1696.
+	//
+	// The clamp alone would squash rows below the floor rather than overflow,
+	// which is a different way to make text collide. It is the safety net and
+	// not the answer: whoever shows a list that can outgrow its room puts it in
+	// something that scrolls, and then this line never fires, because a scroll
+	// hands its content at least the content's own minimum.
+	if height > size.Height {
+		height = size.Height
+	}
 	for _, object := range objects {
 		object.Resize(fyne.NewSize(size.Width, height))
 		object.Move(fyne.NewPos(0, 0))

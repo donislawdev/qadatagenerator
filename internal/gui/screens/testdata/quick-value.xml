@@ -455,177 +455,179 @@
 												</widget>
 											</container>
 										</container>
-										<container pos="0,82" size="724x536">
+										<widget pos="0,82" size="724x536" type="*parts.KeyScroll">
 											<container size="724x536">
-												<rectangle fillColor="menuBackground" radius="10" size="724x536" strokeColor="separator" strokeWidth="2"/>
 												<container size="724x536">
-													<container pos="8,8" size="708x520">
-														<container size="708x52">
-															<rectangle size="708x52"/>
+													<rectangle fillColor="menuBackground" radius="10" size="724x536" strokeColor="separator" strokeWidth="2"/>
+													<container size="724x536">
+														<container pos="8,8" size="708x520">
 															<container size="708x52">
-																<container pos="16,4" size="676x44">
-																	<container size="13x44">
-																		<spacer size="13x14"/>
-																		<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 1</text>
-																		<spacer pos="0,29" size="13x14"/>
-																	</container>
-																	<container pos="29,0" size="105x44">
-																		<spacer size="105x11"/>
-																		<text monospace pos="0,11" size="105x20" textSize="16">63051025079</text>
-																		<spacer pos="0,32" size="105x11"/>
+																<rectangle size="708x52"/>
+																<container size="708x52">
+																	<container pos="16,4" size="676x44">
+																		<container size="13x44">
+																			<spacer size="13x14"/>
+																			<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 1</text>
+																			<spacer pos="0,29" size="13x14"/>
+																		</container>
+																		<container pos="29,0" size="105x44">
+																			<spacer size="105x11"/>
+																			<text monospace pos="0,11" size="105x20" textSize="16">63051025079</text>
+																			<spacer pos="0,32" size="105x11"/>
+																		</container>
 																	</container>
 																</container>
 															</container>
-														</container>
-														<container pos="0,52" size="708x52">
-															<rectangle fillColor="button" size="708x52"/>
-															<container size="708x52">
-																<container pos="16,4" size="676x44">
-																	<container size="13x44">
-																		<spacer size="13x14"/>
-																		<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 2</text>
-																		<spacer pos="0,29" size="13x14"/>
-																	</container>
-																	<container pos="29,0" size="105x44">
-																		<spacer size="105x11"/>
-																		<text monospace pos="0,11" size="105x20" textSize="16">59040488071</text>
-																		<spacer pos="0,32" size="105x11"/>
-																	</container>
-																</container>
-															</container>
-														</container>
-														<container pos="0,104" size="708x52">
-															<rectangle size="708x52"/>
-															<container size="708x52">
-																<container pos="16,4" size="676x44">
-																	<container size="13x44">
-																		<spacer size="13x14"/>
-																		<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 3</text>
-																		<spacer pos="0,29" size="13x14"/>
-																	</container>
-																	<container pos="29,0" size="105x44">
-																		<spacer size="105x11"/>
-																		<text monospace pos="0,11" size="105x20" textSize="16">59080866648</text>
-																		<spacer pos="0,32" size="105x11"/>
+															<container pos="0,52" size="708x52">
+																<rectangle fillColor="button" size="708x52"/>
+																<container size="708x52">
+																	<container pos="16,4" size="676x44">
+																		<container size="13x44">
+																			<spacer size="13x14"/>
+																			<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 2</text>
+																			<spacer pos="0,29" size="13x14"/>
+																		</container>
+																		<container pos="29,0" size="105x44">
+																			<spacer size="105x11"/>
+																			<text monospace pos="0,11" size="105x20" textSize="16">59040488071</text>
+																			<spacer pos="0,32" size="105x11"/>
+																		</container>
 																	</container>
 																</container>
 															</container>
-														</container>
-														<container pos="0,156" size="708x52">
-															<rectangle fillColor="button" size="708x52"/>
-															<container size="708x52">
-																<container pos="16,4" size="676x44">
-																	<container size="13x44">
-																		<spacer size="13x14"/>
-																		<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 4</text>
-																		<spacer pos="0,29" size="13x14"/>
-																	</container>
-																	<container pos="29,0" size="105x44">
-																		<spacer size="105x11"/>
-																		<text monospace pos="0,11" size="105x20" textSize="16">09282050932</text>
-																		<spacer pos="0,32" size="105x11"/>
-																	</container>
-																</container>
-															</container>
-														</container>
-														<container pos="0,208" size="708x52">
-															<rectangle size="708x52"/>
-															<container size="708x52">
-																<container pos="16,4" size="676x44">
-																	<container size="13x44">
-																		<spacer size="13x14"/>
-																		<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 5</text>
-																		<spacer pos="0,29" size="13x14"/>
-																	</container>
-																	<container pos="29,0" size="105x44">
-																		<spacer size="105x11"/>
-																		<text monospace pos="0,11" size="105x20" textSize="16">04262750378</text>
-																		<spacer pos="0,32" size="105x11"/>
+															<container pos="0,104" size="708x52">
+																<rectangle size="708x52"/>
+																<container size="708x52">
+																	<container pos="16,4" size="676x44">
+																		<container size="13x44">
+																			<spacer size="13x14"/>
+																			<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 3</text>
+																			<spacer pos="0,29" size="13x14"/>
+																		</container>
+																		<container pos="29,0" size="105x44">
+																			<spacer size="105x11"/>
+																			<text monospace pos="0,11" size="105x20" textSize="16">59080866648</text>
+																			<spacer pos="0,32" size="105x11"/>
+																		</container>
 																	</container>
 																</container>
 															</container>
-														</container>
-														<container pos="0,260" size="708x52">
-															<rectangle fillColor="button" size="708x52"/>
-															<container size="708x52">
-																<container pos="16,4" size="676x44">
-																	<container size="13x44">
-																		<spacer size="13x14"/>
-																		<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 6</text>
-																		<spacer pos="0,29" size="13x14"/>
-																	</container>
-																	<container pos="29,0" size="105x44">
-																		<spacer size="105x11"/>
-																		<text monospace pos="0,11" size="105x20" textSize="16">66081862269</text>
-																		<spacer pos="0,32" size="105x11"/>
-																	</container>
-																</container>
-															</container>
-														</container>
-														<container pos="0,312" size="708x52">
-															<rectangle size="708x52"/>
-															<container size="708x52">
-																<container pos="16,4" size="676x44">
-																	<container size="13x44">
-																		<spacer size="13x14"/>
-																		<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 7</text>
-																		<spacer pos="0,29" size="13x14"/>
-																	</container>
-																	<container pos="29,0" size="105x44">
-																		<spacer size="105x11"/>
-																		<text monospace pos="0,11" size="105x20" textSize="16">45011356621</text>
-																		<spacer pos="0,32" size="105x11"/>
+															<container pos="0,156" size="708x52">
+																<rectangle fillColor="button" size="708x52"/>
+																<container size="708x52">
+																	<container pos="16,4" size="676x44">
+																		<container size="13x44">
+																			<spacer size="13x14"/>
+																			<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 4</text>
+																			<spacer pos="0,29" size="13x14"/>
+																		</container>
+																		<container pos="29,0" size="105x44">
+																			<spacer size="105x11"/>
+																			<text monospace pos="0,11" size="105x20" textSize="16">09282050932</text>
+																			<spacer pos="0,32" size="105x11"/>
+																		</container>
 																	</container>
 																</container>
 															</container>
-														</container>
-														<container pos="0,364" size="708x52">
-															<rectangle fillColor="button" size="708x52"/>
-															<container size="708x52">
-																<container pos="16,4" size="676x44">
-																	<container size="13x44">
-																		<spacer size="13x14"/>
-																		<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 8</text>
-																		<spacer pos="0,29" size="13x14"/>
-																	</container>
-																	<container pos="29,0" size="105x44">
-																		<spacer size="105x11"/>
-																		<text monospace pos="0,11" size="105x20" textSize="16">93032244881</text>
-																		<spacer pos="0,32" size="105x11"/>
-																	</container>
-																</container>
-															</container>
-														</container>
-														<container pos="0,416" size="708x52">
-															<rectangle size="708x52"/>
-															<container size="708x52">
-																<container pos="16,4" size="676x44">
-																	<container size="13x44">
-																		<spacer size="13x14"/>
-																		<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 9</text>
-																		<spacer pos="0,29" size="13x14"/>
-																	</container>
-																	<container pos="29,0" size="105x44">
-																		<spacer size="105x11"/>
-																		<text monospace pos="0,11" size="105x20" textSize="16">42102204924</text>
-																		<spacer pos="0,32" size="105x11"/>
+															<container pos="0,208" size="708x52">
+																<rectangle size="708x52"/>
+																<container size="708x52">
+																	<container pos="16,4" size="676x44">
+																		<container size="13x44">
+																			<spacer size="13x14"/>
+																			<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 5</text>
+																			<spacer pos="0,29" size="13x14"/>
+																		</container>
+																		<container pos="29,0" size="105x44">
+																			<spacer size="105x11"/>
+																			<text monospace pos="0,11" size="105x20" textSize="16">04262750378</text>
+																			<spacer pos="0,32" size="105x11"/>
+																		</container>
 																	</container>
 																</container>
 															</container>
-														</container>
-														<container pos="0,468" size="708x52">
-															<rectangle fillColor="button" size="708x52"/>
-															<container size="708x52">
-																<container pos="16,4" size="676x44">
-																	<container size="13x44">
-																		<spacer size="13x14"/>
-																		<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11">10</text>
-																		<spacer pos="0,29" size="13x14"/>
+															<container pos="0,260" size="708x52">
+																<rectangle fillColor="button" size="708x52"/>
+																<container size="708x52">
+																	<container pos="16,4" size="676x44">
+																		<container size="13x44">
+																			<spacer size="13x14"/>
+																			<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 6</text>
+																			<spacer pos="0,29" size="13x14"/>
+																		</container>
+																		<container pos="29,0" size="105x44">
+																			<spacer size="105x11"/>
+																			<text monospace pos="0,11" size="105x20" textSize="16">66081862269</text>
+																			<spacer pos="0,32" size="105x11"/>
+																		</container>
 																	</container>
-																	<container pos="29,0" size="105x44">
-																		<spacer size="105x11"/>
-																		<text monospace pos="0,11" size="105x20" textSize="16">64012248081</text>
-																		<spacer pos="0,32" size="105x11"/>
+																</container>
+															</container>
+															<container pos="0,312" size="708x52">
+																<rectangle size="708x52"/>
+																<container size="708x52">
+																	<container pos="16,4" size="676x44">
+																		<container size="13x44">
+																			<spacer size="13x14"/>
+																			<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 7</text>
+																			<spacer pos="0,29" size="13x14"/>
+																		</container>
+																		<container pos="29,0" size="105x44">
+																			<spacer size="105x11"/>
+																			<text monospace pos="0,11" size="105x20" textSize="16">45011356621</text>
+																			<spacer pos="0,32" size="105x11"/>
+																		</container>
+																	</container>
+																</container>
+															</container>
+															<container pos="0,364" size="708x52">
+																<rectangle fillColor="button" size="708x52"/>
+																<container size="708x52">
+																	<container pos="16,4" size="676x44">
+																		<container size="13x44">
+																			<spacer size="13x14"/>
+																			<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 8</text>
+																			<spacer pos="0,29" size="13x14"/>
+																		</container>
+																		<container pos="29,0" size="105x44">
+																			<spacer size="105x11"/>
+																			<text monospace pos="0,11" size="105x20" textSize="16">93032244881</text>
+																			<spacer pos="0,32" size="105x11"/>
+																		</container>
+																	</container>
+																</container>
+															</container>
+															<container pos="0,416" size="708x52">
+																<rectangle size="708x52"/>
+																<container size="708x52">
+																	<container pos="16,4" size="676x44">
+																		<container size="13x44">
+																			<spacer size="13x14"/>
+																			<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 9</text>
+																			<spacer pos="0,29" size="13x14"/>
+																		</container>
+																		<container pos="29,0" size="105x44">
+																			<spacer size="105x11"/>
+																			<text monospace pos="0,11" size="105x20" textSize="16">42102204924</text>
+																			<spacer pos="0,32" size="105x11"/>
+																		</container>
+																	</container>
+																</container>
+															</container>
+															<container pos="0,468" size="708x52">
+																<rectangle fillColor="button" size="708x52"/>
+																<container size="708x52">
+																	<container pos="16,4" size="676x44">
+																		<container size="13x44">
+																			<spacer size="13x14"/>
+																			<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11">10</text>
+																			<spacer pos="0,29" size="13x14"/>
+																		</container>
+																		<container pos="29,0" size="105x44">
+																			<spacer size="105x11"/>
+																			<text monospace pos="0,11" size="105x20" textSize="16">64012248081</text>
+																			<spacer pos="0,32" size="105x11"/>
+																		</container>
 																	</container>
 																</container>
 															</container>
@@ -633,7 +635,7 @@
 													</container>
 												</container>
 											</container>
-										</container>
+										</widget>
 									</container>
 								</container>
 								<container pos="724,0" size="330x619">

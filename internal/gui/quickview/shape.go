@@ -10,6 +10,7 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
+	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/quick"
 )
@@ -116,7 +117,27 @@ func (v *View) valuesCard(values []string) fyne.CanvasObject {
 		banded = !banded
 	}
 	card := paint.Card(palette.NameStepTight, paint.EvenRows(rows...))
-	return paint.FitHeight(len(values), palette.NameStepTight, card)
+	// 🔴 Scrolled, because this screen offers up to fifty values and a window is
+	// not always tall enough for them.
+	//
+	// Without it the card asked for fifty rows at their smallest, which is over
+	// two thousand pixels, and was handed that much whatever the window had.
+	// Fyne does not clip children, so it drew over the band of chrome under it
+	// and off the bottom of the window. The layout next door refuses to overflow
+	// now, but on its own that only trades an overflow for rows squashed thinner
+	// than a line of text, which is the same collision by another route.
+	//
+	// The two together are the answer, and the toolkit does the arithmetic:
+	// scrollContainerRenderer.Layout resizes its content to the LARGER of the
+	// content's minimum and its own size. So when the window has room the card
+	// still grows into it, and when it has not the rows keep their floor and
+	// the list scrolls. Neither behaviour is written here.
+	//
+	// KeyScroll rather than the toolkit's own, for the reason DEC-187 settled:
+	// container.Scroll carries no keyboard method at all, so a person without a
+	// mouse could reach the values on the About screen only by not needing to.
+	// 73.6% of that screen was unreachable before the same repair.
+	return parts.NewKeyScroll(paint.FitHeight(len(values), palette.NameStepTight, card))
 }
 
 // valueRow is one produced value, numbered.

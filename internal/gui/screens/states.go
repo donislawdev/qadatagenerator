@@ -132,8 +132,18 @@ func quickStates() []State {
 func quickStatesOfTheKeyboard() []State {
 	return []State{
 		{
-			Name:     "quick-focus-list",
-			Purpose:  "the keyboard on the list of values, which is the first control here",
+			Name: "quick-focus-list",
+			// 🔴 The list of KINDS, which is the first control here, and the
+			// wording said "the list of values" until 2026-09-09.
+			//
+			// That was a name describing something else on the same screen, and
+			// it went unnoticed because the pattern records whatever happened
+			// rather than what the name promised. It mattered from the day the
+			// card of values gained a keyboard stop of its own: there are now
+			// two things somebody could mean by the list, and this state is the
+			// other one. The stop for the values is fourteen, from
+			// tools/klawiatura, and nothing photographs it yet.
+			Purpose:  "the keyboard on the list of kinds, which is the first control here",
 			Screen:   screenQuick,
 			Quick:    Quick{Generator: "pesel", Seed: "for-the-picture"},
 			Keyboard: Keyboard{Tabs: 6},
