@@ -307,9 +307,8 @@
 															<container size="532x34">
 																<rectangle size="532x34"/>
 																<container size="532x34">
-																	<rectangle size="532x34"/>
 																	<container size="532x34">
-																		<rectangle pos="4,4" radius="4" size="524x26" strokeColor="foreground" strokeWidth="2"/>
+																		<rectangle pos="1,1" radius="6" size="530x32" strokeColor="rgba(224,218,255,255)" strokeWidth="2"/>
 																	</container>
 																	<container size="532x34">
 																		<container pos="12,4" size="508x26">

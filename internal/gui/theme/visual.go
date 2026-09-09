@@ -167,6 +167,7 @@ const (
 	FillPressed = "fill.pressed"
 	MarkCurrent = "mark.current"
 	MarkActive  = "mark.active"
+	MarkFocus   = "mark.focus"
 
 	TextPrimary   = "text.primary"
 	TextSecondary = "text.secondary"
@@ -184,7 +185,7 @@ const (
 var TokenNames = []string{
 	BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed, BgSelection,
 	LineQuiet, BorderControl, BorderPressed,
-	FillPrimary, FillHover, FillPressed, MarkCurrent, MarkActive,
+	FillPrimary, FillHover, FillPressed, MarkCurrent, MarkActive, MarkFocus,
 	TextPrimary, TextSecondary, TextAccent, TextOnFill, TextOnMark,
 	StateSuccess, StateWarning, StateDanger,
 }
@@ -248,6 +249,19 @@ const (
 	// within the ladder without the guard turning red, and low enough that
 	// neutral.8 would also pass if a later measurement prefers grey.
 	ThresholdSelection = 2.5
+	// ThresholdStateChange is ours, and it answers a question WCAG does not
+	// ask: whether a person can see that a control changed under their pointer.
+	//
+	// It exists because the fill of a pressed button cannot be measured against
+	// the band it stands on. Measured on 2026-09-09, the accent ladder has
+	// exactly ONE step that both clears 3.0 against that band and carries white
+	// at 4.5 - the step the button rests on. So the states have to move off it,
+	// and what matters about them is the difference from the RESTING fill,
+	// which is always underneath them: nobody ever sees a hovered button
+	// without having seen the same button a moment earlier.
+	//
+	// Set at 1.5, which the two steps chosen clear at 1.67 and 2.10.
+	ThresholdStateChange = 1.5
 )
 
 // Tokens is every token, the shade behind it, and what it is measured against.
@@ -359,10 +373,27 @@ var Tokens = []Token{
 	// The step DOWN was measured too and it fails for the other reason:
 	// accent.8 carries white at 6.29 and stands 2.85 on a card, under the 3.0 a
 	// control needs to be found at all.
-	{FillHover, "accent.10", ThresholdControl, []string{BgSurface},
-		"the fill of that action under the pointer, one step up because no step down keeps the button findable"},
-	{FillPressed, "accent.11", ThresholdControl, []string{BgSurface},
-		"the fill of that action under the finger, far enough up that pressing is not mistaken for hovering"},
+	// 🔴 The two states of the filled button, and they go DOWN the ladder.
+	//
+	// They went up until 2026-09-09, which made the fill lighter than white
+	// could be read on, so the label turned dark to compensate. The owner saw
+	// the sheet of states and refused it: nobody changes the colour of the text
+	// on a button. He is right, and going down keeps one ink for every state.
+	//
+	// Measured against the RESTING fill rather than against the band the button
+	// stands on, and the reason is beside ThresholdStateChange: the ladder has
+	// one step that is both visible on that band and readable in white, so
+	// there is no room for three. What a person has to see here is that
+	// something changed, and the resting fill is what it changed FROM.
+	//
+	//	rest     accent.9   white 5.14, and 3.49 against the band
+	//	hover    accent.7   white 8.57, 1.67 from rest
+	//	pressed  accent.6   white 10.79, 2.10 from rest
+	{FillHover, "accent.7", ThresholdStateChange, []string{FillPrimary},
+		"the fill of the one action of a screen while the pointer is on it, a shade down from where it rests"},
+	{FillPressed, "accent.6", ThresholdStateChange, []string{FillPrimary},
+		"that fill under the finger, one shade further down again"},
+
 	{MarkCurrent, "accent.11", ThresholdControl, []string{BgSurface, BgCurrent},
 		"the bar beside the sidebar item the window is on, which says where you are without a second word"},
 	// 🔴 The one token measured against another MARK rather than against a
@@ -391,13 +422,44 @@ var Tokens = []Token{
 	{MarkActive, "neutral.12", ThresholdControl, []string{BorderControl, BgControl, BgSurface},
 		"what the toolkit paints on a stock control that is chosen or holds the keyboard, which has to differ from the resting edge it replaces"},
 
+	// 🔴 The edge of the control the keyboard is on, and the second token in
+	// this register measured against another MARK rather than against a
+	// ground.
+	//
+	// It replaced a ring drawn INSIDE the control on 2026-09-09, after the
+	// owner looked at one and said the white ring in the button was awful. He
+	// was right twice over: it is not what anybody else does, and it made the
+	// filled button carry two shapes. Read up on it rather than guessed - NN/g
+	// and the WCAG 2.2 guidance agree that focus is an OUTLINE of at least two
+	// pixels, that it needs 3:1 against what is adjacent to it, and that it
+	// must differ from the UNFOCUSED state of the same control. Hover is a
+	// different thing and changes the ground instead.
+	//
+	// That last requirement is what settled the shade, and it settled it by
+	// killing the obvious answer. The accent this window reads with, accent.11,
+	// measures 1.60 against border.control, so a focused edge in it would be a
+	// colour change nobody could see. Measured across both ladders:
+	//
+	//	accent.11   1.60 against the resting edge   REFUSED
+	//	neutral.11  1.90                            REFUSED
+	//	accent.12   3.03                            taken
+	//	neutral.12  3.44, and it is white, which is what was refused
+	//
+	// So the edge is the top of the accent ladder: 3.03 against the edge it
+	// replaces, 12.16 against the inside of a field, 3.83 on the filled button
+	// and 3.15 on that fill under the pointer. One shade, every control, which
+	// is the whole point of it.
+	{MarkFocus, "accent.12", ThresholdControl,
+		[]string{BorderControl, BgWindow, BgSurface, BgControl, FillPrimary, FillHover},
+		"the edge of the control the keyboard is on, which every control shows the same way"},
+
 	{TextPrimary, "neutral.12", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed, BgSelection},
 		"the value, the label and every word read first"},
 	{TextSecondary, "neutral.11", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed},
 		"a caption, a group heading and the sentence explaining a value"},
 	{TextAccent, "accent.11", ThresholdText, []string{BgWindow, BgSurface, BgCurrent},
 		"the prompt of a command line, and the icon of the screen that is open"},
-	{TextOnFill, "white", ThresholdText, []string{FillPrimary},
+	{TextOnFill, "white", ThresholdText, []string{FillPrimary, FillHover, FillPressed},
 		"the label on the accent fill, measured on that fill rather than on the window"},
 	// 🔴 The second token measured on a MARK rather than on a ground, and it
 	// exists because the toolkit FLOODS rather than tints.
@@ -433,7 +495,7 @@ var Tokens = []Token{
 	// for some third reason and wants a different ink, and the measurement is
 	// the guard rather than the wording: 7.55 on mark.current and fill.pressed,
 	// 4.53 on fill.hover, where a label needs 4.5.
-	{TextOnMark, "neutral.1", ThresholdText, []string{MarkCurrent, FillHover, FillPressed},
+	{TextOnMark, "neutral.1", ThresholdText, []string{MarkCurrent},
 		"the label and the icon on a light accent ground: the flood the toolkit paints on a focused control, and the fill a primary button takes under the pointer"},
 
 	{StateSuccess, "semantic.success", ThresholdText, []string{BgWindow, BgSurface},

@@ -442,7 +442,7 @@
 															</widget>
 															<widget pos="362,0" size="146x34" type="*parts.PrimaryButton">
 																<rectangle fillColor="rgba(112,89,214,255)" radius="5" size="146x34"/>
-																<rectangle pos="2,2" radius="3" size="142x30" strokeColor="foregroundOnPrimary" strokeWidth="2"/>
+																<rectangle pos="2,2" radius="3" size="142x30" strokeColor="rgba(224,218,255,255)" strokeWidth="2"/>
 																<text alignment="center" bold color="foregroundOnPrimary" pos="0,8" size="146x16">Generate this dataset</text>
 															</widget>
 														</container>

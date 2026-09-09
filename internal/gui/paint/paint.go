@@ -134,6 +134,17 @@ func Pad(top, bottom, left, right string, content fyne.CanvasObject) *fyne.Conta
 		theme.StepOf(left), theme.StepOf(right)), content)
 }
 
+// Sides puts a named step of space on the left and the right, and none above or
+// below.
+//
+// It exists because the height of a control is decided elsewhere and must not
+// move: a field standing in a row of controls 34 tall stays 34 tall, and only
+// what is inside it slides in from the edge.
+func Sides(step string, content fyne.CanvasObject) *fyne.Container {
+	return container.New(layout.NewCustomPaddedLayout(0, 0,
+		theme.StepOf(step), theme.StepOf(step)), content)
+}
+
 // PadAll puts the same named step on all four sides.
 func PadAll(step string, content fyne.CanvasObject) *fyne.Container {
 	return Pad(step, step, step, step, content)

@@ -113,10 +113,16 @@ func TestTheKeyboardOnThePrimaryButtonIsVisible(t *testing.T) {
 		t.Fatal("the primary button looks the same with and without the keyboard on it")
 	}
 
-	ink := palette.Ink(palette.TextOnFill)
-	if !sameColour(withKeyboard.ring.StrokeColor, ink) {
-		t.Errorf("the focus ring is %v rather than text.on-fill %v, so its contrast against the fill is not the 5.14 that was measured",
-			withKeyboard.ring.StrokeColor, ink)
+	// 🔴 The SAME token every other control marks focus with, changed on
+	// 2026-09-09. It used to be the ink of the label, which made this the one
+	// control in the window saying focus in its own way - and a white ring
+	// inside a filled button, which the owner called awful when he saw the
+	// sheet of states. mark.focus measures 3.83 against this fill and 3.15
+	// against the fill under the pointer.
+	mark := palette.Ink(palette.MarkFocus)
+	if !sameColour(withKeyboard.ring.StrokeColor, mark) {
+		t.Errorf("the focus mark is %v rather than mark.focus %v, so this button marks focus differently from every control beside it",
+			withKeyboard.ring.StrokeColor, mark)
 	}
 
 	// The keyboard leaving has to put it back, or the mark stays on a control

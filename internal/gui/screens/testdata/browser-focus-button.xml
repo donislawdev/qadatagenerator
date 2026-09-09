@@ -248,7 +248,7 @@
 								<container pos="0,24" size="1070x34">
 									<widget size="115x34" type="*parts.PrimaryButton">
 										<rectangle fillColor="rgba(112,89,214,255)" radius="5" size="115x34"/>
-										<rectangle pos="2,2" radius="3" size="111x30" strokeColor="foregroundOnPrimary" strokeWidth="2"/>
+										<rectangle pos="2,2" radius="3" size="111x30" strokeColor="rgba(224,218,255,255)" strokeWidth="2"/>
 										<text alignment="center" bold color="foregroundOnPrimary" pos="0,8" size="115x16">Open manifest...</text>
 									</widget>
 									<widget pos="115,0" size="198x34" type="*parts.Button">

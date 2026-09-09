@@ -166,32 +166,44 @@ func TestTheKeyboardOnTheChooserIsVisible(t *testing.T) {
 	chooser := NewSelect([]string{"pesel", "nip"}, func(string) {})
 	chooser.SetSelected("pesel")
 
-	resting := len(strokedIn(chooserFace(chooser)))
+	resting := strokedIn(chooserFace(chooser))
+	if len(resting) == 0 {
+		t.Fatal("a resting chooser draws no edge at all, so there is nothing for focus to change")
+	}
 	chooser.FocusGained()
 	holding := strokedIn(chooserFace(chooser))
-	if len(holding) != resting+1 {
-		t.Fatalf("a chooser with the keyboard on it draws %d strokes, where a resting one "+
-			"draws %d and the mark is meant to be one more", len(holding), resting)
+
+	// 🔴 The mark is the EDGE of the control rather than a second shape inside
+	// it, changed on 2026-09-09. So the guard asks whether the drawing CHANGED
+	// and what it changed to, not how many strokes there are: counting shapes
+	// was the right question when focus added one and is the wrong one now,
+	// and it would have gone on passing while the colour drifted anywhere.
+	if len(holding) != len(resting) {
+		t.Fatalf("focus changed the number of strokes from %d to %d, where it is meant to "+
+			"recolour the edge the chooser already has", len(resting), len(holding))
 	}
 
-	var ring *canvas.Rectangle
+	marked := false
 	for _, stroke := range holding {
-		if !sameColour(stroke.StrokeColor, palette.Ink(palette.BorderControl)) {
-			ring = stroke
+		if sameColour(stroke.StrokeColor, palette.Ink(palette.MarkFocus)) {
+			marked = true
 		}
 	}
-	if ring == nil {
-		t.Fatal("the mark a chooser gains with the keyboard is drawn in the colour of its " +
-			"resting edge, so nothing on screen says where the keyboard is")
+	if !marked {
+		t.Errorf("a chooser with the keyboard on it draws no edge in mark.focus %v, so nothing "+
+			"on screen says where the keyboard is", palette.Ink(palette.MarkFocus))
 	}
-	if !sameColour(ring.StrokeColor, palette.Ink(palette.TextPrimary)) {
-		t.Errorf("the keyboard mark is %v, where it is drawn in the ink of the value at %v",
-			ring.StrokeColor, palette.Ink(palette.TextPrimary))
+	for _, stroke := range resting {
+		if sameColour(stroke.StrokeColor, palette.Ink(palette.MarkFocus)) {
+			t.Error("a chooser nobody is on already draws the focus edge, so the mark says nothing")
+		}
 	}
 
 	chooser.FocusLost()
-	if len(strokedIn(chooserFace(chooser))) != resting {
-		t.Error("the mark stayed after the keyboard left")
+	for _, stroke := range strokedIn(chooserFace(chooser)) {
+		if sameColour(stroke.StrokeColor, palette.Ink(palette.MarkFocus)) {
+			t.Error("the mark stayed after the keyboard left")
+		}
 	}
 }
 

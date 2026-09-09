@@ -119,23 +119,31 @@ func pointerGround(hovered, pressed bool) (ground, edge string) {
 // copies is a rule that holds until somebody edits one of them, and this one
 // pairs a fill with the only ink that fill can carry.
 //
-// # 🔴 Why the ink moves with the fill, which no other control here does
+// # 🔴 Why the ink does NOT move with the fill, corrected on 2026-09-09
 //
-// Because the accent ladder leaves no fill that carries both. Measured on
-// 2026-09-09: for white to reach 4.5 a fill needs a luminance of at most
-// 0.1833, and for the dark ink to reach it the fill needs at least 0.1968. The
-// two do not meet, so there is a band of violets carrying no legible label at
-// all, and the step this button rests on sits just below that band while the
-// step it takes under a pointer sits just above it.
+// It used to. The button lightened under the pointer, and lightening past a
+// point leaves white unreadable, so the label went dark to compensate. The
+// owner looked at the sheet of states and said it plainly: nobody changes the
+// colour of the text on a button, and it looks wrong.
 //
-// The full reckoning, including the step DOWN that fails for the opposite
-// reason, is beside fill.hover in the token register.
+// He is right, and the arithmetic that had been written here was answering the
+// wrong question. It said there is no violet carrying both inks - true, and
+// beside the point, because the fill does not have to go up the ladder. NN/g
+// and every design system asked describe hover on a filled button as a slight
+// DARKENING. Going down keeps one ink for every state, measured:
+//
+//	rest     accent.9   white at 5.14
+//	hover    accent.8   white at 6.29
+//	pressed  accent.7   white at 8.57
+//
+// Where the old direction gave 4.23 on hover, under the 4.5 a label answers to,
+// which is what forced the ink to move in the first place.
 func FilledGround(hovered, pressed bool) (fill, ink string) {
 	switch {
 	case pressed:
-		return theme.FillPressed, theme.TextOnMark
+		return theme.FillPressed, theme.TextOnFill
 	case hovered:
-		return theme.FillHover, theme.TextOnMark
+		return theme.FillHover, theme.TextOnFill
 	}
 	return theme.FillPrimary, theme.TextOnFill
 }
@@ -171,6 +179,13 @@ func ButtonFace(look ButtonLook) fyne.CanvasObject {
 	ink := theme.TextPrimary
 	var ground fyne.CanvasObject
 	under, edge := pointerGround(look.Hovered, look.Pressed)
+	// 🔴 Focus is the EDGE of the control rather than a second shape inside it,
+	// changed on 2026-09-09 after the owner looked at the ring in a filled
+	// button and called it awful. The reckoning behind the shade, including the
+	// two candidates it killed, is beside mark.focus in the register.
+	if look.Focused && !look.Disabled {
+		edge = theme.MarkFocus
+	}
 	switch {
 	case look.Disabled:
 		// First, and it stays first. A control nobody can press does not answer
@@ -182,11 +197,36 @@ func ButtonFace(look ButtonLook) fyne.CanvasObject {
 		var fill string
 		fill, ink = FilledGround(look.Hovered, look.Pressed)
 		ground = Fill(fill, theme.RadiusControl)
+		if look.Focused {
+			// The one control with no edge at rest, so focus ADDS one rather
+			// than recolouring it. Same shade as everywhere else: 3.83 against
+			// the fill and 3.15 against the fill under the pointer.
+			ground = inside(Bordered(fill, theme.MarkFocus, theme.RadiusControl))
+		}
 	case look.Plain:
-		// No edge in any state, so a pointer has only the ground to show with.
+		// No edge at rest, so a pointer has only the ground to show with.
 		ground = Clear()
 		if under != "" {
 			ground = Fill(under, theme.RadiusControl)
+		}
+		if look.Focused && !look.Disabled {
+			// 🔴 Except for focus, which has to be visible on every control
+			// that can hold the keyboard. Caught by the sheet of every state of
+			// every control on 2026-09-09 and by nothing else: moving focus
+			// from a ring to an edge left this branch drawing no mark at all,
+			// since it is the one branch that draws no edge to recolour. The
+			// tree still said the button was focused, so no test could see it.
+			//
+			// 🔴 An OUTLINE when this button has no ground of its own, and that
+			// distinction cost a second render. Asking for a bordered shape
+			// with no fill token named fills it with the fallback, so a plain
+			// button in focus came out as a solid white block - which the sheet
+			// showed at once and which the tree, again, called a focused button.
+			if under == "" {
+				ground = inside(Outline(theme.MarkFocus, theme.RadiusControl))
+			} else {
+				ground = inside(Bordered(under, theme.MarkFocus, theme.RadiusControl))
+			}
 		}
 	case under == "":
 		// An edge around nothing rather than a fill of its own. A quiet
@@ -222,11 +262,7 @@ func ButtonFace(look ButtonLook) fyne.CanvasObject {
 			container.New(layout.NewBorderLayout(nil, nil, words, nil), words))
 	}
 
-	dressed := []fyne.CanvasObject{ground, inner}
-	if look.Focused && !look.Disabled {
-		dressed = []fyne.CanvasObject{ground, ring(ink), inner}
-	}
-	return AtLeast(look.Width, theme.ControlHeight, container.NewStack(dressed...))
+	return AtLeast(look.Width, theme.ControlHeight, container.NewStack(ground, inner))
 }
 
 // inside puts a shape far enough in from its own bounds that a stroke centred
@@ -255,19 +291,6 @@ func inside(shape fyne.CanvasObject) fyne.CanvasObject {
 	return container.New(layout.NewCustomPaddedLayout(edge, edge, edge, edge), shape)
 }
 
-// ring is the mark saying the keyboard is on this shape.
-//
-// Inset by a whole stroke rather than half of one, so that a stroke drawn
-// centred on its path lands entirely inside the shape. Half, which is what an
-// edge around a control uses, would leave the outer half of the ring on
-// whatever the button is standing on, and that is a different measurement on
-// every screen.
-func ring(inkToken string) fyne.CanvasObject {
-	mark := Outline(inkToken, theme.RadiusControl-theme.BorderThickness)
-	return Pad(theme.NameStepHairline, theme.NameStepHairline,
-		theme.NameStepHairline, theme.NameStepHairline, mark)
-}
-
 // FieldFace is the look of something typed into: a ground a step off the
 // window, an edge, and the text inside it.
 //
@@ -279,6 +302,23 @@ func FieldFace(value, rung string, width float32) fyne.CanvasObject {
 	return AtLeast(width, theme.ControlHeight,
 		On(ground, Pad(theme.NameStepHairline, theme.NameStepHairline,
 			theme.NameStepRelated, theme.NameStepRelated, text)))
+}
+
+// FieldGround is the ground and the edge of a text field, at rest or focused.
+//
+// # Why a field needs one at all, when the toolkit draws its own
+//
+// Because the toolkit's edge is tied to the arithmetic that places the text:
+// the renderer of widget.Entry puts its words at twice SizeNameInputBorder from
+// the top and draws its edge at that same thickness. Drawing the edge here
+// unties the two, and it also lets a field show focus the way every other
+// control in this window shows it.
+func FieldGround(focused bool) fyne.CanvasObject {
+	edge := theme.BorderControl
+	if focused {
+		edge = theme.MarkFocus
+	}
+	return inside(Bordered(theme.BgControl, edge, theme.RadiusControl))
 }
 
 // ChooserLook is everything the face of a chooser depends on.
@@ -343,6 +383,9 @@ type ChooserLook struct {
 func ChooserFace(look ChooserLook) fyne.CanvasObject {
 	ink := theme.TextPrimary
 	under, edge := pointerGround(look.Hovered, look.Pressed)
+	if look.Focused && !look.Disabled {
+		edge = theme.MarkFocus
+	}
 	if under == "" {
 		// A chooser has a ground of its own at rest, where a button has none,
 		// so this is the one place the resting look is a colour rather than the
@@ -372,9 +415,6 @@ func ChooserFace(look ChooserLook) fyne.CanvasObject {
 	dressed := []fyne.CanvasObject{ground,
 		Pad(theme.NameStepHairline, theme.NameStepHairline,
 			theme.NameStepRelated, theme.NameStepTight, inner)}
-	if look.Focused && !look.Disabled {
-		dressed = []fyne.CanvasObject{dressed[0], ring(ink), dressed[1]}
-	}
 	return AtLeast(look.Width, theme.ControlHeight, container.NewStack(dressed...))
 }
 

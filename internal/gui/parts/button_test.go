@@ -5,10 +5,21 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
+
+	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
 )
 
+// TestMain starts an application WEARING THE WINDOW'S OWN THEME.
+//
+// 🔴 It wore the toolkit's default until 2026-09-09, and that is a measurement
+// error rather than a detail: these are the controls of this window, and the
+// numbers they are built from - the step a word is inset by, the height of a
+// control, the thickness of an edge - all come from the theme. A guard asking
+// where the words of a field start got 16 in the test and 12 in the window,
+// which is the answer to a question nobody was asking.
 func TestMain(m *testing.M) {
-	test.NewApp()
+	application := test.NewApp()
+	application.Settings().SetTheme(fynetheme.Visual{})
 	m.Run()
 }
 

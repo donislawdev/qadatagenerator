@@ -77,9 +77,9 @@ type View struct {
 	// measurement. What replaces the argument is a measured ceiling and a
 	// refusal that names the command line, which has none - so the wall is
 	// still refused and the number is no longer somebody's guess.
-	howMany *widget.Entry
-	born    *widget.Entry
-	seedBox *widget.Entry
+	howMany *parts.FieldEntry
+	born    *parts.FieldEntry
+	seedBox *parts.FieldEntry
 	copy    *parts.Button
 	again   *parts.Button
 	// generate is the one action this screen is for, and the only filled
@@ -166,7 +166,7 @@ func (v *View) build() {
 	v.gender = parts.NewSelect(v.genderChoices(), func(string) { v.draw() })
 	// Typed, so it waits for the button like the seed does (DEC-235). Without
 	// that, typing 500 would produce at 5, at 50 and at 500.
-	v.howMany = widget.NewEntry()
+	v.howMany = parts.NewFieldEntry()
 	v.howMany.OnSubmitted = func(string) { v.draw() }
 	// 🔴 The field will not take a character that could never be a count, and
 	// it will not take more digits than the ceiling has. Added on 2026-09-09
@@ -177,12 +177,12 @@ func (v *View) build() {
 	//
 	// The length comes from the ceiling rather than from a number written here,
 	// so a measurement that moves the ceiling moves this with it.
-	parts.Bounded(v.howMany, len(strconv.Itoa(mostShown)), parts.Digits)
-	v.born = widget.NewEntry()
+	parts.Bounded(&v.howMany.Entry, len(strconv.Itoa(mostShown)), parts.Digits)
+	v.born = parts.NewFieldEntry()
 	// The characters a date is made of, for the same reason. The SHAPE is
 	// still the mode's to refuse, since 9999-99-99 is made of these characters
 	// and is not a date.
-	parts.Bounded(v.born, len(quick.DateShape), parts.DigitsAndDashes)
+	parts.Bounded(&v.born.Entry, len(quick.DateShape), parts.DigitsAndDashes)
 	// The shape of the date is on the field rather than only in the refusal
 	// that follows getting it wrong, which is the same reason the seed field
 	// shows the seed that was used.
@@ -195,13 +195,13 @@ func (v *View) build() {
 	// this screen able to do what the flag does. The screen fills it with the
 	// one it used when nobody said, so asking for the same value again is
 	// reading it off the screen rather than out of a log.
-	v.seedBox = widget.NewEntry()
+	v.seedBox = parts.NewFieldEntry()
 	// A seed the surfaces will take, with the limit and the measurement behind
 	// it in the domain, so this field and the --seed flag of three verbs cannot
 	// come to accept different things. No filter on the characters: a seed is
 	// any text at all, and narrowing that here would refuse a seed the command
 	// line takes.
-	parts.Bounded(v.seedBox, seed.Longest, nil)
+	parts.Bounded(&v.seedBox.Entry, seed.Longest, nil)
 	// 🔴 NOTHING happens while somebody types, and that is DEC-235.
 	//
 	// Until 2026-09-09 this produced on every keystroke, so a thirty two
@@ -640,7 +640,7 @@ func (v *View) showRows(generator string) {
 		// it come and go with what was chosen, so a field that never leaves
 		// belongs before the ones that do.
 		labelled(v.text.T(i18n.QuickLabelCount),
-			paint.AtLeast(paint.FieldWidth(countSample), 0, parts.Standing(v.howMany))),
+			paint.AtLeast(paint.FieldWidth(countSample), 0, parts.Standing(parts.Field(v.howMany)))),
 		labelled(v.text.T(i18n.QuickLabelLocale), v.locales.OnScreen()),
 	}
 	showing := map[string]bool{}
@@ -650,7 +650,7 @@ func (v *View) showRows(generator string) {
 	}
 	if quick.Reads(generator, quick.RoleBirthDate, v.locale) {
 		showing[quick.RoleBirthDate] = true
-		fixed = append(fixed, labelled(v.text.T(i18n.QuickLabelBorn), dated(v.born)))
+		fixed = append(fixed, labelled(v.text.T(i18n.QuickLabelBorn), dated(parts.Field(v.born))))
 	}
 
 	// 🔴 The panel is settled BEFORE the check below, and it was settled after
@@ -704,7 +704,7 @@ func (v *View) showRows(generator string) {
 	//
 	// A centre cannot overflow the room it is given. The button on the right is
 	// what stops it running away, which is what a width of its own was for.
-	seed := labelled(v.text.T(i18n.QuickLabelSeed), parts.Standing(v.seedBox))
+	seed := labelled(v.text.T(i18n.QuickLabelSeed), parts.Standing(parts.Field(v.seedBox)))
 	withSeed := container.New(layout.NewBorderLayout(nil, nil, settings, nil),
 		settings, paint.PadLeft(palette.NameStepRelated, seed))
 

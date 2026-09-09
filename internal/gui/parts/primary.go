@@ -316,8 +316,14 @@ func (r *primaryRenderer) Refresh() {
 	ink := palette.Ink(on)
 	r.fill.FillColor = palette.Ink(fill)
 	r.label.Color = ink
+	// 🔴 The focus mark is mark.focus, the same shade every other control in
+	// this window uses, and it is the edge rather than a ring in the ink of the
+	// label. Changed on 2026-09-09: the owner looked at a sheet of every state
+	// of every control and said the white ring in this button was awful. He was
+	// right on both counts - it was a second shape inside a filled control, and
+	// it was the one control marking focus differently from its neighbours.
 	if b.keyboardIsHere {
-		r.ring.StrokeColor = ink
+		r.ring.StrokeColor = palette.Ink(palette.MarkFocus)
 	} else {
 		r.ring.StrokeColor = color.Transparent
 	}
