@@ -20,7 +20,7 @@ func TestMain(m *testing.M) {
 	application := test.NewApp()
 	// The theme of this product rather than the one the toolkit tests with,
 	// which answers "color not defined" for every name of this palette.
-	application.Settings().SetTheme(fynetheme.Dark{})
+	application.Settings().SetTheme(fynetheme.Current())
 	os.Exit(m.Run())
 }
 

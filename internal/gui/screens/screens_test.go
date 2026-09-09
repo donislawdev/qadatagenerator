@@ -30,7 +30,7 @@ func TestMain(m *testing.M) {
 	// 🔴 The test driver ships a deliberately garish theme so colour changes
 	// stand out. Storing trees drawn with it would make every colour in them a
 	// statement about the toolkit's test theme rather than about this product.
-	application.Settings().SetTheme(fynetheme.Dark{})
+	application.Settings().SetTheme(fynetheme.Current())
 	os.Exit(m.Run())
 }
 

@@ -161,6 +161,7 @@ const (
 
 	FillPrimary = "fill.primary"
 	MarkCurrent = "mark.current"
+	MarkActive  = "mark.active"
 
 	TextPrimary   = "text.primary"
 	TextSecondary = "text.secondary"
@@ -177,7 +178,7 @@ const (
 var TokenNames = []string{
 	BgWindow, BgSurface, BgControl, BgCurrent, BgHover,
 	LineQuiet, BorderControl,
-	FillPrimary, MarkCurrent,
+	FillPrimary, MarkCurrent, MarkActive,
 	TextPrimary, TextSecondary, TextAccent, TextOnFill,
 	StateSuccess, StateWarning, StateDanger,
 }
@@ -266,6 +267,31 @@ var Tokens = []Token{
 		"the fill of the one action a screen is for, which is the only thing carrying hierarchy here"},
 	{MarkCurrent, "accent.11", ThresholdControl, []string{BgSurface, BgCurrent},
 		"the bar beside the sidebar item the window is on, which says where you are without a second word"},
+	// 🔴 The one token measured against another MARK rather than against a
+	// ground, and the reason is the whole entry.
+	//
+	// The toolkit paints this on a stock control that is chosen or holds the
+	// keyboard: the border of a focused field, the caret inside it, and the
+	// glyph of a ticked box. On the field it REPLACES the resting border, so
+	// the pair a person actually sees is this against border.control, and a
+	// measurement against the ground behind them would pass while the change
+	// stayed invisible. That is not a hypothesis: with the accent fill here,
+	// the border went from 0x807E76 to 0x7059D6 and measured 1.26 where the
+	// rule asks for 3.0, which is one saturated mid tone replacing another.
+	//
+	// # Why the accent ladder cannot answer this
+	//
+	// Measured across it: accent.9 gives 1.26, accent.10 gives 1.04, accent.11
+	// gives 1.60. Only accent.12 clears the threshold, at 3.03, and its stated
+	// job is text on a tinted ground. So the mark rides the top of the neutral
+	// ladder, where it clears at 3.44 with room to spare.
+	//
+	// What this costs, said plainly: a ticked box and a focused field are not
+	// violet. The accent is spent on the one action of a screen instead, which
+	// is the budget this system already set, and a focus mark that cannot be
+	// seen is worse than one that is not tinted.
+	{MarkActive, "neutral.12", ThresholdControl, []string{BorderControl, BgControl, BgSurface},
+		"what the toolkit paints on a stock control that is chosen or holds the keyboard, which has to differ from the resting edge it replaces"},
 
 	{TextPrimary, "neutral.12", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgHover},
 		"the value, the label and every word read first"},

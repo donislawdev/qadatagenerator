@@ -65,7 +65,7 @@ func main() {
 	}()
 
 	application := app.New()
-	application.Settings().SetTheme(fynetheme.Dark{})
+	application.Settings().SetTheme(fynetheme.Current())
 
 	text := i18n.English
 	window := application.NewWindow(text.T(i18n.WindowTitle))

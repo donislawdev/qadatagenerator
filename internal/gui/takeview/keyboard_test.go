@@ -313,7 +313,7 @@ func TestTheKeyboardHasSomewhereToGoWhenTheButtonCannotTakeIt(t *testing.T) {
 // So this asks the pixels under the theme the product really wears.
 func TestTheKeyboardCanBeSeenOnEveryKindOfControlHere(t *testing.T) {
 	test.NewTempApp(t)
-	test.ApplyTheme(t, fynetheme.Dark{})
+	test.ApplyTheme(t, fynetheme.Current())
 
 	for _, kind := range []struct {
 		what string

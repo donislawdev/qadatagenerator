@@ -72,12 +72,26 @@ var tokenFor = map[fyne.ThemeColorName]string{
 	toolkit.ColorNameMenuBackground:    palette.BgSurface,
 	toolkit.ColorNameOverlayBackground: palette.BgSurface,
 	toolkit.ColorNameButton:            palette.BgControl,
-	// Primary is what the toolkit paints a chosen control with, and the
-	// accent fill is the one thing this window spends the accent on. Focus
-	// is deliberately NOT the same value: measured on 2026-08-18, a control
-	// painted in the colour focus arrives in has nothing left to show that
-	// it HAS focus, and the pixels of the first window said so.
-	toolkit.ColorNamePrimary: palette.FillPrimary,
+	// 🔴 Primary is what the toolkit paints on a stock control that is chosen
+	// or holds the keyboard, and it answers with the MARK rather than with the
+	// accent fill. Corrected on 2026-09-09 after the switch to this theme
+	// turned a guard red on the take screen.
+	//
+	// The fill was the obvious answer and it is wrong for a measured reason: on
+	// a focused field the toolkit replaces the resting border with this colour,
+	// so the pair is this against border.control, and two saturated mid tones
+	// measure 1.26 where WCAG 1.4.11 asks for 3.0. The register carries the
+	// arithmetic across the whole accent ladder beside the token.
+	//
+	// Nothing of ours reaches the accent fill through here, which is what makes
+	// the correction safe: paint.ButtonFace asks for fill.primary by name and
+	// parts.PrimaryButton paints itself, so this entry is read only by stock
+	// widgets.
+	//
+	// Focus is deliberately NOT the same value: measured on 2026-08-18, a
+	// control painted in the colour focus arrives in has nothing left to show
+	// that it HAS focus, and the pixels of the first window said so.
+	toolkit.ColorNamePrimary: palette.MarkActive,
 	toolkit.ColorNameFocus:   palette.MarkCurrent,
 }
 

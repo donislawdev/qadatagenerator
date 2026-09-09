@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 	// Colours are asked for by name here, and the test theme answers "color
 	// text not defined" for every name of this palette, so a rendering checked
 	// under it would be a rendering of something the window never shows.
-	application.Settings().SetTheme(fynetheme.Dark{})
+	application.Settings().SetTheme(fynetheme.Current())
 	os.Exit(m.Run())
 }
 
