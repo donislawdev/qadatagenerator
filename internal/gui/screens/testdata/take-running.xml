@@ -709,7 +709,9 @@
 																<container size="122x34">
 																	<rectangle size="122x34"/>
 																	<container size="122x34">
-																		<rectangle radius="6" size="122x34" strokeColor="inputBorder" strokeWidth="2"/>
+																		<container size="122x34">
+																			<rectangle pos="1,1" radius="6" size="120x32" strokeColor="inputBorder" strokeWidth="2"/>
+																		</container>
 																		<container size="122x34">
 																			<container pos="16,4" size="90x26">
 																				<container pos="0,4" size="90x16">
@@ -739,7 +741,9 @@
 															<container size="106x34">
 																<rectangle size="106x34"/>
 																<container size="106x34">
-																	<rectangle radius="6" size="106x34" strokeColor="inputBorder" strokeWidth="2"/>
+																	<container size="106x34">
+																		<rectangle pos="1,1" radius="6" size="104x32" strokeColor="inputBorder" strokeWidth="2"/>
+																	</container>
 																	<container size="106x34">
 																		<container pos="16,4" size="74x26">
 																			<container pos="0,4" size="74x16">

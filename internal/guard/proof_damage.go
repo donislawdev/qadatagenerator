@@ -477,6 +477,7 @@ var damageGuards = []Guard{
 		"TestASeparatorThatIsBrieflyUnusableDoesNotTakeTheFileAway", "internal/gui/takeview", ByMutation},
 	{"no screen holds a control the toolkit floods with the focus colour, since the words written across one measure 1.56 and nothing outside its renderer repairs that", "TestNoScreenHoldsAControlTheToolkitFloods", "internal/gui/screens", ByMutation},
 	{"a chooser is outlined in the colour and the thickness the tokens say", "TestTheChooserIsOutlinedFromTheTokens", "internal/gui/parts", ByMutation},
+	{"the edge a face draws lands wholly inside its control, rather than half of it on whatever the control stands on", "TestTheEdgeOfAFaceIsDrawnInsideTheControl", "internal/gui/parts", ByMutation},
 	{"a chooser nobody can use draws no edge, since an edge says a control can be used", "TestADisabledChooserShowsNoEdge", "internal/gui/parts", ByMutation},
 	{"a chooser with the keyboard on it gains a mark that is not its resting edge", "TestTheKeyboardOnTheChooserIsVisible", "internal/gui/parts", ByMutation},
 	{"a chooser keeps its width when something is chosen, so the row it stands in does not move", "TestTheChooserDoesNotChangeWidthWhenSomethingIsChosen", "internal/gui/parts", ByMutation},

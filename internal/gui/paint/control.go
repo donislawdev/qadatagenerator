@@ -109,7 +109,7 @@ func ButtonFace(look ButtonLook) fyne.CanvasObject {
 		// An edge around nothing rather than a fill of its own. A quiet
 		// button stands on three grounds here, and any fill would be a
 		// patch of the wrong colour on two of them. Seen on the render.
-		ground = Outline(theme.BorderControl, theme.RadiusControl)
+		ground = inside(Outline(theme.BorderControl, theme.RadiusControl))
 	}
 
 	row := []fyne.CanvasObject{}
@@ -142,6 +142,32 @@ func ButtonFace(look ButtonLook) fyne.CanvasObject {
 		dressed = []fyne.CanvasObject{ground, ring(ink), inner}
 	}
 	return AtLeast(look.Width, theme.ControlHeight, container.NewStack(dressed...))
+}
+
+// inside puts a shape far enough in from its own bounds that a stroke centred
+// on its edge lands wholly within the control.
+//
+// # 🔴 Why a face needs this, measured on 2026-09-09
+//
+// The toolkit draws a stroke CENTRED on the path, so a rectangle at the full
+// size of a control puts half its edge outside that control. At the thickness
+// this window uses that is one pixel, drawn over whatever the control stands
+// on and arriving as a blend rather than as the colour asked for.
+//
+// It went unnoticed until a chooser that draws itself stood in one row beside a
+// text field that does not, and the two were compared in the stored tree. The
+// toolkit's own field puts its border at 1,1 and one thickness in from each
+// edge. Ours sat at 0,0. The same row, two controls, two different edges - and
+// DEC-215 settled that this is a fault even when each passes on its own.
+//
+// parts.Outlined did this correctly for as long as the window used it, which is
+// why the distance already has a name in the theme.
+//
+// Nothing of ours lays anything out here: the toolkit's padded layout takes the
+// margin, which is the same reason Outlined nested two of its containers.
+func inside(shape fyne.CanvasObject) fyne.CanvasObject {
+	edge := theme.OutlineInset
+	return container.New(layout.NewCustomPaddedLayout(edge, edge, edge, edge), shape)
 }
 
 // ring is the mark saying the keyboard is on this shape.
@@ -224,7 +250,7 @@ type ChooserLook struct {
 //     written on it, which is the entire reason parts.Flooded had to exist.
 func ChooserFace(look ChooserLook) fyne.CanvasObject {
 	ink := theme.TextPrimary
-	ground := Bordered(theme.BgControl, theme.BorderControl, theme.RadiusControl)
+	var ground fyne.CanvasObject = inside(Bordered(theme.BgControl, theme.BorderControl, theme.RadiusControl))
 	switch {
 	case look.Disabled:
 		ink = theme.TextSecondary

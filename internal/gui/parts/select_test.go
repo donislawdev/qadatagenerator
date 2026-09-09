@@ -77,6 +77,60 @@ func TestTheChooserIsOutlinedFromTheTokens(t *testing.T) {
 	}
 }
 
+// TestTheEdgeOfAFaceIsDrawnInsideTheControl is the rule TestTheEdgeIsDrawn
+// InsideTheControlItOutlines holds for parts.Outlined, asked of the drawing
+// that replaced it.
+//
+// # 🔴 Why it had to be asked again, and how the fault was found
+//
+// The toolkit centres a stroke on the path it is given, so a rectangle at the
+// full size of a control leaves half its edge outside, drawn over whatever the
+// control stands on and arriving as a blend of two colours rather than as the
+// one asked for. parts.Outlined knew this and inset its rectangle. The face
+// that replaced it did not, for as long as it took to render one screen.
+//
+// Neither a test nor a reading found it. What found it was the chooser standing
+// in one row beside a text field the toolkit still draws, and the two being
+// compared in the stored tree: the toolkit puts the border of a field at 1,1
+// and one thickness in from each edge, ours sat at 0,0 and the full size. Two
+// controls in one row with two different edges is the fault DEC-215 settled,
+// and it is invisible until something is put next to it.
+func TestTheEdgeOfAFaceIsDrawnInsideTheControl(t *testing.T) {
+	size := fyne.NewSize(220, palette.ControlHeight)
+	faces := map[string]fyne.CanvasObject{
+		"the chooser": chooserFace(func() *Select {
+			chooser := NewSelect([]string{"pesel", "nip"}, func(string) {})
+			chooser.SetSelected("pesel")
+			return chooser
+		}()),
+		"the quiet button": drawnFace(NewButton("Choose a file", func() {})),
+	}
+
+	for name, face := range faces {
+		t.Run(name, func(t *testing.T) {
+			face.Resize(size)
+			strokes := strokedIn(face)
+			if len(strokes) != 1 {
+				t.Fatalf("%s draws %d strokes at rest, where it draws one: its edge", name, len(strokes))
+			}
+			edge := strokes[0]
+
+			wantAt := fyne.NewPos(palette.OutlineInset, palette.OutlineInset)
+			if edge.Position() != wantAt {
+				t.Errorf("%s draws its edge at %v, where half of its own stroke is %v. "+
+					"Anywhere else and half the line falls outside the control, onto whatever "+
+					"it stands on", name, edge.Position(), wantAt)
+			}
+			wantSize := fyne.NewSize(size.Width-palette.BorderThickness, size.Height-palette.BorderThickness)
+			if edge.Size() != wantSize {
+				t.Errorf("%s draws its edge at %v rather than %v, so the far side of the "+
+					"stroke lands somewhere other than the near side does",
+					name, edge.Size(), wantSize)
+			}
+		})
+	}
+}
+
 // TestADisabledChooserShowsNoEdge is the button's rule, asked of the control
 // beside it.
 //

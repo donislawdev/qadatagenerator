@@ -228,7 +228,9 @@
 											<container size="106x34">
 												<rectangle size="106x34"/>
 												<container size="106x34">
-													<rectangle radius="6" size="106x34" strokeColor="inputBorder" strokeWidth="2"/>
+													<container size="106x34">
+														<rectangle pos="1,1" radius="6" size="104x32" strokeColor="inputBorder" strokeWidth="2"/>
+													</container>
 													<container size="106x34">
 														<container pos="16,4" size="74x26">
 															<container pos="0,4" size="74x16">
@@ -494,7 +496,9 @@
 																	<container size="363x34">
 																		<rectangle size="363x34"/>
 																		<container size="363x34">
-																			<rectangle fillColor="button" radius="6" size="363x34" strokeColor="inputBorder" strokeWidth="2"/>
+																			<container size="363x34">
+																				<rectangle fillColor="button" pos="1,1" radius="6" size="361x32" strokeColor="inputBorder" strokeWidth="2"/>
+																			</container>
 																			<container size="363x34">
 																				<container pos="12,4" size="343x26">
 																					<container size="316x26">
@@ -596,7 +600,9 @@
 																	<container size="363x34">
 																		<rectangle size="363x34"/>
 																		<container size="363x34">
-																			<rectangle fillColor="button" radius="6" size="363x34" strokeColor="inputBorder" strokeWidth="2"/>
+																			<container size="363x34">
+																				<rectangle fillColor="button" pos="1,1" radius="6" size="361x32" strokeColor="inputBorder" strokeWidth="2"/>
+																			</container>
 																			<container size="363x34">
 																				<container pos="12,4" size="343x26">
 																					<container size="316x26">
@@ -709,7 +715,9 @@
 																<container size="122x34">
 																	<rectangle size="122x34"/>
 																	<container size="122x34">
-																		<rectangle radius="6" size="122x34" strokeColor="inputBorder" strokeWidth="2"/>
+																		<container size="122x34">
+																			<rectangle pos="1,1" radius="6" size="120x32" strokeColor="inputBorder" strokeWidth="2"/>
+																		</container>
 																		<container size="122x34">
 																			<rectangle pos="4,4" radius="4" size="114x26" strokeColor="foreground" strokeWidth="2"/>
 																		</container>

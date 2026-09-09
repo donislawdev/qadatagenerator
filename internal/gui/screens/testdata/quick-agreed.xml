@@ -231,7 +231,9 @@
 																<container size="118x34">
 																	<rectangle size="118x34"/>
 																	<container size="118x34">
-																		<rectangle fillColor="button" radius="6" size="118x34" strokeColor="inputBorder" strokeWidth="2"/>
+																		<container size="118x34">
+																			<rectangle fillColor="button" pos="1,1" radius="6" size="116x32" strokeColor="inputBorder" strokeWidth="2"/>
+																		</container>
 																		<container size="118x34">
 																			<container pos="12,4" size="98x26">
 																				<container size="71x26">
@@ -260,7 +262,9 @@
 																<container size="117x34">
 																	<rectangle size="117x34"/>
 																	<container size="117x34">
-																		<rectangle fillColor="button" radius="6" size="117x34" strokeColor="inputBorder" strokeWidth="2"/>
+																		<container size="117x34">
+																			<rectangle fillColor="button" pos="1,1" radius="6" size="115x32" strokeColor="inputBorder" strokeWidth="2"/>
+																		</container>
 																		<container size="117x34">
 																			<container pos="12,4" size="97x26">
 																				<container size="70x26">
@@ -289,7 +293,9 @@
 																<container size="117x34">
 																	<rectangle size="117x34"/>
 																	<container size="117x34">
-																		<rectangle fillColor="button" radius="6" size="117x34" strokeColor="inputBorder" strokeWidth="2"/>
+																		<container size="117x34">
+																			<rectangle fillColor="button" pos="1,1" radius="6" size="115x32" strokeColor="inputBorder" strokeWidth="2"/>
+																		</container>
 																		<container size="117x34">
 																			<container pos="12,4" size="97x26">
 																				<container size="70x26">
@@ -318,7 +324,9 @@
 																<container size="117x34">
 																	<rectangle size="117x34"/>
 																	<container size="117x34">
-																		<rectangle fillColor="button" radius="6" size="117x34" strokeColor="inputBorder" strokeWidth="2"/>
+																		<container size="117x34">
+																			<rectangle fillColor="button" pos="1,1" radius="6" size="115x32" strokeColor="inputBorder" strokeWidth="2"/>
+																		</container>
 																		<container size="117x34">
 																			<container pos="12,4" size="97x26">
 																				<container size="70x26">
@@ -412,7 +420,9 @@
 																<container size="87x34">
 																	<rectangle size="87x34"/>
 																	<container size="87x34">
-																		<rectangle radius="6" size="87x34" strokeColor="inputBorder" strokeWidth="2"/>
+																		<container size="87x34">
+																			<rectangle pos="1,1" radius="6" size="85x32" strokeColor="inputBorder" strokeWidth="2"/>
+																		</container>
 																		<container size="87x34">
 																			<container pos="16,4" size="55x26">
 																				<container pos="0,4" size="55x16">
@@ -724,7 +734,9 @@
 													<container size="145x34">
 														<rectangle size="145x34"/>
 														<container size="145x34">
-															<rectangle radius="6" size="145x34" strokeColor="inputBorder" strokeWidth="2"/>
+															<container size="145x34">
+																<rectangle pos="1,1" radius="6" size="143x32" strokeColor="inputBorder" strokeWidth="2"/>
+															</container>
 															<container size="145x34">
 																<container pos="16,4" size="113x26">
 																	<container pos="0,4" size="113x16">

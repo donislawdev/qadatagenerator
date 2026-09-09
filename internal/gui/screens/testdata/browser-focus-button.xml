@@ -233,7 +233,9 @@
 											<container size="198x34">
 												<rectangle size="198x34"/>
 												<container size="198x34">
-													<rectangle radius="6" size="198x34" strokeColor="inputBorder" strokeWidth="2"/>
+													<container size="198x34">
+														<rectangle pos="1,1" radius="6" size="196x32" strokeColor="inputBorder" strokeWidth="2"/>
+													</container>
 													<container size="198x34">
 														<container pos="16,4" size="166x26">
 															<container pos="0,4" size="166x16">

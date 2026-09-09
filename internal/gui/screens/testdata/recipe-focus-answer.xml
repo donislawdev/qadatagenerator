@@ -340,7 +340,9 @@
 																	<container size="85x34">
 																		<rectangle size="85x34"/>
 																		<container size="85x34">
-																			<rectangle radius="6" size="85x34" strokeColor="inputBorder" strokeWidth="2"/>
+																			<container size="85x34">
+																				<rectangle pos="1,1" radius="6" size="83x32" strokeColor="inputBorder" strokeWidth="2"/>
+																			</container>
 																			<container size="85x34">
 																				<container pos="16,4" size="53x26">
 																					<container pos="0,4" size="53x16">
