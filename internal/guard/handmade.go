@@ -69,6 +69,21 @@ type Handmade struct {
 // reach the drawing, and controls that draw themselves, which costs these
 // entries - and chose the second knowing the price.
 var HandmadeAllowed = map[string]Handmade{
+	"TapRow": {
+		Instead: "widget.List, which holds a highlight, moves it with the arrow keys and only builds " +
+			"the rows that are visible",
+		Why: "it fixes the height of every row, and the card on the quick screen spends spare height on " +
+			"its rows so that four values in a tall window are not four lines with a field of black " +
+			"under them. Taking the list would have traded a fault the owner reported for one he " +
+			"reported two days earlier. It is the right answer for the keyboard and is written down " +
+			"as such in B-268",
+	},
+	"tapRowRenderer": {
+		Instead: "the renderer of any toolkit widget that holds one child",
+		Why: "the picture of a row differs between states rather than only changing colour, since the " +
+			"word saying what a click does is absent until the pointer arrives. Swapping a subtree is " +
+			"what a renderer is for, and no toolkit widget exposes that",
+	},
 	"fixedWidth": {
 		Instead: "layout.NewGridWrapLayout, which does force a size on what it holds",
 		Why: "it wants a whole cell size, height included, and the column of screen names has no " +
@@ -126,10 +141,16 @@ var HandmadeAllowed = map[string]Handmade{
 // HandmadeCeiling is how many pieces of the toolkit this project may carry
 // copies of. Lower it when one goes back to the library.
 //
-// 🔴 Raised from 1 to 5 and then to 7 on 2026-09-09, by the owner's decision,
-// and the number is the count of the entries above rather than room to grow.
-// Three controls draw themselves and each costs a type and a renderer, which is
-// six, beside the one layout that was here before.
+// 🔴 Raised from 1 to 5, then to 7, then to 9 on 2026-09-09, and the number is
+// the count of the entries above rather than room to grow. Three controls draw
+// themselves and each costs a type and a renderer, which is six, beside the one
+// layout that was here before and the row that answers the pointer.
+//
+// The last two are the one raise NOT covered by the owner's pace below, and it
+// is stated rather than folded in: they came from a different request, "I
+// cannot copy a single value from values", and a row that answers nobody cannot
+// answer that. widget.List was the library answer and was rejected for a
+// measured reason written beside the entry, not for want of looking.
 //
 // The owner set both the decision and its pace: one control at a time, with a
 // render of the window to look at before the next one starts. So this number
@@ -139,7 +160,7 @@ var HandmadeAllowed = map[string]Handmade{
 // What lowers it again: a control going back to the library, which will happen
 // if the toolkit ever lets a caller supply the content of a button. Nothing
 // else does.
-const HandmadeCeiling = 7
+const HandmadeCeiling = 9
 
 // Handmades reports every layout and widget written inside the window, and
 // every register entry naming one that is no longer there.

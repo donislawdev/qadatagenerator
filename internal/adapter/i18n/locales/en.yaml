@@ -347,6 +347,7 @@ quick.gender.any: any
 quick.copy: Copy
 quick.again: Again
 quick.copied: The values are in the clipboard.
+quick.copied-one: That value is in the clipboard.
 quick.generate: Generate
 quick.may-repeat: Values are drawn rather than dealt, so some may repeat.
 quick.refused.generator: This build cannot produce that value.

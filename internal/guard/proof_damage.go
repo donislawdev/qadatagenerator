@@ -515,4 +515,6 @@ var damageGuards = []Guard{
 	{"a field takes no more characters than the surface can carry, so a paste stops at the limit rather than at a refusal one press later", "TestABoundedFieldStopsAtTheLengthItWasGiven", "internal/gui/parts", ByMutation},
 	{"a field takes no character that could never be part of its answer", "TestABoundedFieldKeepsOnlyTheCharactersItTakes", "internal/gui/parts", ByMutation},
 	{"every door a seed arrives through refuses one longer than the surfaces take, since a rule held at one door and not the next is this project's own failure mode", "TestEveryDoorASeedArrivesThroughRefusesOneTooLong", "internal/cli", ByMutation},
+	{"a row under the pointer draws something else, since the chooser once went on receiving the event while drawing the same picture", "TestARowUnderThePointerDrawsSomethingElse", "internal/gui/parts", ByMutation},
+	{"clicking one value copies that value rather than the set, since rows are built in a loop and a captured variable would give every row the last one", "TestClickingOneValueCopiesThatValueAndNotTheSet", "internal/gui/quickview", ByMutation},
 }

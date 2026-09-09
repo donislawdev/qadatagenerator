@@ -822,6 +822,21 @@ func (v *View) putCommandInClipboard() {
 	v.say(v.commandCopied, v.text.T(i18n.CommandCopied))
 }
 
+// copyOne puts a single value in the clipboard, which is what clicking a row
+// does.
+//
+// It says so on the same mark the Copy button uses, because the two are the
+// same act on a different amount: what was copied is named in the sentence, so
+// a person who clicked a row and a person who pressed Copy are not told the
+// same thing about different contents.
+func (v *View) copyOne(value string) {
+	if v.clipboard == nil {
+		return
+	}
+	v.clipboard.SetContent(value)
+	v.say(v.copied, v.text.T(i18n.QuickCopiedOne))
+}
+
 // say puts a word on one of the two marks and takes it off the other, so that
 // two confirmations can never stand at once claiming different things were
 // copied.

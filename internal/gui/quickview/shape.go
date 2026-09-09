@@ -118,7 +118,7 @@ func (v *View) valuesCard(values []string) fyne.CanvasObject {
 	// what this is in a word instead of in arithmetic a reader has to run.
 	banded := false
 	for at, value := range values {
-		rows = append(rows, valueRow(at+1, digits, value, banded))
+		rows = append(rows, v.valueRow(at+1, digits, value, banded))
 		banded = !banded
 	}
 	card := paint.Card(palette.NameStepTight, paint.EvenRows(rows...))
@@ -160,18 +160,57 @@ func (v *View) valuesCard(values []string) fyne.CanvasObject {
 // across, and a band under every second one is what stops the eye sliding
 // between rows. It is one step of the ladder, which is as loud as this may be
 // without becoming a list of alternating cards.
-func valueRow(number, digits int, value string, banded bool) fyne.CanvasObject {
+//
+// # Why a row is a control rather than a drawing
+//
+// The owner asked to be able to copy ONE value on 2026-09-09, and a drawing
+// takes no notice of anybody. So the row answers the pointer: it lights up
+// under it, says what clicking does, and puts that one value in the clipboard.
+//
+// The word beside it is drawn only under the pointer, and that is the whole of
+// how a person learns the row can be clicked at all. A hint on every row would
+// be twenty thousand copies of the same sentence in a list of values, which is
+// the state the manifest browser was in before its columns were cut down.
+func (v *View) valueRow(number, digits int, value string, banded bool) fyne.CanvasObject {
+	return parts.NewTapRow(
+		func(hovered bool) fyne.CanvasObject {
+			// The same word the button in the heading carries, because it is
+			// the same act on a smaller amount. A second word for it would be
+			// a second thing to learn.
+			return rowFace(number, digits, value, banded, hovered, v.text.T(i18n.QuickCopy))
+		},
+		func() { v.copyOne(value) })
+}
+
+// rowFace is the picture of one row, in whatever state it is in.
+//
+// It lives in this file rather than in paint for the reason the heading does:
+// it is the shape of THIS screen rather than a piece anything else would reach
+// for.
+func rowFace(number, digits int, value string, banded, hovered bool, hint string) fyne.CanvasObject {
 	var ground fyne.CanvasObject = paint.Clear()
-	if banded {
+	switch {
+	case hovered:
+		// The ground any control takes under the pointer, so a row lights up
+		// the same way every other thing in this window does.
+		ground = paint.Fill(palette.BgHover, 0)
+	case banded:
 		ground = paint.Fill(palette.BgControl, 0)
 	}
 
 	index := paint.Mono(fmt.Sprintf("%*d", digits, number), palette.TypeLabel, palette.TextSecondary)
 	index.Alignment = fyne.TextAlignTrailing
 
-	inner := paint.Row(palette.NameStepGroup,
-		paint.Middle(index),
-		paint.Middle(paint.Mono(value, palette.TypeValue, palette.TextPrimary)))
+	var said fyne.CanvasObject = paint.Clear()
+	if hovered {
+		said = paint.Middle(paint.Text(hint, palette.TypeLabel, palette.TextSecondary))
+	}
+
+	inner := container.NewBorder(nil, nil,
+		paint.Row(palette.NameStepGroup,
+			paint.Middle(index),
+			paint.Middle(paint.Mono(value, palette.TypeValue, palette.TextPrimary))),
+		said)
 
 	return paint.On(ground, paint.Pad(palette.NameStepHairline, palette.NameStepHairline,
 		palette.NameStepGroup, palette.NameStepGroup, inner))

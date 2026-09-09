@@ -6,10 +6,12 @@ import (
 	"strings"
 	"testing"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/test"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
+	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/quick"
 )
 
@@ -553,4 +555,67 @@ func TestASettingLeftAloneIsNotWrittenIntoTheCommand(t *testing.T) {
 		t.Errorf("the line offered is %q and it names a setting this value takes no account "+
 			"of, which is a flag the command line refuses for this generator", line)
 	}
+}
+
+// 🔴 One value out of many, which is what the owner asked for on 2026-09-09:
+// "I cannot copy a single value from values".
+//
+// The guard asks for the value of the row that was clicked rather than for any
+// value, because a row wired to the wrong closure is the failure this shape
+// invites: the rows are built in a loop and a captured variable that moved on
+// would give every row the last value in the set.
+func TestClickingOneValueCopiesThatValueAndNotTheSet(t *testing.T) {
+	clipboard := &heldClipboard{}
+	view := New(i18n.English, clipboard)
+	view.ChooseCount("4")
+	view.UseSeed("for-the-test")
+	view.Choose("pesel")
+
+	values := strings.Split(view.Value(), "\n")
+	if len(values) != 4 {
+		t.Fatalf("the screen produced %d values, so this cannot ask about the third", len(values))
+	}
+
+	rows := tapRowsOf(view.Content())
+	if len(rows) != len(values) {
+		t.Fatalf("the card holds %d rows for %d values", len(rows), len(values))
+	}
+	rows[2].Tapped(nil)
+
+	if clipboard.content != values[2] {
+		t.Errorf("clicking the third row copied %q, where the third value is %q",
+			clipboard.content, values[2])
+	}
+	if clipboard.content == view.Value() {
+		t.Error("clicking one row copied the whole set")
+	}
+	if view.copied.Text == "" {
+		t.Error("a clipboard nobody can see was filled without the screen saying so")
+	}
+}
+
+// tapRowsOf finds the rows of the card, in the order they are drawn.
+func tapRowsOf(object fyne.CanvasObject) []*parts.TapRow {
+	var found []*parts.TapRow
+	var walk func(fyne.CanvasObject)
+	walk = func(each fyne.CanvasObject) {
+		switch shape := each.(type) {
+		case *parts.TapRow:
+			found = append(found, shape)
+		case *fyne.Container:
+			for _, child := range shape.Objects {
+				walk(child)
+			}
+		case fyne.Widget:
+			// 🔴 Walked through the renderer, because a card is a widget and a
+			// widget hides its children behind one. A walk that only follows
+			// containers reports an empty card and reads like a screen that
+			// drew nothing.
+			for _, child := range test.WidgetRenderer(shape).Objects() {
+				walk(child)
+			}
+		}
+	}
+	walk(object)
+	return found
 }

@@ -502,6 +502,7 @@ const (
 	QuickCopy        Key = "quick.copy"
 	QuickAgain       Key = "quick.again"
 	QuickCopied      Key = "quick.copied"
+	QuickCopiedOne   Key = "quick.copied-one"
 	// QuickGenerate names the one action this screen is for.
 	//
 	// It exists because a field somebody TYPES into stopped producing on every
@@ -576,7 +577,7 @@ var Keys = []Key{
 	QuickAboutHarbour, QuickAboutUnavailable,
 	QuickLabelGender, QuickLabelBorn,
 	QuickLabelLocale, QuickLabelSeed,
-	QuickGenderAny, QuickCopy, QuickAgain, QuickCopied, QuickGenerate,
+	QuickGenderAny, QuickCopy, QuickAgain, QuickCopied, QuickCopiedOne, QuickGenerate,
 	QuickLabelCount, QuickMayRepeat,
 	QuickRefusedGenerator, QuickRefusedRole, QuickRefusedGender, QuickRefusedDate,
 	QuickRefusedCount, QuickRefusedCountShape, QuickRefusedCountMany,
