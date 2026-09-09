@@ -7,6 +7,7 @@ import (
 	toolkit "fyne.io/fyne/v2/theme"
 
 	"github.com/donislawdev/qadatagenerator/internal/gui/assets"
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
@@ -236,12 +237,52 @@ func (Visual) Font(style fyne.TextStyle) fyne.Resource {
 	return faces[faceFor(style)]
 }
 
-// Icon hands the toolkit's own icons back untouched.
+// Icon hands back this window's own icon where the toolkit draws one inside a
+// control, and the toolkit's own everywhere else.
 //
-// The icons this window draws are loaded by internal/gui/paint, which colours
-// them itself for a reason recorded there. What comes through here is whatever
-// the toolkit draws inside its own controls, and replacing those would be a
-// claim about controls this window does not dress.
+// # Why the arrow of a chooser is answered here and not drawn
+//
+// A chooser draws its own arrow, from whatever the theme answers for
+// IconNameArrowDropDown at widget/select.go:441. This window carries nineteen
+// icons of one family, and a chooser standing in a row of them with the
+// toolkit's arrow beside them is the kind of difference nobody can name and
+// everybody sees: another weight, another set, another idea of what an arrow
+// looks like. Answering here dresses it without a renderer, which is the whole
+// difference between a line of code and a control of our own.
+//
+// 🔴 This sentence used to say that replacing these would be a claim about
+// controls this window does not dress. That was true while nothing here was
+// dressed. Dressing the chooser is exactly what changed on 2026-09-09, so the
+// sentence went with the fact rather than staying behind it.
+//
+// 🔴 # Why BOTH arrows and not just the one a chooser reads
+//
+// Measured rather than reasoned, and the measurement is the reason this comment
+// exists. Answering only the downward arrow moved 14 of the 15 states of the
+// recipe screen, which has no chooser on it at all. The cause is
+// parts.Disclosure: it asks for the downward arrow while it is shut and the
+// upward one while it is open, both through this method. Half an answer would
+// have given ONE control two families of arrow depending on whether a person
+// had opened it, which is worse than the toolkit's own pair and would have
+// shown up as nothing anybody could name.
+//
+// The general form is worth keeping: an icon answered here is answered for
+// every control that asks, and the set of controls that ask is not the set the
+// change was aimed at. The stored trees are what say which those are.
+//
+// # What stays the toolkit's, and why that is not laziness
+//
+// Everything else. An icon inside a control this window has no opinion about
+// is better drawn by the library that draws the control, and swapping one for
+// the pleasure of it would put our family in places nothing here has looked
+// at. A new entry belongs in this switch when a screen shows the control that
+// carries it.
 func (Visual) Icon(name fyne.ThemeIconName) fyne.Resource {
+	switch name {
+	case toolkit.IconNameArrowDropDown:
+		return paint.IconResource(paint.IconChevron, palette.TextSecondary, palette.IconSmall)
+	case toolkit.IconNameArrowDropUp:
+		return paint.IconResource(paint.IconChevronUp, palette.TextSecondary, palette.IconSmall)
+	}
 	return toolkit.DefaultTheme().Icon(name)
 }

@@ -228,7 +228,7 @@
 																	<widget pos="24,5" size="262x20" type="*widget.RichText">
 																		<text alignment="center" bold size="262x16">What this build can generate, 17 generators</text>
 																	</widget>
-																	<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
+																	<image fillMode="contain" pos="4,4" rsc="chevron-down-b4b1a9-15.svg" size="iconInlineSize"/>
 																</widget>
 															</container>
 														</widget>
@@ -292,9 +292,9 @@
 																<text pos="28,0" size="154x24">Replace files already there</text>
 															</widget>
 															<widget pos="362,0" size="146x24" type="*parts.PrimaryButton">
-																<rectangle fillColor="rgba(138,138,138,255)" radius="5" size="146x24"/>
+																<rectangle fillColor="rgba(112,89,214,255)" radius="5" size="146x24"/>
 																<rectangle pos="2,2" radius="3" size="142x20" strokeWidth="2"/>
-																<text alignment="center" bold color="headerBackground" pos="0,4" size="146x16">Generate this dataset</text>
+																<text alignment="center" bold color="foregroundOnPrimary" pos="0,4" size="146x16">Generate this dataset</text>
 															</widget>
 														</container>
 														<container pos="0,52" size="508x24">

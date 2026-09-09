@@ -438,7 +438,7 @@
 																	<widget pos="24,5" size="262x20" type="*widget.RichText">
 																		<text alignment="center" bold size="262x16">What this build can generate, 17 generators</text>
 																	</widget>
-																	<image fillMode="contain" pos="4,4" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
+																	<image fillMode="contain" pos="4,4" rsc="chevron-down-b4b1a9-15.svg" size="iconInlineSize"/>
 																</widget>
 															</container>
 														</widget>

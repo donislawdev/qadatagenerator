@@ -115,9 +115,9 @@
 								</widget>
 								<container pos="0,24" size="1070x28">
 									<widget size="115x28" type="*parts.PrimaryButton">
-										<rectangle fillColor="rgba(138,138,138,255)" radius="5" size="115x28"/>
-										<rectangle pos="2,2" radius="3" size="111x24" strokeColor="headerBackground" strokeWidth="2"/>
-										<text alignment="center" bold color="headerBackground" pos="0,5" size="115x16">Open manifest...</text>
+										<rectangle fillColor="rgba(112,89,214,255)" radius="5" size="115x28"/>
+										<rectangle pos="2,2" radius="3" size="111x24" strokeColor="foregroundOnPrimary" strokeWidth="2"/>
+										<text alignment="center" bold color="foregroundOnPrimary" pos="0,5" size="115x16">Open manifest...</text>
 									</widget>
 									<container pos="115,0" size="180x28">
 										<widget size="180x28" type="*container.ThemeOverride">

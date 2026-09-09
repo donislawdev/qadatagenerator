@@ -127,7 +127,7 @@
 																			<text pos="4,4" size="31x16">pesel</text>
 																		</widget>
 																		<widget pos="82,4" size="20x20" type="*widget.Icon">
-																			<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
+																			<image fillMode="contain" rsc="chevron-down-b4b1a9-15.svg" size="iconInlineSize"/>
 																		</widget>
 																	</widget>
 																</container>
@@ -149,7 +149,7 @@
 																			<text pos="4,4" size="15x16">10</text>
 																		</widget>
 																		<widget pos="82,4" size="20x20" type="*widget.Icon">
-																			<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
+																			<image fillMode="contain" rsc="chevron-down-b4b1a9-15.svg" size="iconInlineSize"/>
 																		</widget>
 																	</widget>
 																</container>
@@ -171,7 +171,7 @@
 																			<text pos="4,4" size="36x16">en-US</text>
 																		</widget>
 																		<widget pos="82,4" size="20x20" type="*widget.Icon">
-																			<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
+																			<image fillMode="contain" rsc="chevron-down-b4b1a9-15.svg" size="iconInlineSize"/>
 																		</widget>
 																	</widget>
 																</container>
@@ -193,7 +193,7 @@
 																			<text pos="4,4" size="20x16">any</text>
 																		</widget>
 																		<widget pos="82,4" size="20x20" type="*widget.Icon">
-																			<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
+																			<image fillMode="contain" rsc="chevron-down-b4b1a9-15.svg" size="iconInlineSize"/>
 																		</widget>
 																	</widget>
 																</container>

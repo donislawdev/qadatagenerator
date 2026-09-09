@@ -113,9 +113,9 @@ func TestTheKeyboardOnThePrimaryButtonIsVisible(t *testing.T) {
 		t.Fatal("the primary button looks the same with and without the keyboard on it")
 	}
 
-	ink := palette.Named(palette.NameTextOnPrimary).NRGBA()
+	ink := palette.Ink(palette.TextOnFill)
 	if !sameColour(withKeyboard.ring.StrokeColor, ink) {
-		t.Errorf("the focus ring is %v rather than text.on-primary %v, so its contrast against the fill is not the 4.99 that was measured",
+		t.Errorf("the focus ring is %v rather than text.on-fill %v, so its contrast against the fill is not the 5.14 that was measured",
 			withKeyboard.ring.StrokeColor, ink)
 	}
 
@@ -127,23 +127,33 @@ func TestTheKeyboardOnThePrimaryButtonIsVisible(t *testing.T) {
 	}
 }
 
-// 🔴 The fill and the ink are the two entries of the palette that were measured
-// as a pair, and not two colours that happen to look right.
+// 🔴 The fill and the ink are the two tokens that were measured as a pair, and
+// not two colours that happen to look right.
 //
-// tools/kontrast.py reads text.on-primary ON action.primary rather than on the
-// window ground, and answers 4.99 for it. A fill taken from anywhere else would
-// leave that measurement describing a pair this control does not use.
-func TestThePrimaryButtonPaintsItselfFromThePalette(t *testing.T) {
+// text.on-fill is read ON fill.primary rather than on the window ground, and
+// measures 5.14 there. A fill taken from anywhere else would leave that
+// measurement describing a pair this control does not use.
+//
+// 🔴 The ink is asked for by NAME rather than compared against white, and that
+// is the point of the test rather than a detail of it. neutral.12, the ink
+// every other piece of text in this window uses, measures 4.35 on this fill and
+// misses the 4.5 a label needs, so the one thing that could silently go wrong
+// here is somebody making this label consistent with its neighbours. The token
+// register carries that arithmetic and this asks the register.
+func TestThePrimaryButtonPaintsItselfFromTheTokens(t *testing.T) {
 	drawing := drawingOf(NewPrimaryButton("generate this dataset", nil))
 
-	fill := palette.Named(palette.NameActionPrimary).NRGBA()
+	fill := palette.Ink(palette.FillPrimary)
 	if !sameColour(drawing.fill.FillColor, fill) {
-		t.Errorf("the slab is %v rather than action.primary %v", drawing.fill.FillColor, fill)
+		t.Errorf("the slab is %v rather than fill.primary %v", drawing.fill.FillColor, fill)
 	}
 
-	ink := palette.Named(palette.NameTextOnPrimary).NRGBA()
+	ink := palette.Ink(palette.TextOnFill)
 	if !sameColour(drawing.label.Color, ink) {
-		t.Errorf("the label is %v rather than text.on-primary %v", drawing.label.Color, ink)
+		t.Errorf("the label is %v rather than text.on-fill %v", drawing.label.Color, ink)
+	}
+	if sameColour(drawing.label.Color, palette.Ink(palette.TextPrimary)) {
+		t.Error("the label took the ordinary text ink, which measures 4.35 on this fill and misses 4.5")
 	}
 }
 

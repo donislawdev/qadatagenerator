@@ -31,6 +31,21 @@ const (
 	IconCheck     = "check"
 	IconChecklist = "clipboard-check"
 	IconChevron   = "chevron-down"
+	// 🔴 IconChevronUp is the one file in this set that was not taken from the
+	// icon set as published. It is chevron-down mirrored about the middle of
+	// the grid: the path of the shipped file is "m6 9 6 6 6-6", and reflecting
+	// it across y=12 gives "m6 15 6-6 6 6", which is what the file holds.
+	//
+	// Derived rather than fetched because a path typed from memory is a guess
+	// that draws something plausible and slightly wrong, and nothing in this
+	// project would catch it. The shape is confirmed by a second file already
+	// in the set: chevrons-up-down carries the same upward stroke as
+	// "m7 9 5-5 5 5", on a shorter span.
+	//
+	// The set is ISC, which permits a modified copy, and the notice beside the
+	// files covers it. This sentence is here so that nobody later reads the
+	// file as one of theirs and looks for it in their catalogue.
+	IconChevronUp = "chevron-up"
 	IconCopy      = "copy"
 	IconDoc       = "file-code"
 	IconFolder    = "folder-open"
@@ -48,7 +63,7 @@ const (
 // side the constants are on.
 var IconNames = []string{
 	IconAgain, IconAlert, IconArrow, IconBolt, IconBug, IconBreak,
-	IconCheck, IconChecklist, IconChevron, IconCopy, IconDoc, IconFolder,
+	IconCheck, IconChecklist, IconChevron, IconChevronUp, IconCopy, IconDoc, IconFolder,
 	IconInfo, IconPlay, IconRecipe, IconSearch, IconShield, IconSwap,
 	IconWarn, IconClose,
 }
@@ -94,6 +109,29 @@ const (
 // icon IS keeps two identical icons identical, which is rule 7 of this project
 // applied to a file name.
 func Icon(name, token string, size float32) *canvas.Image {
+	image := canvas.NewImageFromResource(IconResource(name, token, size))
+	image.FillMode = canvas.ImageFillContain
+	image.SetMinSize(fyne.NewSize(size, size))
+	return image
+}
+
+// IconResource is the same icon as a resource rather than as something drawn,
+// which is the form anything asking the toolkit for an icon has to hand it.
+//
+// # Why this is separate from Icon
+//
+// Two callers want the drawing and one wants the file. The controls of this
+// window take an image and place it themselves, but a control this window does
+// NOT draw asks the theme for its icon by name and takes a resource: a chooser
+// reads theme.IconNameArrowDropDown at widget/select.go:441 and draws whatever
+// comes back inside itself. That is the only route to the arrow of a chooser
+// short of writing a renderer for one, and a renderer is the expensive answer
+// to a question the toolkit already asks out loud.
+//
+// Everything that makes Icon careful applies here unchanged, which is the
+// reason there is one body and not two: the substitution of both attributes,
+// and the name derived from what the icon is rather than counted.
+func IconResource(name, token string, size float32) fyne.Resource {
 	ink := theme.Ink(token)
 	hex := fmt.Sprintf("#%02x%02x%02x", ink.R, ink.G, ink.B)
 
@@ -102,13 +140,8 @@ func Icon(name, token string, size float32) *canvas.Image {
 	body = strings.ReplaceAll(body, sourceStroke,
 		fmt.Sprintf(`stroke-width="%.2f"`, StrokeFor(size)))
 
-	resource := fyne.NewStaticResource(
+	return fyne.NewStaticResource(
 		fmt.Sprintf("%s-%s-%.0f.svg", name, strings.TrimPrefix(hex, "#"), size), []byte(body))
-
-	image := canvas.NewImageFromResource(resource)
-	image.FillMode = canvas.ImageFillContain
-	image.SetMinSize(fyne.NewSize(size, size))
-	return image
 }
 
 // StrokeFor is how thick the line of an icon has to be written in the file so

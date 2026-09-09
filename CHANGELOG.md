@@ -12,6 +12,15 @@ repository once they are released.
 
 ### Changed
 
+- **The button that does the main thing on a screen is now the accent colour**
+  rather than grey, so you can find it without reading every control. On the
+  Quick value screen that is Copy.
+
+- **Every arrow on a control that opens a list is now drawn in the same family
+  as the rest of the icons.** The choosers along the top of a screen and the
+  panel of generators on the recipe screen used to draw the toolkit's arrow,
+  which came from another set and read as a piece of a different program.
+
 - **The Quick value screen has been rebuilt.** The values are a numbered list you
   can read down rather than one block of text, every other row is shaded so your
   eye does not slip between them, and the list grows with the window. The

@@ -385,7 +385,7 @@
 																				<text pos="4,4" size="66x16">Exactly one</text>
 																			</widget>
 																			<widget pos="339,4" size="20x20" type="*widget.Icon">
-																				<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
+																				<image fillMode="contain" rsc="chevron-down-b4b1a9-15.svg" size="iconInlineSize"/>
 																			</widget>
 																		</widget>
 																	</container>
@@ -480,7 +480,7 @@
 																				<text pos="4,4" size="29x16">none</text>
 																			</widget>
 																			<widget pos="339,4" size="20x20" type="*widget.Icon">
-																				<image fillMode="contain" rsc="menuDropDownIcon" size="iconInlineSize" themed="foreground"/>
+																				<image fillMode="contain" rsc="chevron-down-b4b1a9-15.svg" size="iconInlineSize"/>
 																			</widget>
 																		</widget>
 																	</container>

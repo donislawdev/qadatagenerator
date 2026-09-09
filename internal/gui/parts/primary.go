@@ -37,18 +37,50 @@ import (
 // and that distinction is what leaves this road open. A renderer of our own
 // decides what focus looks like, so it does not have to be a flood.
 //
-// # The arithmetic that makes this one work, measured with tools/kontrast.py
+// # Which ladder this reads from, and why it moved on 2026-09-09
 //
-//   - action.primary #8A8A8A stands 4.99 against the window ground #1B1B1B,
-//     where an interface element needs 3.0. So this button needs no added
-//     edge to be found, which is the whole reason Outlined exists for the
-//     others: their fill stands 1.07 and cannot be seen at all.
-//   - text.on-primary #1B1B1B stands 4.99 on that fill, where a label needs
-//     4.5.
-//   - the focus ring is drawn in that same ink and INSIDE the fill, so both
-//     of its sides sit on action.primary and it stands 4.99 as well. Drawn on
-//     the outer edge instead it would border the window ground, which is the
-//     same #1B1B1B, and measure 1.00 on that side.
+// It asked the old palette for action.primary until that day, and the old
+// palette answers #8A8A8A, which is a GREY. DEC-232 built a ladder with an
+// accent on it and DEC-233 put that ladder on the window, so the one filled
+// thing in the whole window went on being drawn in the colour of the design
+// that preceded both. Nothing failed: a grey fill measures 5.55 on the new
+// window ground, so every guard stayed quiet while the screen said nothing
+// about which of its buttons was the one to press.
+//
+// That is the same family as the fault this type was written to fix. A colour
+// added to a register and used nowhere is a promise rather than a capability,
+// and a colour left behind when the register moves is a capability that has
+// quietly become a promise again.
+//
+// # The arithmetic that makes this one work
+//
+// Measured 2026-09-09 on the values in the ladder, against the thresholds the
+// token register carries:
+//
+//   - fill.primary, which is accent.9 #7059D6, stands 3.73 against the window
+//     ground and 3.49 against a card, where an interface element needs 3.0. So
+//     this button needs no added edge to be found, which is the whole reason
+//     Outlined exists for the others: their fill stands 1.07 and cannot be
+//     seen at all.
+//   - text.on-fill, which is white, stands 5.14 on that fill, where a label
+//     needs 4.5.
+//   - 🔴 the white is not a preference. neutral.12, the ink every other piece
+//     of text in this window uses, measures 4.35 on that same fill and misses
+//     4.5. The ladder of neutrals cannot carry a label here, which is what the
+//     token beside White in the theme says in words and this is the number.
+//   - the focus ring is drawn in that same ink and INSIDE the fill, so both of
+//     its sides sit on fill.primary and it stands 5.14 as well.
+//
+// 🔴 The ring stayed inside the fill, and the reason it was put there did NOT
+// survive this change. It was written when the ink was #1B1B1B, the very
+// colour of the old window ground: a ring on the outer edge had one side on
+// the window measuring 1.00, so it was invisible on that side. White measures
+// 19.15 on the new window ground, so today a ring drawn on the outer edge
+// would be seen perfectly well. What keeps it inside is now a claim about
+// SHAPE rather than about contrast - a ring on the outer edge reads as the
+// button having grown by two pixels, and the buttons beside it have an edge of
+// their own at that exact position. Left as it was for a reason that no longer
+// holds, this would have been a rule nobody could check.
 //
 // # What a disabled one looks like, and why it stops being primary
 //
@@ -219,8 +251,8 @@ func (r *primaryRenderer) Refresh() {
 		return
 	}
 
-	ink := palette.Named(palette.NameTextOnPrimary).NRGBA()
-	r.fill.FillColor = palette.Named(palette.NameActionPrimary).NRGBA()
+	ink := palette.Ink(palette.TextOnFill)
+	r.fill.FillColor = palette.Ink(palette.FillPrimary)
 	r.label.Color = ink
 	if r.button.keyboardIsHere {
 		r.ring.StrokeColor = ink
