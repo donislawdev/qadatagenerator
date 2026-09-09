@@ -76,7 +76,13 @@ var _ fyne.Theme = readable{}
 
 func (r readable) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
 	if name == toolkit.ColorNameForeground && r.focused != nil && r.focused() {
-		return palette.Named(palette.NameTextOnFocus).NRGBA()
+		// 🔴 The token rather than the old palette entry, changed 2026-09-09.
+		// Both name the ink read on the toolkit's focus flood, but the flood
+		// itself became mark.current when the window took the new theme, so
+		// the entry describing it had to move to the ladder as well or it
+		// would go on measuring a pair that is no longer on screen. It
+		// measures 7.55 there, where a label needs 4.5.
+		return palette.Ink(palette.TextOnMark)
 	}
 	return beneath().Color(name, variant)
 }

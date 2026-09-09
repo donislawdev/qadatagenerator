@@ -42,6 +42,10 @@ type Button struct {
 	keyboardIsHere bool
 	onScreen       fyne.CanvasObject
 
+	// icon is the NAME of the icon this button shows, empty when it shows
+	// none. ShowIcon says why the name is kept rather than the resource.
+	icon string
+
 	// edge is the rectangle that says this is a control rather than a word.
 	// It is held here rather than looked up in the tree, because whether it
 	// shows depends on two things only the button knows, and both of them
@@ -135,12 +139,14 @@ func (b *Button) hasKeyboard() bool { return b.keyboardIsHere }
 // label. Setting the flag afterwards would paint one frame with the old answer.
 func (b *Button) FocusGained() {
 	b.keyboardIsHere = true
+	b.paintIcon()
 	b.Button.FocusGained()
 }
 
 // FocusLost notes that the keyboard left, then lets the toolkit redraw.
 func (b *Button) FocusLost() {
 	b.keyboardIsHere = false
+	b.paintIcon()
 	b.Button.FocusLost()
 }
 

@@ -39,7 +39,11 @@ import (
 // defect has come back by another door.
 func TestEveryFloodedControlKeepsItsLabelReadable(t *testing.T) {
 	data := sampleWithSource(t)
-	onFocus := palette.Named(palette.NameTextOnFocus).NRGBA()
+	// 🔴 The token rather than the old palette entry, moved 2026-09-09 with the
+	// ink itself. A guard keeps its own copy of what it is comparing against,
+	// and a copy left on the register the window no longer reads is a guard
+	// measuring a pair that is not on screen.
+	onFocus := palette.Ink(palette.TextOnMark)
 
 	for _, state := range All() {
 		content := Assemble(i18n.English, data, state)

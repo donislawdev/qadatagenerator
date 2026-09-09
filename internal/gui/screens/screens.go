@@ -36,6 +36,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/gui/about"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/quickview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/recipeview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/shell"
@@ -255,15 +256,15 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	// exactly what happened on 2026-09-08 and is written up at the constants.
 	making, checking := text.T(i18n.SidebarGroupMake), text.T(i18n.SidebarGroupCheck)
 	column := make([]shell.Screen, 5)
-	column[screenQuick] = shell.Screen{Name: text.T(i18n.ScreenQuick), Group: making,
+	column[screenQuick] = shell.Screen{Name: text.T(i18n.ScreenQuick), Group: making, Icon: paint.IconBolt,
 		Content: quickScreen.Content()}
-	column[screenTake] = shell.Screen{Name: text.T(i18n.ScreenTake), Group: making,
+	column[screenTake] = shell.Screen{Name: text.T(i18n.ScreenTake), Group: making, Icon: paint.IconBreak,
 		Content: takeScreen.Content(), OnDropped: takeScreen.Dropped}
-	column[screenRecipe] = shell.Screen{Name: text.T(i18n.ScreenRecipe), Group: making,
+	column[screenRecipe] = shell.Screen{Name: text.T(i18n.ScreenRecipe), Group: making, Icon: paint.IconRecipe,
 		Content: recipeScreen.Content()}
-	column[screenManifest] = shell.Screen{Name: text.T(i18n.ScreenManifest), Group: checking,
+	column[screenManifest] = shell.Screen{Name: text.T(i18n.ScreenManifest), Group: checking, Icon: paint.IconChecklist,
 		Content: view.Content()}
-	column[screenAbout] = shell.Screen{Name: text.T(i18n.ScreenAbout),
+	column[screenAbout] = shell.Screen{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,
 		Content: about.Content(text, license.Current(), version.Current(), nil, nil)}
 	frame := shell.New(column)
 	settleQuick(quickScreen, state.Quick)

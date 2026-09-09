@@ -1,6 +1,7 @@
 package shell
 
 import (
+	"image/color"
 	"os"
 	"testing"
 
@@ -191,7 +192,25 @@ func TestTheOpenScreenIsMarkedByAShapeRatherThanByColourAlone(t *testing.T) {
 	for index := range all {
 		frame.Open(index)
 		for at, button := range frame.buttons {
-			marked := button.Icon != nil
+			// 🔴 The bar rather than the icon, rewritten 2026-09-09 when the
+			// mark moved off the icon slot.
+			//
+			// It asked whether the button carried an icon, which was the right
+			// question while the icon WAS the mark and became the wrong one
+			// the day every screen gained an icon of its own to say what it is.
+			// Left as it was, this would have passed for the worst possible
+			// reason: five icons present, so five names "marked", so nothing
+			// distinguishing them - the exact fault it exists to catch.
+			//
+			// The rule it holds has not moved an inch. What says which screen
+			// is open must be something a person who does not separate hues can
+			// see, and a bar that is there or is not is such a thing, in the
+			// same way an icon that is there or is not was.
+			//
+			// Asked as a DIFFERENCE rather than as a presence, for the reason
+			// this project keeps relearning: a mark painted the same in both
+			// states passes any test that only asks whether a colour was set.
+			marked := frame.items[at].mark.FillColor != color.Transparent
 			if at == index && !marked {
 				t.Errorf("screen %d is open and its name carries no mark, so only colour says which screen it is",
 					index)

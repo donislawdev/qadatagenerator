@@ -25,6 +25,13 @@ repository once they are released.
   pixels shorter than the chooser beside it, which read as one of them being
   wrong rather than as a small difference.
 
+- **Every screen in the sidebar now has an icon beside its name**, so you can
+  find the one you want without reading the whole column.
+
+- **The screen you are on is marked by a bar at the edge of its name and a
+  shaded background**, instead of by an arrow. The arrow occupied the same
+  place as the icons, so it could not stay once every screen had one.
+
 - **The Quick value screen has been rebuilt.** The values are a numbered list you
   can read down rather than one block of text, every other row is shaded so your
   eye does not slip between them, and the list grows with the window. The

@@ -37,6 +37,14 @@ import (
 type Screen struct {
 	Name    string
 	Content fyne.CanvasObject
+	// Icon is the name of the icon drawn beside this screen's name in the
+	// column, or empty for a screen that shows none.
+	//
+	// It is the NAME of one of this window's icons rather than a resource,
+	// because the colour of an icon on a button depends on where the
+	// keyboard is, and a resource is a colour already decided. ShowIcon
+	// beside the button says what that costs when it is got wrong.
+	Icon string
 	// Group is the heading this screen sits under in the column, and screens
 	// naming the same one sit together beneath it.
 	//
@@ -60,6 +68,7 @@ type Screen struct {
 type Shell struct {
 	screens []Screen
 	buttons []*parts.Button
+	items   []*item
 	body    *fyne.Container
 	// title is the name of the screen being read, drawn above it.
 	//
@@ -74,7 +83,9 @@ type Shell struct {
 func New(screens []Screen) *Shell {
 	frame := &Shell{screens: screens, body: container.NewStack(), title: parts.Title("")}
 	for index := range screens {
-		frame.buttons = append(frame.buttons, frame.button(index))
+		button := frame.button(index)
+		frame.buttons = append(frame.buttons, button)
+		frame.items = append(frame.items, newItem(button))
 	}
 	if len(screens) > 0 {
 		frame.Open(0)
@@ -91,6 +102,12 @@ func New(screens []Screen) *Shell {
 // 9.02 against the window, where the guideline asks for three.
 func (s *Shell) button(index int) *parts.Button {
 	button := parts.NewButton(s.screens[index].Name, func() { s.Open(index) })
+	if name := s.screens[index].Icon; name != "" {
+		button.ShowIcon(name)
+		// The icon leads the words, which is the order every column of
+		// places to go is read in and the order the accepted drawing has.
+		button.IconPlacement = widget.ButtonIconLeadingText
+	}
 	// 🔴 The names line up down the left edge rather than being centred, which
 	// is what the toolkit does when nobody says otherwise.
 	//
@@ -147,10 +164,7 @@ func (s *Shell) Open(index int) {
 	// buttons. The comment on button above says why, and it is the keyboard.
 	for at, button := range s.buttons {
 		button.Importance = widget.LowImportance
-		button.SetIcon(nil)
-		if at == index {
-			button.SetIcon(theme.NavigateNextIcon())
-		}
+		s.items[at].show(at == index)
 		button.Refresh()
 	}
 	// The name of the screen, written above it as well as in the column. Not a
@@ -268,7 +282,7 @@ func (s *Shell) column() fyne.CanvasObject {
 	var items []fyne.CanvasObject
 	group := ""
 	footed := false
-	for at, button := range s.buttons {
+	for at := range s.buttons {
 		switch name := s.screens[at].Group; {
 		case name == "" && !footed:
 			// The rule above the foot of the column, which the accepted
@@ -281,7 +295,7 @@ func (s *Shell) column() fyne.CanvasObject {
 			items = append(items, heading(name))
 		}
 		group = s.screens[at].Group
-		items = append(items, button.OnScreen())
+		items = append(items, s.items[at].onScreen)
 	}
 	return container.New(fixedWidth{width: palette.SidebarWidth}, container.NewVBox(items...))
 }

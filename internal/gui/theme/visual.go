@@ -167,6 +167,7 @@ const (
 	TextSecondary = "text.secondary"
 	TextAccent    = "text.accent"
 	TextOnFill    = "text.on-fill"
+	TextOnMark    = "text.on-mark"
 
 	StateSuccess = "state.success"
 	StateWarning = "state.warning"
@@ -179,7 +180,7 @@ var TokenNames = []string{
 	BgWindow, BgSurface, BgControl, BgCurrent, BgHover,
 	LineQuiet, BorderControl,
 	FillPrimary, MarkCurrent, MarkActive,
-	TextPrimary, TextSecondary, TextAccent, TextOnFill,
+	TextPrimary, TextSecondary, TextAccent, TextOnFill, TextOnMark,
 	StateSuccess, StateWarning, StateDanger,
 }
 
@@ -301,6 +302,29 @@ var Tokens = []Token{
 		"the prompt of a command line, and the icon of the screen that is open"},
 	{TextOnFill, "white", ThresholdText, []string{FillPrimary},
 		"the label on the accent fill, measured on that fill rather than on the window"},
+	// 🔴 The second token measured on a MARK rather than on a ground, and it
+	// exists because the toolkit FLOODS rather than tints.
+	//
+	// A stock button or chooser holding the keyboard is painted entirely in
+	// the focus colour - widget/button.go:379 and widget/select.go:432 - so
+	// everything drawn on it is read on mark.current and not on the ground the
+	// control stands on. Measured on 2026-09-05, before any of this: the
+	// ordinary text ink on that flood gave 1.56 where a label needs 4.5, which
+	// is what parts.Flooded was written to repair.
+	//
+	// # Why it is a token now and was a palette entry before
+	//
+	// Flooded asked the OLD palette for this ink, which is the same debt the
+	// filled button carried until this morning: a control still reading from
+	// the design that preceded the ladder. It also left an icon on such a
+	// control with nothing to repaint itself to, and an icon is exactly what
+	// the sidebar of the accepted drawing puts beside every name.
+	//
+	// Measured 2026-09-09: neutral.1 on mark.current gives 7.55 where a label
+	// needs 4.5 and a mark needs 3.0, so one entry serves both the words and
+	// the icons drawn on a flooded control.
+	{TextOnMark, "neutral.1", ThresholdText, []string{MarkCurrent},
+		"the label and the icon on a control the toolkit has flooded with the focus colour, which is read on that flood rather than on the ground behind it"},
 
 	{StateSuccess, "semantic.success", ThresholdText, []string{BgWindow, BgSurface},
 		"a safe harbour, and a value inside the range it belongs to"},
@@ -388,6 +412,21 @@ const (
 	// whatever its label needs.
 	RadiusPill float32 = 999
 )
+
+// MarkWidth is how wide the bar beside the current item of the sidebar is.
+//
+// # Why it is its own number and not the border thickness
+//
+// They are two different things that happen to be small. A border says a shape
+// is a control and runs all the way round it, so it is as thin as it can be
+// while still arriving in the colour it asked for, which was measured at 2. A
+// bar says WHICH of five places a person is in, read at a glance down a column,
+// and is the only thing on that edge - so it is wide enough to register as a
+// bar rather than as a line somebody drew by accident.
+//
+// Tying it to the border thickness would mean a change made for the reason
+// borders exist silently changing what the sidebar says.
+const MarkWidth float32 = 3
 
 // IconStrokeTarget is how thick the line of an icon should look on screen.
 //
