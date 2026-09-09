@@ -320,6 +320,17 @@ purpose.manifest: A manifest says what to expect from every record a run damaged
 quick.nothing-written: Nothing on this screen is written to a file.
 quick.label.value: Kind
 quick.heading.value: Value
+quick.heading.values-counted: values
+
+quick.about.produces: Produces
+quick.about.check-digit: Check digit
+quick.about.range: Reserved range
+quick.about.check-digit.carried: Yes. One wrong character can be caught by the number itself, so an import that checks it can reject the value.
+quick.about.check-digit.none: None. One wrong character cannot be caught by the number itself, so an import has no way to tell a damaged value from a good one.
+quick.about.range.reserved: Values come from a block the issuer never assigns, so none of them can belong to anybody.
+quick.about.range.none: No block of this scheme is set aside for testing, so a value here may match one that was really issued. Treat it as you would real data.
+quick.about.harbour: Reserved test range
+quick.about.unavailable: Not available in this locale
 quick.label.locale: Locale
 quick.label.seed: Seed
 quick.label.gender: Gender

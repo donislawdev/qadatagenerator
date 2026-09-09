@@ -23,11 +23,11 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
-	toolkit "fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/commandline"
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/quick"
@@ -73,23 +73,40 @@ type View struct {
 	copy    *parts.PrimaryButton
 	again   *parts.Button
 
-	// form carries every setting, and its rows are rebuilt rather than hidden.
+	// settings holds whichever fields the chosen kind actually reads, and it is
+	// refilled rather than hidden.
 	//
-	// 🔴 One form rather than one per row, and the render is what settled it:
-	// five forms stacked gave five label columns of five different widths, so
-	// the labels stood in a ragged line. A form of the toolkit cannot hide one
-	// of its items, which is why the rows are assembled again whenever what is
-	// chosen changes.
-	form *widget.Form
+	// 🔴 A row rather than the form of the toolkit, changed on 2026-09-09. A
+	// form draws a column of labels beside a column of controls, which is the
+	// right shape for a page of settings and the wrong one for a strip of
+	// chrome four fields wide: it spent a third of the window on a column of
+	// right aligned words. The label now stands ABOVE its control, which is
+	// what the accepted drawing asks for and what paint.FieldLabel draws.
+	settings *fyne.Container
+	// showing is which roles have a field on screen, so that a test can ask
+	// the screen rather than count pixels. It replaces reading the items of a
+	// form, which no longer exists.
+	showing map[string]bool
 
-	value *widget.Label
-	told  *widget.Label
+	// values are what the mode produced, kept as a list rather than as one
+	// joined string.
+	//
+	// The screen draws them as numbered rows now, and a row is a thing the
+	// layout can space, band and measure. Joined into a label they were one
+	// object as tall as ten lines, which is why the count of them could not
+	// change anything about how they looked.
+	values []string
+	told   *widget.Label
 
-	// The parts of the right column that stand there only once this screen has
-	// something to put in them. Held here because settle shows and hides them,
-	// and a screen built once cannot reach them any other way.
-	produced *fyne.Container
-	terminal *fyne.Container
+	// result is the card and its heading, or the sentence saying why there is
+	// no card. Refilled by settle, for the reason settings is.
+	result *fyne.Container
+	// about is the panel describing the chosen kind, refilled whenever the kind
+	// or the locale changes, which are the only two things it depends on.
+	about *fyne.Container
+	// terminal is the band at the foot, held so that settle can take it away
+	// when there is no line to show.
+	terminal fyne.CanvasObject
 
 	// command is the line that would do this in a terminal, and the button
 	// beside it puts that line in the clipboard.
@@ -174,28 +191,23 @@ func (v *View) build() {
 	v.command.Truncation = fyne.TextTruncateEllipsis
 	v.copyCommand = parts.NewButton(v.text.T(i18n.CommandCopy), v.putCommandInClipboard)
 
-	// The value is the subject of this screen, so it is the largest thing on
-	// it and it is monospace: an identifier read off a screen is read digit by
-	// digit, and a proportional font makes ones and sevens argue.
+	// 🔴 The values are no longer ONE label, changed on 2026-09-09.
 	//
-	// 🔴 The sentence above was written before the window could say a size, so
-	// until 2026-09-08 it described an intention and the value was drawn at the
-	// same size as the labels beside it. Seen on a real window that day, it was
-	// not the largest thing on the screen and was not even the largest thing in
-	// its own column. The heading size is what the toolkit answers above the
-	// body, so the claim is now the code as well as the comment.
+	// They were a single label holding every value joined by newlines, at the
+	// heading size, and the comment here explained at length why that label was
+	// the largest thing on the screen. The trouble is what a label cannot be: a
+	// row. Nothing could band every second value, nothing could give a value the
+	// room to grow with the window, and the number beside a value had nowhere to
+	// go, so a person comparing the fourth value against their own data had to
+	// count lines with a finger.
 	//
-	// The accepted drawing asks for 30 against a body of 13. The largest size
-	// this theme answers for is 24 against a body of 14, and going past it
-	// would mean writing a number into the window, which is the one thing the
-	// guard over values here refuses.
-	v.value = widget.NewLabelWithStyle("", fyne.TextAlignLeading,
-		fyne.TextStyle{Bold: true, Monospace: true})
-	v.value.SizeName = toolkit.SizeNameHeadingText
+	// They are drawn as rows now, out of the primitives, and the list itself is
+	// the state. What is left here is the sentence the screen says about them,
+	// which is a paragraph and therefore still a label.
 	v.told = widget.NewLabel("")
 	v.told.Importance = widget.LowImportance
-
-	v.form = widget.NewForm()
+	v.told.Wrapping = fyne.TextWrapWord
+	v.showing = map[string]bool{}
 
 	// 🔴 In reading order, because the toolkit walks the objects in the order
 	// they were given and not in the order they are drawn. The screen next door
@@ -228,141 +240,73 @@ func (v *View) build() {
 // on the length of a function, and the limit is bent for nothing. The seam is
 // the one that costs least: what the controls ARE does not change when the
 // arrangement of them does.
+//
+// The arrangement itself lives next door in shape.go, which holds the drawing
+// and nothing else. This function is where the three parts are made and handed
+// to it, and where the two that get refilled are created empty.
 func (v *View) lay() {
-	// 🔴 Two columns, which is what the accepted drawing asks for and what the
-	// window did not do until 2026-09-08.
-	//
-	// Seen on a real window that day: everything on this screen stood in one
-	// column about 450 wide inside a content area of about 850, so most of the
-	// screen was empty and the two buttons hung over the emptiness with the
-	// thing they act on far above them. The drawing puts what somebody SETS on
-	// the left and what they GET on the right, which also puts the buttons
-	// beside what they copy rather than adrift below it.
-	//
-	// A grid of two rather than a split, because neither side is one a person
-	// would want to resize: both hold a fixed number of short things. The split
-	// on the recipe screen is a different case and says so there.
-	settings := parts.Column(palette.NameStepGroup, v.form)
+	// Both are containers this screen refills rather than rebuilds, because a
+	// screen built once cannot reach into itself any other way, and because
+	// the alternative is hiding things that are drawn but empty, which is the
+	// fault this screen was corrected for twice already.
+	v.settings = container.NewStack()
+	v.result = container.NewStack()
+	v.about = container.NewStack()
+	v.terminal = v.commandBand()
 
-	// 🔴 There is no longer a sentence standing here before a value exists,
-	// because there is no longer a moment when none does. The screen opens on a
-	// kind, so it opens on values, and the two states left are a value and a
-	// refusal. The sentence that used to say "choose a kind above" went with the
-	// state it described rather than being left as a line nothing can reach.
-	//
-	// What it looked like before is worth keeping written down, because it was
-	// two rounds of the same mistake: first an empty bordered box with buttons
-	// under it that copied nothing, then that sentence on 76.9 per cent black.
-	// Both came from a drawing that only ever showed a screen which had already
-	// produced something, so the state this screen OPENS in was never drawn,
-	// and it is the one a person meets first.
-	v.produced = parts.Column(palette.NameStepRelated,
-		parts.Panel(v.value),
-		parts.Row(palette.NameStepRelated, v.copy, v.again.OnScreen()),
-	)
-	// The bridge to the other surface, and it comes last because it answers a
-	// question somebody asks after they have what they came for: how do I put
-	// this in a script.
-	v.terminal = parts.Column(palette.NameStepRelated,
-		parts.Section(v.text.T(i18n.CommandHeading)),
-		parts.Panel(v.command),
-		parts.Row(palette.NameStepRelated, v.copyCommand.OnScreen(), layout.NewSpacer()),
-	)
+	// 🔴 The panel is wrapped so that it takes the height of what is IN it
+	// rather than the height of the window. Given the edge of a border it would
+	// be stretched to the full height, and a card with three paragraphs in it
+	// and six hundred pixels of empty interior reads as a thing that failed to
+	// load. The same rule the card of values follows, for the same reason: the
+	// surplus stays on the bare window, where it reads as room.
+	hugging := container.NewVBox(v.about)
 
-	// In reading order within each column, and the left column before the
-	// right, because the toolkit walks the objects in the order they were given
-	// and not in the order they are drawn. The screen next door paid for that
-	// once: the button at the top of it was the last stop.
-	// 🔴 What the screen has to SAY stands beside what it produced rather than
-	// inside it, and that was a defect until 2026-09-08 rather than a choice.
+	// The values take what is left and the panel keeps its width, which is the
+	// way round that follows the content: a value is short and a paragraph has
+	// a readable line length, so the one that must not stretch is the panel.
 	//
-	// It lived inside v.produced, and settle hides v.produced whenever there is
-	// no value. A refusal is exactly the case where there is no value, so every
-	// refusal this screen can give was hidden by the same call that hid the
-	// empty box it belongs to, and what a person saw instead was the sentence
-	// for a screen nobody has chosen anything on yet. Rendered: a date written
-	// the wrong way round answered "Choose a kind above, and the value appears
-	// here" with a kind chosen two lines above it.
-	//
-	// Found by measuring emptiness rather than by any test. The two refusal
-	// states were the emptiest on this screen after the state that opens it,
-	// and they were empty because the one sentence they exist to show was not
-	// being drawn.
-	answer := parts.Column(palette.NameStepSection,
-		parts.Section(v.text.T(i18n.QuickValueHeading)),
-		v.produced,
-		v.told,
-		v.terminal,
-	)
+	// The values come first in the container for the reason the whole screen
+	// does: that is the order the keyboard walks, and they are what a person
+	// came for.
+	body := paint.Pad(palette.NameStepSection, palette.NameStepSection,
+		palette.NameStepMajor, palette.NameStepMajor,
+		container.New(layout.NewBorderLayout(nil, nil, nil, hugging),
+			v.result, hugging))
 
-	// The gap between the two columns is carried by the right one, because the
-	// grid of the toolkit spaces its cells by the theme's padding and takes no
-	// distance of its own. Two columns four pixels apart read as one column.
-	beside := palette.StepOf(palette.NameStepMajor)
-	columns := container.New(layout.NewGridLayout(2), settings,
-		container.New(layout.NewCustomPaddedLayout(0, 0, beside, 0), answer))
-
-	// 🔴 The columns take the whole width rather than being held to the width
-	// this screen was drawn at.
-	//
-	// Held, they were measured on 2026-09-08 and turned down the same day by the
-	// owner looking at the result: at a window of 1670 the content stopped at
-	// 852 and the right half of the screen was empty. The drawing does not say
-	// what should happen at that width, because it was made at 900 - but what it
-	// does say is that the two columns are each half of whatever there is, so
-	// filling is the reading that follows it and holding was mine.
-	//
-	// What this costs is a wide field for a short value, and that cost is real:
-	// a seed is eight characters in a control that is now most of a column. It
-	// is the drawing's own arithmetic, and the alternative was a window that
-	// looks unfinished, which is the louder fault of the two.
-	v.content = parts.Inset(parts.Column(palette.NameStepSection,
-		subdued(v.text.T(i18n.QuickNothingWritten)),
-		columns,
-	))
+	v.content = v.shape(v.settingsBand(v.settings), body, v.terminal)
 }
 
-// settle shows the parts of this screen that have something in them, and hides
-// the ones that do not.
+// settle puts into the screen whatever this screen currently has to say.
 //
-// # Why hidden rather than drawn empty
+// # Why the parts are REBUILT rather than shown and hidden
 //
-// A box with a border and nothing in it reads as a thing that failed to load.
-// Seen on a real window on 2026-09-08 at the size the owner runs it: the screen
-// opened showing two of them, one under a heading saying Value and one under a
-// heading saying the same in a terminal, with a button beneath each that would
-// have copied an empty string.
+// Hiding was the old answer and it produced two defects in two days, both found
+// on the pixels rather than by a test. A bordered box with nothing in it reads
+// as a thing that failed to load, and the sentence explaining a refusal lived
+// INSIDE the block that was hidden whenever there was no value, which is
+// exactly when a refusal has something to say. Building the block that belongs
+// to the current state cannot leave an empty frame behind and cannot hide a
+// sentence inside one, because the state decides what exists rather than what
+// is visible.
 //
-// # Why the two are settled separately
+// # The three states, and why a refusal is not the absence of a value
 //
-// The command is written even when the value was refused, which is a decision
-// made where it is written and worth keeping: somebody whose request was turned
-// down may still want to show that request to somebody else. So the terminal
-// row follows the command and the value follows the value, and a refusal shows
-// the line that caused it with no value above it.
-// 🔴 Three states rather than two, corrected on 2026-09-08. Asking only whether
-// there is a value cannot tell a screen nobody has used yet from one that
-// answered no, and those are the two things a person most needs told apart.
-// What the screen has to say is shown whenever it has something to say, which
-// covers both a refusal standing alone and the warning that stands under a list
-// of values.
+// Values, a refusal, or a value with something said under it. The middle one is
+// the one that was wrong before: asking only whether there is a value cannot
+// tell a screen that produced nothing yet from one that answered no.
 func (v *View) settle() {
-	produced, said := v.value.Text != "", v.told.Text != ""
-	if produced {
-		v.produced.Show()
-	} else {
-		v.produced.Hide()
-	}
-	if said {
-		v.told.Show()
-	} else {
-		v.told.Hide()
-	}
+	v.result.Objects = []fyne.CanvasObject{v.answer()}
+	v.result.Refresh()
+
+	// The line is written even for a request that was turned down, because
+	// somebody whose request was refused may still want to show that request to
+	// somebody else. So the band follows the LINE and not the values.
 	if v.command.Text == "" {
 		v.terminal.Hide()
-	} else {
-		v.terminal.Show()
+		return
 	}
+	v.terminal.Show()
 }
 
 // reloadGenerators puts the list of values back in step with the locale.
@@ -410,7 +354,11 @@ func (v *View) UseSeed(seed string) {
 }
 
 // Value is what is on screen, for a test that asks rather than reads pixels.
-func (v *View) Value() string { return v.value.Text }
+//
+// Joined by newlines, which is the shape the command line writes and the shape
+// every caller of this already expects. The screen draws them as rows, and this
+// is the one place the two forms meet.
+func (v *View) Value() string { return strings.Join(v.values, "\n") }
 
 // drawAgain asks for another value of the same kind.
 //
@@ -439,7 +387,7 @@ func (v *View) produce() {
 	v.told.SetText("")
 	chosen := v.chooser.Selected
 	if chosen == "" {
-		v.value.SetText("")
+		v.values = nil
 		v.command.SetText("")
 		v.showRows("")
 		return
@@ -449,7 +397,7 @@ func (v *View) produce() {
 	if v.seed == "" {
 		drawn, err := quick.NewSeed()
 		if err != nil {
-			v.value.SetText("")
+			v.values = nil
 			v.told.SetText(err.Error())
 			return
 		}
@@ -470,19 +418,19 @@ func (v *View) produce() {
 
 	asked := v.request(chosen)
 	if refusal := quick.Check(asked); refusal.Refused() {
-		v.value.SetText("")
+		v.values = nil
 		v.told.SetText(v.text.T(refusedSays[refusal.Kind]))
 		return
 	}
 	produced, err := quick.Run(asked)
 	if err != nil {
-		v.value.SetText("")
+		v.values = nil
 		v.told.SetText(err.Error())
 		return
 	}
-	// One to a line, which is the same shape the command line writes, so a
-	// person comparing the two screens sees one answer rather than two.
-	v.value.SetText(strings.Join(produced, "\n"))
+	// One to a row, which is the same order the command line writes them in, so
+	// a person comparing the two surfaces sees one answer rather than two.
+	v.values = produced
 	// Said only where it can happen. One value cannot repeat, and a warning
 	// standing beside a screen it does not apply to is how a person learns to
 	// stop reading warnings.
@@ -535,39 +483,90 @@ func (v *View) bindings() map[string]string {
 // generator, and a measurement on 2026-09-05 found three, one of them only in
 // Polish. A list written here would have hidden the gender beside a first name,
 // which is the most obvious use this screen has.
+//
+// # Why the seed is given the room that is left over
+//
+// A seed is thirty two characters and the four fields before it are a word
+// each, so a row that shared its width equally would cut the one value nobody
+// can retype from memory. The layout gives the fixed fields what they ask for
+// and the seed everything else, which is what the accepted drawing does and
+// what stops this row needing a width written into it.
 func (v *View) showRows(generator string) {
-	rows := []*widget.FormItem{
-		widget.NewFormItem(v.text.T(i18n.QuickLabelValue), v.chooser.OnScreen()),
+	fixed := []fyne.CanvasObject{
+		labelled(v.text.T(i18n.QuickLabelValue), v.chooser.OnScreen()),
 		// Second, and above the settings that only some generators read,
-		// because how many is asked of every generator alike. The rows below
-		// it come and go with what was chosen, so a row that never leaves
-		// belongs above the ones that do.
-		widget.NewFormItem(v.text.T(i18n.QuickLabelCount), v.howMany.OnScreen()),
-		widget.NewFormItem(v.text.T(i18n.QuickLabelLocale), v.locales.OnScreen()),
+		// because how many is asked of every generator alike. The fields below
+		// it come and go with what was chosen, so a field that never leaves
+		// belongs before the ones that do.
+		labelled(v.text.T(i18n.QuickLabelCount), v.howMany.OnScreen()),
+		labelled(v.text.T(i18n.QuickLabelLocale), v.locales.OnScreen()),
 	}
+	showing := map[string]bool{}
 	if quick.Reads(generator, quick.RoleGender, v.locale) {
-		rows = append(rows, widget.NewFormItem(v.text.T(i18n.QuickLabelGender), v.gender.OnScreen()))
+		showing[quick.RoleGender] = true
+		fixed = append(fixed, labelled(v.text.T(i18n.QuickLabelGender), v.gender.OnScreen()))
 	}
 	if quick.Reads(generator, quick.RoleBirthDate, v.locale) {
-		rows = append(rows, widget.NewFormItem(v.text.T(i18n.QuickLabelBorn), v.born))
+		showing[quick.RoleBirthDate] = true
+		fixed = append(fixed, labelled(v.text.T(i18n.QuickLabelBorn), dated(v.born)))
 	}
-	rows = append(rows, widget.NewFormItem(v.text.T(i18n.QuickLabelSeed), v.seedBox))
 
-	if sameRows(v.form.Items, rows) {
+	// 🔴 The panel is settled BEFORE the check below, and it was settled after
+	// it for as long as it took to render the screen once.
+	//
+	// That check asks whether the same optional FIELDS are already on screen,
+	// and the panel does not depend on the fields at all: it depends on the
+	// KIND. Choosing a kind that reads the same settings as the last one, which
+	// is most of them, left the check true and the panel describing whatever was
+	// chosen before. Opening the window hit exactly that path, so the panel was
+	// simply not there. One condition cannot guard two things that change at
+	// different moments, and the render is what said so.
+	v.describe(generator)
+
+	if sameFields(v.showing, showing) && len(v.settings.Objects) > 0 {
 		return
 	}
-	v.form.Items = rows
-	v.form.Refresh()
+	v.showing = showing
+	// 🔴 The seed takes the room the fixed fields did not, and the objects are
+	// handed to the layout in the order the keyboard should walk them.
+	//
+	// This was container.NewBorder for as long as it took to walk the screen
+	// once, and that helper appends the CENTRE first: the keyboard reached the
+	// seed at stop six and the list of kinds at stop seven, so the first thing
+	// a person tabbed into was the last field on the row. The comment beside
+	// shape() in this package warns about exactly that, and it was written one
+	// function before this one was got wrong, which is the whole argument for
+	// deriving these numbers from tools/klawiatura rather than from reading.
+	settings := parts.Row(palette.NameStepRelated, fixed...)
+	seed := labelled(v.text.T(i18n.QuickLabelSeed), v.seedBox)
+	v.settings.Objects = []fyne.CanvasObject{
+		container.New(layout.NewBorderLayout(nil, nil, settings, nil), settings, seed),
+	}
+	v.settings.Refresh()
 }
 
-// sameRows reports whether the form already holds these rows, so that a redraw
-// on every keystroke does not rebuild a form that has not changed.
-func sameRows(held, wanted []*widget.FormItem) bool {
+// labelled names a control, above it rather than beside it.
+//
+// It is one call to the drawing next door, named here so that the row above
+// reads as a list of settings rather than as a list of layout instructions.
+func labelled(name string, control fyne.CanvasObject) fyne.CanvasObject {
+	return paint.FieldLabel(name, control)
+}
+
+// sameFields reports whether the same optional settings are already on screen,
+// so that a redraw on every keystroke does not rebuild a row that has not
+// changed.
+//
+// 🔴 It compares the ROLES rather than the labels, which is the correction that
+// came with the row. The old one compared the words in a form, so two settings
+// renamed to the same word in some future translation would have read as one
+// unchanged row. A role is the thing the mode answers about and cannot collide.
+func sameFields(held, wanted map[string]bool) bool {
 	if len(held) != len(wanted) {
 		return false
 	}
-	for at := range held {
-		if held[at].Text != wanted[at].Text {
+	for role := range wanted {
+		if !held[role] {
 			return false
 		}
 	}
@@ -576,28 +575,17 @@ func sameRows(held, wanted []*widget.FormItem) bool {
 
 // Shows reports whether the field for that role is on screen, for a test that
 // asks the screen rather than counting pixels.
-func (v *View) Shows(role string) bool {
-	label := v.text.T(i18n.QuickLabelGender)
-	if role == quick.RoleBirthDate {
-		label = v.text.T(i18n.QuickLabelBorn)
-	}
-	for _, row := range v.form.Items {
-		if row.Text == label {
-			return true
-		}
-	}
-	return false
-}
+func (v *View) Shows(role string) bool { return v.showing[role] }
 
 // putInClipboard copies the value and says that it did.
 //
 // Saying so is not decoration. A clipboard cannot be seen, so a button that
 // silently succeeded and a button that silently did nothing look the same.
 func (v *View) putInClipboard() {
-	if v.value.Text == "" || v.clipboard == nil {
+	if len(v.values) == 0 || v.clipboard == nil {
 		return
 	}
-	v.clipboard.SetContent(v.value.Text)
+	v.clipboard.SetContent(v.Value())
 	v.told.SetText(v.text.T(i18n.QuickCopied))
 }
 

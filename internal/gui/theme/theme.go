@@ -380,6 +380,29 @@ const (
 // names are longer than the English ones.
 const SidebarWidth float32 = 220
 
+// AsideWidth is how wide a column of explanation standing beside content is.
+//
+// # Why a width at all, when everything else here measures itself
+//
+// A paragraph has a readable line length and a window does not. Left to fill
+// whatever is free, the sentences explaining a value would run the full width
+// of a large display, and a line a reader has to track back across is the one
+// thing typography has measured for a century. This is the only place in the
+// window where text is the content rather than the label on something.
+//
+// # Why this number
+//
+// It holds roughly fifty to sixty characters at the body rung, which is inside
+// the range every source on the subject gives for comfortable reading, and it
+// leaves the card beside it the larger share at the size this window opens at.
+// A judgement taken from the accepted drawing rather than a measurement, and
+// stated as one.
+//
+// What would change it: a rung of the type ladder taller than the body used for
+// a paragraph, or a second aside on one screen, which would make the pair of
+// them the thing to measure rather than either alone.
+const AsideWidth float32 = 330
+
 // EntryColumnWidths is how wide each column of the manifest table is.
 //
 // # Why a row is columns rather than lines

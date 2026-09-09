@@ -434,6 +434,45 @@ const (
 	// KIND of value. Both read "Value" until 2026-09-08, on one screen, and
 	// the accepted drawing names the list "Kind" for exactly that reason.
 	QuickValueHeading Key = "quick.heading.value"
+	// QuickValuesCounted is the same heading once there is a NUMBER in front
+	// of it, which is a different word and not a different sentence.
+	//
+	// 🔴 It exists because the screen said "10 Value" on the day it learned to
+	// draw a list, and that is the shape of fault a catalogue of single words
+	// invites: the code joined a number to a noun nobody had told it to
+	// pluralise. Keeping the two forms as two keys is what lets a translator
+	// answer for a language where the number changes the noun, and a language
+	// where the number governs several forms needs a count aware catalogue
+	// rather than a third key here.
+	QuickValuesCounted Key = "quick.heading.values-counted"
+
+	// What the panel beside the values says about the KIND that produced
+	// them. Every one of these is rendered from a fact the mode derived from
+	// what a provider declares, so none of them is a sentence somebody wrote
+	// about a scheme and nothing checks.
+	QuickAboutProduces   Key = "quick.about.produces"
+	QuickAboutCheckDigit Key = "quick.about.check-digit"
+	QuickAboutRange      Key = "quick.about.range"
+	// 🔴 The four sentences below are the only place this window tells
+	// somebody whether a value it just produced could belong to a real
+	// person, and both halves of that are said out loud.
+	//
+	// A scheme with a reserved block gets the reassuring one. A scheme
+	// without one gets a sentence saying so plainly rather than getting
+	// nothing, because a missing line reads as reassurance and rule nine of
+	// the handbook is about exactly this. Two schemes in this build narrow
+	// what they generate WITHOUT claiming a block, which is why the wording
+	// says what is set aside rather than what is generated.
+	QuickAboutCheckDigitCarried Key = "quick.about.check-digit.carried"
+	QuickAboutCheckDigitNone    Key = "quick.about.check-digit.none"
+	QuickAboutRangeReserved     Key = "quick.about.range.reserved"
+	QuickAboutRangeNone         Key = "quick.about.range.none"
+	// QuickAboutHarbour is the badge on a kind whose values come from a block
+	// nobody is ever issued.
+	QuickAboutHarbour Key = "quick.about.harbour"
+	// QuickAboutUnavailable heads the reason this build cannot produce the
+	// chosen kind in the chosen locale.
+	QuickAboutUnavailable Key = "quick.about.unavailable"
 	// What stands where the value will be, before there is one. The drawing
 	// this screen was built from only ever shows a value, so the state this
 	// screen opens in was never drawn at all, and it opened as an empty box
@@ -497,7 +536,11 @@ var Keys = []Key{
 	WindowTitle, ScreenAbout, ScreenManifest, ScreenTake, ScreenRecipe, ScreenQuick,
 	SidebarGroupMake, SidebarGroupCheck,
 
-	QuickNothingWritten, QuickLabelValue, QuickValueHeading,
+	QuickNothingWritten, QuickLabelValue, QuickValueHeading, QuickValuesCounted,
+	QuickAboutProduces, QuickAboutCheckDigit, QuickAboutRange,
+	QuickAboutCheckDigitCarried, QuickAboutCheckDigitNone,
+	QuickAboutRangeReserved, QuickAboutRangeNone,
+	QuickAboutHarbour, QuickAboutUnavailable,
 	QuickLabelGender, QuickLabelBorn,
 	QuickLabelLocale, QuickLabelSeed,
 	QuickGenderAny, QuickCopy, QuickAgain, QuickCopied,

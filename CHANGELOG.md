@@ -10,6 +10,22 @@ repository once they are released.
 
 ## [Unreleased]
 
+### Changed
+
+- **The Quick value screen has been rebuilt.** The values are a numbered list you
+  can read down rather than one block of text, every other row is shaded so your
+  eye does not slip between them, and the list grows with the window. The
+  settings sit in one strip along the top with the seed taking the room left
+  over, and the command that would do the same thing in a terminal runs along
+  the foot.
+
+- **The screen now tells you what kind of value you are looking at.** Beside the
+  values it says what the kind produces, which numbering scheme is behind it,
+  whether a wrong character would be caught by the number itself, and whether
+  the values come from a block that is never issued to anybody. Where a scheme
+  has no such block, it says so plainly, because a value from one of those may
+  match a number that was really issued.
+
 ### Added
 
 - **`--license` now names the typeface and the icon set built into the window.**

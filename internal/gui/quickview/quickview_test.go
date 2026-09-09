@@ -285,8 +285,15 @@ func TestARefusalIsShownRatherThanHiddenWithTheValue(t *testing.T) {
 			// checked here too, and it is gone rather than dropped: this screen
 			// chooses a kind while it is built, so that state cannot be reached
 			// and the line describing it was removed with it.
-			if view.produced.Visible() {
-				t.Error("a refusal is on screen beside the box that holds a value")
+			//
+			// 🔴 This asked whether an empty value box was HIDDEN until
+			// 2026-09-09, and there is no such box any more. The card is built
+			// from the values, so a refusal cannot leave an empty frame behind
+			// to be hidden. The question that survives the change is the one it
+			// was always about: a refusal must not stand beside values.
+			if view.Value() != "" {
+				t.Errorf("the request was turned down and %d value(s) are on screen beside the refusal",
+					len(view.values))
 			}
 		})
 	}
