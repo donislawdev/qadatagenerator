@@ -5,9 +5,11 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/desktop"
 	toolkit "fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
@@ -105,15 +107,26 @@ type PrimaryButton struct {
 	// at exactly the moment it changes, because a control redraws from inside
 	// FocusLost before the focus manager has moved its own record.
 	keyboardIsHere bool
+
+	// pointerIsHere and pointerIsDown are the pointer's half of the same
+	// question, and this control needed them more than the quiet ones beside
+	// it: it is the one button a screen is FOR, so it is the one a person aims
+	// at, and until 2026-09-09 aiming at it changed nothing at all.
+	pointerIsHere bool
+	pointerIsDown bool
 }
 
 // Interfaces are asserted here rather than discovered at a call site, because
 // a widget that quietly stops being focusable still compiles and still draws,
-// and the only symptom is a person with a keyboard never reaching it.
+// and the only symptom is a person with a keyboard never reaching it. The two
+// pointer interfaces are asked for by type in the driver, so dropping one is
+// the same silent failure with the mouse instead.
 var (
-	_ fyne.Widget    = (*PrimaryButton)(nil)
-	_ fyne.Tappable  = (*PrimaryButton)(nil)
-	_ fyne.Focusable = (*PrimaryButton)(nil)
+	_ fyne.Widget       = (*PrimaryButton)(nil)
+	_ fyne.Tappable     = (*PrimaryButton)(nil)
+	_ fyne.Focusable    = (*PrimaryButton)(nil)
+	_ desktop.Hoverable = (*PrimaryButton)(nil)
+	_ desktop.Mouseable = (*PrimaryButton)(nil)
 )
 
 // NewPrimaryButton builds the filled action of a screen.
@@ -140,6 +153,36 @@ func (b *PrimaryButton) Tapped(*fyne.PointEvent) {
 		return
 	}
 	b.OnTapped()
+}
+
+// MouseIn notes that the pointer arrived and redraws.
+func (b *PrimaryButton) MouseIn(*desktop.MouseEvent) {
+	b.pointerIsHere = true
+	b.Refresh()
+}
+
+// MouseMoved is required by the interface and has nothing to do: this control
+// looks the same wherever inside itself the pointer is.
+func (b *PrimaryButton) MouseMoved(*desktop.MouseEvent) {}
+
+// MouseOut notes that the pointer left, and forgets any press with it, for the
+// reason set out at length on parts.Button: a press that slides off this
+// control is released somewhere else and never comes back here.
+func (b *PrimaryButton) MouseOut() {
+	b.pointerIsHere, b.pointerIsDown = false, false
+	b.Refresh()
+}
+
+// MouseDown notes that the pointer is holding this button down.
+func (b *PrimaryButton) MouseDown(*desktop.MouseEvent) {
+	b.pointerIsDown = true
+	b.Refresh()
+}
+
+// MouseUp notes that the pointer let go.
+func (b *PrimaryButton) MouseUp(*desktop.MouseEvent) {
+	b.pointerIsDown = false
+	b.Refresh()
 }
 
 // FocusGained notes that the keyboard arrived and redraws.
@@ -249,14 +292,15 @@ func (r *primaryRenderer) MinSize() fyne.Size {
 
 // Refresh settles every colour from the palette and the state of the button.
 func (r *primaryRenderer) Refresh() {
+	b := r.button
 	radius := beneath().Size(toolkit.SizeNameButtonRadius)
 	r.fill.CornerRadius = radius
 	r.ring.CornerRadius = radius - palette.BorderThickness
 
-	r.label.Text = r.button.Text
+	r.label.Text = b.Text
 	r.label.TextSize = beneath().Size(toolkit.SizeNameText)
 
-	if r.button.Disabled() {
+	if b.Disabled() {
 		r.fill.FillColor = color.Transparent
 		r.label.Color = beneath().Color(toolkit.ColorNameDisabled, toolkit.VariantDark)
 		r.ring.StrokeColor = color.Transparent
@@ -264,10 +308,15 @@ func (r *primaryRenderer) Refresh() {
 		return
 	}
 
-	ink := palette.Ink(palette.TextOnFill)
-	r.fill.FillColor = palette.Ink(palette.FillPrimary)
+	// 🔴 The fill and the ink come back as a PAIR from one place, and they have
+	// to. Above accent.9 no violet in this ladder carries a white label, so a
+	// caller free to move the fill and keep the ink is free to write 4.23 where
+	// WCAG asks 4.5. paint.FilledGround carries the arithmetic.
+	fill, on := paint.FilledGround(b.pointerIsHere, b.pointerIsDown)
+	ink := palette.Ink(on)
+	r.fill.FillColor = palette.Ink(fill)
 	r.label.Color = ink
-	if r.button.keyboardIsHere {
+	if b.keyboardIsHere {
 		r.ring.StrokeColor = ink
 	} else {
 		r.ring.StrokeColor = color.Transparent

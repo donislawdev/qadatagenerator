@@ -49,7 +49,8 @@ func All() []State {
 	states = append(states, browserStates()...)
 	states = append(states, aboutStates()...)
 	states = append(states, quickStates()...)
-	return append(states, quickStatesOfTheKeyboard()...)
+	states = append(states, quickStatesOfTheKeyboard()...)
+	return append(states, quickStatesOfThePointer()...)
 }
 
 // quickStates are the states of the screen that produces one value.
@@ -179,6 +180,111 @@ func quickStatesOfTheKeyboard() []State {
 			Screen:   screenQuick,
 			Quick:    Quick{Generator: "pesel", Seed: "for-the-picture"},
 			Keyboard: Keyboard{Tabs: 12},
+		},
+	}
+}
+
+// quickStatesOfThePointer are the states a MOUSE puts this screen into.
+//
+// # 🔴 Why there were none until 2026-09-09, and what that hid
+//
+// Because the controls had nothing to show. They stopped answering the pointer
+// the day they took their drawing off the toolkit, and no picture in this
+// repository had a mouse in it, so neither absence could reveal the other.
+// Measured on the real binary: a window with the pointer over a sidebar item
+// was identical, to the last of 1,965,600 pixels, to one with the pointer in
+// empty space. The owner saw it by using the program.
+//
+// # Why six, and why these six
+//
+// One per thing that cannot be seen in any of the others, rather than one per
+// control. The rule for the ordinary controls is a single function - the ground
+// a pointer gives a control and the edge that ground needs - so photographing
+// every button under a pointer would be photographing one rule five times.
+//
+// What differs between them is what each control has to say it WITH:
+//
+//   - the sidebar item has no edge in any state, so its ground is the only
+//     signal it owns, and the step from hovered to pressed is the smallest
+//     measurement in this whole system at 1.159.
+//   - the quiet button has an edge, and pressing is the one state where that
+//     edge moves, because the resting one measures 2.80 on the ground pressing
+//     gives it.
+//   - the chooser has a ground of its own at rest, so its step under a pointer
+//     is smaller than a button's: 1.237 where a button on the window gets 1.451.
+//   - the filled button is a different rule entirely. It is the one control
+//     whose INK moves with its ground, because no violet in this ladder above
+//     accent.9 carries a white label, and it needs both of its touched states
+//     because they are two different fills with two different arithmetics.
+//
+// So three of the six are a state held down and three are a pointer resting,
+// and the pairing is not symmetric on purpose: a control is photographed
+// pressed only where pressing shows something hovering does not.
+//
+// Every count of tabs below comes from tools/klawiatura on this exact state,
+// never from counting the controls here. Every one of them will move the next
+// time this screen gains or loses a control, and the walk is the only thing
+// that says so.
+func quickStatesOfThePointer() []State {
+	return []State{
+		{
+			Name: "quick-pointer-sidebar",
+			Purpose: "the pointer on the column of screens, which draws no edge in any state " +
+				"and so has only its ground to answer with",
+			Screen: screenQuick,
+			Quick:  Quick{Seed: "for-the-picture"},
+			// 🔴 The SECOND item and not the first, which was chosen after
+			// looking at the first. Item one is the screen already open, so it
+			// rests on bg.current rather than on nothing, and the step a
+			// pointer gives it is 1.131 where the same step on any other item
+			// is 1.357. That is a real difference and it is left alone: the
+			// item a person hovers in order to click is one of the others, and
+			// clicking the open one does nothing at all, so a quieter answer
+			// there is honest rather than broken.
+			//
+			// What it costs is stated: nothing photographs the open item under
+			// a pointer, so nothing would notice if that 1.131 became 1.000.
+			Pointer: Pointer{Tabs: 2},
+		},
+		{
+			Name: "quick-pointer-sidebar-pressed",
+			Purpose: "that same item held down, which is the smallest difference this system asks " +
+				"anybody to see and therefore the one worth a picture",
+			Screen:  screenQuick,
+			Quick:   Quick{Seed: "for-the-picture"},
+			Pointer: Pointer{Tabs: 2, Pressed: true},
+		},
+		{
+			Name: "quick-pointer-chooser",
+			Purpose: "the pointer on a chooser, which already has a ground at rest and so moves " +
+				"less under one than a button does",
+			Screen:  screenQuick,
+			Quick:   Quick{Seed: "for-the-picture"},
+			Pointer: Pointer{Tabs: 6},
+		},
+		{
+			Name: "quick-pointer-quiet-pressed",
+			Purpose: "a quiet button held down, which is the only state where the edge of a control " +
+				"moves rather than its ground",
+			Screen:  screenQuick,
+			Quick:   Quick{Seed: "for-the-picture"},
+			Pointer: Pointer{Tabs: 11, Pressed: true},
+		},
+		{
+			Name: "quick-pointer-primary",
+			Purpose: "the pointer on the one action this screen is for, which is the only control " +
+				"here whose label changes colour with its fill",
+			Screen:  screenQuick,
+			Quick:   Quick{Seed: "for-the-picture"},
+			Pointer: Pointer{Tabs: 10},
+		},
+		{
+			Name: "quick-pointer-primary-pressed",
+			Purpose: "that same action held down, on the third and last fill the accent ladder " +
+				"offers a button that has to carry a label",
+			Screen:  screenQuick,
+			Quick:   Quick{Seed: "for-the-picture"},
+			Pointer: Pointer{Tabs: 10, Pressed: true},
 		},
 	}
 }

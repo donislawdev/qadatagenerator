@@ -155,11 +155,15 @@ const (
 	BgControl = "bg.control"
 	BgCurrent = "bg.current"
 	BgHover   = "bg.hover"
+	BgPressed = "bg.pressed"
 
 	LineQuiet     = "line.quiet"
 	BorderControl = "border.control"
+	BorderPressed = "border.pressed"
 
 	FillPrimary = "fill.primary"
+	FillHover   = "fill.hover"
+	FillPressed = "fill.pressed"
 	MarkCurrent = "mark.current"
 	MarkActive  = "mark.active"
 
@@ -177,9 +181,9 @@ const (
 // TokenNames is every token constant above, so a test can close the register
 // from the side the constants are on. The same reason ColorNames exists.
 var TokenNames = []string{
-	BgWindow, BgSurface, BgControl, BgCurrent, BgHover,
-	LineQuiet, BorderControl,
-	FillPrimary, MarkCurrent, MarkActive,
+	BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed,
+	LineQuiet, BorderControl, BorderPressed,
+	FillPrimary, FillHover, FillPressed, MarkCurrent, MarkActive,
 	TextPrimary, TextSecondary, TextAccent, TextOnFill, TextOnMark,
 	StateSuccess, StateWarning, StateDanger,
 }
@@ -257,15 +261,59 @@ var Tokens = []Token{
 	{BgCurrent, "neutral.4", ThresholdGround, nil,
 		"the sidebar item naming the screen that is open"},
 	{BgHover, "neutral.5", ThresholdGround, nil,
-		"the row under the pointer, which is where the action belonging to that row appears"},
+		"the row under the pointer, and the ground of any control the pointer is over"},
+	// 🔴 The ground of a control being pressed, and the one entry of this
+	// register whose NEIGHBOUR had to move with it.
+	//
+	// Radix puts the states of a control on steps 3 to 5, and this ladder
+	// spends 4 on the open screen of the sidebar, so a pressed control lands on
+	// 6. That step is the quiet line, which is the first sign it is being asked
+	// to do a second job, and the measurement says so outright: border.control
+	// stands 2.80 on it where WCAG 1.4.11 asks for 3.0. It clears 3.25 on
+	// bg.hover and falls off one step later.
+	//
+	// So a pressed control does not keep its resting edge. That is not a
+	// workaround for a shortage of steps - it is what pressing looks like here,
+	// and border.pressed below carries it.
+	{BgPressed, "neutral.6", ThresholdGround, nil,
+		"the ground of a control under the finger, one step past the ground it takes under the pointer"},
 
 	{LineQuiet, "neutral.6", ThresholdGuide, []string{BgWindow, BgSurface},
 		"the line between two rows and the edge of a card, which the eye follows rather than reads"},
 	{BorderControl, "neutral.10", ThresholdControl, []string{BgWindow, BgSurface, BgControl, BgHover},
 		"the edge saying a shape is a control rather than a word, which DEC-211 settled has to be drawn"},
+	{BorderPressed, "neutral.11", ThresholdControl, []string{BgPressed},
+		"the edge of a control being pressed, which brightens because the resting edge measures 2.80 on the ground pressing gives it"},
 
 	{FillPrimary, "accent.9", ThresholdControl, []string{BgSurface},
 		"the fill of the one action a screen is for, which is the only thing carrying hierarchy here"},
+	// 🔴 The two entries that made the label change colour, and the arithmetic
+	// that left no other road. Measured on 2026-09-09.
+	//
+	// A filled button under the pointer has to look different from one at rest,
+	// and the only thing it has to say that with is its fill. Moving that fill
+	// moves the ground its label is read on, and the two thresholds close in
+	// from opposite sides:
+	//
+	//   - for white to reach 4.5 the fill needs a luminance of at most 0.1833
+	//   - for the dark ink to reach 4.5 it needs a luminance of at least 0.1968
+	//
+	// The two do not meet. Any fill between them carries NO legible label at
+	// all, which is the same shape of finding as DEC-179 and is why this is
+	// written down rather than left as a choice somebody made.
+	//
+	// accent.9 sits at 0.1544, below the gap, so it takes white at 5.14.
+	// accent.10 sits at 0.1983, above it, so white falls to 4.23 and the dark
+	// ink clears at 4.53. There is no step in between, so the ink changes with
+	// the state.
+	//
+	// The step DOWN was measured too and it fails for the other reason:
+	// accent.8 carries white at 6.29 and stands 2.85 on a card, under the 3.0 a
+	// control needs to be found at all.
+	{FillHover, "accent.10", ThresholdControl, []string{BgSurface},
+		"the fill of that action under the pointer, one step up because no step down keeps the button findable"},
+	{FillPressed, "accent.11", ThresholdControl, []string{BgSurface},
+		"the fill of that action under the finger, far enough up that pressing is not mistaken for hovering"},
 	{MarkCurrent, "accent.11", ThresholdControl, []string{BgSurface, BgCurrent},
 		"the bar beside the sidebar item the window is on, which says where you are without a second word"},
 	// 🔴 The one token measured against another MARK rather than against a
@@ -294,9 +342,9 @@ var Tokens = []Token{
 	{MarkActive, "neutral.12", ThresholdControl, []string{BorderControl, BgControl, BgSurface},
 		"what the toolkit paints on a stock control that is chosen or holds the keyboard, which has to differ from the resting edge it replaces"},
 
-	{TextPrimary, "neutral.12", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgHover},
+	{TextPrimary, "neutral.12", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed},
 		"the value, the label and every word read first"},
-	{TextSecondary, "neutral.11", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgHover},
+	{TextSecondary, "neutral.11", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed},
 		"a caption, a group heading and the sentence explaining a value"},
 	{TextAccent, "accent.11", ThresholdText, []string{BgWindow, BgSurface, BgCurrent},
 		"the prompt of a command line, and the icon of the screen that is open"},
@@ -323,8 +371,21 @@ var Tokens = []Token{
 	// Measured 2026-09-09: neutral.1 on mark.current gives 7.55 where a label
 	// needs 4.5 and a mark needs 3.0, so one entry serves both the words and
 	// the icons drawn on a flooded control.
-	{TextOnMark, "neutral.1", ThresholdText, []string{MarkCurrent},
-		"the label and the icon on a control the toolkit has flooded with the focus colour, which is read on that flood rather than on the ground behind it"},
+	// 🔴 Two grounds were added to this token on 2026-09-09, and the entry is
+	// worth reading before a third is.
+	//
+	// It was written for one thing: the flood the toolkit paints on a stock
+	// control holding the keyboard. The two fills beside it are a different
+	// thing that happens to need the same answer - a dark ink on a light violet
+	// - because the accent ladder above accent.9 carries no white label at all.
+	//
+	// So this is the ink for a light accent ground, whatever put the control on
+	// one. What would make that wrong is a ground arriving here that is light
+	// for some third reason and wants a different ink, and the measurement is
+	// the guard rather than the wording: 7.55 on mark.current and fill.pressed,
+	// 4.53 on fill.hover, where a label needs 4.5.
+	{TextOnMark, "neutral.1", ThresholdText, []string{MarkCurrent, FillHover, FillPressed},
+		"the label and the icon on a light accent ground: the flood the toolkit paints on a focused control, and the fill a primary button takes under the pointer"},
 
 	{StateSuccess, "semantic.success", ThresholdText, []string{BgWindow, BgSurface},
 		"a safe harbour, and a value inside the range it belongs to"},

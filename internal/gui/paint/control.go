@@ -63,9 +63,81 @@ type ButtonLook struct {
 	// generator list on 2026-09-05.
 	Plain bool
 
-	// Focused and Disabled are the two states a person can put a button into.
+	// Focused and Disabled are the states a person reaches with the keyboard,
+	// Hovered and Pressed the two they reach with a pointer.
+	//
+	// 🔴 The last two arrived on 2026-09-09 and the sentence that used to stand
+	// here called the first two "the two states a person can put a button
+	// into". That was written while this face was drawing pictures, where the
+	// only states are the ones somebody spells out. It became false the moment
+	// a real control started wearing this face and nothing said so: the toolkit
+	// had drawn a hover of its own since always - widget/button.go:382 blends
+	// ColorNameHover - and taking its drawing away took that with it, silently,
+	// because a state nobody draws leaves no mark to miss.
+	//
+	// Measured on the real binary before this: a window with the pointer over a
+	// sidebar item was identical to one with the pointer in empty space, to the
+	// last of 1,965,600 pixels.
 	Focused  bool
 	Disabled bool
+	Hovered  bool
+	Pressed  bool
+}
+
+// pointerGround is the ground a pointer puts an ordinary control on, and the
+// edge that ground needs. The ground is empty when no pointer is on it, which
+// is the resting look and is not the same as a ground of the window's colour.
+//
+// # Why the edge travels with the ground rather than staying put
+//
+// Because it cannot stay put, and that is measured rather than chosen.
+// border.control clears WCAG 1.4.11 at 3.25 on the ground a pointer gives a
+// control and falls to 2.80 one step later, which is where pressing puts it.
+// The register carries the arithmetic beside bg.pressed.
+//
+// So this returns the pair rather than the ground, and every control asking for
+// one asks for both. A caller free to take the ground and keep its own edge is
+// a caller free to reintroduce that 2.80, in a place where nothing would fail.
+func pointerGround(hovered, pressed bool) (ground, edge string) {
+	switch {
+	case pressed:
+		return theme.BgPressed, theme.BorderPressed
+	case hovered:
+		return theme.BgHover, theme.BorderControl
+	}
+	return "", theme.BorderControl
+}
+
+// FilledGround is the fill the one action of a screen takes, and the ink its
+// label is read in on that fill.
+//
+// # Why this one is exported where pointerGround above is not
+//
+// Because it has a second reader. parts.PrimaryButton keeps three shapes and
+// recolours them instead of rebuilding a face, so it cannot ask ButtonFace for
+// this pair and would otherwise carry a copy of the rule. A rule with two
+// copies is a rule that holds until somebody edits one of them, and this one
+// pairs a fill with the only ink that fill can carry.
+//
+// # 🔴 Why the ink moves with the fill, which no other control here does
+//
+// Because the accent ladder leaves no fill that carries both. Measured on
+// 2026-09-09: for white to reach 4.5 a fill needs a luminance of at most
+// 0.1833, and for the dark ink to reach it the fill needs at least 0.1968. The
+// two do not meet, so there is a band of violets carrying no legible label at
+// all, and the step this button rests on sits just below that band while the
+// step it takes under a pointer sits just above it.
+//
+// The full reckoning, including the step DOWN that fails for the opposite
+// reason, is beside fill.hover in the token register.
+func FilledGround(hovered, pressed bool) (fill, ink string) {
+	switch {
+	case pressed:
+		return theme.FillPressed, theme.TextOnMark
+	case hovered:
+		return theme.FillHover, theme.TextOnMark
+	}
+	return theme.FillPrimary, theme.TextOnFill
 }
 
 // ButtonFace is the look of a button, in whatever state it is in.
@@ -98,20 +170,31 @@ type ButtonLook struct {
 func ButtonFace(look ButtonLook) fyne.CanvasObject {
 	ink := theme.TextPrimary
 	var ground fyne.CanvasObject
+	under, edge := pointerGround(look.Hovered, look.Pressed)
 	switch {
 	case look.Disabled:
+		// First, and it stays first. A control nobody can press does not answer
+		// a pointer, so a flag left set on it by a pointer that arrived before
+		// it was disabled must not reach the drawing.
 		ink = theme.TextSecondary
 		ground = Clear()
 	case look.Filled:
-		ink = theme.TextOnFill
-		ground = Fill(theme.FillPrimary, theme.RadiusControl)
+		var fill string
+		fill, ink = FilledGround(look.Hovered, look.Pressed)
+		ground = Fill(fill, theme.RadiusControl)
 	case look.Plain:
+		// No edge in any state, so a pointer has only the ground to show with.
 		ground = Clear()
-	default:
+		if under != "" {
+			ground = Fill(under, theme.RadiusControl)
+		}
+	case under == "":
 		// An edge around nothing rather than a fill of its own. A quiet
 		// button stands on three grounds here, and any fill would be a
 		// patch of the wrong colour on two of them. Seen on the render.
-		ground = inside(Outline(theme.BorderControl, theme.RadiusControl))
+		ground = inside(Outline(edge, theme.RadiusControl))
+	default:
+		ground = inside(Bordered(under, edge, theme.RadiusControl))
 	}
 
 	row := []fyne.CanvasObject{}
@@ -217,7 +300,12 @@ type ChooserLook struct {
 	// that the words standing in for an answer do not read as one.
 	Unchosen bool
 
-	// Focused and Disabled are the two states a person can put a chooser into.
+	// Focused and Disabled are the states a person reaches with the keyboard,
+	// Hovered and Pressed the two they reach with a pointer. They mean here
+	// exactly what they mean on a button, and they are drawn from the same two
+	// tokens, because a chooser and a button standing in one row have to look
+	// like one family - which DEC-215 settled for the resting look and settles
+	// again for every other.
 	//
 	// 🔴 There is no Open, and its absence is a finding rather than an
 	// omission. The toolkit never draws one either: selectRenderer.updateIcon
@@ -229,6 +317,8 @@ type ChooserLook struct {
 	// learn that the list had closed and would leave the mark stuck open.
 	Focused  bool
 	Disabled bool
+	Hovered  bool
+	Pressed  bool
 }
 
 // ChooserFace is the look of a control that opens a list: the field face with a
@@ -252,7 +342,14 @@ type ChooserLook struct {
 //     written on it, which is the entire reason parts.Flooded had to exist.
 func ChooserFace(look ChooserLook) fyne.CanvasObject {
 	ink := theme.TextPrimary
-	var ground fyne.CanvasObject = inside(Bordered(theme.BgControl, theme.BorderControl, theme.RadiusControl))
+	under, edge := pointerGround(look.Hovered, look.Pressed)
+	if under == "" {
+		// A chooser has a ground of its own at rest, where a button has none,
+		// so this is the one place the resting look is a colour rather than the
+		// absence of one.
+		under = theme.BgControl
+	}
+	var ground fyne.CanvasObject = inside(Bordered(under, edge, theme.RadiusControl))
 	switch {
 	case look.Disabled:
 		ink = theme.TextSecondary

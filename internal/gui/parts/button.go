@@ -9,6 +9,7 @@ package parts
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
@@ -78,15 +79,33 @@ type Button struct {
 	// redraws from inside FocusLost, before the focus manager has moved its own
 	// record.
 	keyboardIsHere bool
+
+	// pointerIsHere and pointerIsDown are the pointer's half of the same
+	// question, and they arrived on 2026-09-09 with the states of the face.
+	//
+	// 🔴 They are not an addition. The toolkit's own button has carried a
+	// hovered flag since always and blends ColorNameHover with it, so taking
+	// its drawing away on 2026-09-09 took a state a person could see and put
+	// nothing in its place. This widget does not even embed widget.Button any
+	// more, so the driver had nothing to call.
+	pointerIsHere bool
+	pointerIsDown bool
 }
 
 // Interfaces are asserted here rather than discovered at a call site, because a
 // widget that quietly stops being focusable still compiles and still draws, and
 // the only symptom is a person with a keyboard never reaching it.
+//
+// 🔴 The last two are what makes a pointer reach this control at all. The
+// driver asks for them by type - internal/driver/glfw/window.go:478 and :494 -
+// so a control that stops implementing one goes on compiling, goes on drawing,
+// and simply stops answering the mouse.
 var (
-	_ fyne.Widget    = (*Button)(nil)
-	_ fyne.Tappable  = (*Button)(nil)
-	_ fyne.Focusable = (*Button)(nil)
+	_ fyne.Widget       = (*Button)(nil)
+	_ fyne.Tappable     = (*Button)(nil)
+	_ fyne.Focusable    = (*Button)(nil)
+	_ desktop.Hoverable = (*Button)(nil)
+	_ desktop.Mouseable = (*Button)(nil)
 )
 
 // NewButton builds a button that answers to both keys.
@@ -125,6 +144,52 @@ func (b *Button) Tapped(*fyne.PointEvent) {
 		return
 	}
 	b.OnTapped()
+}
+
+// MouseIn notes that the pointer arrived and redraws.
+func (b *Button) MouseIn(*desktop.MouseEvent) {
+	b.pointerIsHere = true
+	b.Refresh()
+}
+
+// MouseMoved is required by the interface and has nothing to do: this control
+// looks the same wherever inside itself the pointer is.
+func (b *Button) MouseMoved(*desktop.MouseEvent) {}
+
+// MouseOut notes that the pointer left, and forgets any press with it.
+//
+// # 🔴 Why the press is forgotten here, which is not obvious and is measured
+//
+// Because MouseUp does not necessarily come back. The driver finds the object
+// under the pointer AT THE MOMENT THE BUTTON IS RELEASED and sends the release
+// to that one - internal/driver/glfw/window.go:475 and :583 - so pressing this
+// button, sliding off it and letting go delivers MouseUp to whatever is under
+// the pointer by then, or to nothing at all.
+//
+// Without this line that leaves the button drawn as pressed for the rest of its
+// life, with no way back short of pressing it again. Nothing would fail and no
+// test reading the tree would see it, because the tree would be a legal drawing
+// of a state the widget genuinely believes it is in.
+func (b *Button) MouseOut() {
+	b.pointerIsHere, b.pointerIsDown = false, false
+	b.Refresh()
+}
+
+// MouseDown notes that the pointer is holding this button down.
+//
+// The press is recorded even on a disabled button, and the face throws it away:
+// the state of the pointer is a fact about the pointer, while whether it means
+// anything is a question about the control. Keeping the two apart is what stops
+// a button that is enabled mid press from being wrong about itself.
+func (b *Button) MouseDown(*desktop.MouseEvent) {
+	b.pointerIsDown = true
+	b.Refresh()
+}
+
+// MouseUp notes that the pointer let go.
+func (b *Button) MouseUp(*desktop.MouseEvent) {
+	b.pointerIsDown = false
+	b.Refresh()
 }
 
 // FocusGained notes that the keyboard arrived and redraws.
@@ -224,6 +289,8 @@ func (r *buttonRenderer) Refresh() {
 		Plain:    r.button.Plain,
 		Focused:  r.button.keyboardIsHere,
 		Disabled: r.button.Disabled(),
+		Hovered:  r.button.pointerIsHere,
+		Pressed:  r.button.pointerIsDown,
 	})
 	if r.holder == nil {
 		r.holder = container.NewStack(face)

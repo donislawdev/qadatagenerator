@@ -23,7 +23,10 @@
 package screens
 
 import (
+	"strconv"
+
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/desktop"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
@@ -91,6 +94,39 @@ func (q Quick) Chosen() bool { return q.Generator != "" }
 type Keyboard struct {
 	Tabs int
 	Keys []fyne.KeyName
+}
+
+// Pointer is where the mouse is while the picture is taken.
+//
+// # Why this exists at all, and it is measured rather than tidy
+//
+// Until 2026-09-09 no picture in this repository had a mouse in it, so no
+// picture could show what a control looks like under one. The window had
+// nothing to show either - the controls stopped answering the pointer the day
+// they took their drawing off the toolkit - and the two absences hid each
+// other. Measured on the real binary that day: a window with the pointer over a
+// sidebar item was identical to one with the pointer in empty space, to the
+// last of 1,965,600 pixels.
+//
+// # Why the control is named by a count of tabs
+//
+// Because that count already exists, is already walked by tools/klawiatura, and
+// already goes stale in exactly one way that one tool already reports. A second
+// way of naming a control - a position in pixels, a label to search the tree
+// for - would be a second register of the window, with its own way of being
+// wrong and nothing watching it.
+//
+// A state carries a Keyboard or a Pointer and not both. The walk starts from
+// nothing in each case, so two walks in one state would be one walk of the sum,
+// which is not what either number says.
+type Pointer struct {
+	// Tabs counts the walk that names the control, from the start of the
+	// window. Nought means no pointer is on this screen at all, so the first
+	// control is one rather than nought.
+	Tabs int
+	// Pressed holds the button down on that control, which is the state between
+	// a person deciding and the window answering.
+	Pressed bool
 }
 
 // Ran is what a run of the take and corrupt mode left, for the states that show
@@ -196,6 +232,9 @@ type State struct {
 	// Keyboard is applied after the window exists, because focus with no canvas
 	// has nothing to land on.
 	Keyboard Keyboard
+	// Pointer is where the mouse is, applied after the window exists for the
+	// same reason and carried instead of a Keyboard rather than beside one.
+	Pointer Pointer
 }
 
 // Buildable reports whether this state can be drawn from the data given, and
@@ -478,6 +517,70 @@ func Walk(canvas fyne.Canvas, state State) {
 			focused.TypedKey(&fyne.KeyEvent{Name: key})
 		}
 	}
+	touch(canvas, state.Pointer)
+}
+
+// touch puts the pointer where the state says, and presses if it says so.
+//
+// # 🔴 Why the control is reached through the focus manager and not through
+// test.MoveMouse, which is the obvious answer and is barred
+//
+// The obvious answer is the toolkit's own helper: it asks the driver what lies
+// at a position and hands the events to that, which is the road a real mouse
+// travels and would also catch a control something else is covering.
+//
+// It cannot be used here. fyne.io/fyne/v2/test carries an init that calls
+// NewApp - test/app.go:20 - so IMPORTING it replaces the running application
+// with a test one. This file is not a test file. It is compiled into anything
+// that ever imports this package, and the day something with a real window did,
+// that window would not open and the cause would be an import three files away.
+//
+// So the walk that already names controls is used for this one too, and the
+// price is stated rather than discovered: this reaches a control the KEYBOARD
+// can reach, which is not the same set as the one a pointer can. A control
+// covered by something else, or one no walk lands on, is not reached here. What
+// covers that gap is a guard rather than this probe - a picture is for looking
+// at, and looking at it is what found the fault that started this.
+//
+// The keyboard is put down before the pointer is picked up. A control drawn
+// with both would be a picture of two states at once, and the state a person
+// sees ten times a minute is the one with only the pointer on it.
+func touch(canvas fyne.Canvas, pointer Pointer) {
+	if pointer.Tabs <= 0 {
+		return
+	}
+	canvas.Focus(nil)
+	for i := 0; i < pointer.Tabs; i++ {
+		canvas.FocusNext()
+	}
+	landed, isDrawn := canvas.Focused().(fyne.CanvasObject)
+	canvas.Focus(nil)
+	if !isDrawn {
+		return
+	}
+	hoverable, answersPointer := landed.(desktop.Hoverable)
+	if !answersPointer {
+		// 🔴 Silence here would be a picture of a resting control filed under
+		// the name of a touched one, which is worse than no picture: it would
+		// pass every comparison for ever. A control that does not answer a
+		// pointer is the fault this was written to find.
+		panic("the control " + pointer.name() + " does not answer a pointer, so no picture of it under one can be taken")
+	}
+	hoverable.MouseIn(&desktop.MouseEvent{})
+	if !pointer.Pressed {
+		return
+	}
+	pressable, answersPress := landed.(desktop.Mouseable)
+	if !answersPress {
+		panic("the control " + pointer.name() + " cannot be pressed, so no picture of it pressed can be taken")
+	}
+	pressable.MouseDown(&desktop.MouseEvent{})
+}
+
+// name is how this pointer says which control it meant, for a message somebody
+// reads when it cannot be reached.
+func (p Pointer) name() string {
+	return strconv.Itoa(p.Tabs) + " tabs in"
 }
 
 // Sample is a manifest and a response record small enough to read and wide

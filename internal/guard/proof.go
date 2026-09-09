@@ -522,4 +522,7 @@ var toolGuards = []Guard{
 	{"the book number provider declares no reserved range, because it narrows generation into a window the agency has not allocated and that is not a harbour", "TestTheBookNumberClaimsNoSafeHarbour", "internal/adapter/provider/intl", ByMutation},
 	{"every generated book number falls in the one window under prefix 978 that the agency leaves without a registration group, so no book carries the value today", "TestEveryGeneratedBookNumberSitsInTheUnallocatedWindow", "internal/adapter/provider/intl", ByMutation},
 	{"the book number check digit uses the alternation of one and three counted from the left, which is what the manual prints every product of", "TestTheExampleTheManualWorksComesOutTheSameHere", "internal/adapter/provider/intl", ByMutation},
+	{"every control a pointer can touch draws each of its states differently, so a person can tell hovering from pressing", "TestEveryControlAPointerCanTouchDrawsEachOfItsStatesDifferently", "internal/gui/parts", ByMutation},
+	{"a control forgets a press the pointer carried away, because the driver delivers the release to whatever is under the pointer by then and never to the control that was pressed", "TestAControlForgetsAPressThePointerCarriedAway", "internal/gui/parts", ByMutation},
+	{"a control nobody can use draws nothing for a pointer, however much of one the driver hands it", "TestADisabledControlDrawsNothingForAPointer", "internal/gui/parts", ByMutation},
 }

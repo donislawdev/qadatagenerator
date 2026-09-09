@@ -3,6 +3,7 @@ package parts
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
@@ -57,15 +58,35 @@ type Select struct {
 	// redraws from inside FocusLost, before the focus manager has moved its own
 	// record.
 	keyboardIsHere bool
+
+	// pointerIsHere and pointerIsDown are the pointer's half of the same
+	// question.
+	//
+	// 🔴 The first of them is a SECOND copy of something the embedded widget
+	// already keeps, and it has to be, which is the whole finding here. The
+	// toolkit's chooser has carried a hovered flag since always and colours
+	// itself from it at widget/select.go:435, and it goes on setting that flag
+	// under this renderer - MouseIn is inherited, so the events never stopped
+	// arriving. The flag is unexported, so the drawing next door cannot read
+	// it, and the redraw it triggers redraws the same picture.
+	//
+	// That is what taking the drawing away on 2026-09-09 actually did to this
+	// control: not remove the hover, but leave it running with nothing able to
+	// see it. Measured on the real binary, a window with the pointer on a
+	// control was identical to one with the pointer in empty space.
+	pointerIsHere bool
+	pointerIsDown bool
 }
 
 // Interfaces are asserted here for the reason Button asserts them: a widget
 // that quietly stops being focusable still compiles and still draws, and the
 // only symptom is a person with a keyboard never reaching it.
 var (
-	_ fyne.Widget    = (*Select)(nil)
-	_ fyne.Tappable  = (*Select)(nil)
-	_ fyne.Focusable = (*Select)(nil)
+	_ fyne.Widget       = (*Select)(nil)
+	_ fyne.Tappable     = (*Select)(nil)
+	_ fyne.Focusable    = (*Select)(nil)
+	_ desktop.Hoverable = (*Select)(nil)
+	_ desktop.Mouseable = (*Select)(nil)
 )
 
 // NewSelect builds a chooser that draws itself.
@@ -128,6 +149,51 @@ func (s *Select) FocusGained() {
 func (s *Select) FocusLost() {
 	s.keyboardIsHere = false
 	s.Select.FocusLost()
+}
+
+// MouseIn notes that the pointer arrived, then lets the toolkit note it too.
+//
+// The toolkit's own method is still called, and not because this drawing needs
+// what it sets. A widget half told about its own state is a widget that answers
+// one question correctly and the next one wrongly, and the flag it keeps is
+// read by MinSize and by the pop up, neither of which this file owns.
+func (s *Select) MouseIn(event *desktop.MouseEvent) {
+	s.pointerIsHere = true
+	s.Select.MouseIn(event)
+}
+
+// MouseMoved is required by the interface, and passes the event on for the
+// reason MouseIn does.
+func (s *Select) MouseMoved(event *desktop.MouseEvent) {
+	s.Select.MouseMoved(event)
+}
+
+// MouseOut notes that the pointer left, and forgets any press with it.
+//
+// The press is dropped here for the reason written out at length on
+// parts.Button: the driver delivers MouseUp to whatever is under the pointer
+// when the button is released, so a press that slides off this control is never
+// released on it and would otherwise be drawn for the rest of the run.
+func (s *Select) MouseOut() {
+	s.pointerIsHere, s.pointerIsDown = false, false
+	s.Select.MouseOut()
+}
+
+// MouseDown notes that the pointer is holding this chooser down.
+//
+// 🔴 The toolkit's chooser is not Mouseable at all, so nothing is passed on
+// here and nothing is being overridden. It answers a press through Tapped,
+// which opens the list, and this state is what a person sees in the moment
+// between the two.
+func (s *Select) MouseDown(*desktop.MouseEvent) {
+	s.pointerIsDown = true
+	s.Refresh()
+}
+
+// MouseUp notes that the pointer let go.
+func (s *Select) MouseUp(*desktop.MouseEvent) {
+	s.pointerIsDown = false
+	s.Refresh()
 }
 
 // TypedKey opens the list on Enter as well as on the keys the toolkit answers.
@@ -231,6 +297,8 @@ func (r *chooserRenderer) Refresh() {
 		Unchosen: unchosen,
 		Focused:  r.chooser.hasKeyboard(),
 		Disabled: r.chooser.Disabled(),
+		Hovered:  r.chooser.pointerIsHere,
+		Pressed:  r.chooser.pointerIsDown,
 	})
 	if r.holder == nil {
 		r.holder = container.NewStack(face)
