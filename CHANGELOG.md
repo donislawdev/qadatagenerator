@@ -25,6 +25,12 @@ repository once they are released.
   pixels shorter than the chooser beside it, which read as one of them being
   wrong rather than as a small difference.
 
+- **Buttons are drawn by this program rather than by the toolkit underneath it**,
+  so they look the way the design says instead of the way the library ships. The
+  visible differences: an icon on a button no longer touches its label, a button
+  that cannot be pressed loses its outline rather than only going pale, and the
+  mark showing where the keyboard is no longer floods the whole button.
+
 - **Every screen in the sidebar now has an icon beside its name**, so you can
   find the one you want without reading the whole column.
 

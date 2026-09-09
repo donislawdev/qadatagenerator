@@ -3,8 +3,7 @@ package parts
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	toolkit "fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 )
 
 // Disclosure is a heading a person presses to show what is under it, and press
@@ -61,14 +60,13 @@ func NewDisclosure(title string, body fyne.CanvasObject) *Disclosure {
 	// A heading is read from where the text begins, and this one is as wide as
 	// the pane it heads. The toolkit centres a label by default, which put the
 	// words of this one 371 pixels from the left when it was first drawn.
-	disclosure.header.Alignment = widget.ButtonAlignLeading
-	disclosure.header.IconPlacement = widget.ButtonIconLeadingText
-	// Low importance, because a heading is not a thing to press so much as a
-	// thing to open, and the toolkit's accordion said the same by drawing its
-	// own heading without a filled background. Measured on the stored tree:
-	// at this importance the fill stays away until the pointer or the keyboard
-	// arrives, which is also when it matters here.
-	disclosure.header.Importance = widget.LowImportance
+	disclosure.header.Leading = true
+	// No edge, because a heading is not a thing to press so much as a thing to
+	// open, and this one is as wide as the pane it heads, so a box around it
+	// would read as a box around the section. The owner settled that on
+	// 2026-09-05 with the number beside it, and it was the toolkit's low
+	// importance until the button began drawing itself on 2026-09-09.
+	disclosure.header.Plain = true
 	body.Hide()
 	disclosure.markState()
 	disclosure.column = container.NewVBox(disclosure.header.OnScreen(), body)
@@ -77,15 +75,16 @@ func NewDisclosure(title string, body fyne.CanvasObject) *Disclosure {
 
 // markState puts the arrow of the heading the way the section is.
 //
-// The two icons are the toolkit's own, and they are the pair its accordion
-// used, so a person who has met one of these anywhere else meets the same
-// shape here.
+// The two icons are this window's own chevrons rather than the toolkit's pair.
+// They were the toolkit's until the button began drawing itself, at which point
+// asking the theme for them stopped being the only route to a chevron of ours
+// and started being the long way round to the same picture.
 func (d *Disclosure) markState() {
 	if d.body.Visible() {
-		d.header.SetIcon(toolkit.MenuDropUpIcon())
+		d.header.ShowIcon(paint.IconChevronUp)
 		return
 	}
-	d.header.SetIcon(toolkit.MenuDropDownIcon())
+	d.header.ShowIcon(paint.IconChevron)
 }
 
 // OnScreen is what a layout is given.

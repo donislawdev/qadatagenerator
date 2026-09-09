@@ -169,6 +169,7 @@ func (v *View) build() {
 
 	v.copy = parts.NewPrimaryButton(v.text.T(i18n.QuickCopy), v.putInClipboard)
 	v.again = parts.NewButton(v.text.T(i18n.QuickAgain), v.drawAgain)
+	v.again.ShowIcon(paint.IconAgain)
 
 	// Monospace, because this is a line to be read character by character and
 	// then typed or pasted.
@@ -190,6 +191,7 @@ func (v *View) build() {
 	v.command.Wrapping = fyne.TextWrapOff
 	v.command.Truncation = fyne.TextTruncateEllipsis
 	v.copyCommand = parts.NewButton(v.text.T(i18n.CommandCopy), v.putCommandInClipboard)
+	v.copyCommand.ShowIcon(paint.IconCopy)
 
 	// 🔴 The values are no longer ONE label, changed on 2026-09-09.
 	//

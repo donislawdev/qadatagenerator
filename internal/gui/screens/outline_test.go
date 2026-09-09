@@ -7,7 +7,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
+	"fyne.io/fyne/v2/test"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
@@ -95,11 +95,64 @@ func TestEveryPressableControlDrawsItsOwnEdge(t *testing.T) {
 					state.Name, name, edge.Visible(), !quiet)
 			}
 		})
+
+		// 🔴 The second walk, added 2026-09-09, and it is a second walk rather
+		// than a second case in the first because the two controls now answer
+		// this question in two different places.
+		//
+		// parts.Select is still the toolkit's chooser with a rectangle laid
+		// beside it, so its edge is a sibling and the walk above finds it.
+		// parts.Button draws its own face, so its edge is INSIDE its renderer
+		// and no walk of the layout tree will ever see it. Left with one walk,
+		// this guard reported "holds no button at all" on every screen without
+		// a chooser - which is the failure mode it was built to have, and it
+		// worked: a control that quietly leaves the walk is a control the
+		// promise in this name is no longer true of.
+		//
+		// When the chooser draws itself too, the first walk goes and this one
+		// covers everything.
+		walkTree(content, false, func(object fyne.CanvasObject, _ bool) {
+			button, ours := object.(*parts.Button)
+			if !ours || !button.Visible() {
+				return
+			}
+			found++
+			drawn := edgesInFace(test.WidgetRenderer(button).Objects())
+			quiet := quietButton{button}.quiet()
+			if drawn == quiet {
+				t.Errorf("%s: the button %q draws an edge: %v, where a quiet one is %v. "+
+					"An edge says a control can be used, so a disabled one and a heading go without",
+					state.Name, button.Text, drawn, quiet)
+			}
+		})
+
 		if found == 0 {
-			t.Errorf("state %q holds no button at all, so this walk passed by walking nothing",
+			t.Errorf("state %q holds no pressable control at all, so this walk passed by walking nothing",
 				state.Name)
 		}
 	}
+}
+
+// edgesInFace says whether anything in this drawing paints a stroke.
+//
+// The same question edgeIn asks of a layout, asked of what a renderer holds.
+// Kept separate rather than folded into that one, because that one deliberately
+// stops two levels down to avoid mistaking a control's own fill for an edge,
+// and a face is a tree of our own shapes where every level is ours.
+func edgesInFace(objects []fyne.CanvasObject) bool {
+	for _, object := range objects {
+		switch shape := object.(type) {
+		case *canvas.Rectangle:
+			if shape.StrokeWidth > 0 {
+				return true
+			}
+		case *fyne.Container:
+			if edgesInFace(shape.Objects) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // outlined is a control this window draws an edge around, asked whether this
@@ -148,7 +201,10 @@ func controlDressedIn(group *fyne.Container) (outlined, string) {
 type quietButton struct{ *parts.Button }
 
 func (b quietButton) quiet() bool {
-	return b.Disabled() || b.Importance == widget.LowImportance
+	// Plain rather than low importance, since 2026-09-09. The button draws its
+	// own face and says in one field what it used to say by borrowing a word
+	// from the toolkit that also meant several other things.
+	return b.Disabled() || b.Plain
 }
 
 type quietSelect struct{ *parts.Select }

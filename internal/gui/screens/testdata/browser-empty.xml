@@ -15,25 +15,32 @@
 							<container pos="3,0" size="217x42">
 								<container pos="8,4" size="201x34">
 									<rectangle radius="6" size="201x34"/>
-									<container size="201x34">
-										<rectangle size="201x34"/>
+									<widget size="201x34" type="*parts.Button">
 										<container size="201x34">
-											<widget size="201x34" type="*container.ThemeOverride">
-												<container size="201x34">
-													<widget size="201x34" type="*parts.Button">
-														<rectangle radius="5" size="201x34"/>
-														<rectangle size="201x34"/>
-														<widget pos="24,8" size="70x20" type="*widget.RichText">
-															<text alignment="center" bold size="70x16">Quick value</text>
-														</widget>
-														<image fillMode="contain" pos="4,7" rsc="zap-edece9-15.svg" size="iconInlineSize"/>
-													</widget>
-												</container>
-											</widget>
 											<container size="201x34">
+												<rectangle size="201x34"/>
+												<container size="201x34">
+													<rectangle size="201x34"/>
+													<container size="201x34">
+														<container pos="12,4" size="177x26">
+															<container size="90x26">
+																<container size="15x26">
+																	<spacer size="15x5"/>
+																	<image fillMode="contain" pos="0,5" rsc="zap-edece9-15.svg" size="15x15"/>
+																	<spacer pos="0,20" size="15x5"/>
+																</container>
+																<container pos="23,0" size="67x26">
+																	<spacer size="67x4"/>
+																	<text pos="0,4" size="67x16">Quick value</text>
+																	<spacer pos="0,21" size="67x4"/>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
 											</container>
 										</container>
-									</container>
+									</widget>
 								</container>
 							</container>
 						</container>
@@ -45,25 +52,32 @@
 							<container pos="3,0" size="217x42">
 								<container pos="8,4" size="201x34">
 									<rectangle radius="6" size="201x34"/>
-									<container size="201x34">
-										<rectangle size="201x34"/>
+									<widget size="201x34" type="*parts.Button">
 										<container size="201x34">
-											<widget size="201x34" type="*container.ThemeOverride">
-												<container size="201x34">
-													<widget size="201x34" type="*parts.Button">
-														<rectangle radius="5" size="201x34"/>
-														<rectangle size="201x34"/>
-														<widget pos="24,8" size="101x20" type="*widget.RichText">
-															<text alignment="center" bold size="101x16">Take and corrupt</text>
-														</widget>
-														<image fillMode="contain" pos="4,7" rsc="file-x-edece9-15.svg" size="iconInlineSize"/>
-													</widget>
-												</container>
-											</widget>
 											<container size="201x34">
+												<rectangle size="201x34"/>
+												<container size="201x34">
+													<rectangle size="201x34"/>
+													<container size="201x34">
+														<container pos="12,4" size="177x26">
+															<container size="120x26">
+																<container size="15x26">
+																	<spacer size="15x5"/>
+																	<image fillMode="contain" pos="0,5" rsc="file-x-edece9-15.svg" size="15x15"/>
+																	<spacer pos="0,20" size="15x5"/>
+																</container>
+																<container pos="23,0" size="97x26">
+																	<spacer size="97x4"/>
+																	<text pos="0,4" size="97x16">Take and corrupt</text>
+																	<spacer pos="0,21" size="97x4"/>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
 											</container>
 										</container>
-									</container>
+									</widget>
 								</container>
 							</container>
 						</container>
@@ -75,25 +89,32 @@
 							<container pos="3,0" size="217x42">
 								<container pos="8,4" size="201x34">
 									<rectangle radius="6" size="201x34"/>
-									<container size="201x34">
-										<rectangle size="201x34"/>
+									<widget size="201x34" type="*parts.Button">
 										<container size="201x34">
-											<widget size="201x34" type="*container.ThemeOverride">
-												<container size="201x34">
-													<widget size="201x34" type="*parts.Button">
-														<rectangle radius="5" size="201x34"/>
-														<rectangle size="201x34"/>
-														<widget pos="24,8" size="41x20" type="*widget.RichText">
-															<text alignment="center" bold size="41x16">Recipe</text>
-														</widget>
-														<image fillMode="contain" pos="4,7" rsc="file-cog-edece9-15.svg" size="iconInlineSize"/>
-													</widget>
-												</container>
-											</widget>
 											<container size="201x34">
+												<rectangle size="201x34"/>
+												<container size="201x34">
+													<rectangle size="201x34"/>
+													<container size="201x34">
+														<container pos="12,4" size="177x26">
+															<container size="62x26">
+																<container size="15x26">
+																	<spacer size="15x5"/>
+																	<image fillMode="contain" pos="0,5" rsc="file-cog-edece9-15.svg" size="15x15"/>
+																	<spacer pos="0,20" size="15x5"/>
+																</container>
+																<container pos="23,0" size="39x26">
+																	<spacer size="39x4"/>
+																	<text pos="0,4" size="39x16">Recipe</text>
+																	<spacer pos="0,21" size="39x4"/>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
 											</container>
 										</container>
-									</container>
+									</widget>
 								</container>
 							</container>
 						</container>
@@ -108,25 +129,32 @@
 							<container pos="3,0" size="217x42">
 								<container pos="8,4" size="201x34">
 									<rectangle fillColor="selection" radius="6" size="201x34"/>
-									<container size="201x34">
-										<rectangle size="201x34"/>
+									<widget size="201x34" type="*parts.Button">
 										<container size="201x34">
-											<widget size="201x34" type="*container.ThemeOverride">
-												<container size="201x34">
-													<widget size="201x34" type="*parts.Button">
-														<rectangle radius="5" size="201x34"/>
-														<rectangle size="201x34"/>
-														<widget pos="24,8" size="104x20" type="*widget.RichText">
-															<text alignment="center" bold size="104x16">Manifest browser</text>
-														</widget>
-														<image fillMode="contain" pos="4,7" rsc="clipboard-check-edece9-15.svg" size="iconInlineSize"/>
-													</widget>
-												</container>
-											</widget>
 											<container size="201x34">
+												<rectangle size="201x34"/>
+												<container size="201x34">
+													<rectangle size="201x34"/>
+													<container size="201x34">
+														<container pos="12,4" size="177x26">
+															<container size="124x26">
+																<container size="15x26">
+																	<spacer size="15x5"/>
+																	<image fillMode="contain" pos="0,5" rsc="clipboard-check-edece9-15.svg" size="15x15"/>
+																	<spacer pos="0,20" size="15x5"/>
+																</container>
+																<container pos="23,0" size="101x26">
+																	<spacer size="101x4"/>
+																	<text pos="0,4" size="101x16">Manifest browser</text>
+																	<spacer pos="0,21" size="101x4"/>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
 											</container>
 										</container>
-									</container>
+									</widget>
 								</container>
 							</container>
 						</container>
@@ -142,25 +170,32 @@
 							<container pos="3,0" size="217x42">
 								<container pos="8,4" size="201x34">
 									<rectangle radius="6" size="201x34"/>
-									<container size="201x34">
-										<rectangle size="201x34"/>
+									<widget size="201x34" type="*parts.Button">
 										<container size="201x34">
-											<widget size="201x34" type="*container.ThemeOverride">
-												<container size="201x34">
-													<widget size="201x34" type="*parts.Button">
-														<rectangle radius="5" size="201x34"/>
-														<rectangle size="201x34"/>
-														<widget pos="24,8" size="36x20" type="*widget.RichText">
-															<text alignment="center" bold size="36x16">About</text>
-														</widget>
-														<image fillMode="contain" pos="4,7" rsc="info-edece9-15.svg" size="iconInlineSize"/>
-													</widget>
-												</container>
-											</widget>
 											<container size="201x34">
+												<rectangle size="201x34"/>
+												<container size="201x34">
+													<rectangle size="201x34"/>
+													<container size="201x34">
+														<container pos="12,4" size="177x26">
+															<container size="58x26">
+																<container size="15x26">
+																	<spacer size="15x5"/>
+																	<image fillMode="contain" pos="0,5" rsc="info-edece9-15.svg" size="15x15"/>
+																	<spacer pos="0,20" size="15x5"/>
+																</container>
+																<container pos="23,0" size="35x26">
+																	<spacer size="35x4"/>
+																	<text pos="0,4" size="35x16">About</text>
+																	<spacer pos="0,21" size="35x4"/>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
 											</container>
 										</container>
-									</container>
+									</widget>
 								</container>
 							</container>
 						</container>
@@ -193,24 +228,27 @@
 										<rectangle pos="2,2" radius="3" size="111x30" strokeWidth="2"/>
 										<text alignment="center" bold color="foregroundOnPrimary" pos="0,8" size="115x16">Open manifest...</text>
 									</widget>
-									<container pos="115,0" size="180x34">
-										<rectangle size="180x34"/>
-										<container size="180x34">
-											<widget size="180x34" type="*container.ThemeOverride">
-												<container size="180x34">
-													<widget size="180x34" type="*parts.Button">
-														<rectangle fillColor="disabled button" radius="5" size="180x34"/>
-														<rectangle size="180x34"/>
-														<widget pos="4,8" size="172x16" type="*widget.RichText">
-															<text alignment="center" bold color="disabled" size="172x16">Open application response...</text>
-														</widget>
-													</widget>
+									<widget pos="115,0" size="198x34" type="*parts.Button">
+										<container size="198x34">
+											<container size="198x34">
+												<rectangle size="198x34"/>
+												<container size="198x34">
+													<rectangle size="198x34"/>
+													<container size="198x34">
+														<container pos="16,4" size="166x26">
+															<container pos="0,4" size="166x16">
+																<container size="166x16">
+																	<spacer size="166x0"/>
+																	<text color="disabled" size="166x16">Open application response...</text>
+																	<spacer pos="0,16" size="166x0"/>
+																</container>
+															</container>
+														</container>
+													</container>
 												</container>
-											</widget>
-											<container size="180x34">
 											</container>
 										</container>
-									</container>
+									</widget>
 								</container>
 							</container>
 							<container pos="0,58" size="1070x737">

@@ -67,37 +67,63 @@ func TestTheEdgeAsksForNothingOfItsOwn(t *testing.T) {
 	}
 }
 
-// TestADisabledButtonShowsNoEdge and its pair hold the rule the owner chose,
-// at the one moment it changes: a button becomes unpressable while the window
-// is running, and the mark saying it can be pressed has to go with it.
+// TestADisabledButtonShowsNoEdge and its pair hold the rule the owner chose:
+// an edge says a control can be pressed, so the one control nobody can press
+// must not carry one, and neither must a heading as wide as its own pane.
+//
+// 🔴 Rewritten 2026-09-09 when the button began drawing itself. It used to read
+// a rectangle the control kept beside it and ask whether that was visible. That
+// rectangle is gone: the face decides the edge from the state, so the question
+// moved from "is the edge hidden" to "does the drawing contain an edge at all".
+//
+// The rule did not move an inch, and neither did the moment it is asked at -
+// both states are set after the button exists, which is why each is checked by
+// changing the button rather than by building a second one.
+func edgesIn(object fyne.CanvasObject) int {
+	switch shape := object.(type) {
+	case *canvas.Rectangle:
+		if shape.StrokeWidth > 0 {
+			return 1
+		}
+		return 0
+	case *fyne.Container:
+		found := 0
+		for _, child := range shape.Objects {
+			found += edgesIn(child)
+		}
+		return found
+	}
+	return 0
+}
+
+// drawnFace is what the renderer of this button would put on the screen.
+func drawnFace(button *Button) fyne.CanvasObject {
+	drawing := button.CreateRenderer().(*buttonRenderer)
+	return drawing.holder
+}
+
 func TestADisabledButtonShowsNoEdge(t *testing.T) {
 	button := NewButton("Damage this file", func() {})
-	if !button.edge.Visible() {
-		t.Fatal("a fresh button shows no edge, so the rest of this proves nothing")
+	if edgesIn(drawnFace(button)) == 0 {
+		t.Fatal("a fresh button draws no edge, so the rest of this proves nothing")
 	}
 
 	button.Disable()
-	if button.edge.Visible() {
-		t.Error("a disabled button still shows the edge that says it can be pressed")
+	if edgesIn(drawnFace(button)) != 0 {
+		t.Error("a disabled button still draws the edge that says it can be pressed")
 	}
 
 	button.Enable()
-	if !button.edge.Visible() {
+	if edgesIn(drawnFace(button)) == 0 {
 		t.Error("a button that became pressable again did not get its edge back")
 	}
 }
 
-// TestAHeadingShowsNoEdge covers the second case, and covers it at the moment
-// it is decided rather than at build time: importance is set after the button
-// exists, and the toolkit offers no hook for it, so the edge is settled when
-// the control is handed to a layout.
 func TestAHeadingShowsNoEdge(t *testing.T) {
 	button := NewButton("What this build can generate", func() {})
-	button.Importance = widget.LowImportance
+	button.Plain = true
 
-	button.OnScreen()
-
-	if button.edge.Visible() {
-		t.Error("a heading shows the edge of a button, which is a box drawn round a section")
+	if edgesIn(drawnFace(button)) != 0 {
+		t.Error("a heading draws the edge of a button, which is a box round a section")
 	}
 }

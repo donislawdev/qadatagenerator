@@ -219,11 +219,13 @@ func TestTheOpenScreenIsMarkedByAShapeRatherThanByColourAlone(t *testing.T) {
 				t.Errorf("screen %d is not open and its name carries the mark, so two names claim to be current",
 					at)
 			}
-			if colour, painted := importancePaints[button.Importance]; painted {
-				t.Errorf("the name of screen %d asks for importance %v, which paints the button %s, and a "+
-					"name marked by a colour is a mark somebody who does not separate hues cannot see",
-					at, button.Importance, colour)
-			}
+			// 🔴 The check on importance is gone because importance is gone:
+			// this button draws itself since 2026-09-09 and has no such field,
+			// so there is no longer a way for a name in this column to be
+			// painted by the toolkit at all. What replaced it is stricter and
+			// sits one line up - the mark has to DIFFER between the two states,
+			// which is the thing the importance check was protecting.
+			_ = button
 		}
 	}
 }

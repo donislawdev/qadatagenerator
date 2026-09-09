@@ -8,11 +8,147 @@ package parts
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 )
 
-// Button is the toolkit's button, pressed by Enter as well as by the space bar.
+// Button is a button this window draws itself.
+//
+// # 🔴 Why it stopped being an extension of the toolkit's, on 2026-09-09
+//
+// It used to be widget.Button with one key added and a rectangle laid over it,
+// and that was the right shape while the only complaint was the Enter key. The
+// owner put the accepted drawing beside a render of the window and the answer
+// was plain: the mock built its buttons out of paint.ButtonFace and the window
+// built them out of the toolkit's, so the two were two drawings of one thing
+// and free to look nothing alike. They did.
+//
+// The comment at the top of paint/control.go had promised they could not drift,
+// "because there is one of them". There was one of them and the window was not
+// using it. A promise about a shared drawing is worth nothing until both sides
+// draw from it, which is the same family as a colour added to a register that
+// no line of code reads.
+//
+// # What this costs, said plainly
+//
+// A renderer of our own is a piece of the toolkit written again, and this
+// project keeps a register of those with a ceiling on it, set so that adding
+// one is a decision somebody made rather than a habit. The owner made that
+// decision on 2026-09-09, having seen what the alternative looks like. The
+// entry in HandmadeAllowed says what was considered and why it does not fit,
+// which is what the register is for.
+//
+// # What is gained beyond the look, and none of it is cosmetic
+//
+//   - The gap between an icon and its label. The toolkit takes it from
+//     SizeNamePadding, which this window answers with nought on purpose, so an
+//     icon on a stock button TOUCHES its label. Drawing the row ourselves takes
+//     that gap from the scale like every other gap here.
+//   - The focus mark. The toolkit floods a focused button with the focus
+//     colour, measured at 1.23 for the mark and 1.56 for the label on it, which
+//     is the whole reason parts.Flooded had to exist. A ring we draw needs no
+//     such repair and the ink of the label never has to change.
+//   - The disabled state. One branch of one face, instead of an importance, a
+//     themed colour and a rectangle somebody has to remember to hide.
+type Button struct {
+	widget.DisableableWidget
+
+	// Text is the label and OnTapped what pressing it does. Both exported to
+	// match the toolkit's own button, so a caller moving between them does not
+	// have to learn a second spelling.
+	Text     string
+	OnTapped func()
+
+	// Icon is the NAME of one of this window's icons, empty for none.
+	//
+	// A name and not a resource, because the ink of an icon depends on the
+	// state the button is in, and a resource is a colour already decided.
+	Icon string
+
+	// Leading puts the label against the leading edge, which a column of places
+	// to go needs and a row of actions does not. Plain drops the edge, for a
+	// button that is a place rather than a slab.
+	Leading bool
+	Plain   bool
+
+	// keyboardIsHere is kept here rather than read from the canvas, because the
+	// canvas is wrong about it at exactly the moment it changes: a control
+	// redraws from inside FocusLost, before the focus manager has moved its own
+	// record.
+	keyboardIsHere bool
+}
+
+// Interfaces are asserted here rather than discovered at a call site, because a
+// widget that quietly stops being focusable still compiles and still draws, and
+// the only symptom is a person with a keyboard never reaching it.
+var (
+	_ fyne.Widget    = (*Button)(nil)
+	_ fyne.Tappable  = (*Button)(nil)
+	_ fyne.Focusable = (*Button)(nil)
+)
+
+// NewButton builds a button that answers to both keys.
+func NewButton(label string, tapped func()) *Button {
+	button := &Button{Text: label, OnTapped: tapped}
+	button.ExtendBaseWidget(button)
+	return button
+}
+
+// OnScreen is what a layout is given.
+//
+// 🔴 It hands back the button itself, and it stays because twenty two call
+// sites say it. Until this control drew itself a layout had to be given a
+// container instead: the toolkit resolved the colour of a flooded label through
+// the theme of the scope that label was in, so there had to BE a scope. Nothing
+// resolves through a scope any more, so the wrapper went and the method did
+// not, since removing it would be a rename of twenty two lines saying nothing
+// new.
+func (b *Button) OnScreen() fyne.CanvasObject { return b }
+
+// SetText changes the label and redraws.
+func (b *Button) SetText(label string) {
+	b.Text = label
+	b.Refresh()
+}
+
+// ShowIcon puts one of this window's icons on the button.
+func (b *Button) ShowIcon(name string) {
+	b.Icon = name
+	b.Refresh()
+}
+
+// Tapped presses the button, unless it cannot be pressed.
+func (b *Button) Tapped(*fyne.PointEvent) {
+	if b.Disabled() || b.OnTapped == nil {
+		return
+	}
+	b.OnTapped()
+}
+
+// FocusGained notes that the keyboard arrived and redraws.
+func (b *Button) FocusGained() {
+	b.keyboardIsHere = true
+	b.Refresh()
+}
+
+// FocusLost notes that the keyboard left and redraws.
+func (b *Button) FocusLost() {
+	b.keyboardIsHere = false
+	b.Refresh()
+}
+
+// TypedRune presses on the space bar, which is what the toolkit's own button
+// answers to and therefore what a person arriving from any other control will
+// try first.
+func (b *Button) TypedRune(r rune) {
+	if r == ' ' {
+		b.Tapped(nil)
+	}
+}
+
+// TypedKey presses on Enter as well as on the space bar.
 //
 // # What the toolkit does, and why that is not enough here
 //
@@ -25,148 +161,78 @@ import (
 // Silence in place of an answer is the one thing this product refuses
 // everywhere else, so it is refused here too.
 //
-// # Why an extension rather than a control of our own
-//
-// Everything a button does stays the toolkit's: the drawing, the focus ring, the
-// hover, the importance, the icon. What is added is one key. That is the
-// toolkit's own extension mechanism, so the rule against rebuilding pieces of it
-// is not touched, and there is no renderer here to go stale when the toolkit
-// moves.
-type Button struct {
-	widget.Button
-
-	// keyboardIsHere is kept here rather than read from the canvas, because
-	// the canvas is wrong about it at exactly the moment it changes: a control
-	// redraws from inside FocusLost, before the focus manager has moved its
-	// own record.
-	keyboardIsHere bool
-	onScreen       fyne.CanvasObject
-
-	// icon is the NAME of the icon this button shows, empty when it shows
-	// none. ShowIcon says why the name is kept rather than the resource.
-	icon string
-
-	// edge is the rectangle that says this is a control rather than a word.
-	// It is held here rather than looked up in the tree, because whether it
-	// shows depends on two things only the button knows, and both of them
-	// change while the window is running.
-	edge *canvas.Rectangle
-}
-
-// NewButton builds a button that answers to both keys.
-func NewButton(label string, tapped func()) *Button {
-	button := &Button{}
-	button.Text = label
-	button.OnTapped = tapped
-	button.ExtendBaseWidget(button)
-	dressed, edge := Outlined(Flooded(button, button.hasKeyboard))
-	button.onScreen, button.edge = standing(dressed), edge
-	button.markEdge()
-	return button
-}
-
-// OnScreen is what a layout is given, rather than the button itself.
-//
-// The toolkit floods a focused control with the focus colour, so the label on
-// it has to change colour to stay readable, and a colour is resolved through
-// the theme of the scope a widget is in. Flooded above says why that scope can
-// only be a container. This is where a layout is handed it.
-//
-// A layout given the button instead still compiles, because a button is a
-// canvas object like any other. What refuses it is the guard that walks each
-// screen and the contrast measured on the render, which is the right place for
-// it: the mistake is invisible in the source and plain in the pixels.
-//
-// The edge Outlined draws is settled here as well as at build time, because a
-// caller sets Importance between the two and the toolkit gives no hook for it.
-func (b *Button) OnScreen() fyne.CanvasObject {
-	b.markEdge()
-	return b.onScreen
-}
-
-// Refresh settles the edge, then lets the toolkit redraw.
-//
-// # Why this is the place, and what it does not reach
-//
-// DisableableWidget.Disable and Enable at widget/widget.go:180 and 165 end in
-// impl.Refresh, where impl is this type, so becoming pressable and stopping
-// being pressable both arrive here. SetIcon and SetText do NOT: they call
-// BaseWidget.Refresh, which goes straight to the renderer and never to this
-// method. That is why the edge is also settled in NewButton and in OnScreen,
-// and why the guard walking every screen is what actually holds the rule.
-func (b *Button) Refresh() {
-	b.markEdge()
-	b.Button.Refresh()
-}
-
-// markEdge shows the edge on a button somebody can press, and hides it
-// otherwise.
-//
-// # The two cases that get no edge, and why each
-//
-// A DISABLED button is not a control to find, and the edge is what says a
-// control is there. Leaving it on would make the one thing a person cannot use
-// the most visible thing on the screen. It also gives the disabled state a mark
-// of its own, which until now it did not have: the label went quiet and nothing
-// else changed.
-//
-// A LOW IMPORTANCE button is a heading rather than a slab, which is what the
-// toolkit itself says by leaving the fill off one. There is one in this window,
-// the heading of the list of generators, and it is as wide as its pane, so an
-// edge around it would read as a box drawn round a section. What makes it
-// findable is the arrow beside its words, which is a themed resource and takes
-// the same colour they do. The owner chose this on 2026-09-05, with the number
-// beside it: that heading measures 1.00 against the panel, which is the worst
-// in the window, and the arrow is the answer to it.
-func (b *Button) markEdge() {
-	if b.edge == nil {
-		return
-	}
-	if b.Disabled() || b.Importance == widget.LowImportance {
-		b.edge.Hide()
-		return
-	}
-	b.edge.Show()
-}
-
-// hasKeyboard says whether the keyboard is on this button.
-func (b *Button) hasKeyboard() bool { return b.keyboardIsHere }
-
-// FocusGained notes that the keyboard arrived, then lets the toolkit redraw.
-//
-// The order matters and is the whole point: the toolkit's own FocusGained ends
-// in a Refresh, and that Refresh is what asks the theme for the colour of the
-// label. Setting the flag afterwards would paint one frame with the old answer.
-func (b *Button) FocusGained() {
-	b.keyboardIsHere = true
-	b.paintIcon()
-	b.Button.FocusGained()
-}
-
-// FocusLost notes that the keyboard left, then lets the toolkit redraw.
-func (b *Button) FocusLost() {
-	b.keyboardIsHere = false
-	b.paintIcon()
-	b.Button.FocusLost()
-}
-
-// TypedKey presses on Enter, and hands every other key to the toolkit.
-//
-// Both names are accepted because a keyboard has two of these keys and a person
-// does not think of them as different: fyne.KeyReturn is the one above the right
-// shift, fyne.KeyEnter is the one on the number pad.
+// Both names of the key are accepted because a keyboard has two of them and
+// nobody thinks of them as different: fyne.KeyReturn is above the right shift
+// and fyne.KeyEnter is on the number pad.
 func (b *Button) TypedKey(event *fyne.KeyEvent) {
 	if event == nil {
 		return
 	}
-	if event.Name == fyne.KeyReturn || event.Name == fyne.KeyEnter {
-		// Disabled is asked here rather than left to the toolkit, because this
-		// branch never reaches it. A control that cannot be pressed by the
-		// pointer must not become pressable by the keyboard.
-		if b.OnTapped != nil && !b.Disabled() {
-			b.OnTapped()
-		}
+	if event.Name == fyne.KeyReturn || event.Name == fyne.KeyEnter || event.Name == fyne.KeySpace {
+		b.Tapped(nil)
+	}
+}
+
+// CreateRenderer draws the face.
+func (b *Button) CreateRenderer() fyne.WidgetRenderer {
+	drawing := &buttonRenderer{button: b}
+	drawing.Refresh()
+	return drawing
+}
+
+// buttonRenderer draws whatever face the state of the button asks for.
+//
+// # Why the face is rebuilt rather than repainted
+//
+// A renderer usually keeps its shapes and changes their colours, which is what
+// PrimaryButton next door does with three of them. This one holds a face that
+// is a small tree - a ground, maybe a ring, a row of an icon and some words -
+// and the tree itself differs between states: a disabled button has no ring and
+// no edge, and a button with no icon has no image in it.
+//
+// Keeping one tree and hiding parts of it would mean this file knowing the
+// shape of the face, which is knowledge belonging on the other side of the
+// boundary. Rebuilding costs a handful of objects on a state change a person
+// caused, and it is what keeps the drawing in one place.
+//
+// 🔴 The face is swapped INSIDE a holder rather than replacing the field, and
+// that distinction cost a render. The first version kept the face in a field
+// and built a new one on every Refresh, which reads correctly and draws
+// nothing: the toolkit takes Objects() when it builds the renderer and lays out
+// what it took, so every later face was a tree nobody had been given. On screen
+// the buttons lost their edge and their size and became bare words sitting
+// wherever the last layout had put them. Nothing failed, and no test saw it -
+// the tree of a button is behind its renderer, so the guards were reading the
+// object the renderer HELD while the window drew the one it had been GIVEN.
+type buttonRenderer struct {
+	button *Button
+	holder *fyne.Container
+}
+
+func (r *buttonRenderer) Layout(size fyne.Size) {
+	r.holder.Resize(size)
+	r.holder.Move(fyne.NewPos(0, 0))
+}
+
+func (r *buttonRenderer) MinSize() fyne.Size { return r.holder.MinSize() }
+
+func (r *buttonRenderer) Refresh() {
+	face := paint.ButtonFace(paint.ButtonLook{
+		Label:    r.button.Text,
+		Icon:     r.button.Icon,
+		Leading:  r.button.Leading,
+		Plain:    r.button.Plain,
+		Focused:  r.button.keyboardIsHere,
+		Disabled: r.button.Disabled(),
+	})
+	if r.holder == nil {
+		r.holder = container.NewStack(face)
 		return
 	}
-	b.Button.TypedKey(event)
+	r.holder.Objects = []fyne.CanvasObject{face}
+	r.holder.Refresh()
 }
+
+func (r *buttonRenderer) Objects() []fyne.CanvasObject { return []fyne.CanvasObject{r.holder} }
+
+func (r *buttonRenderer) Destroy() {}

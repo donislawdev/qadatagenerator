@@ -103,10 +103,9 @@ func New(screens []Screen) *Shell {
 func (s *Shell) button(index int) *parts.Button {
 	button := parts.NewButton(s.screens[index].Name, func() { s.Open(index) })
 	if name := s.screens[index].Icon; name != "" {
-		button.ShowIcon(name)
 		// The icon leads the words, which is the order every column of
 		// places to go is read in and the order the accepted drawing has.
-		button.IconPlacement = widget.ButtonIconLeadingText
+		button.ShowIcon(name)
 	}
 	// 🔴 The names line up down the left edge rather than being centred, which
 	// is what the toolkit does when nobody says otherwise.
@@ -117,7 +116,10 @@ func (s *Shell) button(index int) *parts.Button {
 	// lengths started at five different places and the column read as ragged
 	// rather than as a list. The accepted drawing aligns them left, and so does
 	// every list of places to go that anybody has seen before.
-	button.Alignment = widget.ButtonAlignLeading
+	button.Leading = true
+	// No edge either. Five boxes down a column read as five boxes rather than
+	// as a list, and the mark of the current screen is what says where you are.
+	button.Plain = true
 	return button
 }
 
@@ -163,7 +165,6 @@ func (s *Shell) Open(index int) {
 	// What this does NOT change is the one thing worth protecting: these stay
 	// buttons. The comment on button above says why, and it is the keyboard.
 	for at, button := range s.buttons {
-		button.Importance = widget.LowImportance
 		s.items[at].show(at == index)
 		button.Refresh()
 	}

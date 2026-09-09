@@ -45,9 +45,16 @@ func TestEveryFloodedControlKeepsItsLabelReadable(t *testing.T) {
 	// measuring a pair that is not on screen.
 	onFocus := palette.Ink(palette.TextOnMark)
 
+	// 🔴 Counted across the whole walk rather than per state, changed
+	// 2026-09-09. It used to demand a flooded control in EVERY state, which was
+	// right while every screen had one: back then a state with none meant the
+	// walk had lost its way. Now that the button draws itself, the About screen
+	// genuinely has nothing the toolkit floods, and per state this would report
+	// a screen for being CORRECT. The thing worth refusing is a walk that found
+	// nothing anywhere, and that is what this counts.
+	found := 0
 	for _, state := range All() {
 		content := Assemble(i18n.English, data, state)
-		found := 0
 		walkTree(content, false, func(object fyne.CanvasObject, dressed bool) {
 			name, flooded := floodedControl(object)
 			if !flooded {
@@ -110,10 +117,11 @@ func TestEveryFloodedControlKeepsItsLabelReadable(t *testing.T) {
 					"keyboard, so nothing changed when it gained focus", state.Name, name)
 			}
 		})
-		if found == 0 {
-			t.Errorf("state %q holds no flooded control at all, so this walk passed by "+
-				"walking nothing", state.Name)
-		}
+	}
+	if found == 0 {
+		t.Error("no state of any screen holds a control the toolkit floods, so this walk " +
+			"passed by walking nothing. Either every control now draws itself, in which case " +
+			"delete this guard, or the walk stopped finding them")
 	}
 }
 
@@ -126,8 +134,21 @@ func TestEveryFloodedControlKeepsItsLabelReadable(t *testing.T) {
 // a bare toolkit control catching one if a menu ever arrives.
 func floodedControl(object fyne.CanvasObject) (string, bool) {
 	switch typed := object.(type) {
-	case *parts.Button:
-		return fmt.Sprintf("the button %q", typed.Text), true
+	// 🔴 parts.Button is NOT here since 2026-09-09, and its absence is the
+	// finding rather than an omission.
+	//
+	// This guard is about one thing the toolkit does: it FLOODS a focused
+	// control with the focus colour, so whatever is written on that control has
+	// to change ink or become unreadable at 1.56. That is a fact about controls
+	// the toolkit draws. parts.Button draws its own face now, is never flooded,
+	// and paints its own focus ring, so asking it to change ink on focus would
+	// be demanding a repair for damage nobody does to it - and the guard said
+	// exactly that when the button moved: "paints its label the same colour
+	// with and without the keyboard".
+	//
+	// It stays listed for parts.Select, which is still the toolkit's chooser
+	// underneath and still gets flooded. When that one draws itself too, this
+	// guard has nothing left to ask about and goes with it.
 	case *parts.Select:
 		return fmt.Sprintf("the chooser %q", typed.Selected), true
 	case *widget.Button:
