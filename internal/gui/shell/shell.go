@@ -25,6 +25,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
@@ -64,9 +65,36 @@ type Screen struct {
 	OnDropped func([]fyne.URI)
 }
 
+// Brand is the product's name at the head of the column and its promise at the
+// foot, which the accepted drawing has and the window did not until 2026-09-09.
+//
+// # Why the frame is told these rather than reaching for them
+//
+// The version lives in a package the window has no business importing, and the
+// words are a translator's. Handing both in keeps this frame buildable in a
+// test with neither, which is the same reason every screen is handed its
+// readers rather than opening its own files.
+//
+// # Why they are worth the room they take
+//
+// The name says which program this is, which a window with one title bar and
+// four screens does not otherwise say once anybody maximises it. The promise
+// under it is the one sentence about this tool that is true before a person
+// presses anything, and the foot of the column is where somebody looks while
+// deciding whether to trust a window at all.
+type Brand struct {
+	// Name is the product's name and Mark the icon beside it.
+	Name string
+	Mark string
+	// Version is what this build is, and Promise what it does not do.
+	Version string
+	Promise string
+}
+
 // Shell is the frame and which screen is showing.
 type Shell struct {
 	screens []Screen
+	brand   Brand
 	buttons []*parts.Button
 	items   []*item
 	body    *fyne.Container
@@ -80,8 +108,8 @@ type Shell struct {
 }
 
 // New builds the frame around the screens, showing the first one.
-func New(screens []Screen) *Shell {
-	frame := &Shell{screens: screens, body: container.NewStack(), title: parts.Title("")}
+func New(screens []Screen, brand Brand) *Shell {
+	frame := &Shell{screens: screens, brand: brand, body: container.NewStack(), title: parts.Title("")}
 	for index := range screens {
 		button := frame.button(index)
 		frame.buttons = append(frame.buttons, button)
@@ -298,8 +326,65 @@ func (s *Shell) column() fyne.CanvasObject {
 		group = s.screens[at].Group
 		items = append(items, s.items[at].onScreen)
 	}
-	return container.New(fixedWidth{width: palette.SidebarWidth}, container.NewVBox(items...))
+	// The promise goes under the last name rather than beside it, because it
+	// belongs to the program and not to the screen above it.
+	if s.brand.Promise != "" {
+		items = append(items, paint.Pad(palette.NameStepHairline, palette.NameStepHairline,
+			palette.NameStepTight, palette.NameStepHairline,
+			paint.Text(s.footnote(), palette.TypeLabel, palette.TextSecondary)))
+	}
+	column := container.NewVBox(items...)
+	// 🔴 A border rather than another entry in the column, because the mark has
+	// to stay at the top while the names below it grow. A column of the toolkit
+	// gives every child its minimum height, so the spacer that pushes About to
+	// the foot would have nothing to push against if the mark were one of them.
+	whole := fyne.CanvasObject(column)
+	if mark := s.brandMark(); mark != nil {
+		whole = container.New(layout.NewBorderLayout(mark, nil, nil, nil), mark, column)
+	}
+	return container.New(fixedWidth{width: palette.SidebarWidth}, whole)
 }
+
+// brandMark is the product's name at the head of the column, or nothing when
+// the frame was not given one.
+//
+// The tile carries the accent, which is the one place on this screen where the
+// accent says "this is the program" rather than "this is the action". It is the
+// same shape the accepted drawing has: a rounded square of the fill colour with
+// the mark on it, and the name beside it at the weight a name is read first at.
+func (s *Shell) brandMark() fyne.CanvasObject {
+	if s.brand.Name == "" {
+		return nil
+	}
+	row := []fyne.CanvasObject{}
+	if s.brand.Mark != "" {
+		tile := paint.On(paint.Fill(palette.FillPrimary, palette.RadiusControl),
+			container.NewCenter(paint.Icon(s.brand.Mark, palette.TextOnFill, palette.IconSmall)))
+		row = append(row, paint.AtLeast(palette.ControlHeight, palette.ControlHeight, tile))
+	}
+	row = append(row, paint.Middle(paint.Strong(s.brand.Name, palette.TypeBody, palette.TextPrimary)))
+	return paint.Pad(palette.NameStepHairline, palette.NameStepSection,
+		palette.NameStepHairline, palette.NameStepHairline,
+		paint.Row(palette.NameStepRelated, row...))
+}
+
+// footnote is the version and the promise on one line.
+//
+// Joined here rather than by whoever built the frame, because the separator
+// between them is a matter of how the line is drawn and not of what it says. A
+// translator writing it into the words would have every language carrying this
+// window's punctuation.
+func (s *Shell) footnote() string {
+	if s.brand.Version == "" {
+		return s.brand.Promise
+	}
+	return s.brand.Version + brandSeparator + s.brand.Promise
+}
+
+// brandSeparator is what stands between the version and the promise. A middle
+// dot rather than a dash, since DEC-34 leaves this window one dash and it is
+// the one inside words.
+const brandSeparator = "  ·  "
 
 // heading is one group name, drawn quieter than the names it groups.
 //

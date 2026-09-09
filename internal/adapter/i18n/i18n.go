@@ -47,6 +47,12 @@ const (
 	// The headings the column groups its names under, added on 2026-09-08 with
 	// DEC-225. They say what a person came to do rather than what the screens
 	// are, which is the whole point of the order they now sit in.
+	// The promise under the product's name at the foot of the column, added
+	// 2026-09-09. It is the one sentence about this tool that is true before
+	// anybody presses anything, and the accepted drawing puts it where a person
+	// looks while deciding whether to trust the window at all.
+	SidebarOffline Key = "sidebar.offline"
+
 	SidebarGroupMake  Key = "sidebar.group.make"
 	SidebarGroupCheck Key = "sidebar.group.check"
 )
@@ -534,7 +540,7 @@ const (
 // from the side the code is on.
 var Keys = []Key{
 	WindowTitle, ScreenAbout, ScreenManifest, ScreenTake, ScreenRecipe, ScreenQuick,
-	SidebarGroupMake, SidebarGroupCheck,
+	SidebarGroupMake, SidebarGroupCheck, SidebarOffline,
 
 	QuickNothingWritten, QuickLabelValue, QuickValueHeading, QuickValuesCounted,
 	QuickAboutProduces, QuickAboutCheckDigit, QuickAboutRange,

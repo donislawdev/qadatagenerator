@@ -16,6 +16,10 @@ window.title: QA Data Generator
 sidebar.group.make: Make data
 sidebar.group.check: Check a result
 
+# What this build promises before anybody presses anything. It stands under the
+# product's name at the foot of the column, beside the version.
+sidebar.offline: fully offline
+
 screen.about: About
 screen.manifest: Manifest browser
 screen.take: Take and corrupt

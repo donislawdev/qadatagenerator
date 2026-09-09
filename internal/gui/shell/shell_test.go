@@ -3,12 +3,15 @@ package shell
 import (
 	"image/color"
 	"os"
+	"strings"
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
@@ -34,7 +37,7 @@ func screens() []Screen {
 // A window that starts empty looks like one that failed to load, and a person
 // meeting it has no way to tell those apart.
 func TestTheFrameOpensOnTheFirstScreen(t *testing.T) {
-	frame := New(screens())
+	frame := New(screens(), Brand{})
 	showing, any := frame.Showing()
 	if !any {
 		t.Fatal("the frame shows no screen at all")
@@ -48,7 +51,7 @@ func TestTheFrameOpensOnTheFirstScreen(t *testing.T) {
 // screen.
 func TestEveryScreenCanBeOpenedByItsName(t *testing.T) {
 	all := screens()
-	frame := New(all)
+	frame := New(all, Brand{})
 	if len(frame.buttons) != len(all) {
 		t.Fatalf("%d screens have %d names to press", len(all), len(frame.buttons))
 	}
@@ -71,7 +74,7 @@ func TestEveryScreenCanBeOpenedByItsName(t *testing.T) {
 // into a window showing nothing, which reads to a person as the program having
 // crashed.
 func TestAskingForAScreenThatIsNotThereChangesNothing(t *testing.T) {
-	frame := New(screens())
+	frame := New(screens(), Brand{})
 	frame.Open(1)
 	for _, absent := range []int{-1, len(screens())} {
 		frame.Open(absent)
@@ -109,7 +112,7 @@ func TestTheColumnOfNamesKeepsOneWidth(t *testing.T) {
 // A frame built with no screens at all shows nothing and says so, rather than
 // pretending there is a screen to open.
 func TestAFrameWithNoScreensSaysThereIsNothingShowing(t *testing.T) {
-	frame := New(nil)
+	frame := New(nil, Brand{})
 	if _, any := frame.Showing(); any {
 		t.Error("a frame built with no screens claims to be showing one")
 	}
@@ -132,7 +135,7 @@ func TestTheKeyboardMeetsTheNamesBeforeTheScreen(t *testing.T) {
 	frame := New([]Screen{
 		{Name: "Manifest browser", Content: inside},
 		{Name: "About", Content: widget.NewLabel("the about screen")},
-	})
+	}, Brand{})
 
 	window := test.NewWindow(frame.Content())
 	defer window.Close()
@@ -187,7 +190,7 @@ var importancePaints = map[widget.Importance]string{
 // the register above says where that list was read.
 func TestTheOpenScreenIsMarkedByAShapeRatherThanByColourAlone(t *testing.T) {
 	all := screens()
-	frame := New(all)
+	frame := New(all, Brand{})
 
 	for index := range all {
 		frame.Open(index)
@@ -228,4 +231,70 @@ func TestTheOpenScreenIsMarkedByAShapeRatherThanByColourAlone(t *testing.T) {
 			_ = button
 		}
 	}
+}
+
+// The product's name and its promise are on screen, and neither is there when
+// the frame was not given one.
+//
+// 🔴 Both halves, and the second is the one worth having. A frame that always
+// drew a mark would pass the first half while making every test window carry a
+// brand nobody asked it for, and the two call sites that build this frame are
+// not the only things that build it: every test in this package does.
+//
+// The words come from the caller rather than from here for the reason the type
+// says: the version lives in a package this frame has no business importing and
+// the wording belongs to a translator. So this asks that what it was handed
+// reaches the screen, which is the only part of it this package decides.
+func TestTheProductSaysWhatItIsAndWhatItPromises(t *testing.T) {
+	frame := New(screens(), Brand{
+		Name:    "QA Data Generator",
+		Mark:    paint.IconBolt,
+		Version: "v9.9.9",
+		Promise: "fully offline",
+	})
+	drawn := spokenIn(frame.Content())
+
+	for _, want := range []string{"QA Data Generator", "v9.9.9", "fully offline"} {
+		if !strings.Contains(drawn, want) {
+			t.Errorf("the frame does not say %q anywhere, so the brand it was handed went nowhere", want)
+		}
+	}
+	// The version and the promise are one line rather than two, which is what
+	// makes them read as one note about the build instead of two facts stacked.
+	if !strings.Contains(drawn, "v9.9.9"+brandSeparator+"fully offline") {
+		t.Error("the version and the promise are not joined into one line")
+	}
+
+	bare := spokenIn(New(screens(), Brand{}).Content())
+	if strings.Contains(bare, brandSeparator) {
+		t.Error("a frame given no brand still draws the line that separates its parts")
+	}
+}
+
+// spokenIn is every word drawn anywhere in this object.
+//
+// A walk of the tree rather than a look at the fields, because what this asks
+// is whether the words REACH the screen, and a field holding them proves only
+// that somebody stored them.
+func spokenIn(object fyne.CanvasObject) string {
+	var said strings.Builder
+	var walk func(fyne.CanvasObject)
+	walk = func(node fyne.CanvasObject) {
+		switch typed := node.(type) {
+		case *canvas.Text:
+			said.WriteString(typed.Text + "\n")
+		case *widget.Label:
+			said.WriteString(typed.Text + "\n")
+		case *fyne.Container:
+			for _, child := range typed.Objects {
+				walk(child)
+			}
+		case fyne.Widget:
+			for _, child := range test.WidgetRenderer(typed).Objects() {
+				walk(child)
+			}
+		}
+	}
+	walk(object)
+	return said.String()
 }

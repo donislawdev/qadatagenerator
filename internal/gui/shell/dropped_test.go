@@ -21,7 +21,7 @@ func screensWithTargets(t *testing.T) (*Shell, *dropTarget, *dropTarget) {
 		{Name: "first", Content: widget.NewLabel("first"), OnDropped: first.take},
 		{Name: "second", Content: widget.NewLabel("second"), OnDropped: second.take},
 		{Name: "third", Content: widget.NewLabel("third")},
-	}), first, second
+	}, Brand{}), first, second
 }
 
 func dropped() []fyne.URI {

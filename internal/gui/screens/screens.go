@@ -266,7 +266,16 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 		Content: view.Content()}
 	column[screenAbout] = shell.Screen{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,
 		Content: about.Content(text, license.Current(), version.Current(), nil, nil)}
-	frame := shell.New(column)
+	// The same brand the program carries, so a render shows what a person sees.
+	// This copy of the list has been wrong about the sidebar once already: it
+	// carried icons the program did not, and every picture anybody looked at
+	// showed them.
+	frame := shell.New(column, shell.Brand{
+		Name:    text.T(i18n.WindowTitle),
+		Mark:    paint.IconBolt,
+		Version: "v" + version.Current().Tool,
+		Promise: text.T(i18n.SidebarOffline),
+	})
 	settleQuick(quickScreen, state.Quick)
 	if state.Into != "" {
 		recipeScreen.SetOut(state.Into)

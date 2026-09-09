@@ -229,5 +229,17 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 		{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,
 			Content: about.Content(text, license.Current(), version.Current(),
 				saveReport(window), assets.Notice)},
+	}, shell.Brand{
+		// The same name the window carries in its title bar, from the same key,
+		// so the two can never say different things.
+		Name: text.T(i18n.WindowTitle),
+		Mark: paint.IconBolt,
+		// The tool's own version and not the catalog's or the manifest's. This
+		// window has four version numbers behind it and the About screen names
+		// them all, which is the right place for that: here there is room for
+		// one, and the one somebody means by "which version is this" is the
+		// program's.
+		Version: "v" + version.Current().Tool,
+		Promise: text.T(i18n.SidebarOffline),
 	})
 }
