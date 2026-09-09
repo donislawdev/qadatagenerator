@@ -33,6 +33,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/quickview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/recipeview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/shell"
@@ -196,12 +197,37 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 	// that read come after the screens that make, and About goes last because
 	// it answers a question nobody has while working.
 	making, checking := text.T(i18n.SidebarGroupMake), text.T(i18n.SidebarGroupCheck)
+	// 🔴 The icons are here because they were NOT, from the day the sidebar
+	// gained them until 2026-09-09, and nothing said so.
+	//
+	// This list exists twice. The other copy is in internal/gui/screens, which
+	// is what the probe that renders every screen state builds from, and it has
+	// carried an icon per screen since the day they were drawn. This one had
+	// none. So every render anybody looked at showed a column of five names
+	// with an icon each, and the program showed five names with a gap where the
+	// icon would be - which is worse than no gap at all, because the space is
+	// reserved by the same layout either way.
+	//
+	// It survived because the fault is an ABSENCE on a surface nobody
+	// photographs: the tests read the probe's copy, the renders come from the
+	// probe's copy, and the only way to see this one is to run the binary and
+	// look. The owner did, and asked why the program looks worse than the
+	// drawing. This was most of the answer.
+	//
+	// TestEverySidebarScreenCarriesAnIcon reads both copies out of the source
+	// and refuses either one going bare, so the register is closed in the only
+	// way two lists in two packages can be.
 	return shell.New([]shell.Screen{
-		{Name: text.T(i18n.ScreenQuick), Group: making, Content: value.Content()},
-		{Name: text.T(i18n.ScreenTake), Group: making, Content: damage.Content(), OnDropped: damage.Dropped},
-		{Name: text.T(i18n.ScreenRecipe), Group: making, Content: editor.Content()},
-		{Name: text.T(i18n.ScreenManifest), Group: checking, Content: browser.Content()},
-		{Name: text.T(i18n.ScreenAbout), Content: about.Content(text, license.Current(), version.Current(),
-			saveReport(window), assets.Notice)},
+		{Name: text.T(i18n.ScreenQuick), Group: making, Icon: paint.IconBolt,
+			Content: value.Content()},
+		{Name: text.T(i18n.ScreenTake), Group: making, Icon: paint.IconBreak,
+			Content: damage.Content(), OnDropped: damage.Dropped},
+		{Name: text.T(i18n.ScreenRecipe), Group: making, Icon: paint.IconRecipe,
+			Content: editor.Content()},
+		{Name: text.T(i18n.ScreenManifest), Group: checking, Icon: paint.IconChecklist,
+			Content: browser.Content()},
+		{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,
+			Content: about.Content(text, license.Current(), version.Current(),
+				saveReport(window), assets.Notice)},
 	})
 }

@@ -112,6 +112,7 @@ var toolGuards = []Guard{
 	{"the window takes every colour and every distance from the theme", "TestTheWindowTakesEveryValueFromTheTheme", "internal/guard", ByProbe},
 	{"the scanner sees a value the window wrote for itself", "TestTheLiteralGuardFiresOnTheViewAndNotOnTheTheme", "internal/guard", ByProbe},
 	{"the scanner sees a layout and a widget the window wrote for itself", "TestTheHandmadeGuardSeesBothKindsAndIsLoudWhenThereIsNothingToRead", "internal/guard", ByProbe},
+	{"the scanner sees a sidebar entry built without an icon, in either of the two shapes the two copies write", "TestTheSidebarGuardSeesABareScreenAndIsLoudWhenThereIsNothingToRead", "internal/guard", ByProbe},
 	{"a window that is gone is reported rather than read as clean", "TestTheLiteralGuardIsLoudWhenTheWindowIsGone", "internal/guard", ByProbe},
 	{"the theme is exempt by the list and not by its name", "TestTheThemeIsExemptByTheListAndNotByItsName", "internal/guard", ByProbe},
 	{"a spacing step survives the scaling factors a desktop applies", "TestEveryStepSurvivesTheCommonScalingFactors", "internal/gui/theme", ByMutation},
