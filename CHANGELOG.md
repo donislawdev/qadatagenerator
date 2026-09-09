@@ -21,6 +21,10 @@ repository once they are released.
   panel of generators on the recipe screen used to draw the toolkit's arrow,
   which came from another set and read as a piece of a different program.
 
+- **Controls in a row are now the same height.** A text field used to be four
+  pixels shorter than the chooser beside it, which read as one of them being
+  wrong rather than as a small difference.
+
 - **The Quick value screen has been rebuilt.** The values are a numbered list you
   can read down rather than one block of text, every other row is shaded so your
   eye does not slip between them, and the list grows with the window. The

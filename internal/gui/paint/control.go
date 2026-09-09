@@ -4,7 +4,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 
-	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	theme "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
@@ -52,7 +51,7 @@ func ButtonFace(label, icon string, filled bool, width float32) fyne.CanvasObjec
 	}
 	row = append(row, Middle(Text(label, theme.TypeBody, ink)))
 
-	inner := container.NewCenter(parts.Row(theme.NameStepTight, row...))
+	inner := container.NewCenter(Row(theme.NameStepTight, row...))
 	return AtLeast(width, theme.ControlHeight, On(ground, inner))
 }
 

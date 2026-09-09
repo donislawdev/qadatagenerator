@@ -97,7 +97,8 @@ func NewSelect(options []string, changed func(string)) *Select {
 	chooser.OnChanged = changed
 	chooser.PlaceHolder = widget.NewSelect(nil, nil).PlaceHolder
 	chooser.ExtendBaseWidget(chooser)
-	chooser.onScreen, chooser.edge = Outlined(Flooded(chooser, chooser.hasKeyboard))
+	dressed, edge := Outlined(Flooded(chooser, chooser.hasKeyboard))
+	chooser.onScreen, chooser.edge = standing(dressed), edge
 	chooser.markEdge()
 	return chooser
 }

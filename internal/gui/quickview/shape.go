@@ -10,7 +10,6 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
-	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/quick"
 )
@@ -62,7 +61,7 @@ func (v *View) shape(settings, body, command fyne.CanvasObject) fyne.CanvasObjec
 // to the settings anyway: it says what pressing them will not cost you.
 func (v *View) settingsBand(fields fyne.CanvasObject) fyne.CanvasObject {
 	return paint.Band(paint.BandBelow, palette.NameStepGroup, palette.NameStepMajor,
-		parts.Column(palette.NameStepGroup,
+		paint.Column(palette.NameStepGroup,
 			paint.Text(v.text.T(i18n.QuickNothingWritten), palette.TypeBody, palette.TextSecondary),
 			fields))
 }
@@ -144,7 +143,7 @@ func valueRow(number, digits int, value string, banded bool) fyne.CanvasObject {
 	index := paint.Mono(fmt.Sprintf("%*d", digits, number), palette.TypeLabel, palette.TextSecondary)
 	index.Alignment = fyne.TextAlignTrailing
 
-	inner := parts.Row(palette.NameStepGroup,
+	inner := paint.Row(palette.NameStepGroup,
 		paint.Middle(index),
 		paint.Middle(paint.Mono(value, palette.TypeValue, palette.TextPrimary)))
 
@@ -158,7 +157,7 @@ func valueRow(number, digits int, value string, banded bool) fyne.CanvasObject {
 // what somebody would say out loud and "Values (10)" is what a form would say.
 func (v *View) heading(count int) fyne.CanvasObject {
 	return paint.SectionHeading(v.countedValues(count),
-		parts.Row(palette.NameStepTight, v.copy, v.again.OnScreen()))
+		paint.Row(palette.NameStepTight, v.copy, v.again.OnScreen()))
 }
 
 // countedValues is the heading of the card, which says how many are under it.
@@ -197,7 +196,7 @@ func dated(field fyne.CanvasObject) fyne.CanvasObject {
 	// because it is two margins and not one margin twice, which is the same
 	// reason the card of values states its own chrome that way.
 	margin := palette.StepOf(palette.NameStepRelated)
-	return paint.AtLeast(room.Width+margin+margin, 0, field)
+	return paint.AtLeast(room.Width+margin+margin, palette.ControlHeight, field)
 }
 
 // answer is the middle of the screen: the values, or what is said instead.
@@ -240,7 +239,7 @@ func (v *View) answer() fyne.CanvasObject {
 	}
 	heading := paint.Pad(palette.NameStepHairline, palette.NameStepRelated,
 		palette.NameStepHairline, palette.NameStepHairline,
-		parts.Column(palette.NameStepTight, top...))
+		paint.Column(palette.NameStepTight, top...))
 
 	return container.New(layout.NewBorderLayout(heading, nil, nil, nil),
 		heading, v.valuesCard(v.values))

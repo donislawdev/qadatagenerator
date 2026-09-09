@@ -221,17 +221,30 @@ func (r *primaryRenderer) Layout(size fyne.Size) {
 	r.label.Move(fyne.NewPos(0, (size.Height-height)/2))
 }
 
-// MinSize is the label plus the room the toolkit's own button gives its label.
+// MinSize is the label plus the room the toolkit's own button gives its label,
+// never shorter than every other control in this window.
 //
-// The same arithmetic as buttonRenderer.MinSize at widget/button.go:303, which
-// is the label size plus its padding, and the padding is the inner padding of
-// the theme on every side. Room chosen here instead would put this button at a
-// different height from the outlined ones it stands beside, and a row of
-// buttons of two heights reads as a mistake before it reads as a hierarchy.
+// The width is the same arithmetic as buttonRenderer.MinSize at
+// widget/button.go:303, which is the label size plus its padding.
+//
+// 🔴 The height is the scale's rather than the label's, and the reason is the
+// sentence that used to stand here. It said room chosen here would put this
+// button at a different height from the outlined ones beside it, which was
+// true and stopped being true the moment those gained a floor of their own on
+// 2026-09-09. Keeping the arithmetic would have produced exactly the fault the
+// sentence warned about, with the warning still written above it: the one
+// filled button 28 tall in a row of 34s.
+//
+// The floor is a maximum rather than a replacement, so a label too long for
+// the scale still gets the room it needs instead of being clipped.
 func (r *primaryRenderer) MinSize() fyne.Size {
 	room := 2 * beneath().Size(toolkit.SizeNameInnerPadding)
 	size := r.label.MinSize()
-	return fyne.NewSize(size.Width+2*room, size.Height+room)
+	height := size.Height + room
+	if height < palette.ControlHeight {
+		height = palette.ControlHeight
+	}
+	return fyne.NewSize(size.Width+2*room, height)
 }
 
 // Refresh settles every colour from the palette and the state of the button.

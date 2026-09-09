@@ -537,8 +537,8 @@ func (v *View) showRows(generator string) {
 	// shape() in this package warns about exactly that, and it was written one
 	// function before this one was got wrong, which is the whole argument for
 	// deriving these numbers from tools/klawiatura rather than from reading.
-	settings := parts.Row(palette.NameStepRelated, fixed...)
-	seed := labelled(v.text.T(i18n.QuickLabelSeed), v.seedBox)
+	settings := paint.Row(palette.NameStepRelated, fixed...)
+	seed := labelled(v.text.T(i18n.QuickLabelSeed), parts.Standing(v.seedBox))
 	v.settings.Objects = []fyne.CanvasObject{
 		container.New(layout.NewBorderLayout(nil, nil, settings, nil), settings, seed),
 	}

@@ -7,7 +7,6 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
-	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/quick"
 )
@@ -39,7 +38,7 @@ func (v *View) aside(generator string) fyne.CanvasObject {
 	about := quick.Describe(generator, v.locale)
 
 	blocks := []fyne.CanvasObject{
-		parts.Row(palette.NameStepTight,
+		paint.Row(palette.NameStepTight,
 			paint.Middle(paint.Icon(paint.IconBolt, palette.TextAccent, palette.IconMedium)),
 			paint.Middle(paint.Strong(about.Generator, palette.TypeSection, palette.TextPrimary))),
 		v.fact(i18n.QuickAboutProduces, produces(about)),
@@ -58,7 +57,7 @@ func (v *View) aside(generator string) fyne.CanvasObject {
 	}
 
 	return paint.AtLeast(palette.AsideWidth, 0,
-		paint.Card(palette.NameStepGroup, parts.Column(palette.NameStepGroup, blocks...)))
+		paint.Card(palette.NameStepGroup, paint.Column(palette.NameStepGroup, blocks...)))
 }
 
 // produces is what this kind makes, and the scheme behind it where there is one.
@@ -79,7 +78,7 @@ func (v *View) checkDigit(about quick.Description) fyne.CanvasObject {
 	if about.CheckDigit {
 		said = i18n.QuickAboutCheckDigitCarried
 	}
-	return parts.Column(palette.NameStepHairline,
+	return paint.Column(palette.NameStepHairline,
 		paint.Caption(v.text.T(i18n.QuickAboutCheckDigit)),
 		v.paragraph(v.text.T(said)))
 }
@@ -99,8 +98,8 @@ func (v *View) reservedRange(about quick.Description) fyne.CanvasObject {
 		said, mark = i18n.QuickAboutRangeReserved, paint.Pill(
 			v.text.T(i18n.QuickAboutHarbour), palette.StateSuccess, paint.IconShield)
 	}
-	return parts.Column(palette.NameStepHairline,
-		parts.Row(palette.NameStepHairline, mark, paint.Spacer()),
+	return paint.Column(palette.NameStepHairline,
+		paint.Row(palette.NameStepHairline, mark, paint.Spacer()),
 		v.paragraph(v.text.T(said)))
 }
 
@@ -110,7 +109,7 @@ func (v *View) reservedRange(about quick.Description) fyne.CanvasObject {
 // The reason comes from the mode rather than from here, so a kind that gains
 // data stops saying it has none without anybody editing a sentence.
 func (v *View) unavailable(about quick.Description) fyne.CanvasObject {
-	return parts.Column(palette.NameStepHairline,
+	return paint.Column(palette.NameStepHairline,
 		paint.Caption(v.text.T(i18n.QuickAboutUnavailable)),
 		v.paragraph(about.Unavailable))
 }
@@ -118,7 +117,7 @@ func (v *View) unavailable(about quick.Description) fyne.CanvasObject {
 // fact is a caption over one short value, for the lines that are a word rather
 // than a sentence.
 func (v *View) fact(name i18n.Key, value string) fyne.CanvasObject {
-	return parts.Column(palette.NameStepHairline,
+	return paint.Column(palette.NameStepHairline,
 		paint.Caption(v.text.T(name)),
 		paint.Mono(value, palette.TypeBody, palette.TextPrimary))
 }

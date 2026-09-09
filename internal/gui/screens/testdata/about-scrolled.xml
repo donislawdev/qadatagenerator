@@ -7,87 +7,102 @@
 						<widget size="220x22" type="*widget.RichText">
 							<text pos="4,4" size="58x14" textSize="11">MAKE DATA</text>
 						</widget>
-						<container pos="0,22" size="220x28">
-							<widget size="220x28" type="*container.ThemeOverride">
-								<container size="220x28">
-									<widget size="220x28" type="*parts.Button">
-										<rectangle radius="5" size="220x28"/>
-										<rectangle size="220x28"/>
-										<widget pos="4,5" size="70x16" type="*widget.RichText">
-											<text alignment="center" bold size="70x16">Quick value</text>
+						<container pos="0,22" size="220x34">
+							<rectangle size="220x34"/>
+							<container size="220x34">
+								<widget size="220x34" type="*container.ThemeOverride">
+									<container size="220x34">
+										<widget size="220x34" type="*parts.Button">
+											<rectangle radius="5" size="220x34"/>
+											<rectangle size="220x34"/>
+											<widget pos="4,8" size="70x16" type="*widget.RichText">
+												<text alignment="center" bold size="70x16">Quick value</text>
+											</widget>
 										</widget>
-									</widget>
+									</container>
+								</widget>
+								<container size="220x34">
 								</container>
-							</widget>
-							<container size="220x28">
 							</container>
 						</container>
-						<container pos="0,50" size="220x28">
-							<widget size="220x28" type="*container.ThemeOverride">
-								<container size="220x28">
-									<widget size="220x28" type="*parts.Button">
-										<rectangle radius="5" size="220x28"/>
-										<rectangle size="220x28"/>
-										<widget pos="4,5" size="101x16" type="*widget.RichText">
-											<text alignment="center" bold size="101x16">Take and corrupt</text>
+						<container pos="0,56" size="220x34">
+							<rectangle size="220x34"/>
+							<container size="220x34">
+								<widget size="220x34" type="*container.ThemeOverride">
+									<container size="220x34">
+										<widget size="220x34" type="*parts.Button">
+											<rectangle radius="5" size="220x34"/>
+											<rectangle size="220x34"/>
+											<widget pos="4,8" size="101x16" type="*widget.RichText">
+												<text alignment="center" bold size="101x16">Take and corrupt</text>
+											</widget>
 										</widget>
-									</widget>
+									</container>
+								</widget>
+								<container size="220x34">
 								</container>
-							</widget>
-							<container size="220x28">
 							</container>
 						</container>
-						<container pos="0,78" size="220x28">
-							<widget size="220x28" type="*container.ThemeOverride">
-								<container size="220x28">
-									<widget size="220x28" type="*parts.Button">
-										<rectangle radius="5" size="220x28"/>
-										<rectangle size="220x28"/>
-										<widget pos="4,5" size="41x16" type="*widget.RichText">
-											<text alignment="center" bold size="41x16">Recipe</text>
+						<container pos="0,90" size="220x34">
+							<rectangle size="220x34"/>
+							<container size="220x34">
+								<widget size="220x34" type="*container.ThemeOverride">
+									<container size="220x34">
+										<widget size="220x34" type="*parts.Button">
+											<rectangle radius="5" size="220x34"/>
+											<rectangle size="220x34"/>
+											<widget pos="4,8" size="41x16" type="*widget.RichText">
+												<text alignment="center" bold size="41x16">Recipe</text>
+											</widget>
 										</widget>
-									</widget>
+									</container>
+								</widget>
+								<container size="220x34">
 								</container>
-							</widget>
-							<container size="220x28">
 							</container>
 						</container>
-						<widget pos="0,106" size="220x22" type="*widget.RichText">
+						<widget pos="0,124" size="220x22" type="*widget.RichText">
 							<text pos="4,4" size="85x14" textSize="11">CHECK A RESULT</text>
 						</widget>
-						<container pos="0,128" size="220x28">
-							<widget size="220x28" type="*container.ThemeOverride">
-								<container size="220x28">
-									<widget size="220x28" type="*parts.Button">
-										<rectangle radius="5" size="220x28"/>
-										<rectangle size="220x28"/>
-										<widget pos="4,5" size="104x16" type="*widget.RichText">
-											<text alignment="center" bold size="104x16">Manifest browser</text>
+						<container pos="0,146" size="220x34">
+							<rectangle size="220x34"/>
+							<container size="220x34">
+								<widget size="220x34" type="*container.ThemeOverride">
+									<container size="220x34">
+										<widget size="220x34" type="*parts.Button">
+											<rectangle radius="5" size="220x34"/>
+											<rectangle size="220x34"/>
+											<widget pos="4,8" size="104x16" type="*widget.RichText">
+												<text alignment="center" bold size="104x16">Manifest browser</text>
+											</widget>
 										</widget>
-									</widget>
+									</container>
+								</widget>
+								<container size="220x34">
 								</container>
-							</widget>
-							<container size="220x28">
 							</container>
 						</container>
-						<spacer pos="0,156" size="220x711"/>
-						<widget pos="0,868" size="220x4" type="*widget.Separator">
+						<spacer pos="0,180" size="220x681"/>
+						<widget pos="0,862" size="220x4" type="*widget.Separator">
 							<rectangle fillColor="separator" size="220x4"/>
 						</widget>
-						<container pos="0,872" size="220x28">
-							<widget size="220x28" type="*container.ThemeOverride">
-								<container size="220x28">
-									<widget size="220x28" type="*parts.Button">
-										<rectangle radius="5" size="220x28"/>
-										<rectangle size="220x28"/>
-										<widget pos="24,5" size="36x20" type="*widget.RichText">
-											<text alignment="center" bold size="36x16">About</text>
+						<container pos="0,866" size="220x34">
+							<rectangle size="220x34"/>
+							<container size="220x34">
+								<widget size="220x34" type="*container.ThemeOverride">
+									<container size="220x34">
+										<widget size="220x34" type="*parts.Button">
+											<rectangle radius="5" size="220x34"/>
+											<rectangle size="220x34"/>
+											<widget pos="24,8" size="36x20" type="*widget.RichText">
+												<text alignment="center" bold size="36x16">About</text>
+											</widget>
+											<image fillMode="contain" pos="4,7" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
 										</widget>
-										<image fillMode="contain" pos="4,4" rsc="navigateNextIcon" size="iconInlineSize" themed="foreground"/>
-									</widget>
+									</container>
+								</widget>
+								<container size="220x34">
 								</container>
-							</widget>
-							<container size="220x28">
 							</container>
 						</container>
 					</container>
@@ -109,45 +124,51 @@
 						<container pos="24,24" size="1070x796">
 							<rectangle size="1070x796" strokeColor="rgba(78,201,245,255)" strokeWidth="2"/>
 							<widget size="1070x796" type="*parts.KeyScroll">
-								<container pos="0,-1505" size="1070x2302">
-									<container size="1070x28">
-										<container size="199x28">
-											<widget size="199x28" type="*container.ThemeOverride">
-												<container size="199x28">
-													<widget size="199x28" type="*parts.Button">
-														<rectangle fillColor="disabled button" radius="5" size="199x28"/>
-														<rectangle size="199x28"/>
-														<widget pos="4,5" size="191x16" type="*widget.RichText">
-															<text alignment="center" bold color="disabled" size="191x16">Save the licence report as JSON</text>
+								<container pos="0,-1511" size="1070x2308">
+									<container size="1070x34">
+										<container size="199x34">
+											<rectangle size="199x34"/>
+											<container size="199x34">
+												<widget size="199x34" type="*container.ThemeOverride">
+													<container size="199x34">
+														<widget size="199x34" type="*parts.Button">
+															<rectangle fillColor="disabled button" radius="5" size="199x34"/>
+															<rectangle size="199x34"/>
+															<widget pos="4,8" size="191x16" type="*widget.RichText">
+																<text alignment="center" bold color="disabled" size="191x16">Save the licence report as JSON</text>
+															</widget>
 														</widget>
-													</widget>
+													</container>
+												</widget>
+												<container size="199x34">
 												</container>
-											</widget>
-											<container size="199x28">
 											</container>
 										</container>
-										<container pos="199,0" size="193x28">
-											<widget size="193x28" type="*container.ThemeOverride">
-												<container size="193x28">
-													<widget size="193x28" type="*parts.Button">
-														<rectangle fillColor="disabled button" radius="5" size="193x28"/>
-														<rectangle size="193x28"/>
-														<widget pos="4,5" size="185x16" type="*widget.RichText">
-															<text alignment="center" bold color="disabled" size="185x16">Save the font and icon licences</text>
+										<container pos="199,0" size="193x34">
+											<rectangle size="193x34"/>
+											<container size="193x34">
+												<widget size="193x34" type="*container.ThemeOverride">
+													<container size="193x34">
+														<widget size="193x34" type="*parts.Button">
+															<rectangle fillColor="disabled button" radius="5" size="193x34"/>
+															<rectangle size="193x34"/>
+															<widget pos="4,8" size="185x16" type="*widget.RichText">
+																<text alignment="center" bold color="disabled" size="185x16">Save the font and icon licences</text>
+															</widget>
 														</widget>
-													</widget>
+													</container>
+												</widget>
+												<container size="193x34">
 												</container>
-											</widget>
-											<container size="193x28">
 											</container>
 										</container>
 									</container>
-									<widget pos="0,28" size="1070x24" type="*widget.Label">
+									<widget pos="0,34" size="1070x24" type="*widget.Label">
 										<widget size="1070x24" type="*widget.RichText">
 											<text bold pos="4,4" size="51x16">Versions</text>
 										</widget>
 									</widget>
-									<container pos="0,52" size="1070x99">
+									<container pos="0,58" size="1070x99">
 										<container size="1070x24">
 											<widget size="33x24" type="*widget.Label">
 												<widget size="33x24" type="*widget.RichText">
@@ -197,15 +218,15 @@
 											</widget>
 										</container>
 									</container>
-									<widget pos="0,152" size="1070x4" type="*widget.Separator">
+									<widget pos="0,158" size="1070x4" type="*widget.Separator">
 										<rectangle fillColor="separator" size="1070x4"/>
 									</widget>
-									<widget pos="0,156" size="1070x24" type="*widget.Label">
+									<widget pos="0,162" size="1070x24" type="*widget.Label">
 										<widget size="1070x24" type="*widget.RichText">
 											<text bold pos="4,4" size="52x16">Licenses</text>
 										</widget>
 									</widget>
-									<container pos="0,181" size="1070x74">
+									<container pos="0,187" size="1070x74">
 										<container size="1070x24">
 											<widget size="38x24" type="*widget.Label">
 												<widget size="38x24" type="*widget.RichText">
@@ -236,15 +257,15 @@
 											</widget>
 										</widget>
 									</container>
-									<widget pos="0,256" size="1070x4" type="*widget.Separator">
+									<widget pos="0,262" size="1070x4" type="*widget.Separator">
 										<rectangle fillColor="separator" size="1070x4"/>
 									</widget>
-									<widget pos="0,260" size="1070x24" type="*widget.Label">
+									<widget pos="0,266" size="1070x24" type="*widget.Label">
 										<widget size="1070x24" type="*widget.RichText">
 											<text bold pos="4,4" size="144x16">Third party components</text>
 										</widget>
 									</widget>
-									<container pos="0,285" size="1070x1793">
+									<container pos="0,291" size="1070x1793">
 										<container size="1070x49">
 											<container size="1070x24">
 												<widget size="101x24" type="*widget.Label">
@@ -1182,15 +1203,15 @@
 											</container>
 										</container>
 									</container>
-									<widget pos="0,2078" size="1070x4" type="*widget.Separator">
+									<widget pos="0,2084" size="1070x4" type="*widget.Separator">
 										<rectangle fillColor="separator" size="1070x4"/>
 									</widget>
-									<widget pos="0,2082" size="1070x24" type="*widget.Label">
+									<widget pos="0,2088" size="1070x24" type="*widget.Label">
 										<widget size="1070x24" type="*widget.RichText">
 											<text bold pos="4,4" size="93x16">Fonts and icons</text>
 										</widget>
 									</widget>
-									<container pos="0,2107" size="1070x99">
+									<container pos="0,2113" size="1070x99">
 										<container size="1070x49">
 											<container size="1070x24">
 												<widget size="213x24" type="*widget.Label">
@@ -1244,15 +1265,15 @@
 											</container>
 										</container>
 									</container>
-									<widget pos="0,2206" size="1070x4" type="*widget.Separator">
+									<widget pos="0,2212" size="1070x4" type="*widget.Separator">
 										<rectangle fillColor="separator" size="1070x4"/>
 									</widget>
-									<widget pos="0,2210" size="1070x24" type="*widget.Label">
+									<widget pos="0,2216" size="1070x24" type="*widget.Label">
 										<widget size="1070x24" type="*widget.RichText">
 											<text bold pos="4,4" size="181x16">What this means for your data</text>
 										</widget>
 									</widget>
-									<container pos="0,2235" size="1070x66">
+									<container pos="0,2241" size="1070x66">
 										<widget size="1070x24" type="*widget.Label">
 											<widget size="1070x24" type="*widget.RichText">
 												<text pos="4,4" size="658x16">Data generated with this tool belongs to you. It is not a derived work, and the license of this tool does not cover it.</text>
@@ -1270,8 +1291,8 @@
 									<linearGradient size="1070x8" startColor="shadow"/>
 								</widget>
 								<widget pos="1064,0" size="6x796" type="*widget.scrollBarArea">
-									<widget pos="3,521" size="3x275" type="*widget.scrollBar">
-										<rectangle fillColor="scrollbar" radius="6" size="3x275"/>
+									<widget pos="3,521" size="3x274" type="*widget.scrollBar">
+										<rectangle fillColor="scrollbar" radius="6" size="3x274"/>
 									</widget>
 								</widget>
 							</widget>

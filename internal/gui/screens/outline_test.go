@@ -162,9 +162,26 @@ func (s quietSelect) quiet() bool { return s.Disabled() }
 // control. The walk stops there rather than going the whole way down, so that
 // a rectangle belonging to the control itself, which every button has for its
 // own fill, is never mistaken for an edge.
+//
+// 🔴 A rectangle counts only if it DRAWS a stroke, and that qualification was
+// missing until 2026-09-09.
+//
+// Without it this answered yes for any rectangle at all, which was true of
+// every container it was asked about on the day it was written and stopped
+// being true the moment controls gained a floor under their height. That floor
+// is a fully transparent rectangle with no stroke, put there to give a control
+// a minimum size, and it made this report an edge on twelve states where no
+// edge is drawn - including on the one control this project deliberately leaves
+// without one.
+//
+// The name was right the whole time and the test was reading something else.
+// Asking for a stroke is what makes the question match the name: an edge is a
+// mark a person can see, and a rectangle that paints nothing is not one.
 func edgeIn(group *fyne.Container) *canvas.Rectangle {
+	drawn := func(shape *canvas.Rectangle) bool { return shape.StrokeWidth > 0 }
+
 	for _, child := range group.Objects {
-		if edge, is := child.(*canvas.Rectangle); is {
+		if edge, is := child.(*canvas.Rectangle); is && drawn(edge) {
 			return edge
 		}
 		nested, isGroup := child.(*fyne.Container)
@@ -172,7 +189,7 @@ func edgeIn(group *fyne.Container) *canvas.Rectangle {
 			continue
 		}
 		for _, grandchild := range nested.Objects {
-			if edge, is := grandchild.(*canvas.Rectangle); is {
+			if edge, is := grandchild.(*canvas.Rectangle); is && drawn(edge) {
 				return edge
 			}
 		}

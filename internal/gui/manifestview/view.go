@@ -14,6 +14,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/response"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
@@ -345,17 +346,17 @@ func (v *View) waiting() fyne.CanvasObject {
 	// do, the second says why the button beside it cannot be pressed yet. A
 	// dead control that gives no reason reads as a fault in the program, and
 	// this one is dead for a reason a person can act on.
-	head := parts.Column(palette.NameStepSection,
-		parts.Column(palette.NameStepRelated,
+	head := paint.Column(palette.NameStepSection,
+		paint.Column(palette.NameStepRelated,
 			wrapped(Line{Text: v.text.T(i18n.ManifestEmpty)}),
 			wrapped(Line{Text: v.text.T(i18n.ManifestResponseWait), Color: palette.NameTextSubdued}),
 		),
-		parts.Column(palette.NameStepRelated,
+		paint.Column(palette.NameStepRelated,
 			heading(v.text.T(i18n.ManifestHeadingRun)),
 			wrapped(Line{Text: v.text.T(i18n.ManifestRunWait), Color: palette.NameTextSubdued}),
 			panel(names(append(append([]Field{}, screen.Run...), screen.Counts...))),
 		),
-		parts.Column(palette.NameStepRelated,
+		paint.Column(palette.NameStepRelated,
 			heading(v.text.T(i18n.ManifestHeadingEntries)),
 			wrapped(Line{Text: v.text.T(i18n.ManifestEntriesWait), Color: palette.NameTextSubdued}),
 			panel(v.columnGuide()),
@@ -521,7 +522,7 @@ func fields(run, counts []Field) fyne.CanvasObject {
 // the screen with a manifest break their list at the same place.
 func names(all []Field) fyne.CanvasObject {
 	half := (len(all) + 1) / palette.EnvelopeColumns
-	return parts.Row(palette.NameStepMajor, nameColumn(all[:half]), nameColumn(all[half:]))
+	return paint.Row(palette.NameStepMajor, nameColumn(all[:half]), nameColumn(all[half:]))
 }
 
 func nameColumn(fields []Field) fyne.CanvasObject {
@@ -529,7 +530,7 @@ func nameColumn(fields []Field) fyne.CanvasObject {
 	for _, field := range fields {
 		drawn = append(drawn, plain(Line{Text: field.Label, Color: palette.NameTextSubdued}, false))
 	}
-	return parts.Column(palette.NameStepTight, drawn...)
+	return paint.Column(palette.NameStepTight, drawn...)
 }
 
 // form is one column of label and value pairs.

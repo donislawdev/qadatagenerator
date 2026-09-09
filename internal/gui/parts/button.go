@@ -55,7 +55,8 @@ func NewButton(label string, tapped func()) *Button {
 	button.Text = label
 	button.OnTapped = tapped
 	button.ExtendBaseWidget(button)
-	button.onScreen, button.edge = Outlined(Flooded(button, button.hasKeyboard))
+	dressed, edge := Outlined(Flooded(button, button.hasKeyboard))
+	button.onScreen, button.edge = standing(dressed), edge
 	button.markEdge()
 	return button
 }

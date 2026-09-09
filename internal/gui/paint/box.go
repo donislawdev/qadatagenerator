@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 
-	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	theme "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
@@ -91,7 +90,7 @@ func Pill(words, token, icon string) fyne.CanvasObject {
 
 	return On(ground, Pad(theme.NameStepHairline, theme.NameStepHairline,
 		theme.NameStepTight, theme.NameStepTight,
-		parts.Row(theme.NameStepHairline, row...)))
+		Row(theme.NameStepHairline, row...)))
 }
 
 // SectionHeading names one part of a screen, with a line running from the words
@@ -122,7 +121,7 @@ func SectionHeading(words string, actions fyne.CanvasObject) fyne.CanvasObject {
 // opens a gap between a label and the thing it names and is the single detail
 // that dates an interface to the nineteen nineties.
 func FieldLabel(words string, control fyne.CanvasObject) fyne.CanvasObject {
-	return parts.Column(theme.NameStepHairline,
+	return Column(theme.NameStepHairline,
 		Text(words, theme.TypeLabel, theme.TextSecondary), control)
 }
 

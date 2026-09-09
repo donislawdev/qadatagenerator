@@ -1,12 +1,29 @@
-package parts
+package paint
 
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 
-	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
+	theme "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
+
+// Column and Row are the two stacks every screen is built out of.
+//
+// # Why they live here rather than beside the controls
+//
+// They were written in parts, which is where the CONTROLS of this window live,
+// and they are not controls: they carry no behaviour, take no callback and hold
+// no state. That misplacement had a cost that was not visible until a control
+// needed a primitive of its own. paint drew the faces of the controls, so paint
+// imported parts, so parts could not import paint without a cycle - and the
+// thing parts needed from paint was a rectangle that gives a control a floor
+// under its height.
+//
+// Moving two functions that were never controls is the whole fix, and the guard
+// against rebuilding the toolkit has nothing new to object to: both of them are
+// still the toolkit's own layout, asked for the distance rather than assuming
+// it.
 
 // Column stacks things down the screen with a gap named from the scale.
 //
@@ -40,7 +57,7 @@ import (
 // choosing their own would drift apart within a session. The name is what makes
 // two screens agree without either of them knowing about the other.
 func Column(step string, children ...fyne.CanvasObject) *fyne.Container {
-	return container.New(layout.NewCustomPaddedVBoxLayout(palette.StepOf(step)), children...)
+	return container.New(layout.NewCustomPaddedVBoxLayout(theme.StepOf(step)), children...)
 }
 
 // Row lays things across the screen with a gap named from the scale.
@@ -49,5 +66,5 @@ func Column(step string, children ...fyne.CanvasObject) *fyne.Container {
 // close enough to read as a set, and the toolkit's own row gives them the same
 // distance as everything else on the screen gets.
 func Row(step string, children ...fyne.CanvasObject) *fyne.Container {
-	return container.New(layout.NewCustomPaddedHBoxLayout(palette.StepOf(step)), children...)
+	return container.New(layout.NewCustomPaddedHBoxLayout(theme.StepOf(step)), children...)
 }

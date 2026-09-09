@@ -32,6 +32,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/produce"
@@ -281,7 +282,7 @@ func (v *View) reading() fyne.CanvasObject {
 	// was read on a window of 1670 by 1210 on 2026-09-08 and nothing separated
 	// the settings that write from the line that would write the same thing in
 	// a terminal.
-	below := parts.Column(palette.NameStepRelated,
+	below := paint.Column(palette.NameStepRelated,
 		parts.Card(v.text.T(i18n.RecipeHeadingSave), nil, v.bar()),
 		v.commandContent(),
 	)
