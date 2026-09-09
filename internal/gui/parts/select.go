@@ -205,6 +205,28 @@ func (r *chooserRenderer) Refresh() {
 		// something is worse than one that is wider than it needs to be. The
 		// placeholder is in the reckoning because it is a value this control
 		// can display.
+		//
+		// 🔴 Keeping the placeholder in was settled by looking, on 2026-09-09,
+		// after the owner said the question was hard to judge from a
+		// description. Three settings rows were rendered side by side: the
+		// accepted drawing, this, and the same thing with the placeholder left
+		// out. The last is the worst by a distance - every box hugs its own
+		// value, so four settings come out at four widths with no room in any
+		// of them, and the row reads as scraps rather than as a set.
+		//
+		// What that measured is worth writing down, because it is NOT what
+		// this function claims to be for: the row reads well because every
+		// chooser has SLACK beyond its value, and the accepted drawing has
+		// slack in all three of its choosers at three different widths. Here
+		// the slack arrives because "(Select one)" is longer than almost
+		// everything these lists hold.
+		//
+		// So it works, and it works for a reason nobody chose. No screen in
+		// this window ever shows that string - measured across all 49 stored
+		// states, which is nought - so the width of four controls a person
+		// does look at is set by a string nobody ever sees. What would make it
+		// wrong: the toolkit rewording its placeholder, or a list of options
+		// growing past it. B-261 carries the question of a slack of our own.
 		Width:    paint.ChooserWidth(append([]string{r.chooser.PlaceHolder}, r.chooser.Options...)...),
 		Unchosen: unchosen,
 		Focused:  r.chooser.hasKeyboard(),
