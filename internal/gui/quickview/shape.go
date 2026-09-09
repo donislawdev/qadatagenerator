@@ -79,7 +79,12 @@ func (v *View) commandBand() fyne.CanvasObject {
 	return paint.Band(paint.BandAbove, palette.NameStepRelated, palette.NameStepMajor,
 		container.NewBorder(nil, nil,
 			paint.Middle(paint.Mono(commandPrompt, palette.TypeBody, palette.TextAccent)),
-			paint.Middle(v.copyCommand.OnScreen()),
+			// The confirmation belongs HERE, beside the button that fills it,
+			// which is the whole of the change made on 2026-09-09. It used to
+			// go into the sentence above the card, seven hundred pixels away
+			// from the button somebody had just pressed.
+			paint.Row(palette.NameStepTight,
+				paint.Middle(v.commandCopied), paint.Middle(v.copyCommand.OnScreen())),
 			paint.Middle(v.command)))
 }
 
@@ -178,7 +183,12 @@ func valueRow(number, digits int, value string, banded bool) fyne.CanvasObject {
 // what somebody would say out loud and "Values (10)" is what a form would say.
 func (v *View) heading(count int) fyne.CanvasObject {
 	return paint.SectionHeading(v.countedValues(count),
-		paint.Row(palette.NameStepTight, v.copy.OnScreen(), v.again.OnScreen()))
+		// The mark stands to the LEFT of the buttons, so it appears between the
+		// heading and the button that fills it rather than off the edge of the
+		// card. Empty canvas text takes no room, so nothing moves when it is
+		// blank.
+		paint.Row(palette.NameStepTight,
+			paint.Middle(v.copied), v.copy.OnScreen(), v.again.OnScreen()))
 }
 
 // countedValues is the heading of the card, which says how many are under it.

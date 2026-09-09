@@ -24,12 +24,14 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/commandline"
+	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
@@ -58,6 +60,10 @@ type View struct {
 	// that the list on screen and the list the mode knows are one list.
 	generators []string
 	clipboard  Clipboard
+	// copied and commandCopied say that the clipboard was filled, each beside
+	// the button that filled it.
+	copied        *canvas.Text
+	commandCopied *canvas.Text
 
 	chooser *parts.Select
 	locales *parts.Select
@@ -162,7 +168,21 @@ func (v *View) build() {
 	// that, typing 500 would produce at 5, at 50 and at 500.
 	v.howMany = widget.NewEntry()
 	v.howMany.OnSubmitted = func(string) { v.draw() }
+	// 🔴 The field will not take a character that could never be a count, and
+	// it will not take more digits than the ceiling has. Added on 2026-09-09
+	// after the owner typed a thirty seven digit number into the real window:
+	// the screen answered that it was not a whole number, which is not what was
+	// wrong with it, and the command at the foot offered the same number to
+	// copy into a terminal.
+	//
+	// The length comes from the ceiling rather than from a number written here,
+	// so a measurement that moves the ceiling moves this with it.
+	parts.Bounded(v.howMany, len(strconv.Itoa(mostShown)), parts.Digits)
 	v.born = widget.NewEntry()
+	// The characters a date is made of, for the same reason. The SHAPE is
+	// still the mode's to refuse, since 9999-99-99 is made of these characters
+	// and is not a date.
+	parts.Bounded(v.born, len(quick.DateShape), parts.DigitsAndDashes)
 	// The shape of the date is on the field rather than only in the refusal
 	// that follows getting it wrong, which is the same reason the seed field
 	// shows the seed that was used.
@@ -176,6 +196,12 @@ func (v *View) build() {
 	// one it used when nobody said, so asking for the same value again is
 	// reading it off the screen rather than out of a log.
 	v.seedBox = widget.NewEntry()
+	// A seed the surfaces will take, with the limit and the measurement behind
+	// it in the domain, so this field and the --seed flag of three verbs cannot
+	// come to accept different things. No filter on the characters: a seed is
+	// any text at all, and narrowing that here would refuse a seed the command
+	// line takes.
+	parts.Bounded(v.seedBox, seed.Longest, nil)
 	// 🔴 NOTHING happens while somebody types, and that is DEC-235.
 	//
 	// Until 2026-09-09 this produced on every keystroke, so a thirty two
@@ -216,6 +242,24 @@ func (v *View) build() {
 	v.command.Truncation = fyne.TextTruncateEllipsis
 	v.copyCommand = parts.NewButton(v.text.T(i18n.CommandCopy), v.putCommandInClipboard)
 	v.copyCommand.ShowIcon(paint.IconCopy)
+
+	// 🔴 Two marks rather than one sentence, and they stand BESIDE the button
+	// that fills them. Changed on 2026-09-09 from the owner's report: "Copy
+	// command at the bottom has no message about copying, it is under the
+	// values and I do not expect it there".
+	//
+	// The message was never missing. It went into the sentence above the card,
+	// which is where this screen says everything else - about seven hundred
+	// pixels from the button at the foot that had just been pressed. A
+	// clipboard cannot be seen, so a person who does not find the confirmation
+	// has no way at all to tell a button that worked from one that did nothing.
+	//
+	// Filling that sentence had a second cost nobody asked for: it REPLACED
+	// what stood there, so copying a set of values silently deleted the warning
+	// that values may repeat. One label serving two purposes says whichever
+	// thing was said last.
+	v.copied = paint.Text("", palette.TypeLabel, palette.TextSecondary)
+	v.commandCopied = paint.Text("", palette.TypeLabel, palette.TextSecondary)
 
 	// 🔴 The values are no longer ONE label, changed on 2026-09-09.
 	//
@@ -447,6 +491,10 @@ func (v *View) draw() {
 // produce works out the value and the line that would ask a terminal for it.
 func (v *View) produce() {
 	v.told.SetText("")
+	// A confirmation outlives the thing it confirmed otherwise: the clipboard
+	// still holds the old values, and the mark beside the button would say the
+	// new ones are in it.
+	v.forget()
 	chosen := v.chooser.Selected
 	if chosen == "" {
 		v.values = nil
@@ -736,7 +784,7 @@ func (v *View) putInClipboard() {
 		return
 	}
 	v.clipboard.SetContent(v.Value())
-	v.told.SetText(v.text.T(i18n.QuickCopied))
+	v.say(v.copied, v.text.T(i18n.QuickCopied))
 }
 
 // commandFor is the line that asks a terminal for what this screen is showing.
@@ -771,8 +819,33 @@ func (v *View) putCommandInClipboard() {
 		return
 	}
 	v.clipboard.SetContent(v.command.Text)
-	v.told.SetText(v.text.T(i18n.CommandCopied))
+	v.say(v.commandCopied, v.text.T(i18n.CommandCopied))
 }
+
+// say puts a word on one of the two marks and takes it off the other, so that
+// two confirmations can never stand at once claiming different things were
+// copied.
+//
+// Drawn rather than hidden: canvas text with nothing in it occupies no room, so
+// the layout does not move when a mark appears, and there is no block to show
+// and hide.
+func (v *View) say(mark *canvas.Text, words string) {
+	for _, each := range []*canvas.Text{v.copied, v.commandCopied} {
+		if each == nil {
+			continue
+		}
+		if each == mark {
+			each.Text = words
+		} else {
+			each.Text = ""
+		}
+		each.Refresh()
+	}
+}
+
+// forget takes both marks down, which is what a new set of values means: what
+// is in the clipboard is no longer what is on screen.
+func (v *View) forget() { v.say(nil, "") }
 
 // mostShown is the largest number of values this screen draws at once.
 //

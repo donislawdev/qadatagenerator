@@ -47,6 +47,50 @@ import (
 // Size is the length of a derived digest in bytes.
 const Size = sha256.Size
 
+// Longest is the most characters a seed arriving from outside may carry.
+//
+// # Why a seed has a length limit at all
+//
+// It did not until 2026-09-09, and the owner found the gap by pasting into the
+// real window: a field that takes anything takes a file. Nothing crashed, which
+// is what made it worth measuring rather than guessing.
+//
+// The limit is chosen by the owner at 128 and the measurement agrees with it
+// for a reason nobody expected to find. The message this package hashes is
+// assembled in a fixed array of messageRoom bytes on the stack, so a seed long
+// enough to overflow that array moves the whole derivation onto the heap - once
+// per VALUE. Measured on 2026-09-09, three runs of 200 000 draws each, spreads
+// disjoint between every pair:
+//
+//	  32 characters   124.1 - 126.5 ns   0 allocations
+//	 128 characters   179.8 - 181.9 ns   0 allocations
+//	 192 characters   210.2 - 220.3 ns   0 allocations
+//	 256 characters   326.1 - 333.2 ns   1 allocation, 512 B
+//	1024 characters   752.7 - 768.9 ns   1 allocation, 1152 B
+//
+// So the cliff is between 192 and 256, and 128 sits on the safe side of it with
+// room for the four names that share the buffer. A run of a million values pays
+// 0.12 s of hashing at 32 characters and 0.75 s at 1024.
+//
+// 🔴 What this limit is NOT. It is not a claim that a longer seed is wrong, and
+// nothing about the arithmetic changes: a seed of any length hashes to the same
+// 32 bytes and produces a deterministic dataset. It is a limit on what the
+// SURFACES accept, so that both of them accept the same thing. Every dataset
+// already generated is untouched, because no seed anybody has used is anywhere
+// near this.
+//
+// It is counted in RUNES rather than bytes, because a person pastes characters
+// rather than bytes and a limit that cuts a character in half is a limit that
+// produces a different seed from the one on screen.
+const Longest = 128
+
+// TooLong reports whether a seed carries more than the surfaces accept.
+//
+// A question rather than a refusal, because the two surfaces word their
+// refusals differently and share the rule: the command line writes four parts
+// in English always, the window takes its words from a catalogue.
+func TooLong(seed string) bool { return len([]rune(seed)) > Longest }
+
 // Coordinate is the address of one value: which entity, which row, which
 // field, and what the value is for.
 //

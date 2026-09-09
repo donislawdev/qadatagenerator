@@ -81,6 +81,10 @@ func runQuick(out *streams, arguments []string, global crossCutting) int {
 		})
 	}
 
+	if refusal, tooLong := seedRefused(*seed); tooLong {
+		return usage(out, refusal)
+	}
+
 	wanted, shape := wholeCount(*count)
 	if shape.what != "" {
 		return usage(out, shape)

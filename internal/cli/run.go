@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/license"
 	"github.com/donislawdev/qadatagenerator/internal/version"
@@ -779,4 +780,32 @@ func groupData(sources []license.DataSource) []takenFrom {
 		grouped[at].lists = append(grouped[at].lists, entry.Corpus)
 	}
 	return grouped
+}
+
+// seedRefused is the four part refusal for a seed longer than the surfaces
+// take, or nothing when the seed is fine.
+//
+// # Why it is here rather than in the verb that found it
+//
+// Three places take a seed from outside: the quick verb, the generate verb and
+// the reader of a recipe. A rule written in the first one and not carried to
+// the other two is the fault this project has already paid for by name - the
+// defence does not travel with the rule to the second place it applies. One
+// function, three callers, and the guard beside them walks all three.
+//
+// The limit and the arithmetic behind it live in the domain, so this only puts
+// the number into words.
+func seedRefused(given string) (problem, bool) {
+	if !seed.TooLong(given) {
+		return problem{}, false
+	}
+	return problem{
+		what: problemSeedLong + strconv.Itoa(len([]rune(given))) + " characters",
+		why:  problemSeedLongWhy,
+		// Counted in characters rather than bytes for the reason the domain
+		// gives: a person pastes characters, and half a character is not a
+		// seed anybody can read back off a screen.
+		allowed: strconv.Itoa(seed.Longest) + " characters or fewer",
+		instead: problemSeedLongDo,
+	}, true
 }

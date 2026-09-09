@@ -150,12 +150,13 @@ var White = Shade{"white", 0xFF, 0xFF, 0xFF, "the label on the accent fill, whic
 // A token says WHAT is being drawn and never how light it should be, so the
 // shade behind it moves here in one line rather than at every call site.
 const (
-	BgWindow  = "bg.window"
-	BgSurface = "bg.surface"
-	BgControl = "bg.control"
-	BgCurrent = "bg.current"
-	BgHover   = "bg.hover"
-	BgPressed = "bg.pressed"
+	BgWindow    = "bg.window"
+	BgSurface   = "bg.surface"
+	BgControl   = "bg.control"
+	BgCurrent   = "bg.current"
+	BgHover     = "bg.hover"
+	BgPressed   = "bg.pressed"
+	BgSelection = "bg.selection"
 
 	LineQuiet     = "line.quiet"
 	BorderControl = "border.control"
@@ -181,7 +182,7 @@ const (
 // TokenNames is every token constant above, so a test can close the register
 // from the side the constants are on. The same reason ColorNames exists.
 var TokenNames = []string{
-	BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed,
+	BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed, BgSelection,
 	LineQuiet, BorderControl, BorderPressed,
 	FillPrimary, FillHover, FillPressed, MarkCurrent, MarkActive,
 	TextPrimary, TextSecondary, TextAccent, TextOnFill, TextOnMark,
@@ -226,6 +227,27 @@ const (
 	// It is measured by whatever stands on it. Named rather than written as
 	// a bare nought so a reader does not have to guess what nought means.
 	ThresholdGround = 0
+	// ThresholdSelection is ours, and it is a CEILING dressed as a threshold.
+	//
+	// 🔴 It exists because 3.0 is arithmetically unreachable here, which was
+	// measured rather than assumed. A selection is a fill UNDER text, so it
+	// answers to two numbers at once: it has to be seen against the ground of
+	// the field, and the text has to stay readable ON it. Asked of every step
+	// of both ladders on 2026-09-09 with tools/zeton.py:
+	//
+	//	3.0 against bg.control, text still at 4.5   ZERO steps
+	//	2.0 against bg.control, text still at 4.5   neutral.8 (2.55 / 5.41)
+	//	                                            accent.8  (2.60 / 5.32)
+	//
+	// That is the same shape of answer as DEC-179, where a focus indicator
+	// under text turned out to have a hard arithmetic limit, and the same
+	// answer follows: the number is stated as ours, with the measurement
+	// beside it, rather than a WCAG threshold quietly lowered to fit.
+	//
+	// Set at 2.5 rather than at 2.60, so the entry has somewhere to move
+	// within the ladder without the guard turning red, and low enough that
+	// neutral.8 would also pass if a later measurement prefers grey.
+	ThresholdSelection = 2.5
 )
 
 // Tokens is every token, the shade behind it, and what it is measured against.
@@ -277,6 +299,33 @@ var Tokens = []Token{
 	// and border.pressed below carries it.
 	{BgPressed, "neutral.6", ThresholdGround, nil,
 		"the ground of a control under the finger, one step past the ground it takes under the pointer"},
+	// 🔴 The one ground in this register that is NOT a ground, and it is the
+	// entry the owner asked for on 2026-09-09: "I select the seed or how many
+	// and I cannot see it".
+	//
+	// Until then the toolkit's ColorNameSelection was answered with bg.current,
+	// which is the sidebar item of the open screen - one step of the ladder
+	// away from the inside of a field, measuring 1.09 where a person has to see
+	// which characters they picked. Nobody chose that: the token was written
+	// for the sidebar and the selection got it because both wanted "a ground
+	// slightly lighter than the one under it". That is the same family as
+	// ColorNameFocus and ColorNamePrimary, where one toolkit colour serves
+	// several jobs at once, and the third time this project has paid for it.
+	//
+	// 🔴 It serves SIX jobs here, counted in the toolkit source rather than
+	// assumed: selected text (widget/selectable.go:307), the selected row of a
+	// list, the mark on a table cell (widget/table.go:1218, which the manifest
+	// browser draws), a tree node, a grid tile and a file icon. So this shade
+	// is measured against every ground any of those stand on, not just the
+	// inside of a field.
+	//
+	// Violet rather than the grey of neutral.8, which measures within a tenth
+	// of it: grey lands between bg.hover and bg.pressed, so a selection would
+	// look like a control the pointer happens to be over. Violet is the one
+	// hue in this palette that never carries a verdict, and selection is the
+	// only other thing in this window a person makes happen on purpose.
+	{BgSelection, "accent.8", ThresholdSelection, []string{BgWindow, BgSurface, BgControl},
+		"the ground under text somebody selected, and under the row or cell a list has marked"},
 
 	{LineQuiet, "neutral.6", ThresholdGuide, []string{BgWindow, BgSurface},
 		"the line between two rows and the edge of a card, which the eye follows rather than reads"},
@@ -342,7 +391,7 @@ var Tokens = []Token{
 	{MarkActive, "neutral.12", ThresholdControl, []string{BorderControl, BgControl, BgSurface},
 		"what the toolkit paints on a stock control that is chosen or holds the keyboard, which has to differ from the resting edge it replaces"},
 
-	{TextPrimary, "neutral.12", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed},
+	{TextPrimary, "neutral.12", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed, BgSelection},
 		"the value, the label and every word read first"},
 	{TextSecondary, "neutral.11", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed},
 		"a caption, a group heading and the sentence explaining a value"},

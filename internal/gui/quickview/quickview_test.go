@@ -131,9 +131,47 @@ func TestChoosingAValueProducesOneAndCopyingItReachesTheClipboard(t *testing.T) 
 		t.Errorf("Copy put %q in the clipboard while %q was on screen",
 			clipboard.content, produced)
 	}
-	if view.told.Text != i18n.English.T(i18n.QuickCopied) {
-		t.Errorf("Copy said %q, where a clipboard nobody can see needs the screen to say it worked",
-			view.told.Text)
+	// 🔴 Asked of the mark BESIDE the button rather than of the sentence above
+	// the card, which is where this used to go until the owner reported on
+	// 2026-09-09 that he never found it. The distance was the fault, so the
+	// distance is what the guard is about.
+	if view.copied.Text != i18n.English.T(i18n.QuickCopied) {
+		t.Errorf("Copy said %q beside itself, where a clipboard nobody can see needs the screen to say it worked",
+			view.copied.Text)
+	}
+	// And it did not go into the sentence above the card as well. One label
+	// serving both is how copying a set of values silently deleted the warning
+	// that values may repeat - so the confirmation has to be absent from there,
+	// not merely present beside the button.
+	if strings.Contains(view.told.Text, i18n.English.T(i18n.QuickCopied)) {
+		t.Errorf("the confirmation is also in the sentence above the card: %q", view.told.Text)
+	}
+}
+
+// 🔴 Two confirmations never stand at once.
+//
+// Each mark says a DIFFERENT thing was copied - a set of values, or a command
+// line. Both lit at the same time would say the clipboard holds two things, and
+// the one it actually holds is whichever button was pressed last.
+func TestOnlyTheLastThingCopiedSaysSo(t *testing.T) {
+	view := New(i18n.English, &heldClipboard{})
+	view.Choose("pesel")
+
+	view.putInClipboard()
+	view.putCommandInClipboard()
+	if view.copied.Text != "" {
+		t.Errorf("the values still say they were copied (%q) after the command was", view.copied.Text)
+	}
+	if view.commandCopied.Text == "" {
+		t.Error("copying the command said nothing beside the button that did it")
+	}
+
+	// A new set of values means the clipboard no longer holds what is on
+	// screen, so neither mark may go on claiming it does.
+	view.Generate()
+	if view.copied.Text != "" || view.commandCopied.Text != "" {
+		t.Errorf("a fresh run left a confirmation standing: values %q, command %q",
+			view.copied.Text, view.commandCopied.Text)
 	}
 }
 

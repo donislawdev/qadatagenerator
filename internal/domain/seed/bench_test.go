@@ -1,6 +1,7 @@
 package seed_test
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
@@ -102,5 +103,30 @@ func TestDerivingAValueDoesNotAllocateMoreThanItDid(t *testing.T) {
 				test.name, got, allocationCeiling)
 		}
 		t.Logf("%s allocates %v times", test.name, got)
+	}
+}
+
+// BenchmarkDrawBySeedLength is what settled the length a surface will take.
+//
+// The message is assembled in a fixed array on the stack, and a seed long
+// enough to overflow it pushes the whole derivation onto the heap - once per
+// VALUE, not once per run. So the length of a seed is not only a question of
+// what a person can reasonably type: past a point it changes the cost of every
+// value the tool produces. This measures where that point is.
+func BenchmarkDrawBySeedLength(b *testing.B) {
+	at := seed.Coordinate{Entity: "customer", Row: 0, Field: "pesel", Purpose: "value"}
+	for _, length := range []int{32, 128, 192, 256, 1024} {
+		grain := make([]byte, length)
+		for i := range grain {
+			grain[i] = 'a'
+		}
+		source := seed.New(string(grain))
+		b.Run(strconv.Itoa(length), func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; b.Loop(); i++ {
+				at.Row = int64(i)
+				sink = source.Bytes(at)
+			}
+		})
 	}
 }

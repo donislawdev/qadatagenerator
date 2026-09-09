@@ -175,6 +175,17 @@ const (
 	problemQuickCountRangeWhy = "the number given is larger than a whole number this machine holds, so it was never a number of values that could be produced"
 	problemQuickCountRangeDo  = "ask for a number of values a machine could actually write"
 
+	// A seed longer than the surfaces take. Shared by every verb with a
+	// --seed flag and by the reader of a recipe, because the rule belongs to
+	// the seed rather than to any one place a seed arrives from.
+	//
+	// The number is put in by whoever writes the message rather than spelled
+	// out here, so that moving the limit moves one constant in the domain and
+	// no sentence has to be edited to agree with it.
+	problemSeedLong    = "a seed longer than this tool takes: "
+	problemSeedLongWhy = "a seed is hashed for every value produced, and past this length that hashing stops fitting in the space set aside for it, which costs an allocation on every value rather than on every run"
+	problemSeedLongDo  = "shorten the seed, or leave it out and let the run draw one"
+
 	problemQuickCount        = "not a number of values this command takes: "
 	problemQuickCountAllowed = "one or more"
 	problemQuickCountWhy     = "this command answers a request for a value, and a run producing none cannot be told apart from one that failed without printing anything"

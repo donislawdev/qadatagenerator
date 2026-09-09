@@ -188,7 +188,7 @@
 								</container>
 								<container pos="3,0" size="217x42">
 									<container pos="8,4" size="201x34">
-										<rectangle fillColor="selection" radius="6" size="201x34"/>
+										<rectangle fillColor="rgba(40,39,37,255)" radius="6" size="201x34"/>
 										<widget size="201x34" type="*parts.Button">
 											<container size="201x34">
 												<container size="201x34">

@@ -69,7 +69,16 @@ var tokenFor = map[fyne.ThemeColorName]string{
 	toolkit.ColorNameInputBorder:       palette.BorderControl,
 	toolkit.ColorNameSeparator:         palette.LineQuiet,
 	toolkit.ColorNameHover:             palette.BgHover,
-	toolkit.ColorNameSelection:         palette.BgCurrent,
+	// 🔴 Its own token since 2026-09-09, and it was bg.current until then.
+	//
+	// bg.current is the sidebar item of the open screen, and it landed here
+	// because the two wanted the same thing in words - a ground a step lighter
+	// than the one under it. In numbers they do not: selected text sits on the
+	// inside of a field, and one step of the neutral ladder against the next
+	// measures 1.09, so a person selecting a seed saw nothing happen. The owner
+	// reported exactly that. bg.selection is measured against every ground the
+	// toolkit draws this colour on, and the arithmetic is beside the token.
+	toolkit.ColorNameSelection:         palette.BgSelection,
 	toolkit.ColorNameMenuBackground:    palette.BgSurface,
 	toolkit.ColorNameOverlayBackground: palette.BgSurface,
 	toolkit.ColorNameButton:            palette.BgControl,

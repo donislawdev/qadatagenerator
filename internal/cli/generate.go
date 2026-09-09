@@ -109,6 +109,15 @@ func runGenerate(out *streams, arguments []string, global crossCutting) int {
 
 // generateFrom reads the recipe and produces the dataset it describes.
 func generateFrom(out *streams, path string, own *generateFlags, flags crossCutting) int {
+	// Before the recipe is read, because a refusal about the command somebody
+	// typed should not wait behind the parsing of a file. The seed inside the
+	// recipe is refused by the reader instead, so that validate reports it
+	// among all the other problems at once rather than one at a time.
+	if own.given["seed"] {
+		if refusal, tooLong := seedRefused(*own.seed); tooLong {
+			return usage(out, refusal)
+		}
+	}
 	built, code, ok := recipeAt(out, path)
 	if !ok {
 		return code

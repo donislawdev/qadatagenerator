@@ -26,6 +26,7 @@ import (
 	"github.com/goccy/go-yaml/parser"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
+	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
 	"github.com/donislawdev/qadatagenerator/internal/version"
 )
 
@@ -402,6 +403,14 @@ func (r *reader) recipe(top yaml.MapSlice) recipe.Recipe {
 			built.Version, _ = r.text(key, item.Value)
 		case "seed":
 			built.Seed, _ = r.text(key, item.Value)
+			// Reported here rather than where the recipe is used, so that
+			// validate names it among every other problem at once. The rule and
+			// the arithmetic behind the number live in the domain.
+			if seed.TooLong(built.Seed) {
+				r.report(key, "the seed is longer than this tool takes",
+					fmt.Sprintf("%d characters or fewer", seed.Longest),
+					"shorten the seed, or remove the line and let each run draw one")
+			}
 		case "locale":
 			built.Locale = r.oneOf(key, item.Value, knownLocales)
 		case "name":

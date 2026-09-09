@@ -512,4 +512,7 @@ var damageGuards = []Guard{
 	{"a value in a form its scheme does not check is passed over rather than damaged", "TestAFormTheSchemeDoesNotCheckIsNotDamagedInTheFirstPlace", "internal/adapter/mutators", ByMutation},
 	{"a swap landing in a form the scheme does not check is not called a rejection", "TestASwapLandingInAFormTheSchemeDoesNotCheckIsNotCalledARejection", "internal/adapter/mutators", ByMutation},
 	{"the randomness a run was seeded with reaches the mutator that draws with it", "TestTheRunSeedReachesTheMutator", "internal/app/corrupt", ByMutation},
+	{"a field takes no more characters than the surface can carry, so a paste stops at the limit rather than at a refusal one press later", "TestABoundedFieldStopsAtTheLengthItWasGiven", "internal/gui/parts", ByMutation},
+	{"a field takes no character that could never be part of its answer", "TestABoundedFieldKeepsOnlyTheCharactersItTakes", "internal/gui/parts", ByMutation},
+	{"every door a seed arrives through refuses one longer than the surfaces take, since a rule held at one door and not the next is this project's own failure mode", "TestEveryDoorASeedArrivesThroughRefusesOneTooLong", "internal/cli", ByMutation},
 }
