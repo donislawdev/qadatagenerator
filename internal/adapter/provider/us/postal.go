@@ -154,6 +154,11 @@ func (Postal) ID() string { return "US.postal" }
 // One. It carries no check digit, encodes neither a date nor a gender, and has
 // no block that is never assigned, so declaring anything else would be claiming
 // a question this scheme cannot answer.
+// Mask is five digits, the short form and the only one this build produces.
+// The nine digit form with a hyphen is accepted by Validate, which is a
+// different question from what a person gets from Generate.
+func (Postal) Mask() string { return strings.Repeat(string(provider.MaskDigit), postalCodeLength) }
+
 func (Postal) Capabilities() []capability.Name {
 	return []capability.Name{capability.ReferencePostalToPlace}
 }

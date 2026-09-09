@@ -459,6 +459,17 @@ const (
 	QuickAboutProduces   Key = "quick.about.produces"
 	QuickAboutCheckDigit Key = "quick.about.check-digit"
 	QuickAboutRange      Key = "quick.about.range"
+	// QuickAboutFormat heads the written form of one value, and the two
+	// after it are what the places in that form may hold.
+	//
+	// 🔴 They are words for a COUNT the mode works out, not sentences about
+	// a scheme. The window puts the number in front of one of them, which is
+	// the same shape as the count over the card of values, and it is what
+	// keeps a claim about a scheme out of a translation file where nothing
+	// could check it.
+	QuickAboutFormat          Key = "quick.about.format"
+	QuickAboutDigits          Key = "quick.about.digits"
+	QuickAboutLettersOrDigits Key = "quick.about.letters-or-digits"
 	// 🔴 The four sentences below are the only place this window tells
 	// somebody whether a value it just produced could belong to a real
 	// person, and both halves of that are said out loud.
@@ -559,6 +570,7 @@ var Keys = []Key{
 
 	QuickNothingWritten, QuickLabelValue, QuickValueHeading, QuickValuesCounted,
 	QuickAboutProduces, QuickAboutCheckDigit, QuickAboutRange,
+	QuickAboutFormat, QuickAboutDigits, QuickAboutLettersOrDigits,
 	QuickAboutCheckDigitCarried, QuickAboutCheckDigitNone,
 	QuickAboutRangeReserved, QuickAboutRangeNone,
 	QuickAboutHarbour, QuickAboutUnavailable,

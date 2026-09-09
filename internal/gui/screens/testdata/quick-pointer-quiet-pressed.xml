@@ -635,14 +635,14 @@
 									</container>
 								</container>
 								<container pos="696,0" size="358x619">
-									<container size="358x287">
-										<container size="358x287">
-											<container pos="24,4" size="330x279">
-												<rectangle size="330x279"/>
-												<container size="330x279">
-													<rectangle fillColor="menuBackground" radius="10" size="330x279" strokeColor="separator" strokeWidth="2"/>
-													<container size="330x279">
-														<container pos="16,16" size="298x247">
+									<container size="358x388">
+										<container size="358x388">
+											<container pos="24,4" size="330x380">
+												<rectangle size="330x380"/>
+												<container size="330x380">
+													<rectangle fillColor="menuBackground" radius="10" size="330x380" strokeColor="separator" strokeWidth="2"/>
+													<container size="330x380">
+														<container pos="16,16" size="298x348">
 															<container size="298x18">
 																<container size="17x18">
 																	<spacer size="17x0"/>
@@ -659,7 +659,18 @@
 																<text bold color="disabled" size="298x14" textSize="11">PRODUCES</text>
 																<text monospace pos="0,18" size="298x16">identifier (US.ssn)</text>
 															</container>
-															<container pos="0,85" size="298x77">
+															<container pos="0,85" size="298x68">
+																<text bold color="disabled" size="298x14" textSize="11">FORMAT</text>
+																<text monospace pos="0,18" size="298x20" textSize="16">000-00-0000</text>
+																<container pos="0,43" size="298x24">
+																	<widget size="298x24" type="*widget.Label">
+																		<widget size="298x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="42x16">9 digits</text>
+																		</widget>
+																	</widget>
+																</container>
+															</container>
+															<container pos="0,169" size="298x77">
 																<text bold color="disabled" size="298x14" textSize="11">CHECK DIGIT</text>
 																<container pos="0,18" size="298x58">
 																	<widget size="298x58" type="*widget.Label">
@@ -671,7 +682,8 @@
 																	</widget>
 																</container>
 															</container>
-															<container pos="0,178" size="298x68">
+															<rectangle fillColor="separator" pos="0,262" size="298x1"/>
+															<container pos="0,279" size="298x68">
 																<container size="298x23">
 																	<container size="136x23">
 																		<rectangle fillColor="rgba(61,167,102,36)" radius="999" size="136x23"/>

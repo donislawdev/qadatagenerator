@@ -1,6 +1,8 @@
 package intl
 
 import (
+	"strings"
+
 	"fmt"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
@@ -137,6 +139,10 @@ func (EAN) ID() string { return "ean" }
 // There is no claim to write into an unassigned block. No catalog entry aims
 // that corruption at this scheme, and naming blocks without being sure of them
 // would be a promise made to a manifest that nothing here could keep.
+// Mask is thirteen digits, unpunctuated. The bars printed above them are a
+// rendering of the number rather than part of it.
+func (EAN) Mask() string { return strings.Repeat(string(provider.MaskDigit), eanLength) }
+
 func (EAN) Capabilities() []capability.Name {
 	return []capability.Name{
 		capability.IdentifierCheckDigit,

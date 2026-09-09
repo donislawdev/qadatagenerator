@@ -1,6 +1,8 @@
 package quickview
 
 import (
+	"strconv"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
@@ -50,7 +52,17 @@ func (v *View) aside(generator string) fyne.CanvasObject {
 	// answer a question nobody asked and would make the same word mean two
 	// different things on one screen.
 	if about.Scheme != "" {
-		blocks = append(blocks, v.checkDigit(about), v.reservedRange(about))
+		if about.Mask != "" {
+			blocks = append(blocks, v.format(about))
+		}
+		blocks = append(blocks, v.checkDigit(about))
+		// 🔴 A line before the last block, and it is the only one in this
+		// panel. Everything above it is what the scheme IS, and the block
+		// below is the one claim this window makes about whether a value could
+		// belong to somebody. Rule nine is about that block more than about any
+		// other on the screen, so it is worth separating from the facts rather
+		// than being the fourth caption down a column.
+		blocks = append(blocks, paint.Hairline(palette.LineQuiet), v.reservedRange(about))
 	}
 	if about.Unavailable != "" {
 		blocks = append(blocks, v.unavailable(about))
@@ -83,6 +95,33 @@ func produces(about quick.Description) string {
 		return about.Produces
 	}
 	return about.Produces + " (" + about.Scheme + ")"
+}
+
+// format is the written form of one value, and how many places in it vary.
+//
+// # 🔴 Why the mask itself is on screen and not only a sentence about it
+//
+// Because a person reading ten values beside it is comparing shapes, and a mask
+// is the same shape. It says in one line what a sentence needs three for: how
+// long, where the punctuation falls, whether letters appear. This was the
+// largest of the things the owner found missing here on 2026-09-09.
+//
+// # Why the sentence under it is built rather than written
+//
+// The count comes from quick.Places, so the mode reads the mask and this file
+// only chooses words for what it read. A sentence written per scheme would be
+// eleven claims in a translation file, where nothing could check any of them
+// against the values they describe.
+func (v *View) format(about quick.Description) fyne.CanvasObject {
+	places, letters := quick.Places(about.Mask)
+	said := i18n.QuickAboutDigits
+	if letters {
+		said = i18n.QuickAboutLettersOrDigits
+	}
+	return paint.Column(palette.NameStepHairline,
+		paint.Caption(v.text.T(i18n.QuickAboutFormat)),
+		paint.Mono(about.Mask, palette.TypeValue, palette.TextPrimary),
+		v.paragraph(strconv.Itoa(places)+" "+v.text.T(said)))
 }
 
 // checkDigit says whether the number can catch a wrong character on its own.

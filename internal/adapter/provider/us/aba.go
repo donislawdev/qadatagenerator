@@ -168,6 +168,10 @@ func (ABA) ID() string { return "US.aba" }
 // identifier.unassigned-target is declared, because moving a value into a
 // spare series is a different question with a different answer, and one this
 // scheme can answer.
+// Mask is nine digits with no punctuation, which is how the number appears in
+// the routing field of a payment and how this provider generates it.
+func (ABA) Mask() string { return strings.Repeat(string(provider.MaskDigit), abaLength) }
+
 func (ABA) Capabilities() []capability.Name {
 	return []capability.Name{
 		capability.IdentifierCheckDigit,

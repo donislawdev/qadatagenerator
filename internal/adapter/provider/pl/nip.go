@@ -94,6 +94,11 @@ func (NIP) ID() string { return "PL.nip" }
 //
 // One, and the absences are as deliberate as the presence. See the type comment
 // for why there is no date, no gender and no reserved range.
+// Mask is ten digits with no punctuation. The scheme is also written in
+// groups, and this build does not produce it that way, so the mask does not
+// claim it does.
+func (NIP) Mask() string { return strings.Repeat(string(provider.MaskDigit), nipLength) }
+
 func (NIP) Capabilities() []capability.Name {
 	return []capability.Name{capability.IdentifierCheckDigit}
 }

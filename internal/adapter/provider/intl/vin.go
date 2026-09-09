@@ -1,6 +1,8 @@
 package intl
 
 import (
+	"strings"
+
 	"fmt"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
@@ -155,6 +157,16 @@ func (VIN) ID() string { return "vin" }
 // what is assigned and against blocks already reserved. Reserved there means
 // held back for assignment, not left free, so this scheme has no safe harbour
 // in the sense docs/05 uses the word.
+// Mask is seventeen places that each take a digit or a letter, which is the
+// one scheme here that is not purely numeric.
+//
+// It does not say which letters: I, O and Q are excluded by the standard and
+// the last five places are digits for a passenger car. A mask carrying those
+// rules would be a second copy of Validate, and the two would part company.
+func (VIN) Mask() string {
+	return strings.Repeat(string(provider.MaskAlnum), vinLength)
+}
+
 func (VIN) Capabilities() []capability.Name {
 	return []capability.Name{capability.IdentifierCheckDigit}
 }

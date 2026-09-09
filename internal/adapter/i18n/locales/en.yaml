@@ -329,6 +329,9 @@ quick.heading.values-counted: values
 quick.about.produces: Produces
 quick.about.check-digit: Check digit
 quick.about.range: Reserved range
+quick.about.format: Format
+quick.about.digits: digits
+quick.about.letters-or-digits: letters or digits
 quick.about.check-digit.carried: Yes. One wrong character can be caught by the number itself, so an import that checks it can reject the value.
 quick.about.check-digit.none: None. One wrong character cannot be caught by the number itself, so an import has no way to tell a damaged value from a good one.
 quick.about.range.reserved: Values come from a block the issuer never assigns, so none of them can belong to anybody.

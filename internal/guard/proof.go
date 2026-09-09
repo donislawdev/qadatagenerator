@@ -525,4 +525,8 @@ var toolGuards = []Guard{
 	{"every control a pointer can touch draws each of its states differently, so a person can tell hovering from pressing", "TestEveryControlAPointerCanTouchDrawsEachOfItsStatesDifferently", "internal/gui/parts", ByMutation},
 	{"a control forgets a press the pointer carried away, because the driver delivers the release to whatever is under the pointer by then and never to the control that was pressed", "TestAControlForgetsAPressThePointerCarriedAway", "internal/gui/parts", ByMutation},
 	{"a control nobody can use draws nothing for a pointer, however much of one the driver hands it", "TestADisabledControlDrawsNothingForAPointer", "internal/gui/parts", ByMutation},
+	{"every value is written the way its own scheme says it is, so the shape a window shows beside ten values cannot drift from the values themselves", "TestEveryValueIsWrittenTheWayItsSchemeSays", "internal/adapter/values", ByMutation},
+	{"every numbering scheme this build carries can say what its values look like, so no scheme reaches a surface with nothing to describe it", "TestEverySchemeSaysWhatItsValuesLookLike", "internal/adapter/values", ByMutation},
+	{"the reader of a mask refuses what a mask forbids, so a mask that agrees with everything cannot pass for one that works", "TestAMaskRefusesTheThingsItIsMeantTo", "internal/adapter/values", ByMutation},
+	{"every mask fits the panel it is drawn in, because canvas text does not wrap and a mask too long widens the whole panel instead of overflowing", "TestEveryMaskFitsThePanelItIsDrawnIn", "internal/gui/quickview", ByMutation},
 }

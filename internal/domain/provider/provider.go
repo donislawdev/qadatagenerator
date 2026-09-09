@@ -284,6 +284,115 @@ type Provider interface {
 	Validate(value string) Verdict
 }
 
+// Shaped is required of every provider in this build, and says what one of its
+// values looks like written down.
+//
+// # Why a surface needs this at all
+//
+// Because a person meeting a scheme for the first time cannot tell from three
+// sample values whether the next one will be the same length, whether the
+// punctuation is part of it, or whether letters can appear. The window beside
+// the values had four facts about a kind and none of them was the shape of one,
+// which is what the owner meant by there being too little there.
+//
+// # 🔴 Why a mask and not a sentence
+//
+// A sentence about a scheme is prose, and prose is the one thing in this
+// project that nothing checks - it would sit in eleven files and go stale
+// silently. A mask is checkable against the thing it describes, and the guard
+// beside this contract does exactly that: it generates values and refuses a
+// mask that does not fit them. So this cannot drift from the truth without
+// something going red.
+//
+// It also keeps the contract out of the business of language. A mask carries no
+// words, so it needs no translation and no source of its own beyond the values
+// it matches. What a mask MEANS in words - how many digits, in how many groups
+// - a surface works out from the mask itself rather than being told.
+//
+// # What a mask says, and it is deliberately little
+//
+// One character of the mask per character of the value:
+//
+//   - MaskDigit stands for a character that is always a digit.
+//   - MaskAlnum stands for one that may be a digit or a letter.
+//   - anything else stands for itself, and is written in every value.
+//
+// It describes what THIS BUILD PRODUCES rather than everything the scheme
+// permits, and that is the honest scope: the panel carrying it stands beside
+// ten values a person is looking at. Where a scheme has forms this build does
+// not generate, the mask says nothing about them, and the provider's own
+// comment is where that is written down.
+type Shaped interface {
+	// Mask is the written form of one value this provider produces.
+	Mask() string
+}
+
+// The two characters a mask uses for a place that varies. Everything else in a
+// mask stands for itself.
+//
+// They are single characters rather than words so that a mask is the same
+// LENGTH as the value it describes, which is what makes it checkable one
+// character at a time and readable as a shape rather than as a formula.
+const (
+	// MaskDigit is a place holding one digit, nought to nine.
+	//
+	// 🔴 A nought rather than a hash, and it was settled by looking rather
+	// than by argument. Rendered side by side on 2026-09-09, "###-##-####"
+	// reads as a thicket of strokes at the size this panel uses, while
+	// "000-00-0000" reads instantly as three groups of digits - it has the
+	// shape of the thing it describes, which is the entire job.
+	//
+	// The cost is named rather than discovered: a nought can no longer be a
+	// LITERAL in a mask. No scheme this build carries writes a fixed digit
+	// into its form, so nothing is lost today, and the first one that does
+	// will have to move this character rather than work around it.
+	MaskDigit = '0'
+	// MaskAlnum is a place holding a digit or a letter, which is what the
+	// vehicle identifier needs and what no purely numeric scheme uses.
+	//
+	// It collides with a real character in the way MaskDigit no longer does -
+	// a vehicle identifier may genuinely contain an A - and that is harmless
+	// for the same reason it would not be for a digit: no scheme here writes a
+	// fixed LETTER into its form either, so a mask is never ambiguous about
+	// whether a place varies.
+	MaskAlnum = 'A'
+)
+
+// FitsMask says whether a value is written the way a mask says.
+//
+// It lives here rather than in a test so that the one reading of a mask is the
+// one everything uses: the guard that proves a provider's mask, and any surface
+// that ever wants to check a value somebody typed. Two readings of a mask would
+// be two masks.
+func FitsMask(mask, value string) bool {
+	if len(mask) != len(value) {
+		return false
+	}
+	for i := 0; i < len(mask); i++ {
+		got := value[i]
+		switch mask[i] {
+		case MaskDigit:
+			if got < '0' || got > '9' {
+				return false
+			}
+		case MaskAlnum:
+			digit := got >= '0' && got <= '9'
+			letter := (got >= 'A' && got <= 'Z') || (got >= 'a' && got <= 'z')
+			if !digit && !letter {
+				return false
+			}
+		default:
+			// A literal, and it has to be exactly itself. This is the half
+			// that catches a mask which forgot a hyphen, and the half a
+			// length check alone would miss.
+			if got != mask[i] {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // CheckDigited is required of a provider declaring identifier.check-digit.
 //
 // Being able to compute the correct check digit is what makes it possible to

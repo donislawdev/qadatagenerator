@@ -1,6 +1,8 @@
 package intl
 
 import (
+	"strings"
+
 	"fmt"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
@@ -201,6 +203,11 @@ func (ISBN) ID() string { return "isbn" }
 // no reserved range to declare, for the reason written on the type, and a
 // declaration made anyway would be a promise to a manifest that nothing here
 // could keep.
+// Mask is thirteen digits, unpunctuated. The hyphenated form a book prints
+// splits the number in places that depend on the registration group, so there
+// is no single punctuated mask and this build produces none.
+func (ISBN) Mask() string { return strings.Repeat(string(provider.MaskDigit), isbnLength) }
+
 func (ISBN) Capabilities() []capability.Name {
 	return []capability.Name{capability.IdentifierCheckDigit}
 }

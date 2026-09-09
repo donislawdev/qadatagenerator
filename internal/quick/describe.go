@@ -3,6 +3,7 @@ package quick
 import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
+	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 )
 
 // Description is what this build knows ABOUT a kind of value, as opposed to how
@@ -34,6 +35,17 @@ type Description struct {
 	// Scheme is the numbering scheme behind it, empty where there is none.
 	// A first name has no scheme. A PESEL is PL.pesel.
 	Scheme string
+	// Mask is the written form of one value of this scheme, empty for a kind
+	// that has no scheme behind it.
+	//
+	// # Why a surface is given the mask rather than a sentence about it
+	//
+	// Because the mask is the fact and the sentence is a rendering of it. A
+	// window shows the mask itself - somebody comparing it against the values
+	// beside it learns the shape faster than from any wording - and works out
+	// what to say about it with Places below. The wording is then a matter for
+	// the language of the interface, which is where wording belongs.
+	Mask string
 	// CheckDigit says the value carries a digit computed from the rest of it,
 	// so that one wrong character can be caught by the number alone.
 	CheckDigit bool
@@ -88,6 +100,9 @@ func Describe(generator, locale string) Description {
 	if !found {
 		return about
 	}
+	if shaped, saysSo := numbering.(provider.Shaped); saysSo {
+		about.Mask = shaped.Mask()
+	}
 	for _, declared := range numbering.Capabilities() {
 		switch declared {
 		case capability.IdentifierCheckDigit:
@@ -97,4 +112,29 @@ func Describe(generator, locale string) Description {
 		}
 	}
 	return about
+}
+
+// Places counts what varies in a mask: how many characters a person would have
+// to fill in, and whether any of them may be a letter.
+//
+// # Why the mode counts this and not the window
+//
+// Because it is a reading of a mask, and a mask has to be read the same way
+// wherever it is read. Two surfaces counting characters separately would be two
+// readings, and they would part company the first time a mask gained a
+// separator - one of them would call it a place to fill in and the other would
+// not, and both would look right.
+//
+// The window turns the pair into words, which is the half that depends on the
+// language somebody reads.
+func Places(mask string) (count int, letters bool) {
+	for i := 0; i < len(mask); i++ {
+		switch mask[i] {
+		case provider.MaskDigit:
+			count++
+		case provider.MaskAlnum:
+			count, letters = count+1, true
+		}
+	}
+	return count, letters
 }
