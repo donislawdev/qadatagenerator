@@ -104,20 +104,42 @@ var HandmadeAllowed = map[string]Handmade{
 			"paint.ButtonFace, so the mock and the window share ONE drawing rather than two that agree " +
 			"until somebody changes either",
 	},
+	"Select": {
+		Instead: "widget.Select dressed by the theme, which is what this was until 2026-09-09",
+		Why: "two of the four differences from the accepted drawing are beyond any theme, read on the " +
+			"source of v2.8.1. The toolkit draws a chooser no edge at all, so this package laid a " +
+			"rectangle beside the control and showed it by hand. And selectRenderer.bgColor at " +
+			"widget/select.go:432 floods a focused one with the focus colour, where the value on it " +
+			"measures 1.56 against the 4.5 of WCAG 1.4.3, so a scope overriding the theme had to sit " +
+			"around every chooser to change the ink. Only the DRAWING is taken over: the pop up menu, " +
+			"the keys and the selection stay the toolkit's, since none of that was what differed",
+	},
+	"chooserRenderer": {
+		Instead: "the renderer widget.Select builds for itself",
+		Why: "it is the renderer that performs the flood above and that leaves out the edge, so it is " +
+			"the only place either can be decided. It draws paint.ChooserFace, which is the drawing " +
+			"the mock uses, so the two cannot differ. Its MinSize also stops being the width of the " +
+			"words (Select one), which is what the toolkit's measures no matter what the chooser holds",
+	},
 }
 
 // HandmadeCeiling is how many pieces of the toolkit this project may carry
 // copies of. Lower it when one goes back to the library.
 //
-// 🔴 Raised from 1 to 5 on 2026-09-09 by the owner's decision, and the number
-// is the count of the entries above rather than room to grow. Two controls draw
-// themselves and each costs a type and a renderer, which is four, beside the
-// one layout that was here before.
+// 🔴 Raised from 1 to 5 and then to 7 on 2026-09-09, by the owner's decision,
+// and the number is the count of the entries above rather than room to grow.
+// Three controls draw themselves and each costs a type and a renderer, which is
+// six, beside the one layout that was here before.
+//
+// The owner set both the decision and its pace: one control at a time, with a
+// render of the window to look at before the next one starts. So this number
+// moves by two, on purpose, and a jump of more than two is somebody having
+// converted several controls without anybody having seen any of them.
 //
 // What lowers it again: a control going back to the library, which will happen
 // if the toolkit ever lets a caller supply the content of a button. Nothing
 // else does.
-const HandmadeCeiling = 5
+const HandmadeCeiling = 7
 
 // Handmades reports every layout and widget written inside the window, and
 // every register entry naming one that is no longer there.

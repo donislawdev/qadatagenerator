@@ -2,67 +2,73 @@ package parts
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 )
 
-// Select is the toolkit's chooser, dressed so its value stays readable while
-// the keyboard is on it.
+// Select is a chooser this window draws itself, over the behaviour of the
+// toolkit's.
 //
-// # Why this exists beside Button
+// # 🔴 Why it stopped being the toolkit's drawing, on 2026-09-09
 //
-// For one reason, and it is the same reason: widget/select.go:432 answers a
-// focused chooser with ColorNameFocus for its whole background, exactly as
-// widget/button.go:379 does for a button. The value written across that
-// background is drawn in the ordinary foreground colour, which measures 1.56
-// on it where WCAG 1.4.3 asks for 4.5. Flooded says what that number is and
-// why no colour of fill repairs it.
+// The same finding that moved the button one commit earlier, and the same
+// measurement: the accepted drawing built its choosers out of paint.ChooserFace
+// and the window built them out of widget.Select wearing two patches, so there
+// were two drawings of one control and nothing holding them together. Counted
+// on the day: three uses of that face in the mock, NONE in the product.
 //
-// This one was found by reading the toolkit rather than by looking, because
-// the catalogue of screen states had no state with the keyboard on a chooser,
-// so nothing ever photographed it. The state was added with this type.
+// # What was tried first, and why the theme could not reach it
 //
-// # Why an extension rather than a control of our own
+// Dressing the toolkit's chooser is cheaper and leaves no renderer to go stale,
+// which is why it was the road taken for a month. Its ceiling was read on the
+// source of v2.8.1 rather than guessed, and two of the four differences are
+// beyond it:
 //
-// Everything the chooser does stays the toolkit's: the list, the pop up, the
-// keys, the drawing. What is added is a flag saying where the keyboard is, and
-// the theme that reads it. There is no renderer here to go stale.
+//   - The edge. The toolkit draws none for a chooser, so this package laid a
+//     rectangle BESIDE the control and showed or hid it by hand.
+//   - The focus mark. selectRenderer.bgColor at widget/select.go:432 floods the
+//     whole control with the focus colour, and the value written across it
+//     measures 1.56 where WCAG 1.4.3 asks for 4.5. No colour repairs that,
+//     which is what parts.Flooded exists to say, so this package overrode the
+//     theme of a scope around every chooser to change the ink of the value.
+//
+// Both patches are gone with this renderer, along with the height floor and the
+// scope they needed to live in. The register of pieces rebuilt here gains two
+// entries and the tree loses three wrappers per chooser.
+//
+// # What stays the toolkit's, and it is the larger half
+//
+// Everything that is not the drawing: the pop up menu, where it opens, the keys
+// that walk the options, the selection itself and the binding. None of that is
+// reachable from outside the package - showPopUp is private and so is the pop
+// up it keeps - and none of it is what the owner was looking at.
+//
+// 🔴 A renderer of our own does not disturb it, which was read rather than
+// assumed: Tapped needs no renderer beyond an animation it skips when nil, and
+// showPopUp asks the widget for its size and its canvas, never for its
+// drawing.
 type Select struct {
 	widget.Select
 
-	// keyboardIsHere is kept here for the reason it is kept on Button: the
-	// canvas is wrong about focus at the moment it changes, because a control
-	// redraws from inside FocusLost before the focus manager moves its record.
+	// keyboardIsHere is kept here rather than read from the canvas, because the
+	// canvas is wrong about it at exactly the moment it changes: a control
+	// redraws from inside FocusLost, before the focus manager has moved its own
+	// record.
 	keyboardIsHere bool
-	onScreen       fyne.CanvasObject
-
-	// edge is the rectangle that says this is a control rather than a word.
-	//
-	// 🔴 # Why a chooser needs one when its arrow already says what it is
-	//
-	// Measured on 2026-09-06: the fill of a chooser at rest arrives as #202023
-	// against a panel of #242424, which is 1.05 where WCAG 1.4.11 asks for 3.0.
-	// The arrow beside the value is plain enough at 13.26, and it says WHAT the
-	// control is. It does not say WHERE it is, which is the other half of what
-	// a person needs in order to click one.
-	//
-	// The argument that settled it is not that number, though. A chooser and a
-	// text field sit in ONE form on two screens of this window, rows apart, and
-	// only one of them has a box: the toolkit draws an outline for an entry at
-	// widget/entry.go and none for a chooser. That difference is an accident of
-	// which widget the toolkit happens to border, not a decision anybody made,
-	// and it reads on screen as two kinds of control where there is one.
-	//
-	// The heading of a disclosure was deliberately left without an edge on
-	// 2026-09-05 and does not settle this one: the reason there was that the
-	// heading is as wide as its pane, so a box around it reads as a box around
-	// a section. A chooser is compact and stands in a form beside bordered
-	// fields.
-	edge *canvas.Rectangle
 }
 
-// NewSelect builds a chooser whose value can be read while the keyboard is on
-// it.
+// Interfaces are asserted here for the reason Button asserts them: a widget
+// that quietly stops being focusable still compiles and still draws, and the
+// only symptom is a person with a keyboard never reaching it.
+var (
+	_ fyne.Widget    = (*Select)(nil)
+	_ fyne.Tappable  = (*Select)(nil)
+	_ fyne.Focusable = (*Select)(nil)
+)
+
+// NewSelect builds a chooser that draws itself.
 //
 // # 🔴 Why the toolkit's constructor is read from rather than copied
 //
@@ -82,65 +88,37 @@ type Select struct {
 // the value is truncated to an ellipsis and drawn at -4,-4. 54 choosers across
 // 22 screen states, on both screens that have one.
 //
-// KeyTable in this same package sets its fields by hand and says why in a
-// sentence that describes this exact trap. A rule written beside a neighbour
-// does not protect the neighbour.
+// 🔴 It matters more now than it did then, and in a way that would be harder to
+// see. widget.Select.MinSize begins with s.ExtendBaseWidget(s) on the EMBEDDED
+// widget, so a chooser that reached that line with no impl would answer with
+// the toolkit's own size and the toolkit's own drawing, for the rest of its
+// life. It cannot, because the line below runs first, and that is the whole
+// reason this is a constructor rather than a struct literal callers write.
 //
 // The placeholder is READ from a throwaway chooser rather than spelled again
-// here, which keeps the original reason for the copy: the toolkit does not
-// export that string, and a second copy of it would drift the first time the
-// toolkit changed its wording. Reading it costs one widget that is never drawn
-// and never resized, so no impl of ours is involved.
+// here: the toolkit does not export that string, and a second copy of it would
+// drift the first time the toolkit changed its wording.
 func NewSelect(options []string, changed func(string)) *Select {
 	chooser := &Select{}
 	chooser.Options = options
 	chooser.OnChanged = changed
 	chooser.PlaceHolder = widget.NewSelect(nil, nil).PlaceHolder
 	chooser.ExtendBaseWidget(chooser)
-	dressed, edge := Outlined(Flooded(chooser, chooser.hasKeyboard))
-	chooser.onScreen, chooser.edge = standing(dressed), edge
-	chooser.markEdge()
 	return chooser
 }
 
-// OnScreen is what a layout is given, rather than the chooser itself. Button
-// says why.
-func (s *Select) OnScreen() fyne.CanvasObject {
-	s.markEdge()
-	return s.onScreen
-}
-
-// Refresh settles the edge, then lets the toolkit redraw. Button says why this
-// is the place and what it does not reach.
-func (s *Select) Refresh() {
-	s.markEdge()
-	s.Select.Refresh()
-}
-
-// markEdge shows the edge on a chooser somebody can use, and hides it
-// otherwise.
+// OnScreen is what a layout is given.
 //
-// Only the disabled case, because a chooser has no notion of importance. An
-// edge says a control can be used, so leaving it on a disabled one would make
-// the thing nobody can touch the most visible thing on the screen, and would
-// take away the mark the disabled state gained when the button got one.
-func (s *Select) markEdge() {
-	if s.edge == nil {
-		return
-	}
-	if s.Disabled() {
-		s.edge.Hide()
-		return
-	}
-	s.edge.Show()
-}
-
-func (s *Select) hasKeyboard() bool { return s.keyboardIsHere }
+// It hands back the chooser itself, and it stays for the reason the same method
+// on Button stays: until this control drew itself a layout had to be given the
+// scope the theme override lived in, and removing the method now would be a
+// rename of every call site saying nothing new.
+func (s *Select) OnScreen() fyne.CanvasObject { return s }
 
 // FocusGained notes that the keyboard arrived, then lets the toolkit redraw.
 //
-// The flag is set first because the toolkit's own FocusGained ends in the
-// Refresh that asks the theme for the colour of the value.
+// The flag is set before the toolkit's own method rather than after, because
+// that method ends in the Refresh that builds the face.
 func (s *Select) FocusGained() {
 	s.keyboardIsHere = true
 	s.Select.FocusGained()
@@ -151,3 +129,95 @@ func (s *Select) FocusLost() {
 	s.keyboardIsHere = false
 	s.Select.FocusLost()
 }
+
+// TypedKey opens the list on Enter as well as on the keys the toolkit answers.
+//
+// # Why this is here at all
+//
+// widget.Select opens on Space, Up and Down, and does nothing at all on Enter.
+// That is the fault the button was given a key for on 2026-08-18, arriving at
+// the control next door: a person presses the key that means yes, gets silence,
+// and cannot tell a control that ignores the key from a program that has
+// stopped answering. Silence in place of an answer is the one thing this
+// product refuses everywhere else.
+//
+// It is spelled as the key the toolkit already understands rather than as a
+// call, because opening the list is showPopUp and that method is private. Both
+// names of the key are accepted because a keyboard has two of them and nobody
+// thinks of them as different.
+func (s *Select) TypedKey(event *fyne.KeyEvent) {
+	if event == nil {
+		return
+	}
+	if event.Name == fyne.KeyReturn || event.Name == fyne.KeyEnter {
+		s.Select.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+		return
+	}
+	s.Select.TypedKey(event)
+}
+
+// CreateRenderer draws the face.
+func (s *Select) CreateRenderer() fyne.WidgetRenderer {
+	// The toolkit's own CreateRenderer begins by extending the embedded widget,
+	// and this one does not, deliberately. Reaching here at all means the cache
+	// asked THIS type for a renderer, which it only does when impl already
+	// names it. Calling it would be a no-op on every path that exists and a way
+	// to hide the missing constructor on any path that ever did not.
+	drawing := &chooserRenderer{chooser: s}
+	drawing.Refresh()
+	return drawing
+}
+
+// hasKeyboard is what the face is told, and what a guard can ask.
+func (s *Select) hasKeyboard() bool { return s.keyboardIsHere }
+
+// chooserRenderer draws whatever face the state of the chooser asks for.
+//
+// 🔴 The face is swapped INSIDE a holder rather than replacing a field, for the
+// reason written at length beside buttonRenderer: the toolkit takes Objects()
+// when it builds the renderer and lays out what it took, so a field reassigned
+// on every Refresh produces a tree nobody was given. Nothing fails and no test
+// sees it, because a guard reads the object the renderer HOLDS while the window
+// draws the one it was GIVEN. What Objects() hands back has to be one identity
+// for the life of the renderer.
+type chooserRenderer struct {
+	chooser *Select
+	holder  *fyne.Container
+}
+
+func (r *chooserRenderer) Layout(size fyne.Size) {
+	r.holder.Resize(size)
+	r.holder.Move(fyne.NewPos(0, 0))
+}
+
+func (r *chooserRenderer) MinSize() fyne.Size { return r.holder.MinSize() }
+
+func (r *chooserRenderer) Refresh() {
+	value, unchosen := r.chooser.Selected, false
+	if value == "" {
+		value, unchosen = r.chooser.PlaceHolder, true
+	}
+	face := paint.ChooserFace(paint.ChooserLook{
+		Value: value,
+		// 🔴 Wide enough for anything this chooser could be asked to show, not
+		// for what it shows now. ChooserWidth says why, and the short of it is
+		// that a row of settings that shuffles sideways when somebody chooses
+		// something is worse than one that is wider than it needs to be. The
+		// placeholder is in the reckoning because it is a value this control
+		// can display.
+		Width:    paint.ChooserWidth(append([]string{r.chooser.PlaceHolder}, r.chooser.Options...)...),
+		Unchosen: unchosen,
+		Focused:  r.chooser.hasKeyboard(),
+		Disabled: r.chooser.Disabled(),
+	})
+	if r.holder == nil {
+		r.holder = container.NewStack(face)
+		return
+	}
+	r.holder.Objects = []fyne.CanvasObject{face}
+	r.holder.Refresh()
+}
+
+func (r *chooserRenderer) Objects() []fyne.CanvasObject { return []fyne.CanvasObject{r.holder} }
+
+func (r *chooserRenderer) Destroy() {}

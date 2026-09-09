@@ -492,28 +492,32 @@
 															<widget pos="0,224" size="168x34" type="*widget.RichText">
 																<text alignment="trailing" bold pos="53,4" size="111x16">Defects per record</text>
 															</widget>
-															<container pos="168,224" size="363x34">
-																<rectangle size="363x34"/>
+															<widget pos="168,224" size="363x34" type="*parts.Select">
 																<container size="363x34">
-																	<widget size="363x34" type="*container.ThemeOverride">
-																		<container size="363x34">
-																			<widget size="363x34" type="*parts.Select">
-																				<rectangle fillColor="button" radius="6" size="363x34"/>
-																				<rectangle size="0x0"/>
-																				<widget pos="0,4" size="339x24" type="*widget.RichText">
-																					<text pos="4,4" size="66x16">Exactly one</text>
-																				</widget>
-																				<widget pos="339,7" size="20x20" type="*widget.Icon">
-																					<image fillMode="contain" rsc="chevron-down-b4b1a9-15.svg" size="iconInlineSize"/>
-																				</widget>
-																			</widget>
-																		</container>
-																	</widget>
 																	<container size="363x34">
-																		<rectangle pos="1,1" radius="5" size="361x32" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+																		<rectangle size="363x34"/>
+																		<container size="363x34">
+																			<rectangle fillColor="button" radius="6" size="363x34" strokeColor="inputBorder" strokeWidth="2"/>
+																			<container size="363x34">
+																				<container pos="12,4" size="343x26">
+																					<container size="316x26">
+																						<spacer size="316x4"/>
+																						<text pos="0,4" size="316x16">Exactly one</text>
+																						<spacer pos="0,21" size="316x4"/>
+																					</container>
+																					<container pos="316,0" size="27x26">
+																						<container pos="8,4" size="15x18">
+																							<spacer size="15x1"/>
+																							<image fillMode="contain" pos="0,1" rsc="chevron-down-b4b1a9-15.svg" size="15x15"/>
+																							<spacer pos="0,16" size="15x1"/>
+																						</container>
+																					</container>
+																				</container>
+																			</container>
+																		</container>
 																	</container>
 																</container>
-															</container>
+															</widget>
 															<widget pos="0,258" size="168x24" type="*widget.RichText">
 																<text alignment="trailing" bold pos="25,4" size="139x16">Columns to leave alone</text>
 															</widget>
@@ -590,28 +594,32 @@
 															<widget pos="0,382" size="168x34" type="*widget.RichText">
 																<text alignment="trailing" bold pos="45,4" size="119x16">Extra manifest form</text>
 															</widget>
-															<container pos="168,382" size="363x34">
-																<rectangle size="363x34"/>
+															<widget pos="168,382" size="363x34" type="*parts.Select">
 																<container size="363x34">
-																	<widget size="363x34" type="*container.ThemeOverride">
-																		<container size="363x34">
-																			<widget size="363x34" type="*parts.Select">
-																				<rectangle fillColor="button" radius="6" size="363x34"/>
-																				<rectangle size="0x0"/>
-																				<widget pos="0,4" size="339x24" type="*widget.RichText">
-																					<text pos="4,4" size="29x16">none</text>
-																				</widget>
-																				<widget pos="339,7" size="20x20" type="*widget.Icon">
-																					<image fillMode="contain" rsc="chevron-down-b4b1a9-15.svg" size="iconInlineSize"/>
-																				</widget>
-																			</widget>
-																		</container>
-																	</widget>
 																	<container size="363x34">
-																		<rectangle pos="1,1" radius="5" size="361x32" strokeColor="rgba(114,114,114,255)" strokeWidth="2"/>
+																		<rectangle size="363x34"/>
+																		<container size="363x34">
+																			<rectangle fillColor="button" radius="6" size="363x34" strokeColor="inputBorder" strokeWidth="2"/>
+																			<container size="363x34">
+																				<container pos="12,4" size="343x26">
+																					<container size="316x26">
+																						<spacer size="316x4"/>
+																						<text pos="0,4" size="316x16">none</text>
+																						<spacer pos="0,21" size="316x4"/>
+																					</container>
+																					<container pos="316,0" size="27x26">
+																						<container pos="8,4" size="15x18">
+																							<spacer size="15x1"/>
+																							<image fillMode="contain" pos="0,1" rsc="chevron-down-b4b1a9-15.svg" size="15x15"/>
+																							<spacer pos="0,16" size="15x1"/>
+																						</container>
+																					</container>
+																				</container>
+																			</container>
+																		</container>
 																	</container>
 																</container>
-															</container>
+															</widget>
 															<widget pos="0,416" size="168x24" type="*widget.RichText">
 																<text alignment="trailing" bold pos="4,4" size="160x16">Replace files already there</text>
 															</widget>

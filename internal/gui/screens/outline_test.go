@@ -6,12 +6,10 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/test"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
-	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
 // TestEveryPressableControlDrawsItsOwnEdge walks every state of every screen and
@@ -19,12 +17,12 @@ import (
 //
 // # Why the question is about the tree and not about the colour
 //
-// The lesson is a day old and it cost a whole guard. A test that asks what
-// colour a control will be painted passes even when the control was handed to a
-// layout wrongly, because the toolkit resolves colours from the moment a scope
-// is built rather than from where the object ends up. So this asks the shape of
-// the tree instead: the layout has to have been given the container Outlined
-// builds, with the edge in it beside the control.
+// A test that asks what colour a control will be painted passes even when the
+// control was handed to a layout wrongly, because the toolkit resolves colours
+// from the moment a scope is built rather than from where the object ends up.
+// That cost a whole guard on 2026-09-08. So this asks the shape of what is
+// drawn instead: the face the renderer of the control puts on screen has to
+// carry a stroke, or not carry one, according to what the control is.
 //
 // # Why it is not a number off the render either
 //
@@ -43,86 +41,49 @@ import (
 // # The third case, which this walk cannot see, and where it is held instead
 //
 // parts.PrimaryButton has no edge either, and it never reaches this walk at
-// all: it is handed to a layout bare rather than through the container Outlined
-// builds, so controlDressedIn never finds it. That is deliberate and it is why
-// the guard below exists. A control this one silently passes over is a control
-// the promise in this name is no longer true of, and an exception nobody checks
-// is the same thing as no rule.
+// all: it is handed to a layout bare and its face carries no edge for the walk
+// to find. That is deliberate and it is why the guard below exists. A control
+// this one silently passes over is a control the promise in this name is no
+// longer true of, and an exception nobody checks is the same thing as no rule.
+//
+// # 🔴 Why there is one walk here since 2026-09-09, where there were two
+//
+// There were two because the two controls answered this question in two
+// different places: the button drew its own face, so its edge was inside its
+// renderer, while the chooser was the toolkit's with a rectangle laid BESIDE
+// it, so its edge was a sibling in the layout. The comment on the second walk
+// said what to do on the day the chooser drew itself too, and this is it: the
+// walk over siblings goes, and this one covers both.
+//
+// What went with it is the colour and the thickness of the edge, which the
+// walk over siblings also asked. Those moved to parts, where the renderer of
+// each control can be reached and where the same questions are already asked of
+// the button. Here the question is the structural one, over every state of
+// every screen: whether the mark is there at all, and whether the two controls
+// that go without are the two that were decided.
 func TestEveryPressableControlDrawsItsOwnEdge(t *testing.T) {
 	data := sampleWithSource(t)
-	want := rgba(palette.Named(palette.NameControlOutline).NRGBA())
 
 	for _, state := range All() {
 		content := Assemble(i18n.English, data, state)
 		found := 0
 		walkTree(content, false, func(object fyne.CanvasObject, _ bool) {
-			group, isGroup := object.(*fyne.Container)
-			if !isGroup {
-				return
-			}
-			control, name := controlDressedIn(group)
-			if control == nil {
+			control, name := ourControl(object)
+			if control == nil || !object.Visible() {
 				return
 			}
 			found++
 
-			edge := edgeIn(group)
-			if edge == nil {
-				t.Errorf("%s: %s stands on screen with no edge beside it. "+
-					"A layout was given the dressed control rather than what Outlined returns",
-					state.Name, name)
-				return
-			}
-			if got := rgba(edge.StrokeColor); got != want {
-				t.Errorf("%s: %s is outlined %v, where the palette says %v",
-					state.Name, name, got, want)
-			}
-			if edge.StrokeWidth != palette.BorderThickness {
-				t.Errorf("%s: %s is outlined %v thick, where the palette says %v. "+
-					"Below that the toolkit draws the line between two rows of pixels "+
-					"and every pixel of it is a half blend",
-					state.Name, name, edge.StrokeWidth, palette.BorderThickness)
-			}
-
+			drawn := edgesInFace(test.WidgetRenderer(object.(fyne.Widget)).Objects())
 			// 🔴 A chooser has no notion of importance, so the quiet cases are
 			// asked of the control rather than assumed of a button. Reading
 			// Importance off something that has none would have been a
 			// compile error here and a wrong rule anywhere it was not.
 			quiet := control.quiet()
-			if edge.Visible() == quiet {
-				t.Errorf("%s: %s shows its edge %v where it should be %v. "+
-					"An edge says a control can be used, so a disabled one and a heading go without",
-					state.Name, name, edge.Visible(), !quiet)
-			}
-		})
-
-		// 🔴 The second walk, added 2026-09-09, and it is a second walk rather
-		// than a second case in the first because the two controls now answer
-		// this question in two different places.
-		//
-		// parts.Select is still the toolkit's chooser with a rectangle laid
-		// beside it, so its edge is a sibling and the walk above finds it.
-		// parts.Button draws its own face, so its edge is INSIDE its renderer
-		// and no walk of the layout tree will ever see it. Left with one walk,
-		// this guard reported "holds no button at all" on every screen without
-		// a chooser - which is the failure mode it was built to have, and it
-		// worked: a control that quietly leaves the walk is a control the
-		// promise in this name is no longer true of.
-		//
-		// When the chooser draws itself too, the first walk goes and this one
-		// covers everything.
-		walkTree(content, false, func(object fyne.CanvasObject, _ bool) {
-			button, ours := object.(*parts.Button)
-			if !ours || !button.Visible() {
-				return
-			}
-			found++
-			drawn := edgesInFace(test.WidgetRenderer(button).Objects())
-			quiet := quietButton{button}.quiet()
 			if drawn == quiet {
-				t.Errorf("%s: the button %q draws an edge: %v, where a quiet one is %v. "+
+				t.Errorf("%s: %s draws an edge: %v, where a quiet one is %v. "+
 					"An edge says a control can be used, so a disabled one and a heading go without",
-					state.Name, button.Text, drawn, quiet)
+					state.Name, name, drawn, quiet)
 			}
 		})
 
@@ -166,33 +127,21 @@ type outlined interface {
 	quiet() bool
 }
 
-// controlDressedIn is the control this container was built around, if it was.
+// ourControl is the control this object is, if it is one of the two this window
+// draws itself, named for a message.
 //
-// Only the direct children are read. A container holding such a container
-// somewhere below it is an ordinary layout and owes nothing, and reading the
-// whole subtree would make every ancestor of every control a finding.
-func controlDressedIn(group *fyne.Container) (outlined, string) {
-	for _, child := range group.Objects {
-		dressed, own := child.(*container.ThemeOverride)
-		if !own {
-			continue
-		}
-		var found outlined
-		var name string
-		walkTree(dressed, false, func(object fyne.CanvasObject, _ bool) {
-			if found != nil {
-				return
-			}
-			switch typed := object.(type) {
-			case *parts.Button:
-				found, name = quietButton{typed}, fmt.Sprintf("the button %q", typed.Text)
-			case *parts.Select:
-				found, name = quietSelect{typed}, fmt.Sprintf("the chooser %q", typed.Selected)
-			}
-		})
-		if found != nil {
-			return found, name
-		}
+// 🔴 It replaced a helper that looked for the CONTAINER a control had been
+// dressed in, and the difference is the whole point of the change it came with.
+// That one could only find a control somebody had wrapped, so a control handed
+// to a layout bare left the walk without a word - which is how a guard about
+// every pressable control came to be silent about the one this project cares
+// most about. Asking the object what it is has no such gap.
+func ourControl(object fyne.CanvasObject) (outlined, string) {
+	switch typed := object.(type) {
+	case *parts.Button:
+		return quietButton{typed}, fmt.Sprintf("the button %q", typed.Text)
+	case *parts.Select:
+		return quietSelect{typed}, fmt.Sprintf("the chooser %q", typed.Selected)
 	}
 	return nil, ""
 }

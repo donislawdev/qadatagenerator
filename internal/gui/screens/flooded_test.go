@@ -7,55 +7,63 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/test"
-	toolkit "fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
-	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
-// TestEveryFloodedControlKeepsItsLabelReadable walks every state of every
-// screen and asks each control the toolkit floods with the focus colour what
-// its label will be painted with while the keyboard is on it.
+// TestNoScreenHoldsAControlTheToolkitFloods walks every state of every screen
+// and refuses any control the toolkit paints over with the focus colour.
 //
-// # Why this is a walk of the tree rather than a number off the render
+// # 🔴 Why this asks the opposite of what it asked until 2026-09-09
 //
-// The render measures pixels, which is the stronger evidence, but it only
-// measures what it can find: on 2026-09-05 it reported 1015 text nodes
-// measured and 1554 it could not measure, and the value written across a
-// chooser was among the second group. A control nothing photographs is a
-// control nothing guards, so absence from the failure list of that probe is
-// not a pass. This walk has no such gap, because it asks the control rather
-// than the picture.
+// It used to be TestEveryFloodedControlKeepsItsLabelReadable, and it checked
+// that each such control sat inside a theme of its own that repaired the ink of
+// its label. That was the right question while the window was built out of the
+// toolkit's controls: the flood is 1.56 for the words written across it, no
+// fill repairs it, and changing the ink was the only answer available.
 //
-// # Why it also refuses a bare toolkit control
+// The chooser was the last control that needed it. Both controls of this window
+// now draw their own face and their own focus ring, so nothing here is flooded
+// and there is no ink to repair. Its own comment said what to do on that day
+// and this is the half of it worth keeping: the question about the repair goes,
+// the question about the DAMAGE stays.
+//
+// That is the stronger of the two, and it was always available. A control the
+// toolkit floods can only be dressed when somebody remembers to hand a layout
+// its OnScreen rather than the control, which is a thing to get right at every
+// call site. Not having one on screen at all is a thing to get right once.
+//
+// # Why a bare toolkit control is the thing being refused
 //
 // A widget.Button or a widget.Select that is not one of ours is one nothing can
 // dress, since the theme that repairs the label is given to a container built
 // around the control and there is no container around a control the toolkit
 // makes inside its own renderer. That is why the list of generators stopped
-// being a widget.Accordion. A bare one appearing here again means the same
-// defect has come back by another door.
-func TestEveryFloodedControlKeepsItsLabelReadable(t *testing.T) {
+// being a widget.Accordion. One appearing here means the defect has come back
+// by another door, and now it means something simpler as well: a screen went
+// back to a control that does not look like the rest of the window.
+func TestNoScreenHoldsAControlTheToolkitFloods(t *testing.T) {
 	data := sampleWithSource(t)
-	// 🔴 The token rather than the old palette entry, moved 2026-09-09 with the
-	// ink itself. A guard keeps its own copy of what it is comparing against,
-	// and a copy left on the register the window no longer reads is a guard
-	// measuring a pair that is not on screen.
-	onFocus := palette.Ink(palette.TextOnMark)
 
-	// 🔴 Counted across the whole walk rather than per state, changed
-	// 2026-09-09. It used to demand a flooded control in EVERY state, which was
-	// right while every screen had one: back then a state with none meant the
-	// walk had lost its way. Now that the button draws itself, the About screen
-	// genuinely has nothing the toolkit floods, and per state this would report
-	// a screen for being CORRECT. The thing worth refusing is a walk that found
-	// nothing anywhere, and that is what this counts.
-	found := 0
+	// 🔴 The canary, and it is what stops this guard passing by walking
+	// nothing. The count it used to keep was of the controls it objected to,
+	// which is now expected to be nought, so a broken walk and a clean window
+	// would read alike. This counts the controls it walked PAST instead: our
+	// own two, which every screen but About has several of. Nought of those
+	// means the walk stopped reaching controls, whatever it reports.
+	ours := 0
 	for _, state := range All() {
 		content := Assemble(i18n.English, data, state)
-		walkTree(content, false, func(object fyne.CanvasObject, dressed bool) {
+		walkTree(content, false, func(object fyne.CanvasObject, _ bool) {
+			switch object.(type) {
+			case *parts.Button, *parts.Select:
+				if object.Visible() {
+					ours++
+				}
+			}
+
 			name, flooded := floodedControl(object)
 			if !flooded {
 				return
@@ -75,53 +83,15 @@ func TestEveryFloodedControlKeepsItsLabelReadable(t *testing.T) {
 			if !object.Visible() {
 				return
 			}
-			found++
-			// 🔴 THE STRUCTURAL QUESTION, and it is the one that catches a
-			// mistake. The colour question below cannot: measured on
-			// 2026-09-05, a button handed to a layout WITHOUT OnScreen still
-			// paints its label correctly, because NewThemeOverride registers
-			// the whole subtree the moment it is built and cache.Renderer
-			// makes the renderer to reach it. So the colour is right by a side
-			// effect of construction, whatever ends up on screen.
-			//
-			// We do not build on that. What the toolkit promises is a
-			// container whose children are themed, and a container that is not
-			// on screen also never pushes its theme while the window lays
-			// itself out. Leaning on the side effect would be leaning on
-			// something nobody wrote down and nobody has to keep true.
-			if !dressed {
-				t.Errorf("%s: %s stands on screen outside any theme of its own. "+
-					"A layout was given the control rather than its OnScreen",
-					state.Name, name)
-			}
-
-			focusable, takesKeyboard := object.(fyne.Focusable)
-			if !takesKeyboard {
-				t.Errorf("%s: %s is flooded with the focus colour and cannot take the keyboard",
-					state.Name, name)
-				return
-			}
-
-			resting := labelColour(object)
-			focusable.FocusGained()
-			holding := labelColour(object)
-			focusable.FocusLost()
-
-			if holding != rgba(onFocus) {
-				t.Errorf("%s: %s paints its label %v while the keyboard is on it, "+
-					"where the palette says %v",
-					state.Name, name, holding, rgba(onFocus))
-			}
-			if resting == holding {
-				t.Errorf("%s: %s paints its label the same colour with and without the "+
-					"keyboard, so nothing changed when it gained focus", state.Name, name)
-			}
+			t.Errorf("%s: %s. The toolkit floods it with the focus colour when the keyboard "+
+				"arrives, which measures 1.56 for the words written across it, and nothing "+
+				"outside its own renderer can repair that. Use the one in parts",
+				state.Name, name)
 		})
 	}
-	if found == 0 {
-		t.Error("no state of any screen holds a control the toolkit floods, so this walk " +
-			"passed by walking nothing. Either every control now draws itself, in which case " +
-			"delete this guard, or the walk stopped finding them")
+	if ours == 0 {
+		t.Error("no state of any screen holds a control of ours, so this walk passed by " +
+			"walking nothing rather than by finding a window built the way it should be")
 	}
 }
 
@@ -134,41 +104,25 @@ func TestEveryFloodedControlKeepsItsLabelReadable(t *testing.T) {
 // a bare toolkit control catching one if a menu ever arrives.
 func floodedControl(object fyne.CanvasObject) (string, bool) {
 	switch typed := object.(type) {
-	// 🔴 parts.Button is NOT here since 2026-09-09, and its absence is the
-	// finding rather than an omission.
+	// 🔴 Neither parts.Button nor parts.Select is here, and their absence is
+	// the finding rather than an omission.
 	//
 	// This guard is about one thing the toolkit does: it FLOODS a focused
-	// control with the focus colour, so whatever is written on that control has
-	// to change ink or become unreadable at 1.56. That is a fact about controls
-	// the toolkit draws. parts.Button draws its own face now, is never flooded,
-	// and paints its own focus ring, so asking it to change ink on focus would
-	// be demanding a repair for damage nobody does to it - and the guard said
-	// exactly that when the button moved: "paints its label the same colour
-	// with and without the keyboard".
+	// control with the focus colour, so whatever is written on that control
+	// becomes unreadable at 1.56. That is a fact about controls the TOOLKIT
+	// draws. Both of ours draw their own face and paint their own focus ring,
+	// so neither is ever flooded, and listing one here would be reporting a
+	// control for damage nobody does to it.
 	//
-	// It stays listed for parts.Select, which is still the toolkit's chooser
-	// underneath and still gets flooded. When that one draws itself too, this
-	// guard has nothing left to ask about and goes with it.
-	case *parts.Select:
-		return fmt.Sprintf("the chooser %q", typed.Selected), true
+	// parts.Select was listed until 2026-09-09 and came off on the day it began
+	// drawing itself. It is the reason this guard now asks its question the
+	// other way round.
 	case *widget.Button:
 		return fmt.Sprintf("a toolkit button %q, which nothing can dress", typed.Text), true
 	case *widget.Select:
 		return fmt.Sprintf("a toolkit chooser %q, which nothing can dress", typed.Selected), true
 	}
 	return "", false
-}
-
-// labelColour is what this control's own theme answers for the colour its
-// label is painted with.
-//
-// The colour is asked of the theme of the control rather than read off a
-// picture, because that is where the answer comes from: the renderer of a
-// button sets a colour NAME on its text and leaves the text to resolve it
-// against the scope it is in.
-func labelColour(object fyne.CanvasObject) [4]uint32 {
-	answer := toolkit.CurrentForWidget(object).Color(toolkit.ColorNameForeground, toolkit.VariantDark)
-	return rgba(answer)
 }
 
 func rgba(from interface {
