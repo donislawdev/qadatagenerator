@@ -292,7 +292,8 @@ func quickStatesOfThePointer() []State {
 // takeStates are the states of the screen that damages somebody else's file,
 // which is the screen with the most of them.
 func takeStates() []State {
-	states := append(takeStatesBeforeARun(), takeStatesOfTheKeyboard()...)
+	states := append(takeStatesBeforeARun(), takeStateOfThePointer()...)
+	states = append(states, takeStatesOfTheKeyboard()...)
 	states = append(states, takeStatesOfARun()...)
 	return append(states, takeStatesOfWhatARunLeft()...)
 }
@@ -318,6 +319,35 @@ func takeStatesBeforeARun() []State {
 			Screen:      screenTake,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
+		},
+	}
+}
+
+// takeStateOfThePointer is one picture on a SECOND screen, and it exists to
+// answer a question the six on the first one cannot.
+//
+// 🔴 Every touched state photographed elsewhere lives on the screen the states
+// of the pointer were built on, and a mechanism proved on one screen is a
+// mechanism nobody has run on the others. This project has paid for that
+// distinction: twenty three stored trees stood green for three weeks and failed
+// at the first run on a system they had never been run on.
+//
+// One rather than six, because what differs between screens is not the rule -
+// the controls are the same four types everywhere - but whether the screen
+// USES them. This build has no stock button or chooser on any screen, which is
+// what TestNoScreenHoldsAControlTheToolkitFloods already holds, so one picture
+// here turns that from an argument into a photograph.
+func takeStateOfThePointer() []State {
+	return []State{
+		{
+			Name: "take-pointer-choose",
+			Purpose: "the pointer on a control of a screen the states of the pointer were not " +
+				"built on, which is the only thing saying they are not a property of one screen",
+			Screen: screenTake,
+			// Six, from tools/klawiatura on this state: five names in the
+			// column and then the one control this screen has before a file
+			// has been chosen.
+			Pointer: Pointer{Tabs: 6},
 		},
 	}
 }
