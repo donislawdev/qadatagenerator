@@ -50,6 +50,7 @@ func All() []State {
 	states = append(states, aboutStates()...)
 	states = append(states, quickStates()...)
 	states = append(states, quickStatesOfTheKeyboard()...)
+	states = append(states, quickStatesOfThePanel()...)
 	return append(states, quickStatesOfThePointer()...)
 }
 
@@ -180,6 +181,63 @@ func quickStatesOfTheKeyboard() []State {
 			Screen:   screenQuick,
 			Quick:    Quick{Generator: "pesel", Seed: "for-the-picture"},
 			Keyboard: Keyboard{Tabs: 12},
+		},
+	}
+}
+
+// quickStatesOfThePanel are the panel a kind is picked from, in each state a
+// person can put it in from the keyboard (DEC-244).
+//
+// # Why five pictures of one panel
+//
+// Each shows something none of the others can. The panel as it opens, with the
+// chosen kind marked and the keyboard on it. The keyboard moved onto a kind
+// that is not chosen, which is the one state where the mark and the outline
+// stand on different rows. A filter that leaves three rows under one heading
+// and hides the other headings. A filter that leaves nothing, which is the
+// state a list quietly goes blank in unless a sentence is put there. And the
+// flat panel the locale chooser opens, which has no field and no foot.
+//
+// Every one of them opens the panel with Enter on a Tab count from
+// tools/klawiatura, for the reason the states above do: the count is the only
+// thing that names a control, and the walk is what says when it moves.
+func quickStatesOfThePanel() []State {
+	pesel := Quick{Generator: "pesel", Seed: "for-the-picture"}
+	return []State{
+		{
+			Name:     "quick-kind-open",
+			Purpose:  "the panel of kinds as it opens, with the chosen kind marked and the keyboard on it",
+			Screen:   screenQuick,
+			Quick:    pesel,
+			Keyboard: Keyboard{Tabs: 6, Keys: []fyne.KeyName{fyne.KeyReturn}},
+		},
+		{
+			Name:     "quick-kind-walked",
+			Purpose:  "the keyboard moved two kinds down from the chosen one, so the mark and the outline stand apart",
+			Screen:   screenQuick,
+			Quick:    pesel,
+			Keyboard: Keyboard{Tabs: 6, Keys: []fyne.KeyName{fyne.KeyReturn, fyne.KeyDown, fyne.KeyDown}},
+		},
+		{
+			Name:     "quick-kind-filtered",
+			Purpose:  "a filter typed into the panel, leaving the Polish kinds under their heading and nothing else",
+			Screen:   screenQuick,
+			Quick:    pesel,
+			Keyboard: Keyboard{Tabs: 6, Keys: []fyne.KeyName{fyne.KeyReturn}, Typed: "pol"},
+		},
+		{
+			Name:     "quick-kind-nothing",
+			Purpose:  "a filter nothing matches, which the panel says in a sentence rather than by going blank",
+			Screen:   screenQuick,
+			Quick:    pesel,
+			Keyboard: Keyboard{Tabs: 6, Keys: []fyne.KeyName{fyne.KeyReturn}, Typed: "zzz"},
+		},
+		{
+			Name:     "quick-locale-open",
+			Purpose:  "the flat panel a short list opens, with no field and no foot, so the two shapes can be compared",
+			Screen:   screenQuick,
+			Quick:    pesel,
+			Keyboard: Keyboard{Tabs: 8, Keys: []fyne.KeyName{fyne.KeyReturn}},
 		},
 	}
 }

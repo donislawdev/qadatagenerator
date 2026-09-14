@@ -1,6 +1,7 @@
 package quick_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
@@ -103,6 +104,46 @@ func TestAnUnknownKindIsDescribedAsClaimingNothing(t *testing.T) {
 	if about.Produces != "" || about.Scheme != "" || about.CheckDigit || about.ReservedRange {
 		t.Errorf("a generator this build does not have is described as producing %q under scheme %q",
 			about.Produces, about.Scheme)
+	}
+	if about.Group.Kind != "" {
+		t.Errorf("a generator this build does not have is shelved under %q", about.Group.Kind)
+	}
+}
+
+// Every kind this build has stands on a shelf a list can name, and the shelf
+// follows the scheme where there is one.
+//
+// # Why the country is checked against the scheme rather than against a list
+//
+// DEC-47 fixes the shape of a scheme identifier: a country code in ISO 3166-1
+// alpha-2 before the dot, or no dot for an international standard. The group is
+// read off that shape, so the test reads it off the same shape by the other
+// route and holds the two together. A list of expected countries here would be
+// a second register, and the next country would have to be added twice.
+func TestEveryKindStandsOnAShelfAListCanName(t *testing.T) {
+	for _, locale := range quick.Locales() {
+		for _, generator := range quick.Generators(locale) {
+			about := quick.Describe(generator, locale)
+			switch about.Group.Kind {
+			case quick.GroupCountry:
+				if len(about.Group.Country) != 2 || about.Group.Country != strings.ToUpper(about.Group.Country) {
+					t.Errorf("%s is shelved under the country %q, which is not an alpha-2 code", generator, about.Group.Country)
+				}
+				if !strings.HasPrefix(about.Scheme, about.Group.Country+".") {
+					t.Errorf("%s is shelved under %s and its scheme is %q", generator, about.Group.Country, about.Scheme)
+				}
+			case quick.GroupInternational:
+				if about.Scheme == "" || strings.Contains(about.Scheme, ".") {
+					t.Errorf("%s is shelved as international and its scheme is %q", generator, about.Scheme)
+				}
+			case quick.GroupPeople, quick.GroupPlaces:
+				if about.Scheme != "" {
+					t.Errorf("%s is shelved under %s and still has the scheme %q", generator, about.Group.Kind, about.Scheme)
+				}
+			default:
+				t.Errorf("%s in %s stands on no shelf a list can name: %+v", generator, locale, about.Group)
+			}
+		}
 	}
 }
 

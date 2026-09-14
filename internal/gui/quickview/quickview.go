@@ -154,6 +154,7 @@ func (v *View) Content() fyne.CanvasObject { return v.content }
 
 func (v *View) build() {
 	v.chooser = parts.NewSelect(v.generators, func(string) { v.draw() })
+	v.chooser.SetChoices(v.choices(), v.panelWords())
 	// The data locale, beside the interface language and never the same
 	// control, which is the rule the screen next door already follows. It also
 	// decides which values take account of a gender, so it sits above the two
@@ -387,8 +388,7 @@ func (v *View) settle() {
 // coincidence, which is the shape of defect this project keeps finding.
 func (v *View) reloadGenerators() {
 	v.generators = quick.Generators(v.locale)
-	v.chooser.Options = v.generators
-	v.chooser.Refresh()
+	v.chooser.SetChoices(v.choices(), v.panelWords())
 }
 
 // UseLocale picks a locale, the way a person clicking the list would.

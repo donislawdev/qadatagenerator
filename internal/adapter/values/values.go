@@ -237,6 +237,20 @@ func (s Source) ProviderOf(generator string) (string, bool) {
 	return known.behind.ID(), true
 }
 
+// TopicOf says which shelf a generator without a scheme stands on, and whether
+// it stands on one at all.
+//
+// A generator behind a scheme answers false here on purpose: its shelf is read
+// off the scheme, and answering with a topic as well would be two answers to
+// one question, which is what the guard beside this file refuses.
+func (s Source) TopicOf(generator string) (string, bool) {
+	known, found := producers[generator]
+	if !found || known.topic == "" {
+		return "", false
+	}
+	return known.topic, true
+}
+
 // ProviderNamed returns the scheme with that identifier and whether this build
 // carries it.
 //
@@ -460,20 +474,42 @@ type generator struct {
 	// English. A register that answered without the locale would promise an
 	// influence that half the runs do not have.
 	reads func(locale string) []string
+	// topic is the shelf a generator with no scheme behind it stands on, for
+	// a surface that lists every kind this build has.
+	//
+	// # Why it is declared for six generators and derived for the rest
+	//
+	// A generator behind a scheme already says where it belongs: the
+	// identifier of the scheme carries a country (DEC-47), or carries none and
+	// is international. Nothing about a first name or a city says that, so
+	// the register has to, and it says it HERE rather than in a list beside
+	// the register for the reason every other field of this struct is here -
+	// a second list is a place for a generator to be missing from. The guard
+	// beside this file holds that every generator stands on exactly one
+	// shelf: a scheme or a topic, never both and never neither.
+	topic string
 }
+
+// The shelves a generator without a scheme can stand on.
+const (
+	TopicPeople = "people"
+	TopicPlaces = "places"
+)
 
 // producers is the registry. It is a map rather than a switch so that the list
 // of names and the list of implementations cannot drift apart.
 var producers = map[string]generator{
 	FirstName: {produce: Source.firstName, list: "first-names",
 		needs: fromLists("first-names-female", "first-names-male"),
-		reads: everywhere(provider.RoleGender)},
+		reads: everywhere(provider.RoleGender), topic: TopicPeople},
 	LastName: {produce: Source.lastName, list: "last-names", needs: surnameLists,
-		reads: whereSurnamesInflect},
-	Gender:     {produce: Source.gender},
-	BirthDate:  {produce: Source.birthDate},
-	City:       {produce: fromList("cities"), list: "cities", needs: fromLists("cities")},
-	Region:     {produce: fromList("regions"), list: "regions", needs: fromLists("regions")},
+		reads: whereSurnamesInflect, topic: TopicPeople},
+	Gender:    {produce: Source.gender, topic: TopicPeople},
+	BirthDate: {produce: Source.birthDate, topic: TopicPeople},
+	City: {produce: fromList("cities"), list: "cities", needs: fromLists("cities"),
+		topic: TopicPlaces},
+	Region: {produce: fromList("regions"), list: "regions", needs: fromLists("regions"),
+		topic: TopicPlaces},
 	PostalCode: {produce: Source.postalCode, behind: us.Postal{}, needs: postalRegister},
 	Pesel: {produce: fromProvider(pl.PESEL{}), behind: pl.PESEL{},
 		reads: everywhere(provider.RoleBirthDate, provider.RoleGender)},

@@ -94,6 +94,12 @@ func (q Quick) Chosen() bool { return q.Generator != "" }
 type Keyboard struct {
 	Tabs int
 	Keys []fyne.KeyName
+	// Typed is written after Keys, character by character, to whatever holds
+	// the keyboard then - which is the search field of an open panel, since
+	// opening it is one of Keys. Then is pressed after that, so a state can
+	// type a filter and walk what it left.
+	Typed string
+	Then  []fyne.KeyName
 }
 
 // Pointer is where the mouse is while the picture is taken.
@@ -512,12 +518,25 @@ func Walk(canvas fyne.Canvas, state State) {
 	for i := 0; i < state.Keyboard.Tabs; i++ {
 		canvas.FocusNext()
 	}
-	for _, key := range state.Keyboard.Keys {
+	press(canvas, state.Keyboard.Keys)
+	for _, r := range state.Keyboard.Typed {
+		if focused := canvas.Focused(); focused != nil {
+			focused.TypedRune(r)
+		}
+	}
+	press(canvas, state.Keyboard.Then)
+	touch(canvas, state.Pointer)
+}
+
+// press sends each key to whatever holds the keyboard at that moment, which
+// is asked again for every key because a key can move it: Enter on a chooser
+// opens a panel and the next key goes into that.
+func press(canvas fyne.Canvas, keys []fyne.KeyName) {
+	for _, key := range keys {
 		if focused := canvas.Focused(); focused != nil {
 			focused.TypedKey(&fyne.KeyEvent{Name: key})
 		}
 	}
-	touch(canvas, state.Pointer)
 }
 
 // touch puts the pointer where the state says, and presses if it says so.

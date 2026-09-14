@@ -457,8 +457,13 @@ var Tokens = []Token{
 		"the value, the label and every word read first"},
 	{TextSecondary, "neutral.11", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed},
 		"a caption, a group heading and the sentence explaining a value"},
-	{TextAccent, "accent.11", ThresholdText, []string{BgWindow, BgSurface, BgCurrent},
-		"the prompt of a command line, and the icon of the screen that is open"},
+	// bg.hover joined the grounds on 2026-09-14 with the panel a kind is
+	// picked from: the chosen row keeps its accent name under the pointer,
+	// and the pointer moves the ground. Computed before it was added, since
+	// the test beside this file would otherwise have been the first to
+	// know: accent.11 on neutral.5 is 5.20.
+	{TextAccent, "accent.11", ThresholdText, []string{BgWindow, BgSurface, BgCurrent, BgHover},
+		"the prompt of a command line, the icon of the screen that is open, and the name of the kind that is chosen"},
 	{TextOnFill, "white", ThresholdText, []string{FillPrimary, FillHover, FillPressed},
 		"the label on the accent fill, measured on that fill rather than on the window"},
 	// 🔴 The second token measured on a MARK rather than on a ground, and it
@@ -699,6 +704,39 @@ const MarkThickness float32 = 3
 // What would change it: a rung of the type ladder taller than the body inside a
 // control, which nothing asks for today.
 const ControlHeight float32 = 34
+
+// PanelWidth and PanelHeight bound the panel a kind is picked from, which is
+// the one thing in this window that floats over the content.
+//
+// # Why the panel has a size of its own rather than the width of its chooser
+//
+// The chooser under it is as wide as its widest value, which is a word. The
+// panel shows that word, a second column beside it and a heading above, so a
+// panel the width of the chooser would cut its own rows. It is one width for
+// every list it opens over, so a person opening the second chooser sees the
+// same panel as over the first.
+//
+// # Why the height is a ceiling and not a size
+//
+// Below it the panel is as tall as its rows, and above it the rows scroll.
+// The ceiling matters because Fyne does not clip: a panel of fixed height
+// with more rows than fit would let the rows run out of its bottom edge and
+// draw on whatever stands under it, without failing, which is what B-258
+// measured on the mock. The rows are in a scrolling area, which is the one
+// container that does clip, and the ceiling is what makes that area finite.
+//
+// # Why these numbers
+//
+// Both taken from the accepted drawing, tools/makieta -otwarty. The height
+// leaves room under a panel opened at StartHeight for the shadow to be seen
+// below it, and the width holds the longest heading with the check mark
+// beside it. What would change them: a second column wider than a mask, or a
+// window opened smaller than StartHeight, where the panel takes the room it
+// has rather than this.
+const (
+	PanelWidth  float32 = 430
+	PanelHeight float32 = 470
+)
 
 // BadgeWashAlpha is how faintly a verdict colour is drawn under text of that
 // same colour.

@@ -345,3 +345,32 @@ func TestEveryDrawnDateIsARealDay(t *testing.T) {
 		t.Errorf("only %d months came up in five hundred draws", len(seen))
 	}
 }
+
+// Every generator stands on exactly one shelf: a scheme or a topic.
+//
+// # Why this is a guard and not a remark
+//
+// A surface listing every kind puts each under a heading, and the heading is
+// read off the scheme for eleven generators and off a declared topic for the
+// other six. A generator with neither would land under no heading at all, and
+// nothing about building the window would say so - the list would simply be
+// one entry short in a place nobody counts. A generator with both would be a
+// second answer to a question the scheme already answered.
+func TestEveryGeneratorStandsOnExactlyOneShelf(t *testing.T) {
+	source := values.New("en-US", "shelves")
+	for _, generator := range source.Names() {
+		_, behindScheme := source.ProviderOf(generator)
+		topic, declared := source.TopicOf(generator)
+		switch {
+		case behindScheme && declared:
+			t.Errorf("%s is behind a scheme AND declares the topic %q, which is two answers", generator, topic)
+		case !behindScheme && !declared:
+			t.Errorf("%s is behind no scheme and declares no topic, so no list can shelve it", generator)
+		case declared && topic != values.TopicPeople && topic != values.TopicPlaces:
+			t.Errorf("%s declares the topic %q, which is not a shelf this build names", generator, topic)
+		}
+	}
+	if topic, declared := source.TopicOf(values.Pesel); declared {
+		t.Errorf("a PESEL is behind a scheme and still answered with the topic %q", topic)
+	}
+}

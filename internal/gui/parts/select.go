@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
+	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
 // Select is a chooser this window draws itself, over the behaviour of the
@@ -39,19 +40,32 @@ import (
 // scope they needed to live in. The register of pieces rebuilt here gains two
 // entries and the tree loses three wrappers per chooser.
 //
-// # What stays the toolkit's, and it is the larger half
+// # What stays the toolkit's, and what stopped being its on 2026-09-14
 //
-// Everything that is not the drawing: the pop up menu, where it opens, the keys
-// that walk the options, the selection itself and the binding. None of that is
-// reachable from outside the package - showPopUp is private and so is the pop
-// up it keeps - and none of it is what the owner was looking at.
+// The selection itself and the binding stay: Selected, SetSelected, Options,
+// OnChanged and the placeholder are the toolkit's and are read as before.
 //
-// 🔴 A renderer of our own does not disturb it, which was read rather than
-// assumed: Tapped needs no renderer beyond an animation it skips when nil, and
-// showPopUp asks the widget for its size and its canvas, never for its
-// drawing.
+// 🔴 The pop up does not. Until DEC-244 it was the toolkit's menu, opened by
+// the toolkit's Tapped and its TypedKey, and the sentence above this one said
+// it was the larger half and not what the owner was looking at. He looked at it
+// on 2026-09-08 and asked for the panel he had been shown: grouped, with a
+// search field, because there will be hundreds of kinds. The menu cannot hold
+// either, and it is private, so it could not be extended. Tapped and TypedKey
+// below open parts.picker in its place and never reach the toolkit's menu.
 type Select struct {
 	widget.Select
+
+	// choices are the options with what the panel shows beside each and the
+	// heading it stands under. Empty for a chooser built from bare strings,
+	// which opens a flat panel of its Options.
+	choices []Choice
+	// words are what the panel says, in the language of the screen that
+	// built this chooser.
+	words PanelWords
+	// panel and overlay are the open panel and the layer it stands in, nil
+	// while the panel is closed.
+	panel   *picker
+	overlay fyne.CanvasObject
 
 	// keyboardIsHere is kept here rather than read from the canvas, because the
 	// canvas is wrong about it at exactly the moment it changes: a control
@@ -196,30 +210,185 @@ func (s *Select) MouseUp(*desktop.MouseEvent) {
 	s.Refresh()
 }
 
-// TypedKey opens the list on Enter as well as on the keys the toolkit answers.
+// TypedKey opens the panel on Enter as well as on the keys the toolkit answered.
 //
-// # Why this is here at all
+// # Why Enter is here at all
 //
-// widget.Select opens on Space, Up and Down, and does nothing at all on Enter.
+// widget.Select opened on Space, Up and Down, and did nothing at all on Enter.
 // That is the fault the button was given a key for on 2026-08-18, arriving at
 // the control next door: a person presses the key that means yes, gets silence,
 // and cannot tell a control that ignores the key from a program that has
 // stopped answering. Silence in place of an answer is the one thing this
-// product refuses everywhere else.
+// product refuses everywhere else. Both names of the key are accepted because
+// a keyboard has two of them and nobody thinks of them as different.
 //
-// It is spelled as the key the toolkit already understands rather than as a
-// call, because opening the list is showPopUp and that method is private. Both
-// names of the key are accepted because a keyboard has two of them and nobody
-// thinks of them as different.
+// 🔴 Only Left and Right reach the toolkit's TypedKey, and that is deliberate:
+// they walk the options without opening anything, which is behaviour this
+// project did not write and must not quietly take away. Its Space, Up and
+// Down would open the toolkit's menu beside our panel, and the two would
+// answer the same keystroke twice.
 func (s *Select) TypedKey(event *fyne.KeyEvent) {
-	if event == nil {
+	if event == nil || s.Disabled() {
 		return
 	}
-	if event.Name == fyne.KeyReturn || event.Name == fyne.KeyEnter {
-		s.Select.TypedKey(&fyne.KeyEvent{Name: fyne.KeySpace})
+	switch event.Name {
+	case fyne.KeyReturn, fyne.KeyEnter, fyne.KeySpace, fyne.KeyUp, fyne.KeyDown:
+		s.open()
+	case fyne.KeyLeft, fyne.KeyRight:
+		s.Select.TypedKey(event)
+	}
+}
+
+// Tapped opens the panel, in place of the toolkit's menu.
+func (s *Select) Tapped(*fyne.PointEvent) {
+	if s.Disabled() {
 		return
 	}
-	s.Select.TypedKey(event)
+	s.open()
+}
+
+// SetChoices gives the chooser its options with what the panel shows beside
+// each, and the words the panel says.
+//
+// The values become Options, so everything the toolkit does with Options -
+// the selection, the placeholder, the binding - goes on working, and a chooser
+// built from bare strings and one built from choices are one control.
+func (s *Select) SetChoices(choices []Choice, words PanelWords) {
+	s.choices = choices
+	s.words = words
+	options := make([]string, 0, len(choices))
+	for _, choice := range choices {
+		options = append(options, choice.Value)
+	}
+	s.Options = options
+	s.Refresh()
+}
+
+// choicesToOffer is what the panel is built from: the choices when there are
+// any, otherwise the bare options as a flat list.
+func (s *Select) choicesToOffer() []Choice {
+	if len(s.choices) > 0 {
+		return s.choices
+	}
+	flat := make([]Choice, 0, len(s.Options))
+	for _, option := range s.Options {
+		flat = append(flat, Choice{Value: option})
+	}
+	return flat
+}
+
+// Open shows the panel over the canvas this chooser is on, and is the one
+// thing a screen may ask of the panel directly, so that a picture of it open
+// can be taken.
+func (s *Select) Open() { s.open() }
+
+// IsOpen says whether the panel is on screen, for a test that would otherwise
+// have to read the overlays of the canvas.
+func (s *Select) IsOpen() bool { return s.panel != nil }
+
+// open puts the panel in an overlay under this chooser and gives it the
+// keyboard.
+//
+// # 🔴 Why an overlay of our own rather than widget.PopUp
+//
+// PopUp draws a ground of its own under its content, in the overlay colour of
+// the theme, with the toolkit's shadow and the toolkit's radius. Under a card
+// that draws its own edge, its own radius and the one shadow this window
+// allows, that would be a second ground showing at every corner and a second
+// shadow under the first. The overlay stack takes any object, which is all
+// PopUp does with it, read on the source of v2.8.1.
+//
+// The shield under the panel is a TapRow that draws nothing: a tap anywhere
+// but on the panel reaches it and closes the panel, which is what PopUp does
+// with its own dismiss.
+func (s *Select) open() {
+	if s.panel != nil {
+		return
+	}
+	canvas := fyne.CurrentApp().Driver().CanvasForObject(s)
+	if canvas == nil {
+		return
+	}
+	s.panel = newPicker(s.choicesToOffer(), s.Selected, s.words, s.SetSelected, s.closePanel)
+	s.panel.onShape = s.fit
+	shield := NewTapRow(func(bool) fyne.CanvasObject { return paint.Clear() }, s.closePanel)
+	layer := container.NewWithoutLayout(s.panel)
+	s.overlay = container.NewStack(shield, layer)
+
+	s.fit()
+	canvas.Overlays().Add(s.overlay)
+	s.overlay.Resize(canvas.Size())
+	s.panel.reveal()
+	canvas.Focus(s.panel.keyReceiver())
+}
+
+// fit sizes and places the open panel for the rows it holds now, under or
+// over this chooser. Called when it opens and again whenever the filter
+// changes what it holds, so the panel is always as tall as its rows and never
+// taller than the ceiling.
+func (s *Select) fit() {
+	canvas := fyne.CurrentApp().Driver().CanvasForObject(s)
+	if s.panel == nil || canvas == nil {
+		return
+	}
+	at := fyne.CurrentApp().Driver().AbsolutePositionForObject(s)
+	wanted := fyne.NewSize(s.panel.Width(s.Size().Width), s.panel.ContentHeight())
+	position, size := place(canvas.Size(), at, s.Size(), wanted, s.panel.MinSize().Height)
+	s.panel.Resize(size)
+	s.panel.Move(position)
+}
+
+// place is where the panel goes and how large it is, given the canvas, the
+// chooser it opens under, how wide it wants to be, how tall its rows would
+// like it, and the least height it can be.
+//
+// Under the chooser, as tall as its rows up to the ceiling - and kept inside
+// the canvas rather than let run off it. A chooser near the right edge gets a
+// panel slid left, a chooser near the foot gets one that opens ABOVE it when
+// there is more room there, and a canvas smaller than the panel gets one the
+// size of the canvas, which then scrolls. A pure function so that every one
+// of those cases is a line in a test rather than a window somebody has to
+// shrink by hand.
+func place(room fyne.Size, at fyne.Position, chooser fyne.Size, wanted fyne.Size, least float32) (fyne.Position, fyne.Size) {
+	gap := palette.StepOf(palette.NameStepHairline)
+	// A gap on each side of the panel, so that it never touches an edge of
+	// the canvas.
+	margins := gap + gap
+	width := min(wanted.Width, room.Width-margins)
+	x := at.X
+	if x+width+gap > room.Width {
+		x = max(gap, room.Width-width-gap)
+	}
+
+	height := min(palette.PanelHeight, wanted.Height)
+	below := room.Height - (at.Y + chooser.Height + gap) - gap
+	above := at.Y - margins
+	y := at.Y + chooser.Height + gap
+	if below >= height || below >= above {
+		height = max(least, min(height, below))
+	} else {
+		height = max(least, min(height, above))
+		y = at.Y - gap - height
+	}
+	// A canvas with no room either side, which a test can make and a person
+	// can too by shrinking the window: the panel is then its least height and
+	// is slid up until it fits, rather than drawn off the bottom.
+	y = max(gap, min(y, room.Height-height-gap))
+	return fyne.NewPos(x, y), fyne.NewSize(width, height)
+}
+
+// closePanel takes the panel down. Focus goes back to whatever the canvas had
+// under the overlay, which is this chooser, since an overlay has a focus of
+// its own and never moved the one beneath it.
+func (s *Select) closePanel() {
+	if s.panel == nil {
+		return
+	}
+	if canvas := fyne.CurrentApp().Driver().CanvasForObject(s); canvas != nil {
+		canvas.Overlays().Remove(s.overlay)
+	}
+	s.panel, s.overlay = nil, nil
+	s.Refresh()
 }
 
 // CreateRenderer draws the face.

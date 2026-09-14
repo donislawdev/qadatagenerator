@@ -111,7 +111,27 @@ func (f *FieldEntry) FocusLost() {
 
 // Field dresses a text field in the ground, the edge and the focus mark this
 // window gives every control.
-func Field(entry *FieldEntry) fyne.CanvasObject {
+func Field(entry *FieldEntry) fyne.CanvasObject { return field(entry, entry) }
+
+// field is Field with the object put in the tree named apart from the field
+// whose focus is watched.
+//
+// # Why the two are ever different
+//
+// A type embedding FieldEntry to answer a key differently is a different
+// object to the driver: the focus manager focuses whatever it found in the
+// tree and calls THAT object's TypedKey. Putting the embedded field in the
+// tree would put the embedded TypedKey in charge, and the override would be
+// dead code that compiles. The search field of the panel a kind is picked
+// from is that type, and is the reason this seam exists.
+func field(entry *FieldEntry, shown fyne.CanvasObject) fyne.CanvasObject {
+	return fieldWith(entry, shown, nil)
+}
+
+// fieldWith is field with something standing before the text, inside the
+// edge: the magnifier of a search field, which is what tells a person the
+// field filters rather than takes a value.
+func fieldWith(entry *FieldEntry, shown fyne.CanvasObject, leading fyne.CanvasObject) fyne.CanvasObject {
 	resting, focused := paint.FieldGround(false), paint.FieldGround(true)
 	focused.Hide()
 	entry.onFocus = func(here bool) {
@@ -129,8 +149,11 @@ func Field(entry *FieldEntry) fyne.CanvasObject {
 	// chooser starts its word. Nothing at the foot, so the field keeps whatever
 	// height the row gives it.
 	step := palette.StepOf(palette.NameStepTight)
-	inside := container.New(layout.NewCustomPaddedLayout(step, 0, step, step),
-		container.NewThemeOverride(entry, bareField{}))
+	var typed fyne.CanvasObject = container.NewThemeOverride(shown, bareField{})
+	if leading != nil {
+		typed = container.New(layout.NewBorderLayout(nil, nil, leading, nil), leading, typed)
+	}
+	inside := container.New(layout.NewCustomPaddedLayout(step, 0, step, step), typed)
 
 	return container.NewStack(resting, focused, inside)
 }

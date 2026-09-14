@@ -357,3 +357,13 @@ quick.refused.date: A date of birth is written as YYYY-MM-DD.
 quick.refused.count: This screen asks for at least one value.
 quick.refused.count-shape: How many is a whole number, such as 10.
 quick.refused.count-many: values is the most this screen shows at once. The command line below takes any number.
+quick.group.international: International
+quick.group.people: People
+quick.group.places: Places
+country.PL: Poland
+country.US: United States
+quick.pick.prompt: Type to filter, for example iban or pesel
+quick.pick.kinds: kinds
+quick.pick.matches: "%d of %d match"
+quick.pick.enter: Enter to pick
+quick.pick.nothing: Nothing matches. Try a shorter word, or a country.

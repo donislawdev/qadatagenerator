@@ -136,6 +136,26 @@ var HandmadeAllowed = map[string]Handmade{
 			"the mock uses, so the two cannot differ. Its MinSize also stops being the width of the " +
 			"words (Select one), which is what the toolkit's measures no matter what the chooser holds",
 	},
+	"picker": {
+		Instead: "widget.PopUpMenu, which widget.Select opens, and widget.PopUp around a list of our own",
+		Why: "the menu is a column of items and nothing else, read on the source of v2.8.1: it cannot " +
+			"take a field to filter by, cannot put a heading between two items and shows one column " +
+			"where the owner asked for two, with grouping and searching, because there will be " +
+			"hundreds of kinds. It is also private to widget.Select, so it could not be extended. " +
+			"PopUp draws a ground, a shadow and a radius of the toolkit's under whatever it is given, " +
+			"which under a card drawing its own would be a second ground at every corner and a second " +
+			"shadow. The overlay stack of the canvas takes any object, which is all PopUp does with " +
+			"it. The rows are TapRow and the field is FieldEntry, so what this type holds is the " +
+			"keyboard row, the filter and the keys - and it is focusable because a key goes to the " +
+			"top overlay and to nothing under it (DEC-244)",
+	},
+	"pickerRenderer": {
+		Instead: "the renderer widget.PopUp builds for itself",
+		Why: "it draws the ground, the shadow and the radius named above, and a renderer is the only " +
+			"place that drawing can be left out. This one holds the tree the panel was built as and " +
+			"swaps nothing, since every state of the panel lives on a row, the foot or the " +
+			"visibility of the scrolling area",
+	},
 }
 
 // HandmadeCeiling is how many pieces of the toolkit this project may carry
@@ -157,10 +177,16 @@ var HandmadeAllowed = map[string]Handmade{
 // moves by two, on purpose, and a jump of more than two is somebody having
 // converted several controls without anybody having seen any of them.
 //
+// 🔴 Raised from 9 to 11 on 2026-09-14 for the panel a kind is picked from,
+// which is one control and its renderer, at the owner's pace: it was the one
+// control of that session, and the window was rendered with it open before
+// anything else started. It is the seventh fault the owner named, and the
+// last one open, so this raise closes B-258 rather than opening anything.
+//
 // What lowers it again: a control going back to the library, which will happen
 // if the toolkit ever lets a caller supply the content of a button. Nothing
 // else does.
-const HandmadeCeiling = 9
+const HandmadeCeiling = 11
 
 // Handmades reports every layout and widget written inside the window, and
 // every register entry naming one that is no longer there.

@@ -542,6 +542,33 @@ const (
 	QuickRefusedGender    Key = "quick.refused.gender"
 	QuickRefusedDate      Key = "quick.refused.date"
 
+	// The panel a kind is picked from, which groups the kinds under headings
+	// and filters them as somebody types (DEC-244).
+	//
+	// The headings follow quick.Group: one for each kind of shelf the mode
+	// names, and one per country a scheme belongs to. A country is worded
+	// here rather than left as its code because a person reads a list of
+	// headings, and PL beside United States is a code beside a name. The
+	// guard beside the quick screen holds that every country a scheme
+	// carries has a name here, so a scheme for a new country cannot arrive
+	// without one.
+	QuickGroupInternational Key = "quick.group.international"
+	QuickGroupPeople        Key = "quick.group.people"
+	QuickGroupPlaces        Key = "quick.group.places"
+	CountryPL               Key = "country.PL"
+	CountryUS               Key = "country.US"
+	// QuickPickPrompt is what the empty search field says. QuickPickKinds is
+	// the noun after the count in the foot of the panel, and QuickPickMatches
+	// replaces both when a filter is on, with the two counts in order:
+	// matching, then all. QuickPickNothing stands where the rows were when
+	// nothing matches, because a list that quietly goes blank reads as a
+	// list that broke.
+	QuickPickPrompt  Key = "quick.pick.prompt"
+	QuickPickKinds   Key = "quick.pick.kinds"
+	QuickPickMatches Key = "quick.pick.matches"
+	QuickPickEnter   Key = "quick.pick.enter"
+	QuickPickNothing Key = "quick.pick.nothing"
+
 	// The line a person can paste into a terminal to get the same thing.
 	// docs/08 asks for this on every screen that produces something, and says
 	// why: without it the window and the terminal stop being one product.
@@ -581,6 +608,8 @@ var Keys = []Key{
 	QuickLabelCount, QuickMayRepeat,
 	QuickRefusedGenerator, QuickRefusedRole, QuickRefusedGender, QuickRefusedDate,
 	QuickRefusedCount, QuickRefusedCountShape, QuickRefusedCountMany,
+	QuickGroupInternational, QuickGroupPeople, QuickGroupPlaces, CountryPL, CountryUS,
+	QuickPickPrompt, QuickPickKinds, QuickPickMatches, QuickPickEnter, QuickPickNothing,
 	CommandHeading, CommandCopy, CommandCopied,
 	PurposeTake, PurposeRecipe, PurposeManifest, AboutSaveJSON,
 

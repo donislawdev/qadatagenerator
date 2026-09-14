@@ -1,6 +1,8 @@
 package quick
 
 import (
+	"strings"
+
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
 	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
@@ -67,6 +69,61 @@ type Description struct {
 	// Unavailable is why this build cannot produce the kind in the locale
 	// asked about, and is empty when it can.
 	Unavailable string
+	// Group is the shelf a surface listing every kind puts this one on.
+	Group Group
+}
+
+// Group is where a kind of value stands in a list of all of them.
+//
+// # Why the mode decides this and not the window
+//
+// Because it is read off facts the mode already holds. A scheme carries a
+// country in its identifier or carries none (DEC-47), and a generator with no
+// scheme declares a topic in the register (values.TopicOf). A window sorting
+// kinds into headings by its own reading of the names would be a second copy
+// of that rule, and the two would part the day a scheme arrived whose name did
+// not look like the ones before it.
+//
+// The words for a group are the window's, since a heading is read in the
+// language of the interface. The mode hands over a kind and a code, never a
+// sentence.
+type Group struct {
+	// Kind is one of the four constants below, or empty for a name this build
+	// does not know.
+	Kind string
+	// Country is the ISO 3166-1 alpha-2 code the scheme carries, for
+	// GroupCountry only.
+	Country string
+}
+
+// The kinds of group.
+const (
+	// GroupCountry is a kind whose scheme belongs to one country.
+	GroupCountry = "country"
+	// GroupInternational is a kind whose scheme belongs to no country.
+	GroupInternational = "international"
+	// GroupPeople is a kind with no scheme that describes a person.
+	GroupPeople = "people"
+	// GroupPlaces is a kind with no scheme that describes a place.
+	GroupPlaces = "places"
+)
+
+// groupOf reads the shelf off a scheme, or off a declared topic where there is
+// no scheme.
+func groupOf(scheme string, topic string) Group {
+	if scheme != "" {
+		if dot := strings.Index(scheme, "."); dot > 0 {
+			return Group{Kind: GroupCountry, Country: scheme[:dot]}
+		}
+		return Group{Kind: GroupInternational}
+	}
+	switch topic {
+	case values.TopicPeople:
+		return Group{Kind: GroupPeople}
+	case values.TopicPlaces:
+		return Group{Kind: GroupPlaces}
+	}
+	return Group{}
 }
 
 // Describe answers what this build knows about one kind of value in one locale.
@@ -92,6 +149,8 @@ func Describe(generator, locale string) Description {
 	}
 
 	scheme, behind := source.ProviderOf(generator)
+	topic, _ := source.TopicOf(generator)
+	about.Group = groupOf(scheme, topic)
 	if !behind {
 		return about
 	}
