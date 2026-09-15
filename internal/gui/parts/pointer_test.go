@@ -55,6 +55,7 @@ func touchables() []touchable {
 		{"a plain button, which draws no edge in any state", plain},
 		{"the filled action of a screen", NewPrimaryButton("Generate", func() {})},
 		{"a chooser", NewSelect([]string{"pesel", "nip"}, func(string) {})},
+		{"a check box", NewCheck("Field format (L2)", func(bool) {})},
 	}
 }
 

@@ -156,6 +156,23 @@ var HandmadeAllowed = map[string]Handmade{
 			"swaps nothing, since every state of the panel lives on a row, the foot or the " +
 			"visibility of the scrolling area",
 	},
+	"Check": {
+		Instead: "widget.Check, and widget.CheckGroup around eight of them, which the take screen " +
+			"used until 2026-09-15",
+		Why: "read on the source of v2.8.1: it marks focus with a filled circle behind the box " +
+			"(focusIndicator in ColorNameFocus) and draws the box out of two icons of the theme's, " +
+			"and neither can be reached from outside the renderer. Eight of them stand in one column " +
+			"beside fields and choosers that mark focus with an edge, so the column would carry two " +
+			"languages of states, which DEC-215 settled is a fault even when each control passes on " +
+			"its own. Nothing of the toolkit's control is needed underneath: a tap toggles a flag, " +
+			"and the keys are Space and Enter (DEC-245)",
+	},
+	"checkRenderer": {
+		Instead: "the renderer widget.Check builds for itself",
+		Why: "it is the renderer that draws the circle and the icons above, so it is the only place " +
+			"either can be decided. This one draws paint.CheckFace, the drawing the mock uses, so " +
+			"the accepted look and the window cannot differ",
+	},
 }
 
 // HandmadeCeiling is how many pieces of the toolkit this project may carry
@@ -183,10 +200,16 @@ var HandmadeAllowed = map[string]Handmade{
 // anything else started. It is the seventh fault the owner named, and the
 // last one open, so this raise closes B-258 rather than opening anything.
 //
+// 🔴 Raised from 11 to 13 on 2026-09-15 for the check box, one control and
+// its renderer, at the same pace: it is the one control of the take screen's
+// move onto paint, the owner chose it over widget.Check on a render of the
+// screen (DEC-245), and the screen is rendered with it before anything else
+// on that screen changes.
+//
 // What lowers it again: a control going back to the library, which will happen
 // if the toolkit ever lets a caller supply the content of a button. Nothing
 // else does.
-const HandmadeCeiling = 11
+const HandmadeCeiling = 13
 
 // Handmades reports every layout and widget written inside the window, and
 // every register entry naming one that is no longer there.

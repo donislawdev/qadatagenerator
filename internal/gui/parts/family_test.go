@@ -62,6 +62,10 @@ func TestEveryControlMarksFocusWithTheSameRing(t *testing.T) {
 			control := NewKeyScroll(reading())
 			return control.FocusGained, control.Framed()
 		}},
+		{"check box", func() (func(), fyne.CanvasObject) {
+			control := NewCheck("Field format (L2)", func(bool) {})
+			return control.FocusGained, control
+		}},
 	}
 
 	for _, kind := range kinds {

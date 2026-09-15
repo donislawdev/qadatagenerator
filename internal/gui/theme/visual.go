@@ -394,8 +394,13 @@ var Tokens = []Token{
 	{FillPressed, "accent.6", ThresholdStateChange, []string{FillPrimary},
 		"that fill under the finger, one shade further down again"},
 
-	{MarkCurrent, "accent.11", ThresholdControl, []string{BgSurface, BgCurrent},
-		"the bar beside the sidebar item the window is on, which says where you are without a second word"},
+	// The grounds of a check box joined on 2026-09-15 (DEC-245): the mark in a
+	// ticked box is this shade, on the ground of a field and on that ground
+	// under the pointer. A MARK rather than text.accent, and the difference
+	// is measured: the same shade on bg.pressed is 4.49, which fails a label
+	// and passes a mark, and a tick is a mark.
+	{MarkCurrent, "accent.11", ThresholdControl, []string{BgSurface, BgCurrent, BgControl, BgHover, BgPressed},
+		"the bar beside the sidebar item the window is on, and the mark in a ticked check box"},
 	// 🔴 The one token measured against another MARK rather than against a
 	// ground, and the reason is the whole entry.
 	//
@@ -587,6 +592,11 @@ const (
 	RadiusCard float32 = 10
 	// RadiusControl rounds a button, a field and a chooser.
 	RadiusControl float32 = 6
+	// RadiusCheck rounds the box of a check box. Less than a control, because
+	// the box is eighteen across and at six it read as a radio button on the
+	// render of 2026-09-15 (DEC-245). A radius follows the size of the shape
+	// it rounds, so a small shape gets a small one.
+	RadiusCheck float32 = 4
 	// RadiusPill rounds a badge into a capsule.
 	//
 	// Far larger than any badge, because the toolkit clamps a corner radius
@@ -848,6 +858,10 @@ const (
 	IconMedium float32 = 17
 	// IconLarge is for the sheet that proves every icon renders at all.
 	IconLarge float32 = 26
+	// CheckBox is the side of the box of a check box: a small icon with room
+	// for its edge, so the mark inside it is the small icon and nothing has to
+	// be scaled.
+	CheckBox float32 = 18
 )
 
 var shadesByName = func() map[string]Shade {
