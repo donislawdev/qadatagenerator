@@ -295,25 +295,50 @@ type Plan struct {
 	Ordered int
 	// Implemented is how many of those this build can actually carry out.
 	Implemented int
+	// ByLayer is the same two numbers for each named layer, in the order the
+	// layers were named. The sums above are the sums of these.
+	//
+	// # Why the split is here rather than in a surface
+	//
+	// Two sums say that something is missing and not what. A person who
+	// ordered L2 and L3 and reads "6 of 16" cannot tell which of the two this
+	// build has barely started on, and that is the question rule 9 of the
+	// project exists to answer. The split is a fact about the run, so it is
+	// worked out once here and both surfaces say it in their own words
+	// (DEC-245).
+	ByLayer []LayerPlan
 	// Writes are the files the run would leave behind.
 	Writes []string
 	// Out is where it would leave them.
 	Out string
 }
 
+// LayerPlan is what a run would do in one named layer.
+type LayerPlan struct {
+	// Layer is the code the policy named, as --layers takes it.
+	Layer string
+	// Ordered is how many kinds of damage the catalog describes in it, and
+	// Implemented how many of those this build carries out.
+	Ordered     int
+	Implemented int
+}
+
 // Plan says what the policy asks for and writes nothing.
 func (o *Opened) Plan(settings Settings, described catalog.Catalog) Plan {
 	coverage := mutators.Coverage{Described: described}
-	ordered, implemented := 0, 0
-	for _, layer := range settings.Layers {
-		inLayer := len(described.InLayer(catalog.Layer(layer)))
-		ordered += inLayer
-		implemented += inLayer - coverage.Unimplemented(layer)
-	}
-	return Plan{
-		Ordered: ordered, Implemented: implemented, Out: settings.Out,
+	planned := Plan{
+		Out:    settings.Out,
 		Writes: append([]string{OutputName(o.path)}, damage.Files(settings.Manifest)...),
 	}
+	for _, layer := range settings.Layers {
+		inLayer := len(described.InLayer(catalog.Layer(layer)))
+		done := inLayer - coverage.Unimplemented(layer)
+		planned.Ordered += inLayer
+		planned.Implemented += done
+		planned.ByLayer = append(planned.ByLayer,
+			LayerPlan{Layer: layer, Ordered: inLayer, Implemented: done})
+	}
+	return planned
 }
 
 // Result is what a finished run left behind.

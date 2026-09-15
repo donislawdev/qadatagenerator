@@ -3,6 +3,7 @@ package cli
 import (
 	"flag"
 	"io"
+	"strconv"
 	"strings"
 	"time"
 
@@ -355,5 +356,12 @@ func sayWhatWouldHappen(out *streams, opened *take.Opened, own *takeFlags,
 	out.note(noteDryRunPolicy + kindsOfDamage(planned.Ordered) + " in " + *own.layers +
 		", and this build implements " + counted(planned.Implemented, "kind") + " of them. " +
 		noteDryRunEveryOrder)
+	// One line per layer, because the sums above say that something is missing
+	// and not what. The split is the mode's, so the window says the same thing
+	// in its own words (DEC-245).
+	for _, layer := range planned.ByLayer {
+		out.note(noteDryRunLayer + layer.Layer + ": " + counted(layer.Ordered, "kind") +
+			", of which this build implements " + strconv.Itoa(layer.Implemented))
+	}
 	out.note(noteDryRunWrites + listOf(planned.Writes) + " in " + planned.Out)
 }

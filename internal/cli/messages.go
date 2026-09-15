@@ -314,6 +314,7 @@ const (
 	noteRestInManifest           = "The manifest names every one."
 	noteRestInManifestOfARealRun = "Run this without --dry-run and the manifest names every one."
 	noteDryRunPolicy             = "the policy draws on "
+	noteDryRunLayer              = "in "
 	noteDryRunWrites             = "a real run would write "
 	noteDryRunEveryOrder         = "A real run writes one manifest entry per ordered defect, applied or not"
 

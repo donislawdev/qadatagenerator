@@ -260,7 +260,9 @@ func TestADryRunSaysWhatItWorkedOutAndWritesNothing(t *testing.T) {
 	if len(left) != 0 {
 		t.Errorf("a dry run left %d files behind", len(left))
 	}
-	for _, wanted := range []string{"PL.pesel", "would write"} {
+	// The line per layer is the split the window draws as rows (DEC-245): a
+	// sum says something is missing, the line says in which layer.
+	for _, wanted := range []string{"PL.pesel", "would write", "in L3: ", "of which this build implements"} {
 		if !strings.Contains(got.log, wanted) {
 			t.Errorf("a dry run did not say %q, and said %q", wanted, got.log)
 		}
