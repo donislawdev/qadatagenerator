@@ -6,13 +6,12 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
+	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 )
 
@@ -270,12 +269,11 @@ func (v *View) setControls(usable bool) {
 // settingControls is every setting of a run, WITHOUT the button that chooses
 // the file.
 //
-// 🔴 The separation exists because the two states that disable these want
-// opposite things from that button. A run in flight disables it as well: the
-// file is being read from, and choosing another one halfway would damage one
-// file and describe another. A screen with no file yet must leave it the one
-// live thing on the screen, because it is the only way forward and a screen
-// where nothing at all can be pressed reads as broken rather than as waiting.
+// The separation exists because a run in flight disables that button as well,
+// for a reason of its own: the file is being read from, and choosing another
+// one halfway would damage one file and describe another. The settings are
+// alive from the moment the screen opens (DEC-245), so this is the one list
+// of things a run puts out of reach and gives back.
 func (v *View) settingControls() []fyne.Disableable {
 	return []fyne.Disableable{
 		v.layers, v.share, v.perRow, v.exclude, v.delimiter, v.locale, v.seed,
@@ -283,56 +281,48 @@ func (v *View) settingControls() []fyne.Disableable {
 	}
 }
 
-// previewSettings leaves the settings on screen for somebody who has chosen no
-// file, disabled, so that the screen says what it does before it is asked to do
-// it.
+// drawRun draws the one action of the screen in the band, and whatever the
+// last run left in the card.
 //
-// 🔴 # Why they are shown at all before there is a file
-//
-// Measured on 2026-09-08 with tools/pustka.py at the size the window is
-// actually kept: this screen stood 64.0 per cent empty in the state it OPENS
-// in, with a heading, two sentences and one button in the top third and
-// nothing under them. The state a program opens in is the one nobody draws and
-// the first one a person meets, and what it said about this tool was that the
-// tool does almost nothing.
-//
-// Everything under here already existed and was hidden. Showing it costs no new
-// content and answers the question somebody opening this screen actually has,
-// which is what this thing is going to do to their file.
-//
-// # Why disabled rather than live
-//
-// Every one of them describes a run of a file, and there is no file. A live
-// control that silently governs nothing is the worse of the two, and this
-// screen already answers a run in flight the same way: disabled beside its
-// reason rather than absent, because a control that vanishes leaves a person
-// looking for it.
-func (v *View) previewSettings() {
-	for _, control := range v.settingControls() {
-		control.Disable()
-	}
-	// Live, and it is the only one. Everything else on this screen is waiting
-	// for what this button produces.
-	v.chooseFile.Enable()
-}
-
-// drawRun draws the button that starts a run, and whatever the last one left.
+// The band shows the button that damages or the button that stops, never
+// both: a run in flight has one way out and a screen at rest has one way
+// forward, and a person looks in one place for either.
 func (v *View) drawRun() {
+	v.action.Objects = []fyne.CanvasObject{v.actionNow()}
+	v.action.Refresh()
 	v.runBox.Objects = v.runContent()
 	v.runBox.Refresh()
+	// The plan stands in the card only while there is nothing newer to say:
+	// a run going on, or what the last one did, takes its place, and the
+	// heading over the card says which it is.
+	heading := i18n.TakeHeadingPlan
+	if len(v.runBox.Objects) > 0 {
+		v.planBox.Hide()
+		if !v.busy() {
+			heading = i18n.TakeHeadingResult
+		}
+	} else {
+		v.planBox.Show()
+	}
+	v.cardHeading.Objects = []fyne.CanvasObject{v.heading(heading)}
+	v.cardHeading.Refresh()
 }
 
-func (v *View) runContent() []fyne.CanvasObject {
+// actionNow is the button the band holds in this state, enabled or not.
+func (v *View) actionNow() fyne.CanvasObject {
 	if v.busy() {
-		return v.runningContent()
+		v.stop.Enable()
+		if v.stage == stageStopping {
+			v.stop.Disable()
+		}
+		return v.stop.OnScreen()
 	}
-	drawn := []fyne.CanvasObject{container.NewHBox(v.damage)}
 	v.damage.Enable()
 	if v.refusedNow() || v.readingNow() {
-		// Disabled rather than absent, and the reason is directly above it in
-		// the answer to what would happen. A control that vanishes leaves a
-		// person looking for it, and one that is disabled beside its reason is
-		// the same information without the search.
+		// Disabled rather than absent, and the reason is in the card beside
+		// it, in the answer to what would happen. A control that vanishes
+		// leaves a person looking for it, and one that is disabled beside its
+		// reason is the same information without the search.
 		//
 		// A read in flight disables it for a reason of its own: what stands on
 		// the screen describes the file as it was read a moment ago, and a run
@@ -340,10 +330,20 @@ func (v *View) runContent() []fyne.CanvasObject {
 		// that it had been told something else.
 		v.damage.Disable()
 	}
-	if outcome := v.outcome(); outcome != nil {
-		drawn = append(drawn, heading(v.text.T(i18n.TakeHeadingResult)), outcome)
+	return v.damage
+}
+
+// runContent is what the card says about a run: that one is going on, or what
+// the last one left, or nothing while there has been none.
+func (v *View) runContent() []fyne.CanvasObject {
+	if v.busy() {
+		return v.runningContent()
 	}
-	return drawn
+	outcome := v.outcome()
+	if outcome == nil {
+		return nil
+	}
+	return []fyne.CanvasObject{outcome}
 }
 
 // refusedNow reports whether the settings as they stand would be refused.
@@ -355,7 +355,7 @@ func (v *View) refusedNow() bool {
 		take.CheckOutput(v.path, v.chosen).Refused()
 }
 
-// runningContent is the state docs/17 calls work in progress.
+// runningContent is what the card says while a run is going on.
 //
 // # Why there is nothing here that moves
 //
@@ -369,18 +369,15 @@ func (v *View) refusedNow() bool {
 // fails at random is a guard somebody turns off.
 //
 // What a person actually needs is here in words: that the file is being damaged,
-// that nothing is on the disk yet under its own name, and the way to stop.
+// that nothing is on the disk yet under its own name, and the way to stop, which
+// stands in the band where the button that started it stood.
 func (v *View) runningContent() []fyne.CanvasObject {
 	said := i18n.TakeRunning
-	v.stop.Enable()
 	if v.stage == stageStopping {
 		said = i18n.TakeRunStopping
-		v.stop.Disable()
 	}
 	return []fyne.CanvasObject{
-		container.NewHBox(v.stop.OnScreen()),
-		beside(theme.InfoIcon(), wrapped(v.text.T(said))),
-	}
+		v.marked(paint.IconInfo, palette.TextAccent, v.paragraph(v.text.T(said)))}
 }
 
 // outcome is what the last run left behind, or nothing when there has not been
@@ -390,16 +387,14 @@ func (v *View) outcome() fyne.CanvasObject {
 	case stageWritten:
 		return v.written()
 	case stageStopped:
-		return container.NewVBox(
-			v.told(i18n.TakeResultStopped, theme.InfoIcon()),
-			wrapped(v.text.T(i18n.TakeResultStoppedWhy)),
-		)
+		return paint.Column(palette.NameStepTight,
+			v.told(i18n.TakeResultStopped, paint.IconInfo, palette.TextAccent),
+			v.paragraph(v.text.T(i18n.TakeResultStoppedWhy)))
 	case stageFailed:
-		return container.NewVBox(
-			v.told(i18n.TakeResultFailed, theme.WarningIcon()),
-			wrapped(fault.Says(v.failed)),
-			wrapped(v.text.T(i18n.TakeResultFailedWhy)),
-		)
+		return paint.Column(palette.NameStepTight,
+			v.told(i18n.TakeResultFailed, paint.IconWarn, palette.StateWarning),
+			v.paragraph(fault.Says(v.failed)),
+			v.paragraph(v.text.T(i18n.TakeResultFailedWhy)))
 	default:
 		return nil
 	}
@@ -420,39 +415,45 @@ func (v *View) outcome() fyne.CanvasObject {
 func (v *View) written() fyne.CanvasObject {
 	counts := v.result.Counts
 	lines := []fyne.CanvasObject{
-		wrappedPair(v.text.T(i18n.TakeResultWritten),
+		v.fact(i18n.TakeResultWritten,
 			listOf(v.result.Written)+" "+v.text.T(i18n.TakeResultIn)+" "+v.result.Out),
 	}
-	// 🔴 Directly under the files, because it is about those files rather than
-	// about the damage, and everything below this line counts defects. A
-	// manifest this build will not read back is the one thing a finished run can
-	// leave behind that shows up nowhere else: the files are written, the counts
-	// add up, and the refusal arrives days later on another screen with nothing
-	// connecting it to the run that caused it. The command line has said so
-	// since it learned to and this screen said nothing at all.
+	// 🔴 A file this build will not read back is said HERE, before the counts,
+	// because it changes what the counts are worth: a manifest nobody can open
+	// on the next screen is a manifest that has to be read some other way. The
+	// fact comes from the run and the words are this surface's, which is the
+	// same split as every refusal on this screen.
 	if len(v.result.Oversized) > 0 {
 		lines = append(lines,
-			pair(v.text.T(i18n.TakeResultOversized), listOf(namesOf(v.result.Oversized))),
+			v.pair(i18n.TakeResultOversized, listOf(namesOf(v.result.Oversized))),
 			v.notice(i18n.TakeResultOversizedWhy))
 	}
 	lines = append(lines,
-		pair(v.text.T(i18n.TakeResultOrdered), strconv.Itoa(counts.Requested)),
-		pair(v.text.T(i18n.TakeResultApplied), strconv.Itoa(counts.Applied)))
+		v.pair(i18n.TakeResultOrdered, strconv.Itoa(counts.Requested)),
+		v.pair(i18n.TakeResultApplied, strconv.Itoa(counts.Applied)))
 	if missing := counts.Missing(); missing > 0 {
 		lines = append(lines,
-			pair(v.text.T(i18n.TakeResultMissing), strconv.Itoa(missing)),
+			v.pair(i18n.TakeResultMissing, strconv.Itoa(missing)),
 			v.notice(i18n.TakeResultMissingWhy))
 	}
 	if counts.Unpartnered > 0 {
 		lines = append(lines,
-			pair(v.text.T(i18n.TakeResultUnpartnered), strconv.Itoa(counts.Unpartnered)),
-			wrapped(v.text.T(i18n.TakeResultUnpartneredWhy)))
+			v.pair(i18n.TakeResultUnpartnered, strconv.Itoa(counts.Unpartnered)),
+			v.paragraph(v.text.T(i18n.TakeResultUnpartneredWhy)))
 	}
-	return container.NewVBox(lines...)
+	return paint.Column(palette.NameStepTight, lines...)
 }
 
-// namesOf is the files of an oversized list, because the screen names them and
-// the sizes belong to the sentence rather than to the list.
+// pair is a label and the value beside it. Values are data rather than
+// interface text, so they are not keys.
+func (v *View) pair(label i18n.Key, value string) fyne.CanvasObject {
+	return paint.Row(palette.NameStepTight,
+		paint.Strong(v.text.T(label), palette.TypeBody, palette.TextPrimary),
+		paint.Text(value, palette.TypeBody, palette.TextSecondary))
+}
+
+// namesOf is the names of the files that are too large to read back, for the
+// sentence that lists them.
 func namesOf(big []take.Oversize) []string {
 	names := make([]string, 0, len(big))
 	for _, one := range big {
@@ -466,9 +467,6 @@ func namesOf(big []take.Oversize) []string {
 // The shape rather than a colour on its own, for the reason measured for this
 // palette: the colours that carry meaning differ in hue while barely differing
 // in lightness, so somebody who does not separate hues sees one shade of grey.
-func (v *View) told(key i18n.Key, mark fyne.Resource) fyne.CanvasObject {
-	headline := widget.NewLabel(v.text.T(key))
-	headline.TextStyle = fyne.TextStyle{Bold: true}
-	headline.Wrapping = fyne.TextWrapWord
-	return beside(mark, headline)
+func (v *View) told(key i18n.Key, icon, ink string) fyne.CanvasObject {
+	return v.marked(icon, ink, paint.Strong(v.text.T(key), palette.TypeBody, palette.TextPrimary))
 }

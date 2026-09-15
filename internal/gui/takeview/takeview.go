@@ -17,6 +17,23 @@
 // asks. The two surfaces therefore cannot disagree about any of it. What lives
 // here is the drawing and the words, and the words are keys rather than
 // sentences because this is the translated surface.
+//
+// # The shape, since 2026-09-15 (DEC-245)
+//
+// A band at the top holds the file, how it is read and the one action of the
+// screen. The body is two columns: what to damage on the left, and on the
+// right the one card, saying what a run would do or did, over the panel
+// saying what the file holds. A band at the foot holds the command that does
+// the same in a terminal. It is the shape of the Quick screen, because the two
+// are one program, and the settings went into a column rather than the band
+// because there are ten of them: the band with all ten took half the window
+// at the size the owner keeps it, measured on the mock before a line of this
+// was written.
+//
+// 🔴 What the shape repairs is measured rather than felt. The old screen put
+// the action, the state of a run and the result under the fold of a scrolling
+// pane at that size (B-280), so a person pressed a button they could not see
+// and then saw nothing happen.
 package takeview
 
 import (
@@ -24,6 +41,7 @@ import (
 	"strconv"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
@@ -32,7 +50,9 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
+	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 )
 
@@ -60,11 +80,14 @@ type View struct {
 	// clipboard is where the line that would do this in a terminal goes, or
 	// nothing when this screen is being rendered rather than shown.
 	clipboard Clipboard
-	// command is that line, and the button beside it copies it.
-	command     *widget.Label
-	copyCommand *parts.Button
-	opened      *take.Opened
-	path        string
+	// command is that line, the button beside it copies it, and the mark
+	// beside the button says that it did.
+	command       *widget.Label
+	copyCommand   *parts.Button
+	commandCopied *canvas.Text
+	terminal      fyne.CanvasObject
+	opened        *take.Opened
+	path          string
 
 	// reading is the file being read right now, and nothing while none is.
 	//
@@ -86,7 +109,10 @@ type View struct {
 	// unread is what the last attempt to read a file ended with, kept so that a
 	// caller assembling this screen without a person can say what went wrong
 	// rather than draw an empty screen and call it the state it asked for.
+	// tried is the file that attempt was about, so that the band can name it
+	// after the path has been let go of.
 	unread error
+	tried  string
 
 	// What the screen is doing and what the last run left. The stage decides
 	// what is drawn and the two beside it carry what there is to say about it.
@@ -110,43 +136,38 @@ type View struct {
 	// working by keyboard and a person working by mouse look the same.
 	hadKeyboard bool
 
-	// The parts that change with what is on screen. They are kept rather than
-	// rebuilt, because rebuilding a control throws away what somebody typed
-	// into it and where the keyboard was standing.
-	empty   *fyne.Container
-	fileBox *fyne.Container
-	// split holds the description apart from the settings, and is put away
-	// while there is no file to describe. The two scrolling areas inside it are
-	// kept because each of them is a place the keyboard can stand.
-	split        *container.Split
-	fileScroll   *parts.KeyScroll
-	answerScroll *parts.KeyScroll
+	// The parts that are refilled with what is on screen. They are kept rather
+	// than rebuilt, because rebuilding a control throws away what somebody
+	// typed into it and where the keyboard was standing.
+	//
+	// facts is the slot in the band beside the button: the name of the file
+	// and its figures, or the sentence about there being none. action holds
+	// the button that damages and the one that stops, of which one is shown.
+	// planBox and runBox are the two parts of the one card, and fileBox is
+	// what the panel holds, inside the scrolling area the keyboard can reach.
+	facts       *fyne.Container
+	action      *fyne.Container
+	cardHeading *fyne.Container
+	planBox     *fyne.Container
+	runBox      *fyne.Container
+	fileBox     *fyne.Container
+	fileScroll  *parts.KeyScroll
+	// panel is the slot the panel stands in: hugging its sentence while there
+	// is no file, and filling the column with a scrolling area once there is
+	// a description to scroll.
+	panel   *fyne.Container
+	content fyne.CanvasObject
 
-	settingsBox *fyne.Container
-	// settingsWait says why the settings are dead, and stands only while they are.
-	settingsWait *widget.Label
-	planBox      *fyne.Container
-	runBox       *fyne.Container
-	// 🔴 The rules between the three boxes above are held rather than left in
-	// the column, because a rule outlives what it divides. The first version of
-	// the empty state hid every box and left the split showing, which drew two
-	// separators across a half screen dividing nothing from nothing. Hiding a
-	// box now hides the rule with it.
-	answerRules []*widget.Separator
-	// fileWait says what the left pane will hold, so that a person sees the
-	// shape of this screen before choosing anything rather than a blank half.
-	fileWait *widget.Label
-
-	layers    *widget.CheckGroup
-	share     *widget.Entry
+	layers    kindBoxes
+	share     *parts.FieldEntry
 	perRow    *parts.Select
-	exclude   *widget.Entry
-	delimiter *widget.Entry
-	locale    *widget.Entry
-	seed      *widget.Entry
-	out       *widget.Entry
+	exclude   *parts.FieldEntry
+	delimiter *parts.FieldEntry
+	locale    *parts.FieldEntry
+	seed      *parts.FieldEntry
+	out       *parts.FieldEntry
 	manifest  *parts.Select
-	overwrite *widget.Check
+	overwrite *parts.Check
 
 	chooseFile *parts.Button
 	damage     *parts.PrimaryButton
@@ -172,107 +193,109 @@ func New(text i18n.Catalogue, window fyne.Window, described catalog.Catalog,
 	view := &View{
 		text: text, window: window, described: described, openFile: openFile,
 		work: work, clipboard: clipboard, chosen: take.Defaults(),
-		empty: container.NewVBox(), fileBox: container.NewVBox(),
-		settingsBox: container.NewVBox(), planBox: container.NewVBox(),
-		runBox: container.NewVBox(),
+		facts: container.NewStack(), action: container.NewStack(),
+		cardHeading: container.NewStack(),
+		planBox:     container.NewStack(), runBox: container.NewStack(),
+		fileBox: container.NewStack(), panel: container.NewStack(),
 	}
 	view.buildControls()
-	view.sayNothingIsChosen()
+	view.lay()
 	view.redraw()
 	return view
 }
 
 // Content is the whole screen.
+func (v *View) Content() fyne.CanvasObject { return v.content }
+
+// lay puts the controls on the screen, apart from making them.
 //
-// The parts are handed over in the order a person reads them, which is also the
-// order the keyboard walks them.
-//
-// 🔴 That sentence stood here before it was true. container.NewBorder appends
-// its edges after its middle, so the convenient call put the whole of the right
-// hand pane in front of the bar holding the button that chooses a file, and the
-// button standing at the very top of the screen was the nineteenth and last
-// thing the keyboard reached. Measured on 2026-08-24 by walking a real canvas.
-// Nothing about the drawing said so, which is the same failure the manifest
-// browser paid for on 2026-08-18 and the reason this comment was written in the
-// first place. A comment is not a guard, so what holds it now is a test.
-//
-// The layout is therefore built with the objects named in reading order rather
-// than through the call that reorders them, which is what the browser next door
-// already does.
-func (v *View) Content() fyne.CanvasObject {
-	// What the file holds is on the left and what to do about it on the right,
-	// each scrolling on its own.
-	//
-	// 🔴 A single column was the first shape and it does not survive a real
-	// file. Rendered against five columns, the answer to what a run would do
-	// had already fallen off the bottom of the window, and a file from the
-	// people this mode is for carries dozens: the description grows with the
-	// file while the settings and the answer do not, so the one thing somebody
-	// came to read is pushed further away the more there is to read about.
-	//
-	// The toolkit's own split is used rather than a layout of ours. It also
-	// gives a person the divider, so a wide description can be given room
-	// without this screen deciding for them how much it deserves.
-	v.answerRules = []*widget.Separator{widget.NewSeparator(), widget.NewSeparator()}
-	answer := container.NewVBox(
-		v.settingsBox,
-		v.answerRules[0],
-		v.planBox,
-		v.answerRules[1],
-		v.runBox,
-	)
-	// 🔴 Both panes scroll with the keyboard rather than with the toolkit's own
-	// scrolling area, which answers to the wheel and to nothing else. This
-	// screen is the taller of the two that had one: the description of a file
-	// grows with the number of columns in it, and the settings are ten rows
-	// whatever the window is. Measured on the About screen on 2026-08-24, where
-	// the same absence left 73.6 percent of the content reachable only with a
-	// mouse.
-	//
-	// The cost is stated rather than discovered: each of these is one more
-	// place for the keyboard to stand, so the walk of this screen is two longer
-	// than it was and the stored states that count presses of Tab moved with
-	// it.
+// 🔴 Every layout here is given its objects in reading order, which is the
+// order the keyboard walks them. container.NewBorder appends its edges after
+// its middle, so the convenient call once put the whole right hand pane in
+// front of the bar holding the button that chooses a file, and the button at
+// the very top of the screen was the nineteenth and last thing the keyboard
+// reached. Measured on 2026-08-24 by walking a real canvas, and held by a test
+// since.
+func (v *View) lay() {
 	v.fileScroll = parts.NewKeyScroll(v.fileBox)
-	v.answerScroll = parts.NewKeyScroll(answer)
-	split := container.NewHSplit(v.fileScroll.Framed(), v.answerScroll.Framed())
-	v.split = split
-	// The purpose comes before the control, because somebody opening this
-	// window for the first time reads the name in the column, learns that the
-	// screen is called Take and corrupt, and still does not know whether it is
-	// about to write over the file they are about to choose.
-	purpose := wrapped(v.text.T(i18n.PurposeTake))
-	purpose.Importance = widget.LowImportance
-	// 🔴 What the screen says before a file is chosen stays UNDER the button and
-	// is not centred in the space below it. Tried on 2026-09-08 and turned down
-	// by measurement, which is written here because the idea is an obvious one
-	// and the next session will have it again.
-	//
-	// The screen with no file is three lines in the top left of a window the
-	// owner runs at 1670 by 1210, so putting them in the middle of what is left
-	// looks like the answer. Spacers above and below made it WORSE: rendered,
-	// the first sentence came out as a label 1366 by 122 for a single line of
-	// text 19 high, and the two sentences ended up 131 apart.
-	//
-	// The cause is that a wrapping label reports a MinSize computed against
-	// whatever width it has at the time of asking, and in a column it is asked
-	// before it has been given one. A column then reserves that wrong height.
-	// It happens not to bite in the border edge above, because there the label
-	// is given the width first.
-	//
-	// So vertical centring of wrapping text is not a thing to reach for here.
-	// The emptiness on this screen is a shortage of CONTENT before a file is
-	// chosen, and the answer to it is showing something, not moving three lines
-	// into the middle of the nothing.
-	body := container.NewVBox(purpose, container.NewHBox(v.chooseFile.OnScreen()), v.empty)
-	// 🔴 Drawn again now that the split exists. The screen was first drawn while
-	// this was still being built, so the state with no file had hidden every box
-	// and left the split itself showing: two separator lines across an otherwise
-	// empty half of the screen, dividing nothing from nothing. Seen in the
-	// stored tree rather than by anybody looking, which is what that guard is
-	// for.
-	v.redraw()
-	return parts.Inset(container.New(layout.NewBorderLayout(body, nil, nil, nil), body, split))
+	v.terminal = v.commandBand()
+
+	// The panel hugs the width of an aside and takes the height the card
+	// leaves, scrolling inside it: what a file holds grows with the number of
+	// its columns and the window does not.
+	// 🔴 ONE heading object per border, named and given to the layout twice.
+	// A border finds its edges by COMPARING the objects it was given, so a
+	// heading built twice would be laid out as a second centre and drawn
+	// across the card. The quick screen paid for that with a button once.
+	// The card shows the plan of the next run OR what the last one did,
+	// never both: together they were taller than the column at the size the
+	// owner keeps the window, and the panel under them was handed a negative
+	// height, which the render's rasteriser refuses with a panic. The heading
+	// over the card says which of the two it is, so it is refilled with the
+	// card rather than built once.
+	card := paint.Card(palette.NameStepGroup,
+		paint.Column(palette.NameStepRelated, v.planBox, v.runBox))
+	result := container.New(layout.NewBorderLayout(v.cardHeading, nil, nil, nil),
+		v.cardHeading, container.NewVBox(card))
+	right := container.New(layout.NewBorderLayout(result, nil, nil, nil),
+		result, paint.Pad(palette.NameStepSection, palette.NameStepHairline,
+			palette.NameStepHairline, palette.NameStepHairline,
+			paint.AtLeast(palette.AsideWidth, 0, v.panel)))
+
+	settingsHeading := v.heading(i18n.TakeHeadingSettings)
+	settings := container.New(layout.NewBorderLayout(settingsHeading, nil, nil, nil),
+		settingsHeading, container.NewVBox(v.settingsColumn()))
+
+	aside := paint.PadLeft(palette.NameStepSection, right)
+	body := paint.Pad(palette.NameStepSection, palette.NameStepSection,
+		palette.NameStepMajor, palette.NameStepMajor,
+		container.New(layout.NewBorderLayout(nil, nil, nil, aside), settings, aside))
+
+	band := v.fileBand()
+	v.content = container.New(layout.NewBorderLayout(band, v.terminal, nil, nil),
+		band, body, v.terminal)
+}
+
+// heading is the title of one column, with the line every section heading of
+// this window carries.
+func (v *View) heading(key i18n.Key) fyne.CanvasObject {
+	return paint.Pad(palette.NameStepHairline, palette.NameStepRelated,
+		palette.NameStepHairline, palette.NameStepHairline,
+		paint.SectionHeading(v.text.T(key), paint.Spacer()))
+}
+
+// fileBand is the band at the top: what the screen is for, then the file and
+// how it is read, and the one action at the right, dropped by the height of
+// the label it does not have so that it stands level with the fields.
+//
+// The separator and the locale stand with the file rather than with the
+// settings, because they decide how the file is READ: changing either changes
+// what the panel says the file holds, where every other setting changes only
+// what a run would do with it.
+func (v *View) fileBand() fyne.CanvasObject {
+	drop := paint.Space(0, palette.TypeSize(palette.TypeLabel)+palette.StepOf(palette.NameStepHairline))
+	choose := container.NewVBox(drop, v.chooseFile.OnScreen())
+	// 🔴 The facts take what the button and the fields leave, rather than
+	// standing in a row with them. In a row they were given the width they
+	// asked for, and the sentence about there being no file asked for more
+	// than the band had, so the fields walked under the button at the far
+	// end - seen on the first render of the state the screen opens in.
+	facts := container.NewVBox(drop, paint.AtLeast(0, palette.ControlHeight, paint.Middle(v.facts)))
+	reading := paint.Row(palette.NameStepRelated,
+		labelled(v.text.T(i18n.TakeSettingDelimiter),
+			paint.AtLeast(paint.FieldWidth(delimiterSample), 0, parts.Standing(parts.Field(v.delimiter)))),
+		labelled(v.text.T(i18n.TakeSettingLocale),
+			paint.AtLeast(paint.FieldWidth(localeSample), 0, parts.Standing(parts.Field(v.locale)))))
+	file := paint.Lead(choose,
+		paint.PadLeft(palette.NameStepRelated,
+			paint.Trail(facts, paint.PadLeft(palette.NameStepRelated, reading))))
+	action := container.NewVBox(drop, v.action)
+	// The sentence wraps, because it is the longest line on this screen and a
+	// piece of canvas text would otherwise decide how narrow the window may be.
+	return paint.Band(paint.BandBelow, palette.NameStepGroup, palette.NameStepMajor,
+		paint.Column(palette.NameStepGroup,
+			v.paragraph(v.text.T(i18n.PurposeTake)),
+			paint.Trail(file, paint.PadLeft(palette.NameStepGroup, action))))
 }
 
 // Open reads a file and puts the screen into the state that shows it.
@@ -281,9 +304,9 @@ func (v *View) Content() fyne.CanvasObject {
 //
 // Something outside this package has to reach that state without a file
 // chooser: the guard holding what every screen draws, and the probe rendering
-// them to pictures. It carries the whole state change rather than the drawing
-// alone, which is the correction of a drift this project measured on the other
-// screen, where an exported call that only drew reached a state no person can.
+// them. It carries the whole state change rather than the drawing alone, which
+// is the correction of a drift this project measured on the other screen,
+// where an exported call that only drew reached a state no person can.
 //
 // # Why it answers nothing
 //
@@ -328,18 +351,15 @@ func (v *View) Unread() error { return v.unread }
 
 // startReading hands a read to the place of work and shows that it is going on.
 //
-// # Why the answer is checked against a counter before it is used
-//
-// Reads are superseded rather than refused, because the separator is read again
-// on every keystroke and a person types faster than a large file is walked.
-// Without the counter the answer about the file as it was two keystrokes ago
-// would arrive last and win, and the screen would describe a file read under a
-// separator nobody has on screen. The counter is read and written only on the
-// thread that draws, which is what lets it be a plain number.
+// 🔴 The answer is applied only if it is still the answer to the latest
+// question. Two reads in flight at once are ordinary here, because the
+// separator is typed one character at a time and every character reads the
+// file again, and the one that finishes second is not always the one that was
+// asked second.
 func (v *View) startReading(path string, answer func(*take.Opened, error)) {
 	v.asked++
 	wanted := v.asked
-	v.reading = path
+	v.reading, v.tried = path, path
 	v.unread = nil
 	v.drawReading()
 	settings := v.chosen
@@ -347,8 +367,8 @@ func (v *View) startReading(path string, answer func(*take.Opened, error)) {
 		opened, err := v.openFile(path, settings)
 		return func() {
 			if wanted != v.asked {
-				// A later read has already been asked for, so this answer is
-				// about a question nobody is asking any more.
+				// A later question was asked, so this answer is about a
+				// file, or a separator, nobody is waiting for any more.
 				return
 			}
 			v.reading = ""
@@ -356,10 +376,9 @@ func (v *View) startReading(path string, answer func(*take.Opened, error)) {
 			answer(opened, err)
 		}
 	}, func(err error) func() {
-		// A read that came apart takes the same road as a read that failed,
-		// with nothing opened. Every caller of this already has to handle a
-		// failure with no file behind it, so this adds a cause rather than a
-		// case.
+		// The place of work could not even start the read, which is a
+		// failure of the same kind as a file that cannot be read, and is
+		// shown the same way.
 		return func() {
 			if wanted != v.asked {
 				return
@@ -371,7 +390,7 @@ func (v *View) startReading(path string, answer func(*take.Opened, error)) {
 	})
 }
 
-// readingNow reports whether a file is being read right now.
+// readingNow reports whether a file is being read.
 //
 // It is apart from busy, which is about a run. The two never overlap, and they
 // are asked about separately because they mean different things to a person: a
@@ -386,35 +405,54 @@ func (v *View) readingNow() bool { return v.reading != "" }
 // unchanged screen and a screen still working look identical, and the one thing
 // a person cannot do is tell them apart.
 func (v *View) drawReading() {
-	// The name of the file first, because it is what tells a person which read
-	// they are waiting for when they have just changed the separator on one
-	// file after another.
-	//
-	// 🔴 The name and not the path, for two reasons that happen to agree. A
-	// person knows their file by its name, and the whole path is a line of
-	// noise around it. And the stored tree of this state would otherwise carry
-	// the directory the sample was written into, which is a fresh temporary
-	// directory on every run, so the guard comparing those trees would fail at
-	// random. A guard that fails at random is a guard somebody turns off.
-	said := []fyne.CanvasObject{
-		wrapped(filepath.Base(v.reading)), wrapped(v.text.T(i18n.TakeReading)),
-	}
-	// Into whichever of the two is on screen, and never into both. The one that
-	// is hidden keeps whatever it last said, and a stored tree of this screen
-	// carries hidden objects as well as shown ones, so a sentence left in the
-	// wrong box would show up there as a screen saying two things at once.
-	if v.opened == nil {
-		v.empty.Objects = said
-		v.empty.Refresh()
-	} else {
-		v.fileBox.Objects = said
-		v.fileBox.Refresh()
-	}
-	// The button that would start a run goes with it. A run begun now would use
-	// the file as it was read a moment ago, under settings the screen has since
-	// been told to change, and would say so in a manifest.
+	v.drawFacts()
+	v.planBox.Objects = []fyne.CanvasObject{v.paragraph(v.text.T(i18n.TakeReading))}
+	v.planBox.Refresh()
 	v.drawRun()
 }
+
+// drawFacts fills the slot beside the button with what is known about the
+// file: its name and figures, that it is being read, that it could not be, or
+// that there is none yet.
+//
+// 🔴 The name and not the path, for two reasons that happen to agree. A person
+// knows their file by its name, and the whole path is a line of noise around
+// it. And the stored tree of this state would otherwise carry the directory
+// the sample was written into, which is a fresh temporary directory on every
+// run, so the guard comparing those trees would fail at random. A guard that
+// fails at random is a guard somebody turns off.
+func (v *View) drawFacts() {
+	var said fyne.CanvasObject
+	switch {
+	case v.readingNow():
+		said = v.named(v.reading, v.text.T(i18n.TakeFileReading), palette.TextSecondary)
+	case v.unread != nil:
+		said = v.named(v.tried, v.text.T(i18n.TakeFileUnreadable), palette.StateDanger)
+	case v.opened == nil:
+		// A label cut with an ellipsis rather than a piece of canvas text,
+		// because this is a sentence and the slot is whatever the band has
+		// left: a piece of canvas text would ask for its whole width and take
+		// it from the fields beside it.
+		said = v.cut(v.text.T(i18n.TakeFileNone))
+	default:
+		table := v.opened.Table()
+		said = v.named(v.path, counted(table.Rows, "record")+" "+dot+" "+
+			counted(len(table.Columns), "column"), palette.TextSecondary)
+	}
+	v.facts.Objects = []fyne.CanvasObject{said}
+	v.facts.Refresh()
+}
+
+// named is the name of a file with a few words after it.
+func (v *View) named(path, words, ink string) fyne.CanvasObject {
+	return paint.Row(palette.NameStepTight,
+		paint.Strong(filepath.Base(path), palette.TypeBody, palette.TextPrimary),
+		paint.Text(dot+" "+words, palette.TypeBody, ink))
+}
+
+// dot stands between two facts about a file, as it does between the version
+// and the promise at the foot of the sidebar.
+const dot = "·"
 
 // forgetLastRun clears what this screen says about a run that is now about
 // another file.
@@ -442,9 +480,8 @@ func (v *View) choose() {
 			return
 		}
 		if chosen == nil {
-			// A cancelled chooser leaves the screen as it was. Turning it into
-			// a message would tell somebody something went wrong when they were
-			// the one who decided nothing should.
+			// The dialog was dismissed, which is a person changing their
+			// mind rather than anything to say.
 			return
 		}
 		defer func() { _ = chosen.Close() }()
@@ -452,169 +489,92 @@ func (v *View) choose() {
 	}, v.window)
 }
 
-// showUnreadable puts the failure where the file would have been, and leaves
-// the rest of the screen out of the way.
+// showUnreadable puts the failure where the plan would have been, and says in
+// the band that the file could not be read.
 func (v *View) showUnreadable(err error) {
-	v.empty.Objects = []fyne.CanvasObject{
-		wrapped(v.text.T(i18n.TakeUnreadable) + " " + err.Error()),
-		wrapped(v.text.T(i18n.TakeDrop)),
-	}
-	v.empty.Refresh()
+	v.unread = err
 	v.redraw()
+	v.planBox.Objects = []fyne.CanvasObject{paint.Column(palette.NameStepTight,
+		v.paragraph(v.text.T(i18n.TakeUnreadable)+" "+err.Error()),
+		v.paragraph(v.text.T(i18n.TakeDrop)))}
+	v.planBox.Refresh()
 }
 
-// redraw shows the parts that belong to the state the screen is in.
+// redraw draws the parts that belong to the state the screen is in.
 //
-// Hiding rather than rebuilding, so that a control keeps what was typed into it
-// and the keyboard keeps its place.
+// The controls are refilled rather than rebuilt, so that a control keeps what
+// was typed into it and the keyboard keeps its place.
 func (v *View) redraw() {
+	v.drawFacts()
+	v.drawFile()
+	v.drawCommand()
 	if v.opened == nil {
-		v.empty.Show()
-		v.showWaiting()
+		v.planBox.Objects = []fyne.CanvasObject{v.paragraph(v.text.T(i18n.TakePlanWait))}
+		v.planBox.Refresh()
+		v.drawRun()
 		return
 	}
-	v.empty.Hide()
-	v.settingsWait.Hide()
-	v.fileWait.Hide()
-	for _, rule := range v.answerRules {
-		rule.Show()
-	}
-	// Given back, because the state above took them away. Guarded by the run
-	// in flight rather than left to where this happens to be called from: no
-	// caller today redraws during a run, and a rule that holds only while
-	// nobody adds a caller is not a rule. Thawing mid run would put the
-	// settings of the next run under the fingers of somebody watching this one.
+	// The controls come back to life after a run. Nothing else touches them,
+	// since every setting is alive from the moment the screen opens.
 	if !v.busy() {
 		v.thaw()
 	}
-	// Put back what the empty box says, because a read that has just answered
-	// left the sentence about reading in it. It is hidden from here on, so this
-	// is not about what anybody sees: it is about the box holding what it
-	// means, so that the next time it is shown it is not a sentence about a
-	// file that was read minutes ago.
-	v.sayNothingIsChosen()
-	v.drawFile()
 	v.drawPlan()
 	v.drawRun()
-	v.fileBox.Show()
-	v.settingsBox.Show()
-	v.planBox.Show()
-	v.runBox.Show()
-	if v.split != nil {
-		v.split.Show()
-	}
 }
 
-// sayNothingIsChosen is what the screen says before anybody has chosen a file.
-func (v *View) sayNothingIsChosen() {
-	v.empty.Objects = []fyne.CanvasObject{
-		wrapped(v.text.T(i18n.TakeEmpty)), wrapped(v.text.T(i18n.TakeDrop)),
-	}
-	v.empty.Refresh()
+// labelled names a control, above it rather than beside it.
+//
+// It is one call to the drawing next door, named here so that a row of
+// settings reads as a list of settings rather than as layout instructions.
+func labelled(name string, control fyne.CanvasObject) fyne.CanvasObject {
+	return paint.FieldLabel(name, control)
 }
 
-// hideSplit puts away everything that describes a file, for the state where
-// there is none.
-func (v *View) hideSplit() {
-	v.fileBox.Hide()
-	v.settingsBox.Hide()
-	v.planBox.Hide()
-	v.runBox.Hide()
-	for _, rule := range v.answerRules {
-		rule.Hide()
-	}
-	if v.split != nil {
-		v.split.Hide()
-	}
-}
-
-// showWaiting is the screen before a file is chosen: the shape of it, with the
-// settings in place and dead, and each half saying what will stand there.
-//
-// 🔴 # Why the whole shape rather than a bare button
-//
-// Measured on 2026-09-08 with tools/pustka.py at the size the window is kept:
-// this screen stood 64.0 per cent empty in the state it OPENS in, and the state
-// a program opens in is the one no drawing shows and the first a person meets.
-// What it said about this tool was that the tool does almost nothing.
-//
-// Nothing here is new content invented to fill space. The settings existed and
-// were hidden, and what the two sentences add is the name of what each half is
-// for, which is the question somebody opening this screen actually has.
-//
-// # What stays away, and why it is not the same answer
-//
-// The plan and the result describe a PARTICULAR file: what a run would do to it
-// and what a run of it produced. With no file each is a heading over nothing,
-// which is the box somebody forgot to fill rather than a screen that is
-// waiting. The settings differ because they are true before there is a file:
-// they are what a run WOULD use, and they are what somebody wants to set while
-// looking for one.
-func (v *View) showWaiting() {
-	if v.split == nil {
-		// Called once from New, before Content has built the split. There is
-		// nothing on screen yet to put into a state.
-		v.hideSplit()
-		return
-	}
-	v.split.Show()
-	v.fileBox.Show()
-	v.fileWait.Show()
-	v.settingsBox.Show()
-	v.settingsWait.Show()
-	v.planBox.Hide()
-	v.runBox.Hide()
-	for _, rule := range v.answerRules {
-		rule.Hide()
-	}
-	v.previewSettings()
-}
-
-// wrapped is a paragraph that follows the width of the window rather than
-// running off the edge of it.
-func wrapped(words string) *widget.Label {
+// cut is a sentence that takes the width it is given and ends in an ellipsis
+// where it does not fit, for the one slot of this screen that is a single
+// line beside other things.
+func (v *View) cut(words string) fyne.CanvasObject {
 	label := widget.NewLabel(words)
-	label.Wrapping = fyne.TextWrapWord
+	label.Wrapping = fyne.TextWrapOff
+	label.Truncation = fyne.TextTruncateEllipsis
+	label.Importance = widget.LowImportance
+	label.SizeName = fyne.ThemeSizeName(palette.TypeBody)
 	return label
 }
 
-// beside is a mark with a paragraph that follows the width of the window.
+// paragraph is a sentence that wraps to the width it is given, in the type of
+// the body and the ink of an explanation.
 //
-// 🔴 A row of the toolkit gives each thing the width it asks for and no more,
-// and a wrapping label asks for the width of its whole sentence. Put in a row it
-// therefore does not wrap at all, it runs off the right edge, and the wrapping
-// that was set on it does nothing. Seen on the render of the state that shows a
-// run going on: the sentence saying what stopping leaves behind was cut mid
-// word at the edge of the screen. A border gives its middle whatever is left
-// over after the edges, which is the width wrapping needs.
-func beside(mark fyne.Resource, words fyne.CanvasObject) fyne.CanvasObject {
-	return container.NewBorder(nil, nil, widget.NewIcon(mark), nil, words)
+// A label of the toolkit's rather than paint.Text, because paint.Text is a
+// piece of canvas and never wraps, and the sentences here are the longest on
+// any screen of this window.
+func (v *View) paragraph(words string) fyne.CanvasObject {
+	label := widget.NewLabel(words)
+	label.Wrapping = fyne.TextWrapWord
+	label.Importance = widget.LowImportance
+	label.SizeName = fyne.ThemeSizeName(palette.TypeBody)
+	return container.NewStack(label)
 }
 
-// wrappedPair is a label and a value long enough to need wrapping.
-//
-// Paths and lists of file names are as long as somebody's directory, so the
-// value beside the label is the one thing on this screen whose length nobody
-// here decides.
-func wrappedPair(label, value string) fyne.CanvasObject {
-	name := widget.NewLabelWithStyle(label, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	return container.NewBorder(nil, nil, name, nil, wrapped(value))
+// notice is a sentence with the mark of a warning before it, for the things a
+// person is better off knowing before they press the button.
+func (v *View) notice(key i18n.Key) fyne.CanvasObject {
+	return v.marked(paint.IconWarn, palette.StateWarning, v.paragraph(v.text.T(key)))
 }
 
-// heading names one part of this screen, with the rule the accepted drawing
-// puts under it.
-//
-// Five of them, and every one is a section rather than a line of emphasis: what
-// the file holds, what to damage, what would happen, the result, and the
-// terminal line. Until 2026-09-08 they were bold text and nothing else, so
-// nothing said where one part of this screen stopped and the next began, which
-// on the busiest screen in the window is where it hurts most.
-func heading(words string) fyne.CanvasObject {
-	return parts.Section(words)
+// marked puts an icon before something, level with its first line.
+func (v *View) marked(icon, ink string, words fyne.CanvasObject) fyne.CanvasObject {
+	return paint.Lead(
+		paint.Pad(palette.NameStepHairline, palette.NameStepHairline,
+			palette.NameStepHairline, palette.NameStepTight,
+			paint.Icon(icon, ink, palette.IconSmall)),
+		words)
 }
 
-// counted writes a number with the thing it counts, in the singular where there
-// is one of it.
+// counted says how many of a thing there are, in the plural where there are
+// not exactly one. Values are data rather than interface text, so this is not
+// a key.
 func counted(many int, thing string) string {
 	if many == 1 {
 		return "1 " + thing

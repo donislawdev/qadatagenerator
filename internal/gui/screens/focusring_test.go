@@ -44,7 +44,10 @@ import (
 // rebuilt. The fifth name here is the event CLAUDE.md names as the condition
 // for the gate and the mutations to come back.
 func TestEveryStopOfTheKeyboardDrawsExactlyOneFocusRing(t *testing.T) {
-	built := []string{"quick-opens"}
+	// The take screen joined on 2026-09-15 (DEC-245), in the state it opens
+	// in and in the one with a file read, since the two walk different
+	// controls: the card and the panel hold different things.
+	built := []string{"quick-opens", "take-empty", "take-plan"}
 	data := sampleWithSource(t)
 
 	for _, name := range built {

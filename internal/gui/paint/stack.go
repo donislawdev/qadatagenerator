@@ -68,3 +68,51 @@ func Column(step string, children ...fyne.CanvasObject) *fyne.Container {
 func Row(step string, children ...fyne.CanvasObject) *fyne.Container {
 	return container.New(layout.NewCustomPaddedHBoxLayout(theme.StepOf(step)), children...)
 }
+
+// Lead puts something at the left at the width it asks for, and hands the rest
+// of the width to what stands beside it.
+//
+// # Why a border and not a row
+//
+// A row gives every child the width it asks for and a field asks for very
+// little, so the last field of a row of settings came out as wide as a word.
+// The toolkit's border layout is the one that hands a side what is left, and
+// it is named here so that a screen says which thing grows rather than
+// spelling the layout out. The objects are given in reading order, which is
+// also the order the keyboard walks them - the convenient NewBorder appends
+// its centre first, which this project has paid for twice.
+func Lead(leading, rest fyne.CanvasObject) *fyne.Container {
+	return container.New(layout.NewBorderLayout(nil, nil, leading, nil), leading, rest)
+}
+
+// Trail is Lead the other way round: what stands on the right keeps the width
+// it asks for, and what is left goes to the rest.
+func Trail(rest, trailing fyne.CanvasObject) *fyne.Container {
+	return container.New(layout.NewBorderLayout(nil, nil, nil, trailing), rest, trailing)
+}
+
+// Grid lays cells of one size out in as many columns as the width allows, and
+// wraps the rest onto the next row.
+//
+// It is the toolkit's grid wrap, named here for the same reason Row and Column
+// are: a screen says what it wants and not which layout does it. The cell is
+// measured by the caller from the widest thing that will stand in it, because
+// the toolkit wants one size for every cell and a cell narrower than its words
+// lets them run into the next column - Fyne does not clip.
+//
+// 🔴 The cell is never nought. The toolkit counts columns by dividing the
+// width by the cell plus its padding, and this window answers nought to the
+// padding on purpose, so a cell of nought is nought over nought: NaN, which
+// then arrives as the height of the grid, the height of the window and the
+// width of a label three layouts away, where the text renderer slices by it
+// and panics. Measured on 2026-09-15 on a screen built with an empty
+// catalogue, where the grid had no kinds to measure a cell from.
+func Grid(cell fyne.Size, cells ...fyne.CanvasObject) *fyne.Container {
+	if cell.Width < theme.HairlineThickness {
+		cell.Width = theme.HairlineThickness
+	}
+	if cell.Height < theme.HairlineThickness {
+		cell.Height = theme.HairlineThickness
+	}
+	return container.NewGridWrap(cell, cells...)
+}

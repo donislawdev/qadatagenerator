@@ -137,10 +137,12 @@ verify.kind.silent: taken without the mark the manifest expected
 verify.kind.missing: the application never answered for this row
 
 take.choose: Choose a file
-take.empty: Choose a file this tool did not make. Nothing is read until you choose one, and nothing is written until you ask for it.
+take.file.none: No file yet. Choose one, or drop it onto this window.
+take.file.reading: being read
+take.file.unreadable: could not be read
 take.drop: You can also drop a file onto this window.
-take.settings.wait: These are the settings a run would use. They come alive once a file is chosen.
-take.file.wait: What the file holds appears here. How many records it has, what each column was taken for, and what this tool could not work out.
+take.file.wait: Its records, its columns, and what each column was taken for by looking at the values, since nothing declares it.
+take.plan.wait: Choose a file, and this says what a run would do with it before anything is written.
 take.unreadable: This file could not be read.
 take.reading: This file is being read, which means walking all of it. Nothing is written while that goes on, and the screen answers again as soon as it knows what the file holds.
 
@@ -156,6 +158,7 @@ take.file.taken-for: taken for
 take.file.because: because
 take.file.agrees-with: taken to agree with
 take.file.byte-order-mark: This file begins with a byte order mark. The damaged file is written without one.
+take.file.not-worked-out: Not worked out
 take.file.not-inferred: Looking at values cannot establish these. Damage that needs them is still ordered, and the manifest carries the reason it could not be applied.
 take.file.one-column: This file was read as a single column. A file written by a European spreadsheet separates its fields with a semicolon rather than a comma, so check the field separator before damaging it.
 take.file.nothing-recognised: No column was recognised as carrying a numbering scheme, so damage aimed at one has nothing to work with in this file.
@@ -195,8 +198,9 @@ take.setting.manifest: Extra manifest form
 take.setting.overwrite: Replace files already there
 take.setting.none: none
 
-take.plan.kinds: Kinds of damage ordered
-take.plan.implemented: Of those, this build can carry out
+take.plan.carried: Carried out by this build, of those ordered
+# tekst-ok: the word between two figures of one row, 3 of 9, and nothing more
+take.plan.of: of
 take.plan.writes: Files this would write
 # tekst-ok: the word between a file and its directory, the same in take.result.in and recipe.in
 take.plan.writes-to: in
@@ -295,6 +299,7 @@ recipe.entities: entities
 recipe.field: field
 recipe.fields: fields
 recipe.showing: showing
+# tekst-ok: the word between two figures, showing 10 of 12, the same word take.plan.of stands between its two
 recipe.of: of
 # tekst-ok: one row of a table, the word the manifest browser places a defect with in manifest.place.row
 recipe.row: row

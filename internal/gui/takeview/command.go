@@ -5,12 +5,13 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/commandline"
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
+	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
 // buildCommand makes the line that would do this in a terminal, once.
@@ -31,43 +32,56 @@ func (v *View) buildCommand() {
 		fyne.TextStyle{Monospace: true})
 	// Cut with an ellipsis rather than wrapped or left to run. A command is one
 	// long line by nature, and a label reports the width of its whole text as
-	// the least it can be, so an uncut one drags the pane holding it along.
-	// Measured on 2026-09-08 once the pane was no longer being stretched by
-	// something else: cut, the line renders 513 pixels wide inside a pane of
-	// 522, which is what it should do.
+	// the least it can be, so an uncut one drags the band holding it along.
 	//
 	// A cut line is honest here in a way it would not be elsewhere, because
 	// nothing on this screen asks anybody to READ this line. The button beside
 	// it carries the whole of it to the clipboard, and what stays visible is
 	// the verb and the first flags, which is what tells a person whether the
 	// line is the one they wanted.
-	//
-	// 🔴 A note for whoever measures this next, because it cost an hour. When
-	// the pane was 1998 wide, this label rendered 1515 wide and cutting it
-	// looked like it did nothing. It was doing exactly what it says: there was
-	// simply room. The pane was being stretched by the row of tick boxes above,
-	// which is written up where that row is built. A remedy tried against the
-	// wrong cause looks like a remedy that does not work.
 	v.command.Wrapping = fyne.TextWrapOff
 	v.command.Truncation = fyne.TextTruncateEllipsis
 	v.copyCommand = parts.NewButton(v.text.T(i18n.CommandCopy), v.putCommandInClipboard)
+	v.copyCommand.ShowIcon(paint.IconCopy)
+	v.commandCopied = paint.Text("", palette.TypeLabel, palette.TextSecondary)
 }
 
-// commandContent is that line with the button that copies it.
-func (v *View) commandContent() fyne.CanvasObject {
+// commandBand is the band at the foot of the screen holding the line and the
+// button that copies it, the same band the Quick screen has and for the same
+// reason: the command is not a box floating over nothing, it is chrome
+// touching the edge of the window, symmetrical to the band at the top.
+func (v *View) commandBand() fyne.CanvasObject {
+	return paint.Band(paint.BandAbove, palette.NameStepRelated, palette.NameStepMajor,
+		container.NewBorder(nil, nil,
+			paint.Middle(paint.Mono(commandPrompt, palette.TypeBody, palette.TextAccent)),
+			paint.Row(palette.NameStepTight,
+				paint.Middle(v.commandCopied), paint.Middle(v.copyCommand.OnScreen())),
+			paint.Middle(v.command)))
+}
+
+// commandPrompt is what a terminal shows before a line, so that the line reads
+// as one and is not mistaken for a sentence about it.
+const commandPrompt = "$"
+
+// drawCommand writes the line out again, and hides the band while there is
+// no file to write it about.
+//
+// A command with no file is a command that refuses, and a band offering one
+// to copy would be offering exactly the thing the mode turns down.
+func (v *View) drawCommand() {
+	if v.terminal == nil {
+		// Asked while the controls are still being built: choosing the
+		// default of a list runs its callback, and the band does not exist
+		// until every control does. Nothing to draw into yet.
+		return
+	}
+	if v.path == "" {
+		v.command.SetText("")
+		v.terminal.Hide()
+		return
+	}
 	v.command.SetText(v.commandLine())
-	// 🔴 The line sits in the middle of a border and nowhere else. Measured on
-	// 2026-09-08 with it in a plain column: the text rendered as one unbroken
-	// run 1515 pixels wide and pushed the pane holding it to 1998 inside a
-	// window of 1342, so the description of the file beside it lost a third of
-	// its width and every paragraph in it rewrapped. Wrapping was set on the
-	// label and did nothing, which is the trap written up at beside() below:
-	// a wrapping label asks for the width of its whole sentence, and only the
-	// middle of a border is given what is left rather than what it asks for.
-	return container.NewVBox(
-		v.command,
-		container.NewHBox(v.copyCommand.OnScreen(), layout.NewSpacer()),
-	)
+	v.terminal.Show()
 }
 
 // commandLine writes out what a terminal would be asked for.
@@ -107,4 +121,6 @@ func (v *View) putCommandInClipboard() {
 		return
 	}
 	v.clipboard.SetContent(v.command.Text)
+	v.commandCopied.Text = v.text.T(i18n.CommandCopied)
+	v.commandCopied.Refresh()
 }

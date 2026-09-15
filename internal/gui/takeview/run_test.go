@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
@@ -117,6 +118,11 @@ func texts(object fyne.CanvasObject) []string {
 	switch typed := object.(type) {
 	case *widget.Label:
 		return []string{typed.Text}
+	// A piece of canvas text is what the figures, the names and the headlines
+	// of this screen are drawn as since it began drawing with paint, and it is
+	// what a person reads as much as a label is.
+	case *canvas.Text:
+		return []string{typed.Text}
 	case *parts.Button:
 		return []string{typed.Text}
 	case *widget.Button:
@@ -204,7 +210,17 @@ func TestTheScreenSaysWhatARunWouldDoBeforeItRunsAnything(t *testing.T) {
 	}
 	planned := view.opened.Plan(view.chosen, view.described)
 	said := texts(view.planBox)
-	for _, want := range []string{strconv.Itoa(planned.Ordered), take.OutputName(view.path)} {
+	// A row per named layer, with how much of it this build carries out, and
+	// the files a run would write (DEC-245). The sum stood here until
+	// 2026-09-15 and said that something was missing without saying what.
+	if len(planned.ByLayer) == 0 {
+		t.Fatal("the plan names no layer, so this proves nothing about the rows")
+	}
+	wanted := []string{take.OutputName(view.path)}
+	for _, layer := range planned.ByLayer {
+		wanted = append(wanted, strconv.Itoa(layer.Implemented)+" of "+strconv.Itoa(layer.Ordered))
+	}
+	for _, want := range wanted {
 		if !saying(said, want) {
 			t.Errorf("the screen does not say %q about what a run would do. It said %q", want, said)
 		}

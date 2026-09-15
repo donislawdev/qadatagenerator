@@ -1,12 +1,14 @@
 package takeview
 
 import (
+	"strconv"
+
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
+	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 )
 
@@ -18,25 +20,30 @@ import (
 // here is a real option with a name of its own.
 const perRowDefault = "exactly_one"
 
+// Samples the width of a field is measured from, so that no width is written
+// as a number here. Each is the longest value the field is for: a share is at
+// most a hundred percent, a separator is one character with room to see it,
+// and a locale is a language and a country.
+const (
+	shareSample     = "100%"
+	delimiterSample = ",,"
+	localeSample    = "en-US"
+)
+
 // buildControls makes every setting a control, once.
 //
 // Once rather than on each draw, because a control rebuilt under somebody is a
 // control that loses what they typed and where their keyboard was standing.
+//
+// 🔴 Every setting is alive from the moment the screen opens (DEC-245). Until
+// 2026-09-15 all of them were dead until a file had been read, with a sentence
+// saying so, and nothing was protected by that: the plan needs the file, the
+// settings do not, and the command line takes its flags in any order. The one
+// thing that waits for the file is the button that damages it.
 func (v *View) buildControls() {
 	v.chosen.PerRow = perRowDefault
 	v.buildCommand()
-	v.layers = widget.NewCheckGroup(v.layerLabels(), func(chosen []string) {
-		v.chosen.Layers = v.codesOfLabels(chosen)
-		v.settingChanged()
-	})
-	// 🔴 Down the pane rather than across it, changed on 2026-09-08 with the
-	// names. Across was right while the labels were L0 and L1: eight of them
-	// fitted in one row. Named for a person they are five times as long, and
-	// eight of those in a row asked for 1998 pixels inside a window of 1342,
-	// which took a third of the width off the description of the file beside
-	// them. A row gives each thing the width it asks for, so the widest thing
-	// in it decides how wide the whole pane is.
-	v.layers.Horizontal = false
+	v.layers = v.buildKinds()
 
 	v.share = v.entry(v.chosen.Rows, func(typed string) { v.chosen.Rows = typed })
 	v.exclude = v.entry("", func(typed string) { v.chosen.ExcludeFields = take.NamesIn(typed) })
@@ -68,24 +75,32 @@ func (v *View) buildControls() {
 	// over a file in somebody's working directory is the failure the writer of
 	// files exists to prevent, and a window is where an accidental second press
 	// is easiest.
-	v.overwrite = widget.NewCheck("", func(ticked bool) {
+	v.overwrite = parts.NewCheck(v.text.T(i18n.TakeSettingOverwrite), func(ticked bool) {
 		v.chosen.Overwrite = ticked
 		v.settingChanged()
 	})
 
 	v.chooseFile = parts.NewButton(v.text.T(i18n.TakeChoose), v.choose)
+	v.chooseFile.ShowIcon(paint.IconFolder)
 	v.damage = parts.NewPrimaryButton(v.text.T(i18n.TakeRun), v.Start)
 	v.stop = parts.NewButton(v.text.T(i18n.TakeStop), v.Stop)
-	// The sentence saying why the settings are dead sits between the heading
-	// and the form, and is hidden the moment a file arrives. Held on the view
-	// because redraw shows and hides it, and a screen built once cannot reach
-	// it any other way.
-	v.settingsWait = wrapped(v.text.T(i18n.TakeSettingsWait))
-	v.fileWait = wrapped(v.text.T(i18n.TakeFileWait))
-	v.fileBox.Objects = []fyne.CanvasObject{v.fileWait}
-	v.settingsBox.Objects = []fyne.CanvasObject{
-		heading(v.text.T(i18n.TakeHeadingSettings)), v.settingsWait, v.form(),
+}
+
+// buildKinds makes one check box per kind of damage this build describes, in
+// the order the catalogue gives them, each telling the same callback.
+//
+// Ticking one changes the whole set of chosen kinds rather than adding a code,
+// so that the order of the codes is the catalogue's and not the order somebody
+// clicked in. The command line and the manifest both list them that way.
+func (v *View) buildKinds() kindBoxes {
+	var kinds kindBoxes
+	for _, code := range v.layerCodes() {
+		kinds = append(kinds, kindBox{code: code, box: parts.NewCheck(v.labelOfLayer(code), func(bool) {
+			v.chosen.Layers = v.layers.chosen()
+			v.settingChanged()
+		})})
 	}
+	return kinds
 }
 
 // ChooseLayers ticks kinds of damage, the way a person clicking them would.
@@ -98,16 +113,15 @@ func (v *View) buildControls() {
 // controls cannot produce, so this ticks the boxes and lets the same callback
 // run that a click runs.
 // The kinds arrive as the catalogue names them, because that is what a caller
-// outside a window has: a layer code, the same string --layers takes. The tick
-// boxes are labelled for a person since 2026-09-08, so the codes are turned
-// into those labels here rather than at every caller.
+// outside a window has: a layer code, the same string --layers takes.
 func (v *View) ChooseLayers(kinds []string) {
-	v.layers.SetSelected(v.labelsOfCodes(kinds))
+	v.layers.tick(kinds)
 }
 
-// entry is a text setting that answers as it is typed into.
-func (v *View) entry(start string, keep func(string)) *widget.Entry {
-	field := widget.NewEntry()
+// entry is a text setting that answers as it is typed into, dressed the way
+// every field of this window is.
+func (v *View) entry(start string, keep func(string)) *parts.FieldEntry {
+	field := parts.NewFieldEntry()
 	field.SetText(start)
 	field.OnChanged = func(typed string) {
 		keep(typed)
@@ -116,23 +130,50 @@ func (v *View) entry(start string, keep func(string)) *widget.Entry {
 	return field
 }
 
-// form lays the settings out as labelled rows.
+// settingsColumn lays the settings out under a heading of their own: the
+// kinds in a grid that wraps to the width it is given, then the settings that
+// decide how much is damaged, then the ones that decide where it goes.
 //
-// The toolkit's own form is used rather than a grid of our own, so the labels
-// line up the way every other program on this desktop lines them up.
-func (v *View) form() fyne.CanvasObject {
-	return widget.NewForm(
-		widget.NewFormItem(v.text.T(i18n.TakeSettingLayers), v.layers),
-		widget.NewFormItem(v.text.T(i18n.TakeSettingRows), v.share),
-		widget.NewFormItem(v.text.T(i18n.TakeSettingPerRow), v.perRow.OnScreen()),
-		widget.NewFormItem(v.text.T(i18n.TakeSettingExclude), v.exclude),
-		widget.NewFormItem(v.text.T(i18n.TakeSettingDelimiter), v.delimiter),
-		widget.NewFormItem(v.text.T(i18n.TakeSettingLocale), v.locale),
-		widget.NewFormItem(v.text.T(i18n.TakeSettingSeed), v.seed),
-		widget.NewFormItem(v.text.T(i18n.TakeSettingOut), v.out),
-		widget.NewFormItem(v.text.T(i18n.TakeSettingManifest), v.manifest.OnScreen()),
-		widget.NewFormItem(v.text.T(i18n.TakeSettingOverwrite), v.overwrite),
-	)
+// # Why a grid for the kinds
+//
+// Eight kinds in one column took a quarter of the screen and pushed everything
+// under them below the fold, measured on the render of 2026-09-15. A grid
+// wraps them into as many columns as the width allows, two at the size the
+// owner keeps the window, and the cell is measured from the longest name, so
+// a translation that is longer costs a column rather than an overlap.
+func (v *View) settingsColumn() fyne.CanvasObject {
+	labels := make([]string, 0, len(v.layers))
+	for _, kind := range v.layers {
+		labels = append(labels, kind.box.Text)
+	}
+	// The cell is the widest box plus a step of the scale, because the grid
+	// puts its cells edge to edge and this window's padding is nought: without
+	// the step the longest name touched the box of the next column, seen on
+	// the first render.
+	cell := fyne.NewSize(paint.CheckWidth(labels...)+palette.StepOf(palette.NameStepRelated),
+		palette.ControlHeight)
+	kinds := paint.Column(palette.NameStepHairline,
+		paint.Caption(v.text.T(i18n.TakeSettingLayers)),
+		paint.Grid(cell, v.layers.controls()...))
+
+	// The seed takes what the two fields before it leave, and the directory
+	// what the chooser after it leaves: a seed and a path are the two values
+	// nobody can retype from memory, so they get the room.
+	howMuch := paint.Lead(
+		paint.Row(palette.NameStepRelated,
+			labelled(v.text.T(i18n.TakeSettingRows),
+				paint.AtLeast(paint.FieldWidth(shareSample), 0, parts.Standing(parts.Field(v.share)))),
+			labelled(v.text.T(i18n.TakeSettingPerRow), v.perRow.OnScreen())),
+		paint.PadLeft(palette.NameStepRelated,
+			labelled(v.text.T(i18n.TakeSettingSeed), parts.Standing(parts.Field(v.seed)))))
+	leaveAlone := labelled(v.text.T(i18n.TakeSettingExclude), parts.Standing(parts.Field(v.exclude)))
+	where := paint.Trail(
+		labelled(v.text.T(i18n.TakeSettingOut), parts.Standing(parts.Field(v.out))),
+		paint.PadLeft(palette.NameStepRelated,
+			labelled(v.text.T(i18n.TakeSettingManifest), v.manifest.OnScreen())))
+	replace := paint.AtLeast(0, palette.ControlHeight, v.overwrite.OnScreen())
+
+	return paint.Column(palette.NameStepGroup, kinds, howMuch, leaveAlone, where, replace)
 }
 
 // manifestChoices is every extra form of the manifest, with the absence of one
@@ -158,10 +199,22 @@ func (v *View) formNamed(picked string) string {
 //
 // The button goes with the answer rather than being left alone, because the
 // two say one thing between them: a setting that would be refused takes the
-// answer away and has to take the way of acting on it away as well.
+// answer away and has to take the way of acting on it away as well. The
+// command follows too, since it is these settings written as flags.
 func (v *View) settingChanged() {
+	v.drawCommand()
 	if v.opened == nil {
 		return
+	}
+	// 🔴 What the last run did is let go of the moment a setting changes,
+	// since 2026-09-15. The card says one thing: what pressing the button now
+	// would do, or what the last press did, whichever is newer. A result kept
+	// beside settings it was not made with would belong to neither, which is
+	// the same reason the settings are frozen for the length of a run. The
+	// files of that run are still on the disk and the manifest browser is
+	// where their detail lives.
+	if !v.busy() {
+		v.forgetLastRun()
 	}
 	v.drawPlan()
 	v.drawRun()
@@ -181,15 +234,20 @@ func (v *View) settingChanged() {
 // so a person lost their open file to a backspace and could not get it back
 // without choosing it again.
 //
-// What the last run did is not forgotten either, because it is about this same
-// file and the file has not changed.
+// What the last run did is let go of, as it is for any other setting since
+// 2026-09-15: the separator is a setting of the run as much as of the read,
+// and a result kept beside a setting it was not made with belongs to neither.
 // Like Open it hands the read over rather than doing it here, and for the
 // sharper version of the same reason: this one is asked on every keystroke, so
 // reading the file where the key was pressed would mean a window that stops
 // answering the keyboard exactly while somebody is typing into it.
 func (v *View) reopen() {
+	v.drawCommand()
 	if v.path == "" {
 		return
+	}
+	if !v.busy() {
+		v.forgetLastRun()
 	}
 	v.startReading(v.path, func(opened *take.Opened, err error) {
 		if err != nil {
@@ -208,10 +266,7 @@ func (v *View) reopen() {
 // because they answer the same question. Its first line names the setting that
 // is wrong, so nothing is lost by not putting it against the control.
 func (v *View) drawPlan() {
-	v.planBox.Objects = []fyne.CanvasObject{
-		heading(v.text.T(i18n.TakeHeadingPlan)), v.planContent(),
-		heading(v.text.T(i18n.CommandHeading)), v.commandContent(),
-	}
+	v.planBox.Objects = []fyne.CanvasObject{v.planContent()}
 	v.planBox.Refresh()
 }
 
@@ -223,20 +278,37 @@ func (v *View) planContent() fyne.CanvasObject {
 		return v.refusal(refused)
 	}
 	planned := v.opened.Plan(v.chosen, v.described)
-	return container.NewVBox(
-		pair(v.text.T(i18n.TakePlanKinds), counted(planned.Ordered, "kind")),
-		pair(v.text.T(i18n.TakePlanImplemented), counted(planned.Implemented, "kind")),
-		wrappedPair(v.text.T(i18n.TakePlanWrites),
+	// The names stand in a column as wide as the longest of them, so that the
+	// figures line up and can be compared down the card.
+	names := paint.OptionNameWidth(v.layerLabels()...)
+	rows := []fyne.CanvasObject{paint.Caption(v.text.T(i18n.TakePlanCarried))}
+	for _, layer := range planned.ByLayer {
+		rows = append(rows, v.layerRow(layer, names))
+	}
+	return paint.Column(palette.NameStepRelated,
+		paint.Column(palette.NameStepTight, rows...),
+		paint.Hairline(palette.LineQuiet),
+		v.fact(i18n.TakePlanWrites,
 			listOf(planned.Writes)+" "+v.text.T(i18n.TakePlanWritesTo)+" "+planned.Out),
-		wrapped(v.text.T(i18n.TakePlanEveryOrder)),
-	)
+		v.paragraph(v.text.T(i18n.TakePlanEveryOrder)))
 }
 
-// pair is a label and the value beside it. Values are data rather than
-// interface text, so they are not keys.
-func pair(label, value string) fyne.CanvasObject {
-	name := widget.NewLabelWithStyle(label, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	return container.NewHBox(name, widget.NewLabel(value))
+// layerRow is one named kind of damage with how much of it this build carries
+// out: the name where the tick box has it, and "3 of 9" in figures, because a
+// figure is what somebody compares across rows.
+func (v *View) layerRow(layer take.LayerPlan, names float32) fyne.CanvasObject {
+	return paint.Row(palette.NameStepRelated,
+		paint.AtLeast(names, 0, paint.Strong(v.labelOfLayer(layer.Layer), palette.TypeBody, palette.TextPrimary)),
+		paint.Mono(strconv.Itoa(layer.Implemented)+" "+v.text.T(i18n.TakePlanOf)+" "+
+			strconv.Itoa(layer.Ordered), palette.TypeBody, palette.TextPrimary))
+}
+
+// fact is a caption over a value, the way the panel beside the values on the
+// Quick screen states one.
+func (v *View) fact(name i18n.Key, value string) fyne.CanvasObject {
+	return paint.Column(palette.NameStepHairline,
+		paint.Caption(v.text.T(name)),
+		v.paragraph(value))
 }
 
 // listOf writes names the way a sentence does.

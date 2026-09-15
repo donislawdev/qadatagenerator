@@ -113,15 +113,18 @@ const (
 // text field.
 const (
 	TakeChoose Key = "take.choose"
-	TakeEmpty  Key = "take.empty"
-	// TakeSettingsWait says why the settings below it cannot be touched yet.
-	// They are on screen before a file is chosen so that the screen shows what
-	// it does before it is asked to do it, and a row of dead controls with no
-	// reason beside them reads as a broken screen rather than as a waiting one.
-	TakeSettingsWait Key = "take.settings.wait"
-	// TakeFileWait names what the left half will hold, so that the half is
-	// waiting rather than blank before a file is chosen.
+	// TakeFileNone stands in the band where the name of the file will, so
+	// that the band says what to do before there is a file. TakeFileReading
+	// and TakeFileUnreadable stand beside the name while it is being read and
+	// after it could not be, and the sentences about either go in the card.
+	TakeFileNone       Key = "take.file.none"
+	TakeFileReading    Key = "take.file.reading"
+	TakeFileUnreadable Key = "take.file.unreadable"
+	// TakeFileWait names what the panel will hold, so that the panel is waiting
+	// rather than blank before a file is chosen, and TakePlanWait does the same
+	// for the card.
 	TakeFileWait   Key = "take.file.wait"
+	TakePlanWait   Key = "take.plan.wait"
 	TakeDrop       Key = "take.drop"
 	TakeUnreadable Key = "take.unreadable"
 	TakeReading    Key = "take.reading"
@@ -138,6 +141,7 @@ const (
 	TakeFileBecause           Key = "take.file.because"
 	TakeFileAgreesWith        Key = "take.file.agrees-with"
 	TakeFileByteOrderMark     Key = "take.file.byte-order-mark"
+	TakeFileNotWorkedOut      Key = "take.file.not-worked-out"
 	TakeFileNotInferred       Key = "take.file.not-inferred"
 	TakeFileOneColumn         Key = "take.file.one-column"
 	TakeFileNothingRecognised Key = "take.file.nothing-recognised"
@@ -176,11 +180,15 @@ const (
 	TakePerRowExactlyOne Key = "take.per-row.exactly-one"
 	TakePerRowAny        Key = "take.per-row.any"
 
-	TakePlanKinds       Key = "take.plan.kinds"
-	TakePlanImplemented Key = "take.plan.implemented"
-	TakePlanWrites      Key = "take.plan.writes"
-	TakePlanWritesTo    Key = "take.plan.writes-to"
-	TakePlanEveryOrder  Key = "take.plan.every-order"
+	// TakePlanCarried heads the rows saying, for each kind ordered, how much
+	// of it this build carries out, and TakePlanOf is the word between the two
+	// figures of a row: 3 of 9. Two sums stood here until 2026-09-15 and said
+	// that something was missing without saying what (DEC-245).
+	TakePlanCarried    Key = "take.plan.carried"
+	TakePlanOf         Key = "take.plan.of"
+	TakePlanWrites     Key = "take.plan.writes"
+	TakePlanWritesTo   Key = "take.plan.writes-to"
+	TakePlanEveryOrder Key = "take.plan.every-order"
 
 	// The words of a run: the one that starts it, the one that ends it early,
 	// and what a person is told while it is going on.
@@ -644,11 +652,12 @@ var Keys = []Key{
 	ManifestFailureRunLacksCapability, ManifestFailureFieldTypeNotCovered,
 	ManifestFailureSchemeNotCovered, ManifestFailureDeclinedByMutator,
 
-	TakeChoose, TakeEmpty, TakeSettingsWait, TakeFileWait, TakeDrop, TakeUnreadable, TakeReading,
+	TakeChoose, TakeFileNone, TakeFileReading, TakeFileUnreadable, TakeFileWait, TakePlanWait,
+	TakeDrop, TakeUnreadable, TakeReading,
 	TakeHeadingFile, TakeHeadingSettings, TakeHeadingPlan, TakeHeadingResult,
 	TakeFileRows, TakeFileColumns, TakeFileNothingDeclared,
 	TakeFileTakenFor, TakeFileBecause, TakeFileAgreesWith,
-	TakeFileByteOrderMark, TakeFileNotInferred,
+	TakeFileByteOrderMark, TakeFileNotWorkedOut, TakeFileNotInferred,
 	TakeFileOneColumn, TakeFileNothingRecognised,
 	TakeLayerBytes, TakeLayerStructure, TakeLayerFormat, TakeLayerMeaning,
 	TakeLayerBetween, TakeLayerAcross, TakeLayerUnicode, TakeLayerUnusual,
@@ -657,7 +666,7 @@ var Keys = []Key{
 	TakeSettingLayers, TakeSettingRows, TakeSettingPerRow, TakeSettingExclude,
 	TakeSettingDelimiter, TakeSettingLocale, TakeSettingSeed, TakeSettingOut,
 	TakeSettingManifest, TakeSettingOverwrite, TakeSettingNone,
-	TakePlanKinds, TakePlanImplemented, TakePlanWrites, TakePlanWritesTo,
+	TakePlanCarried, TakePlanOf, TakePlanWrites, TakePlanWritesTo,
 	TakePlanEveryOrder,
 	TakeRun, TakeStop, TakeRunning, TakeRunStopping,
 	TakeResultWritten, TakeResultIn, TakeResultOrdered, TakeResultApplied,

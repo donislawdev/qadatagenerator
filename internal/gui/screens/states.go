@@ -424,42 +424,48 @@ func takeStatesOfTheKeyboard() []State {
 			Layers:      []string{"L2", "L3"},
 			Keyboard:    Keyboard{Tabs: 6},
 		},
+		// 🔴 Every count below is from tools/klawiatura on 2026-09-15, the day
+		// the screen moved onto paint (DEC-245) and its walk changed shape: the
+		// band holds the file, how it is read and the act, the column under it
+		// the settings of the damage, and the panel comes last. Taken from the
+		// walk rather than counted here, for the reason the quick screen's
+		// states give: a count from reading lands on the neighbour.
 		{
 			Name: "take-focus-setting",
-			Purpose: "the keyboard in a text setting, which is the one control the toolkit " +
-				"marks with the chosen colour rather than the focus colour",
-			Screen:      screenTake,
-			NeedsSource: true,
-			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 17},
-		},
-		{
-			Name: "take-focus-choice",
-			Purpose: "the keyboard on a chooser, which the toolkit floods with the focus " +
-				"colour exactly as it floods a button, and which no state here " +
-				"reached until that flooding was measured",
+			Purpose: "the keyboard in a text setting, the share of records, which is the " +
+				"first setting of the damage under the band",
 			Screen:      screenTake,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 			Keyboard:    Keyboard{Tabs: 18},
 		},
 		{
-			Name: "take-focus-pane",
-			Purpose: "the keyboard on the pane that says what the file holds, which the " +
-				"toolkit's own scrolling area never lets it reach",
+			Name: "take-focus-choice",
+			Purpose: "the keyboard on a chooser, the one for defects per record, which " +
+				"draws its own ring like every other control here",
 			Screen:      screenTake,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 7},
+			Keyboard:    Keyboard{Tabs: 19},
+		},
+		{
+			Name: "take-focus-pane",
+			Purpose: "the keyboard on the panel that says what the file holds, which the " +
+				"toolkit's own scrolling area never lets it reach, and which is the " +
+				"last stop of the screen before the command",
+			Screen:      screenTake,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+			Keyboard:    Keyboard{Tabs: 25},
 		},
 		{
 			Name: "take-focus-damage",
-			Purpose: "the keyboard at the far end of the screen, on the button that damages " +
-				"the file, having passed every setting of the run on the way",
+			Purpose: "the keyboard on the button that damages the file, which stands in the " +
+				"band beside the file it is about, before the settings of the damage",
 			Screen:      screenTake,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 26},
+			Keyboard:    Keyboard{Tabs: 9},
 		},
 		{
 			Name: "take-reading",
@@ -489,13 +495,14 @@ func takeStatesOfARun() []State {
 		},
 		{
 			Name: "take-focus-stop",
-			Purpose: "the keyboard on the way to stop a run, which is the only thing on " +
-				"this screen it can reach while one is going on",
+			Purpose: "the keyboard on the way to stop a run, which stands where the button " +
+				"that started it stood and is the first thing on this screen it can " +
+				"reach while one is going on",
 			Screen:      screenTake,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 			Ran:         RanInFlight,
-			Keyboard:    Keyboard{Tabs: 8},
+			Keyboard:    Keyboard{Tabs: 6},
 		},
 	}
 }

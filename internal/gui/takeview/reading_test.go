@@ -210,16 +210,14 @@ func TestBothPanesOfThisScreenCanBeReadWithoutAMouse(t *testing.T) {
 			reached = append(reached, canvas.Focused())
 		}
 	}
-	if len(reached) != 2 {
-		t.Fatalf("the keyboard reached %d of the two scrolling panes of this screen in a "+
-			"whole walk of it, so what they hold cannot be read without a mouse", len(reached))
+	// One pane since 2026-09-15 (DEC-245): the settings stand in a column that
+	// fits the window and the description of the file is the one thing that
+	// grows with what it describes, so it is the one thing that scrolls.
+	if len(reached) != 1 {
+		t.Fatalf("the keyboard reached %d scrolling panes of this screen in a whole walk of "+
+			"it, and the panel saying what the file holds is the one there is", len(reached))
 	}
 	if reached[0] != fyne.Focusable(view.fileScroll) {
-		t.Error("the keyboard meets the pane of settings before the one saying what the file " +
-			"holds, which is the other way round from how the screen is read")
-	}
-	if reached[1] != fyne.Focusable(view.answerScroll) {
-		t.Error("the second pane the keyboard reaches is not the one holding what to do " +
-			"about the file")
+		t.Error("the scrolling pane the keyboard reaches is not the one saying what the file holds")
 	}
 }

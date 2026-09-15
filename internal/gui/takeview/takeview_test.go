@@ -1,13 +1,33 @@
 package takeview
 
 import (
+	"os"
 	"strings"
 	"testing"
 
+	"fyne.io/fyne/v2/test"
+
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 )
+
+// TestMain puts the tests under the theme of this product rather than the one
+// the toolkit tests with.
+//
+// 🔴 It is not a nicety, since 2026-09-15. The sentences of this screen are
+// labels asking for a size by the name of a rung of the type ladder, and the
+// toolkit's test theme answers nought to a name it does not know. A label of
+// size nought has a character width of nought, the rich text divides the
+// width by it, and int(+Inf) is a slice index that panics deep in the toolkit
+// on the first layout. The quick screen's tests found the same thing the day
+// they began drawing with the ladder.
+func TestMain(m *testing.M) {
+	application := test.NewApp()
+	application.Settings().SetTheme(fynetheme.Current())
+	os.Exit(m.Run())
+}
 
 // TestEveryRefusalOfTheModeHasWordsOnThisScreen holds this surface to answering
 // for every refusal the take and corrupt mode can produce.

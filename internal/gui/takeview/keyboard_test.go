@@ -77,8 +77,12 @@ func TestTheKeyboardMeetsTheFileBeforeEverythingItIsUsedFor(t *testing.T) {
 			describe(canvas.Focused()))
 	}
 
-	// From there the walk has to arrive at the settings and only then at the run,
-	// which is the order the three parts are read in.
+	// From there the walk has to arrive at how the file is read, then at the
+	// act, and only then at what the act is made of, which is the order the
+	// band and the column under it are read in (DEC-245): the file and its
+	// reading stand together at the top with the one action beside them, the
+	// way the Quick screen keeps Generate beside what it produces from, and
+	// the settings of the damage stand under both.
 	reached := map[fyne.Focusable]int{}
 	for pressed := 1; pressed <= walkLength; pressed++ {
 		canvas.FocusNext()
@@ -89,15 +93,19 @@ func TestTheKeyboardMeetsTheFileBeforeEverythingItIsUsedFor(t *testing.T) {
 			reached[canvas.Focused()] = pressed
 		}
 	}
-	seed, damage := reached[view.seed], reached[view.damage]
-	if seed == 0 || damage == 0 {
-		t.Fatalf("one press of Tab per control did not reach both a setting and the run: "+
-			"the seed at %d and the button that damages the file at %d", seed, damage)
+	delimiter, damage, seed := reached[view.delimiter], reached[view.damage], reached[view.seed]
+	if delimiter == 0 || seed == 0 || damage == 0 {
+		t.Fatalf("one press of Tab per control did not reach the separator, the seed and the "+
+			"run: at %d, %d and %d", delimiter, seed, damage)
 	}
-	if damage < seed {
+	if damage < delimiter {
 		t.Errorf("the keyboard reaches the button that damages the file at press %d and "+
-			"a setting of that run at press %d, so it offers the act before what the act "+
-			"is made of", damage, seed)
+			"the separator the file is read with at press %d, so it offers the act before "+
+			"the file the act is about", damage, delimiter)
+	}
+	if seed < damage {
+		t.Errorf("the keyboard reaches a setting of the damage at press %d before the act at "+
+			"press %d, which is not the order the band and the column are read in", seed, damage)
 	}
 }
 
@@ -147,16 +155,17 @@ func TestARunDoesNotLeaveTheKeyboardOnSomethingItPutOutOfReach(t *testing.T) {
 		t.Run(where.what, func(t *testing.T) {
 			view, _, canvas := onACanvas(t)
 			if where.reach == nil {
-				// The first tick box, reached the way a person reaches it: past
-				// the button that chooses a file and past the two panes, which
-				// are places to stand as well as places to read.
-				for presses := 0; presses < 4; presses++ {
+				// The first tick box, reached the way a person reaches it: by
+				// pressing Tab until one is under the keyboard, past the band
+				// holding the file and the act.
+				found := false
+				for presses := 0; presses < walkLength && !found; presses++ {
 					canvas.FocusNext()
+					_, found = canvas.Focused().(*parts.Check)
 				}
-				if _, isTick := canvas.Focused().(*widget.Check); !isTick {
-					t.Fatalf("the fourth thing the keyboard reaches is %s rather than a "+
-						"tick box, so this case is testing something else",
-						describe(canvas.Focused()))
+				if !found {
+					t.Fatalf("a whole walk of the screen reached no tick box, so this case "+
+						"is testing something else (last on %s)", describe(canvas.Focused()))
 				}
 			} else {
 				standOn(t, canvas, where.reach(view))
@@ -312,9 +321,15 @@ func TestTheKeyboardHasSomewhereToGoWhenTheButtonCannotTakeIt(t *testing.T) {
 // to show that focus arrived, and the first press of Tab changed not one pixel.
 // So this asks the pixels under the theme the product really wears.
 func TestTheKeyboardCanBeSeenOnEveryKindOfControlHere(t *testing.T) {
-	test.NewTempApp(t)
+	// 🔴 Not test.NewTempApp. Its cleanup makes a FRESH test application, with
+	// the toolkit's test theme, in place of the one TestMain dressed in this
+	// product's theme - and the next test to build this screen then asked that
+	// theme for a rung of the type ladder, got nought, and panicked inside the
+	// text renderer. The theme is applied to the application there is.
 	test.ApplyTheme(t, fynetheme.Current())
 
+	// The controls this screen is made of since 2026-09-15 (DEC-245), each
+	// drawing its own mark of focus.
 	for _, kind := range []struct {
 		what string
 		// floor is what this kind of control measures today. It is a ratchet in
@@ -324,19 +339,23 @@ func TestTheKeyboardCanBeSeenOnEveryKindOfControlHere(t *testing.T) {
 		build func() (fyne.CanvasObject, fyne.Focusable)
 	}{
 		{"a tick box for a kind of damage", visibleMark, func() (fyne.CanvasObject, fyne.Focusable) {
-			box := widget.NewCheck("L2", func(bool) {})
+			box := parts.NewCheck("Field format (L2)", func(bool) {})
 			return box, box
 		}},
 		{"a text setting", visibleMark, func() (fyne.CanvasObject, fyne.Focusable) {
-			field := widget.NewEntry()
-			return field, field
+			field := parts.NewFieldEntry()
+			return parts.Field(field), field
 		}},
 		{"a list setting", visibleMark, func() (fyne.CanvasObject, fyne.Focusable) {
-			list := widget.NewSelect([]string{"one", "two"}, func(string) {})
+			list := parts.NewSelect([]string{"one", "two"}, func(string) {})
 			return list, list
 		}},
 		{"a button", visibleMark, func() (fyne.CanvasObject, fyne.Focusable) {
 			button := parts.NewButton(i18n.English.T(i18n.TakeRun), func() {})
+			return button, button
+		}},
+		{"the filled action of the screen", visibleMark, func() (fyne.CanvasObject, fyne.Focusable) {
+			button := parts.NewPrimaryButton(i18n.English.T(i18n.TakeRun), func() {})
 			return button, button
 		}},
 	} {
@@ -375,8 +394,11 @@ func TestTheKeyboardCanBeSeenOnEveryKindOfControlHere(t *testing.T) {
 // "did anything change" would have called that a mark.
 const visibleMark = 3.0
 
-// paint is a colour that arrived where another colour was.
-type paint struct{ was, now color.Color }
+// coat is a colour that arrived where another colour was.
+//
+// Named apart from the package that draws this window, which the screen has
+// imported since it began drawing itself.
+type coat struct{ was, now color.Color }
 
 // largestChange finds the colour the keyboard puts down over the widest area,
 // and says what was underneath it.
@@ -384,8 +406,8 @@ type paint struct{ was, now color.Color }
 // The widest area rather than the strongest difference, because the smoothed
 // edge of any shape carries a handful of pixels of every colour in between. The
 // body of the mark is what a person sees, and the body is what covers ground.
-func largestChange(before, after image.Image) (paint, int) {
-	counted := map[paint]int{}
+func largestChange(before, after image.Image) (coat, int) {
+	counted := map[coat]int{}
 	bounds := before.Bounds()
 	for x := bounds.Min.X; x < bounds.Max.X; x++ {
 		for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
@@ -395,10 +417,10 @@ func largestChange(before, after image.Image) (paint, int) {
 			if r1 == r2 && g1 == g2 && b1 == b2 && a1 == a2 {
 				continue
 			}
-			counted[paint{was: was, now: now}]++
+			counted[coat{was: was, now: now}]++
 		}
 	}
-	var widest paint
+	var widest coat
 	most := 0
 	for which, covering := range counted {
 		if covering > most {

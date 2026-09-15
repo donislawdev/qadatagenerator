@@ -4,11 +4,10 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
+	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 )
 
@@ -90,29 +89,25 @@ var refusalSays = map[take.RefusalKind]refusalWords{
 func (v *View) refusal(refused take.Refusal) fyne.CanvasObject {
 	words, known := refusalSays[refused.Kind]
 	if !known {
-		// Unreachable while the guard beside this holds. It says so rather than
-		// describing this as some other refusal, because a message that names
-		// what it does not know is recoverable and one that confidently names
-		// the wrong cause sends somebody to fix what was never broken.
+		// A refusal this screen has no words for is still a refusal, and it
+		// says so rather than saying nothing. The guard holding the register
+		// against the mode's list makes this branch a fault to fix, not a
+		// state to design for.
 		words = refusalWords{
 			what: i18n.TakeRefusalUnnamed, why: i18n.TakeRefusalUnnamedWhy,
 			instead: i18n.TakeRefusalUnnamedDo,
 		}
 	}
 
-	headline := widget.NewLabel(v.text.T(words.what))
-	headline.TextStyle = fyne.TextStyle{Bold: true}
-	headline.Wrapping = fyne.TextWrapWord
-	lines := []fyne.CanvasObject{
-		beside(theme.WarningIcon(), headline),
-		wrapped(v.text.T(words.why)),
-	}
+	headline := v.marked(paint.IconWarn, palette.StateWarning,
+		paint.Strong(v.text.T(words.what), palette.TypeBody, palette.TextPrimary))
+	lines := []fyne.CanvasObject{headline, v.paragraph(v.text.T(words.why))}
 	if allowed := v.allowedIn(refused, words); allowed != "" {
-		lines = append(lines, wrapped(v.text.T(i18n.TakeRefusalAllowed)+": "+allowed))
+		lines = append(lines, v.paragraph(v.text.T(i18n.TakeRefusalAllowed)+": "+allowed))
 	}
-	lines = append(lines, wrapped(v.text.T(i18n.TakeRefusalInstead)+": "+
+	lines = append(lines, v.paragraph(v.text.T(i18n.TakeRefusalInstead)+": "+
 		v.text.T(words.instead)))
-	return container.NewVBox(lines...)
+	return paint.Column(palette.NameStepTight, lines...)
 }
 
 // allowedIn is what would have been taken, from whichever of the two places

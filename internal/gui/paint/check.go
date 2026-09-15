@@ -1,6 +1,8 @@
 package paint
 
 import (
+	"math"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 
@@ -81,4 +83,21 @@ func CheckFace(look CheckLook) fyne.CanvasObject {
 	return Row(theme.NameStepTight,
 		Middle(square),
 		Middle(Text(look.Label, theme.TypeBody, ink)))
+}
+
+// CheckWidth is how wide a cell has to be to hold any of these check boxes
+// whole, box and words.
+//
+// Measured from the face rather than added up, for the reason ChooserWidth
+// gives: arithmetic written beside a drawing is a second copy of the drawing.
+// Rounded up, for the reason FieldWidth gives: a fractional width makes the
+// layout round a neighbour's position into a gap nobody chose.
+func CheckWidth(labels ...string) float32 {
+	widest := float32(0)
+	for _, label := range labels {
+		if measured := CheckFace(CheckLook{Label: label}).MinSize().Width; measured > widest {
+			widest = measured
+		}
+	}
+	return float32(math.Ceil(float64(widest)))
 }
