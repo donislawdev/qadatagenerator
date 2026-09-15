@@ -33,7 +33,9 @@ about.heading.embedded: Fonts and icons
 about.heading.notices: What this means for your data
 
 about.version.tool: Tool
+# tekst-ok: the same thing the manifest browser names in manifest.run.catalog, so one set of words
 about.version.catalog: Corruption catalog
+# tekst-ok: the same thing the manifest browser names in manifest.run.spec, so one set of words
 about.version.manifest: Manifest format
 about.version.recipe: Recipe schema
 
@@ -71,10 +73,15 @@ manifest.wait.detail: The value before and after, or the reason the damage could
 manifest.response.wait: Open a manifest first. A record of what your application did is judged against what a run promised, so until then there is nothing to judge it against.
 
 manifest.run.generated: Generated
+# tekst-ok: the seed a run was made from, named as the settings name it on two screens
 manifest.run.seed: Seed
+# tekst-ok: the locale of the data, named as the setting of the take screen names it
 manifest.run.locale: Data locale
+# tekst-ok: the same thing the About screen names in about.version.catalog
 manifest.run.catalog: Corruption catalog
+# tekst-ok: the same thing the About screen names in about.version.manifest
 manifest.run.spec: Manifest format
+# tekst-ok: the recipe a run was made from, one word wherever a recipe is named
 manifest.run.recipe: Recipe
 manifest.run.policy: Corruption policy
 manifest.run.tag: Tag
@@ -99,6 +106,7 @@ manifest.column.status: Outcome
 manifest.column.detail: Why, and what changed
 
 manifest.place.whole-file: whole file
+# tekst-ok: one row of a table, the word the recipe editor counts rows with in recipe.row
 manifest.place.row: row
 manifest.place.byte: byte
 
@@ -176,25 +184,33 @@ take.setting.rows: Share of records
 take.setting.per-row: Defects per record
 take.setting.exclude: Columns to leave alone
 take.setting.delimiter: Field separator
+# tekst-ok: the same setting the manifest browser reports in manifest.run.locale
 take.setting.locale: Data locale
+# tekst-ok: the same setting on the Quick screen and in the manifest browser, one word
 take.setting.seed: Seed
+# tekst-ok: the same setting on the recipe screen in recipe.write-to, one wording
 take.setting.out: Write to
 take.setting.manifest: Extra manifest form
+# tekst-ok: the same setting on the recipe screen in recipe.replace, one wording
 take.setting.overwrite: Replace files already there
 take.setting.none: none
 
 take.plan.kinds: Kinds of damage ordered
 take.plan.implemented: Of those, this build can carry out
 take.plan.writes: Files this would write
+# tekst-ok: the word between a file and its directory, the same in take.result.in and recipe.in
 take.plan.writes-to: in
 take.plan.every-order: A real run writes one manifest entry for every ordered defect, applied or not.
 
 take.run: Damage this file
+# tekst-ok: the same action on the recipe screen in recipe.stop-run, one wording
 take.stop: Stop this run
 take.running: This file is being damaged. Nothing appears under its own name until the whole run has succeeded, so stopping now leaves nothing behind.
+# tekst-ok: the same promise on the recipe screen in recipe.stopping, and both runs keep it
 take.running.stopping: Stopping. The run ends after the record it is on, and leaves nothing behind.
 
 take.result.written: Files written
+# tekst-ok: the word between a file and its directory, the same in take.plan.writes-to and recipe.in
 take.result.in: in
 take.result.ordered: Defects ordered
 take.result.applied: Of those, applied
@@ -213,10 +229,12 @@ take.result.failed.why: Every file gets its real name only once a whole run has 
 take.refusal.allowed: What would be taken
 take.refusal.instead: What to do
 
+# tekst-ok: the kinds this build carries come from the catalogue at run time, take.Check fills Allowed and the screen shows them
 take.refusal.no-layers: No kind of damage is chosen
 take.refusal.no-layers.why: The kinds decide what this does, and there is no default, because damaging the bytes of a file and damaging a value inside it are different requests.
 take.refusal.no-layers.do: Tick at least one kind of damage above.
 
+# tekst-ok: the kinds this build carries come from the catalogue at run time, take.Check fills Allowed and the screen shows them
 take.refusal.unknown-layer: This build describes no damage of this kind
 take.refusal.unknown-layer.why: A kind with nothing described in it would order a run that produced nothing while looking as though it had.
 take.refusal.unknown-layer.do: Choose a kind from the list above.
@@ -226,6 +244,7 @@ take.refusal.delimiter.why: It is the character that separates the fields of one
 take.refusal.delimiter.allowed: One character, such as a comma or a semicolon
 take.refusal.delimiter.do: Put a single character in the field separator above.
 
+# tekst-ok: the forms this build writes come from the exporter at run time, take.Check fills Allowed and the screen shows them
 take.refusal.manifest-form: This build does not write a manifest in that form
 take.refusal.manifest-form.why: The manifest is always written as JSON, and this setting asks for an extra form of it beside that one.
 take.refusal.manifest-form.do: Choose a form from the list above.
@@ -235,6 +254,7 @@ take.refusal.share.why: It decides how much of the file is damaged, and a value 
 take.refusal.share.allowed: A percentage, such as 5% or 100%
 take.refusal.share.do: Put a percentage in the share of records above.
 
+# tekst-ok: the settings this build knows come from the engine at run time, take.Check fills Allowed and the screen shows them
 take.refusal.per-row: No such setting for how many defects one record carries
 take.refusal.per-row.why: Anything else would be read as one defect per record, so a misspelling would quietly reduce the damage and the run would still report success.
 take.refusal.per-row.do: Choose a setting from the list above.
@@ -244,10 +264,12 @@ take.refusal.overwrite-source.why: The damaged records would replace the records
 take.refusal.overwrite-source.allowed: A directory that is not where the file itself sits
 take.refusal.overwrite-source.do: Choose another directory to write to.
 
+# tekst-ok: not about a value at all, this is the refusal for a reason the build has no words for
 take.refusal.unnamed: This build stopped the run for a reason it cannot put into words
 take.refusal.unnamed.why: The run was stopped for a real reason and this copy of the tool has no message for it, which is a fault in the tool rather than in what was asked of it.
 take.refusal.unnamed.do: Report this, and say which settings were on screen.
 
+# tekst-ok: the name of the screen is the name of the thing it edits, and the manifest browser names that thing the same way
 screen.recipe: Recipe
 
 recipe.empty: Write or paste a recipe here. It is checked as you type, and nothing is written to disk until you ask for it.
@@ -260,6 +282,7 @@ recipe.generator: generator
 recipe.generators: generators
 recipe.not-in: is not available in
 recipe.nothing-to-draw-from: Where this build has nothing to draw from
+# tekst-ok: the heading over the editor names the thing it edits, the same word as the screen and the manifest browser use
 recipe.heading.recipe: Recipe
 recipe.heading.problems: Problems
 recipe.no-objections: No objections. This recipe can be used as it stands.
@@ -273,6 +296,7 @@ recipe.field: field
 recipe.fields: fields
 recipe.showing: showing
 recipe.of: of
+# tekst-ok: one row of a table, the word the manifest browser places a defect with in manifest.place.row
 recipe.row: row
 recipe.rows: rows
 recipe.no-rows: This table would have no rows, because the recipe asks for none.
@@ -282,13 +306,16 @@ recipe.parent-outside: not in this preview
 recipe.refused: This recipe reads correctly and still cannot be run.
 recipe.crashed: This is a defect in this build rather than a problem with the recipe. Report it together with the recipe that produced it.
 recipe.will-not-do: What this run will not do
+# tekst-ok: the same setting on the take screen in take.setting.out, one wording
 recipe.write-to: Write to
 recipe.choose-dir: Choose...
+# tekst-ok: the same setting on the take screen in take.setting.overwrite, one wording
 recipe.replace: Replace files already there
 recipe.generate: Generate this dataset
 recipe.heading.save: Save
 recipe.command.file: your-recipe.yaml
 recipe.command.example: The file name above is an example. This window does not write the recipe file, so save the recipe beside your tests and use its name in the command.
+# tekst-ok: the same action on the take screen in take.stop, one wording
 recipe.stop-run: Stop this run
 recipe.would-write: Would write
 recipe.nothing-yet: Nothing has been written yet.
@@ -297,8 +324,10 @@ recipe.need-fix: Fix what is wrong with the recipe above, and this button writes
 recipe.dir-hint: Choose or paste a path
 recipe.need-directory: Choose a directory first. This window writes nowhere until you say where.
 recipe.writing: Writing this dataset. Nothing appears under its own name until the whole run has succeeded, so stopping now leaves nothing behind.
+# tekst-ok: the same promise on the take screen in take.running.stopping, and both runs keep it
 recipe.stopping: Stopping. The run ends after the record it is on, and leaves nothing behind.
 recipe.wrote: Wrote
+# tekst-ok: the word between a file and its directory, the same in take.plan.writes-to and take.result.in
 recipe.in: in
 recipe.file: file
 recipe.files: files
@@ -339,6 +368,7 @@ quick.about.range.none: No block of this scheme is set aside for testing, so a v
 quick.about.harbour: Reserved test range
 quick.about.unavailable: Not available in this locale
 quick.label.locale: Locale
+# tekst-ok: the same setting on the take screen and in the manifest browser, one word
 quick.label.seed: Seed
 quick.label.gender: Gender
 quick.label.born: Born
