@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 
@@ -15,10 +16,9 @@ import (
 
 // saying reports whether the words are anywhere on what is drawn.
 //
-// The tree is walked rather than rendered, because these two guards are about
-// what the screen says and not about how it looks. The two scrolling areas of
-// the toolkit are walked into, which is what reaches the sentence this screen
-// shows when it has nothing else.
+// The tree is walked rather than rendered, because these guards are about what
+// the screen says and not about how it looks. The scrolling areas of the
+// toolkit are walked into, which is what reaches the sentence in the card.
 func saying(drawn fyne.CanvasObject, words string) bool {
 	for _, said := range texts(drawn) {
 		if strings.Contains(said, words) {
@@ -32,6 +32,10 @@ func texts(object fyne.CanvasObject) []string {
 	switch typed := object.(type) {
 	case *widget.Label:
 		return []string{typed.Text}
+	case *canvas.Text:
+		return []string{typed.Text}
+	case *widget.RichText:
+		return drawn(typed)
 	case *container.Scroll:
 		return texts(typed.Content)
 	case *fyne.Container:
@@ -63,10 +67,10 @@ func TestReadingADocumentSaysSoAndPutsTheControlsOutOfReach(t *testing.T) {
 		Manifest: func(string) (manifest.Manifest, error) {
 			return manifest.Manifest{}, errors.New("nothing was read, this test never answers")
 		},
-	}, func(read func() func(), _ func(error) func()) { waiting = append(waiting, read) })
+	}, func(read func() func(), _ func(error) func()) { waiting = append(waiting, read) }, nil)
 	view.Content()
 
-	view.startReading(func() func() {
+	view.startReading("/runs/expectation-manifest.json", theManifest, func() func() {
 		_, _ = view.read.Manifest("whatever")
 		return func() {}
 	})
@@ -83,17 +87,41 @@ func TestReadingADocumentSaysSoAndPutsTheControlsOutOfReach(t *testing.T) {
 		t.Error("the button that opens a response record can be pressed while a document " +
 			"is being read")
 	}
-	if !saying(view.body, i18n.English.T(i18n.ManifestReading)) {
+	if !saying(view.detailBox, i18n.English.T(i18n.ManifestReading)) {
 		t.Error("the screen does not say that it is reading, so a person waiting on a large " +
 			"manifest cannot tell it from a screen with nothing to say")
+	}
+	if !saying(view.manifestFacts, i18n.English.T(i18n.ManifestFactsReading)) {
+		t.Error("the band does not say beside the file that it is being read")
 	}
 
 	waiting[0]()()
 	if view.open.Disabled() {
 		t.Error("the read answered and the button that opens a manifest is still out of reach")
 	}
-	if view.reading {
+	if view.Reading() {
 		t.Error("the read answered and the screen still holds itself to be reading")
+	}
+}
+
+// A read that failed leaves the band naming the file and the card saying why.
+func TestADocumentThatCouldNotBeReadIsNamedInTheBandAndExplainedInTheCard(t *testing.T) {
+	view := New(i18n.English, nil, Readers{}, func(read func() func(), _ func(error) func()) {
+		read()()
+	}, nil)
+	view.Content()
+	view.startReading("/runs/broken.json", theManifest, func() func() {
+		return func() { view.unreadable(errors.New("this is not a manifest")) }
+	})
+
+	if !saying(view.manifestFacts, i18n.English.T(i18n.ManifestFactsUnreadable)) {
+		t.Error("the band does not say that the file could not be read")
+	}
+	if !saying(view.detailBox, "this is not a manifest") {
+		t.Error("the card does not carry what went wrong")
+	}
+	if view.Unread() == nil {
+		t.Error("a caller with nobody looking at the screen is told nothing went wrong")
 	}
 }
 
@@ -108,12 +136,12 @@ func TestAnAnswerAboutADocumentNobodyIsWaitingForIsNotDrawn(t *testing.T) {
 	waiting := []func() func(){}
 	view := New(i18n.English, nil, Readers{}, func(read func() func(), _ func(error) func()) {
 		waiting = append(waiting, read)
-	})
+	}, nil)
 	view.Content()
 
 	drawn := 0
-	view.startReading(func() func() { return func() { drawn = 1 } })
-	view.startReading(func() func() { return func() { drawn = 2 } })
+	view.startReading("/runs/first.json", theManifest, func() func() { return func() { drawn = 1 } })
+	view.startReading("/runs/second.json", theManifest, func() func() { return func() { drawn = 2 } })
 	if len(waiting) != 2 {
 		t.Fatalf("the screen asked for %d reads rather than the two this guard walks",
 			len(waiting))

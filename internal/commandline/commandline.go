@@ -33,6 +33,10 @@ const (
 	Quick    = "quick"
 	Generate = "generate"
 	Corrupt  = "corrupt"
+	// Verify is the one verb a window has an equivalent for without producing
+	// anything: the manifest browser with a response record open is the same
+	// comparison qadg verify prints, and the line it shows names both files.
+	Verify = "verify"
 )
 
 // The flags those verbs take.
@@ -56,7 +60,7 @@ const (
 
 // Verbs is every verb named above, so a test can close the register from the
 // side the constants are on.
-var Verbs = []string{Quick, Generate, Corrupt}
+var Verbs = []string{Quick, Generate, Corrupt, Verify}
 
 // Flags is every flag named above, for the same reason.
 var Flags = []string{

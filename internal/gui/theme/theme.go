@@ -417,44 +417,70 @@ const AsideWidth float32 = 330
 // # Why the widths differ rather than being equal
 //
 // Equal columns were the second attempt and they waste the room the long
-// columns need on the short ones: "row 4" and a sentence explaining why damage
-// could not be applied do not want the same width. The proportions below come
-// from what each column holds: an identifier of the form LAYER.area.variant, a
-// place, one of three phrases, one of two, one of two words, and a sentence.
+// columns need on the short ones: "row 4" and a phrase of five words do not
+// want the same width. The widths below come from what each column holds, and
+// since 2026-09-15 they are MEASURED on the face the table draws with rather
+// than estimated: an identifier of the form LAYER.area.variant, a place, one of
+// three phrases with a mark in front of the soft ones, and one of a closed set
+// of outcomes.
 //
-// The last one is deliberately the widest, because it is the one column allowed
-// to carry prose. Practice on tables reserves full wrapping for exactly one
-// column and holds every other to a single line, which is the same rhythm the
-// paragraph above is about.
+// 🔴 Four columns rather than six, and the reason is arithmetic (DEC-247).
+// The six columns of the first drawing added up to 1740, and the window at the
+// size the owner keeps it hands the table 828: the sidebar takes 222 of 1113
+// and the body a margin on each side. So the column saying whether damage
+// happened at all, and the one carrying the reason it did not, were never on
+// the screen without scrolling sideways, on the one screen where rule 4.4 asks
+// that an unapplied entry stand out. The certainty joined the expectation as a
+// mark in front of it, and the sentence went under the table into a card of
+// its own, where it has room to wrap. The outcome column says, once a response
+// record is open, what the application did with the row, because a row that
+// was not applied has no answer and an applied one said only "applied".
 //
-// Every value is a multiple of the spacing module for the reason recorded with
-// that module: a desktop scales the interface by a factor the user picks, and
-// these land on whole numbers at the common ones.
+// # What each width is, measured with tools/miary on 2026-09-15
 //
-// 🔴 The fourth and third were 340 and 220 until 2026-09-08, and measuring them
-// is what settled the change rather than looking at them.
-//
-// The fourth column holds one of two words, hard or "~ soft", the wider of which
-// renders 36 pixels across against a heading of 65. It had 340, which is nine
-// times its widest value and two hundred and seventy five pixels of nothing, on
-// a table already too wide for the window it sits in. The third holds one of
-// three phrases, the longest rendering 210 across, and it had 220. Ten pixels of
-// room on the column carrying the longest fixed phrase, beside two hundred and
-// seventy five spare on the column carrying the shortest, is the proportion
-// reversed rather than a margin chosen.
-//
-// The paragraph above this one had it right in words the whole time and the
-// numbers under it did not match: one of three phrases, then one of two. The
-// prose was checked and the arithmetic was not, which is why there is now a
-// guard that renders every value each column can hold and asks whether it fits.
-//
-// Ten pixels also fails on the first translation of this window, since a phrase
-// of the same meaning in another language is longer as often as not. The third
-// column now has thirty, and the table is 1740 rather than 1980.
-var EntryColumnWidths = []float32{280, 240, 240, 120, 140, 720}
+// The first column is a FLOOR rather than a width: the table hands it whatever
+// the other three leave, since an identifier is the one thing that gains from
+// a wide window. The floor holds most identifiers whole (the longest in the
+// catalog, L4.coherence.national_id_vs_birthdate, renders 236 and is cut with
+// an ellipsis at the floor, where the card under the table carries it whole).
+// The second holds "customer   row 2   last_name" at 176 and cuts a five digit
+// row number. The third holds "~ should be accepted and marked" at 205, the
+// widest phrase of its closed set. The fourth holds "no column of that kind" at
+// 138, the widest outcome. Each is its widest value plus one tight step, so
+// that text never touches the edge of its cell, which reads as text that was
+// cut. A guard renders every value each fixed column can hold and asks whether
+// it fits, because the paragraph above the previous widths had the proportion
+// right in words while the numbers under it had it reversed.
+var EntryColumnWidths = []float32{200, 184, 216, 148}
+
+// EntryStretchColumn is the column that takes whatever width the others leave,
+// never less than its entry in EntryColumnWidths.
+const EntryStretchColumn = 0
 
 // EntryColumns is how many columns one entry is laid out in.
 func EntryColumns() int { return len(EntryColumnWidths) }
+
+// EntryRowsAtLeast is the fewest rows the entries table asks the window for,
+// the heading not counted.
+//
+// 🔴 Measured before it was written down: with the envelope open in the
+// compared state at 1670 by 1210, a table with no floor was handed a negative
+// height and the render died in the rasteriser, where a real window would have
+// grown without a word. With a floor the window knows what it needs and the
+// render says outright that the content does not fit.
+const EntryRowsAtLeast = 4
+
+// EntryDetailHeight is how tall the card under the entries table is, in the
+// units the toolkit scales for the user.
+//
+// Fixed rather than hugging its content, because the card is refilled with
+// whichever entry the keyboard or the pointer is on, and a card that changed
+// height with every entry would move the foot of the table on every arrow key.
+// Four lines of body type with a hairline between them and the card's own
+// padding above and below: 112 cut the fourth line on the render of the
+// compared state, and this is the height at which the same render showed all
+// four.
+const EntryDetailHeight float32 = 132
 
 // PreviewColumnMin and PreviewColumnMax bound a column of the recipe preview.
 //
@@ -493,9 +519,11 @@ const (
 // than the exception would be, since "this one is only a count" is the sentence
 // every value in a view could be introduced with.
 //
-// Two, because the envelope carries about a dozen pairs and one column of them
-// is a tall block of a screen whose subject is the table under it.
-const EnvelopeColumns = 2
+// Three since DEC-247, and two before it. The envelope carries eight to eleven
+// pairs and stands in a section a person opens over the table, so every row of
+// it is a row the table loses while the section is open: three columns hold
+// eleven pairs in four rows where two held them in six.
+const EnvelopeColumns = 3
 
 // Space is one step of the spacing scale.
 type Space struct {

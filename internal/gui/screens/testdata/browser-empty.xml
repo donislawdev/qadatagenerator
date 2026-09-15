@@ -238,164 +238,233 @@
 				</container>
 				<container pos="0,55" size="1118x844">
 					<container size="1118x844">
-						<container pos="24,24" size="1070x796">
-							<container size="1070x58">
-								<widget size="1070x24" type="*widget.Label">
-									<widget size="1070x24" type="*widget.RichText">
-										<text color="disabled" pos="4,4" size="868x16">A manifest says what to expect from every record a run damaged. Add the answer your application gave, and this screen says where the two disagree.</text>
-									</widget>
-								</widget>
-								<container pos="0,24" size="1070x34">
-									<widget size="115x34" type="*parts.PrimaryButton">
-										<rectangle fillColor="rgba(112,89,214,255)" radius="5" size="115x34"/>
-										<rectangle pos="2,2" radius="3" size="111x30" strokeWidth="2"/>
-										<text alignment="center" bold color="foregroundOnPrimary" pos="0,8" size="115x16">Open manifest...</text>
-									</widget>
-									<widget pos="115,0" size="198x34" type="*parts.Button">
-										<container size="198x34">
-											<container size="198x34">
-												<rectangle size="198x34"/>
-												<container size="198x34">
-													<rectangle size="198x34"/>
-													<container size="198x34">
-														<container pos="16,4" size="166x26">
-															<container pos="0,4" size="166x16">
-																<container size="166x16">
-																	<spacer size="166x0"/>
-																	<text color="disabled" size="166x16">Open application response...</text>
-																	<spacer pos="0,16" size="166x0"/>
+						<container size="1118x149">
+							<container size="1118x148">
+								<rectangle fillColor="menuBackground" size="1118x148"/>
+								<container size="1118x148">
+									<container pos="32,16" size="1054x116">
+										<container size="1054x24">
+											<widget size="1054x24" type="*widget.Label">
+												<widget size="1054x24" type="*widget.RichText">
+													<text color="disabled" pos="4,4" size="868x16">A manifest says what to expect from every record a run damaged. Add the answer your application gave, and this screen says where the two disagree.</text>
+												</widget>
+											</widget>
+										</container>
+										<container pos="0,40" size="1054x76">
+											<container size="1054x34">
+												<container size="221x34">
+													<rectangle size="221x34"/>
+													<widget size="221x34" type="*parts.PrimaryButton">
+														<rectangle fillColor="rgba(112,89,214,255)" radius="5" size="221x34"/>
+														<rectangle pos="2,2" radius="3" size="217x30" strokeWidth="2"/>
+														<text alignment="center" bold color="foregroundOnPrimary" pos="0,8" size="221x16">Open manifest...</text>
+													</widget>
+												</container>
+												<container pos="221,0" size="832x34">
+													<container pos="12,0" size="820x34">
+														<rectangle size="820x34"/>
+														<container size="820x34">
+															<spacer size="820x4"/>
+															<container pos="0,4" size="820x24">
+																<widget size="820x24" type="*widget.Label">
+																	<widget size="820x24" type="*widget.RichText">
+																		<text color="disabled" pos="4,4" size="140x16">No manifest is open yet.</text>
+																	</widget>
+																</widget>
+															</container>
+															<spacer pos="0,29" size="820x4"/>
+														</container>
+													</container>
+												</container>
+											</container>
+											<container pos="0,42" size="1054x34">
+												<container size="221x34">
+													<rectangle size="221x34"/>
+													<widget size="221x34" type="*parts.Button">
+														<container size="221x34">
+															<container size="221x34">
+																<rectangle size="221x34"/>
+																<container size="221x34">
+																	<rectangle size="221x34"/>
+																	<container size="221x34">
+																		<container pos="16,4" size="189x26">
+																			<container pos="0,4" size="189x16">
+																				<container size="15x16">
+																					<spacer size="15x0"/>
+																					<image fillMode="contain" rsc="clipboard-check-b4b1a9-15.svg" size="15x15"/>
+																					<spacer pos="0,15" size="15x0"/>
+																				</container>
+																				<container pos="23,0" size="166x16">
+																					<spacer size="166x0"/>
+																					<text color="disabled" size="166x16">Open application response...</text>
+																					<spacer pos="0,16" size="166x0"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</widget>
+												</container>
+												<container pos="221,0" size="832x34">
+													<container pos="12,0" size="820x34">
+														<rectangle size="820x34"/>
+														<container size="820x34">
+															<spacer size="820x4"/>
+															<container pos="0,4" size="820x24">
+																<widget size="820x24" type="*widget.Label">
+																	<widget size="820x24" type="*widget.RichText">
+																		<text color="disabled" pos="4,4" size="131x16">Needs a manifest first.</text>
+																	</widget>
+																</widget>
+															</container>
+															<spacer pos="0,29" size="820x4"/>
+														</container>
+													</container>
+												</container>
+											</container>
+										</container>
+									</container>
+								</container>
+							</container>
+							<rectangle fillColor="separator" pos="0,148" size="1118x1"/>
+						</container>
+						<container pos="0,149" size="1118x694">
+							<container pos="32,24" size="1054x646">
+								<container size="1054x34">
+									<container size="1054x34">
+										<widget size="1054x34" type="*parts.Button">
+											<container size="1054x34">
+												<container size="1054x34">
+													<rectangle size="1054x34"/>
+													<container size="1054x34">
+														<rectangle size="1054x34"/>
+														<container size="1054x34">
+															<container pos="12,4" size="1030x26">
+																<container size="105x26">
+																	<container size="15x26">
+																		<spacer size="15x5"/>
+																		<image fillMode="contain" pos="0,5" rsc="chevron-down-edece9-15.svg" size="15x15"/>
+																		<spacer pos="0,20" size="15x5"/>
+																	</container>
+																	<container pos="23,0" size="82x26">
+																		<spacer size="82x4"/>
+																		<text pos="0,4" size="82x16">About this run</text>
+																		<spacer pos="0,21" size="82x4"/>
+																	</container>
 																</container>
 															</container>
 														</container>
 													</container>
 												</container>
 											</container>
-										</container>
-									</widget>
+										</widget>
+									</container>
+									<container pos="0,34" size="1054x0">
+									</container>
 								</container>
-							</container>
-							<container pos="0,58" size="1070x737">
-								<container size="1070x737">
-									<container size="1070x603">
-										<container size="1070x61">
-											<widget size="1070x24" type="*widget.RichText">
-												<text pos="4,4" size="791x16">No manifest is open. Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data.</text>
-											</widget>
-											<widget pos="0,36" size="1070x24" type="*widget.RichText">
-												<text pos="4,4" size="847x16">Open a manifest first. A record of what your application did is judged against what a run promised, so until then there is nothing to judge it against.</text>
-											</widget>
-										</container>
-										<container pos="0,85" size="1070x250">
-											<container size="1070x28">
-												<widget size="1070x24" type="*widget.Label">
-													<widget size="1070x24" type="*widget.RichText">
-														<text bold pos="4,4" size="48x16">This run</text>
-													</widget>
-												</widget>
-												<widget pos="0,24" size="1070x4" type="*widget.Separator">
-													<rectangle fillColor="separator" size="1070x4"/>
-												</widget>
+								<container pos="0,34" size="1054x460">
+									<container size="1054x54">
+										<container pos="4,16" size="1046x34">
+											<container pos="4,4" size="1038x18">
+												<container pos="108,0" size="591x18">
+													<container pos="12,4" size="567x10">
+														<spacer size="567x4"/>
+														<rectangle fillColor="separator" pos="0,4" size="567x1"/>
+														<spacer pos="0,5" size="567x4"/>
+													</container>
+												</container>
+												<container size="108x18">
+													<spacer size="108x0"/>
+													<text bold size="108x18" textSize="14">Ordered damage</text>
+													<spacer pos="0,18" size="108x0"/>
+												</container>
+												<container pos="699,0" size="338x18">
+													<spacer size="338x1"/>
+													<container pos="0,1" size="338x14">
+														<text color="disabled" size="338x14" textSize="11">~ marks an expectation that depends on the rules of your application</text>
+													</container>
+													<spacer pos="0,16" size="338x1"/>
+												</container>
 											</container>
-											<widget pos="0,40" size="1070x24" type="*widget.RichText">
-												<text pos="4,4" size="572x16">These are the fields every manifest carries about the run that wrote it. They fill in once one is open.</text>
-											</widget>
-											<container pos="0,77" size="1070x172">
-												<rectangle fillColor="rgba(36,36,36,255)" size="1070x172"/>
-												<container size="1070x172">
-													<container pos="8,8" size="1054x156">
-														<container size="115x156">
-															<widget size="115x24" type="*widget.RichText">
-																<text pos="4,4" size="61x16">Generated</text>
-															</widget>
-															<widget pos="0,32" size="115x24" type="*widget.RichText">
-																<text pos="4,4" size="29x16">Seed</text>
-															</widget>
-															<widget pos="0,65" size="115x24" type="*widget.RichText">
-																<text pos="4,4" size="65x16">Data locale</text>
-															</widget>
-															<widget pos="0,98" size="115x24" type="*widget.RichText">
-																<text pos="4,4" size="107x16">Corruption catalog</text>
-															</widget>
-															<widget pos="0,131" size="115x24" type="*widget.RichText">
-																<text pos="4,4" size="92x16">Manifest format</text>
+										</container>
+									</container>
+									<container pos="0,54" size="1054x406">
+										<container size="1054x406">
+											<container size="1054x168">
+												<rectangle fillColor="menuBackground" radius="10" size="1054x168" strokeColor="separator" strokeWidth="2"/>
+												<container size="1054x168">
+													<container pos="16,16" size="1022x136">
+														<container size="1022x24">
+															<widget size="1022x24" type="*widget.Label">
+																<widget size="1022x24" type="*widget.RichText">
+																	<text color="disabled" pos="4,4" size="591x16">One line per damage a run ordered, in the order it attempted them. Each line carries these four things.</text>
+																</widget>
 															</widget>
 														</container>
-														<container pos="147,0" size="92x156">
-															<widget size="92x24" type="*widget.RichText">
-																<text pos="4,4" size="31x16">Rows</text>
-															</widget>
-															<widget pos="0,32" size="92x24" type="*widget.RichText">
-																<text pos="4,4" size="84x16">Rows changed</text>
-															</widget>
-															<widget pos="0,65" size="92x24" type="*widget.RichText">
-																<text pos="4,4" size="47x16">Ordered</text>
-															</widget>
-															<widget pos="0,98" size="92x24" type="*widget.RichText">
-																<text pos="4,4" size="44x16">Applied</text>
-															</widget>
-															<widget pos="0,131" size="92x24" type="*widget.RichText">
-																<text pos="4,4" size="67x16">Not applied</text>
-															</widget>
+														<container pos="0,36" size="1022x99">
+															<text bold pos="4,4" size="56x16">Damage</text>
+															<container pos="64,0" size="957x24">
+																<widget size="957x24" type="*widget.Label">
+																	<widget size="957x24" type="*widget.RichText">
+																		<text color="disabled" pos="4,4" size="510x16">The identifier of what was done, the same one the catalogue and the command line use.</text>
+																	</widget>
+																</widget>
+															</container>
+															<text bold pos="4,28" size="56x16">Where</text>
+															<container pos="64,24" size="957x24">
+																<widget size="957x24" type="*widget.Label">
+																	<widget size="957x24" type="*widget.RichText">
+																		<text color="disabled" pos="4,4" size="227x16">The record and the column it landed in.</text>
+																	</widget>
+																</widget>
+															</container>
+															<text bold pos="4,53" size="56x16">Expected</text>
+															<container pos="64,49" size="957x24">
+																<widget size="957x24" type="*widget.Label">
+																	<widget size="957x24" type="*widget.RichText">
+																		<text color="disabled" pos="4,4" size="700x16">What a correct application should do with that record. A ~ in front means it depends on the rules of your own application.</text>
+																	</widget>
+																</widget>
+															</container>
+															<text bold pos="4,78" size="56x16">Outcome</text>
+															<container pos="64,74" size="957x24">
+																<widget size="957x24" type="*widget.Label">
+																	<widget size="957x24" type="*widget.RichText">
+																		<text color="disabled" pos="4,4" size="725x16">Whether the run managed to apply the damage at all, and once a response is open, what your application did with the record.</text>
+																	</widget>
+																</widget>
+															</container>
 														</container>
 													</container>
 												</container>
 											</container>
 										</container>
-										<container pos="0,360" size="1070x243">
-											<container size="1070x28">
-												<widget size="1070x24" type="*widget.Label">
-													<widget size="1070x24" type="*widget.RichText">
-														<text bold pos="4,4" size="100x16">Ordered damage</text>
+									</container>
+								</container>
+								<container pos="0,494" size="1054x152">
+									<container pos="4,16" size="1046x132">
+										<rectangle size="1046x132"/>
+										<container size="1046x132">
+											<rectangle fillColor="menuBackground" radius="10" size="1046x132" strokeColor="separator" strokeWidth="2"/>
+											<container size="1046x132">
+												<container pos="16,16" size="1014x100">
+													<widget size="1014x100" type="*parts.KeyScroll">
+														<container size="1014x100">
+															<container size="1014x100">
+																<container size="1014x41">
+																	<widget size="1014x41" type="*widget.Label">
+																		<widget size="1014x41" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="983x16">Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data. The entry the keyboard or the pointer is on is read out</text>
+																			<text color="disabled" pos="4,20" size="65x16">here in full.</text>
+																		</widget>
+																	</widget>
+																</container>
+															</container>
+														</container>
 													</widget>
-												</widget>
-												<widget pos="0,24" size="1070x4" type="*widget.Separator">
-													<rectangle fillColor="separator" size="1070x4"/>
-												</widget>
-											</container>
-											<widget pos="0,40" size="1070x24" type="*widget.RichText">
-												<text pos="4,4" size="583x16">One line per damage a run ordered, in the order it attempted them. Each line carries these six things.</text>
-											</widget>
-											<container pos="0,77" size="1070x165">
-												<rectangle fillColor="rgba(36,36,36,255)" size="1070x165"/>
-												<container size="1070x165">
-													<container pos="8,8" size="1054x149">
-														<widget size="151x24" type="*widget.RichText">
-															<text bold pos="4,4" size="49x16">Damage</text>
-														</widget>
-														<widget pos="151,0" size="902x24" type="*widget.RichText">
-															<text pos="4,4" size="510x16">The identifier of what was done, the same one the catalogue and the command line use.</text>
-														</widget>
-														<widget pos="0,24" size="151x24" type="*widget.RichText">
-															<text bold pos="4,4" size="39x16">Where</text>
-														</widget>
-														<widget pos="151,24" size="902x24" type="*widget.RichText">
-															<text pos="4,4" size="227x16">The record and the column it landed in.</text>
-														</widget>
-														<widget pos="0,49" size="151x24" type="*widget.RichText">
-															<text bold pos="4,4" size="56x16">Expected</text>
-														</widget>
-														<widget pos="151,49" size="902x24" type="*widget.RichText">
-															<text pos="4,4" size="312x16">What a correct application should do with that record.</text>
-														</widget>
-														<widget pos="0,74" size="151x24" type="*widget.RichText">
-															<text bold pos="4,4" size="55x16">Certainty</text>
-														</widget>
-														<widget pos="151,74" size="902x24" type="*widget.RichText">
-															<text pos="4,4" size="535x16">Whether that is a hard expectation or one that depends on the rules of your own application.</text>
-														</widget>
-														<widget pos="0,99" size="151x24" type="*widget.RichText">
-															<text bold pos="4,4" size="54x16">Outcome</text>
-														</widget>
-														<widget pos="151,99" size="902x24" type="*widget.RichText">
-															<text pos="4,4" size="308x16">Whether the run managed to apply the damage at all.</text>
-														</widget>
-														<widget pos="0,124" size="151x24" type="*widget.RichText">
-															<text bold pos="4,4" size="143x16">Why, and what changed</text>
-														</widget>
-														<widget pos="151,124" size="902x24" type="*widget.RichText">
-															<text pos="4,4" size="432x16">The value before and after, or the reason the damage could not be applied.</text>
-														</widget>
-													</container>
+													<rectangle radius="10" size="1014x100" strokeWidth="2"/>
 												</container>
 											</container>
 										</container>

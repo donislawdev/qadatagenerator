@@ -432,7 +432,7 @@ var toolGuards = []Guard{
 	{"a defect spanning several records survives being written and read back", "TestADefectSpanningSeveralRecordsSurvivesBeingWrittenAndRead", "internal/adapter/manifestjson", ByMutation},
 	{"a byte offset survives being written and read back, where its loss would be silent", "TestAByteOffsetSurvivesBeingWrittenAndRead", "internal/adapter/manifestjson", ByMutation},
 	{"nothing in the window rebuilds a piece of the toolkit without saying why", "TestNothingInTheWindowRebuildsTheToolkitWithoutSayingWhy", "internal/guard", ByMutation},
-	{"an entry that did not happen says why on the screen, without one column repeating another", "TestAnUnappliedEntrySaysWhyOnTheScreen", "internal/gui/manifestview", ByMutation},
+	{"an entry that did not happen says why on the screen, its kind in the table and its reason in the card under it", "TestAnUnappliedEntrySaysWhyOnTheScreen", "internal/gui/manifestview", ByMutation},
 	{"the second state shows what the application did with every row that could be judged", "TestTheSecondStateShowsWhatTheApplicationDidWithEveryJudgedRow", "internal/gui/manifestview", ByMutation},
 	{"a document written to a version this build cannot read is refused rather than compared", "TestADocumentFromAVersionThisBuildCannotReadIsRefused", "internal/cli", ByMutation},
 	{"a document from a newer minor version is read and the run says what that costs", "TestADocumentFromANewerMinorVersionIsReadAndSaidSo", "internal/cli", ByMutation},

@@ -582,6 +582,13 @@ func browserStates() []State {
 			NeedsResponse: true,
 		},
 		{
+			Name:          "browser-envelope",
+			Purpose:       "the section over the table open, showing the envelope of the run",
+			Screen:        screenManifest,
+			NeedsManifest: true,
+			Envelope:      true,
+		},
+		{
 			Name:          "browser-focus-button",
 			Purpose:       "the keyboard on the button that opens a manifest",
 			Screen:        screenManifest,
@@ -589,12 +596,15 @@ func browserStates() []State {
 			Keyboard:      Keyboard{Tabs: 6},
 		},
 		{
+			// Tabs derived with tools/klawiatura on 2026-09-15: five screens,
+			// two buttons, the section over the table, then the table. The
+			// card under the table reads out the entry the keyboard lands on.
 			Name:          "browser-focus-cell",
-			Purpose:       "the keyboard inside the table, three rows down and one column across",
+			Purpose:       "the keyboard inside the table, three rows down and one column across, and the card reading that entry out",
 			Screen:        screenManifest,
 			NeedsManifest: true,
 			Keyboard: Keyboard{
-				Tabs: 8,
+				Tabs: 9,
 				Keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight},
 			},
 		},

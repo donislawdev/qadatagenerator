@@ -52,25 +52,58 @@ about.notices.header: Licence notices for the fonts and icons built into this pr
 
 manifest.open: Open manifest...
 manifest.open-response: Open application response...
-manifest.empty: No manifest is open. Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data.
+manifest.empty: No manifest is open yet.
 manifest.unreadable: This file could not be read as a manifest.
 manifest.reading: Reading this file. A large manifest takes a moment, and the screen answers again as soon as it has been read.
 
-manifest.heading.run: This run
+manifest.heading.run: About this run
 manifest.heading.entries: Ordered damage
-manifest.heading.unsettled: Not settled
 manifest.heading.limits: What this comparison could not see
 
 manifest.run.wait: These are the fields every manifest carries about the run that wrote it. They fill in once one is open.
-manifest.entries.wait: One line per damage a run ordered, in the order it attempted them. Each line carries these six things.
+manifest.entries.wait: One line per damage a run ordered, in the order it attempted them. Each line carries these four things.
 
 manifest.wait.mutator: The identifier of what was done, the same one the catalogue and the command line use.
 manifest.wait.place: The record and the column it landed in.
-manifest.wait.expect: What a correct application should do with that record.
-manifest.wait.confidence: Whether that is a hard expectation or one that depends on the rules of your own application.
-manifest.wait.status: Whether the run managed to apply the damage at all.
-manifest.wait.detail: The value before and after, or the reason the damage could not be applied.
-manifest.response.wait: Open a manifest first. A record of what your application did is judged against what a run promised, so until then there is nothing to judge it against.
+manifest.wait.expect: What a correct application should do with that record. A ~ in front means it depends on the rules of your own application.
+manifest.wait.status: Whether the run managed to apply the damage at all, and once a response is open, what your application did with the record.
+manifest.response.wait: Needs a manifest first.
+
+# tekst-ok: words that stand after a number or a file name in the band, not sentences
+manifest.facts.entry: entry
+manifest.facts.entries: entries
+manifest.facts.seed: seed
+# tekst-ok: the word between two figures, 4 of 6, the same word take.plan.of and recipe.of stand between theirs
+manifest.facts.of: of
+manifest.facts.answered: rows answered
+manifest.facts.reading: reading
+# tekst-ok: the same words take.file.unreadable puts beside a file, because the two bands say the same thing about a file
+manifest.facts.unreadable: could not be read
+
+# tekst-ok: words that stand after a number at the heading of the table, not sentences
+manifest.tally.ordered: ordered
+# tekst-ok: the same word manifest.entry.applied writes in a cell, here after a number in the tally
+manifest.tally.applied: applied
+manifest.tally.not-applied: not applied
+manifest.tally.compared: compared
+manifest.tally.disagree: disagree
+# tekst-ok: the same words manifest.answer.not-settled writes in a cell, here after a number in the tally
+manifest.tally.not-settled: not settled
+
+manifest.detail.wait: Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data. The entry the keyboard or the pointer is on is read out here in full.
+manifest.detail.select: Move the keyboard onto an entry, or click one, and it is read out here in full.
+# tekst-ok: the word before "3 of 6" in the card under the table
+manifest.detail.entry: entry
+# tekst-ok: the second half of a sentence, after the expectation the entry carries
+manifest.detail.hard: and the certainty is hard. The answer does not depend on the rules of your application.
+# tekst-ok: the second half of a sentence, after the expectation the entry carries
+manifest.detail.soft: and the certainty is soft. The right answer depends on the rules of your application, so a disagreement is reported and never failed on.
+# tekst-ok: the words before the kind of failure and the reason the run recorded, the same words as the count manifest.count.not-applied labels
+manifest.detail.not-applied: Not applied
+
+# tekst-ok: an example file name, as recipe.command.file is
+manifest.command.response: your-response.json
+manifest.command.example: The response file name above is an example. Open an application response, and the line names it.
 
 manifest.run.generated: Generated
 # tekst-ok: the seed a run was made from, named as the settings name it on two screens
@@ -91,19 +124,26 @@ manifest.run.rows-mutated: Rows changed
 
 manifest.count.requested: Ordered
 manifest.count.applied: Applied
+# tekst-ok: the label of a count in the envelope, the same words manifest.detail.not-applied opens a sentence with
 manifest.count.not-applied: Not applied
 
+# tekst-ok: the word in a cell of the table, the same word manifest.tally.applied puts after a number
 manifest.entry.applied: applied
 manifest.entry.not-applied: NOT APPLIED
 manifest.entry.before: was
 manifest.entry.after: now
 
+# tekst-ok: the verdict of the application in one or two words, for a column 148 wide
+manifest.answer.accepted: accepted
+manifest.answer.rejected: rejected
+manifest.answer.none: no answer
+# tekst-ok: the words in a cell of the table, the same words manifest.tally.not-settled puts after a number
+manifest.answer.not-settled: not settled
+
 manifest.column.mutator: Damage
 manifest.column.place: Where
 manifest.column.expect: Expected
-manifest.column.confidence: Certainty
 manifest.column.status: Outcome
-manifest.column.detail: Why, and what changed
 
 manifest.place.whole-file: whole file
 # tekst-ok: one row of a table, the word the recipe editor counts rows with in recipe.row
@@ -116,7 +156,9 @@ manifest.expectation.warning: should be accepted and marked
 
 manifest.confidence.hard: hard
 manifest.confidence.soft: "~ soft"
-manifest.legend.soft: A soft expectation is marked ~ and means the right answer depends on the rules of your application rather than on the data, so a disagreement there is reported and never failed on.
+# tekst-ok: the mark itself, which stands in front of a soft expectation in the table
+manifest.confidence.mark: "~"
+manifest.legend.mark: ~ marks an expectation that depends on the rules of your application
 
 manifest.failure.undescribed: not in the catalog
 manifest.failure.unimplemented: not built yet
@@ -125,7 +167,6 @@ manifest.failure.field-type-not-covered: no column of that kind
 manifest.failure.scheme-not-covered: scheme not covered
 manifest.failure.declined-by-mutator: the damage declined
 
-verify.compared: Entries compared
 verify.agreed: The application answered the way the manifest expected, everywhere it could be judged.
 verify.no-answer: The response record says nothing about this row.
 verify.verdict.accepted: the application accepted this row
@@ -139,6 +180,7 @@ verify.kind.missing: the application never answered for this row
 take.choose: Choose a file
 take.file.none: No file yet. Choose one, or drop it onto this window.
 take.file.reading: being read
+# tekst-ok: the same words manifest.facts.unreadable puts beside a file, because the two bands say the same thing about a file
 take.file.unreadable: could not be read
 take.drop: You can also drop a file onto this window.
 take.file.wait: Its records, its columns, and what each column was taken for by looking at the values, since nothing declares it.

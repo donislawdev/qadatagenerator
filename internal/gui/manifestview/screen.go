@@ -10,8 +10,8 @@
 // walking the widget tree sees an empty frame and would pass while saying
 // nothing at all.
 //
-// So this file answers what the screen says, as plain values, and the file
-// beside it answers how that is drawn. The first is checked entry by entry
+// So this file answers what the screen says, as plain values, and the files
+// beside it answer how that is drawn. The first is checked entry by entry
 // against a manifest, and the second is checked by driving one row of the list
 // directly. Neither half alone would be worth much: a model nothing renders is
 // prose, and a renderer with no model is a screen nobody can hold to anything.
@@ -21,6 +21,17 @@
 // It reads no file. A manifest and a response record arrive already parsed,
 // which is what lets the whole screen be built against a manifest a test wrote
 // by hand rather than against one that had to exist on a disk somewhere.
+//
+// # The shape, since 2026-09-15 (DEC-247)
+//
+// An entry is four cells: the damage, where it landed, what was expected of
+// the record with a mark in front of a soft expectation, and what became of it.
+// The sentences an entry carries beyond those four - why it could not be
+// applied, the value before and after, what the application did and how that
+// compares - are read out one entry at a time in a card under the table. Six
+// columns added up to 1740 units and the window hands the table 828, so the
+// two columns saying what became of an entry were never on the screen without
+// scrolling sideways.
 package manifestview
 
 import (
@@ -34,7 +45,7 @@ import (
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
-// Line is one phrase together with the palette entry it is painted in.
+// Line is one phrase together with the token it is painted in.
 //
 // The colour is a name rather than a value, because the guard beside this
 // package refuses a colour written anywhere in the window outside the theme,
@@ -60,34 +71,42 @@ type Field struct {
 // # Why an unapplied entry carries its reason here rather than in a tooltip
 //
 // docs/17 puts it plainly and the reason is the ban on silence: an entry that
-// did not happen is the one a reader most needs to see, so it is on the screen
-// in a colour meant to stand out rather than hidden behind a pointer. Fyne 2.8
-// has no tooltips in any case, which is a fact about the toolkit rather than a
-// design.
+// did not happen is the one a reader most needs to see, so its kind is in the
+// table in a colour meant to stand out, and its reason is one arrow key away
+// in the card under it rather than hidden behind a pointer. Fyne 2.8 has no
+// tooltips in any case, which is a fact about the toolkit rather than a design.
 type Row struct {
 	// Mutator is the identifier and its layer, which are data.
 	Mutator string
 	// Place is where the damage sits, in words.
 	Place string
-	// Status says whether it happened at all.
-	Status Line
-	// Expect is what the application should do about it, and Confidence is
-	// how much that expectation is worth.
+	// Applied says whether the damage happened at all, and Status says so in
+	// words: "applied", or the closed kind of failure when it did not.
+	Applied bool
+	Status  Line
+	// Expect is what the application should do about it, with the mark of a
+	// soft expectation in front when the answer belongs to the application,
+	// and Certainty is the same thing as a sentence for the card.
 	//
-	// Two lines rather than one, because a soft expectation is not a weaker
-	// version of a hard one. It is a statement that the right answer belongs
-	// to the application, and rule five of the handbook refuses to let the
-	// window suggest otherwise.
-	Expect     Line
-	Confidence Line
+	// The mark rather than a second column, because a soft expectation is not
+	// a weaker version of a hard one and the column that said so cost 120
+	// units of a table that had 828. Rule five of the handbook refuses to let
+	// the window suggest otherwise, and the mark in front of the phrase is a
+	// shape, which is what docs/17 asks of anything carrying meaning.
+	Expect    Line
+	Certainty Line
 	// Reason is why the damage could not be applied, empty when it was.
 	Reason Line
 	// Values is the original and what replaced it, empty when the mutator
 	// keeps neither.
 	Values Line
-	// Answer is what the application did about this row, and is filled only in
-	// the second state.
-	Answer Line
+	// Answer is what the application did about this row in a word or two,
+	// for the outcome column, and Finding is the same thing as a sentence for
+	// the card: the verdict, and where the two disagree, how. Both are filled
+	// only in the second state, and only for an applied entry, since a damage
+	// that never happened is nothing an application could answer for.
+	Answer  Line
+	Finding Line
 }
 
 // Cells is one entry as the columns of a table, in column order.
@@ -101,11 +120,9 @@ type Row struct {
 func (r Row) Cells() []Line {
 	return []Line{
 		{Text: r.Mutator},
-		{Text: r.Place, Color: palette.NameTextSubdued},
+		{Text: r.Place, Color: palette.TextSecondary},
 		r.Expect,
-		r.Confidence,
-		r.Status,
-		r.Detail(),
+		r.Outcome(),
 	}
 }
 
@@ -120,27 +137,37 @@ func (r Row) Cell(column int) Line {
 	return cells[column]
 }
 
-// Detail is the one line of a row that carries a sentence rather than a value.
+// Outcome is what became of the ordered damage, in the one column that says so.
 //
-// # Why the three are one line rather than three
+// # Why one column carries both halves
 //
-// A reason belongs to an entry that did not happen and values belong to one
-// that did, so the two never occur together. The answer of an application joins
-// the values because it is about the same thing: what became of damage that was
-// really done. Keeping them on separate lines meant an entry with no values
-// left a hole in the middle of its own row, and the line below that hole read
-// as though it belonged to the next entry.
-func (r Row) Detail() Line {
-	if r.Reason.Text != "" {
-		return r.Reason
+// A damage that was not applied has no answer from any application, and one
+// that was applied said only "applied" in the first drawing, in a column
+// beside a second one carrying the answer. Two columns held one fact each and
+// never both, so the column that said the least in every row was the one the
+// table could not afford. Here the kind of failure stands for an entry that
+// did not happen, the application's verdict for one that did once a response
+// is open, and "applied" until then.
+func (r Row) Outcome() Line {
+	if !r.Applied {
+		return r.Status
 	}
-	if r.Values.Text == "" {
+	if r.Answer.Text != "" {
 		return r.Answer
 	}
-	if r.Answer.Text == "" {
-		return r.Values
+	return r.Status
+}
+
+// Detail is everything the card under the table reads out about this entry
+// beyond its four cells, in reading order, with nothing empty in it.
+func (r Row) Detail() []Line {
+	var lines []Line
+	for _, line := range []Line{r.Certainty, r.Values, r.Reason, r.Finding} {
+		if line.Text != "" {
+			lines = append(lines, line)
+		}
 	}
-	return Line{Text: r.Values.Text + separator + r.Answer.Text, Color: r.Answer.Color}
+	return lines
 }
 
 // Comparison is the second state: a response record and the report of putting
@@ -161,12 +188,17 @@ type Screen struct {
 	// Rows is one entry of the manifest each, in the order damage was
 	// attempted, which is deterministic for one seed.
 	Rows []Row
-	// Unsettled is every entry the comparison could not judge, and Limits is
-	// what it could not see at all. Both are empty in the first state.
+	// Compared is how many applied entries the second state could judge,
+	// Disagreed how many of those the application answered against the
+	// manifest, and Unsettled every entry the comparison could not judge.
+	// Limits is what it could not see at all. All are empty in the first
+	// state.
 	//
-	// 🔴 Neither is optional in the second. A comparison reporting only its
+	// 🔴 None is optional in the second. A comparison reporting only its
 	// findings reads as a complete account of the run, and the whole argument
 	// of this project is that a quiet gap is worse than a loud one.
+	Compared  int
+	Disagreed int
 	Unsettled []Line
 	Limits    []Line
 }
@@ -185,6 +217,8 @@ func Build(text i18n.Catalogue, promised manifest.Manifest, comparison *Comparis
 	}
 	if comparison != nil {
 		screen.Notes = notesOf(text, comparison.Report)
+		screen.Compared = comparison.Report.Compared
+		screen.Disagreed = disagreedOf(comparison.Report)
 		screen.Unsettled = unsettledOf(comparison.Report)
 		screen.Limits = limitLines(comparison.Report)
 	}
@@ -197,14 +231,22 @@ func Build(text i18n.Catalogue, promised manifest.Manifest, comparison *Comparis
 // Left out rather than shown empty: a row reading "Tag" against nothing is a
 // reader wondering whether the tag was lost or never set, and the manifest does
 // not distinguish those either.
+//
+// The order is the order of the columns the envelope is laid out in, and the
+// format version stands before the catalog version for a reason the render
+// showed: the columns share the width equally and a value has what its column's
+// widest label leaves, so the timestamp, the longest value every manifest
+// carries, is kept in a column whose labels are short. "Corruption catalog" is
+// the widest label of the envelope and stood in that column until 2026-09-15,
+// where it cut the timestamp to an ellipsis.
 func runFields(text i18n.Catalogue, promised manifest.Manifest) []Field {
 	run := promised.Run()
 	fields := []Field{
 		{text.T(i18n.ManifestRunGenerated), run.GeneratedAt},
 		{text.T(i18n.ManifestRunSeed), run.Seed},
 		{text.T(i18n.ManifestRunLocale), run.Locale},
-		{text.T(i18n.ManifestRunCatalog), run.CatalogVersion},
 		{text.T(i18n.ManifestRunSpec), promised.SpecVersion()},
+		{text.T(i18n.ManifestRunCatalog), run.CatalogVersion},
 	}
 	for _, optional := range []Field{
 		{text.T(i18n.ManifestRunSource), run.Source},
@@ -272,7 +314,7 @@ func Waiting(text i18n.Catalogue) Screen {
 	}
 	return Screen{
 		Run: waiting(i18n.ManifestRunGenerated, i18n.ManifestRunSeed, i18n.ManifestRunLocale,
-			i18n.ManifestRunCatalog, i18n.ManifestRunSpec,
+			i18n.ManifestRunSpec, i18n.ManifestRunCatalog,
 			i18n.ManifestRunRowsTotal, i18n.ManifestRunRowsMutated),
 		Counts: waiting(i18n.ManifestCountRequested, i18n.ManifestCountApplied,
 			i18n.ManifestCountNotApplied),
@@ -294,18 +336,19 @@ func rowOf(text i18n.Catalogue, defect manifest.Defect, comparison *Comparison) 
 	// "L0.bom.unexpected L0" is repeating itself in the one place a person
 	// scans first.
 	row := Row{
-		Mutator:    string(defect.Mutator),
-		Place:      placeOf(text, defect.Location),
-		Status:     statusOf(text, defect),
-		Expect:     expectationOf(text, defect.Expectation),
-		Confidence: confidenceOf(text, defect.Confidence),
-		Values:     valuesOf(text, defect),
+		Mutator:   string(defect.Mutator),
+		Place:     placeOf(text, defect.Location),
+		Applied:   defect.Applied,
+		Status:    statusOf(text, defect),
+		Expect:    expectationOf(text, defect.Expectation, defect.Confidence),
+		Certainty: certaintyOf(text, defect.Expectation, defect.Confidence),
+		Values:    valuesOf(text, defect),
 	}
 	if !defect.Applied {
 		row.Reason = failureOf(text, defect)
 	}
 	if comparison != nil && defect.Applied {
-		row.Answer = answerOf(text, *comparison, defect)
+		row.Answer, row.Finding = answerOf(text, *comparison, defect)
 	}
 	return row
 }
@@ -317,28 +360,31 @@ func rowOf(text i18n.Catalogue, defect manifest.Defect, comparison *Comparison) 
 // grows its own spacing habit.
 const separator = "   "
 
-// statusOf says what became of ordered damage.
+// statusOf says what became of ordered damage, before any application has.
 //
 // # Why the kind of failure stands here rather than beside the reason
 //
 // Looking at a real manifest showed it: fifty three of sixty entries were not
 // applied, so a column reading NOT APPLIED fifty three times and a column
 // repeating the same sentence beside it gave a reader nothing to compare. The
-// kind is a closed vocabulary and short, so it belongs in the narrow column,
-// where it differs between entries. The sentence the run recorded names the
-// column or the capability, so it belongs in the wide one.
+// kind is a closed vocabulary and short, so it belongs in the table, where it
+// differs between entries. The sentence the run recorded names the column or
+// the capability, so it belongs in the card under the table, one entry at a
+// time.
 //
 // The colour still marks the row out at a glance, which is what rule 4.4 asks:
-// an entry that did not happen has to stand out rather than fade.
+// an entry that did not happen has to stand out rather than fade. It is the
+// warning token rather than the danger one, because a damage this build could
+// not do is a limit of the run and not a fault of the application under test.
 func statusOf(text i18n.Catalogue, defect manifest.Defect) Line {
 	if defect.Applied {
-		return Line{Text: text.T(i18n.ManifestEntryApplied), Color: palette.NameTextSubdued}
+		return Line{Text: text.T(i18n.ManifestEntryApplied), Color: palette.TextSecondary}
 	}
 	phrase := text.T(i18n.ManifestEntryNotApplied)
 	if key, known := failureKeys[defect.FailureKind]; known {
 		phrase = text.T(key)
 	}
-	return Line{Text: phrase, Color: palette.NameNotApplied}
+	return Line{Text: phrase, Color: palette.StateWarning}
 }
 
 // placeOf says where the damage sits, in the terms the layer uses.
@@ -373,7 +419,7 @@ func rowPart(text i18n.Catalogue, location manifest.Location) string {
 	return text.T(i18n.ManifestPlaceRow) + " " + strconv.Itoa(location.Row)
 }
 
-// expectationKeys and the two registers below turn a closed vocabulary of the
+// expectationKeys and the registers below turn a closed vocabulary of the
 // domain into phrases a person reads.
 //
 // 🔴 Each one is closed against the domain in both directions by a test, so a
@@ -387,15 +433,9 @@ var expectationKeys = map[catalog.Expectation]i18n.Key{
 	catalog.Warning:    i18n.ManifestExpectationWarning,
 }
 
-var expectationColors = map[catalog.Expectation]string{
-	catalog.Rejection:  palette.NameRejection,
-	catalog.Acceptance: palette.NameAcceptance,
-	catalog.Warning:    palette.NameWarning,
-}
-
 var confidenceKeys = map[catalog.Confidence]i18n.Key{
-	catalog.Hard: i18n.ManifestConfidenceHard,
-	catalog.Soft: i18n.ManifestConfidenceSoft,
+	catalog.Hard: i18n.ManifestDetailHard,
+	catalog.Soft: i18n.ManifestDetailSoft,
 }
 
 var failureKeys = map[manifest.FailureKind]i18n.Key{
@@ -414,53 +454,65 @@ var kindKeys = map[verify.Kind]i18n.Key{
 	verify.Missing:     i18n.VerifyKindMissing,
 }
 
-// expectationOf is what the application should do, in words and in colour.
+// expectationOf is what the application should do, with the mark of a soft
+// expectation in front of it.
 //
-// The word carries the meaning and the colour only reinforces it. That is WCAG
-// 1.4.1, and here it rests on a measurement rather than on the guideline alone:
-// the three colours differ from each other by a contrast of 1.18 to 1.41, so
-// somebody who does not separate hues sees one shade of grey.
-func expectationOf(text i18n.Catalogue, expectation catalog.Expectation) Line {
-	key, known := expectationKeys[expectation]
-	if !known {
-		return Line{Text: string(expectation)}
+// In the ordinary text colour since DEC-247. Three colours over sixty rows were
+// noise, and WCAG 1.4.1 asks that the word carry the meaning in any case: the
+// three colours differed from each other by a contrast of 1.18 to 1.41, so
+// somebody who does not separate hues saw one shade of grey. Colour on this
+// screen is kept for what needs attention, which is what did not happen and
+// where an application disagreed.
+func expectationOf(text i18n.Catalogue, expectation catalog.Expectation, confidence catalog.Confidence) Line {
+	phrase := string(expectation)
+	if key, known := expectationKeys[expectation]; known {
+		phrase = text.T(key)
 	}
-	return Line{Text: text.T(key), Color: expectationColors[expectation]}
+	if confidence == catalog.Soft {
+		phrase = text.T(i18n.ManifestConfidenceMark) + " " + phrase
+	}
+	return Line{Text: phrase}
 }
 
-// confidenceOf says how much the expectation is worth.
+// certaintyOf says how much the expectation is worth, as a sentence for the
+// card: the expectation again, and then what the certainty means.
 //
-// A soft one gets a sign of its own in front of the phrase rather than a paler
-// shade of the same thing. Paler reads as less important, and soft does not
-// mean less important. It means the answer belongs to the application being
-// tested and this tool is not entitled to assert it.
-func confidenceOf(text i18n.Catalogue, confidence catalog.Confidence) Line {
+// A sentence rather than one of two words, because the card is the one place
+// with room for one, and because "soft" on its own has told nobody what soft
+// means. It means the answer belongs to the application being tested and this
+// tool is not entitled to assert it.
+func certaintyOf(text i18n.Catalogue, expectation catalog.Expectation, confidence catalog.Confidence) Line {
 	key, known := confidenceKeys[confidence]
 	if !known {
-		return Line{Text: string(confidence)}
+		return Line{Text: expectationOf(text, expectation, confidence).Text + ", " + string(confidence),
+			Color: palette.TextSecondary}
 	}
-	return Line{Text: text.T(key), Color: palette.NameTextSubdued}
+	return Line{Text: expectationOf(text, expectation, confidence).Text + ", " + text.T(key),
+		Color: palette.TextSecondary}
 }
 
-// failureOf is what the run recorded about damage it could not do.
+// failureOf is what the run recorded about damage it could not do, as the card
+// reads it out: that it was not applied, the closed kind, and the sentence the
+// run wrote for the case at hand.
 //
-// The closed kind is not repeated here, because it is already in the column
-// beside this one. What is left is the sentence the run wrote for the case at
-// hand: which column, which capability, which value. It is not a key and cannot
-// become one, since it is composed per entry, and that limit is recorded rather
-// than hidden.
+// The kind IS repeated here, though it already stands in the table, because the
+// card is read on its own: an arrow key later it is about another entry, and a
+// line reading only "the column follows no scheme" has lost what it is a
+// reason for. The sentence is not a key and cannot become one, since it is
+// composed per entry, and that limit is recorded rather than hidden.
 //
-// The kind falls back to standing here when this build has no phrase for it,
-// which keeps an unrecognised kind visible rather than silent.
+// An unrecognised kind falls back to standing here by its own name, which keeps
+// it visible rather than silent.
 func failureOf(text i18n.Catalogue, defect manifest.Defect) Line {
-	phrase := defect.FailureReason
-	if _, known := failureKeys[defect.FailureKind]; !known {
-		phrase = string(defect.FailureKind) + separator + phrase
+	kind := string(defect.FailureKind)
+	if key, known := failureKeys[defect.FailureKind]; known {
+		kind = text.T(key)
 	}
-	if phrase == "" {
-		phrase = text.T(i18n.ManifestEntryNotApplied)
+	phrase := text.T(i18n.ManifestDetailNotApplied) + ": " + kind
+	if defect.FailureReason != "" {
+		phrase += ". " + defect.FailureReason
 	}
-	return Line{Text: phrase, Color: palette.NameNotApplied}
+	return Line{Text: phrase, Color: palette.StateWarning}
 }
 
 // valuesOf is what was there and what took its place.
@@ -482,7 +534,7 @@ func valuesOf(text i18n.Catalogue, defect manifest.Defect) Line {
 	if phrase == "" {
 		return Line{}
 	}
-	return Line{Text: phrase, Color: palette.NameCorrupted}
+	return Line{Text: phrase, Color: palette.TextAccent}
 }
 
 // quoted puts a value in marks so that an empty one and a missing one do not
@@ -490,33 +542,44 @@ func valuesOf(text i18n.Catalogue, defect manifest.Defect) Line {
 // apart.
 func quoted(value string) string { return "\"" + value + "\"" }
 
-// answerOf is what the application did about this row.
+// answerOf is what the application did about this row: a word or two for the
+// table, and the sentence for the card.
 //
 // The verdict is shown even where the two agreed. A screen that spoke only
 // about disagreements would leave a reader unable to tell a row that agreed
 // from one nothing was said about, and those are the two answers this project
-// most insists on separating.
-func answerOf(text i18n.Catalogue, comparison Comparison, defect manifest.Defect) Line {
+// most insists on separating. A disagreement is painted in the danger token
+// and an entry the comparison could not settle in the warning one, because
+// the first is a claim about the application and the second is a question
+// the response record did not carry the evidence to answer.
+func answerOf(text i18n.Catalogue, comparison Comparison, defect manifest.Defect) (short, long Line) {
 	answer, reacted := comparison.Record.ByRow(defect.Location.Row)
 	if !reacted {
-		return Line{Text: text.T(i18n.VerifyNoAnswer), Color: palette.NameRejection}
+		return Line{Text: text.T(i18n.ManifestAnswerNone), Color: palette.StateDanger},
+			Line{Text: text.T(i18n.VerifyNoAnswer), Color: palette.StateDanger}
 	}
-	phrase := verdictOf(text, answer.Verdict)
+	verdict, word := verdictOf(text, answer.Verdict)
 	if finding, found := findingFor(comparison.Report, defect); found {
-		return Line{Text: phrase + separator + kindOf(text, finding.Kind) + separator + finding.Detail,
-			Color: palette.NameRejection}
+		return Line{Text: word, Color: palette.StateDanger},
+			Line{Text: verdict + separator + kindOf(text, finding.Kind) + separator + finding.Detail,
+				Color: palette.StateDanger}
 	}
-	return Line{Text: phrase, Color: palette.NameTextSubdued}
+	if open, found := unsettledFor(comparison.Report, defect); found {
+		return Line{Text: text.T(i18n.ManifestAnswerNotSettled), Color: palette.StateWarning},
+			Line{Text: verdict + separator + open.Reason, Color: palette.StateWarning}
+	}
+	return Line{Text: word, Color: palette.TextSecondary}, Line{Text: verdict, Color: palette.TextSecondary}
 }
 
-func verdictOf(text i18n.Catalogue, verdict response.Verdict) string {
+// verdictOf is the verdict of the application as a sentence and as a word.
+func verdictOf(text i18n.Catalogue, verdict response.Verdict) (sentence, word string) {
 	switch verdict {
 	case response.Accepted:
-		return text.T(i18n.VerifyVerdictAccepted)
+		return text.T(i18n.VerifyVerdictAccepted), text.T(i18n.ManifestAnswerAccepted)
 	case response.Rejected:
-		return text.T(i18n.VerifyVerdictRejected)
+		return text.T(i18n.VerifyVerdictRejected), text.T(i18n.ManifestAnswerRejected)
 	}
-	return string(verdict)
+	return string(verdict), string(verdict)
 }
 
 func kindOf(text i18n.Catalogue, kind verify.Kind) string {
@@ -543,30 +606,61 @@ func findingFor(report verify.Report, defect manifest.Defect) (verify.Finding, b
 	return verify.Finding{}, false
 }
 
+// unsettledFor is the question about one entry the comparison could not
+// answer, if there is one, matched the way a finding is and for the same
+// reason.
+func unsettledFor(report verify.Report, defect manifest.Defect) (verify.Unsettled, bool) {
+	for _, open := range report.Unsettled {
+		if open.Row == defect.Location.Row &&
+			open.Field == defect.Location.Field &&
+			open.Mutator == defect.Mutator {
+			return open, true
+		}
+	}
+	return verify.Unsettled{}, false
+}
+
 // notesOf is what the comparison says about the run as a whole.
 //
 // A finding with no row belongs here rather than beside an entry, and there is
 // one that behaves that way: records the application never reacted to at all
 // are counted from the dataset rather than from the damaged rows. Attaching it
 // to an entry would put a statement about the whole file on one arbitrary line
-// of it.
+// of it. How many entries were compared is not a note any more: it stands at
+// the heading of the table with the other counts.
+//
+// The detail stands alone, without the phrase for the kind in front of it. The
+// phrases are written for one row ("the application never answered for this
+// row"), and rendering showed one at the head of a sentence about the whole
+// dataset. The detail of a finding about the whole file is a sentence already.
 func notesOf(text i18n.Catalogue, report verify.Report) []Line {
-	notes := []Line{{
-		Text:  text.T(i18n.VerifyCompared) + " " + strconv.Itoa(report.Compared),
-		Color: palette.NameTextSubdued,
-	}}
+	var notes []Line
 	for _, finding := range report.Findings {
 		if finding.Row == 0 {
-			notes = append(notes, Line{
-				Text:  kindOf(text, finding.Kind) + separator + finding.Detail,
-				Color: palette.NameRejection,
-			})
+			words := finding.Detail
+			if words == "" {
+				words = kindOf(text, finding.Kind)
+			}
+			notes = append(notes, Line{Text: words, Color: palette.StateDanger})
 		}
 	}
 	if len(report.Findings) == 0 {
-		notes = append(notes, Line{Text: text.T(i18n.VerifyAgreed), Color: palette.NameAcceptance})
+		notes = append(notes, Line{Text: text.T(i18n.VerifyAgreed), Color: palette.StateSuccess})
 	}
 	return notes
+}
+
+// disagreedOf counts the findings that belong to one entry each, which is what
+// the tally at the heading of the table reports beside how many were compared.
+// A finding about the whole file is a note and is not an entry that disagreed.
+func disagreedOf(report verify.Report) int {
+	disagreed := 0
+	for _, finding := range report.Findings {
+		if finding.Row != 0 {
+			disagreed++
+		}
+	}
+	return disagreed
 }
 
 func unsettledOf(report verify.Report) []Line {
@@ -574,7 +668,7 @@ func unsettledOf(report verify.Report) []Line {
 	for _, open := range report.Unsettled {
 		lines = append(lines, Line{
 			Text:  placeOfUnsettled(open) + open.Reason,
-			Color: palette.NameWarning,
+			Color: palette.StateWarning,
 		})
 	}
 	return lines
@@ -590,7 +684,7 @@ func placeOfUnsettled(open verify.Unsettled) string {
 func limitLines(report verify.Report) []Line {
 	lines := make([]Line, 0, len(report.Limits))
 	for _, limit := range report.Limits {
-		lines = append(lines, Line{Text: limit, Color: palette.NameTextSubdued})
+		lines = append(lines, Line{Text: limit, Color: palette.TextSecondary})
 	}
 	return lines
 }

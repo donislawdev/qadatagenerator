@@ -73,6 +73,38 @@ func screenOf(t *testing.T, comparison *Comparison, defects ...manifest.Defect) 
 	return Build(i18n.English, built(t, defects...), comparison)
 }
 
+// everyKindOfScreen is both states built with every kind of entry the model
+// can produce: hard and soft, applied and not, agreed with, disagreed with,
+// unanswered and unsettled.
+func everyKindOfScreen(t *testing.T) []Screen {
+	t.Helper()
+	// Three rows damaged rather than the two the shared run says, because the
+	// entries below land on three rows and a manifest counts them.
+	envelope := run()
+	envelope.RowsMutated = 3
+	promised, problems := manifest.New("0.1", envelope, []manifest.Defect{
+		applied("d1", 1, catalog.Rejection, catalog.Hard),
+		applied("d2", 2, catalog.Rejection, catalog.Soft),
+		applied("d3", 3, catalog.Warning, catalog.Soft),
+		unapplied("d4", manifest.Unimplemented, "this build does not carry that damage yet"),
+	})
+	if len(problems) > 0 {
+		t.Fatalf("the manifest this test is built on is not valid: %v", problems)
+	}
+	actual := response.Record{
+		SpecVersion: "0.1",
+		Rows: []response.Row{
+			{Number: 1, Verdict: response.Accepted},
+			{Number: 3, Verdict: response.Accepted},
+		},
+	}
+	comparison := Comparison{Record: actual, Report: verify.Compare(promised, actual)}
+	return []Screen{
+		Build(i18n.English, promised, nil),
+		Build(i18n.English, promised, &comparison),
+	}
+}
+
 // everything a person could read off the screen, so that a test asks about what
 // is shown rather than about which member happens to hold it.
 func said(screen Screen) []string {
@@ -80,12 +112,11 @@ func said(screen Screen) []string {
 	for _, field := range append(append([]Field{}, screen.Run...), screen.Counts...) {
 		all = append(all, field.Label, field.Value)
 	}
-	for _, line := range append(append(append([]Line{}, screen.Notes...), screen.Unsettled...), screen.Limits...) {
+	for _, line := range lines(screen) {
 		all = append(all, line.Text)
 	}
 	for _, row := range screen.Rows {
-		all = append(all, row.Mutator, row.Place, row.Status.Text, row.Expect.Text,
-			row.Confidence.Text, row.Reason.Text, row.Values.Text, row.Answer.Text)
+		all = append(all, row.Mutator, row.Place)
 	}
 	return all
 }
@@ -130,7 +161,11 @@ func TestEveryOrderedDamageIsOnTheScreenWhateverBecameOfIt(t *testing.T) {
 //
 // DEC-152 asks for the kind beside every unapplied damage in the window, and it
 // is the promise of the whole product: the reason is on the screen rather than
-// behind a pointer, and Fyne 2.8 has no tooltip to hide it in anyway.
+// behind a pointer, and Fyne 2.8 has no tooltip to hide it in anyway. The kind
+// stands in the table, where it differs between entries, and the card under
+// the table repeats it in front of the sentence, because the card is read on
+// its own and a reason with nothing saying what it is a reason for is half a
+// reason.
 func TestAnUnappliedEntrySaysWhyOnTheScreen(t *testing.T) {
 	why := "the column follows no scheme this damage suits"
 	screen := screenOf(t, nil, unapplied("d1", manifest.SchemeNotCovered, why))
@@ -139,23 +174,22 @@ func TestAnUnappliedEntrySaysWhyOnTheScreen(t *testing.T) {
 	if row.Reason.Text == "" {
 		t.Fatal("an entry that did not happen carries no reason on the screen")
 	}
-	// The sentence the run recorded and the closed kind are both on the screen
-	// and in different columns, so neither repeats the other in every row.
 	if !strings.Contains(row.Reason.Text, why) {
 		t.Errorf("the reason on screen is %q and does not carry what the run recorded", row.Reason.Text)
 	}
-	if row.Status.Text != i18n.English.T(i18n.ManifestFailureSchemeNotCovered) {
-		t.Errorf("the outcome on screen is %q and does not name the kind of failure", row.Status.Text)
+	kind := i18n.English.T(i18n.ManifestFailureSchemeNotCovered)
+	if row.Outcome().Text != kind {
+		t.Errorf("the outcome column reads %q and does not name the kind of failure", row.Outcome().Text)
 	}
-	if strings.Contains(row.Reason.Text, row.Status.Text) {
-		t.Errorf("the reason %q repeats the outcome %q, so a column of sixty entries says the same "+
-			"thing twice in every row", row.Reason.Text, row.Status.Text)
+	if !strings.Contains(row.Reason.Text, kind) {
+		t.Errorf("the card reads %q, which does not say what kind of failure the sentence is about",
+			row.Reason.Text)
 	}
 	// It has to stand out rather than fade. A row that did not happen is the
 	// one a reader most needs to find without reading.
-	if row.Reason.Color != palette.NameNotApplied || row.Status.Color != palette.NameNotApplied {
-		t.Errorf("an unapplied entry is painted %q and %q rather than in the colour meant to stand out",
-			row.Status.Color, row.Reason.Color)
+	if row.Reason.Color != palette.StateWarning || row.Outcome().Color != palette.StateWarning {
+		t.Errorf("an unapplied entry is painted %q and %q rather than in the token meant to stand out",
+			row.Outcome().Color, row.Reason.Color)
 	}
 }
 
@@ -164,19 +198,37 @@ func TestAnUnappliedEntrySaysWhyOnTheScreen(t *testing.T) {
 // Rule five of the handbook says the manifest does not pretend to a certainty
 // it does not have, and this is that rule at the pixel. Paler reads as less
 // important. Soft does not mean less important, it means the right answer
-// belongs to the application being tested.
+// belongs to the application being tested. So the soft one carries a mark in
+// front of the same words in the table, and the card says in a sentence what
+// the mark means.
 func TestASoftExpectationDoesNotLookLikeAHardOne(t *testing.T) {
 	screen := screenOf(t, nil,
 		applied("d1", 1, catalog.Rejection, catalog.Hard),
 		applied("d2", 2, catalog.Rejection, catalog.Soft),
 	)
-	hard, soft := screen.Rows[0].Confidence, screen.Rows[1].Confidence
+	hard, soft := screen.Rows[0].Expect, screen.Rows[1].Expect
 	if hard.Text == soft.Text {
-		t.Fatalf("both confidences read %q, so nothing on screen tells them apart", hard.Text)
+		t.Fatalf("both expectations read %q, so nothing in the table tells them apart", hard.Text)
 	}
-	if !strings.ContainsAny(soft.Text, "~") {
-		t.Errorf("the soft confidence reads %q and carries no sign of its own, so it differs by "+
-			"wording alone where the rule asks for a mark", soft.Text)
+	mark := i18n.English.T(i18n.ManifestConfidenceMark)
+	if !strings.HasPrefix(soft.Text, mark) {
+		t.Errorf("the soft expectation reads %q and does not begin with the mark %q", soft.Text, mark)
+	}
+	if strings.HasPrefix(hard.Text, mark) {
+		t.Errorf("the hard expectation reads %q and carries the mark of a soft one", hard.Text)
+	}
+	if screen.Rows[0].Certainty.Text == screen.Rows[1].Certainty.Text {
+		t.Error("the card says the same thing about a hard certainty and a soft one")
+	}
+	// The mark in the table and the mark in the phrase for the certainty are
+	// the same mark, or the one line explaining it explains something else.
+	if !strings.HasPrefix(i18n.English.T(i18n.ManifestConfidenceSoft), mark) {
+		t.Errorf("the soft certainty reads %q and does not begin with the mark %q the table uses",
+			i18n.English.T(i18n.ManifestConfidenceSoft), mark)
+	}
+	if !strings.HasPrefix(i18n.English.T(i18n.ManifestLegendMark), mark) {
+		t.Errorf("the legend reads %q and does not begin with the mark %q it explains",
+			i18n.English.T(i18n.ManifestLegendMark), mark)
 	}
 }
 
@@ -196,9 +248,6 @@ func TestEveryClosedVocabularyOfTheDomainHasAPhrase(t *testing.T) {
 		if _, known := expectationKeys[expectation]; !known {
 			t.Errorf("the expectation %q has no phrase, so it would reach a screen as an empty space", expectation)
 		}
-		if _, known := expectationColors[expectation]; !known {
-			t.Errorf("the expectation %q has no colour", expectation)
-		}
 	}
 	for expectation := range expectationKeys {
 		if !expectations[expectation] {
@@ -210,12 +259,12 @@ func TestEveryClosedVocabularyOfTheDomainHasAPhrase(t *testing.T) {
 	for _, confidence := range catalog.Confidences() {
 		confidences[confidence] = true
 		if _, known := confidenceKeys[confidence]; !known {
-			t.Errorf("the confidence %q has no phrase", confidence)
+			t.Errorf("the confidence %q has no sentence", confidence)
 		}
 	}
 	for confidence := range confidenceKeys {
 		if !confidences[confidence] {
-			t.Errorf("a phrase names the confidence %q, which the domain does not have", confidence)
+			t.Errorf("a sentence names the confidence %q, which the domain does not have", confidence)
 		}
 	}
 
@@ -303,8 +352,8 @@ func TestAManifestThatOrderedNothingStillShowsItsRun(t *testing.T) {
 //
 // 🔴 This is the test the parity register names for the verify capability. The
 // window reaching verify means exactly this: the same list of entries, each one
-// carrying how the application answered, with a hard disagreement told apart
-// from a soft one. A screen showing only the disagreements would leave a reader
+// carrying how the application answered, with a disagreement told apart from
+// agreement. A screen showing only the disagreements would leave a reader
 // unable to separate a row that agreed from one nothing was said about, and
 // those two are what this project most insists on keeping apart.
 func TestTheSecondStateShowsWhatTheApplicationDidWithEveryJudgedRow(t *testing.T) {
@@ -325,24 +374,37 @@ func TestTheSecondStateShowsWhatTheApplicationDidWithEveryJudgedRow(t *testing.T
 	screen := Build(i18n.English, promised, &comparison)
 
 	for index, row := range screen.Rows {
-		if row.Answer.Text == "" {
+		if row.Answer.Text == "" || row.Finding.Text == "" {
 			t.Errorf("row %d carries nothing about what the application did", index+1)
 		}
+		if row.Outcome().Text != row.Answer.Text {
+			t.Errorf("row %d shows %q in the outcome column rather than the application's answer %q",
+				index+1, row.Outcome().Text, row.Answer.Text)
+		}
 	}
-	hole := screen.Rows[0].Answer
-	if !strings.Contains(hole.Text, i18n.English.T(i18n.VerifyKindHole)) {
+	hole := screen.Rows[0]
+	if !strings.Contains(hole.Finding.Text, i18n.English.T(i18n.VerifyKindHole)) {
 		t.Errorf("the row the application wrongly accepted reads %q and does not name the disagreement",
-			hole.Text)
+			hole.Finding.Text)
 	}
-	if hole.Color != palette.NameRejection {
-		t.Errorf("a disagreement is painted %q rather than in the colour of a rejection", hole.Color)
+	if hole.Answer.Color != palette.StateDanger || hole.Finding.Color != palette.StateDanger {
+		t.Errorf("a disagreement is painted %q and %q rather than in the danger token",
+			hole.Answer.Color, hole.Finding.Color)
 	}
-	agreed := screen.Rows[1].Answer
-	if strings.Contains(agreed.Text, i18n.English.T(i18n.VerifyKindHole)) {
-		t.Errorf("the row the application answered as expected reads %q and names a disagreement", agreed.Text)
+	agreed := screen.Rows[1]
+	if strings.Contains(agreed.Finding.Text, i18n.English.T(i18n.VerifyKindHole)) {
+		t.Errorf("the row the application answered as expected reads %q and names a disagreement",
+			agreed.Finding.Text)
+	}
+	if agreed.Answer.Color == palette.StateDanger {
+		t.Error("a row that agreed is painted in the danger token, so agreement and disagreement look alike")
 	}
 	if !says(screen, i18n.English.T(i18n.VerifyVerdictRejected)) {
 		t.Error("the screen does not say that the application rejected the row it was expected to reject")
+	}
+	if screen.Compared != 2 || screen.Disagreed != 1 {
+		t.Errorf("the tally says %d compared and %d disagreed for two judged rows with one hole",
+			screen.Compared, screen.Disagreed)
 	}
 }
 
@@ -354,12 +416,16 @@ func TestARowTheApplicationNeverAnsweredForSaysSo(t *testing.T) {
 	comparison := Comparison{Record: actual, Report: verify.Compare(promised, actual)}
 	screen := Build(i18n.English, promised, &comparison)
 
-	if screen.Rows[0].Answer.Text != i18n.English.T(i18n.VerifyNoAnswer) {
-		t.Errorf("a row nothing was said about reads %q", screen.Rows[0].Answer.Text)
+	if screen.Rows[0].Answer.Text != i18n.English.T(i18n.ManifestAnswerNone) {
+		t.Errorf("a row nothing was said about reads %q in the outcome column", screen.Rows[0].Answer.Text)
+	}
+	if screen.Rows[0].Finding.Text != i18n.English.T(i18n.VerifyNoAnswer) {
+		t.Errorf("a row nothing was said about reads %q in the card", screen.Rows[0].Finding.Text)
 	}
 }
 
-// The second state carries what it could not settle and what it could not see.
+// The second state carries what it could not settle and what it could not see,
+// and an entry it could not settle says so in its own row.
 //
 // 🔴 Both, and neither is decoration. A comparison reporting only its findings
 // reads as a complete account of the run, and an unanswered question read as a
@@ -377,11 +443,18 @@ func TestTheSecondStateCarriesWhatItCouldNotSettleAndCouldNotSee(t *testing.T) {
 		t.Error("an expectation of a mark against a record carrying no warnings is settled on screen, " +
 			"and nothing could have settled it")
 	}
+	if screen.Rows[0].Answer.Text != i18n.English.T(i18n.ManifestAnswerNotSettled) {
+		t.Errorf("the entry the comparison could not settle reads %q in the outcome column", screen.Rows[0].Answer.Text)
+	}
+	if screen.Rows[0].Answer.Color != palette.StateWarning {
+		t.Errorf("the entry the comparison could not settle is painted %q rather than in the warning token",
+			screen.Rows[0].Answer.Color)
+	}
 	if len(screen.Limits) == 0 {
 		t.Error("the screen states no limit against a record that carries neither stored values nor warnings")
 	}
 	if len(screen.Notes) == 0 {
-		t.Error("the second state says nothing about how many entries were compared")
+		t.Error("the second state says nothing about the run as a whole")
 	}
 }
 
@@ -395,11 +468,33 @@ func TestAFindingAboutTheWholeDatasetIsNotHungOnOneRow(t *testing.T) {
 	comparison := Comparison{Record: actual, Report: verify.Compare(promised, actual)}
 	screen := Build(i18n.English, promised, &comparison)
 
-	if !says(screen, i18n.English.T(i18n.VerifyKindMissing)) {
-		t.Fatal("the screen does not say that records never reached the application")
+	var whole []string
+	for _, finding := range comparison.Report.Findings {
+		if finding.Row == 0 {
+			whole = append(whole, finding.Detail)
+		}
 	}
-	if strings.Contains(screen.Rows[0].Answer.Text, i18n.English.T(i18n.VerifyKindMissing)) {
-		t.Error("a statement about the whole dataset is shown against one row of it")
+	if len(whole) == 0 {
+		t.Fatal("the comparison found nothing about the whole dataset, so this test checks nothing")
+	}
+	for _, detail := range whole {
+		found := false
+		for _, note := range screen.Notes {
+			if note.Text == detail && note.Color == palette.StateDanger {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("the screen does not say, as a note in the danger token, that %q", detail)
+		}
+		for _, line := range []Line{screen.Rows[0].Answer, screen.Rows[0].Finding} {
+			if strings.Contains(line.Text, detail) {
+				t.Error("a statement about the whole dataset is shown against one row of it")
+			}
+		}
+	}
+	if screen.Disagreed != 0 {
+		t.Errorf("a finding about the whole dataset is counted as %d entries that disagreed", screen.Disagreed)
 	}
 }
 
@@ -407,11 +502,15 @@ func TestAFindingAboutTheWholeDatasetIsNotHungOnOneRow(t *testing.T) {
 // data yet.
 func TestTheFirstStateClaimsNothingAboutAnyApplication(t *testing.T) {
 	screen := screenOf(t, nil, applied("d1", 1, catalog.Rejection, catalog.Hard))
-	if screen.Rows[0].Answer.Text != "" {
-		t.Errorf("a manifest shown on its own carries %q about an application", screen.Rows[0].Answer.Text)
+	if screen.Rows[0].Answer.Text != "" || screen.Rows[0].Finding.Text != "" {
+		t.Errorf("a manifest shown on its own carries %q and %q about an application",
+			screen.Rows[0].Answer.Text, screen.Rows[0].Finding.Text)
 	}
 	if len(screen.Notes) != 0 || len(screen.Unsettled) != 0 || len(screen.Limits) != 0 {
 		t.Error("a manifest shown on its own carries the sections that belong to a comparison")
+	}
+	if screen.Compared != 0 || screen.Disagreed != 0 {
+		t.Error("a manifest shown on its own carries a tally of a comparison nobody made")
 	}
 }
 
@@ -423,15 +522,7 @@ func TestTheFirstStateClaimsNothingAboutAnyApplication(t *testing.T) {
 // has already made once on the About screen.
 func TestNoPhraseRendersAsItsOwnKey(t *testing.T) {
 	looksLikeAKey := regexp.MustCompile(`^[a-z][a-z0-9]*(\.[a-z0-9-]+)+$`)
-	promised := built(t, applied("d1", 1, catalog.Rejection, catalog.Hard),
-		unapplied("d2", manifest.DeclinedByMutator, "the value already sits in the block this aims at"))
-	actual := response.Record{SpecVersion: "0.1", Rows: []response.Row{{Number: 1, Verdict: response.Accepted}}}
-	comparison := Comparison{Record: actual, Report: verify.Compare(promised, actual)}
-
-	for _, screen := range []Screen{
-		Build(i18n.English, promised, nil),
-		Build(i18n.English, promised, &comparison),
-	} {
+	for _, screen := range everyKindOfScreen(t) {
 		for _, phrase := range said(screen) {
 			if looksLikeAKey.MatchString(phrase) {
 				t.Errorf("the phrase %q reads as a translation key rather than as a sentence", phrase)

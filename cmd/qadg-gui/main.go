@@ -149,7 +149,7 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 	browser := manifestview.New(text, window, manifestview.Readers{
 		Manifest: manifestjson.Load,
 		Response: responsejson.Load,
-	}, background.ReadInBackground)
+	}, background.ReadInBackground, clipboard)
 	// The catalog of damage is data compiled into this binary, so a failure to
 	// read it means the binary itself is not what it was built as. There is
 	// nothing a person could do about it from inside a window and nothing this

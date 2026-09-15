@@ -33,6 +33,7 @@ package parts
 
 import (
 	"fyne.io/fyne/v2"
+	toolkit "fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
@@ -46,10 +47,14 @@ type KeyTable struct {
 	// sets is already true by the time the refresh inside the toolkit runs.
 	onFocus func(has bool)
 	// ring is the mark of focus a screen built out of paint shows on every
-	// control. It is mounted only by Framed, so a screen using the table bare -
-	// the manifest browser, which still marks focus the toolkit's way - never
-	// shows it.
+	// control. It is mounted only by Framed, so a screen using the table bare
+	// never shows it.
 	ring ring
+	// widths are the columns as Widths set them, and stretch is the one that
+	// takes the remainder on every resize, or nothing when Widths was not
+	// called and the toolkit's fixed widths are all there is.
+	widths  []float32
+	stretch int
 }
 
 // NewKeyTable builds a table that says when the keyboard arrives and leaves.
@@ -77,6 +82,54 @@ func NewKeyTable(
 // screen built out of paint puts on itself. A screen that marks focus the
 // toolkit's way uses the table bare and the ring is never mounted.
 func (t *KeyTable) Framed() fyne.CanvasObject { return t.ring.framed(t) }
+
+// Widths sets every column, and hands one of them whatever the table has left.
+//
+// # Why one column takes the remainder rather than every column having a width
+//
+// The toolkit's table knows only fixed widths, so a table of fixed columns is
+// either narrower than its pane, with a strip of nothing on the right, or wider,
+// with a scrollbar along the bottom and its last columns out of sight. The
+// manifest browser had the second for its whole life (DEC-247). The column
+// chosen here is the one that gains from a wide window, and it is never
+// narrower than the width it was given, so that a narrow window still shows
+// something of every column and scrolls sideways rather than crushing one.
+//
+// The remainder is worked out on every resize, which is the only moment the
+// table's width is known. The toolkit lays a padding after every column, so
+// that is taken off as well, or the last column would end one padding past
+// the edge and grow a scrollbar for it.
+func (t *KeyTable) Widths(widths []float32, stretch int) {
+	t.widths = append([]float32(nil), widths...)
+	t.stretch = stretch
+	for column, width := range widths {
+		t.SetColumnWidth(column, width)
+	}
+}
+
+// Resize lays the table out at the size it is given, with the stretched
+// column, if there is one, taking what the others leave.
+//
+// The toolkit's own resize goes first, so that the widths are set against a
+// table that already knows how wide it is. SetColumnWidth refreshes only when
+// the width really changes, so a resize to the same size costs nothing.
+func (t *KeyTable) Resize(size fyne.Size) {
+	t.Table.Resize(size)
+	if t.widths == nil || t.stretch < 0 || t.stretch >= len(t.widths) {
+		return
+	}
+	padding := t.Theme().Size(toolkit.SizeNamePadding)
+	left := size.Width - padding*float32(len(t.widths))
+	for column, width := range t.widths {
+		if column != t.stretch {
+			left -= width
+		}
+	}
+	if left < t.widths[t.stretch] {
+		left = t.widths[t.stretch]
+	}
+	t.SetColumnWidth(t.stretch, left)
+}
 
 // FocusGained records the focus before the toolkit redraws the cell, and draws
 // the ring for a screen that mounted it.

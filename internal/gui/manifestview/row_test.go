@@ -20,12 +20,14 @@ import (
 // cell laid out without one is a nil dereference rather than a quiet no
 // operation. The window has an application by the time any cell is drawn, and a
 // test has to say so.
+//
+// 🔴 The real theme rather than the default test one, and not only for looks:
+// this screen is built out of paint, which asks the theme for its type sizes by
+// name, and the default test theme answers a name it does not know with nought.
+// A label of size nought divides by zero in the text renderer three layouts on,
+// which is why nothing here uses test.NewTempApp.
 func TestMain(m *testing.M) {
 	application := test.NewApp()
-	// The theme of this product rather than the one the toolkit tests with.
-	// Colours are asked for by name here, and the test theme answers "color
-	// text not defined" for every name of this palette, so a rendering checked
-	// under it would be a rendering of something the window never shows.
 	application.Settings().SetTheme(fynetheme.Current())
 	os.Exit(m.Run())
 }
@@ -66,22 +68,24 @@ func shows(object fyne.CanvasObject, want string) bool {
 
 func sample() Row {
 	return Row{
-		Mutator:    "L3.checksum.off_by_one",
-		Place:      "customer   row 1   pesel",
-		Status:     Line{Text: "applied", Color: palette.NameTextSubdued},
-		Expect:     Line{Text: "should be rejected", Color: palette.NameRejection},
-		Confidence: Line{Text: "hard expectation", Color: palette.NameTextSubdued},
-		Values:     Line{Text: `was "44051401359"   now "44051401358"`, Color: palette.NameCorrupted},
+		Mutator:   "L3.checksum.off_by_one",
+		Place:     "customer   row 1   pesel",
+		Applied:   true,
+		Status:    Line{Text: "applied", Color: palette.TextSecondary},
+		Expect:    Line{Text: "should be rejected"},
+		Certainty: Line{Text: "should be rejected, and the certainty is hard.", Color: palette.TextSecondary},
+		Values:    Line{Text: `was "44051401359"   now "44051401358"`, Color: palette.TextAccent},
 	}
 }
 
-// Every part of an entry reaches a column, and the columns are the ones the
-// headings name.
+// Every part of an entry reaches a column or the card under the table, and the
+// columns are the ones the headings name.
 //
 // 🔴 The pairing is what matters. A table asks the row for a cell by number and
 // asks this package for a heading by the same number, so a column added in one
 // place and not the other puts the heading of one thing above the values of
-// another and goes on compiling.
+// another and goes on compiling. And a part of an entry that reaches neither
+// the table nor the card is a fact the manifest carries and nobody sees.
 func TestEveryPartOfAnEntryReachesTheColumnItsHeadingNames(t *testing.T) {
 	entry := sample()
 	cells := entry.Cells()
@@ -96,10 +100,7 @@ func TestEveryPartOfAnEntryReachesTheColumnItsHeadingNames(t *testing.T) {
 			len(palette.EntryColumnWidths), palette.EntryColumns())
 	}
 
-	for _, want := range []string{
-		entry.Mutator, entry.Place, entry.Status.Text,
-		entry.Expect.Text, entry.Confidence.Text, entry.Values.Text,
-	} {
+	for _, want := range []string{entry.Mutator, entry.Place, entry.Status.Text, entry.Expect.Text} {
 		found := false
 		for _, cell := range cells {
 			if strings.Contains(cell.Text, want) {
@@ -108,6 +109,17 @@ func TestEveryPartOfAnEntryReachesTheColumnItsHeadingNames(t *testing.T) {
 		}
 		if !found {
 			t.Errorf("no column of the table carries %q", want)
+		}
+	}
+	for _, want := range []string{entry.Certainty.Text, entry.Values.Text} {
+		found := false
+		for _, line := range entry.Detail() {
+			if strings.Contains(line.Text, want) {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("neither the table nor the card under it carries %q", want)
 		}
 	}
 	// Every heading resolves to a sentence rather than to its own key, and so
@@ -137,10 +149,10 @@ func TestEveryPartOfAnEntryReachesTheColumnItsHeadingNames(t *testing.T) {
 // reuse only starts once there are more entries than cells on screen.
 func TestAReusedCellCarriesNothingFromTheEntryBeforeIt(t *testing.T) {
 	cell := painted(Line{})
-	set(cell, Line{Text: "the column follows no scheme this damage suits", Color: palette.NameNotApplied}, fyne.TextStyle{})
-	set(cell, Line{Text: "applied", Color: palette.NameTextSubdued}, fyne.TextStyle{})
+	set(cell, Line{Text: "no column of that kind", Color: palette.StateWarning}, fyne.TextStyle{})
+	set(cell, Line{Text: "applied", Color: palette.TextSecondary}, fyne.TextStyle{})
 
-	if shows(cell, "the column follows no scheme this damage suits") {
+	if shows(cell, "no column of that kind") {
 		t.Error("the cell still shows what the entry before it put there")
 	}
 	if !shows(cell, "applied") {
@@ -148,32 +160,52 @@ func TestAReusedCellCarriesNothingFromTheEntryBeforeIt(t *testing.T) {
 	}
 }
 
-// The one column allowed to carry prose carries the reason where there is one
-// and what changed where there is not.
+// The outcome column says what became of the damage, and the card under the
+// table carries what the columns do not.
 //
-// A reason belongs to an entry that did not happen and values belong to one
-// that did, so the two never occur together. The answer of an application joins
-// the values, because it is about the same thing.
-func TestTheDetailColumnCarriesTheReasonOrWhatChanged(t *testing.T) {
-	reason := Line{Text: "this build does not carry that damage yet", Color: palette.NameNotApplied}
-	answer := Line{Text: "the application accepted this row", Color: palette.NameTextSubdued}
+// 🔴 The outcome is one column with two halves and this is the guard on the
+// seam: a damage that did not happen shows its kind of failure whatever any
+// application said, one that happened shows the application's verdict once
+// there is one, and "applied" until then. The card carries the reason of one
+// and the values and finding of the other, so an entry with none of them shows
+// an empty card rather than somebody else's.
+func TestTheOutcomeColumnAndTheCardDivideAnEntryBetweenThem(t *testing.T) {
+	kind := Line{Text: "not built yet", Color: palette.StateWarning}
+	reason := Line{Text: "Not applied: not built yet. This build does not carry that damage.", Color: palette.StateWarning}
+	answer := Line{Text: "accepted", Color: palette.StateDanger}
+	finding := Line{Text: "the application accepted this row   accepted although the manifest expected a rejection",
+		Color: palette.StateDanger}
+	values := Line{Text: `was "1250"   now "n/a"`, Color: palette.TextAccent}
 
-	if got := (Row{Reason: reason}).Detail(); got.Text != reason.Text {
-		t.Errorf("an unapplied entry shows %q in the detail column", got.Text)
+	unapplied := Row{Applied: false, Status: kind, Reason: reason, Answer: answer}
+	if got := unapplied.Outcome(); got.Text != kind.Text {
+		t.Errorf("an unapplied entry shows %q in the outcome column rather than its kind of failure", got.Text)
 	}
-	if got := (Row{Answer: answer}).Detail(); got.Text != answer.Text {
-		t.Errorf("an applied entry shows %q in the detail column", got.Text)
+	applied := Row{Applied: true, Status: Line{Text: "applied"}}
+	if got := applied.Outcome(); got.Text != "applied" {
+		t.Errorf("an applied entry with no response shows %q in the outcome column", got.Text)
 	}
-	if got := (Row{}).Detail(); got.Text != "" {
-		t.Errorf("an entry with neither shows %q in the detail column", got.Text)
+	judged := Row{Applied: true, Status: Line{Text: "applied"}, Answer: answer, Finding: finding, Values: values}
+	if got := judged.Outcome(); got.Text != answer.Text {
+		t.Errorf("a judged entry shows %q in the outcome column rather than the application's verdict", got.Text)
 	}
 
-	values := Line{Text: `was "1250"   now "n/a"`, Color: palette.NameCorrupted}
-	both := (Row{Values: values, Answer: answer}).Detail()
-	for _, want := range []string{values.Text, answer.Text} {
-		if !strings.Contains(both.Text, want) {
-			t.Errorf("the detail column reads %q and drops %q", both.Text, want)
+	if got := unapplied.Detail(); len(got) != 1 || got[0].Text != reason.Text {
+		t.Errorf("the card reads an unapplied entry out as %v rather than as its reason", got)
+	}
+	for _, want := range []string{values.Text, finding.Text} {
+		found := false
+		for _, line := range judged.Detail() {
+			if line.Text == want {
+				found = true
+			}
 		}
+		if !found {
+			t.Errorf("the card reads a judged entry out without %q", want)
+		}
+	}
+	if got := (Row{}).Detail(); len(got) != 0 {
+		t.Errorf("an entry with nothing beyond its cells reads out %v", got)
 	}
 }
 
@@ -255,25 +287,54 @@ func TestAPhraseWithNoColourIsStillVisible(t *testing.T) {
 	if !ok {
 		t.Fatal("a phrase is not built out of a piece of text at all")
 	}
-	if got := string(segment.Style.ColorName); got != palette.NameText {
-		t.Errorf("a phrase with no colour named asks the theme for %q rather than for the text colour", got)
+	if got := string(segment.Style.ColorName); got != palette.TextPrimary {
+		t.Errorf("a phrase with no colour named asks the theme for %q rather than for the text token", got)
 	}
 }
 
-// Every colour this screen asks the theme for is one the theme answers with the
+// Every token this screen asks the theme for is one the theme answers with the
 // measured value for.
 //
 // 🔴 The bridge that closes here is easy to miss. A colour is a name by the time
 // it reaches the toolkit, and a name the toolkit does not recognise comes back
-// fully transparent rather than as an error, so the control is an invisible hole
-// and the cause is nowhere near the symptom.
+// fully transparent, or as the text colour by this theme's own repair, so a
+// phrase painted with it is either a hole or the wrong colour and the cause is
+// nowhere near the symptom. Measured on 2026-09-15 before this screen moved to
+// the tokens: the names of the old palette were not tokens of the theme the
+// window wears, and "~ soft" stood at a contrast of 1.68.
 func TestTheThemeAnswersForEveryColourThisScreenAsksFor(t *testing.T) {
-	dark := fynetheme.Dark{}
-	for _, name := range palette.ColorNames {
-		want := palette.Named(name).NRGBA()
-		got := dark.Color(fyne.ThemeColorName(name), toolkit.VariantDark)
-		if got != color.Color(want) {
-			t.Errorf("the theme answers %v for %q and the palette measured %v", got, name, want)
+	theme := fynetheme.Current()
+	asked := map[string]bool{palette.TextPrimary: true}
+	for _, screen := range everyKindOfScreen(t) {
+		for _, line := range lines(screen) {
+			if line.Color != "" {
+				asked[line.Color] = true
+			}
 		}
 	}
+	if len(asked) < len([]string{palette.TextSecondary, palette.TextAccent, palette.StateWarning,
+		palette.StateDanger}) {
+		t.Fatalf("the screens built here ask for %d colours, too few to have reached every kind of entry", len(asked))
+	}
+	for name := range asked {
+		if _, ours := palette.TokenOf(name); !ours {
+			t.Errorf("the screen paints a line in %q, which is not a token of the theme, so the theme answers "+
+				"with whatever it answers for a name it does not know", name)
+			continue
+		}
+		want := palette.Ink(name)
+		got := theme.Color(fyne.ThemeColorName(name), toolkit.VariantDark)
+		if got != color.Color(want) {
+			t.Errorf("the theme answers %v for %q and the register measured %v", got, name, want)
+		}
+	}
+}
+
+// lines is every coloured phrase a screen carries, wherever it stands.
+func lines(screen Screen) []Line {
+	all := append(append(append([]Line{}, screen.Notes...), screen.Unsettled...), screen.Limits...)
+	for _, row := range screen.Rows {
+		all = append(all, row.Status, row.Expect, row.Certainty, row.Reason, row.Values, row.Answer, row.Finding)
+	}
+	return all
 }

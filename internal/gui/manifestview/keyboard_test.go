@@ -9,9 +9,9 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
-	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
 // styleOf asks the table to fill a fresh cell and reports how it was drawn.
@@ -45,12 +45,9 @@ func marked(style fyne.TextStyle) bool { return style.Bold && style.Underline }
 // focused. A mark drawn on that answer stays behind on a table nobody is in,
 // pointing at a place the keyboard has left.
 func TestTheCellTheKeyboardStandsOnIsMarkedAndTheMarkLeavesWithIt(t *testing.T) {
-	view := New(i18n.English, nil, Readers{}, background.ReadHere)
+	view := New(i18n.English, nil, Readers{}, background.ReadHere, nil)
 	rows := []Row{sample(), sample(), sample()}
-	entries, ok := view.table(rows).(*parts.KeyTable)
-	if !ok {
-		t.Fatal("the entries are no longer shown in a table that says when it has focus")
-	}
+	entries := view.table(rows)
 
 	elsewhere := widget.NewButton("somewhere else", func() {})
 	window := test.NewWindow(container.NewBorder(elsewhere, nil, nil, nil, entries))
@@ -91,6 +88,40 @@ func TestTheCellTheKeyboardStandsOnIsMarkedAndTheMarkLeavesWithIt(t *testing.T) 
 	}
 }
 
+// The card under the table follows the keyboard through the entries.
+//
+// 🔴 This is what makes the arrow keys browsing rather than moving a mark. The
+// sentences an entry carries beyond its four cells stand in the card and
+// nowhere else, so a card that did not follow the keyboard would leave a
+// person who does not use a pointer unable to read the reason for any entry.
+func TestTheCardReadsOutTheEntryTheKeyboardStandsOn(t *testing.T) {
+	view := New(i18n.English, nil, Readers{}, background.ReadHere, nil)
+	view.Open(built(t,
+		applied("d1", 1, catalog.Rejection, catalog.Hard),
+		applied("d2", 2, catalog.Rejection, catalog.Soft),
+	), "")
+	window := test.NewWindow(view.Content())
+	defer window.Close()
+	window.Resize(fyne.NewSize(1342, 800))
+	canvas := window.Canvas()
+
+	if view.hasSelected {
+		t.Fatal("an entry is read out before the keyboard or the pointer has chosen one")
+	}
+	canvas.Focus(view.entries)
+	if !view.hasSelected || view.selected != 0 {
+		t.Fatalf("the keyboard arrived on the table and the card reads out entry %d, chosen %v",
+			view.selected, view.hasSelected)
+	}
+	view.entries.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDown})
+	if view.selected != 1 {
+		t.Errorf("the keyboard moved down and the card still reads out entry %d", view.selected)
+	}
+	if !saying(view.detailBox, view.screen.Rows[1].Certainty.Text) {
+		t.Error("the card does not carry the sentence of the entry the keyboard is on")
+	}
+}
+
 // The mark is drawn rather than merely recorded.
 //
 // 🔴 A style that no pixel carries is the failure family this screen has already
@@ -99,7 +130,7 @@ func TestTheCellTheKeyboardStandsOnIsMarkedAndTheMarkLeavesWithIt(t *testing.T) 
 // asks whether the marked one puts more ink on the screen. Weight and an
 // underline both add pixels, so fewer or equal means the mark never arrived.
 func TestTheMarkOfTheKeyboardReachesThePixels(t *testing.T) {
-	line := Line{Text: "should be rejected", Color: palette.NameRejection}
+	line := Line{Text: "should be rejected"}
 
 	plainCell := painted(Line{})
 	set(plainCell, line, fyne.TextStyle{})
@@ -136,40 +167,46 @@ func inkOf(t *testing.T, object fyne.CanvasObject) int {
 	return ink
 }
 
-// The keyboard meets the controls of the screen before it meets the entries.
+// The keyboard meets the controls of the screen in reading order: the two
+// buttons of the band, the section over the table, and only then the entries.
 //
 // 🔴 Measured on 2026-08-18 before this was true: the first press of Tab landed
 // on the table, and the button that opens a manifest, which stands above it,
 // came second. Nothing about the drawing said so, because the convenient way of
-// building a border hands the middle over first and the edges after it.
+// building a border hands the middle over first and the edges after it. The
+// name is the one the registers of proofs and mutations know it by.
 func TestTheKeyboardMeetsTheButtonsBeforeTheEntries(t *testing.T) {
-	view := New(i18n.English, nil, Readers{}, background.ReadHere)
-	content := view.Content()
-	view.show(view.rendered(Screen{Rows: []Row{sample(), sample()}}))
+	view := New(i18n.English, nil, Readers{}, background.ReadHere, nil)
+	view.Open(built(t, applied("d1", 1, catalog.Rejection, catalog.Hard)), "")
 
-	window := test.NewWindow(content)
+	window := test.NewWindow(view.Content())
 	defer window.Close()
-	window.Resize(fyne.NewSize(1342, 600))
-
+	window.Resize(fyne.NewSize(1342, 800))
 	canvas := window.Canvas()
-	canvas.FocusNext()
-	// 🔴 Asked by its LABEL rather than by its Go type. This asserted
-	// *parts.Button until 2026-09-08 and went red the day the button that opens
-	// a manifest became the filled one, which is a change of appearance and not
-	// of order. A guard about what the keyboard reaches first has no business
-	// knowing which of two button types draws it.
-	label, ok := labelOf(canvas.Focused())
-	if !ok {
-		t.Fatalf("the first thing the keyboard reaches is %T rather than a button", canvas.Focused())
-	}
-	if label != i18n.English.T(i18n.ManifestOpen) {
-		t.Errorf("the first thing the keyboard reaches is %q rather than the button that opens a manifest",
-			label)
-	}
 
+	// 🔴 Asked by LABEL rather than by Go type. This asserted *parts.Button
+	// until 2026-09-08 and went red the day the button that opens a manifest
+	// became the filled one, which is a change of appearance and not of order.
+	for _, want := range []i18n.Key{i18n.ManifestOpen, i18n.ManifestOpenResponse, i18n.ManifestHeadingRun} {
+		canvas.FocusNext()
+		label, ok := labelOf(canvas.Focused())
+		if !ok {
+			t.Fatalf("the keyboard reaches %T where a button reading %q was expected",
+				canvas.Focused(), i18n.English.T(want))
+		}
+		if label != i18n.English.T(want) {
+			t.Errorf("the keyboard reaches %q where %q was expected", label, i18n.English.T(want))
+		}
+	}
 	canvas.FocusNext()
 	if _, isTable := canvas.Focused().(*parts.KeyTable); !isTable {
-		t.Errorf("after the button the keyboard reaches %T rather than the entries", canvas.Focused())
+		t.Errorf("after the section over the table the keyboard reaches %T rather than the entries",
+			canvas.Focused())
+	}
+	canvas.FocusNext()
+	if _, isCard := canvas.Focused().(*parts.KeyScroll); !isCard {
+		t.Errorf("after the entries the keyboard reaches %T rather than the card under them",
+			canvas.Focused())
 	}
 }
 

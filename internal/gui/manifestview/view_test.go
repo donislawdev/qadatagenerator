@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne/v2/storage"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
-	"github.com/donislawdev/qadatagenerator/internal/app/verify"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/domain/response"
@@ -32,13 +31,13 @@ import (
 // and had done since the day it was written. Prose was checked and arithmetic
 // was not, which is the thing this asks about.
 //
-// # Why only these three columns
+// # Why only two columns beyond the headings
 //
 // They are the ones whose values come from a closed set, so the widest value is
-// a fact rather than a sample. What a damage is called and what changed in a
-// value are as long as somebody's data, and a column for those is a judgement
-// about how much to show rather than a size that can be right or wrong. Every
-// heading is checked, because there are six of those and they are all fixed.
+// a fact rather than a sample. What a damage is called and where it landed are
+// as long as somebody's data, and a column for those is a judgement about how
+// much to show rather than a size that can be right or wrong. Every heading is
+// checked, because there are four of those and they are all fixed.
 func TestEveryColumnOfTheEntriesTableFitsWhatItCanHold(t *testing.T) {
 	// Room to spare rather than merely fitting. Text touching the edge of its
 	// cell reads as text that was cut, so a column that fits to the pixel is one
@@ -69,20 +68,24 @@ func TestEveryColumnOfTheEntriesTableFitsWhatItCanHold(t *testing.T) {
 
 	// The closed sets, each named by the column it belongs to, taken from the
 	// catalogue rather than written out here so that a phrase reworded in the
-	// catalogue is measured in its new wording.
-	for _, held := range []struct {
-		column int
-		keys   []i18n.Key
-	}{
-		{2, []i18n.Key{i18n.ManifestExpectationRejection, i18n.ManifestExpectationAcceptance,
-			i18n.ManifestExpectationWarning}},
-		{3, []i18n.Key{i18n.ManifestConfidenceHard, i18n.ManifestConfidenceSoft}},
-		{4, []i18n.Key{i18n.ManifestEntryApplied, i18n.ManifestEntryNotApplied}},
-	} {
-		for _, key := range held.keys {
-			words := i18n.English.T(key)
-			fits(t, held.column, "the value "+words, words)
-		}
+	// catalogue is measured in its new wording. The expectations are measured
+	// with the mark of a soft one in front, which is the wider of the two ways
+	// they are written.
+	mark := i18n.English.T(i18n.ManifestConfidenceMark) + " "
+	for _, key := range []i18n.Key{i18n.ManifestExpectationRejection, i18n.ManifestExpectationAcceptance,
+		i18n.ManifestExpectationWarning} {
+		words := mark + i18n.English.T(key)
+		fits(t, 2, "the value "+words, words)
+	}
+	outcomes := []i18n.Key{i18n.ManifestEntryApplied, i18n.ManifestEntryNotApplied,
+		i18n.ManifestAnswerAccepted, i18n.ManifestAnswerRejected, i18n.ManifestAnswerNone,
+		i18n.ManifestAnswerNotSettled}
+	for _, key := range failureKeys {
+		outcomes = append(outcomes, key)
+	}
+	for _, key := range outcomes {
+		words := i18n.English.T(key)
+		fits(t, 3, "the value "+words, words)
 	}
 }
 
@@ -96,17 +99,23 @@ func (c chosenFile) Read([]byte) (int, error) { return 0, io.EOF }
 func (c chosenFile) Close() error             { return nil }
 func (c chosenFile) URI() fyne.URI            { return storage.NewFileURI(c.path) }
 
-// The screen draws in both of its states, and every part of the drawing is
-// reached.
+// The screen draws in all three of its states, and every part of the drawing
+// is reached.
 //
 // It is worth having as much for what it does not assert as for what it does:
 // it renders rather than inspects, so it holds the drawing code to running at
 // all against a real manifest. What each part says is checked next door,
 // against the model, which is where those questions can be asked precisely.
-func TestTheScreenDrawsInBothStates(t *testing.T) {
-	view := New(i18n.English, nil, Readers{}, background.ReadHere)
+func TestTheScreenDrawsInEveryState(t *testing.T) {
+	view := New(i18n.English, nil, Readers{}, background.ReadHere, nil)
 	if view.Content() == nil {
 		t.Fatal("the screen builds nothing at all")
+	}
+	if view.entries != nil {
+		t.Error("the screen holds a table before there is a manifest to fill it")
+	}
+	if len(view.detailBox.Objects) == 0 {
+		t.Error("the card under the table says nothing before there is a manifest")
 	}
 
 	promised, problems := manifest.New("0.1", manifest.Run{
@@ -125,27 +134,32 @@ func TestTheScreenDrawsInBothStates(t *testing.T) {
 		t.Fatalf("the manifest this test is built on is not valid: %v", problems)
 	}
 
-	if view.rendered(Build(i18n.English, promised, nil)) == nil {
-		t.Error("the first state draws nothing")
+	view.Open(promised, "")
+	if view.entries == nil {
+		t.Error("the first state draws no table")
+	}
+	if len(view.notesBox.Objects) != 0 {
+		t.Error("the first state draws the notes that belong to a comparison")
 	}
 
 	actual := response.Record{SpecVersion: "0.1", Rows: []response.Row{{Number: 1, Verdict: response.Accepted}}}
-	comparison := Comparison{Record: actual, Report: verify.Compare(promised, actual)}
-	second := Build(i18n.English, promised, &comparison)
-	if view.rendered(second) == nil {
-		t.Error("the second state draws nothing")
+	if !view.Compare(actual, "") {
+		t.Fatal("a record was refused although there is a manifest to judge it against")
 	}
-	// The footer of the second state carries the legend and whatever the
-	// comparison could not settle, so it is never absent once a response is in.
-	if view.foot(second) == nil {
-		t.Error("the second state draws no footer, so the legend and the limits have nowhere to be")
+	if view.entries == nil {
+		t.Error("the second state draws no table")
+	}
+	// The strip under the envelope carries the notes and the limits of the
+	// second state, so it is never empty once a response is in.
+	if len(view.notesBox.Objects) == 0 {
+		t.Error("the second state draws no notes, so what the comparison could not see has nowhere to be")
 	}
 }
 
 // A column nobody defined is headed with nothing rather than taking the view
 // down, which is the same bargain the row makes about its cells.
 func TestAColumnWithNoHeadingIsEmptyRatherThanFatal(t *testing.T) {
-	view := New(i18n.English, nil, Readers{}, background.ReadHere)
+	view := New(i18n.English, nil, Readers{}, background.ReadHere, nil)
 	for _, absent := range []int{-1, len(columns)} {
 		if got := view.columnName(absent); got != "" {
 			t.Errorf("column %d is headed %q", absent, got)
@@ -160,20 +174,20 @@ func TestAColumnWithNoHeadingIsEmptyRatherThanFatal(t *testing.T) {
 // an error message would tell a person something went wrong when they were the
 // one who decided nothing should.
 func TestACancelledChooserChangesNothingAndAFailedOneSaysSo(t *testing.T) {
-	view := New(i18n.English, nil, Readers{}, background.ReadHere)
-	before := view.body.Objects[0]
+	view := New(i18n.English, nil, Readers{}, background.ReadHere, nil)
+	before := view.detailBox.Objects[0]
 
 	if _, ok := view.pathOf(nil, nil); ok {
 		t.Error("a cancelled chooser was treated as a choice")
 	}
-	if view.body.Objects[0] != before {
+	if view.detailBox.Objects[0] != before || view.Unread() != nil {
 		t.Error("a cancelled chooser changed the screen")
 	}
 
 	if _, ok := view.pathOf(nil, errors.New("the chooser could not open")); ok {
 		t.Error("a chooser that failed was treated as a choice")
 	}
-	if view.body.Objects[0] == before {
+	if view.detailBox.Objects[0] == before || view.Unread() == nil {
 		t.Error("a chooser that failed left the screen saying nothing about it")
 	}
 
@@ -194,7 +208,7 @@ func TestADocumentThatCannotBeReadLeavesTheScreenSayingWhy(t *testing.T) {
 		Manifest: func(string) (manifest.Manifest, error) {
 			return manifest.Manifest{}, errors.New("this is not a manifest")
 		},
-	}, background.ReadHere)
+	}, background.ReadHere, nil)
 	promised, err := view.read.Manifest("whatever")
 	if err == nil {
 		t.Fatal("the reader handed in for this test did not fail, so the test checks nothing")
@@ -214,7 +228,7 @@ func TestADocumentThatCannotBeReadLeavesTheScreenSayingWhy(t *testing.T) {
 // probe photographed a screen no person can reach by opening a manifest, and
 // the picture was wrong in a way that reads as correct.
 func TestOpeningAManifestFromOutsideReachesTheSameStateAsTheChooser(t *testing.T) {
-	view := New(i18n.English, nil, Readers{}, background.ReadHere)
+	view := New(i18n.English, nil, Readers{}, background.ReadHere, nil)
 	if !view.respond.Disabled() {
 		t.Fatal("the response button is available before there is a manifest to judge against")
 	}
@@ -235,7 +249,7 @@ func TestOpeningAManifestFromOutsideReachesTheSameStateAsTheChooser(t *testing.T
 		t.Fatalf("the manifest this test is built on is not valid: %v", problems)
 	}
 
-	view.Open(promised)
+	view.Open(promised, "")
 	if view.respond.Disabled() {
 		t.Error("a manifest is open and the response button is still unavailable, so this way in " +
 			"reaches a state the chooser never leaves behind")
@@ -245,8 +259,11 @@ func TestOpeningAManifestFromOutsideReachesTheSameStateAsTheChooser(t *testing.T
 	}
 
 	actual := response.Record{SpecVersion: "0.1", Rows: []response.Row{{Number: 1, Verdict: response.Rejected}}}
-	if !view.Compare(actual) {
+	if !view.Compare(actual, "") {
 		t.Error("a record was refused although there is a manifest to judge it against")
+	}
+	if !view.hasResponse {
+		t.Error("a record is on the screen and the screen does not know it holds one")
 	}
 }
 
@@ -255,9 +272,59 @@ func TestOpeningAManifestFromOutsideReachesTheSameStateAsTheChooser(t *testing.T
 // The comparison has nothing to say without a manifest, and a screen showing it
 // would be saying it anyway.
 func TestAResponseRecordWithNoManifestIsRefused(t *testing.T) {
-	view := New(i18n.English, nil, Readers{}, background.ReadHere)
+	view := New(i18n.English, nil, Readers{}, background.ReadHere, nil)
 	actual := response.Record{SpecVersion: "0.1", Rows: []response.Row{{Number: 1, Verdict: response.Accepted}}}
-	if view.Compare(actual) {
+	if view.Compare(actual, "") {
 		t.Error("a record was compared against a manifest that is not there")
 	}
 }
+
+// The terminal line names the two files once both are open, and until then it
+// says which of the two is an example and cannot be copied.
+//
+// 🔴 A line carrying an example name is a line that fails when pasted. The
+// copy is what carries it to a pipeline, so the copy stays out of reach until
+// every name in the line is one this screen was really handed.
+func TestTheTerminalLineNamesBothFilesOrSaysWhichIsAnExample(t *testing.T) {
+	copied := ""
+	view := New(i18n.English, nil, Readers{}, background.ReadHere, clipboardOf(&copied))
+	if view.terminal.Visible() {
+		t.Error("the terminal line is offered before there is a manifest to name in it")
+	}
+
+	promised := built(t, applied("d1", 1, catalog.Rejection, catalog.Hard))
+	view.Open(promised, "/runs/expectation-manifest.json")
+	if !view.terminal.Visible() {
+		t.Fatal("a manifest is open and the terminal line is hidden")
+	}
+	example := i18n.English.T(i18n.ManifestCommandResponse)
+	if !strings.Contains(view.command.Text, example) || !strings.Contains(view.command.Text, "expectation-manifest.json") {
+		t.Errorf("with a manifest and no response the line reads %q", view.command.Text)
+	}
+	if !view.copyCommand.Disabled() || !view.commandNote.Visible() {
+		t.Error("the line still names an example and the copy can be pressed, or nothing says which part is the example")
+	}
+	view.putCommandInClipboard()
+	if copied != "" {
+		t.Errorf("a line naming an example file was copied: %q", copied)
+	}
+
+	actual := response.Record{SpecVersion: "0.1", Rows: []response.Row{{Number: 1, Verdict: response.Rejected}}}
+	view.Compare(actual, "/runs/answers.json")
+	if strings.Contains(view.command.Text, example) || !strings.Contains(view.command.Text, "answers.json") {
+		t.Errorf("with both files open the line reads %q", view.command.Text)
+	}
+	if view.copyCommand.Disabled() || view.commandNote.Visible() {
+		t.Error("both files are named and the copy cannot be pressed, or the sentence about an example is still there")
+	}
+	view.putCommandInClipboard()
+	if copied != view.command.Text {
+		t.Errorf("the clipboard holds %q and the line reads %q", copied, view.command.Text)
+	}
+}
+
+// recorder is a clipboard a test can read back.
+type recorder struct{ into *string }
+
+func clipboardOf(into *string) recorder      { return recorder{into: into} }
+func (r recorder) SetContent(content string) { *r.into = content }

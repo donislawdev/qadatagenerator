@@ -227,6 +227,9 @@ type State struct {
 	// until somebody asks for it and is therefore invisible in every other
 	// state. A list nobody can photograph is a list nobody reviews.
 	Generators bool
+	// Envelope opens the section holding the envelope of a run on the manifest
+	// browser, closed until somebody asks for it for the same reason.
+	Envelope bool
 	// Reading leaves the read of the file unanswered, which is the screen a
 	// person looks at while a large one is being walked.
 	//
@@ -263,7 +266,11 @@ func (s State) Buildable(data Data) (bool, string) {
 // The screen is put into its state through the same calls the file chooser
 // makes, so nothing here can reach a state a person cannot.
 func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
-	view := manifestview.New(text, nil, manifestview.Readers{}, background.ReadHere)
+	// The clipboard is nothing at all, for the reason given at the other
+	// screens: a state of this list is a picture, and a picture that reached
+	// the clipboard of the machine taking it would change something outside
+	// itself.
+	view := manifestview.New(text, nil, manifestview.Readers{}, background.ReadHere, nil)
 	// The read happens where it is asked for, because this caller has no
 	// drawing thread to hand anything back to and wants the screen finished by
 	// the time the call returns. Nothing is watching for a signal either: these
@@ -331,11 +338,19 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	if state.Generators {
 		recipeScreen.ShowGenerators()
 	}
+	// The manifest and the record arrive parsed, so they are named here by the
+	// name a run gives its manifest and by a name a response record could
+	// carry, which is what a picture of this screen should show rather than
+	// a directory of the machine it was rendered on: a bare name is a path a
+	// person can paste from the directory the files are in.
 	if state.NeedsManifest {
-		view.Open(data.Promised)
+		view.Open(data.Promised, manifestjson.Name)
 	}
 	if state.NeedsResponse && data.HasActual {
-		view.Compare(data.Actual)
+		view.Compare(data.Actual, sampleResponseName)
+	}
+	if state.Envelope {
+		view.ShowRun()
 	}
 	if state.NeedsSource && data.SourcePath != "" {
 		takeScreen.Open(data.SourcePath)
@@ -601,6 +616,12 @@ func touch(canvas fyne.Canvas, pointer Pointer) {
 func (p Pointer) name() string {
 	return strconv.Itoa(p.Tabs) + " tabs in"
 }
+
+// sampleResponseName is what the response record of the sample is called in
+// the pictures of the manifest browser. The format names no file of its own,
+// since the record is written by somebody else's test harness, so this is a
+// name a picture shows rather than one this tool reads or writes.
+const sampleResponseName = "application-response.json"
 
 // Sample is a manifest and a response record small enough to read and wide
 // enough to carry every kind of entry the screen draws differently.

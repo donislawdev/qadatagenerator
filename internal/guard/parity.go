@@ -186,7 +186,7 @@ var WindowReach = map[string]Claim{
 		Screen: "the directory to write to, as a field with a chooser beside it. It starts " +
 			"empty on purpose: a window has no working directory anybody can see, so it " +
 			"refuses to guess where somebody's files go",
-		Test: "TestADisabledButtonSaysWhichOfTheThreeThingsIsMissing",
+		Test: "TestADisabledButtonSaysWhatIsMissingInTheCard",
 	},
 	"generate --overwrite": {
 		Screen: "replacing files already there, as a tick box that is off until somebody " +

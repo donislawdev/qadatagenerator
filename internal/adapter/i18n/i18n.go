@@ -271,10 +271,9 @@ const (
 	ManifestUnreadable   Key = "manifest.unreadable"
 	ManifestReading      Key = "manifest.reading"
 
-	ManifestHeadingRun       Key = "manifest.heading.run"
-	ManifestHeadingEntries   Key = "manifest.heading.entries"
-	ManifestHeadingUnsettled Key = "manifest.heading.unsettled"
-	ManifestHeadingLimits    Key = "manifest.heading.limits"
+	ManifestHeadingRun     Key = "manifest.heading.run"
+	ManifestHeadingEntries Key = "manifest.heading.entries"
+	ManifestHeadingLimits  Key = "manifest.heading.limits"
 
 	// The sentences of the state before a manifest is open. They name what each
 	// part of the screen will hold, which is the question somebody meeting this
@@ -287,14 +286,50 @@ const (
 
 	// What each column of the entries table holds, said once in the state that
 	// has no entries to say it with. A heading on its own is a word, and
-	// "Certainty" or "Outcome" is not a word somebody meeting this tool can
-	// work out.
-	ManifestWaitMutator    Key = "manifest.wait.mutator"
-	ManifestWaitPlace      Key = "manifest.wait.place"
-	ManifestWaitExpect     Key = "manifest.wait.expect"
-	ManifestWaitConfidence Key = "manifest.wait.confidence"
-	ManifestWaitStatus     Key = "manifest.wait.status"
-	ManifestWaitDetail     Key = "manifest.wait.detail"
+	// "Outcome" is not a word somebody meeting this tool can work out.
+	ManifestWaitMutator Key = "manifest.wait.mutator"
+	ManifestWaitPlace   Key = "manifest.wait.place"
+	ManifestWaitExpect  Key = "manifest.wait.expect"
+	ManifestWaitStatus  Key = "manifest.wait.status"
+
+	// The few words beside the two buttons of the band: what is open, how
+	// much of it there is, and what is being done to it. Data stands between
+	// them (a file name, a seed, a count), so each is a word rather than a
+	// sentence.
+	ManifestFactsEntry      Key = "manifest.facts.entry"
+	ManifestFactsEntries    Key = "manifest.facts.entries"
+	ManifestFactsSeed       Key = "manifest.facts.seed"
+	ManifestFactsOf         Key = "manifest.facts.of"
+	ManifestFactsAnswered   Key = "manifest.facts.answered"
+	ManifestFactsReading    Key = "manifest.facts.reading"
+	ManifestFactsUnreadable Key = "manifest.facts.unreadable"
+
+	// The tally at the heading of the table: how much of what was ordered
+	// happened, or once a response is open, how much of it could be judged
+	// and with what result. Words after a number, so they are separate from
+	// the labels of the envelope, which stand before one.
+	ManifestTallyOrdered    Key = "manifest.tally.ordered"
+	ManifestTallyApplied    Key = "manifest.tally.applied"
+	ManifestTallyNotApplied Key = "manifest.tally.not-applied"
+	ManifestTallyCompared   Key = "manifest.tally.compared"
+	ManifestTallyDisagree   Key = "manifest.tally.disagree"
+	ManifestTallyNotSettled Key = "manifest.tally.not-settled"
+
+	// The card under the table, which reads out one entry in full: what to do
+	// before there is a file, what to do before an entry is chosen, and the
+	// sentences an entry is read out with. The certainty is a sentence here
+	// and a mark in the table, because the card has the room the cell has not.
+	ManifestDetailWait       Key = "manifest.detail.wait"
+	ManifestDetailSelect     Key = "manifest.detail.select"
+	ManifestDetailEntry      Key = "manifest.detail.entry"
+	ManifestDetailHard       Key = "manifest.detail.hard"
+	ManifestDetailSoft       Key = "manifest.detail.soft"
+	ManifestDetailNotApplied Key = "manifest.detail.not-applied"
+
+	// The line that does the same in a terminal, with the response record as
+	// an example until one is open.
+	ManifestCommandResponse Key = "manifest.command.response"
+	ManifestCommandExample  Key = "manifest.command.example"
 
 	ManifestRunGenerated   Key = "manifest.run.generated"
 	ManifestRunSeed        Key = "manifest.run.seed"
@@ -317,12 +352,19 @@ const (
 	ManifestEntryBefore     Key = "manifest.entry.before"
 	ManifestEntryAfter      Key = "manifest.entry.after"
 
-	ManifestColumnMutator    Key = "manifest.column.mutator"
-	ManifestColumnPlace      Key = "manifest.column.place"
-	ManifestColumnExpect     Key = "manifest.column.expect"
-	ManifestColumnConfidence Key = "manifest.column.confidence"
-	ManifestColumnStatus     Key = "manifest.column.status"
-	ManifestColumnDetail     Key = "manifest.column.detail"
+	// What the outcome column says once a response record is open: the short
+	// verdict of the application on the row, or that it gave none, or that
+	// the comparison could not settle it. Short, because the column is 148
+	// wide and the sentence stands in the card under the table.
+	ManifestAnswerAccepted   Key = "manifest.answer.accepted"
+	ManifestAnswerRejected   Key = "manifest.answer.rejected"
+	ManifestAnswerNone       Key = "manifest.answer.none"
+	ManifestAnswerNotSettled Key = "manifest.answer.not-settled"
+
+	ManifestColumnMutator Key = "manifest.column.mutator"
+	ManifestColumnPlace   Key = "manifest.column.place"
+	ManifestColumnExpect  Key = "manifest.column.expect"
+	ManifestColumnStatus  Key = "manifest.column.status"
 
 	ManifestPlaceWholeFile Key = "manifest.place.whole-file"
 	ManifestPlaceRow       Key = "manifest.place.row"
@@ -334,7 +376,12 @@ const (
 
 	ManifestConfidenceHard Key = "manifest.confidence.hard"
 	ManifestConfidenceSoft Key = "manifest.confidence.soft"
-	ManifestLegendSoft     Key = "manifest.legend.soft"
+	// The mark a soft expectation carries in front of it in the table, and the
+	// one line explaining it at the heading of the table before any file is
+	// open. Once entries are on the screen the card under them explains the
+	// certainty of each in a sentence.
+	ManifestConfidenceMark Key = "manifest.confidence.mark"
+	ManifestLegendMark     Key = "manifest.legend.mark"
 
 	ManifestFailureUndescribed         Key = "manifest.failure.undescribed"
 	ManifestFailureUnimplemented       Key = "manifest.failure.unimplemented"
@@ -343,7 +390,6 @@ const (
 	ManifestFailureSchemeNotCovered    Key = "manifest.failure.scheme-not-covered"
 	ManifestFailureDeclinedByMutator   Key = "manifest.failure.declined-by-mutator"
 
-	VerifyCompared        Key = "verify.compared"
 	VerifyAgreed          Key = "verify.agreed"
 	VerifyNoAnswer        Key = "verify.no-answer"
 	VerifyVerdictAccepted Key = "verify.verdict.accepted"
@@ -635,23 +681,31 @@ var Keys = []Key{
 
 	ManifestOpen, ManifestOpenResponse, ManifestEmpty, ManifestUnreadable,
 	ManifestReading,
-	ManifestHeadingRun, ManifestHeadingEntries, ManifestHeadingUnsettled,
-	ManifestHeadingLimits,
+	ManifestHeadingRun, ManifestHeadingEntries, ManifestHeadingLimits,
 	ManifestRunWait, ManifestEntriesWait, ManifestResponseWait,
-	ManifestWaitMutator, ManifestWaitPlace, ManifestWaitExpect,
-	ManifestWaitConfidence, ManifestWaitStatus, ManifestWaitDetail,
+	ManifestWaitMutator, ManifestWaitPlace, ManifestWaitExpect, ManifestWaitStatus,
+	ManifestFactsEntry, ManifestFactsEntries, ManifestFactsSeed, ManifestFactsOf,
+	ManifestFactsAnswered, ManifestFactsReading, ManifestFactsUnreadable,
+	ManifestTallyOrdered, ManifestTallyApplied, ManifestTallyNotApplied,
+	ManifestTallyCompared, ManifestTallyDisagree, ManifestTallyNotSettled,
+	ManifestDetailWait, ManifestDetailSelect, ManifestDetailEntry,
+	ManifestDetailHard, ManifestDetailSoft, ManifestDetailNotApplied,
+	ManifestCommandResponse, ManifestCommandExample,
 	ManifestRunGenerated, ManifestRunSeed, ManifestRunLocale, ManifestRunCatalog,
 	ManifestRunSpec, ManifestRunRecipe, ManifestRunPolicy, ManifestRunTag,
 	ManifestRunSource, ManifestRunRowsTotal, ManifestRunRowsMutated,
 	ManifestCountRequested, ManifestCountApplied, ManifestCountNotApplied,
 	ManifestEntryApplied, ManifestEntryNotApplied,
 	ManifestEntryBefore, ManifestEntryAfter,
+	ManifestAnswerAccepted, ManifestAnswerRejected, ManifestAnswerNone,
+	ManifestAnswerNotSettled,
 	ManifestColumnMutator, ManifestColumnPlace, ManifestColumnExpect,
-	ManifestColumnConfidence, ManifestColumnStatus, ManifestColumnDetail,
+	ManifestColumnStatus,
 	ManifestPlaceWholeFile, ManifestPlaceRow, ManifestPlaceByte,
 	ManifestExpectationRejection, ManifestExpectationAcceptance,
 	ManifestExpectationWarning,
-	ManifestConfidenceHard, ManifestConfidenceSoft, ManifestLegendSoft,
+	ManifestConfidenceHard, ManifestConfidenceSoft, ManifestConfidenceMark,
+	ManifestLegendMark,
 	ManifestFailureUndescribed, ManifestFailureUnimplemented,
 	ManifestFailureRunLacksCapability, ManifestFailureFieldTypeNotCovered,
 	ManifestFailureSchemeNotCovered, ManifestFailureDeclinedByMutator,
@@ -692,7 +746,7 @@ var Keys = []Key{
 	TakeRefusalOverwriteSourceAllowed, TakeRefusalOverwriteSourceDo,
 	TakeRefusalUnnamed, TakeRefusalUnnamedWhy, TakeRefusalUnnamedDo,
 
-	VerifyCompared, VerifyAgreed, VerifyNoAnswer,
+	VerifyAgreed, VerifyNoAnswer,
 	VerifyVerdictAccepted, VerifyVerdictRejected,
 	VerifyKindHole, VerifyKindOverzealous, VerifyKindSilent, VerifyKindMissing,
 
