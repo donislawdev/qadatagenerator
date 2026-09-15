@@ -130,11 +130,10 @@ type View struct {
 	// closing records that somebody asked for the window while a run was going
 	// on, so that the window can be given to them once the run has stopped.
 	closing bool
-	// hadKeyboard records that the keyboard was on this screen when a run
-	// began, so that the end of the run knows whether it owes anybody a place
-	// to stand. Asked then rather than at the end, because by the end a person
-	// working by keyboard and a person working by mouse look the same.
-	hadKeyboard bool
+	// keys moves the keyboard off the button a run takes away and back when
+	// the run ends. Shared with the recipe screen since 2026-09-15, and the
+	// reasons stand on the type.
+	keys parts.Handover
 
 	// The parts that are refilled with what is on screen. They are kept rather
 	// than rebuilt, because rebuilding a control throws away what somebody
@@ -563,13 +562,10 @@ func (v *View) notice(key i18n.Key) fyne.CanvasObject {
 	return v.marked(paint.IconWarn, palette.StateWarning, v.paragraph(v.text.T(key)))
 }
 
-// marked puts an icon before something, level with its first line.
+// marked puts an icon before something, level with its first line. It is the
+// drawing next door, named here so that the card reads as what it says.
 func (v *View) marked(icon, ink string, words fyne.CanvasObject) fyne.CanvasObject {
-	return paint.Lead(
-		paint.Pad(palette.NameStepHairline, palette.NameStepHairline,
-			palette.NameStepHairline, palette.NameStepTight,
-			paint.Icon(icon, ink, palette.IconSmall)),
-		words)
+	return paint.Marked(icon, ink, words)
 }
 
 // counted says how many of a thing there are, in the plural where there are

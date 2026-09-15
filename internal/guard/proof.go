@@ -457,7 +457,7 @@ var toolGuards = []Guard{
 	{"what was counted is written in the form of the word that fits it", "TestTheCountsOnScreenUseTheRightFormOfEachWord", "internal/gui/recipeview", ByMutation},
 	{"a parent outside the preview is named rather than left blank", "TestAParentOutsideTheSampleIsNamedRatherThanLeftBlank", "internal/gui/recipeview", ByMutation},
 	{"the button on the recipe editor writes the dataset and says what it wrote", "TestTheScreenWritesTheDatasetAndSaysWhatItWrote", "internal/gui/recipeview", ByMutation},
-	{"a button that cannot run names the one thing that is missing", "TestADisabledButtonSaysWhichOfTheThreeThingsIsMissing", "internal/gui/recipeview", ByMutation},
+	{"a button that cannot run names the one thing that is missing", "TestADisabledButtonSaysWhatIsMissingInTheCard", "internal/gui/recipeview", ByMutation},
 	{"the screen starts no run it would refuse", "TestAScreenWithNowhereToWriteStartsNothing", "internal/gui/recipeview", ByMutation},
 	{"the files named before a run are the files the run writes", "TestWhatTheScreenSaysItWouldWriteIsWhatTheRunWrites", "internal/gui/recipeview", ByMutation},
 	{"closing the window while a dataset is being written stops the run first", "TestAskingForTheWindowWhileWritingADatasetStopsItFirst", "internal/gui/recipeview", ByMutation},

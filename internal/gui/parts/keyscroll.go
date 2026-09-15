@@ -1,10 +1,7 @@
 package parts
 
 import (
-	"image/color"
-
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
@@ -54,12 +51,13 @@ import (
 // stops counting rings on the SCREEN is what holds it now.
 //
 // The colour is mark.focus, the one shade every other control draws its ring
-// in, since 2026-09-14. Until then it was the focus entry of the palette the
-// window no longer wears, which made this the one mark on three screens in a
-// colour of its own.
+// in, since 2026-09-14. The ring itself is the shared one every control that
+// draws its own focus wears, rounded like a card here because a scrolling area
+// is the size of one and, on the screen where what scrolls IS a card, a
+// control sized ring would land inside the card's own edge.
 type KeyScroll struct {
 	container.Scroll
-	frame *canvas.Rectangle
+	ring ring
 }
 
 // NewKeyScroll makes content scrollable and reachable without a mouse.
@@ -67,53 +65,25 @@ type KeyScroll struct {
 // Vertical only, because every scrolling area in this window is a column and a
 // direction nobody uses is a direction nobody checks.
 func NewKeyScroll(content fyne.CanvasObject) *KeyScroll {
-	// Nothing is painted inside the frame, only its outline. A filled
-	// rectangle behind a scrolling area is a second background, and the day
-	// somebody changes the window colour it becomes a visible rectangle
-	// nobody put there on purpose.
-	scroll := &KeyScroll{frame: canvas.NewRectangle(color.Transparent)}
+	scroll := &KeyScroll{ring: newRing(palette.RadiusCard)}
 	scroll.Direction = container.ScrollVerticalOnly
 	scroll.Content = content
-	// The same width the outline of a text field needed, and for the same
-	// measured reason: at a width of one the toolkit draws a line between two
-	// rows of pixels and every pixel of it is a half blend.
-	scroll.frame.StrokeWidth = palette.BorderThickness
-	scroll.frame.StrokeColor = color.Transparent
-	// Rounded like a card rather than like a control, because a scrolling area
-	// is the size of a card and, on the one screen where what scrolls IS a
-	// card, the frame then lands on the card's own edge and recolours it.
-	scroll.frame.CornerRadius = palette.RadiusCard
 	scroll.ExtendBaseWidget(scroll)
 	return scroll
 }
 
 // Framed is this scrolling area together with the frame that says when it holds
 // the keyboard. It is what a screen puts on itself, and the only thing that
-// puts the mark on the screen at all.
-//
-// 🔴 The frame comes SECOND, so that it is drawn over what scrolls and not
-// under it. It was first until 2026-09-14, and on the one screen where the
-// content has a ground of its own the ground painted over the inner half of
-// the stroke: tools/ognisko.py on the real window found 5213 pixels changed at
-// a contrast of 1.44, which is the outer half blended with the window. A
-// stroke on a shape with no fill covers nothing but its own edge, and a
-// rectangle takes no event, so the wheel and the keyboard still reach the
-// area under it.
-func (s *KeyScroll) Framed() fyne.CanvasObject {
-	return container.NewStack(s, s.frame)
-}
+// puts the mark on the screen at all: bare, the area is reached by the keyboard
+// and shows nought pixels of change, which was the Quick screen until
+// 2026-09-14 (B-279).
+func (s *KeyScroll) Framed() fyne.CanvasObject { return s.ring.framed(s) }
 
 // FocusGained draws the frame in the colour that means the keyboard is here.
-func (s *KeyScroll) FocusGained() {
-	s.frame.StrokeColor = palette.Ink(palette.MarkFocus)
-	s.frame.Refresh()
-}
+func (s *KeyScroll) FocusGained() { s.ring.set(true) }
 
 // FocusLost takes it away again.
-func (s *KeyScroll) FocusLost() {
-	s.frame.StrokeColor = color.Transparent
-	s.frame.Refresh()
-}
+func (s *KeyScroll) FocusLost() { s.ring.set(false) }
 
 // TypedRune ignores text. A scrolling area is read rather than written into.
 //

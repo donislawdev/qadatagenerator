@@ -149,6 +149,7 @@ take.reading: This file is being read, which means walking all of it. Nothing is
 take.heading.file: What this file holds
 take.heading.settings: What to damage
 take.heading.plan: What would happen
+# tekst-ok: the same heading over the same card on the recipe screen in recipe.heading.result, one wording
 take.heading.result: What this run did
 
 take.file.rows: Records
@@ -201,6 +202,7 @@ take.setting.none: none
 take.plan.carried: Carried out by this build, of those ordered
 # tekst-ok: the word between two figures of one row, 3 of 9, and nothing more
 take.plan.of: of
+# tekst-ok: the same heading over the same fact on the recipe screen in recipe.plan.writes, one wording
 take.plan.writes: Files this would write
 # tekst-ok: the word between a file and its directory, the same in take.result.in and recipe.in
 take.plan.writes-to: in
@@ -213,6 +215,7 @@ take.running: This file is being damaged. Nothing appears under its own name unt
 # tekst-ok: the same promise on the recipe screen in recipe.stopping, and both runs keep it
 take.running.stopping: Stopping. The run ends after the record it is on, and leaves nothing behind.
 
+# tekst-ok: the same heading over the same fact on the recipe screen in recipe.result.written, one wording
 take.result.written: Files written
 # tekst-ok: the word between a file and its directory, the same in take.plan.writes-to and recipe.in
 take.result.in: in
@@ -276,7 +279,7 @@ take.refusal.unnamed.do: Report this, and say which settings were on screen.
 # tekst-ok: the name of the screen is the name of the thing it edits, and the manifest browser names that thing the same way
 screen.recipe: Recipe
 
-recipe.empty: Write or paste a recipe here. It is checked as you type, and nothing is written to disk until you ask for it.
+recipe.empty: Write or paste a recipe on the left. It is checked as you type, and nothing is written to disk until you ask for it.
 recipe.placeholder: A recipe, in YAML
 recipe.checking: Checking this recipe.
 recipe.name: this recipe
@@ -287,7 +290,10 @@ recipe.generators: generators
 recipe.not-in: is not available in
 recipe.nothing-to-draw-from: Where this build has nothing to draw from
 # tekst-ok: the heading over the editor names the thing it edits, the same word as the screen and the manifest browser use
-recipe.heading.recipe: Recipe
+recipe.heading.recipe: Your recipe
+recipe.heading.describes: What it describes
+# tekst-ok: the same heading over the same card on the take screen in take.heading.result, one wording
+recipe.heading.result: What this run did
 recipe.heading.problems: Problems
 recipe.no-objections: No objections. This recipe can be used as it stands.
 recipe.line: line
@@ -317,25 +323,22 @@ recipe.choose-dir: Choose...
 # tekst-ok: the same setting on the take screen in take.setting.overwrite, one wording
 recipe.replace: Replace files already there
 recipe.generate: Generate this dataset
-recipe.heading.save: Save
 recipe.command.file: your-recipe.yaml
 recipe.command.example: The file name above is an example. This window does not write the recipe file, so save the recipe beside your tests and use its name in the command.
 # tekst-ok: the same action on the take screen in take.stop, one wording
 recipe.stop-run: Stop this run
-recipe.would-write: Would write
-recipe.nothing-yet: Nothing has been written yet.
-recipe.need-recipe: Write a recipe above, and this button writes what it describes.
-recipe.need-fix: Fix what is wrong with the recipe above, and this button writes what it describes.
+# tekst-ok: the same heading over the same fact on the take screen in take.plan.writes, one wording
+recipe.plan.writes: Files this would write
 recipe.dir-hint: Choose or paste a path
 recipe.need-directory: Choose a directory first. This window writes nowhere until you say where.
 recipe.writing: Writing this dataset. Nothing appears under its own name until the whole run has succeeded, so stopping now leaves nothing behind.
 # tekst-ok: the same promise on the take screen in take.running.stopping, and both runs keep it
 recipe.stopping: Stopping. The run ends after the record it is on, and leaves nothing behind.
-recipe.wrote: Wrote
+# tekst-ok: the same heading over the same fact on the take screen in take.result.written, one wording
+recipe.result.written: Files written
+recipe.result.rows: Rows written
 # tekst-ok: the word between a file and its directory, the same in take.plan.writes-to and take.result.in
 recipe.in: in
-recipe.file: file
-recipe.files: files
 recipe.run-stopped: You stopped this run. Nothing was written, because every file gets its real name only once a whole run has succeeded.
 recipe.run-failed: This run did not finish, and nothing that looks complete was left behind.
 

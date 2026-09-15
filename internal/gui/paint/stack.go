@@ -91,6 +91,22 @@ func Trail(rest, trailing fyne.CanvasObject) *fyne.Container {
 	return container.New(layout.NewBorderLayout(nil, nil, nil, trailing), rest, trailing)
 }
 
+// Marked puts an icon before something, level with its first line: a verdict
+// with its shape, a warning with its triangle.
+//
+// The shape rather than a colour on its own, for the reason measured for this
+// palette: the colours that carry meaning differ in hue while barely differing
+// in lightness, so somebody who does not separate hues sees one shade of grey.
+// It was a method of the take screen until the recipe screen needed the same
+// row on 2026-09-15.
+func Marked(icon, ink string, words fyne.CanvasObject) *fyne.Container {
+	return Lead(
+		Pad(theme.NameStepHairline, theme.NameStepHairline,
+			theme.NameStepHairline, theme.NameStepTight,
+			Icon(icon, ink, theme.IconSmall)),
+		words)
+}
+
 // Grid lays cells of one size out in as many columns as the width allows, and
 // wraps the rest onto the next row.
 //

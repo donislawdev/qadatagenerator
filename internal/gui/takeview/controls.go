@@ -84,6 +84,10 @@ func (v *View) buildControls() {
 	v.chooseFile.ShowIcon(paint.IconFolder)
 	v.damage = parts.NewPrimaryButton(v.text.T(i18n.TakeRun), v.Start)
 	v.stop = parts.NewButton(v.text.T(i18n.TakeStop), v.Stop)
+	// The button that chooses a file is the one control always in the tree,
+	// which is what the keyboard needs to find the canvas through and to fall
+	// back onto.
+	v.keys = parts.Handover{Anchor: v.chooseFile}
 }
 
 // buildKinds makes one check box per kind of damage this build describes, in

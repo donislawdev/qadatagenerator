@@ -61,7 +61,7 @@ func TestTheScreenWritesTheDatasetAndSaysWhatItWrote(t *testing.T) {
 	}
 
 	drawn := rendered(t, view)
-	if !strings.Contains(drawn, i18n.English.T(i18n.RecipeWrote)) {
+	if !strings.Contains(drawn, i18n.English.T(i18n.RecipeResultWritten)) {
 		t.Error("the screen does not say what the run wrote")
 	}
 	if !strings.Contains(drawn, dir) {
@@ -69,33 +69,41 @@ func TestTheScreenWritesTheDatasetAndSaysWhatItWrote(t *testing.T) {
 	}
 }
 
-// 🔴 A button that cannot run says what to do rather than only being grey.
+// 🔴 A button that cannot run says what to do rather than only being grey, and
+// since 2026-09-15 it says it in the card beside the button rather than under it
+// (DEC-246).
 //
-// Three reasons and three sentences. A disabled control with no words beside it
-// sends somebody looking for what they did wrong, and the one thing this screen
-// knows is exactly which of the three it is.
-func TestADisabledButtonSaysWhichOfTheThreeThingsIsMissing(t *testing.T) {
+// The empty screen says what to do, a recipe with problems is its own reason,
+// and a clean recipe with nowhere to write is asked for the directory. A
+// disabled control with no words beside it sends somebody looking for what they
+// did wrong, and the card is where the one thing this screen knows is said.
+func TestADisabledButtonSaysWhatIsMissingInTheCard(t *testing.T) {
 	view := recipeview.New(i18n.English, real(t), recipeview.Writer(),
 		background.Work{Read: background.ReadHere, Produce: produceHere}, nil)
 	view.Content()
 
-	if drawn := spoken(rendered(t, view)); !strings.Contains(drawn, i18n.English.T(i18n.RecipeNeedRecipe)) {
-		t.Error("an empty screen does not say that a recipe comes first")
+	if drawn := spoken(rendered(t, view)); !strings.Contains(drawn, i18n.English.T(i18n.RecipeEmpty)) {
+		t.Error("an empty screen does not say what to do")
 	}
 
 	view.SetRecipe(screens.BrokenRecipe)
-	if drawn := spoken(rendered(t, view)); !strings.Contains(drawn, i18n.English.T(i18n.RecipeNeedFix)) {
-		t.Error("a recipe with problems does not say that they come first")
+	if drawn := spoken(rendered(t, view)); !strings.Contains(drawn, i18n.English.T(i18n.RecipeHeadingProblems)) {
+		t.Error("a recipe with problems does not name them")
 	}
 
 	view.SetRecipe(screens.CleanRecipe)
 	if drawn := spoken(rendered(t, view)); !strings.Contains(drawn, i18n.English.T(i18n.RecipeNeedDirectory)) {
-		t.Error("a screen with nowhere to write does not say so")
+		t.Error("a clean recipe with nowhere to write does not ask for a directory")
 	}
 
-	view.SetOut(t.TempDir())
-	if drawn := rendered(t, view); !strings.Contains(drawn, i18n.English.T(i18n.RecipeWouldWrite)) {
-		t.Error("a screen with everything it needs does not say what it would write")
+	// The directory is drawn verbatim under the files a run would write, so the
+	// path it was given is what says the screen now knows where to write. The
+	// heading over it is set in capitals by the theme, which is why the path and
+	// not the heading is what this looks for.
+	dir := t.TempDir()
+	view.SetOut(dir)
+	if drawn := spoken(rendered(t, view)); !strings.Contains(drawn, dir) {
+		t.Error("a screen with everything it needs does not say where it would write")
 	}
 }
 

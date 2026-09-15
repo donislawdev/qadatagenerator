@@ -38,16 +38,20 @@ import (
 //
 // # Which screens
 //
-// The ones built on paint, named in the list below. The other four still mark
+// The ones built on paint, named in the list below. The other two still mark
 // focus the toolkit's way - an edge the renderer of widget.Entry recolours,
 // which is no rectangle in this tree - and each joins the list on the day it is
-// rebuilt. The fifth name here is the event CLAUDE.md names as the condition
+// rebuilt. The whole list of five is the event CLAUDE.md names as the condition
 // for the gate and the mutations to come back.
 func TestEveryStopOfTheKeyboardDrawsExactlyOneFocusRing(t *testing.T) {
 	// The take screen joined on 2026-09-15 (DEC-245), in the state it opens
 	// in and in the one with a file read, since the two walk different
-	// controls: the card and the panel hold different things.
-	built := []string{"quick-opens", "take-empty", "take-plan"}
+	// controls: the card and the panel hold different things. The recipe screen
+	// joined the same day (DEC-246), in the empty state and in one with a
+	// preview and somewhere to write, which between them walk every control it
+	// has: the empty one reaches the example button, the ready one the filled
+	// button that writes and a table.
+	built := []string{"quick-opens", "take-empty", "take-plan", "recipe-empty", "recipe-ready"}
 	data := sampleWithSource(t)
 
 	for _, name := range built {

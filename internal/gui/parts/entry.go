@@ -2,7 +2,12 @@ package parts
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+
+	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
 // Editor is the toolkit's multi line text field that gives the Tab key back to
@@ -46,12 +51,41 @@ import (
 //
 // Everything this field does stays the toolkit's: the drawing, the caret, the
 // selection, the wrapping, the scrolling. What changes is the answer to one
-// question. That is the toolkit's own extension mechanism, so the rule against
-// rebuilding pieces of it is untouched and there is no renderer here to go
-// stale when the toolkit moves.
+// question and the mark it shows for focus. That is the toolkit's own extension
+// mechanism, so the rule against rebuilding pieces of it is untouched and there
+// is no renderer here to go stale when the toolkit moves.
+//
+// # 🔴 Why it wears the same ground and mark as the small fields
+//
+// On a screen built out of paint, a text field answers the pointer with a
+// ground and the keyboard with a ring in mark.focus, and a chooser or button
+// beside it does the same (DEC-215, DEC-237). A multi line field is a text
+// field too, so it wears the SAME grounds the single line one does, through the
+// same helper: the toolkit draws nothing a picture can see for a pointer on an
+// entry (B-282) and marks focus with an edge of its own, which would be a
+// second language of focus on a screen that has one. So the toolkit's chrome is
+// switched off with the same bare theme and this draws the ground itself.
+//
+// # onFocus and onHover
+//
+// Told when the keyboard and the pointer arrive and leave, so the grounds drawn
+// around the field can answer. They are the same two hooks the single line
+// field carries, for the same reason.
 type Editor struct {
 	widget.Entry
+	onFocus func(bool)
+	onHover func(bool)
+	dressed fyne.CanvasObject
 }
+
+// Asserted so that dropping one of these is a compile error rather than a field
+// that silently stops answering the pointer, which is how the chooser once lost
+// its hover.
+var (
+	_ fyne.Widget       = (*Editor)(nil)
+	_ fyne.Focusable    = (*Editor)(nil)
+	_ desktop.Hoverable = (*Editor)(nil)
+)
 
 // NewEditor builds a multi line field the keyboard can leave.
 func NewEditor(changed func(string)) *Editor {
@@ -80,3 +114,63 @@ func NewEditor(changed func(string)) *Editor {
 // because this type is what goes into the container, so the assertion finds the
 // answer below rather than the embedded one.
 func (e *Editor) AcceptsTab() bool { return false }
+
+// Framed is the editor dressed in the grounds and the mark every text control
+// in this window wears, which is what a screen puts on itself. Built once, for
+// the reason the single line field is: the grounds hold the focus, and dressing
+// it twice would hand the keyboard to a ground nobody mounted (B-279).
+//
+// The words are placed by this padding rather than by the toolkit: the bare
+// theme sets the input border to nought, which moves the text to the top left,
+// so a step of the scale on every side puts it back where a field's text sits.
+func (e *Editor) Framed() fyne.CanvasObject {
+	if e.dressed != nil {
+		return e.dressed
+	}
+	grounds, set := focusGrounds()
+	focused, hovered := false, false
+	e.onFocus = func(here bool) { focused = here; set(focused, hovered) }
+	e.onHover = func(here bool) { hovered = here; set(focused, hovered) }
+	step := palette.StepOf(palette.NameStepTight)
+	typed := container.NewThemeOverride(e, bareField{})
+	inside := container.New(layout.NewCustomPaddedLayout(step, step, step, step), typed)
+	e.dressed = container.NewStack(append(grounds, inside)...)
+	return e.dressed
+}
+
+// FocusGained tells the grounds the keyboard is here, then lets the toolkit
+// place the caret.
+func (e *Editor) FocusGained() {
+	if e.onFocus != nil {
+		e.onFocus(true)
+	}
+	e.Entry.FocusGained()
+}
+
+// FocusLost tells them it left, then lets the toolkit take the caret.
+func (e *Editor) FocusLost() {
+	if e.onFocus != nil {
+		e.onFocus(false)
+	}
+	e.Entry.FocusLost()
+}
+
+// MouseIn tells the grounds the pointer is on the field, which the toolkit's
+// entry does not (B-282): it answers a pointer with the shape of the cursor and
+// nothing a picture can see.
+func (e *Editor) MouseIn(*desktop.MouseEvent) {
+	if e.onHover != nil {
+		e.onHover(true)
+	}
+}
+
+// MouseMoved is a pointer moving over the field, which changes nothing the
+// ground shows.
+func (e *Editor) MouseMoved(*desktop.MouseEvent) {}
+
+// MouseOut tells them the pointer left.
+func (e *Editor) MouseOut() {
+	if e.onHover != nil {
+		e.onHover(false)
+	}
+}

@@ -117,44 +117,45 @@ func recipeStatesOfTheKeyboard() []State {
 			Purpose:  "the keyboard on the preview itself, which is where the arrow keys move a cell at a time",
 			Screen:   screenRecipe,
 			Recipe:   CleanRecipe,
-			Keyboard: Keyboard{Tabs: 8},
+			Keyboard: Keyboard{Tabs: 11},
 		},
 		{
 			Name: "recipe-focus-button",
-			Purpose: "the keyboard on the button that writes, which is the last stop of the " +
-				"walk because the bar is read last",
+			Purpose: "the keyboard on the button that writes, which since 2026-09-15 is in " +
+				"the band near the top rather than the last stop of the walk, because the " +
+				"band that holds it is read first",
 			Screen:   screenRecipe,
 			Recipe:   CleanRecipe,
 			Into:     "a-directory",
-			Keyboard: Keyboard{Tabs: 13},
+			Keyboard: Keyboard{Tabs: 9},
 		},
 		{
 			Name: "recipe-focus-example",
-			Purpose: "the keyboard on the offer of a recipe that runs, which is on the empty " +
-				"screen and nowhere else",
+			Purpose: "the keyboard on the offer of a recipe that runs, which is in the card " +
+				"on the empty screen and nowhere else",
 			Screen:   screenRecipe,
-			Keyboard: Keyboard{Tabs: 7},
+			Keyboard: Keyboard{Tabs: 11},
 		},
 		{
 			Name: "recipe-focus-generators",
 			Purpose: "the keyboard on the list of what this build can generate, which is a " +
 				"heading somebody opens rather than a wall of names nobody asked for",
 			Screen:   screenRecipe,
-			Keyboard: Keyboard{Tabs: 9},
+			Keyboard: Keyboard{Tabs: 12},
 		},
 		{
 			Name:     "recipe-focus-editor",
 			Purpose:  "the keyboard in the field the recipe is written in, which it can also leave",
 			Screen:   screenRecipe,
 			Recipe:   BrokenRecipe,
-			Keyboard: Keyboard{Tabs: 6},
+			Keyboard: Keyboard{Tabs: 9},
 		},
 		{
 			Name:     "recipe-focus-answer",
-			Purpose:  "the keyboard on the pane holding the answer, which the toolkit's own scrolling area never lets it reach",
+			Purpose:  "the keyboard on the card holding the answer, which the toolkit's own scrolling area never lets it reach",
 			Screen:   screenRecipe,
 			Recipe:   BrokenRecipe,
-			Keyboard: Keyboard{Tabs: 7},
+			Keyboard: Keyboard{Tabs: 10},
 		},
 	}
 }

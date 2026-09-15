@@ -184,9 +184,37 @@ func fieldWith(entry *FieldEntry, shown fyne.CanvasObject, leading fyne.CanvasOb
 		return entry.dressed
 	}
 
-	// One ground per state the field can be in, all built and all but one
-	// hidden, so that answering the keyboard or the pointer is showing a
-	// different one rather than painting.
+	grounds, set := focusGrounds()
+	focused, hovered := false, false
+	entry.onFocus = func(here bool) { focused = here; set(focused, hovered) }
+	entry.onHover = func(here bool) { hovered = here; set(focused, hovered) }
+
+	// The words are placed by this space rather than by the toolkit: eight from
+	// the left, to which the renderer adds its own four, which is where a
+	// chooser starts its word. Nothing at the foot, so the field keeps whatever
+	// height the row gives it.
+	step := palette.StepOf(palette.NameStepTight)
+	var typed fyne.CanvasObject = container.NewThemeOverride(shown, bareField{})
+	if leading != nil {
+		typed = container.New(layout.NewBorderLayout(nil, nil, leading, nil), leading, typed)
+	}
+	inside := container.New(layout.NewCustomPaddedLayout(step, 0, step, step), typed)
+
+	entry.dressed = container.NewStack(append(grounds, inside)...)
+	return entry.dressed
+}
+
+// focusGrounds builds the four grounds a text control stands on - resting,
+// under the pointer, with the keyboard, and both - all but the first hidden,
+// and returns them with a way to say which is showing.
+//
+// It is the one drawing every text field in this window wears, so that a field
+// and the chooser or button beside it answer the pointer and the keyboard the
+// same way (DEC-215, DEC-237). The control that wears it wires its own focus
+// and pointer to the setter: the text field does, and so does the recipe
+// editor, which is the second text control and the reason this is a helper
+// rather than a block inside one of them.
+func focusGrounds() (grounds []fyne.CanvasObject, set func(focused, hovered bool)) {
 	resting := paint.FieldGround(false, false)
 	underPointer := paint.FieldGround(false, true)
 	withKeyboard := paint.FieldGround(true, false)
@@ -195,8 +223,7 @@ func fieldWith(entry *FieldEntry, shown fyne.CanvasObject, leading fyne.CanvasOb
 		ground.Hide()
 	}
 	current := resting
-	focused, hovered := false, false
-	redraw := func() {
+	set = func(focused, hovered bool) {
 		wanted := resting
 		switch {
 		case focused && hovered:
@@ -216,28 +243,7 @@ func fieldWith(entry *FieldEntry, shown fyne.CanvasObject, leading fyne.CanvasOb
 		wanted.Show()
 		current = wanted
 	}
-	entry.onFocus = func(here bool) {
-		focused = here
-		redraw()
-	}
-	entry.onHover = func(here bool) {
-		hovered = here
-		redraw()
-	}
-
-	// The words are placed by this space rather than by the toolkit: eight from
-	// the left, to which the renderer adds its own four, which is where a
-	// chooser starts its word. Nothing at the foot, so the field keeps whatever
-	// height the row gives it.
-	step := palette.StepOf(palette.NameStepTight)
-	var typed fyne.CanvasObject = container.NewThemeOverride(shown, bareField{})
-	if leading != nil {
-		typed = container.New(layout.NewBorderLayout(nil, nil, leading, nil), leading, typed)
-	}
-	inside := container.New(layout.NewCustomPaddedLayout(step, 0, step, step), typed)
-
-	entry.dressed = container.NewStack(resting, underPointer, withKeyboard, both, inside)
-	return entry.dressed
+	return []fyne.CanvasObject{resting, underPointer, withKeyboard, both}, set
 }
 
 // bareField is this window's theme with the chrome of an input taken out of it.

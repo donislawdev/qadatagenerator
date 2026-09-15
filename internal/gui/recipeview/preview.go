@@ -10,12 +10,13 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/produce"
 )
 
-// drawPreview puts the first rows of every table under the verdict.
+// preview is the first rows of every table under the verdict.
 //
 // # Why rows at all, when the verdict already says the recipe is usable
 //
@@ -27,40 +28,46 @@ import (
 //
 // The rows are the run's own first rows rather than an illustration of them, and
 // what makes that true is in internal/produce rather than here.
-func (v *View) drawPreview() {
+func (v *View) preview() []fyne.CanvasObject {
+	var blocks []fyne.CanvasObject
 	for _, table := range v.answer.Sample.Tables {
-		v.answerBox.Add(heading(table.Entity))
-		v.answerBox.Add(detail(v.rowsShown(table)))
+		head := paint.Row(palette.NameStepTight,
+			paint.Strong(table.Entity, palette.TypeBody, palette.TextPrimary),
+			paint.Text(v.rowsShown(table), palette.TypeBody, palette.TextSecondary))
+		var body fyne.CanvasObject
 		switch {
 		case len(table.Columns) == 0:
-			v.answerBox.Add(sentence(v.text.T(i18n.RecipeNoFields)))
+			body = v.paragraph(v.text.T(i18n.RecipeNoFields))
 		case len(table.Rows) == 0:
-			// 🔴 A sentence rather than an empty rectangle, which is point
-			// eight of the GUI checklist. A count of nought is an ordinary
-			// thing to ask for while a test is being written, and a table
-			// drawn with a heading and nothing under it says the tool failed.
-			v.answerBox.Add(sentence(v.text.T(i18n.RecipeNoRows)))
+			// 🔴 A sentence rather than an empty rectangle, which is point eight
+			// of the GUI checklist. A count of nought is an ordinary thing to
+			// ask for while a test is being written, and a table drawn with a
+			// heading and nothing under it says the tool failed.
+			body = v.paragraph(v.text.T(i18n.RecipeNoRows))
 		default:
-			v.answerBox.Add(v.rows(table))
+			body = v.rows(table)
 		}
+		blocks = append(blocks, paint.Column(palette.NameStepTight, head, body))
 	}
-	v.drawWrittenText()
+	return append(blocks, v.writtenText()...)
 }
 
-// drawWrittenText shows the file itself for a form that is not a table.
+// writtenText shows the file itself for a form that is not a table.
 //
 // The object form nests children inside parents, so there is no row to put in a
 // column. Showing the bytes is the honest answer: it is what the file will
 // contain, and this screen has nothing truer to say about it.
-func (v *View) drawWrittenText() {
+func (v *View) writtenText() []fyne.CanvasObject {
 	if len(v.answer.Sample.Tables) > 0 || len(v.answer.Sample.Files) == 0 {
-		return
+		return nil
 	}
-	v.answerBox.Add(sentence(v.text.T(i18n.RecipeAsText)))
+	blocks := []fyne.CanvasObject{v.paragraph(v.text.T(i18n.RecipeAsText))}
 	for _, file := range v.answer.Sample.Files {
-		v.answerBox.Add(heading(file.Name))
-		v.answerBox.Add(written(file.Text))
+		blocks = append(blocks, paint.Column(palette.NameStepTight,
+			paint.Strong(file.Name, palette.TypeBody, palette.TextPrimary),
+			written(file.Text)))
 	}
+	return blocks
 }
 
 // rowsShown says how much of a table is on screen.
@@ -126,7 +133,11 @@ func (v *View) rows(table produce.Table) fyne.CanvasObject {
 	rows := float32(len(shown.Rows))
 	tall := canvas.NewRectangle(color.Transparent)
 	tall.SetMinSize(fyne.NewSize(0, cell+rows*cell+(rows-1)*between))
-	return container.NewBorder(nil, nil, tall, nil, built)
+	// Framed, so that a keyboard standing on the table shows the one mark of
+	// focus every control here wears. The frame is over the table alone, inside
+	// the height the spacer gives the row, so it hugs the cells rather than the
+	// whole width of the widened card.
+	return container.NewBorder(nil, nil, tall, nil, built.Framed())
 }
 
 // cell is one piece of text in the table, on one line and cut with an ellipsis.

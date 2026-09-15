@@ -18,6 +18,24 @@
 // screen was built in, where the preview came before the button that writes,
 // and for the same reason. A control that writes before anybody has seen what
 // it would write is a control nobody can check.
+//
+// # The shape, since 2026-09-15 (DEC-246)
+//
+// A band at the top holds where a run writes, whether it may replace what is
+// there, and the one action of the screen. The body is two equal columns: the
+// recipe on the left, and on the right the one card, saying what the recipe
+// describes while somebody writes it, or what the last run did once they have
+// pressed the button. A band at the foot holds the command that does the same
+// in a terminal. It is the shape of the Quick and take screens, because the
+// three are one program, and the columns are equal rather than a column and an
+// aside because both halves want width: a recipe is written in lines and a
+// preview is a table.
+//
+// 🔴 What the shape repairs is measured rather than felt. Until then the
+// controls that write and the terminal line stood UNDER the answer in the
+// right half of a divider, so at the size the owner keeps the window the button
+// was below the fold (B-280), and this was the one screen of five with a
+// divider, which the keyboard could not move.
 package recipeview
 
 import (
@@ -83,16 +101,13 @@ type View struct {
 	check Check
 	write Write
 	work  background.Work
-	// window is what a directory chooser opens over, and nothing else. A screen
-	// that reaches further into the window than that is a screen that cannot be
-	// built without one, and every stored state of this one is built without.
+	// window is what a directory chooser opens over and what a run takes over
+	// while it is going on, and nothing else. A screen that reaches further
+	// into the window than that is a screen that cannot be built without one,
+	// and every stored state of this one is built without.
 	window fyne.Window
 
 	editor *parts.Editor
-	// answer is what is drawn under the recipe: the problems, or the sentence
-	// that there are none, or the sentence saying the recipe is being read.
-	answerBox  *fyne.Container
-	answerPane *parts.KeyScroll
 	// answer is what the last finished check said about the recipe.
 	answer Answer
 	// crashed is set when reading the recipe came apart rather than finished.
@@ -100,26 +115,13 @@ type View struct {
 	// It is a field of its own rather than a fourth outcome inside Answer,
 	// because Answer is what a check says about a recipe and this says nothing
 	// about the recipe at all. It is cleared by the next check, like every
-	// other thing on this screen that describes what is written above it.
+	// other thing on this screen that describes what is written beside it.
 	crashed error
 	// checked says whether anything has been judged yet, which is not the same
 	// as a report with no problems in it. An empty screen has no report and a
 	// valid recipe has one, and drawing them alike would tell somebody their
 	// blank window had been approved.
 	checked bool
-
-	// The two controls that answer what can be written here rather than what is
-	// written. They belong to the build and not to the recipe, so neither is
-	// rebuilt when the answer changes.
-	example    *parts.Button
-	exampleRow fyne.CanvasObject
-	generators *parts.Disclosure
-
-	// The line that would do this in a terminal, and the button beside it.
-	// Built once for the reason everything else focusable here is.
-	command     *widget.Label
-	copyCommand *parts.Button
-
 	// asked counts the checks asked for, so that an answer which is no longer
 	// the latest question is dropped rather than drawn.
 	//
@@ -135,17 +137,47 @@ type View struct {
 	// checking is true while a check is in flight, so the screen can say so.
 	checking bool
 
-	// The bar along the bottom and what the last run left behind.
-	out      *widget.Entry
+	// The one card and the heading over it, refilled with what is on screen.
+	// The card is a column inside a scrolling area, so it hugs a sentence and
+	// scrolls a preview, and the heading says whether it is about the recipe or
+	// about the last run.
+	cardHeading *fyne.Container
+	cardBox     *fyne.Container
+	card        *parts.KeyScroll
+	content     fyne.CanvasObject
+
+	// The two controls that answer what can be written here rather than what is
+	// written. They belong to the build and not to the recipe, so neither is
+	// rebuilt when the answer changes.
+	example    *parts.Button
+	generators *parts.Disclosure
+
+	// The band along the top: where a run writes, whether it may replace what
+	// is there, and the one action, which is the button that generates or the
+	// button that stops, of which one is shown.
+	out      *parts.FieldEntry
 	choose   *parts.Button
-	replace  *widget.Check
-	run      *parts.PrimaryButton
-	status   *fyne.Container
-	halt     *background.Stopper
-	stopping bool
-	written  produce.Written
-	failed   error
-	ran      bool
+	replace  *parts.Check
+	generate *parts.PrimaryButton
+	stop     *parts.Button
+	action   *fyne.Container
+	// keys moves the keyboard off the button a run takes away and back when
+	// the run ends, the same way the take screen does.
+	keys parts.Handover
+
+	// The band at the foot: the line that would do this in a terminal, and the
+	// button beside it, which cannot be pressed because this window writes no
+	// recipe file.
+	command     fyne.CanvasObject
+	commandText *widget.Label
+	copyCommand *parts.Button
+
+	// What a run is doing and what the last one left. The stage decides what
+	// the card draws and the two beside it carry what there is to say.
+	stage   stage
+	halt    *background.Stopper
+	written produce.Written
+	failed  error
 	// closing says somebody asked to leave while a run was going on, so that
 	// the window is given up once the run has ended rather than while it is
 	// still writing.
@@ -156,138 +188,73 @@ type View struct {
 // New builds the screen.
 func New(text i18n.Catalogue, check Check, write Write, work background.Work,
 	window fyne.Window) *View {
-	view := &View{text: text, check: check, write: write, work: work, window: window}
-	view.buildBar()
+	view := &View{
+		text: text, check: check, write: write, work: work, window: window,
+		cardHeading: container.NewStack(), action: container.NewStack(),
+	}
+	view.buildBand()
 	view.editor = parts.NewEditor(view.Recheck)
 	view.editor.SetPlaceHolder(text.T(i18n.RecipePlaceholder))
-	view.answerBox = container.NewVBox()
-	// 🔴 Built here rather than in Content, because it can take focus. The
-	// screen next door builds its panes in Content and carries B-203 for it: a
-	// second call there replaces a focusable widget while the keyboard is still
-	// standing on the old one, which is unreachable today and one refactor away
-	// from being a bug. Built once, the question cannot arise.
-	view.answerPane = parts.NewKeyScroll(view.answerBox)
 	view.buildHints()
 	view.buildCommand()
+	view.lay()
+	view.draw()
 	return view
 }
 
 // Content is the whole screen.
+func (v *View) Content() fyne.CanvasObject { return v.content }
+
+// lay puts the controls on the screen, apart from making them.
 //
-// The recipe is above and what is wrong with it below, each given the full
-// width, and the divider between them belongs to the person.
-//
-// 🔴 Not the left and right of the screen next door, and the difference is
-// measured rather than a matter of taste. That screen splits sideways because
-// both of its halves are narrow. Here both halves want width: the window opens
-// at 900 with the column of screen names taking 220, which leaves 680 for the
-// content and 340 for half of it, and the longest line of the documented
-// recipe is 93 characters. A recipe folded at 340 pixels is a recipe nobody can
-// read, and a problem is a sentence.
-//
-// The parts are named in reading order, because container.NewBorder appends its
-// edges after its middle and this project has twice paid for the walk that
-// comes out of that.
-func (v *View) Content() fyne.CanvasObject {
-	// 🔴 A split rather than a fixed division, so that a person reading a long
-	// recipe can take the room from the answer and a person reading eleven
-	// problems can take it back. Neither of the two is the one that always
-	// deserves more.
-	//
-	// # Why it turned sideways on 2026-09-08
-	//
-	// It ran the other way until then, and the reason recorded here was
-	// measured: at a window of 900 the content was 680, half of it was 340, and
-	// the longest line of the documented recipe is 93 characters, which does
-	// not fit in 340. The window is now 1120, so the halves are about 425, and
-	// 93 monospace characters still do not fit in 425. The measurement did not
-	// stop being true.
-	//
-	// What changed is that it stopped being the whole question. The accepted
-	// drawing puts the recipe on the left and everything it CAUSES on the
-	// right, and the reason is what a person does here: they write, then read
-	// what came of it, then write again. Stacked, the answer to what they wrote
-	// begins below the fold, and the render showed exactly that - the verdict,
-	// the preview and the controls that write were cut off at the bottom edge.
-	// Side by side, a keystroke and its consequence are visible at once.
-	//
-	// The 93 character line is answered by the divider rather than by the
-	// layout. It belongs to a person, it is where it was left, and somebody
-	// editing a long line pulls it right. That is the same argument this
-	// comment always made, pointed at the axis the drawing asks for.
-	split := container.NewHSplit(v.writing(), v.reading())
-	// The purpose stands at the top, above the recipe rather than beside it.
-	// Somebody landing here sees a text field and no hint that what goes in it
-	// is a file they are meant to keep, which is the whole point of writing one
-	// rather than clicking through a form.
-	purpose := widget.NewLabel(v.text.T(i18n.PurposeRecipe))
-	purpose.Wrapping = fyne.TextWrapWord
-	purpose.Importance = widget.LowImportance
-	// 🔴 No share is set here, and the empty line is the decision. Giving the
-	// recipe the larger half reads as obviously right and is a number nobody
-	// measured, and the guard over values in the window said so: the view holds
-	// neither colours nor distances of its own, and a proportion invented at the
-	// one place it is used is exactly what that guard was written before the
-	// first screen to prevent. The toolkit's own half and half is taken instead,
-	// and the divider belongs to the person, who is the only one here who knows
-	// whether they are reading the recipe or the answer.
-	v.draw()
-	// 🔴 The purpose is named before the split, because the layout walks its
-	// objects in the order they are given and a person reads this screen
-	// downwards. This project has twice paid for the walk that comes out of
-	// taking the drawing for the order.
-	return parts.Inset(container.New(layout.NewBorderLayout(purpose, nil, nil, nil),
-		purpose, split))
+// 🔴 Every layout here is given its objects in reading order, which is the
+// order the keyboard walks them. container.NewBorder appends its edges after
+// its middle, and this project has three times paid for the walk that comes out
+// of that, the last time one function after writing a paragraph about it.
+func (v *View) lay() {
+	// 🔴 The card stands in a COLUMN inside the scrolling area, not in it
+	// directly. A scrolling area hands its content the larger of the content's
+	// minimum and its own size, so a card put straight into it stretched to
+	// the foot of the column and the state the screen opens in was an empty
+	// framed rectangle over two thirds of it, seen on the first render of the
+	// mock. A column gives its child exactly its minimum, so the card hugs a
+	// sentence, and with a preview in it is taller than the window and
+	// scrolls. No layout of our own was needed for that, which matters: two
+	// of those already stand red in the register without an entry.
+	v.cardBox = paint.Column(palette.NameStepGroup)
+	v.card = parts.NewKeyScroll(container.NewVBox(paint.Card(palette.NameStepGroup, v.cardBox)))
+
+	recipeHeading := v.heading(i18n.RecipeHeadingRecipe)
+	left := container.New(layout.NewBorderLayout(recipeHeading, nil, nil, nil),
+		recipeHeading, v.editor.Framed())
+	right := container.New(layout.NewBorderLayout(v.cardHeading, nil, nil, nil),
+		v.cardHeading, v.card.Framed())
+	// Two equal columns: as many columns as halves, so the count is read from
+	// the slice rather than written as a bare number the theme has no name for.
+	// The gap between them is one step of the scale, taken half from each cell,
+	// so that the halves stay equal.
+	halves := []fyne.CanvasObject{
+		paint.Pad(palette.NameStepHairline, palette.NameStepHairline,
+			palette.NameStepHairline, palette.NameStepRelated, left),
+		paint.Pad(palette.NameStepHairline, palette.NameStepHairline,
+			palette.NameStepRelated, palette.NameStepHairline, right),
+	}
+	columns := container.NewGridWithColumns(len(halves), halves...)
+	body := paint.Pad(palette.NameStepSection, palette.NameStepSection,
+		palette.NameStepMajor, palette.NameStepMajor, columns)
+
+	band := v.settingsBand()
+	v.command = v.commandBand()
+	v.content = container.New(layout.NewBorderLayout(band, v.command, nil, nil),
+		band, body, v.command)
 }
 
-// writing is the left half: the recipe, and the offer of one to start from.
-//
-// The offer sits UNDER the field rather than inside the answer beside it, which
-// is where it was until 2026-09-08. It is about what goes IN the field, so it
-// belongs with the field. In the answer it was competing with the verdict for
-// the same column, which the accepted drawing calls out by name as the thing
-// wrong with this screen.
-//
-// 🔴 The list of generators did NOT come with it, and the reason is measured
-// rather than a matter of taste. It was moved here too at first, and rendering
-// the state where it is open ended the process: a border gives its bottom edge
-// the height that edge asks for and the middle whatever is left, an open list
-// of seventeen names asks for more than the screen is tall, and the field above
-// it was therefore laid out at a height of minus 171. The toolkit painted a
-// rectangle of that height and the rasterizer took a slice of negative length.
-//
-// So what is placed here is only what has a height that cannot grow. Anything
-// that can belongs in the answer pane beside it, which scrolls, and the list is
-// back there for that reason as well as the one already written where it is
-// drawn.
-func (v *View) writing() fyne.CanvasObject {
-	// The field takes what is left, and the offer takes the one row it asks
-	// for. A column would share the height between them and leave the recipe
-	// short.
-	return container.New(layout.NewBorderLayout(nil, v.exampleRow, nil, nil),
-		v.editor, v.exampleRow)
-}
-
-// reading is the right half: what the recipe turned out to be, and what to do
-// with it.
-//
-// In the order somebody meets them. The answer is first and takes the room,
-// because it is what changes as they type. The controls that write come after
-// it, because writing is what happens once the answer is one they wanted, and
-// the terminal line comes last for the reason it comes last everywhere: it
-// answers a question asked after somebody has what they came for.
-func (v *View) reading() fyne.CanvasObject {
-	// Two cards rather than two headings with rows under them. Boxed, each
-	// group says where it stops, which is what the pane did not say when it
-	// was read on a window of 1670 by 1210 on 2026-09-08 and nothing separated
-	// the settings that write from the line that would write the same thing in
-	// a terminal.
-	below := paint.Column(palette.NameStepRelated,
-		parts.Card(v.text.T(i18n.RecipeHeadingSave), nil, v.bar()),
-		v.commandContent(),
-	)
-	return container.New(layout.NewBorderLayout(nil, below, nil, nil),
-		v.answerPane.Framed(), below)
+// heading is the title of one column, with the line every section heading of
+// this window carries.
+func (v *View) heading(key i18n.Key) fyne.CanvasObject {
+	return paint.Pad(palette.NameStepHairline, palette.NameStepRelated,
+		palette.NameStepHairline, palette.NameStepHairline,
+		paint.SectionHeading(v.text.T(key), paint.Spacer()))
 }
 
 // SetRecipe puts a recipe on the screen and judges it, without anybody typing.
@@ -326,6 +293,16 @@ func (v *View) Report() (validate.Report, bool) { return v.answer.Report, v.chec
 func (v *View) Recheck(recipe string) {
 	v.asked++
 	wanted := v.asked
+	// 🔴 What the last run did is let go of on the first keystroke after it
+	// (DEC-246). The card says one thing: what the recipe describes, or what
+	// the last press did, whichever is newer, and a result kept beside a
+	// recipe it was not made from would belong to neither. The files of that
+	// run are still on the disk, and the manifest browser is where their
+	// detail lives. A run going on is not let go of, because it is the newer
+	// thing for as long as it goes on.
+	if !v.busy() {
+		v.forgetLastRun()
+	}
 
 	// An empty screen is not a recipe with no problems. It gets a sentence
 	// saying what to do, which is point eight of the GUI checklist, and no
@@ -382,85 +359,120 @@ func (v *View) Recheck(recipe string) {
 // looking at the screen.
 func (v *View) Checking() bool { return v.checking }
 
-// draw puts the answer under the recipe.
-//
-// The problems TAKE THE PLACE of the verdict rather than standing beside it,
-// because both answer the same question and a screen that shows both at once
-// makes a person work out which one is current. It is the same shape the screen
-// next door uses for a refusal.
+// draw puts on the screen everything that depends on its state: the card and
+// its heading, the one action in the band, and the terminal line.
 func (v *View) draw() {
-	v.answerBox.Objects = nil
+	v.drawCard()
+	v.drawAction()
+	v.drawCommand()
+}
+
+// drawCard fills the card with the one thing it says, and the heading over it
+// with which thing that is.
+//
+// A run, going on or finished, takes the place of the answer rather than
+// standing beside it, because both answer the question of what pressing the
+// button means and a screen that shows both at once makes a person work out
+// which one is current. Among the answers, the problems TAKE THE PLACE of the
+// verdict for the same reason. It is the same shape the take screen uses.
+func (v *View) drawCard() {
+	heading := i18n.RecipeHeadingDescribes
+	var blocks []fyne.CanvasObject
+	switch {
+	case v.busy():
+		heading = i18n.RecipeHeadingResult
+		blocks = v.runningContent()
+	case v.stage != stageReady:
+		heading = i18n.RecipeHeadingResult
+		blocks = v.outcome()
+	default:
+		blocks = v.answerContent()
+	}
+	v.cardBox.Objects = blocks
+	v.cardBox.Refresh()
+	v.cardHeading.Objects = []fyne.CanvasObject{v.heading(heading)}
+	v.cardHeading.Refresh()
+}
+
+// answerContent is what the card says about the recipe on the screen, and
+// under it in every case the list of what this build can generate.
+//
+// The list is last and in every answer, because it answers what can be written
+// rather than anything about what is written. Closed until somebody opens it,
+// and it stays open through the next answer because it is the same widget put
+// back rather than a new one built. It stays in THIS card because this one
+// scrolls, which is what an open list of seventeen names needs: a border gives
+// its bottom edge the height that edge asks for, and rendering the open list
+// as one ended the process on 2026-09-08 with a field laid out at minus 171.
+func (v *View) answerContent() []fyne.CanvasObject {
+	var blocks []fyne.CanvasObject
 	switch {
 	case v.checking:
-		v.answerBox.Add(sentence(v.text.T(i18n.RecipeChecking)))
+		blocks = append(blocks, v.paragraph(v.text.T(i18n.RecipeChecking)))
 	case v.crashed != nil:
-		v.drawCrash()
+		blocks = append(blocks, v.crash()...)
 	case !v.checked:
-		v.answerBox.Add(sentence(v.text.T(i18n.RecipeEmpty)))
+		blocks = append(blocks, v.empty()...)
 	case len(v.answer.Report.Problems) > 0:
-		v.drawProblems()
+		blocks = append(blocks, v.problems()...)
 	case v.answer.Refused != nil:
 		// 🔴 A recipe the validator approved and the plan will not run. It takes
 		// the place of the approval rather than standing under it, for the same
 		// reason the problems do: two answers to one question make a person work
 		// out which is current, and here one of them would be wrong.
-		v.drawRefusal()
+		blocks = append(blocks, v.refusal()...)
 	default:
-		v.drawClean()
-		v.drawPreview()
+		blocks = append(blocks, v.clean()...)
+		blocks = append(blocks, v.preview()...)
 	}
-	v.drawWillNotDo()
-	v.drawUnchecked()
-	// 🔴 The offer of an example belongs to the empty screen and to no other
-	// state. A control offering to replace what somebody has written is a
-	// control that has to ask first, and one sitting there disabled in every
-	// other state is a line of furniture that reads as text in this theme
-	// anyway (B-208). It leaves the screen when the field stops being empty,
-	// and pressing it is one of the ways that happens, which is why it puts the
-	// keyboard in the field afterwards.
-	//
-	// Hidden rather than taken out of a column, because it moved to the half
-	// this screen is written in on 2026-09-08 and that half is built once. The
-	// list of generators beside it is NOT hidden in any state, because it
-	// answers what can be written rather than anything about what is written.
-	if v.checked || v.checking {
-		v.exampleRow.Hide()
-	} else {
-		v.exampleRow.Show()
-	}
-	// Last, and in every state, because it answers what can be written rather
-	// than anything about what is written. Closed until somebody opens it, and
-	// it stays open through the next answer because it is the same widget put
-	// back rather than a new one built. It stays in THIS pane because this one
-	// scrolls, which is what an open list of seventeen names needs.
-	v.answerBox.Add(v.generators.OnScreen())
-	v.answerBox.Refresh()
-	// The bar says what a run would do now, so it moves with every answer.
-	v.drawBar()
+	blocks = append(blocks, v.willNotDo()...)
+	blocks = append(blocks, v.unchecked()...)
+	return append(blocks, paint.Hairline(palette.LineQuiet), v.generators.OnScreen())
 }
 
-// drawRefusal says that the recipe reads correctly and cannot be run anyway.
+// empty is what the card says to somebody who has written nothing yet: what to
+// do, and the one control that does it for them.
+//
+// 🔴 The offer of an example belongs to the empty screen and to no other
+// state. A control offering to replace what somebody has written is a control
+// that has to ask first, and one sitting there disabled in every other state is
+// a line of furniture. It stands beside the sentence that explains it rather
+// than in the heading of the column (DEC-246), and pressing it is one of the
+// ways the screen stops being empty, which is why it puts the keyboard in the
+// field afterwards.
+func (v *View) empty() []fyne.CanvasObject {
+	return []fyne.CanvasObject{
+		v.paragraph(v.text.T(i18n.RecipeEmpty)),
+		paint.Lead(v.example.OnScreen(), paint.Spacer()),
+	}
+}
+
+// refusal says that the recipe reads correctly and cannot be run anyway.
 //
 // The failure carries the four parts a refusal has, already assembled by
 // whoever raised it, so it is drawn as the sentence it is rather than taken
 // apart here.
-func (v *View) drawRefusal() {
-	v.answerBox.Add(heading(v.text.T(i18n.RecipeRefused)))
-	v.answerBox.Add(sentence(fault.Says(v.answer.Refused)))
+func (v *View) refusal() []fyne.CanvasObject {
+	return []fyne.CanvasObject{
+		v.told(paint.IconAlert, palette.StateWarning, v.text.T(i18n.RecipeRefused)),
+		v.paragraph(fault.Says(v.answer.Refused)),
+	}
 }
 
-// drawCrash says that this build came apart while reading the recipe.
+// crash says that this build came apart while reading the recipe.
 //
 // What happened comes first and what to do about it second, which is the order
 // a refusal uses on the other surface. The first line names itself as a defect
 // of ours, because that is how the failure was built, so the second line does
 // not have to argue it and can be the one thing a person can actually do.
-func (v *View) drawCrash() {
-	v.answerBox.Add(sentence(fault.Says(v.crashed)))
-	v.answerBox.Add(sentence(v.text.T(i18n.RecipeCrashed)))
+func (v *View) crash() []fyne.CanvasObject {
+	return []fyne.CanvasObject{
+		paint.Marked(paint.IconBug, palette.StateDanger, sentence(fault.Says(v.crashed))),
+		v.paragraph(v.text.T(i18n.RecipeCrashed)),
+	}
 }
 
-// drawWillNotDo lists what the plan says the run will not do.
+// willNotDo lists what the plan says the run will not do.
 //
 // # Why this is a second list beside what was not checked
 //
@@ -471,48 +483,85 @@ func (v *View) drawCrash() {
 // changes nothing in the form asked for. Until now the window carried the first
 // and dropped the second, so a column that will come out empty had nowhere to
 // be said.
-func (v *View) drawWillNotDo() {
+func (v *View) willNotDo() []fyne.CanvasObject {
 	if len(v.answer.Sample.Notes) == 0 {
-		return
+		return nil
 	}
-	// No rule of its own is added here any more. The heading carries one under
-	// itself since 2026-09-08, and a rule above plus a rule below draws a box
-	// around the two words rather than separating anything.
-	v.answerBox.Add(heading(v.text.T(i18n.RecipeWillNotDo) + " (" +
-		strconv.Itoa(len(v.answer.Sample.Notes)) + ")"))
+	lines := []fyne.CanvasObject{paint.Caption(v.text.T(i18n.RecipeWillNotDo) + " (" +
+		strconv.Itoa(len(v.answer.Sample.Notes)) + ")")}
 	for _, note := range v.answer.Sample.Notes {
-		v.answerBox.Add(detail(note.Where + ": " + note.What))
+		lines = append(lines, v.paragraph(note.Where+": "+note.What))
 	}
+	return []fyne.CanvasObject{paint.Column(palette.NameStepHairline, lines...)}
 }
 
-// drawProblems lists what is wrong, each at the line it was written on.
-func (v *View) drawProblems() {
-	v.answerBox.Add(heading(v.text.T(i18n.RecipeHeadingProblems) + " (" +
-		strconv.Itoa(len(v.answer.Report.Problems)) + ")"))
+// problems lists what is wrong, each at the line it was written on.
+func (v *View) problems() []fyne.CanvasObject {
+	blocks := []fyne.CanvasObject{
+		v.told(paint.IconAlert, palette.StateDanger, v.text.T(i18n.RecipeHeadingProblems)+" ("+
+			strconv.Itoa(len(v.answer.Report.Problems))+")"),
+	}
 	for _, found := range v.answer.Report.Problems {
-		v.answerBox.Add(sentence(v.place(found.Where, found.Line) + found.What))
+		lines := []fyne.CanvasObject{sentence(v.place(found.Where, found.Line) + found.What)}
 		if found.Allowed != "" {
-			v.answerBox.Add(detail(v.text.T(i18n.RecipeAllowed) + ": " + found.Allowed))
+			lines = append(lines, v.paragraph(v.text.T(i18n.RecipeAllowed)+": "+found.Allowed))
 		}
 		if found.Hint != "" {
-			v.answerBox.Add(detail(v.text.T(i18n.RecipeTry) + ": " + found.Hint))
+			lines = append(lines, v.paragraph(v.text.T(i18n.RecipeTry)+": "+found.Hint))
 		}
+		blocks = append(blocks, paint.Column(palette.NameStepHairline, lines...))
 	}
+	return blocks
 }
 
-// drawClean says the recipe can be used, and what was read to say so.
+// clean says the recipe can be used, what was read to say so, and what a run
+// would write.
 //
 // The counts are there for the same reason the command line prints them: they
 // are how somebody sees that the recipe was READ rather than skimmed, and a
 // bare approval of a file the tool misunderstood is the one answer this product
 // must never give.
-func (v *View) drawClean() {
-	v.answerBox.Add(heading(v.text.T(i18n.RecipeNoObjections)))
-	v.answerBox.Add(detail(
-		counted(v.answer.Report.Entities, v.text.T(i18n.RecipeEntity),
-			v.text.T(i18n.RecipeEntities)) + ", " +
+func (v *View) clean() []fyne.CanvasObject {
+	verdict := paint.Column(palette.NameStepTight,
+		v.told(paint.IconCheck, palette.StateSuccess, v.text.T(i18n.RecipeNoObjections)),
+		v.paragraph(counted(v.answer.Report.Entities, v.text.T(i18n.RecipeEntity),
+			v.text.T(i18n.RecipeEntities))+", "+
 			counted(v.answer.Report.Fields, v.text.T(i18n.RecipeField),
 				v.text.T(i18n.RecipeFields))))
+	blocks := []fyne.CanvasObject{verdict}
+	if would := v.wouldWrite(); would != nil {
+		blocks = append(blocks, would)
+	}
+	return append(blocks, paint.Hairline(palette.LineQuiet))
+}
+
+// wouldWrite names the files a run would make and where, which is the answer a
+// dry run gives at the other surface, or says that there is nowhere yet.
+//
+// The names come from the sample rather than from the recipe, because the
+// sample got them by watching the writer ask for them. A screen working them
+// out from the entities would be right about the comma separated form and
+// wrong about the one that writes a single file.
+//
+// 🔴 The one reason the button can be disabled while the recipe is clean is
+// said HERE, under the files, rather than beside the button (DEC-246): it is
+// the first thing in the card after the verdict, so it stands above the fold,
+// and it is about exactly the thing it stands under.
+func (v *View) wouldWrite() fyne.CanvasObject {
+	if len(v.answer.Sample.Files) == 0 {
+		return nil
+	}
+	names := make([]string, 0, len(v.answer.Sample.Files))
+	for _, file := range v.answer.Sample.Files {
+		names = append(names, file.Name)
+	}
+	if v.out.Text == "" {
+		return paint.Column(palette.NameStepHairline,
+			paint.Caption(v.text.T(i18n.RecipePlanWrites)),
+			v.paragraph(listOf(names)),
+			v.paragraph(v.text.T(i18n.RecipeNeedDirectory)))
+	}
+	return v.fact(i18n.RecipePlanWrites, listOf(names)+" "+v.text.T(i18n.RecipeIn)+" "+v.out.Text)
 }
 
 // counted writes a number with the thing it counts, in whichever form of the
@@ -532,20 +581,21 @@ func counted(many int, one, rest string) string {
 	return strconv.Itoa(many) + " " + rest
 }
 
-// drawUnchecked says what this build did not look at.
+// unchecked says what this build did not look at.
 //
 // It is drawn whether or not there were problems, for the reason the report
 // type gives: a clean answer that hides its own blind spots invites trust it
 // has not earned.
-func (v *View) drawUnchecked() {
+func (v *View) unchecked() []fyne.CanvasObject {
 	if !v.checked || len(v.answer.Report.Unchecked) == 0 {
-		return
+		return nil
 	}
-	v.answerBox.Add(heading(v.text.T(i18n.RecipeUnchecked) + " (" +
-		strconv.Itoa(len(v.answer.Report.Unchecked)) + ")"))
+	lines := []fyne.CanvasObject{paint.Caption(v.text.T(i18n.RecipeUnchecked) + " (" +
+		strconv.Itoa(len(v.answer.Report.Unchecked)) + ")")}
 	for _, skipped := range v.answer.Report.Unchecked {
-		v.answerBox.Add(detail(skipped.Where + ": " + skipped.What + " - " + skipped.Reason))
+		lines = append(lines, v.paragraph(skipped.Where+": "+skipped.What+" - "+skipped.Reason))
 	}
+	return []fyne.CanvasObject{paint.Column(palette.NameStepHairline, lines...)}
 }
 
 // place names where a problem is, in the same words the command line uses.

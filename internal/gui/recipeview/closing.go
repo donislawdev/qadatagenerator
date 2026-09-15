@@ -73,7 +73,7 @@ func (v *View) releaseWatchForClosing() {
 // on here. Setting the flag anyway would arm the NEXT run to close the window
 // behind whoever started it.
 func (v *View) stoppedFromOutside() {
-	if !v.running() {
+	if !v.busy() {
 		v.leave()
 		return
 	}

@@ -147,10 +147,10 @@ func TestAScrollingAreaWithNothingToScrollStaysPut(t *testing.T) {
 // screen.
 func TestTheFrameSaysWhereTheKeyboardIs(t *testing.T) {
 	scroll, canvas := onScreen(t, reading())
-	quiet := scroll.frame.StrokeColor
+	quiet := scroll.ring.frame.StrokeColor
 
 	canvas.Focus(scroll)
-	marked := scroll.frame.StrokeColor
+	marked := scroll.ring.frame.StrokeColor
 	if marked == quiet {
 		t.Fatal("the keyboard arrived and the frame is drawn exactly as it was, so nothing " +
 			"on the screen says where a person is standing")
@@ -163,7 +163,7 @@ func TestTheFrameSaysWhereTheKeyboardIs(t *testing.T) {
 	if canvas.Focused() == fyne.Focusable(scroll) {
 		t.Fatal("focus did not leave, so this proves nothing about leaving")
 	}
-	if scroll.frame.StrokeColor != quiet {
+	if scroll.ring.frame.StrokeColor != quiet {
 		t.Error("the keyboard left and the frame still says it is here")
 	}
 }
@@ -176,8 +176,8 @@ func TestTheFrameSaysWhereTheKeyboardIs(t *testing.T) {
 // here rather than a fresh number, so the two cannot drift apart.
 func TestTheFrameIsThickEnoughToBeSeen(t *testing.T) {
 	scroll := NewKeyScroll(reading())
-	if scroll.frame.StrokeWidth != palette.BorderThickness {
+	if scroll.ring.frame.StrokeWidth != palette.BorderThickness {
 		t.Errorf("the frame is %v thick rather than the measured %v",
-			scroll.frame.StrokeWidth, palette.BorderThickness)
+			scroll.ring.frame.StrokeWidth, palette.BorderThickness)
 	}
 }

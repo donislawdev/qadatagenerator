@@ -2,11 +2,12 @@ package recipeview
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
+	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
 // What this screen says to somebody who has never seen a recipe.
@@ -20,9 +21,8 @@ import (
 // learn them was to guess one wrong and read the refusal. A vocabulary
 // reachable only by making a mistake is a vocabulary this tool keeps to itself.
 //
-// The count is written in the past tense on purpose. It was thirteen on the day
-// this screen was built and it is read from the register at every draw, so a
-// sentence claiming a number today would be a sentence going stale on its own.
+// The count is read from the register at every draw, so a sentence claiming a
+// number today would be a sentence going stale on its own.
 //
 // # Why this is not the form DEC-13 refused
 //
@@ -69,17 +69,13 @@ output:
 
 // buildHints makes the two controls that answer what can be written here.
 //
-// Built once, like the pane above them and for the same reason: both can take
+// Built once, like the card above them and for the same reason: both can take
 // the keyboard, and the list remembers whether somebody opened it. Rebuilding
 // it on every answer would shut it again on the next key press, which is the
 // kind of defect that only shows up when a person is actually using the thing.
 func (v *View) buildHints() {
 	v.example = parts.NewButton(v.text.T(i18n.RecipeExample), v.startFromExample)
-	// 🔴 In a row of its own, because a column stretches what it holds and the
-	// render showed the offer of an example as a bar across the whole window.
-	// A button that wide reads as the main thing on the screen, and the main
-	// thing on this screen is the field above it.
-	v.exampleRow = container.NewHBox(v.example.OnScreen())
+	v.example.ShowIcon(paint.IconRecipe)
 	v.generators = parts.NewDisclosure(v.generatorsTitle(), v.generatorsList())
 }
 
@@ -141,10 +137,10 @@ func (v *View) generatorsTitle() string {
 // wrong for as long as the field is empty.
 func (v *View) generatorsList() fyne.CanvasObject {
 	source := values.New("", "")
-	rows := container.NewVBox()
+	rows := []fyne.CanvasObject{}
 	var missing []string
 	for _, name := range source.Names() {
-		rows.Add(sentence(name + " - " + producedBy(source, name)))
+		rows = append(rows, sentence(name+" - "+producedBy(source, name)))
 		for _, locale := range values.Locales() {
 			if fine, why := source.CanProduce(name, locale); !fine {
 				missing = append(missing,
@@ -153,12 +149,12 @@ func (v *View) generatorsList() fyne.CanvasObject {
 		}
 	}
 	if len(missing) > 0 {
-		rows.Add(heading(v.text.T(i18n.RecipeNothingToDrawFrom)))
+		rows = append(rows, paint.Caption(v.text.T(i18n.RecipeNothingToDrawFrom)))
 		for _, line := range missing {
-			rows.Add(sentence(line))
+			rows = append(rows, v.paragraph(line))
 		}
 	}
-	return rows
+	return paint.Column(palette.NameStepHairline, rows...)
 }
 
 // producedBy says what one generator makes, naming the numbering scheme behind

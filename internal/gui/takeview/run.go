@@ -96,7 +96,7 @@ func (v *View) Start() {
 	// Before the run is handed over rather than after it, because a place of
 	// work that answers straight away carries the run out inside this call and
 	// the end of the run has a keyboard of its own to place.
-	v.hadKeyboard = v.handKeyboardOver(v.stop, v.damage)
+	v.keys.Begin(v.stop, v.damage)
 	v.interceptClose()
 	v.watchForClosing()
 	v.work.Run(func() (take.Result, error) {
@@ -151,7 +151,7 @@ func (v *View) finished(result take.Result, err error) {
 		return
 	}
 	v.drawRun()
-	v.giveTheKeyboardBack(v.damage, v.stop)
+	v.keys.End(v.damage, v.stop)
 }
 
 // interceptClose makes the closing of the window stop the run first.

@@ -375,8 +375,14 @@ const (
 	RecipeNotIn             Key = "recipe.not-in"
 	RecipeNothingToDrawFrom Key = "recipe.nothing-to-draw-from"
 
-	RecipeHeadingRecipe   Key = "recipe.heading.recipe"
-	RecipeHeadingProblems Key = "recipe.heading.problems"
+	// The two columns and what the card over the right one is called: what
+	// the recipe describes while somebody writes, and what the last run did
+	// once they have pressed the button. One card, one heading saying which
+	// (DEC-246), the way the take screen names its card.
+	RecipeHeadingRecipe    Key = "recipe.heading.recipe"
+	RecipeHeadingDescribes Key = "recipe.heading.describes"
+	RecipeHeadingResult    Key = "recipe.heading.result"
+	RecipeHeadingProblems  Key = "recipe.heading.problems"
 
 	RecipeNoObjections Key = "recipe.no-objections"
 	RecipeLine         Key = "recipe.line"
@@ -406,37 +412,35 @@ const (
 	RecipeCrashed       Key = "recipe.crashed"
 	RecipeWillNotDo     Key = "recipe.will-not-do"
 
-	// The bar along the bottom, which is the half of this screen that writes.
+	// The band along the top, which is the half of this screen that writes.
 	//
-	// 🔴 The three reasons a run cannot start are three keys rather than one,
-	// because a disabled button that says only that it is disabled sends
-	// somebody looking for what they did wrong. Each of them names the one
-	// thing to do next.
+	// 🔴 The reasons a run cannot start are not keys of their own any more
+	// (DEC-246). Until 2026-09-15 three sentences stood under the button. Now
+	// the card carries the reason where it arises: the empty screen says what
+	// to do, a problem is its own reason, and the one reason left is the
+	// directory, said under the files a run would write.
 	RecipeWriteTo   Key = "recipe.write-to"
 	RecipeChooseDir Key = "recipe.choose-dir"
 	RecipeReplace   Key = "recipe.replace"
 	RecipeGenerate  Key = "recipe.generate"
-	// The heading over the controls that write, and the two keys of the
-	// terminal line beneath them. The file name is an example rather than a
-	// path, because this window does not write the recipe file.
-	RecipeHeadingSave    Key = "recipe.heading.save"
+	// The two keys of the terminal line at the foot. The file name is an
+	// example rather than a path, because this window does not write the
+	// recipe file.
 	RecipeCommandFile    Key = "recipe.command.file"
 	RecipeCommandExample Key = "recipe.command.example"
 	RecipeStopRun        Key = "recipe.stop-run"
-	RecipeWouldWrite     Key = "recipe.would-write"
-	RecipeNothingYet     Key = "recipe.nothing-yet"
-	RecipeNeedRecipe     Key = "recipe.need-recipe"
-	RecipeNeedFix        Key = "recipe.need-fix"
-	RecipeNeedDirectory  Key = "recipe.need-directory"
-	RecipeDirHint        Key = "recipe.dir-hint"
-	RecipeWriting        Key = "recipe.writing"
-	RecipeStopping       Key = "recipe.stopping"
-	RecipeWrote          Key = "recipe.wrote"
-	RecipeIn             Key = "recipe.in"
-	RecipeFile           Key = "recipe.file"
-	RecipeFiles          Key = "recipe.files"
-	RecipeRunStopped     Key = "recipe.run-stopped"
-	RecipeRunFailed      Key = "recipe.run-failed"
+	// What the card says about a run: the files it would write before one, and
+	// what it left behind after one.
+	RecipePlanWrites    Key = "recipe.plan.writes"
+	RecipeNeedDirectory Key = "recipe.need-directory"
+	RecipeDirHint       Key = "recipe.dir-hint"
+	RecipeWriting       Key = "recipe.writing"
+	RecipeStopping      Key = "recipe.stopping"
+	RecipeResultWritten Key = "recipe.result.written"
+	RecipeResultRows    Key = "recipe.result.rows"
+	RecipeIn            Key = "recipe.in"
+	RecipeRunStopped    Key = "recipe.run-stopped"
+	RecipeRunFailed     Key = "recipe.run-failed"
 )
 
 // The keys of the Quick value screen.
@@ -695,16 +699,15 @@ var Keys = []Key{
 	RecipeEmpty, RecipePlaceholder, RecipeChecking, RecipeName,
 	RecipeExample, RecipeCanGenerate, RecipeGenerator, RecipeGenerators,
 	RecipeNotIn, RecipeNothingToDrawFrom,
-	RecipeHeadingRecipe, RecipeHeadingProblems,
+	RecipeHeadingRecipe, RecipeHeadingDescribes, RecipeHeadingResult, RecipeHeadingProblems,
 	RecipeNoObjections, RecipeLine, RecipeAllowed, RecipeTry,
 	RecipeUnchecked, RecipeEntity, RecipeEntities, RecipeField, RecipeFields,
 	RecipeShowing, RecipeOf, RecipeRow, RecipeRows, RecipeNoRows, RecipeNoFields,
 	RecipeAsText, RecipeParentOutside, RecipeRefused, RecipeCrashed, RecipeWillNotDo,
 	RecipeWriteTo, RecipeChooseDir, RecipeReplace, RecipeGenerate, RecipeStopRun,
-	RecipeHeadingSave, RecipeCommandFile, RecipeCommandExample,
-	RecipeWouldWrite, RecipeNothingYet, RecipeNeedRecipe, RecipeNeedFix,
-	RecipeNeedDirectory, RecipeDirHint, RecipeWriting, RecipeStopping, RecipeWrote, RecipeIn,
-	RecipeFile, RecipeFiles, RecipeRunStopped, RecipeRunFailed,
+	RecipeCommandFile, RecipeCommandExample,
+	RecipePlanWrites, RecipeNeedDirectory, RecipeDirHint, RecipeWriting, RecipeStopping,
+	RecipeResultWritten, RecipeResultRows, RecipeIn, RecipeRunStopped, RecipeRunFailed,
 }
 
 // The catalogue travels inside the binary, because a window that needs a file

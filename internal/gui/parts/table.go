@@ -34,6 +34,8 @@ package parts
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
+
+	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
 // KeyTable is the toolkit's table, plus a word about focus.
@@ -43,6 +45,11 @@ type KeyTable struct {
 	// onFocus is told before the table acts on the change, so that whatever it
 	// sets is already true by the time the refresh inside the toolkit runs.
 	onFocus func(has bool)
+	// ring is the mark of focus a screen built out of paint shows on every
+	// control. It is mounted only by Framed, so a screen using the table bare -
+	// the manifest browser, which still marks focus the toolkit's way - never
+	// shows it.
+	ring ring
 }
 
 // NewKeyTable builds a table that says when the keyboard arrives and leaves.
@@ -57,7 +64,7 @@ func NewKeyTable(
 	update func(widget.TableCellID, fyne.CanvasObject),
 	onFocus func(has bool),
 ) *KeyTable {
-	table := &KeyTable{onFocus: onFocus}
+	table := &KeyTable{onFocus: onFocus, ring: newRing(palette.RadiusControl)}
 	table.Length = length
 	table.CreateCell = create
 	table.UpdateCell = update
@@ -66,8 +73,15 @@ func NewKeyTable(
 	return table
 }
 
-// FocusGained records the focus before the toolkit redraws the cell.
+// Framed is the table with the ring that says the keyboard is on it, which a
+// screen built out of paint puts on itself. A screen that marks focus the
+// toolkit's way uses the table bare and the ring is never mounted.
+func (t *KeyTable) Framed() fyne.CanvasObject { return t.ring.framed(t) }
+
+// FocusGained records the focus before the toolkit redraws the cell, and draws
+// the ring for a screen that mounted it.
 func (t *KeyTable) FocusGained() {
+	t.ring.set(true)
 	if t.onFocus != nil {
 		t.onFocus(true)
 	}
@@ -77,6 +91,7 @@ func (t *KeyTable) FocusGained() {
 // FocusLost records the loss before the toolkit redraws every cell, which is the
 // whole reason this type exists.
 func (t *KeyTable) FocusLost() {
+	t.ring.set(false)
 	if t.onFocus != nil {
 		t.onFocus(false)
 	}
