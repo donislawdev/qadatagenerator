@@ -633,24 +633,12 @@ func (v *View) bindings() map[string]string {
 // and the seed everything else, which is what the accepted drawing does and
 // what stops this row needing a width written into it.
 func (v *View) showRows(generator string) {
-	fixed := []fyne.CanvasObject{
-		labelled(v.text.T(i18n.QuickLabelValue), v.chooser.OnScreen()),
-		// Second, and above the settings that only some generators read,
-		// because how many is asked of every generator alike. The fields below
-		// it come and go with what was chosen, so a field that never leaves
-		// belongs before the ones that do.
-		labelled(v.text.T(i18n.QuickLabelCount),
-			paint.AtLeast(paint.FieldWidth(countSample), 0, parts.Standing(parts.Field(v.howMany)))),
-		labelled(v.text.T(i18n.QuickLabelLocale), v.locales.OnScreen()),
-	}
 	showing := map[string]bool{}
 	if quick.Reads(generator, quick.RoleGender, v.locale) {
 		showing[quick.RoleGender] = true
-		fixed = append(fixed, labelled(v.text.T(i18n.QuickLabelGender), v.gender.OnScreen()))
 	}
 	if quick.Reads(generator, quick.RoleBirthDate, v.locale) {
 		showing[quick.RoleBirthDate] = true
-		fixed = append(fixed, labelled(v.text.T(i18n.QuickLabelBorn), dated(parts.Field(v.born))))
 	}
 
 	// 🔴 The panel is settled BEFORE the check below, and it was settled after
@@ -665,10 +653,41 @@ func (v *View) showRows(generator string) {
 	// different moments, and the render is what said so.
 	v.describe(generator)
 
+	// 🔴 NOTHING is built before this line, and until 2026-09-14 the row of
+	// fixed fields was built above it, on every draw, whether or not the return
+	// below then threw it away.
+	//
+	// Building it dressed the count field again each time, and dressing a field
+	// hands its focus to the grounds of THAT dressing. Opening the window draws
+	// three times and rebuilds the row once, so the grounds on the screen were
+	// the first dressing's and the focus went to the third's: the keyboard
+	// arrived on the count field and not one pixel changed, measured by
+	// tools/ognisko.py on the real window (B-279). The seed field, dressed below
+	// this line and therefore only when the row is really rebuilt, showed its
+	// ring the whole time, which is what narrowed it to the order of these
+	// lines. A field is dressed once now, so the fault cannot come back by this
+	// door, and this line is here so that it cannot come back by a similar one.
 	if sameFields(v.showing, showing) && len(v.settings.Objects) > 0 {
 		return
 	}
 	v.showing = showing
+
+	fixed := []fyne.CanvasObject{
+		labelled(v.text.T(i18n.QuickLabelValue), v.chooser.OnScreen()),
+		// Second, and above the settings that only some generators read,
+		// because how many is asked of every generator alike. The fields below
+		// it come and go with what was chosen, so a field that never leaves
+		// belongs before the ones that do.
+		labelled(v.text.T(i18n.QuickLabelCount),
+			paint.AtLeast(paint.FieldWidth(countSample), 0, parts.Standing(parts.Field(v.howMany)))),
+		labelled(v.text.T(i18n.QuickLabelLocale), v.locales.OnScreen()),
+	}
+	if showing[quick.RoleGender] {
+		fixed = append(fixed, labelled(v.text.T(i18n.QuickLabelGender), v.gender.OnScreen()))
+	}
+	if showing[quick.RoleBirthDate] {
+		fixed = append(fixed, labelled(v.text.T(i18n.QuickLabelBorn), dated(parts.Field(v.born))))
+	}
 	// 🔴 The seed takes the room the fixed fields did not, and the objects are
 	// handed to the layout in the order the keyboard should walk them.
 	//

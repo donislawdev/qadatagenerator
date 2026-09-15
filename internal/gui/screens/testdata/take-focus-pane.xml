@@ -273,7 +273,6 @@
 							</container>
 							<widget pos="0,58" size="1070x737" type="*container.Split">
 								<container size="532x737">
-									<rectangle size="532x737" strokeColor="rgba(78,201,245,255)" strokeWidth="2"/>
 									<widget size="532x737" type="*parts.KeyScroll">
 										<container size="532x737">
 											<container size="532x28">
@@ -418,13 +417,13 @@
 											</widget>
 										</container>
 									</widget>
+									<rectangle radius="10" size="532x737" strokeColor="rgba(224,218,255,255)" strokeWidth="2"/>
 								</container>
 								<widget pos="532,0" size="5x737" type="*container.divider">
 									<rectangle fillColor="shadow" size="5x737"/>
 									<rectangle fillColor="foreground" pos="0,368" size="4x0"/>
 								</widget>
 								<container pos="537,0" size="532x737">
-									<rectangle size="532x737" strokeWidth="2"/>
 									<widget size="532x737" type="*parts.KeyScroll">
 										<container size="532x737">
 											<container size="532x470">
@@ -774,6 +773,7 @@
 											</container>
 										</container>
 									</widget>
+									<rectangle radius="10" size="532x737" strokeWidth="2"/>
 								</container>
 							</widget>
 						</container>

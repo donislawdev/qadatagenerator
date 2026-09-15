@@ -272,7 +272,6 @@
 								</widget>
 								<container pos="537,0" size="532x771">
 									<container size="532x399">
-										<rectangle size="532x399" strokeWidth="2"/>
 										<widget size="532x399" type="*parts.KeyScroll">
 											<container size="532x399">
 												<container size="532x28">
@@ -380,6 +379,7 @@
 												</container>
 											</container>
 										</widget>
+										<rectangle radius="10" size="532x399" strokeWidth="2"/>
 									</container>
 									<container pos="0,399" size="532x372">
 										<container size="532x166">

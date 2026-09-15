@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
 	toolkit "fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -66,16 +67,21 @@ import (
 // already answers with its own tokens.
 type FieldEntry struct {
 	widget.Entry
-	// onFocus is told when the keyboard arrives and leaves, so that the ring
-	// drawn around this field can appear.
+	// onFocus is told when the keyboard arrives and leaves, and onHover when
+	// the pointer does, so that the ground drawn around this field can answer.
 	onFocus func(bool)
+	onHover func(bool)
+	// dressed is this field in the ground and the marks of the window, made
+	// once. See Field for why once.
+	dressed fyne.CanvasObject
 }
 
 // Asserted so that dropping one of these is a compile error rather than a field
 // that silently stops answering, which is how the chooser lost its hover.
 var (
-	_ fyne.Widget    = (*FieldEntry)(nil)
-	_ fyne.Focusable = (*FieldEntry)(nil)
+	_ fyne.Widget       = (*FieldEntry)(nil)
+	_ fyne.Focusable    = (*FieldEntry)(nil)
+	_ desktop.Hoverable = (*FieldEntry)(nil)
 )
 
 // NewFieldEntry builds a text field that looks like the rest of this window.
@@ -109,8 +115,50 @@ func (f *FieldEntry) FocusLost() {
 	}
 }
 
-// Field dresses a text field in the ground, the edge and the focus mark this
-// window gives every control.
+// MouseIn tells whoever draws around this field that the pointer is on it.
+//
+// # 🔴 Why a field has to be told at all, checked at the source
+//
+// widget.Entry answers a pointer with the shape of the cursor and with nothing
+// a picture can see: entry.go of v2.8.1 has Cursor and no MouseIn, where
+// button.go and select.go both keep a hovered flag and draw from it. Measured
+// by tools/najazd.py on the real window on 2026-09-14, five runs: the pointer
+// on either field of the Quick screen changed nought pixels, against 3588 to
+// 15130 for every button and chooser in the same row (B-282). The owner's rule
+// asks every control for every state, so the field is given the pointer here,
+// on the object the driver finds in the tree, and the ground beside it answers
+// the way a quiet button's does.
+func (f *FieldEntry) MouseIn(*desktop.MouseEvent) {
+	if f.onHover != nil {
+		f.onHover(true)
+	}
+}
+
+// MouseMoved is a pointer moving over the field, which changes nothing the
+// ground shows.
+func (f *FieldEntry) MouseMoved(*desktop.MouseEvent) {}
+
+// MouseOut tells them the pointer left.
+func (f *FieldEntry) MouseOut() {
+	if f.onHover != nil {
+		f.onHover(false)
+	}
+}
+
+// Field dresses a text field in the ground, the edge and the marks this window
+// gives every control, and it does so ONCE: asked again for the same field it
+// hands back the same object, the way OnScreen does on a button or a chooser.
+//
+// # 🔴 Why once, measured on the real window
+//
+// Dressing a field hands its focus to the grounds of THAT dressing. The Quick
+// screen dressed its count field on every draw and mounted the dressing only
+// when the row had really changed, so after the second draw the grounds on the
+// screen belonged to one dressing and the keyboard arrived at another: nought
+// pixels changed on the real window with the focus on that field, while the
+// seed field beside it, dressed only when mounted, showed its ring (B-279,
+// tools/ognisko.py). The screen no longer builds before it decides, and this
+// makes the same mistake harmless anywhere else.
 func Field(entry *FieldEntry) fyne.CanvasObject { return field(entry, entry) }
 
 // field is Field with the object put in the tree named apart from the field
@@ -132,16 +180,49 @@ func field(entry *FieldEntry, shown fyne.CanvasObject) fyne.CanvasObject {
 // edge: the magnifier of a search field, which is what tells a person the
 // field filters rather than takes a value.
 func fieldWith(entry *FieldEntry, shown fyne.CanvasObject, leading fyne.CanvasObject) fyne.CanvasObject {
-	resting, focused := paint.FieldGround(false), paint.FieldGround(true)
-	focused.Hide()
-	entry.onFocus = func(here bool) {
-		if here {
-			resting.Hide()
-			focused.Show()
+	if entry.dressed != nil {
+		return entry.dressed
+	}
+
+	// One ground per state the field can be in, all built and all but one
+	// hidden, so that answering the keyboard or the pointer is showing a
+	// different one rather than painting.
+	resting := paint.FieldGround(false, false)
+	underPointer := paint.FieldGround(false, true)
+	withKeyboard := paint.FieldGround(true, false)
+	both := paint.FieldGround(true, true)
+	for _, ground := range []fyne.CanvasObject{underPointer, withKeyboard, both} {
+		ground.Hide()
+	}
+	current := resting
+	focused, hovered := false, false
+	redraw := func() {
+		wanted := resting
+		switch {
+		case focused && hovered:
+			wanted = both
+		case focused:
+			wanted = withKeyboard
+		case hovered:
+			wanted = underPointer
+		}
+		if wanted == current {
 			return
 		}
-		focused.Hide()
-		resting.Show()
+		// Hidden first, and the order matters: hiding is what asks the window
+		// to draw again. Showing alone sets a flag and nothing else,
+		// container.go:186 of v2.8.1.
+		current.Hide()
+		wanted.Show()
+		current = wanted
+	}
+	entry.onFocus = func(here bool) {
+		focused = here
+		redraw()
+	}
+	entry.onHover = func(here bool) {
+		hovered = here
+		redraw()
 	}
 
 	// The words are placed by this space rather than by the toolkit: eight from
@@ -155,7 +236,8 @@ func fieldWith(entry *FieldEntry, shown fyne.CanvasObject, leading fyne.CanvasOb
 	}
 	inside := container.New(layout.NewCustomPaddedLayout(step, 0, step, step), typed)
 
-	return container.NewStack(resting, focused, inside)
+	entry.dressed = container.NewStack(resting, underPointer, withKeyboard, both, inside)
+	return entry.dressed
 }
 
 // bareField is this window's theme with the chrome of an input taken out of it.

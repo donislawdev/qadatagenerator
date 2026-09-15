@@ -304,7 +304,8 @@ func FieldFace(value, rung string, width float32) fyne.CanvasObject {
 			theme.NameStepRelated, theme.NameStepRelated, text)))
 }
 
-// FieldGround is the ground and the edge of a text field, at rest or focused.
+// FieldGround is the ground and the edge of a text field, in whichever of its
+// four states the keyboard and the pointer put it in.
 //
 // # Why a field needs one at all, when the toolkit draws its own
 //
@@ -313,12 +314,24 @@ func FieldFace(value, rung string, width float32) fyne.CanvasObject {
 // the top and draws its edge at that same thickness. Drawing the edge here
 // unties the two, and it also lets a field show focus the way every other
 // control in this window shows it.
-func FieldGround(focused bool) fyne.CanvasObject {
-	edge := theme.BorderControl
+//
+// # Why the pointer is answered from the rule the quiet button uses
+//
+// The toolkit draws nothing for a pointer on a field (B-282), so what it should
+// look like is a decision, and the decision already made for a quiet button is
+// the one thing that keeps a field and a button in one row looking like one
+// program: the same ground under the pointer, the same edge, and focus as the
+// edge in mark.focus whichever ground is under it. There is no pressed state,
+// since pressing a field puts the caret in it and the toolkit draws that.
+func FieldGround(focused, hovered bool) fyne.CanvasObject {
+	under, edge := pointerGround(hovered, false)
+	if under == "" {
+		under = theme.BgControl
+	}
 	if focused {
 		edge = theme.MarkFocus
 	}
-	return inside(Bordered(theme.BgControl, edge, theme.RadiusControl))
+	return inside(Bordered(under, edge, theme.RadiusControl))
 }
 
 // ChooserLook is everything the face of a chooser depends on.

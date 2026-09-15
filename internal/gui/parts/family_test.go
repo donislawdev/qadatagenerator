@@ -55,6 +55,13 @@ func TestEveryControlMarksFocusWithTheSameRing(t *testing.T) {
 			dressed := Field(control)
 			return control.FocusGained, dressed
 		}},
+		// Framed, because the frame IS the mark and a bare scrolling area has
+		// none. Joined on 2026-09-14, the day its ring took the shade of every
+		// other and the Quick screen was found holding one without a frame.
+		{"scrolling area", func() (func(), fyne.CanvasObject) {
+			control := NewKeyScroll(reading())
+			return control.FocusGained, control.Framed()
+		}},
 	}
 
 	for _, kind := range kinds {

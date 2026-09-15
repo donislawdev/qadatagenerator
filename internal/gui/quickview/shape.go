@@ -142,7 +142,14 @@ func (v *View) valuesCard(values []string) fyne.CanvasObject {
 	// container.Scroll carries no keyboard method at all, so a person without a
 	// mouse could reach the values on the About screen only by not needing to.
 	// 73.6% of that screen was unreachable before the same repair.
-	return parts.NewKeyScroll(paint.FitHeight(len(values), palette.NameStepTight, card))
+	//
+	// 🔴 Framed, and it was bare until 2026-09-14. The frame is the whole of
+	// what shows the keyboard has reached the card, and a scrolling area put on
+	// a screen without it keeps recolouring a rectangle that is not there:
+	// nought pixels on the real window at the fourteenth stop, with every test
+	// of the type green (B-279). The frame lands on the edge of the card and
+	// recolours it, which is how every other control here marks focus.
+	return parts.NewKeyScroll(paint.FitHeight(len(values), palette.NameStepTight, card)).Framed()
 }
 
 // valueRow is one produced value, numbered.

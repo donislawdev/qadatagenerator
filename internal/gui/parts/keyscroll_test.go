@@ -155,8 +155,8 @@ func TestTheFrameSaysWhereTheKeyboardIs(t *testing.T) {
 		t.Fatal("the keyboard arrived and the frame is drawn exactly as it was, so nothing " +
 			"on the screen says where a person is standing")
 	}
-	if marked != palette.Named(palette.NameFocus).NRGBA() {
-		t.Errorf("the frame is drawn %v rather than in the colour that means focus", marked)
+	if marked != palette.Ink(palette.MarkFocus) {
+		t.Errorf("the frame is drawn %v rather than in the one colour every control marks focus with", marked)
 	}
 
 	canvas.FocusNext()

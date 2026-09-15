@@ -42,6 +42,21 @@ import (
 // a renderer would make this a piece of the toolkit rebuilt rather than
 // extended, against a register that may only get smaller. So the frame is a
 // rectangle beside it in a stack, and Framed is what a screen adds to itself.
+//
+// # 🔴 The frame is the ring every control draws, and it is only there if
+// the screen took it
+//
+// Framed is the whole of the mark. A screen that puts the scrolling area on
+// itself bare gets an area the keyboard reaches and nothing that shows it did:
+// FocusGained recolours a rectangle nobody mounted, every test of this type
+// passes, and the real window shows nought pixels of change. That was the
+// Quick screen until 2026-09-14 (B-279), and the guard that walks a screen's
+// stops counting rings on the SCREEN is what holds it now.
+//
+// The colour is mark.focus, the one shade every other control draws its ring
+// in, since 2026-09-14. Until then it was the focus entry of the palette the
+// window no longer wears, which made this the one mark on three screens in a
+// colour of its own.
 type KeyScroll struct {
 	container.Scroll
 	frame *canvas.Rectangle
@@ -64,19 +79,33 @@ func NewKeyScroll(content fyne.CanvasObject) *KeyScroll {
 	// rows of pixels and every pixel of it is a half blend.
 	scroll.frame.StrokeWidth = palette.BorderThickness
 	scroll.frame.StrokeColor = color.Transparent
+	// Rounded like a card rather than like a control, because a scrolling area
+	// is the size of a card and, on the one screen where what scrolls IS a
+	// card, the frame then lands on the card's own edge and recolours it.
+	scroll.frame.CornerRadius = palette.RadiusCard
 	scroll.ExtendBaseWidget(scroll)
 	return scroll
 }
 
 // Framed is this scrolling area together with the frame that says when it holds
-// the keyboard. It is what a screen puts on itself.
+// the keyboard. It is what a screen puts on itself, and the only thing that
+// puts the mark on the screen at all.
+//
+// 🔴 The frame comes SECOND, so that it is drawn over what scrolls and not
+// under it. It was first until 2026-09-14, and on the one screen where the
+// content has a ground of its own the ground painted over the inner half of
+// the stroke: tools/ognisko.py on the real window found 5213 pixels changed at
+// a contrast of 1.44, which is the outer half blended with the window. A
+// stroke on a shape with no fill covers nothing but its own edge, and a
+// rectangle takes no event, so the wheel and the keyboard still reach the
+// area under it.
 func (s *KeyScroll) Framed() fyne.CanvasObject {
-	return container.NewStack(s.frame, s)
+	return container.NewStack(s, s.frame)
 }
 
 // FocusGained draws the frame in the colour that means the keyboard is here.
 func (s *KeyScroll) FocusGained() {
-	s.frame.StrokeColor = palette.Named(palette.NameFocus).NRGBA()
+	s.frame.StrokeColor = palette.Ink(palette.MarkFocus)
 	s.frame.Refresh()
 }
 

@@ -449,8 +449,14 @@ var Tokens = []Token{
 	// replaces, 12.16 against the inside of a field, 3.83 on the filled button
 	// and 3.15 on that fill under the pointer. One shade, every control, which
 	// is the whole point of it.
+	//
+	// bg.hover joined the grounds on 2026-09-14, the day the text field began
+	// answering the pointer: a field with the keyboard on it and the pointer
+	// over it draws this edge on that ground, as a quiet button already did.
+	// line.quiet joined the same day, because the frame of a scrolling area
+	// lands on the edge of the card it holds and recolours it.
 	{MarkFocus, "accent.12", ThresholdControl,
-		[]string{BorderControl, BgWindow, BgSurface, BgControl, FillPrimary, FillHover},
+		[]string{BorderControl, LineQuiet, BgWindow, BgSurface, BgControl, BgHover, FillPrimary, FillHover},
 		"the edge of the control the keyboard is on, which every control shows the same way"},
 
 	{TextPrimary, "neutral.12", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed, BgSelection},
