@@ -76,6 +76,24 @@ func TestAMissingKeyNamesItself(t *testing.T) {
 	}
 }
 
+// One of a thing takes the first form and every other number the second,
+// nought included: "0 modules" is English and "0 module" is not. The words come
+// from the catalogue, so a missing key would show up here as its own name.
+func TestACountTakesTheFormOfTheWordItsNumberAsksFor(t *testing.T) {
+	for _, one := range []struct {
+		many int
+		want string
+	}{
+		{0, "0 modules"},
+		{1, "1 module"},
+		{36, "36 modules"},
+	} {
+		if got := English.Counted(one.many, AboutCountModule, AboutCountModules); got != one.want {
+			t.Errorf("%d counted as %q, want %q", one.many, got, one.want)
+		}
+	}
+}
+
 func TestAnUnreadableCatalogueIsReportedRatherThanGuessed(t *testing.T) {
 	if _, err := Parse("xx", []byte("this: [is not\n  valid yaml")); err == nil {
 		t.Fatal("a broken catalogue parsed without complaint")

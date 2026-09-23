@@ -460,7 +460,9 @@
 															<container pos="16,16" size="479x222">
 																<container size="479x23">
 																	<container size="27x23">
-																		<image fillMode="contain" pos="4,4" rsc="circle-alert-e05561-15.svg" size="15x15"/>
+																		<container size="27x23">
+																			<image fillMode="contain" pos="4,4" rsc="circle-alert-e05561-15.svg" size="15x15"/>
+																		</container>
 																	</container>
 																	<text bold pos="27,0" size="452x23">Problems (1)</text>
 																</container>

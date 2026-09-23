@@ -460,7 +460,9 @@
 																<container size="479x55">
 																	<container size="479x23">
 																		<container size="27x23">
-																			<image fillMode="contain" pos="4,4" rsc="check-3da766-15.svg" size="15x15"/>
+																			<container size="27x23">
+																				<image fillMode="contain" pos="4,4" rsc="check-3da766-15.svg" size="15x15"/>
+																			</container>
 																		</container>
 																		<text bold pos="27,0" size="452x23">No objections. This recipe can be used as it stands.</text>
 																	</container>

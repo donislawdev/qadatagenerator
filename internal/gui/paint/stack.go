@@ -99,11 +99,21 @@ func Trail(rest, trailing fyne.CanvasObject) *fyne.Container {
 // in lightness, so somebody who does not separate hues sees one shade of grey.
 // It was a method of the take screen until the recipe screen needed the same
 // row on 2026-09-15.
+//
+// # 🔴 Why the icon stands in a column of its own
+//
+// The leading side of a border is given the whole height of the row, and an
+// image centres itself in whatever it is given. So beside a sentence of three
+// lines the icon stood level with the second one, and nothing said so: every
+// sentence it had marked until 2026-09-23 fitted on one line. The mock of the
+// About screen was the first with a notice long enough to wrap. A column gives
+// the icon its own height at the top, which is what "level with its first line"
+// promised.
 func Marked(icon, ink string, words fyne.CanvasObject) *fyne.Container {
 	return Lead(
-		Pad(theme.NameStepHairline, theme.NameStepHairline,
+		container.NewVBox(Pad(theme.NameStepHairline, theme.NameStepHairline,
 			theme.NameStepHairline, theme.NameStepTight,
-			Icon(icon, ink, theme.IconSmall)),
+			Icon(icon, ink, theme.IconSmall))),
 		words)
 }
 

@@ -23,6 +23,7 @@ import (
 	_ "embed"
 	"fmt"
 	"sort"
+	"strconv"
 
 	"github.com/goccy/go-yaml"
 )
@@ -73,10 +74,28 @@ const (
 	AboutLicenseCode Key = "about.license.code"
 	AboutLicenseSpec Key = "about.license.spec"
 
-	// Only the date carries a label. The module name, its version and its
-	// license read as themselves on the line, and a label in front of each
-	// turned thirty seven modules into a wall nobody could scan.
+	// The heads of the columns of the three lists on the screen: what it is,
+	// which version, under which license, and the day that license was read.
+	// A head over a column rather than a label in front of every value, which
+	// turned thirty seven modules into a wall nobody could scan (DEC-250). The
+	// first column is named by what the list holds.
+	AboutColumnModule  Key = "about.column.module"
+	AboutColumnSource  Key = "about.column.source"
+	AboutColumnAsset   Key = "about.column.asset"
+	AboutColumnVersion Key = "about.column.version"
+	AboutColumnLicense Key = "about.column.license"
 	AboutColumnChecked Key = "about.column.checked"
+
+	// How many of each thing a list holds, beside its heading, in the two
+	// forms a number asks of an English noun (see QuickValuesCounted).
+	AboutCountModule  Key = "about.count.module"
+	AboutCountModules Key = "about.count.modules"
+	AboutCountList    Key = "about.count.list"
+	AboutCountLists   Key = "about.count.lists"
+	AboutCountSource  Key = "about.count.source"
+	AboutCountSources Key = "about.count.sources"
+	AboutCountAsset   Key = "about.count.asset"
+	AboutCountAssets  Key = "about.count.assets"
 
 	AboutEmptyComponents Key = "about.empty.components"
 	AboutEmptyData       Key = "about.empty.data"
@@ -641,6 +660,7 @@ const (
 	PurposeTake     Key = "purpose.take"
 	PurposeRecipe   Key = "purpose.recipe"
 	PurposeManifest Key = "purpose.manifest"
+	PurposeAbout    Key = "purpose.about"
 
 	// The machine readable form of what this screen says. DEC-30 names the
 	// reader and it is a compliance scanner, which reads documents rather than
@@ -669,13 +689,16 @@ var Keys = []Key{
 	QuickGroupInternational, QuickGroupPeople, QuickGroupPlaces, CountryPL, CountryUS,
 	QuickPickPrompt, QuickPickKinds, QuickPickMatches, QuickPickEnter, QuickPickNothing,
 	CommandHeading, CommandCopy, CommandCopied,
-	PurposeTake, PurposeRecipe, PurposeManifest, AboutSaveJSON,
+	PurposeTake, PurposeRecipe, PurposeManifest, PurposeAbout, AboutSaveJSON,
 
 	AboutHeadingVersions, AboutHeadingLicenses, AboutHeadingComponents,
 	AboutHeadingData, AboutHeadingNotices,
 	AboutVersionTool, AboutVersionCatalog, AboutVersionManifest, AboutVersionRecipe,
 	AboutLicenseCode, AboutLicenseSpec,
-	AboutColumnChecked,
+	AboutColumnModule, AboutColumnSource, AboutColumnAsset,
+	AboutColumnVersion, AboutColumnLicense, AboutColumnChecked,
+	AboutCountModule, AboutCountModules, AboutCountList, AboutCountLists,
+	AboutCountSource, AboutCountSources, AboutCountAsset, AboutCountAssets,
 	AboutEmptyComponents, AboutEmptyData,
 	AboutHeadingEmbedded, AboutEmptyEmbedded, AboutSaveNotices, AboutNoticesHeader,
 
@@ -820,6 +843,24 @@ func (c Catalogue) T(key Key) string {
 		return value
 	}
 	return string(key)
+}
+
+// Counted is a number with the thing it counts, in whichever of the two forms
+// of the word fits it.
+//
+// # Why here rather than in each screen
+//
+// Written first in the take screen, then twice more in the manifest browser and
+// the recipe screen as copies of each other, and a fourth copy would have come
+// with the About screen on 2026-09-23. The two forms are the catalogue's, so
+// the choice between them belongs beside the catalogue. The same limit as the
+// note on QuickValuesCounted: a language whose number governs more than two
+// forms needs a count aware catalogue, not a third key.
+func (c Catalogue) Counted(many int, one, rest Key) string {
+	if many == 1 {
+		return strconv.Itoa(many) + " " + c.T(one)
+	}
+	return strconv.Itoa(many) + " " + c.T(rest)
 }
 
 // Names lists every key the catalogue carries, sorted, so a test comparing it

@@ -12,6 +12,23 @@ repository once they are released.
 
 ### Changed
 
+- **The About screen has been rebuilt so that what you come for is on the first
+  screen.** The versions and the licenses stand side by side in one card, under
+  them the two sentences about the data you generate, and then the lists of what
+  went into the build, the short ones first. The two buttons that save a file
+  are in the strip along the top, which does not scroll. The modules are one row
+  each in columns you can scan, and their web address is no longer repeated on
+  screen, because it is the name of the module with https:// in front of it. It
+  is still in the report the button saves.
+
+- **The About screen spells license the way the command line does.** The two
+  buttons said licence, while the headings and `--license` said license.
+
+- **A sign beside a sentence now stands level with its first line.** Beside a
+  sentence long enough to wrap it stood level with the middle of it, on the
+  result of a take and corrupt run, on the verdicts of the recipe screen and on
+  the notes of a comparison in the manifest browser.
+
 - **The button that does the main thing on a screen is now the accent colour**
   rather than grey, so you can find it without reading every control. On the
   Quick value screen that is Copy.
@@ -53,6 +70,11 @@ repository once they are released.
   match a number that was really issued.
 
 ### Added
+
+- **The About screen lists the reference data built into the program**: where
+  the names, places and other lists come from, under which terms, the day those
+  terms were read, and which lists came from each source. `--license` has
+  printed this all along and the window never showed it.
 
 - **`--license` now names the typeface and the icon set built into the window.**
   The report listed the modules this tool links and the reference data it

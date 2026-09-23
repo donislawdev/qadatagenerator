@@ -885,7 +885,9 @@
 															<container size="306x75">
 																<container size="306x75">
 																	<container size="27x75">
-																		<image fillMode="contain" pos="4,4" rsc="info-a594ff-15.svg" size="15x67"/>
+																		<container size="27x23">
+																			<image fillMode="contain" pos="4,4" rsc="info-a594ff-15.svg" size="15x15"/>
+																		</container>
 																	</container>
 																	<container pos="27,0" size="279x75">
 																		<widget size="279x75" type="*widget.Label">

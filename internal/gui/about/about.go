@@ -9,6 +9,21 @@
 // promise that was made in one document and carried by no other: the parity
 // rule says every function has to be describable from both surfaces, and the
 // license flags had no path here until this screen existed.
+//
+// # How it is laid out, settled as DEC-250
+//
+// A person comes here for one of four things: the version to put in a report,
+// the license of the code and of the specification, whether the data they
+// generate is theirs, or the file a compliance department reads. All four stand
+// above the fold. The band at the top holds the purpose and the two ways to save
+// a file, and it does not scroll, so the file is found without looking for it.
+// Under it: one card with the versions and the licenses side by side, the
+// sentences about the user's data, and then the three lists of what went into
+// the build, the short ones first and the thirty six modules last.
+//
+// It had shown 29.1 percent of its content, with the versions and the first of
+// the modules above the fold (B-280), and it had never shown the reference data
+// the command line prints, which the rule of parity does not allow.
 package about
 
 import (
@@ -17,10 +32,13 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
+	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/license"
 	"github.com/donislawdev/qadatagenerator/internal/version"
 )
@@ -57,6 +75,57 @@ type Saver func(contents []byte)
 // printed section are what describe it.
 type Notices func(name string) (string, bool)
 
+// Content is the whole screen, built from what this build carries.
+//
+// It takes the report and the versions rather than reading them itself, so the
+// screen can be rendered in a test against a build that carries something else
+// entirely. A view that fetches its own facts can only ever be checked against
+// the one set of facts it fetches.
+//
+// The objects are handed to the layout in reading order, which is the order
+// the keyboard walks them: the two buttons in the band, then the page.
+func Content(text i18n.Catalogue, report license.Report, versions version.Set,
+	save Saver, notices Notices) fyne.CanvasObject {
+	top := band(text, report, save, notices)
+	// The scrolling area is the keyboard's rather than the toolkit's own, which
+	// answers to the wheel and to nothing else. The page holds no control, so
+	// without that the only way through it is a mouse: measured on 2026-08-24 at
+	// 3169 pixels of content in a window showing 836 of them, with every key
+	// leaving the offset at zero (DEC-187).
+	page := parts.NewKeyScroll(sections(text, report, versions)).Framed()
+	return container.New(layout.NewBorderLayout(top, nil, nil, nil), top, page)
+}
+
+// band is what the screen is for and the two files it can write.
+//
+// # Why the buttons are here rather than beside what they describe
+//
+// The band does not scroll. The report is for a compliance department (DEC-30),
+// and its button standing beside the sections it describes would have put the
+// second one, the notices of the fonts, under the fold. Both are quiet: this
+// screen is read rather than acted on, so nothing on it is the one action it is
+// for (DEC-250).
+func band(text i18n.Catalogue, report license.Report, save Saver, notices Notices) fyne.CanvasObject {
+	return paint.Band(paint.BandBelow, palette.NameStepGroup, palette.NameStepMajor,
+		paint.Column(palette.NameStepGroup,
+			quiet(text.T(i18n.PurposeAbout)),
+			paint.Row(palette.NameStepRelated,
+				saveButton(text, report, save).OnScreen(),
+				noticeButton(text, report, save, notices).OnScreen())))
+}
+
+// quiet is a sentence in the second ink that wraps to the width it is given.
+//
+// A label rather than text of the canvas, because a sentence as canvas text is
+// drawn on one line whatever the width, and so decides how narrow the window
+// may be. Placed in a column, where the width is the column's.
+func quiet(words string) fyne.CanvasObject {
+	label := widget.NewLabel(words)
+	label.Wrapping = fyne.TextWrapWord
+	label.Importance = widget.LowImportance
+	return label
+}
+
 // saveButton offers the report in the form a machine reads.
 //
 // # Why a file rather than a panel showing the same thing
@@ -82,6 +151,7 @@ func saveButton(text i18n.Catalogue, report license.Report, save Saver) *parts.B
 		}
 		save(encoded)
 	})
+	button.ShowIcon(paint.IconDoc)
 	// A screen with no way to write is a screen where this button would do
 	// nothing at all, and a control that does nothing is a promise. Disabled,
 	// it also loses its edge, which is what says a control is there.
@@ -89,155 +159,6 @@ func saveButton(text i18n.Catalogue, report license.Report, save Saver) *parts.B
 		button.Disable()
 	}
 	return button
-}
-
-// Content is the whole screen, built from what this build carries.
-//
-// It takes the report and the versions rather than reading them itself, so the
-// screen can be rendered in a test against a build that carries something else
-// entirely. A view that fetches its own facts can only ever be checked against
-// the one set of facts it fetches.
-func Content(text i18n.Catalogue, report license.Report, versions version.Set,
-	save Saver, notices Notices) fyne.CanvasObject {
-	sections := []fyne.CanvasObject{
-		container.NewHBox(
-			saveButton(text, report, save).OnScreen(),
-			noticeButton(text, report, save, notices).OnScreen()),
-		heading(text, i18n.AboutHeadingVersions),
-		versionList(text, versions),
-		widget.NewSeparator(),
-		heading(text, i18n.AboutHeadingLicenses),
-		licenseList(text, report),
-		widget.NewSeparator(),
-		heading(text, i18n.AboutHeadingComponents),
-		componentList(text, report),
-		widget.NewSeparator(),
-		// The fonts and the icons, which are neither modules nor reference
-		// lists and were named on neither surface until 2026-09-08. This
-		// section is the window's half of the pair, and the command line
-		// prints the same facts under a heading of its own.
-		heading(text, i18n.AboutHeadingEmbedded),
-		embeddedList(text, report),
-		widget.NewSeparator(),
-		heading(text, i18n.AboutHeadingNotices),
-		noticeList(report),
-	}
-	// The scrolling area is the keyboard's rather than the toolkit's own, which
-	// answers to the wheel and to nothing else. This screen is one long column
-	// and has no control on it at all, so without that the only way through it
-	// is a mouse: measured on 2026-08-24 at 3169 pixels of content in a window
-	// showing 836 of them, with every key leaving the offset at zero.
-	return parts.Inset(parts.NewKeyScroll(container.NewVBox(sections...)).Framed())
-}
-
-func heading(text i18n.Catalogue, key i18n.Key) fyne.CanvasObject {
-	return widget.NewLabelWithStyle(text.T(key), fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-}
-
-// pair is a label and the value beside it. Values are data rather than
-// interface text, so they are not keys.
-func pair(label, value string) fyne.CanvasObject {
-	name := widget.NewLabelWithStyle(label, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	return container.NewHBox(name, widget.NewLabel(value))
-}
-
-func versionList(text i18n.Catalogue, versions version.Set) fyne.CanvasObject {
-	return container.NewVBox(
-		pair(text.T(i18n.AboutVersionTool), versions.Tool),
-		pair(text.T(i18n.AboutVersionCatalog), versions.Catalog),
-		pair(text.T(i18n.AboutVersionManifest), versions.Manifest),
-		pair(text.T(i18n.AboutVersionRecipe), versions.Recipe),
-	)
-}
-
-func licenseList(text i18n.Catalogue, report license.Report) fyne.CanvasObject {
-	rows := []fyne.CanvasObject{
-		pair(text.T(i18n.AboutLicenseCode), report.Code.License),
-		pair(text.T(i18n.AboutLicenseSpec), report.Spec.License),
-	}
-	// The scope is filled only where the license does not cover everything
-	// this binary compiles, and without it the two names above read as a
-	// contradiction.
-	if report.Spec.Scope != "" {
-		rows = append(rows, widget.NewLabel(report.Spec.Scope))
-	}
-	return container.NewVBox(rows...)
-}
-
-func componentList(text i18n.Catalogue, report license.Report) fyne.CanvasObject {
-	if len(report.Components) == 0 {
-		return widget.NewLabel(text.T(i18n.AboutEmptyComponents))
-	}
-	rows := make([]fyne.CanvasObject, 0, len(report.Components))
-	for _, component := range report.Components {
-		rows = append(rows, componentRow(text, component))
-	}
-	return container.NewVBox(rows...)
-}
-
-// componentRow describes one linked module in two lines rather than five.
-//
-// # Why two rather than one field per line
-//
-// Looking at the first build showed the reason: with a label on its own line
-// for every field, thirty seven modules became one hundred and eighty five
-// lines that all look the same. Squinting at it picked out nothing, which is
-// the first question the checklist in docs/17 asks of a screen. The module
-// name leads because it is what somebody scans for, and the rest of the facts
-// follow it on the same line.
-//
-// The day the license was read stays on screen beside the license itself,
-// because a license is a property of a version rather than of a project, and a
-// name with no date is a fact somebody remembered rather than one they checked.
-func componentRow(text i18n.Catalogue, component license.Component) fyne.CanvasObject {
-	name := widget.NewLabelWithStyle(component.Module, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	terms := widget.NewLabel(component.Version + "   " + component.License)
-
-	source := widget.NewLabel(component.Source)
-	source.Importance = widget.LowImportance
-	checked := widget.NewLabel(text.T(i18n.AboutColumnChecked) + " " + component.Checked)
-	checked.Importance = widget.LowImportance
-
-	return container.NewVBox(
-		container.NewHBox(name, terms),
-		container.NewHBox(source, checked),
-	)
-}
-
-func noticeList(report license.Report) fyne.CanvasObject {
-	generated := widget.NewLabel(report.Notices.GeneratedData)
-	generated.Wrapping = fyne.TextWrapWord
-	synthetic := widget.NewLabel(report.Notices.SyntheticData)
-	synthetic.Wrapping = fyne.TextWrapWord
-	return container.NewVBox(generated, synthetic)
-}
-
-// embeddedList names the typeface and the icon set this build carries.
-//
-// The shape follows componentRow above rather than inventing a second one: the
-// asset leads because it is what somebody scans for, the terms follow on the
-// same line, and the day they were read stays beside them because a licence is
-// a property of a version rather than of a project.
-func embeddedList(text i18n.Catalogue, report license.Report) fyne.CanvasObject {
-	if len(report.Embedded) == 0 {
-		return widget.NewLabel(text.T(i18n.AboutEmptyEmbedded))
-	}
-	rows := make([]fyne.CanvasObject, 0, len(report.Embedded))
-	for _, asset := range report.Embedded {
-		name := widget.NewLabelWithStyle(asset.Asset, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-		terms := widget.NewLabel(asset.Version + "   " + asset.License)
-
-		source := widget.NewLabel(asset.Source)
-		source.Importance = widget.LowImportance
-		checked := widget.NewLabel(text.T(i18n.AboutColumnChecked) + " " + asset.Checked)
-		checked.Importance = widget.LowImportance
-
-		rows = append(rows, container.NewVBox(
-			container.NewHBox(name, terms),
-			container.NewHBox(source, checked),
-		))
-	}
-	return container.NewVBox(rows...)
 }
 
 // noticeButton offers the licence texts of the embedded assets as one file.
@@ -262,6 +183,7 @@ func noticeButton(text i18n.Catalogue, report license.Report, save Saver,
 	button := parts.NewButton(text.T(i18n.AboutSaveNotices), func() {
 		save([]byte(document))
 	})
+	button.ShowIcon(paint.IconShield)
 	if save == nil || document == "" {
 		button.Disable()
 	}

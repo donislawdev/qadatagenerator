@@ -721,10 +721,12 @@ func printLicense(out *streams, machineReadable bool) {
 	if len(license.Data) == 0 {
 		out.emit(licenseNoData)
 	}
-	for _, source := range groupData(license.Data) {
-		out.emit("  " + source.project + " " + source.version)
-		out.emit("    " + source.license + "  " + source.source)
-		for _, list := range source.lists {
+	// Grouped by the register's own rule, which the About screen of the window
+	// uses as well, so both surfaces name each project once and in one order.
+	for _, source := range license.BySource(license.Data) {
+		out.emit("  " + source.Project + " " + source.Version)
+		out.emit("    " + source.License + "  " + source.Source)
+		for _, list := range source.Lists {
 			out.emit("      " + list)
 		}
 	}
@@ -747,39 +749,6 @@ func printLicense(out *streams, machineReadable bool) {
 	out.emit(license.GeneratedDataNotice)
 	out.emit("")
 	out.emit(license.SyntheticDataNotice)
-}
-
-// takenFrom is one project and everything read from it. The registry keeps a
-// row per list, because that is what a gate can compare with the files, and a
-// person reading the licences wants the project named once.
-type takenFrom struct {
-	project string
-	version string
-	license string
-	source  string
-	lists   []string
-}
-
-func groupData(sources []license.DataSource) []takenFrom {
-	var grouped []takenFrom
-	index := map[string]int{}
-	for _, entry := range sources {
-		key := entry.Project + " " + entry.Version
-		at, seen := index[key]
-		if !seen {
-			index[key] = len(grouped)
-			grouped = append(grouped, takenFrom{
-				project: entry.Project,
-				version: entry.Version,
-				license: entry.License,
-				source:  entry.Source,
-				lists:   []string{entry.Corpus},
-			})
-			continue
-		}
-		grouped[at].lists = append(grouped[at].lists, entry.Corpus)
-	}
-	return grouped
 }
 
 // seedRefused is the four part refusal for a seed longer than the surfaces

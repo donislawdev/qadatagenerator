@@ -870,7 +870,9 @@
 																<container size="306x189">
 																	<container size="306x23">
 																		<container size="27x23">
-																			<image fillMode="contain" pos="4,4" rsc="triangle-alert-e8a33d-15.svg" size="15x15"/>
+																			<container size="27x23">
+																				<image fillMode="contain" pos="4,4" rsc="triangle-alert-e8a33d-15.svg" size="15x15"/>
+																			</container>
 																		</container>
 																		<text bold pos="27,0" size="279x23">No kind of damage is chosen</text>
 																	</container>

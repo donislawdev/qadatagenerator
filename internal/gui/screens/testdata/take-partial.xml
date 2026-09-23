@@ -897,7 +897,9 @@
 																	</container>
 																	<container pos="0,142" size="306x58">
 																		<container size="27x58">
-																			<image fillMode="contain" pos="4,4" rsc="triangle-alert-e8a33d-15.svg" size="15x50"/>
+																			<container size="27x23">
+																				<image fillMode="contain" pos="4,4" rsc="triangle-alert-e8a33d-15.svg" size="15x15"/>
+																			</container>
 																		</container>
 																		<container pos="27,0" size="279x58">
 																			<widget size="279x58" type="*widget.Label">

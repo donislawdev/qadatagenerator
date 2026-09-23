@@ -37,6 +37,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/response"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/about"
+	"github.com/donislawdev/qadatagenerator/internal/gui/assets"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
@@ -316,8 +317,14 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 		Content: recipeScreen.Content()}
 	column[screenManifest] = shell.Screen{Name: text.T(i18n.ScreenManifest), Group: checking, Icon: paint.IconChecklist,
 		Content: view.Content()}
+	// 🔴 A way to write that writes nowhere, and the notices this build carries,
+	// so the picture has the controls the window has (B-283). Handed nothing,
+	// both buttons were disabled, the keyboard walked past them, and every Tab
+	// counted on a picture of this screen was two short of the window. Nothing
+	// is written by pressing them here, which is why a picture may have them.
+	// That they really write is held by the screen's own package.
 	column[screenAbout] = shell.Screen{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,
-		Content: about.Content(text, license.Current(), version.Current(), nil, nil)}
+		Content: about.Content(text, license.Current(), version.Current(), func([]byte) {}, assets.Notice)}
 	// The same brand the program carries, so a render shows what a person sees.
 	// This copy of the list has been wrong about the sidebar once already: it
 	// carried icons the program did not, and every picture anybody looked at

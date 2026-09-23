@@ -366,7 +366,9 @@
 											<container pos="4,12" size="1046x66">
 												<container size="1046x24">
 													<container size="27x24">
-														<image fillMode="contain" pos="4,4" rsc="circle-alert-e05561-15.svg" size="15x16"/>
+														<container size="27x23">
+															<image fillMode="contain" pos="4,4" rsc="circle-alert-e05561-15.svg" size="15x15"/>
+														</container>
 													</container>
 													<container pos="27,0" size="1019x24">
 														<widget size="1019x24" type="*widget.RichText">

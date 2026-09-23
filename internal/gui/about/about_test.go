@@ -9,12 +9,14 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/gui/assets"
+	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/license"
 	"github.com/donislawdev/qadatagenerator/internal/version"
@@ -25,8 +27,13 @@ import (
 // until 2026-09-08, when it gained its first control: everything on it before
 // that was a label, and a label does not ask the running application how wide
 // it is.
+//
+// The theme is the product's, as in every other screen's tests: the lists on
+// this screen measure their columns on the text they draw, and the toolkit's
+// test theme draws it at other sizes.
 func TestMain(m *testing.M) {
-	test.NewApp()
+	application := test.NewApp()
+	application.Settings().SetTheme(fynetheme.Current())
 	os.Exit(m.Run())
 }
 
@@ -36,9 +43,15 @@ func TestMain(m *testing.M) {
 // comparing rendered pixels to a stored image goes red when a padding changes
 // and says nothing about whether the licence is still on screen, which is the
 // promise this screen exists to keep.
+//
+// 🔴 Text of the canvas as well as labels. The values in the lists and the
+// card are drawn as canvas text since 2026-09-23, and a walk that knew only
+// labels would have reported every module missing.
 func texts(object fyne.CanvasObject) []string {
 	switch typed := object.(type) {
 	case *widget.Label:
+		return []string{typed.Text}
+	case *canvas.Text:
 		return []string{typed.Text}
 	case *fyne.Container:
 		var found []string
@@ -140,6 +153,50 @@ func TestEveryLinkedModuleIsNamedWithTheDayItsLicenceWasRead(t *testing.T) {
 	}
 }
 
+// The reference data is on the screen as the license flag prints it: each
+// source named with its version, its terms, the day they were read and every
+// list taken from it.
+//
+// 🔴 The screen went without this section from its first commit until
+// 2026-09-23, while --license printed it and the heading waited in the
+// catalogue, and every test here was green because none asked.
+func TestEveryReferenceDataSourceIsNamedWithItsLists(t *testing.T) {
+	all := screen(t)
+	sources := license.BySource(license.Current().Data)
+	if len(sources) == 0 {
+		t.Fatal("no reference data in the register, so this test would pass by checking nothing")
+	}
+	for _, source := range sources {
+		for _, want := range []string{source.Project, source.Version, source.License, source.Checked, source.Source} {
+			if !has(all, want) {
+				t.Errorf("the screen does not carry %q for %s", want, source.Project)
+			}
+		}
+		for _, list := range source.Lists {
+			if !has(all, list) {
+				t.Errorf("the screen does not name the list %s read from %s", list, source.Project)
+			}
+		}
+	}
+}
+
+// The typeface and the icon set are named with their terms, as the license
+// flag names them.
+func TestEveryEmbeddedAssetIsNamedWithItsTerms(t *testing.T) {
+	all := screen(t)
+	report := license.Current()
+	if len(report.Embedded) == 0 {
+		t.Fatal("no embedded asset in the register, so this test would pass by checking nothing")
+	}
+	for _, asset := range report.Embedded {
+		for _, want := range []string{asset.Asset, asset.Version, asset.License, asset.Checked, asset.Source} {
+			if !has(all, want) {
+				t.Errorf("the screen does not carry %q for %s", want, asset.Asset)
+			}
+		}
+	}
+}
+
 // No screen holds its own sentences, and no label renders as a key.
 //
 // # Why the shape is checked rather than the list of known keys
@@ -150,8 +207,14 @@ func TestEveryLinkedModuleIsNamedWithTheDayItsLicenceWasRead(t *testing.T) {
 // stayed green, because the identifier was not one it knew to look for. What
 // matters to a person reading the window is the shape, so that is what this
 // looks at.
+//
+// 🔴 Every part after a dot starts with a letter, because every key does and a
+// version does not. On 2026-09-23 the versions of the modules became texts of
+// their own, and "v0.0.1" matched the looser shape thirty six times. No key in
+// the catalogue has a part starting with a digit, which was counted before the
+// shape was narrowed, so nothing the looser shape caught is let through.
 func TestNoLabelRendersAsItsOwnKey(t *testing.T) {
-	looksLikeAKey := regexp.MustCompile(`^[a-z][a-z0-9]*(\.[a-z0-9-]+)+$`)
+	looksLikeAKey := regexp.MustCompile(`^[a-z][a-z0-9]*(\.[a-z][a-z0-9-]*)+$`)
 	for _, one := range screen(t) {
 		if looksLikeAKey.MatchString(one) {
 			t.Errorf("the label %q reads as a translation key rather than as a sentence", one)
@@ -161,11 +224,22 @@ func TestNoLabelRendersAsItsOwnKey(t *testing.T) {
 
 // A screen built against a build carrying nothing has to say so rather than
 // show an empty space, which reads as a layout fault.
+//
+// All three lists, because each has its own sentence and a list forgotten here
+// is the one that would show a head over nothing.
 func TestAnEmptyRegisterIsStatedRatherThanLeftBlank(t *testing.T) {
 	empty := license.Report{}
 	all := texts(Content(i18n.English, empty, version.Current(), nil, assets.Notice))
-	if !has(all, i18n.English.T(i18n.AboutEmptyComponents)) {
-		t.Error("a build with no linked module shows nothing where the sentence saying so belongs")
+	for _, key := range []i18n.Key{i18n.AboutEmptyComponents, i18n.AboutEmptyData, i18n.AboutEmptyEmbedded} {
+		if !has(all, i18n.English.T(key)) {
+			t.Errorf("a build with an empty register shows nothing where %q belongs", i18n.English.T(key))
+		}
+	}
+	// A count of nought beside a heading over that sentence would say it twice.
+	for _, nought := range []string{"0 modules", "0 lists", "0 assets"} {
+		if has(all, nought) {
+			t.Errorf("an empty list is counted as %q beside a sentence already saying it is empty", nought)
+		}
 	}
 }
 

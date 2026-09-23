@@ -619,18 +619,24 @@ func aboutStates() []State {
 			Purpose: "versions, licences and every third party component",
 			Screen:  screenAbout,
 		},
+		// Tabs derived with tools/klawiatura on 2026-09-23: five screens, the two
+		// buttons of the band, then the page. 🔴 The name stood at 4 until then,
+		// which is the manifest browser: the stored picture of "the keyboard on
+		// the name of this screen" had its ring on another screen's name, and it
+		// was green, because a picture records what happened rather than what
+		// the name of the state promises.
 		{
 			Name:     "about-focus-name",
 			Purpose:  "the keyboard on the name of the screen being read",
 			Screen:   screenAbout,
-			Keyboard: Keyboard{Tabs: 4},
+			Keyboard: Keyboard{Tabs: 5},
 		},
 		{
 			Name: "about-focus-body",
 			Purpose: "the keyboard in the text of the screen, which the toolkit's own " +
 				"scrolling area never allows it to reach",
 			Screen:   screenAbout,
-			Keyboard: Keyboard{Tabs: 6},
+			Keyboard: Keyboard{Tabs: 8},
 		},
 		{
 			Name: "about-scrolled",
@@ -638,7 +644,7 @@ func aboutStates() []State {
 				"alone, which is three quarters of it that a mouse used to be needed for",
 			Screen: screenAbout,
 			Keyboard: Keyboard{
-				Tabs: 6,
+				Tabs: 8,
 				Keys: []fyne.KeyName{fyne.KeyPageDown, fyne.KeyPageDown},
 			},
 		},
