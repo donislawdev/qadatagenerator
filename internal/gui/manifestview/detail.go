@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
@@ -30,9 +31,20 @@ import (
 // What to do. Point eight of the GUI checklist: an empty card reads as a fault
 // in the program, and this one is the first thing under the table a person
 // meets on opening the screen.
+//
+// # One thing at a time, and a heading saying which (DEC-249)
+//
+// The card reads out an entry OR the envelope of the run, never both, and the
+// heading over it names the one it holds. It is the card of the take screen
+// again, which holds the plan of a run or what the last one did (DEC-245):
+// both together were taller than the room there was, and there as here the
+// heading is what keeps a person from reading one as the other. Choosing an
+// entry, by a click or by the keyboard, puts the entry back.
 
-// drawDetail fills the card with the one thing it says.
+// drawDetail fills the card with the one thing it says, and its heading with
+// what that is.
 func (v *View) drawDetail() {
+	v.drawCardHeading()
 	var blocks []fyne.CanvasObject
 	switch {
 	case v.reading != "":
@@ -42,6 +54,8 @@ func (v *View) drawDetail() {
 		// two together say whose fault it is without this screen deciding.
 		blocks = []fyne.CanvasObject{v.told(Line{
 			Text: v.text.T(i18n.ManifestUnreadable) + " " + fault.Says(v.unread), Color: palette.StateDanger})}
+	case v.showingRun:
+		blocks = v.runBlocks()
 	case !v.hasPromise:
 		blocks = []fyne.CanvasObject{v.paragraph(v.text.T(i18n.ManifestDetailWait))}
 	case !v.hasSelected || v.selected >= len(v.screen.Rows):
@@ -51,6 +65,33 @@ func (v *View) drawDetail() {
 	}
 	v.detailBox.Objects = []fyne.CanvasObject{paint.Column(palette.NameStepHairline, blocks...)}
 	v.detailBox.Refresh()
+}
+
+// drawCardHeading names what the card holds, and labels the button beside the
+// name with where a press takes it.
+//
+// The heading is built again only when its title changes, because this runs
+// on every arrow key and the title changes only when the card switches
+// between an entry and the run. It stands a group's step under the table,
+// which is the room the card had above it before it had a heading, and that
+// step is above it only: padded on the sides as well, its words stood four
+// pixels in from the heading of the table on the first render.
+func (v *View) drawCardHeading() {
+	title, press := i18n.ManifestHeadingEntry, i18n.ManifestHeadingRun
+	if v.showingRun {
+		title, press = i18n.ManifestHeadingRun, i18n.ManifestShowEntry
+	}
+	if label := v.text.T(press); v.about.Text != label {
+		v.about.SetText(label)
+	}
+	if title == v.cardTitle && len(v.cardHeading.Objects) > 0 {
+		return
+	}
+	v.cardTitle = title
+	above := paint.Gap(palette.NameStepGroup)
+	v.cardHeading.Objects = []fyne.CanvasObject{container.New(layout.NewBorderLayout(above, nil, nil, nil),
+		above, headed(v.text.T(title), v.about))}
+	v.cardHeading.Refresh()
 }
 
 // entry is one entry read out: the damage and where it landed with its number,

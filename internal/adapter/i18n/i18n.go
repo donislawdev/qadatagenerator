@@ -293,6 +293,11 @@ const (
 	ManifestHeadingRun     Key = "manifest.heading.run"
 	ManifestHeadingEntries Key = "manifest.heading.entries"
 	ManifestHeadingLimits  Key = "manifest.heading.limits"
+	// The card under the table says one thing at a time, an entry or the run,
+	// and its heading says which. The first is the heading of an entry, the
+	// second the button that brings the entry back in place of the run.
+	ManifestHeadingEntry Key = "manifest.heading.entry"
+	ManifestShowEntry    Key = "manifest.show-entry"
 
 	// The sentences of the state before a manifest is open. They name what each
 	// part of the screen will hold, which is the question somebody meeting this
@@ -344,6 +349,7 @@ const (
 	ManifestDetailHard       Key = "manifest.detail.hard"
 	ManifestDetailSoft       Key = "manifest.detail.soft"
 	ManifestDetailNotApplied Key = "manifest.detail.not-applied"
+	ManifestDetailBecause    Key = "manifest.detail.because"
 
 	// The line that does the same in a terminal, with the response record as
 	// an example until one is open.
@@ -705,6 +711,7 @@ var Keys = []Key{
 	ManifestOpen, ManifestOpenResponse, ManifestEmpty, ManifestUnreadable,
 	ManifestReading,
 	ManifestHeadingRun, ManifestHeadingEntries, ManifestHeadingLimits,
+	ManifestHeadingEntry, ManifestShowEntry,
 	ManifestRunWait, ManifestEntriesWait, ManifestResponseWait,
 	ManifestWaitMutator, ManifestWaitPlace, ManifestWaitExpect, ManifestWaitStatus,
 	ManifestFactsEntry, ManifestFactsEntries, ManifestFactsSeed, ManifestFactsOf,
@@ -712,7 +719,7 @@ var Keys = []Key{
 	ManifestTallyOrdered, ManifestTallyApplied, ManifestTallyNotApplied,
 	ManifestTallyCompared, ManifestTallyDisagree, ManifestTallyNotSettled,
 	ManifestDetailWait, ManifestDetailSelect, ManifestDetailEntry,
-	ManifestDetailHard, ManifestDetailSoft, ManifestDetailNotApplied,
+	ManifestDetailHard, ManifestDetailSoft, ManifestDetailNotApplied, ManifestDetailBecause,
 	ManifestCommandResponse, ManifestCommandExample,
 	ManifestRunGenerated, ManifestRunSeed, ManifestRunLocale, ManifestRunCatalog,
 	ManifestRunSpec, ManifestRunRecipe, ManifestRunPolicy, ManifestRunTag,

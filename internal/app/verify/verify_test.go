@@ -207,6 +207,34 @@ func TestRecordsNobodyReactedToAreCountedFromTheDataset(t *testing.T) {
 	}
 }
 
+// The count of records nobody reacted to agrees with its verb, for one record
+// as for many.
+//
+// 🔴 The real window read "so 1 were never reacted to" on 2026-09-23 (B-289),
+// and so did the command line, since both print the same sentence.
+func TestOneRecordNobodyReactedToIsSaidInTheSingular(t *testing.T) {
+	for _, tc := range []struct {
+		rows int
+		want string
+	}{
+		{2, "so 1 was never reacted to"},
+		{3, "so 2 were never reacted to"},
+	} {
+		report := verify.Compare(
+			promised(t, tc.rows, damage(1, catalog.Rejection, catalog.Hard)),
+			answered(response.Row{Number: 1, Verdict: response.Rejected}))
+		said := ""
+		for _, finding := range report.Findings {
+			if finding.Kind == verify.Missing && finding.Row == 0 {
+				said = finding.Detail
+			}
+		}
+		if !strings.HasSuffix(said, tc.want) {
+			t.Errorf("%d records and one answer read %q where it should end %q", tc.rows, said, tc.want)
+		}
+	}
+}
+
 // Damage that was never applied has nothing in the dataset to react to, so it
 // is not compared and does not count against the application.
 func TestDamageThatNeverHappenedIsNotComparedAgainstAnybody(t *testing.T) {

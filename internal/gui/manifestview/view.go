@@ -42,15 +42,22 @@ type Clipboard interface{ SetContent(string) }
 // surface that reads a file the moment it is opened is a surface that acts on
 // its own, and this tool writes to other people's databases.
 //
-// # The shape, since 2026-09-15 (DEC-247)
+// # The shape, since 2026-09-15 (DEC-247) and 2026-09-23 (DEC-249)
 //
 // A band at the top holds the two files, one under the other: the manifest,
 // which is the one action of the screen and the only filled button, and the
-// response record, which cannot be opened before it. The body is the envelope
-// of the run in a section a person opens over the table, the table of entries
-// taking every unit of height the rest leaves, and under it one card reading
-// out whichever entry the keyboard or the pointer is on. A band at the foot
-// holds the line that does the same comparison in a terminal.
+// response record, which cannot be opened before it. The body is the strip a
+// comparison adds about the whole file, the table of entries taking every unit
+// of height the rest leaves, and under it one card saying one thing at a time:
+// the entry somebody clicked or moved the keyboard onto, or the envelope of the
+// run, with a heading over it saying which. A band at the foot holds the line
+// that does the same comparison in a terminal.
+//
+// 🔴 The envelope stood in a section over the table until 2026-09-23, and the
+// real window refused it: opened beside a comparison it asked for 1423 pixels
+// of height where the owner's screen has 1392 to give (B-286). In the card it
+// takes the height an entry takes, which is fixed, so opening it cannot grow
+// the window at all.
 type View struct {
 	text      i18n.Catalogue
 	window    fyne.Window
@@ -75,18 +82,21 @@ type View struct {
 	manifestFacts *fyne.Container
 	responseFacts *fyne.Container
 
-	// The body: the section holding the envelope, the strip of notes a
-	// comparison adds under it, the tally at the heading of the table, the
-	// slot the table or the shape of one stands in, and the card under it.
-	run        *parts.Disclosure
-	runBox     *fyne.Container
-	notesBox   *fyne.Container
-	tally      *fyne.Container
-	entriesBox *fyne.Container
-	entries    *parts.KeyTable
-	detailBox  *fyne.Container
-	detail     *parts.KeyScroll
-	content    fyne.CanvasObject
+	// The body: the strip of notes a comparison adds over the table, the tally
+	// at the heading of the table, the slot the table or the shape of one
+	// stands in, and the card under it with its heading, the button in that
+	// heading which puts the run in the card and takes it out again, and the
+	// title the heading was last drawn with.
+	notesBox    *fyne.Container
+	tally       *fyne.Container
+	entriesBox  *fyne.Container
+	entries     *parts.KeyTable
+	cardHeading *fyne.Container
+	about       *parts.Button
+	cardTitle   i18n.Key
+	detailBox   *fyne.Container
+	detail      *parts.KeyScroll
+	content     fyne.CanvasObject
 
 	// The band at the foot: the terminal line, the button that copies it, the
 	// mark saying that it did, and the sentence saying which part of the line
@@ -125,15 +135,19 @@ type View struct {
 	// question is dropped rather than drawn over a newer one.
 	asked int
 
-	// Which entry the card reads out: the one the keyboard is standing on
-	// while the table has focus, otherwise the last one chosen either way.
-	// Both are needed: the cell somebody moved to is worth marking only while
-	// the table is what the keyboard is talking to.
+	// Which entry the card reads out: the last one chosen, by a click or by the
+	// keyboard moving onto it, and never one the pointer merely passed over
+	// (DEC-249). The cell the keyboard stands on is kept beside it, because it
+	// is worth marking only while the table is what the keyboard is talking to.
 	selected     int
 	hasSelected  bool
 	highlight    widget.TableCellID
 	hasHighlight bool
 	tableFocused bool
+	// showingRun is the card saying what the run was rather than reading out
+	// an entry. Choosing an entry ends it, and so does the button that
+	// started it.
+	showingRun bool
 }
 
 // document says which of the two files a read or a failure was about.
@@ -154,8 +168,8 @@ func New(text i18n.Catalogue, window fyne.Window, read Readers, load background.
 	view := &View{
 		text: text, window: window, read: read, load: load, clipboard: clipboard,
 		manifestFacts: container.NewStack(), responseFacts: container.NewStack(),
-		runBox: container.NewStack(), notesBox: container.NewStack(),
-		tally: container.NewStack(), entriesBox: container.NewStack(),
+		notesBox: container.NewStack(), tally: container.NewStack(),
+		entriesBox: container.NewStack(), cardHeading: container.NewStack(),
 		detailBox: container.NewStack(),
 	}
 	view.buildBand()
@@ -175,31 +189,28 @@ func (v *View) Content() fyne.CanvasObject { return v.content }
 // its middle, and measured on 2026-08-18 that put the table in front of the
 // button above it. Three screens have paid for the same walk since.
 func (v *View) lay() {
-	v.run = parts.NewDisclosure(v.text.T(i18n.ManifestHeadingRun),
-		paint.Pad(palette.NameStepHairline, palette.NameStepHairline,
-			palette.NameStepHairline, palette.NameStepHairline,
-			paint.Card(palette.NameStepGroup, v.runBox)))
-	top := container.NewVBox(v.run.OnScreen(), v.notesBox)
-
-	heading := paint.Pad(palette.NameStepGroup, palette.NameStepHairline,
-		palette.NameStepHairline, palette.NameStepHairline,
-		paint.Pad(palette.NameStepHairline, palette.NameStepRelated,
-			palette.NameStepHairline, palette.NameStepHairline,
-			paint.SectionHeading(v.text.T(i18n.ManifestHeadingEntries), paint.Middle(v.tally))))
+	heading := headed(v.text.T(i18n.ManifestHeadingEntries), paint.Middle(v.tally))
 	middle := container.New(layout.NewBorderLayout(heading, nil, nil, nil), heading, v.entriesBox)
 
 	// The card under the table is a fixed height, so that reading out one
 	// entry after another never moves the foot of the table, and scrolls
 	// inside, because a value somebody damaged can be as long as they like.
+	// The envelope of the run takes the same card and the same height, which
+	// is what keeps the window from growing when it is opened (DEC-249).
+	//
+	// 🔴 The heading is refilled as the card changes what it says, and the
+	// button in it is one object moved from one heading to the next, so that a
+	// keyboard standing on it is still standing on it after the press.
+	v.about = parts.NewButton(v.text.T(i18n.ManifestHeadingRun), v.toggleRun)
+	v.about.Plain = true
 	v.detail = parts.NewKeyScroll(v.detailBox)
-	foot := paint.Pad(palette.NameStepGroup, palette.NameStepHairline,
-		palette.NameStepHairline, palette.NameStepHairline,
-		paint.AtLeast(0, palette.EntryDetailHeight,
-			paint.Card(palette.NameStepGroup, v.detail.Framed())))
+	card := paint.AtLeast(0, palette.EntryDetailHeight,
+		paint.Card(palette.NameStepGroup, v.detail.Framed()))
+	foot := container.New(layout.NewBorderLayout(v.cardHeading, nil, nil, nil), v.cardHeading, card)
 
 	body := paint.Pad(palette.NameStepSection, palette.NameStepSection,
 		palette.NameStepMajor, palette.NameStepMajor,
-		container.New(layout.NewBorderLayout(top, foot, nil, nil), top, middle, foot))
+		container.New(layout.NewBorderLayout(v.notesBox, foot, nil, nil), v.notesBox, middle, foot))
 
 	band := v.fileBand()
 	v.terminal = v.commandBand()
@@ -230,6 +241,7 @@ func (v *View) Open(promised manifest.Manifest, path string) {
 	v.screen = Build(v.text, promised, nil)
 	v.respond.Enable()
 	v.forgetSelection()
+	v.entries = nil
 	v.draw()
 }
 
@@ -238,6 +250,17 @@ func (v *View) Open(promised manifest.Manifest, path string) {
 // A record without a manifest to judge it against is refused rather than drawn,
 // because the comparison has nothing to say and a screen showing it would be
 // saying it anyway.
+//
+// 🔴 # Why the chosen entry survives
+//
+// The entries are the same entries: the manifest did not change, and a
+// comparison adds what the application did to each of them. Until 2026-09-23
+// this let go of the entry the card was reading out and built the table
+// again, so a person who had chosen an entry to see what their application did
+// about it found the card back at the sentence asking them to choose one, and
+// the table back at its top (B-288, rule 3 of the window: nothing resets on a
+// refresh). The table is refreshed in place instead, so the selection, the cell
+// the keyboard stands on and how far it was scrolled all stay where they were.
 func (v *View) Compare(actual response.Record, path string) bool {
 	if !v.hasPromise {
 		return false
@@ -245,23 +268,61 @@ func (v *View) Compare(actual response.Record, path string) bool {
 	comparison := Comparison{Record: actual, Report: verify.Compare(v.promised, actual)}
 	v.screen = Build(v.text, v.promised, &comparison)
 	v.hasResponse, v.responsePath, v.answered = true, path, len(actual.Rows)
-	v.forgetSelection()
 	v.draw()
 	return true
 }
 
-// ShowRun opens the section holding the envelope, for a picture of it.
-func (v *View) ShowRun() { v.run.Open() }
+// ShowRun puts the envelope of the run in the card, which is what the button in
+// the card's heading does, and it is exported for a picture of that state.
+//
+// The table lets go of its selection while the card is about the run. The
+// entry stays chosen here, which is what the button that brings it back reads
+// out, but a click on the very entry that was selected would otherwise be
+// ignored by the toolkit - it selects nothing that is already selected - and
+// the card would go on saying what the run was under a person clicking an
+// entry to read it.
+func (v *View) ShowRun() {
+	v.showingRun = true
+	if v.entries != nil {
+		v.entries.UnselectAll()
+	}
+	v.detail.ScrollToTop()
+	v.drawDetail()
+}
+
+// showEntry takes the run out of the card and puts back the entry chosen before
+// it, selected again in the table so that the violet and the card agree.
+func (v *View) showEntry() {
+	v.showingRun = false
+	if v.entries != nil && v.hasSelected {
+		column := 0
+		if v.hasHighlight && v.highlight.Row == v.selected {
+			column = v.highlight.Col
+		}
+		v.entries.Select(widget.TableCellID{Row: v.selected, Col: column})
+	}
+	v.detail.ScrollToTop()
+	v.drawDetail()
+}
+
+// toggleRun is the press of the button in the card's heading.
+func (v *View) toggleRun() {
+	if v.showingRun {
+		v.showEntry()
+		return
+	}
+	v.ShowRun()
+}
 
 // draw puts on the screen everything that depends on its state.
 //
 // The parts are refilled rather than rebuilt, so that a control keeps where the
 // keyboard was standing. The table is the exception: it is built from the rows
-// it shows, so it is built again when the rows change, which is when a file is
-// opened and at no other time.
+// of a manifest, so it is built again when a manifest is opened and at no other
+// time. A comparison refreshes it in place.
 func (v *View) draw() {
 	v.drawBand()
-	v.drawRun()
+	v.drawNotes()
 	v.drawTally()
 	v.drawEntries()
 	v.drawDetail()

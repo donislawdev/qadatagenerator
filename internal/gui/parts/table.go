@@ -22,6 +22,28 @@
 // ExtendBaseWidget leaves the implementation alone once it is set, so the table's
 // own call to it inside CreateRenderer does not undo the extension.
 //
+// # 🔴 OnHighlighted hears the keyboard here, and only the keyboard
+//
+// The toolkit calls OnHighlighted for two different things. The arrow keys move
+// its highlight and it says where to, and the pointer passing over a cell says
+// the same thing about that cell without moving anything: widget/table.go:777
+// in fyne 2.8.1, from hoverAt, which leaves the keyboard's place alone. A
+// screen cannot tell the two apart from the call, and the manifest browser
+// could not: its card read out whatever entry the pointer last crossed and
+// stayed there after the pointer left the table, beside the violet of the entry
+// somebody had clicked (B-287, measured on the real window on 2026-09-23).
+//
+// A click was worse in a way nobody saw. Tapped hands the table focus first,
+// FocusGained reports the keyboard's OLD place through the same call, and only
+// then does the click select its own cell. A screen that follows the keyboard
+// by selecting would scroll to where the keyboard last was and back again, and
+// the row under the pointer would jump.
+//
+// So the pointer's events reach the toolkit with OnHighlighted out of reach,
+// and the hover rectangle, the selection and everything else the toolkit does
+// for a pointer stay exactly as they were. What a screen hears through
+// OnHighlighted is what the name has always promised: where the keyboard is.
+//
 // # Why it lives here rather than beside the screen that first needed it
 //
 // It was written inside the manifest browser, which was the only screen with a
@@ -33,10 +55,19 @@ package parts
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/driver/desktop"
 	toolkit "fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
+)
+
+// The driver finds the pointer's half by type, so a method below that stopped
+// matching the interface would go on compiling while the toolkit's own method
+// took the event, OnHighlighted and all.
+var (
+	_ fyne.Tappable     = (*KeyTable)(nil)
+	_ desktop.Hoverable = (*KeyTable)(nil)
 )
 
 // KeyTable is the toolkit's table, plus a word about focus.
@@ -149,4 +180,30 @@ func (t *KeyTable) FocusLost() {
 		t.onFocus(false)
 	}
 	t.Table.FocusLost()
+}
+
+// MouseIn, MouseMoved and Tapped are the toolkit's, with OnHighlighted kept out
+// of reach while they run. The heading of this file says why.
+func (t *KeyTable) MouseIn(event *desktop.MouseEvent) {
+	t.pointing(func() { t.Table.MouseIn(event) })
+}
+
+// MouseMoved is the toolkit's hover, which moves its rectangle and nothing else.
+func (t *KeyTable) MouseMoved(event *desktop.MouseEvent) {
+	t.pointing(func() { t.Table.MouseMoved(event) })
+}
+
+// Tapped is the toolkit's click: focus, then the selection of the cell under
+// the pointer, which a screen hears through OnSelected.
+func (t *KeyTable) Tapped(event *fyne.PointEvent) {
+	t.pointing(func() { t.Table.Tapped(event) })
+}
+
+// pointing runs one event of the pointer with OnHighlighted set aside, and puts
+// it back however the event ends.
+func (t *KeyTable) pointing(event func()) {
+	heard := t.OnHighlighted
+	t.OnHighlighted = nil
+	defer func() { t.OnHighlighted = heard }()
+	event()
 }

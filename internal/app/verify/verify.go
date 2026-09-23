@@ -279,10 +279,20 @@ func (r *Report) addShortfall(promised manifest.Manifest, actual response.Record
 	if total <= 0 || len(actual.Rows) >= total {
 		return
 	}
+	// The verb follows the count, which the real window showed reading "so 1
+	// were never reacted to" (B-289). The noun before it is left plural: a
+	// record naming no row is one of its Problems, which the reader refuses,
+	// so a record that was read answers for at least one row and a dataset
+	// with more records than that has at least two.
+	missing := total - len(actual.Rows)
+	were := "were"
+	if missing == 1 {
+		were = "was"
+	}
 	r.Findings = append(r.Findings, Finding{
 		Kind: Missing, Confidence: catalog.Hard,
 		Detail: fmt.Sprintf("the dataset had %d records and the response record answers for %d, "+
-			"so %d were never reacted to", total, len(actual.Rows), total-len(actual.Rows)),
+			"so %d %s never reacted to", total, len(actual.Rows), missing, were),
 	})
 }
 

@@ -36,6 +36,9 @@ package manifestview
 
 import (
 	"strconv"
+	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/app/verify"
@@ -503,6 +506,17 @@ func certaintyOf(text i18n.Catalogue, expectation catalog.Expectation, confidenc
 //
 // An unrecognised kind falls back to standing here by its own name, which keeps
 // it visible rather than silent.
+//
+// 🔴 # Why the sentence is joined by a word rather than begun after a full stop
+//
+// Every reason this build records is written to follow other words - the
+// command line puts it after a colon - so it begins in lower case, and the card
+// read "Not applied: not built yet. this build carries..." on the real window
+// (B-289). Raising its first letter would fix that reason and break others:
+// several begin with a value or the name of a knob ("drift_years is nought"
+// from national_id_vs_birthdate), and a capital there changes what somebody
+// would type into a recipe. A joining word lets every reason be read as it was
+// written.
 func failureOf(text i18n.Catalogue, defect manifest.Defect) Line {
 	kind := string(defect.FailureKind)
 	if key, known := failureKeys[defect.FailureKind]; known {
@@ -510,7 +524,7 @@ func failureOf(text i18n.Catalogue, defect manifest.Defect) Line {
 	}
 	phrase := text.T(i18n.ManifestDetailNotApplied) + ": " + kind
 	if defect.FailureReason != "" {
-		phrase += ". " + defect.FailureReason
+		phrase += ", " + text.T(i18n.ManifestDetailBecause) + " " + defect.FailureReason
 	}
 	return Line{Text: phrase, Color: palette.StateWarning}
 }
@@ -641,7 +655,7 @@ func notesOf(text i18n.Catalogue, report verify.Report) []Line {
 			if words == "" {
 				words = kindOf(text, finding.Kind)
 			}
-			notes = append(notes, Line{Text: words, Color: palette.StateDanger})
+			notes = append(notes, Line{Text: sentence(words), Color: palette.StateDanger})
 		}
 	}
 	if len(report.Findings) == 0 {
@@ -684,7 +698,40 @@ func placeOfUnsettled(open verify.Unsettled) string {
 func limitLines(report verify.Report) []Line {
 	lines := make([]Line, 0, len(report.Limits))
 	for _, limit := range report.Limits {
-		lines = append(lines, Line{Text: limit, Color: palette.TextSecondary})
+		lines = append(lines, Line{Text: sentence(limit), Color: palette.TextSecondary})
 	}
 	return lines
+}
+
+// sentence is a phrase of the comparison made to stand on its own line: a
+// capital at the front and a full stop at the end.
+//
+// # Why here and not where the phrase is written
+//
+// The comparison writes its phrases to follow other words, because the command
+// line prints them after its own: a limit after "not settled here:", where a
+// capital would be the fault. The screen is where a phrase stops following
+// anything and becomes a line of its own, which read "the dataset had 24
+// records..." on the real window (B-289).
+//
+// # Why this cannot raise a value
+//
+// It is used only on the notes and the limits, and every one of those begins
+// with words of the comparison itself ("the dataset", "no row", "the response
+// record") or with a phrase of the catalogue, never with a value or a name from
+// somebody's data. The reason an entry was not applied is the counter-example,
+// and that one is joined by a word instead (failureOf).
+func sentence(words string) string {
+	if words == "" {
+		return words
+	}
+	first, size := utf8.DecodeRuneInString(words)
+	if unicode.IsLower(first) {
+		words = string(unicode.ToUpper(first)) + words[size:]
+	}
+	last, _ := utf8.DecodeLastRuneInString(words)
+	if !strings.ContainsRune(".!?", last) {
+		words += "."
+	}
+	return words
 }

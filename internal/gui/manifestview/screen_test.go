@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/app/verify"
@@ -480,7 +482,7 @@ func TestAFindingAboutTheWholeDatasetIsNotHungOnOneRow(t *testing.T) {
 	for _, detail := range whole {
 		found := false
 		for _, note := range screen.Notes {
-			if note.Text == detail && note.Color == palette.StateDanger {
+			if note.Text == sentence(detail) && note.Color == palette.StateDanger {
 				found = true
 			}
 		}
@@ -495,6 +497,55 @@ func TestAFindingAboutTheWholeDatasetIsNotHungOnOneRow(t *testing.T) {
 	}
 	if screen.Disagreed != 0 {
 		t.Errorf("a finding about the whole dataset is counted as %d entries that disagreed", screen.Disagreed)
+	}
+}
+
+// A sentence of the comparison that stands on a line of its own reads as one:
+// a capital at the front and a full stop at the end.
+//
+// 🔴 Seen on the real window on 2026-09-23 (B-289): the note over the table
+// read "the dataset had 24 records...", because the comparison writes its
+// phrases to follow the words the command line puts in front of them. The
+// limits are the same kind of phrase on the same kind of line.
+func TestASentenceOfTheComparisonOnALineOfItsOwnReadsAsOne(t *testing.T) {
+	promised := built(t, applied("d1", 1, catalog.Rejection, catalog.Hard))
+	actual := response.Record{SpecVersion: "0.1", Rows: []response.Row{{Number: 1, Verdict: response.Rejected}}}
+	comparison := Comparison{Record: actual, Report: verify.Compare(promised, actual)}
+	screen := Build(i18n.English, promised, &comparison)
+
+	standing := append(append([]Line{}, screen.Notes...), screen.Limits...)
+	if len(screen.Notes) == 0 || len(screen.Limits) == 0 {
+		t.Fatalf("the comparison left %d notes and %d limits, so this test checks nothing",
+			len(screen.Notes), len(screen.Limits))
+	}
+	for _, line := range standing {
+		first, _ := utf8.DecodeRuneInString(line.Text)
+		last, _ := utf8.DecodeLastRuneInString(line.Text)
+		if !unicode.IsUpper(first) || last != '.' {
+			t.Errorf("a line standing on its own reads %q, which does not begin and end as a sentence", line.Text)
+		}
+	}
+}
+
+// The reason an entry could not be applied is joined to its kind by a word,
+// and keeps the first letter it was written with.
+//
+// 🔴 The window read "Not applied: not built yet. this build carries..." (B-289).
+// The reason is not raised to a capital to mend that, because several reasons
+// begin with the name of a knob or with a value, and the capital would change
+// what somebody types into a recipe. The reason below is one of those.
+func TestTheReasonAnEntryWasNotAppliedIsJoinedRatherThanCapitalised(t *testing.T) {
+	why := "drift_years is nought, so the identifier would keep agreeing with the column beside it"
+	screen := screenOf(t, nil, unapplied("d1", manifest.DeclinedByMutator, why))
+
+	reason := screen.Rows[0].Reason.Text
+	want := i18n.English.T(i18n.ManifestFailureDeclinedByMutator) + ", " +
+		i18n.English.T(i18n.ManifestDetailBecause) + " " + why
+	if !strings.HasSuffix(reason, want) {
+		t.Errorf("the reason reads %q where it should end %q", reason, want)
+	}
+	if strings.Contains(reason, ". "+why) || strings.Contains(reason, "Drift_years") {
+		t.Errorf("the reason reads %q, which begins a sentence with a phrase written to follow words", reason)
 	}
 }
 

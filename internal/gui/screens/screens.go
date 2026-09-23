@@ -228,8 +228,9 @@ type State struct {
 	// until somebody asks for it and is therefore invisible in every other
 	// state. A list nobody can photograph is a list nobody reviews.
 	Generators bool
-	// Envelope opens the section holding the envelope of a run on the manifest
-	// browser, closed until somebody asks for it for the same reason.
+	// Envelope puts the envelope of a run in the card of the manifest browser,
+	// where an entry stands until somebody asks for the run, so it is
+	// invisible in every other state for the same reason.
 	Envelope bool
 	// Reading leaves the read of the file unanswered, which is the screen a
 	// person looks at while a large one is being walked.

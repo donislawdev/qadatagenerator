@@ -46,8 +46,8 @@ func marked(style fyne.TextStyle) bool { return style.Bold && style.Underline }
 // pointing at a place the keyboard has left.
 func TestTheCellTheKeyboardStandsOnIsMarkedAndTheMarkLeavesWithIt(t *testing.T) {
 	view := New(i18n.English, nil, Readers{}, background.ReadHere, nil)
-	rows := []Row{sample(), sample(), sample()}
-	entries := view.table(rows)
+	view.screen.Rows = []Row{sample(), sample(), sample()}
+	entries := view.table()
 
 	elsewhere := widget.NewButton("somewhere else", func() {})
 	window := test.NewWindow(container.NewBorder(elsewhere, nil, nil, nil, entries))
@@ -168,13 +168,18 @@ func inkOf(t *testing.T, object fyne.CanvasObject) int {
 }
 
 // The keyboard meets the controls of the screen in reading order: the two
-// buttons of the band, the section over the table, and only then the entries.
+// buttons of the band, then the entries, then the button in the heading of the
+// card under them, then the card.
 //
 // 🔴 Measured on 2026-08-18 before this was true: the first press of Tab landed
 // on the table, and the button that opens a manifest, which stands above it,
 // came second. Nothing about the drawing said so, because the convenient way of
 // building a border hands the middle over first and the edges after it. The
 // name is the one the registers of proofs and mutations know it by.
+//
+// The button that puts the run in the card stood over the table until
+// 2026-09-23 and was the third stop. It moved with the envelope into the
+// heading of the card (DEC-249), so it comes after the entries now.
 func TestTheKeyboardMeetsTheButtonsBeforeTheEntries(t *testing.T) {
 	view := New(i18n.English, nil, Readers{}, background.ReadHere, nil)
 	view.Open(built(t, applied("d1", 1, catalog.Rejection, catalog.Hard)), "")
@@ -187,7 +192,8 @@ func TestTheKeyboardMeetsTheButtonsBeforeTheEntries(t *testing.T) {
 	// 🔴 Asked by LABEL rather than by Go type. This asserted *parts.Button
 	// until 2026-09-08 and went red the day the button that opens a manifest
 	// became the filled one, which is a change of appearance and not of order.
-	for _, want := range []i18n.Key{i18n.ManifestOpen, i18n.ManifestOpenResponse, i18n.ManifestHeadingRun} {
+	button := func(want i18n.Key) {
+		t.Helper()
 		canvas.FocusNext()
 		label, ok := labelOf(canvas.Focused())
 		if !ok {
@@ -198,14 +204,17 @@ func TestTheKeyboardMeetsTheButtonsBeforeTheEntries(t *testing.T) {
 			t.Errorf("the keyboard reaches %q where %q was expected", label, i18n.English.T(want))
 		}
 	}
+	button(i18n.ManifestOpen)
+	button(i18n.ManifestOpenResponse)
 	canvas.FocusNext()
 	if _, isTable := canvas.Focused().(*parts.KeyTable); !isTable {
-		t.Errorf("after the section over the table the keyboard reaches %T rather than the entries",
+		t.Errorf("after the two buttons of the band the keyboard reaches %T rather than the entries",
 			canvas.Focused())
 	}
+	button(i18n.ManifestHeadingRun)
 	canvas.FocusNext()
 	if _, isCard := canvas.Focused().(*parts.KeyScroll); !isCard {
-		t.Errorf("after the entries the keyboard reaches %T rather than the card under them",
+		t.Errorf("after the heading of the card the keyboard reaches %T rather than the card",
 			canvas.Focused())
 	}
 }

@@ -39,20 +39,35 @@ func (v *View) columnName(column int) string {
 // drawEntries puts the table in its slot, or the shape of one while there is
 // no manifest to fill it with.
 //
-// The table is built from the rows it shows, so it is built here rather than
-// once. This runs when a file is opened and at no other time: a read that is
-// going on and a read that failed leave the entries where they are, because
-// the file on the screen is still the file on the screen.
+// The table is built once per manifest, which Open marks by letting go of the
+// one before. A comparison keeps the rows and changes what some cells say, so
+// the table is refreshed in place and keeps its selection and its scroll
+// (B-288). A read that is going on and a read that failed leave the entries
+// where they are, because the file on the screen is still the file on the
+// screen.
 func (v *View) drawEntries() {
-	if !v.hasPromise {
+	switch {
+	case !v.hasPromise:
 		v.entries = nil
 		v.entriesBox.Objects = []fyne.CanvasObject{v.guide()}
-	} else {
-		v.entries = v.table(v.screen.Rows)
+	case v.entries == nil:
+		v.entries = v.table()
 		v.entriesBox.Objects = []fyne.CanvasObject{
 			paint.AtLeast(0, v.rowsAtLeast(), v.entries.Framed())}
+	default:
+		v.entries.Refresh()
+		return
 	}
 	v.entriesBox.Refresh()
+}
+
+// headed is the heading of one part of the body, with its line and the step
+// under it, and the table and the card under it wear the same one so that the
+// two read as two parts of one screen.
+func headed(words string, trailing fyne.CanvasObject) fyne.CanvasObject {
+	return paint.Pad(palette.NameStepHairline, palette.NameStepRelated,
+		palette.NameStepHairline, palette.NameStepHairline,
+		paint.SectionHeading(words, trailing))
 }
 
 // rowsAtLeast is the least height the table asks the window for: its heading
@@ -116,14 +131,25 @@ func (v *View) guide() fyne.CanvasObject {
 // a highlight from cell to cell, and the card reads out the entry under it as
 // it moves, so that browsing with the arrow keys is browsing. The pointer
 // selects an entry by clicking it, and the card reads that one out until
-// another is chosen.
-func (v *View) table(rows []Row) *parts.KeyTable {
+// another is chosen. Passing over an entry with the pointer only lights it
+// (DEC-249): parts.KeyTable keeps the pointer out of OnHighlighted, which is
+// where the card used to follow it (B-287).
+//
+// 🔴 The keyboard SELECTS as it moves, rather than only highlighting. The
+// selection is the violet the toolkit paints, and a card following a highlight
+// the violet did not follow showed one entry beside the violet of another -
+// the picture B-287 was reported with, reached by keys instead of a pointer.
+// One mark for the entry the card is about, whichever way it was chosen.
+//
+// The rows are read from the screen rather than handed in, so that a
+// comparison changing what the cells say reaches a table it did not rebuild.
+func (v *View) table() *parts.KeyTable {
 	entries := parts.NewKeyTable(
-		func() (int, int) { return len(rows), palette.EntryColumns() },
+		func() (int, int) { return len(v.screen.Rows), palette.EntryColumns() },
 		func() fyne.CanvasObject { return painted(Line{}) },
 		func(cell widget.TableCellID, object fyne.CanvasObject) {
-			if text, ok := object.(*widget.RichText); ok && cell.Row < len(rows) {
-				set(text, rows[cell.Row].Cell(cell.Col), v.cellStyle(cell))
+			if text, ok := object.(*widget.RichText); ok && cell.Row < len(v.screen.Rows) {
+				set(text, v.screen.Rows[cell.Row].Cell(cell.Col), v.cellStyle(cell))
 			}
 		},
 		v.tableFocus,
@@ -136,36 +162,56 @@ func (v *View) table(rows []Row) *parts.KeyTable {
 				fyne.TextStyle{Bold: true})
 		}
 	}
-	// The toolkit redraws the cell it is leaving and the cell it is arriving at
-	// before it says where it arrived, so the mark has to be moved by hand here.
-	// Without these two refreshes the mark trails one key press behind.
 	entries.OnHighlighted = func(cell widget.TableCellID) {
-		previous, had := v.highlight, v.hasHighlight
-		v.highlight, v.hasHighlight = cell, true
-		if had && previous != cell {
-			entries.RefreshItem(previous)
-		}
-		entries.RefreshItem(cell)
-		v.readOut(cell.Row)
+		entries.Select(cell)
+		v.choose(entries, cell)
 	}
-	entries.OnSelected = func(cell widget.TableCellID) { v.readOut(cell.Row) }
+	entries.OnSelected = func(cell widget.TableCellID) { v.choose(entries, cell) }
 	entries.Widths(palette.EntryColumnWidths, palette.EntryStretchColumn)
 	return entries
 }
 
-// tableFocus records whether the table is what the keyboard is talking to, and
-// reads out the entry it is standing on when it arrives.
-func (v *View) tableFocus(has bool) {
-	v.tableFocused = has
-	if has && v.hasHighlight {
-		v.readOut(v.highlight.Row)
+// tableFocus records whether the table is what the keyboard is talking to.
+//
+// It reads nothing out. The toolkit says where the keyboard stands straight
+// after this, through OnHighlighted, and on a click it does not: a click
+// selects its own cell, and reading out where the keyboard last stood first
+// would draw the card twice for an entry nobody asked about.
+func (v *View) tableFocus(has bool) { v.tableFocused = has }
+
+// choose makes one cell the one the table is about: the keyboard's mark moves
+// to it and the card reads its entry out.
+//
+// The toolkit keeps its own record of where the keyboard stands, and a
+// selection moves that record too, so this mirror follows both a key and a
+// click. The toolkit also redraws the cell it is leaving and the cell it is
+// arriving at before it says where it arrived, so the mark is moved by hand
+// here. Without these two refreshes the mark trails one key press behind.
+//
+// A key reaches this twice, once from the selection it makes and once from the
+// highlight that made it, and the second time there is nothing left to do.
+func (v *View) choose(entries *parts.KeyTable, cell widget.TableCellID) {
+	if v.hasHighlight && v.highlight == cell && v.hasSelected && v.selected == cell.Row && !v.showingRun {
+		return
 	}
+	previous, had := v.highlight, v.hasHighlight
+	v.highlight, v.hasHighlight = cell, true
+	if had && previous != cell {
+		entries.RefreshItem(previous)
+	}
+	entries.RefreshItem(cell)
+	v.readOut(cell.Row)
 }
 
-// readOut makes the card under the table about one entry.
+// readOut makes the card under the table about one entry, in place of the run
+// if the run was what it said.
 func (v *View) readOut(row int) {
 	if row < 0 || row >= len(v.screen.Rows) {
 		return
+	}
+	if v.showingRun {
+		v.showingRun = false
+		v.detail.ScrollToTop()
 	}
 	v.selected, v.hasSelected = row, true
 	v.drawDetail()

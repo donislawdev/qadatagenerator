@@ -13,11 +13,11 @@ import (
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
-// The section over the table: the envelope of the run, closed until somebody
-// opens it, and under it the sentences a comparison says about the run as a
-// whole.
+// The run as a whole: its envelope, which the card under the table says in
+// place of an entry when somebody asks for it, and the sentences a comparison
+// says about the whole file, in a strip over the table.
 //
-// # Why the envelope is closed by default
+// # Why the envelope waits for a press
 //
 // The seed, the locale and the number of entries stand in the band beside the
 // file, and how much of what was ordered happened stands at the heading of the
@@ -27,11 +27,19 @@ import (
 // opened the screen for. Measured on the first render of the mock: a card of
 // those pairs over the table left the table three rows at the size the owner
 // keeps the window (DEC-247).
+//
+// # Why in the card and not over the table
+//
+// Over the table it made the window taller by what it holds, and on the real
+// window that was 172 pixels for a manifest and 269 beside a comparison, past
+// the 1392 the owner's screen has to give (B-286, docs/17 section 31.4). The
+// card is a fixed height that scrolls inside, so what the run holds is no
+// longer a height anybody's window has to find (DEC-249).
 
-// drawRun fills the envelope with what is known about the run, and the strip
-// under it with what a comparison says about the whole file.
-func (v *View) drawRun() {
-	blocks := []fyne.CanvasObject{}
+// runBlocks is the envelope as the card reads it out: what is known about the
+// run, or before any manifest the names of what will be known.
+func (v *View) runBlocks() []fyne.CanvasObject {
+	var blocks []fyne.CanvasObject
 	fields := v.screen.Run
 	counts := v.screen.Counts
 	if !v.hasPromise {
@@ -39,14 +47,20 @@ func (v *View) drawRun() {
 		fields, counts = waiting.Run, waiting.Counts
 		blocks = append(blocks, v.paragraph(v.text.T(i18n.ManifestRunWait)))
 	}
-	blocks = append(blocks, v.envelope(append(append([]Field{}, fields...), counts...)))
-	v.runBox.Objects = []fyne.CanvasObject{paint.Column(palette.NameStepRelated, blocks...)}
-	v.runBox.Refresh()
+	return append(blocks, v.envelope(append(append([]Field{}, fields...), counts...)))
+}
 
+// drawNotes fills the strip over the table with what a comparison says about
+// the whole file, and empties it while there is no comparison.
+//
+// The step is under the strip rather than over it, because what is over it is
+// the band, which keeps its own distance, and what is under it is the heading
+// of the table, which would otherwise stand against the last note.
+func (v *View) drawNotes() {
 	v.notesBox.Objects = nil
 	if v.hasResponse {
-		v.notesBox.Objects = []fyne.CanvasObject{paint.Pad(palette.NameStepRelated,
-			palette.NameStepHairline, palette.NameStepHairline, palette.NameStepHairline, v.notes())}
+		v.notesBox.Objects = []fyne.CanvasObject{paint.Pad(palette.NameStepHairline,
+			palette.NameStepGroup, palette.NameStepHairline, palette.NameStepHairline, v.notes())}
 	}
 	v.notesBox.Refresh()
 }

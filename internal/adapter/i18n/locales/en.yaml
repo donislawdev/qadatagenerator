@@ -73,6 +73,8 @@ manifest.reading: Reading this file. A large manifest takes a moment, and the sc
 manifest.heading.run: About this run
 manifest.heading.entries: Ordered damage
 manifest.heading.limits: What this comparison could not see
+manifest.heading.entry: Chosen entry
+manifest.show-entry: Back to the entry
 
 manifest.run.wait: These are the fields every manifest carries about the run that wrote it. They fill in once one is open.
 manifest.entries.wait: One line per damage a run ordered, in the order it attempted them. Each line carries these four things.
@@ -104,7 +106,7 @@ manifest.tally.disagree: disagree
 # tekst-ok: the same words manifest.answer.not-settled writes in a cell, here after a number in the tally
 manifest.tally.not-settled: not settled
 
-manifest.detail.wait: Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data. The entry the keyboard or the pointer is on is read out here in full.
+manifest.detail.wait: Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data. Click an entry, or move the keyboard onto one, and it is read out here in full.
 manifest.detail.select: Move the keyboard onto an entry, or click one, and it is read out here in full.
 # tekst-ok: the word before "3 of 6" in the card under the table
 manifest.detail.entry: entry
@@ -114,6 +116,8 @@ manifest.detail.hard: and the certainty is hard. The answer does not depend on t
 manifest.detail.soft: and the certainty is soft. The right answer depends on the rules of your application, so a disagreement is reported and never failed on.
 # tekst-ok: the words before the kind of failure and the reason the run recorded, the same words as the count manifest.count.not-applied labels
 manifest.detail.not-applied: Not applied
+# tekst-ok: the word joining the kind of failure to the reason the run recorded, which is written to follow a word rather than to open a sentence, the same word take.file.because joins a basis the take screen was handed with
+manifest.detail.because: because
 
 # tekst-ok: an example file name, as recipe.command.file is
 manifest.command.response: your-response.json
@@ -212,6 +216,7 @@ take.file.rows: Records
 take.file.columns: Columns
 take.file.nothing-declared: Nothing declared what these columns hold, so it was worked out by looking at the values.
 take.file.taken-for: taken for
+# tekst-ok: the word joining a basis the take screen was handed to what it explains, the same word manifest.detail.because joins the reason a run recorded with
 take.file.because: because
 take.file.agrees-with: taken to agree with
 take.file.byte-order-mark: This file begins with a byte order mark. The damaged file is written without one.

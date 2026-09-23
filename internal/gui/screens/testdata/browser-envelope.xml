@@ -329,160 +329,43 @@
 						</container>
 						<container pos="0,149" size="1118x617">
 							<container pos="32,24" size="1054x569">
-								<container size="1054x173">
-									<container size="1054x173">
-										<widget size="1054x34" type="*parts.Button">
-											<container size="1054x34">
-												<container size="1054x34">
-													<rectangle size="1054x34"/>
-													<container size="1054x34">
-														<rectangle size="1054x34"/>
-														<container size="1054x34">
-															<container pos="12,4" size="1030x26">
-																<container size="105x26">
-																	<container size="15x26">
-																		<spacer size="15x5"/>
-																		<image fillMode="contain" pos="0,5" rsc="chevron-up-edece9-15.svg" size="15x15"/>
-																		<spacer pos="0,20" size="15x5"/>
-																	</container>
-																	<container pos="23,0" size="82x26">
-																		<spacer size="82x4"/>
-																		<text pos="0,4" size="82x16">About this run</text>
-																		<spacer pos="0,21" size="82x4"/>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</container>
-												</container>
-											</container>
-										</widget>
-										<container pos="0,34" size="1054x139">
-											<container pos="4,4" size="1046x131">
-												<rectangle fillColor="menuBackground" radius="10" size="1046x131" strokeColor="separator" strokeWidth="2"/>
-												<container size="1046x131">
-													<container pos="16,16" size="1014x99">
-														<container size="1014x99">
-															<container size="1014x99">
-																<container size="338x99">
-																	<widget size="100x24" type="*widget.RichText">
-																		<text color="disabled" pos="4,4" size="61x16">Generated</text>
-																	</widget>
-																	<widget pos="100,0" size="237x24" type="*widget.RichText">
-																		<text bold pos="4,4" size="143x16">2026-08-18T09:19:59Z</text>
-																	</widget>
-																	<widget pos="0,24" size="100x24" type="*widget.RichText">
-																		<text color="disabled" pos="4,4" size="29x16">Seed</text>
-																	</widget>
-																	<widget pos="100,24" size="237x24" type="*widget.RichText">
-																		<text bold pos="4,4" size="117x16">policy-walkthrough</text>
-																	</widget>
-																	<widget pos="0,49" size="100x24" type="*widget.RichText">
-																		<text color="disabled" pos="4,4" size="65x16">Data locale</text>
-																	</widget>
-																	<widget pos="100,49" size="237x24" type="*widget.RichText">
-																		<text bold pos="4,4" size="31x16">pl-PL</text>
-																	</widget>
-																	<widget pos="0,74" size="100x24" type="*widget.RichText">
-																		<text color="disabled" pos="4,4" size="92x16">Manifest format</text>
-																	</widget>
-																	<widget pos="100,74" size="237x24" type="*widget.RichText">
-																		<text bold pos="4,4" size="19x16">0.1</text>
-																	</widget>
-																</container>
-																<container pos="338,0" size="338x99">
-																	<widget size="115x24" type="*widget.RichText">
-																		<text color="disabled" pos="4,4" size="107x16">Corruption catalog</text>
-																	</widget>
-																	<widget pos="115,0" size="222x24" type="*widget.RichText">
-																		<text bold pos="4,4" size="19x16">0.1</text>
-																	</widget>
-																	<widget pos="0,24" size="115x24" type="*widget.RichText">
-																		<text color="disabled" pos="4,4" size="39x16">Recipe</text>
-																	</widget>
-																	<widget pos="115,24" size="222x24" type="*widget.RichText">
-																		<text bold pos="4,4" size="115x16">policy walkthrough</text>
-																	</widget>
-																	<widget pos="0,49" size="115x24" type="*widget.RichText">
-																		<text color="disabled" pos="4,4" size="31x16">Rows</text>
-																	</widget>
-																	<widget pos="115,49" size="222x24" type="*widget.RichText">
-																		<text bold pos="4,4" size="7x16">6</text>
-																	</widget>
-																	<widget pos="0,74" size="115x24" type="*widget.RichText">
-																		<text color="disabled" pos="4,4" size="84x16">Rows changed</text>
-																	</widget>
-																	<widget pos="115,74" size="222x24" type="*widget.RichText">
-																		<text bold pos="4,4" size="7x16">4</text>
-																	</widget>
-																</container>
-																<container pos="676,0" size="338x99">
-																	<widget size="75x24" type="*widget.RichText">
-																		<text color="disabled" pos="4,4" size="47x16">Ordered</text>
-																	</widget>
-																	<widget pos="75,0" size="262x24" type="*widget.RichText">
-																		<text bold pos="4,4" size="7x16">6</text>
-																	</widget>
-																	<widget pos="0,24" size="75x24" type="*widget.RichText">
-																		<text color="disabled" pos="4,4" size="44x16">Applied</text>
-																	</widget>
-																	<widget pos="75,24" size="262x24" type="*widget.RichText">
-																		<text bold pos="4,4" size="7x16">4</text>
-																	</widget>
-																	<widget pos="0,49" size="75x24" type="*widget.RichText">
-																		<text color="disabled" pos="4,4" size="67x16">Not applied</text>
-																	</widget>
-																	<widget pos="75,49" size="262x24" type="*widget.RichText">
-																		<text bold pos="4,4" size="7x16">2</text>
-																	</widget>
-																</container>
-															</container>
-														</container>
-													</container>
-												</container>
-											</container>
-										</container>
-									</container>
-									<container pos="0,173" size="1054x0">
-									</container>
+								<container size="1054x0">
 								</container>
-								<container pos="0,173" size="1054x243">
-									<container size="1054x54">
-										<container pos="4,16" size="1046x34">
-											<container pos="4,4" size="1038x18">
-												<container pos="108,0" size="701x18">
-													<container pos="12,4" size="677x10">
-														<spacer size="677x4"/>
-														<rectangle fillColor="separator" pos="0,4" size="677x1"/>
-														<spacer pos="0,5" size="677x4"/>
-													</container>
+								<container size="1054x371">
+									<container size="1054x34">
+										<container pos="4,4" size="1046x18">
+											<container pos="108,0" size="709x18">
+												<container pos="12,4" size="685x10">
+													<spacer size="685x4"/>
+													<rectangle fillColor="separator" pos="0,4" size="685x1"/>
+													<spacer pos="0,5" size="685x4"/>
 												</container>
-												<container size="108x18">
-													<spacer size="108x0"/>
-													<text bold size="108x18" textSize="14">Ordered damage</text>
-													<spacer pos="0,18" size="108x0"/>
-												</container>
-												<container pos="809,0" size="228x18">
-													<spacer size="228x0"/>
+											</container>
+											<container size="108x18">
+												<spacer size="108x0"/>
+												<text bold size="108x18" textSize="14">Ordered damage</text>
+												<spacer pos="0,18" size="108x0"/>
+											</container>
+											<container pos="817,0" size="228x18">
+												<spacer size="228x0"/>
+												<container size="228x16">
 													<container size="228x16">
-														<container size="228x16">
-															<text color="disabled" size="56x16">6 ordered</text>
-															<text color="disabled" pos="64,0" size="4x16">·</text>
-															<text color="disabled" pos="77,0" size="54x16">4 applied</text>
-															<text color="disabled" pos="139,0" size="4x16">·</text>
-															<text color="warning" pos="151,0" size="76x16">2 not applied</text>
-														</container>
+														<text color="disabled" size="56x16">6 ordered</text>
+														<text color="disabled" pos="64,0" size="4x16">·</text>
+														<text color="disabled" pos="77,0" size="54x16">4 applied</text>
+														<text color="disabled" pos="139,0" size="4x16">·</text>
+														<text color="warning" pos="151,0" size="76x16">2 not applied</text>
 													</container>
-													<spacer pos="0,17" size="228x0"/>
 												</container>
+												<spacer pos="0,17" size="228x0"/>
 											</container>
 										</container>
 									</container>
-									<container pos="0,54" size="1054x189">
-										<container size="1054x189">
-											<rectangle size="1054x189"/>
-											<container size="1054x189">
-												<widget size="1054x189" type="*parts.KeyTable">
+									<container pos="0,34" size="1054x337">
+										<container size="1054x337">
+											<rectangle size="1054x337"/>
+											<container size="1054x337">
+												<widget size="1054x337" type="*parts.KeyTable">
 													<widget size="1054x24" type="*widget.clip">
 														<container size="0x0">
 															<rectangle fillColor="headerBackground" size="1054x24"/>
@@ -500,7 +383,7 @@
 															</widget>
 														</container>
 													</widget>
-													<widget pos="0,24" size="0x164" type="*widget.clip">
+													<widget pos="0,24" size="0x312" type="*widget.clip">
 														<container size="0x0">
 														</container>
 													</widget>
@@ -509,16 +392,16 @@
 															<rectangle fillColor="headerBackground" size="21x24"/>
 														</container>
 													</widget>
-													<widget size="1054x189" type="*widget.clip">
+													<widget size="1054x337" type="*widget.clip">
 														<container size="0x0">
-															<widget pos="504,0" size="4x189" type="*widget.Separator">
-																<rectangle fillColor="separator" size="4x189"/>
+															<widget pos="504,0" size="4x337" type="*widget.Separator">
+																<rectangle fillColor="separator" size="4x337"/>
 															</widget>
-															<widget pos="688,0" size="4x189" type="*widget.Separator">
-																<rectangle fillColor="separator" size="4x189"/>
+															<widget pos="688,0" size="4x337" type="*widget.Separator">
+																<rectangle fillColor="separator" size="4x337"/>
 															</widget>
-															<widget pos="904,0" size="4x189" type="*widget.Separator">
-																<rectangle fillColor="separator" size="4x189"/>
+															<widget pos="904,0" size="4x337" type="*widget.Separator">
+																<rectangle fillColor="separator" size="4x337"/>
 															</widget>
 															<widget pos="0,47" size="1054x4" type="*widget.Separator">
 																<rectangle fillColor="separator" size="1054x4"/>
@@ -537,8 +420,8 @@
 															</widget>
 														</container>
 													</widget>
-													<widget pos="0,24" size="1054x164" type="*widget.Scroll">
-														<widget size="1054x164" type="*widget.tableCells">
+													<widget pos="0,24" size="1054x312" type="*widget.Scroll">
+														<widget size="1054x312" type="*widget.tableCells">
 															<widget size="506x24" type="*widget.RichText">
 																<text pos="4,4" size="143x16">L3.checksum.off_by_one</text>
 															</widget>
@@ -614,32 +497,144 @@
 														</widget>
 													</widget>
 												</widget>
-												<rectangle radius="6" size="1054x189" strokeWidth="2"/>
+												<rectangle radius="6" size="1054x337" strokeWidth="2"/>
 											</container>
 										</container>
 									</container>
 								</container>
-								<container pos="0,417" size="1054x152">
-									<container pos="4,16" size="1046x132">
-										<rectangle size="1046x132"/>
-										<container size="1046x132">
-											<rectangle fillColor="menuBackground" radius="10" size="1046x132" strokeColor="separator" strokeWidth="2"/>
-											<container size="1046x132">
-												<container pos="16,16" size="1014x100">
-													<widget size="1014x100" type="*parts.KeyScroll">
-														<container size="1014x100">
-															<container size="1014x100">
-																<container size="1014x24">
-																	<widget size="1014x24" type="*widget.Label">
-																		<widget size="1014x24" type="*widget.RichText">
-																			<text color="disabled" pos="4,4" size="435x16">Move the keyboard onto an entry, or click one, and it is read out here in full.</text>
-																		</widget>
-																	</widget>
+								<container pos="0,371" size="1054x198">
+									<container size="1054x66">
+										<container size="1054x66">
+											<container size="1054x16">
+												<rectangle size="1054x16"/>
+												<rectangle size="1054x16"/>
+											</container>
+											<container pos="0,16" size="1054x50">
+												<container pos="4,4" size="1046x34">
+													<container pos="92,0" size="822x34">
+														<container pos="12,4" size="798x26">
+															<spacer size="798x12"/>
+															<rectangle fillColor="separator" pos="0,12" size="798x1"/>
+															<spacer pos="0,13" size="798x12"/>
+														</container>
+													</container>
+													<container size="92x34">
+														<spacer size="92x7"/>
+														<text bold pos="0,7" size="92x18" textSize="14">About this run</text>
+														<spacer pos="0,26" size="92x7"/>
+													</container>
+													<widget pos="914,0" size="131x34" type="*parts.Button">
+														<container size="131x34">
+															<container size="131x34">
+																<rectangle size="131x34"/>
+																<container size="131x34">
+																	<rectangle size="131x34"/>
+																	<container size="131x34">
+																		<container pos="16,4" size="99x26">
+																			<container pos="0,4" size="99x16">
+																				<container size="99x16">
+																					<spacer size="99x0"/>
+																					<text size="99x16">Back to the entry</text>
+																					<spacer pos="0,16" size="99x0"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
 																</container>
 															</container>
 														</container>
 													</widget>
-													<rectangle radius="10" size="1014x100" strokeWidth="2"/>
+												</container>
+											</container>
+										</container>
+									</container>
+									<container pos="0,66" size="1054x132">
+										<rectangle size="1054x132"/>
+										<container size="1054x132">
+											<rectangle fillColor="menuBackground" radius="10" size="1054x132" strokeColor="separator" strokeWidth="2"/>
+											<container size="1054x132">
+												<container pos="16,16" size="1022x100">
+													<widget size="1022x100" type="*parts.KeyScroll">
+														<container size="1022x100">
+															<container size="1022x100">
+																<container size="1022x99">
+																	<container size="340x99">
+																		<widget size="100x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="61x16">Generated</text>
+																		</widget>
+																		<widget pos="100,0" size="240x24" type="*widget.RichText">
+																			<text bold pos="4,4" size="143x16">2026-08-18T09:19:59Z</text>
+																		</widget>
+																		<widget pos="0,24" size="100x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="29x16">Seed</text>
+																		</widget>
+																		<widget pos="100,24" size="240x24" type="*widget.RichText">
+																			<text bold pos="4,4" size="117x16">policy-walkthrough</text>
+																		</widget>
+																		<widget pos="0,49" size="100x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="65x16">Data locale</text>
+																		</widget>
+																		<widget pos="100,49" size="240x24" type="*widget.RichText">
+																			<text bold pos="4,4" size="31x16">pl-PL</text>
+																		</widget>
+																		<widget pos="0,74" size="100x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="92x16">Manifest format</text>
+																		</widget>
+																		<widget pos="100,74" size="240x24" type="*widget.RichText">
+																			<text bold pos="4,4" size="19x16">0.1</text>
+																		</widget>
+																	</container>
+																	<container pos="340,0" size="340x99">
+																		<widget size="115x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="107x16">Corruption catalog</text>
+																		</widget>
+																		<widget pos="115,0" size="224x24" type="*widget.RichText">
+																			<text bold pos="4,4" size="19x16">0.1</text>
+																		</widget>
+																		<widget pos="0,24" size="115x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="39x16">Recipe</text>
+																		</widget>
+																		<widget pos="115,24" size="224x24" type="*widget.RichText">
+																			<text bold pos="4,4" size="115x16">policy walkthrough</text>
+																		</widget>
+																		<widget pos="0,49" size="115x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="31x16">Rows</text>
+																		</widget>
+																		<widget pos="115,49" size="224x24" type="*widget.RichText">
+																			<text bold pos="4,4" size="7x16">6</text>
+																		</widget>
+																		<widget pos="0,74" size="115x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="84x16">Rows changed</text>
+																		</widget>
+																		<widget pos="115,74" size="224x24" type="*widget.RichText">
+																			<text bold pos="4,4" size="7x16">4</text>
+																		</widget>
+																	</container>
+																	<container pos="681,0" size="340x99">
+																		<widget size="75x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="47x16">Ordered</text>
+																		</widget>
+																		<widget pos="75,0" size="265x24" type="*widget.RichText">
+																			<text bold pos="4,4" size="7x16">6</text>
+																		</widget>
+																		<widget pos="0,24" size="75x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="44x16">Applied</text>
+																		</widget>
+																		<widget pos="75,24" size="265x24" type="*widget.RichText">
+																			<text bold pos="4,4" size="7x16">4</text>
+																		</widget>
+																		<widget pos="0,49" size="75x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="67x16">Not applied</text>
+																		</widget>
+																		<widget pos="75,49" size="265x24" type="*widget.RichText">
+																			<text bold pos="4,4" size="7x16">2</text>
+																		</widget>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</widget>
+													<rectangle radius="10" size="1022x100" strokeWidth="2"/>
 												</container>
 											</container>
 										</container>

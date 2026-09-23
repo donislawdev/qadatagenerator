@@ -583,7 +583,7 @@ func browserStates() []State {
 		},
 		{
 			Name:          "browser-envelope",
-			Purpose:       "the section over the table open, showing the envelope of the run",
+			Purpose:       "the envelope of the run in the card under the table, in place of an entry",
 			Screen:        screenManifest,
 			NeedsManifest: true,
 			Envelope:      true,
@@ -596,15 +596,18 @@ func browserStates() []State {
 			Keyboard:      Keyboard{Tabs: 6},
 		},
 		{
-			// Tabs derived with tools/klawiatura on 2026-09-15: five screens,
-			// two buttons, the section over the table, then the table. The
+			// Tabs derived with tools/klawiatura on 2026-09-23: five screens,
+			// the two buttons of the band, then the table. The button that
+			// puts the run in the card stood over the table until that day
+			// and was the eighth stop. It moved under the table with the
+			// envelope (DEC-249), and at 9 this state photographed it. The
 			// card under the table reads out the entry the keyboard lands on.
 			Name:          "browser-focus-cell",
 			Purpose:       "the keyboard inside the table, three rows down and one column across, and the card reading that entry out",
 			Screen:        screenManifest,
 			NeedsManifest: true,
 			Keyboard: Keyboard{
-				Tabs: 9,
+				Tabs: 8,
 				Keys: []fyne.KeyName{fyne.KeyDown, fyne.KeyDown, fyne.KeyDown, fyne.KeyRight},
 			},
 		},

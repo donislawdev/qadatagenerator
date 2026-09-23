@@ -332,66 +332,34 @@
 						</container>
 						<container pos="0,149" size="1118x694">
 							<container pos="32,24" size="1054x646">
-								<container size="1054x34">
+								<container size="1054x0">
+								</container>
+								<container size="1054x448">
 									<container size="1054x34">
-										<widget size="1054x34" type="*parts.Button">
-											<container size="1054x34">
-												<container size="1054x34">
-													<rectangle size="1054x34"/>
-													<container size="1054x34">
-														<rectangle size="1054x34"/>
-														<container size="1054x34">
-															<container pos="12,4" size="1030x26">
-																<container size="105x26">
-																	<container size="15x26">
-																		<spacer size="15x5"/>
-																		<image fillMode="contain" pos="0,5" rsc="chevron-down-edece9-15.svg" size="15x15"/>
-																		<spacer pos="0,20" size="15x5"/>
-																	</container>
-																	<container pos="23,0" size="82x26">
-																		<spacer size="82x4"/>
-																		<text pos="0,4" size="82x16">About this run</text>
-																		<spacer pos="0,21" size="82x4"/>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</container>
+										<container pos="4,4" size="1046x18">
+											<container pos="108,0" size="599x18">
+												<container pos="12,4" size="575x10">
+													<spacer size="575x4"/>
+													<rectangle fillColor="separator" pos="0,4" size="575x1"/>
+													<spacer pos="0,5" size="575x4"/>
 												</container>
 											</container>
-										</widget>
-									</container>
-									<container pos="0,34" size="1054x0">
-									</container>
-								</container>
-								<container pos="0,34" size="1054x460">
-									<container size="1054x54">
-										<container pos="4,16" size="1046x34">
-											<container pos="4,4" size="1038x18">
-												<container pos="108,0" size="591x18">
-													<container pos="12,4" size="567x10">
-														<spacer size="567x4"/>
-														<rectangle fillColor="separator" pos="0,4" size="567x1"/>
-														<spacer pos="0,5" size="567x4"/>
-													</container>
+											<container size="108x18">
+												<spacer size="108x0"/>
+												<text bold size="108x18" textSize="14">Ordered damage</text>
+												<spacer pos="0,18" size="108x0"/>
+											</container>
+											<container pos="707,0" size="338x18">
+												<spacer size="338x1"/>
+												<container pos="0,1" size="338x14">
+													<text color="disabled" size="338x14" textSize="11">~ marks an expectation that depends on the rules of your application</text>
 												</container>
-												<container size="108x18">
-													<spacer size="108x0"/>
-													<text bold size="108x18" textSize="14">Ordered damage</text>
-													<spacer pos="0,18" size="108x0"/>
-												</container>
-												<container pos="699,0" size="338x18">
-													<spacer size="338x1"/>
-													<container pos="0,1" size="338x14">
-														<text color="disabled" size="338x14" textSize="11">~ marks an expectation that depends on the rules of your application</text>
-													</container>
-													<spacer pos="0,16" size="338x1"/>
-												</container>
+												<spacer pos="0,16" size="338x1"/>
 											</container>
 										</container>
 									</container>
-									<container pos="0,54" size="1054x406">
-										<container size="1054x406">
+									<container pos="0,34" size="1054x414">
+										<container size="1054x414">
 											<container size="1054x168">
 												<rectangle fillColor="menuBackground" radius="10" size="1054x168" strokeColor="separator" strokeWidth="2"/>
 												<container size="1054x168">
@@ -443,28 +411,73 @@
 										</container>
 									</container>
 								</container>
-								<container pos="0,494" size="1054x152">
-									<container pos="4,16" size="1046x132">
-										<rectangle size="1046x132"/>
-										<container size="1046x132">
-											<rectangle fillColor="menuBackground" radius="10" size="1046x132" strokeColor="separator" strokeWidth="2"/>
-											<container size="1046x132">
-												<container pos="16,16" size="1014x100">
-													<widget size="1014x100" type="*parts.KeyScroll">
-														<container size="1014x100">
-															<container size="1014x100">
-																<container size="1014x41">
-																	<widget size="1014x41" type="*widget.Label">
-																		<widget size="1014x41" type="*widget.RichText">
-																			<text color="disabled" pos="4,4" size="983x16">Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data. The entry the keyboard or the pointer is on is read out</text>
-																			<text color="disabled" pos="4,20" size="65x16">here in full.</text>
+								<container pos="0,448" size="1054x198">
+									<container size="1054x66">
+										<container size="1054x66">
+											<container size="1054x16">
+												<rectangle size="1054x16"/>
+												<rectangle size="1054x16"/>
+											</container>
+											<container pos="0,16" size="1054x50">
+												<container pos="4,4" size="1046x34">
+													<container pos="85,0" size="846x34">
+														<container pos="12,4" size="822x26">
+															<spacer size="822x12"/>
+															<rectangle fillColor="separator" pos="0,12" size="822x1"/>
+															<spacer pos="0,13" size="822x12"/>
+														</container>
+													</container>
+													<container size="85x34">
+														<spacer size="85x7"/>
+														<text bold pos="0,7" size="85x18" textSize="14">Chosen entry</text>
+														<spacer pos="0,26" size="85x7"/>
+													</container>
+													<widget pos="931,0" size="114x34" type="*parts.Button">
+														<container size="114x34">
+															<container size="114x34">
+																<rectangle size="114x34"/>
+																<container size="114x34">
+																	<rectangle size="114x34"/>
+																	<container size="114x34">
+																		<container pos="16,4" size="82x26">
+																			<container pos="0,4" size="82x16">
+																				<container size="82x16">
+																					<spacer size="82x0"/>
+																					<text size="82x16">About this run</text>
+																					<spacer pos="0,16" size="82x0"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</widget>
+												</container>
+											</container>
+										</container>
+									</container>
+									<container pos="0,66" size="1054x132">
+										<rectangle size="1054x132"/>
+										<container size="1054x132">
+											<rectangle fillColor="menuBackground" radius="10" size="1054x132" strokeColor="separator" strokeWidth="2"/>
+											<container size="1054x132">
+												<container pos="16,16" size="1022x100">
+													<widget size="1022x100" type="*parts.KeyScroll">
+														<container size="1022x100">
+															<container size="1022x100">
+																<container size="1022x41">
+																	<widget size="1022x41" type="*widget.Label">
+																		<widget size="1022x41" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="989x16">Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data. Click an entry, or move the keyboard onto one, and it is</text>
+																			<text color="disabled" pos="4,20" size="117x16">read out here in full.</text>
 																		</widget>
 																	</widget>
 																</container>
 															</container>
 														</container>
 													</widget>
-													<rectangle radius="10" size="1014x100" strokeWidth="2"/>
+													<rectangle radius="10" size="1022x100" strokeWidth="2"/>
 												</container>
 											</container>
 										</container>
