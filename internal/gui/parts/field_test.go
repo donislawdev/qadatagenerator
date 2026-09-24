@@ -101,6 +101,145 @@ func TestAFieldAnswersThePointerTheWayAQuietButtonDoes(t *testing.T) {
 	}
 }
 
+// textControl is a text control of this package, reached through the hooks a
+// driver uses.
+type textControl interface {
+	fyne.Disableable
+	fyne.Focusable
+	desktop.Hoverable
+}
+
+// textControls are both text controls, each with the way it is dressed. The
+// dressing is handed back rather than done, so that a test can disable a
+// control before a screen has put it on itself.
+func textControls() []struct {
+	name  string
+	build func() (textControl, func() fyne.CanvasObject)
+} {
+	return []struct {
+		name  string
+		build func() (textControl, func() fyne.CanvasObject)
+	}{
+		{"the field", func() (textControl, func() fyne.CanvasObject) {
+			field := NewFieldEntry()
+			return field, func() fyne.CanvasObject { return Field(field) }
+		}},
+		{"the recipe editor", func() (textControl, func() fyne.CanvasObject) {
+			editor := NewEditor(func(string) {})
+			return editor, editor.Framed
+		}},
+	}
+}
+
+// 🔴 A text control out of reach looks like a chooser out of reach, whoever is
+// on it, and comes back the way the pointer and the keyboard left it.
+//
+// DEC-253. A field kept the edge that says it can be used through the whole of
+// a run on the take screen, because the toolkit greys the words and the ground
+// is drawn beside it by this package, which nothing had told. It is compared
+// with the chooser rather than with a colour, because what was decided is one
+// family: a colour right on its own would stay green while the two drifted.
+func TestATextControlOutOfReachLooksLikeAChooserOutOfReach(t *testing.T) {
+	chooser := NewSelect([]string{"pesel", "nip"}, func(string) {})
+	chooser.Disable()
+	want := groundsIn(chooserFace(chooser))
+	if want == "[]" {
+		t.Fatal("a disabled chooser shows no ground, so the rest of this compares with nothing")
+	}
+
+	for _, each := range textControls() {
+		t.Run(each.name, func(t *testing.T) {
+			control, dress := each.build()
+			dressed := dress()
+			resting := shapesShownIn(dressed)
+
+			control.Disable()
+			off := shapesShownIn(dressed)
+			if got := groundsIn(dressed); got != want {
+				t.Errorf("%s out of reach shows %s, where the chooser beside it shows %s",
+					each.name, got, want)
+			}
+
+			control.MouseIn(&desktop.MouseEvent{})
+			control.FocusGained()
+			if touched := shapesShownIn(dressed); touched != off {
+				t.Errorf("%s answered the pointer and the keyboard while out of reach:\n"+
+					"  disabled %s\n  touched  %s", each.name, off, touched)
+			}
+
+			// Given back with both still on it, which is where a person's hand
+			// is when a run ends under it.
+			control.Enable()
+			if marks := focusEdgesIn(dressed); marks != 1 {
+				t.Errorf("%s came back with the keyboard in it and draws %d rings, want 1",
+					each.name, marks)
+			}
+			if !showsFill(dressed, palette.Ink(palette.BgHover)) {
+				t.Errorf("%s came back with the pointer on it and not on the ground of the pointer",
+					each.name)
+			}
+
+			control.MouseOut()
+			control.FocusLost()
+			if back := shapesShownIn(dressed); back != resting {
+				t.Errorf("%s is not as it was before any of this:\n  before %s\n  after  %s",
+					each.name, resting, back)
+			}
+		})
+	}
+}
+
+// A control disabled before a screen dressed it is dressed out of reach. The
+// dressing is made once, when a screen first draws, and a screen may disable a
+// control before that.
+func TestATextControlDisabledBeforeItIsDressedIsDressedOutOfReach(t *testing.T) {
+	chooser := NewSelect([]string{"pesel", "nip"}, func(string) {})
+	chooser.Disable()
+	want := groundsIn(chooserFace(chooser))
+
+	for _, each := range textControls() {
+		t.Run(each.name, func(t *testing.T) {
+			control, dress := each.build()
+			control.Disable()
+			if got := groundsIn(dress()); got != want {
+				t.Errorf("%s disabled before it was dressed shows %s, where a chooser out of reach shows %s",
+					each.name, got, want)
+			}
+		})
+	}
+}
+
+// groundsIn is every visible shape in a drawing that fills something, with what
+// decides how it looks: the fill, the edge and the corners. A shape filling
+// nothing is left out, since the face of a chooser holds one that keeps its
+// size and nobody sees it.
+func groundsIn(object fyne.CanvasObject) string {
+	var seen []string
+	var walk func(fyne.CanvasObject)
+	walk = func(each fyne.CanvasObject) {
+		if each == nil || !each.Visible() {
+			return
+		}
+		switch shape := each.(type) {
+		case *canvas.Rectangle:
+			if shape.FillColor == nil {
+				return
+			}
+			if _, _, _, alpha := shape.FillColor.RGBA(); alpha == 0 {
+				return
+			}
+			seen = append(seen, fmt.Sprintf("fill=%v edge=%v width=%v corners=%v",
+				shape.FillColor, shape.StrokeColor, shape.StrokeWidth, shape.CornerRadius))
+		case *fyne.Container:
+			for _, child := range shape.Objects {
+				walk(child)
+			}
+		}
+	}
+	walk(object)
+	return fmt.Sprint(seen)
+}
+
 // shapesShownIn is every shape a person would see in a dressing, in drawing
 // order, with the colours it is drawn in. Hidden grounds are skipped, because a
 // hidden ground is one nobody sees, and that is the whole of what the field's

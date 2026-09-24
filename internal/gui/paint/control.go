@@ -376,15 +376,52 @@ func FieldFace(value, rung string, width float32) fyne.CanvasObject {
 // program: the same ground under the pointer, the same edge, and focus as the
 // edge in mark.focus whichever ground is under it. There is no pressed state,
 // since pressing a field puts the caret in it and the toolkit draws that.
-func FieldGround(focused, hovered bool) fyne.CanvasObject {
-	under, edge := pointerGround(hovered, false)
+//
+// # Why a field out of reach looks like a chooser out of reach
+//
+// Because the two stand in one row of every form in this window, and DEC-215
+// made them one family. So it is the same ground, drawn by the same function,
+// whoever is on the field: the pointer and the keyboard still arrive at a
+// disabled field - a press focuses it so its text can be copied, at
+// widget/entry.go:397 and internal/app/focus_manager.go:48 of v2.8.1 - and
+// neither may make it look like something that can be changed (DEC-253).
+func FieldGround(look FieldLook) fyne.CanvasObject {
+	if look.Disabled {
+		return disabledGround()
+	}
+	under, edge := pointerGround(look.Hovered, false)
 	if under == "" {
 		under = theme.BgControl
 	}
-	if focused {
+	if look.Focused {
 		edge = theme.MarkFocus
 	}
 	return inside(Bordered(under, edge, theme.RadiusControl))
+}
+
+// FieldLook is everything the ground of a text field depends on.
+//
+// A struct for the reason ChooserLook is one, and with its names: the states
+// mean here exactly what they mean on the chooser beside it.
+type FieldLook struct {
+	Focused  bool
+	Hovered  bool
+	Disabled bool
+}
+
+// disabledGround is what a control that holds a value wears when nobody can
+// change it: the ground and no edge.
+//
+// An edge says a control can be used, so it goes. The ground stays, because a
+// value nobody can touch still has to show WHERE it is, or it floats in the
+// window. One function for the chooser and the field, so that the two cannot
+// drift apart the way they did before DEC-215.
+//
+// Not inset like the edged grounds, and that is what keeps the size the same:
+// an edge is centred on its path, so the edged ground one pixel in reaches the
+// border of the control, and a ground with no edge has to reach it on its own.
+func disabledGround() fyne.CanvasObject {
+	return Fill(theme.BgControl, theme.RadiusControl)
 }
 
 // ChooserLook is everything the face of a chooser depends on.
@@ -439,9 +476,8 @@ type ChooserLook struct {
 // # What each state looks like, and why it matches the button
 //
 //   - DISABLED keeps the ground and loses the edge, which is exactly what the
-//     rectangle laid beside the toolkit's chooser used to do. An edge says a
-//     control can be used. The ground stays because a chooser nobody can touch
-//     still has to show WHERE it is, or the value floats in the window.
+//     rectangle laid beside the toolkit's chooser used to do, and since DEC-253
+//     what a text field out of reach wears too: both take disabledGround.
 //   - FOCUSED gains a ring inside the shape, in the ink of the value, drawn by
 //     the same helper the button uses. The toolkit's answer is to flood the
 //     whole control with the focus colour, measured at 1.56 for the value
@@ -462,7 +498,7 @@ func ChooserFace(look ChooserLook) fyne.CanvasObject {
 	switch {
 	case look.Disabled:
 		ink = theme.TextSecondary
-		ground = Fill(theme.BgControl, theme.RadiusControl)
+		ground = disabledGround()
 	case look.Unchosen:
 		ink = theme.TextSecondary
 	}

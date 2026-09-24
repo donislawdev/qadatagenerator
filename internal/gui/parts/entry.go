@@ -66,16 +66,19 @@ import (
 // second language of focus on a screen that has one. So the toolkit's chrome is
 // switched off with the same bare theme and this draws the ground itself.
 //
-// # onFocus and onHover
+// # onFocus, onHover and onDisable
 //
-// Told when the keyboard and the pointer arrive and leave, so the grounds drawn
-// around the field can answer. They are the same two hooks the single line
-// field carries, for the same reason.
+// Told when the keyboard and the pointer arrive and leave and when the field
+// goes out of reach, so the grounds drawn around the field can answer. They are
+// the same three hooks the single line field carries, for the same reason. No
+// screen disables the editor today, and it answers anyway: a control is
+// expected to have all its states, and the catalogue of DEC-253 shows them.
 type Editor struct {
 	widget.Entry
-	onFocus func(bool)
-	onHover func(bool)
-	dressed fyne.CanvasObject
+	onFocus   func(bool)
+	onHover   func(bool)
+	onDisable func(bool)
+	dressed   fyne.CanvasObject
 }
 
 // Asserted so that dropping one of these is a compile error rather than a field
@@ -127,10 +130,8 @@ func (e *Editor) Framed() fyne.CanvasObject {
 	if e.dressed != nil {
 		return e.dressed
 	}
-	grounds, set := focusGrounds()
-	focused, hovered := false, false
-	e.onFocus = func(here bool) { focused = here; set(focused, hovered) }
-	e.onHover = func(here bool) { hovered = here; set(focused, hovered) }
+	grounds, look := textGrounds(e.Disabled())
+	e.onFocus, e.onHover, e.onDisable = look.focus, look.hover, look.disable
 	step := palette.StepOf(palette.NameStepTight)
 	typed := container.NewThemeOverride(e, bareField{})
 	inside := container.New(layout.NewCustomPaddedLayout(step, step, step, step), typed)
@@ -172,5 +173,22 @@ func (e *Editor) MouseMoved(*desktop.MouseEvent) {}
 func (e *Editor) MouseOut() {
 	if e.onHover != nil {
 		e.onHover(false)
+	}
+}
+
+// Disable puts the editor out of reach and tells the grounds, which the
+// toolkit cannot: see FieldEntry.Disable.
+func (e *Editor) Disable() {
+	e.Entry.Disable()
+	if e.onDisable != nil {
+		e.onDisable(true)
+	}
+}
+
+// Enable gives it back.
+func (e *Editor) Enable() {
+	e.Entry.Enable()
+	if e.onDisable != nil {
+		e.onDisable(false)
 	}
 }

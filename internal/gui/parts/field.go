@@ -67,10 +67,12 @@ import (
 // already answers with its own tokens.
 type FieldEntry struct {
 	widget.Entry
-	// onFocus is told when the keyboard arrives and leaves, and onHover when
-	// the pointer does, so that the ground drawn around this field can answer.
-	onFocus func(bool)
-	onHover func(bool)
+	// onFocus is told when the keyboard arrives and leaves, onHover when the
+	// pointer does, and onDisable when the field goes out of reach and comes
+	// back, so that the ground drawn around this field can answer.
+	onFocus   func(bool)
+	onHover   func(bool)
+	onDisable func(bool)
 	// dressed is this field in the ground and the marks of the window, made
 	// once. See Field for why once.
 	dressed fyne.CanvasObject
@@ -145,6 +147,30 @@ func (f *FieldEntry) MouseOut() {
 	}
 }
 
+// Disable puts the field out of reach and tells whoever draws around it.
+//
+// # Why a field has to be told, checked at the source
+//
+// widget.Entry takes Disable from DisableableWidget, which sets a flag and
+// refreshes the toolkit's renderer - widget/widget.go:180 of v2.8.1 - and that
+// renderer greys the words and nothing else. The ground and the edge are drawn
+// beside it, by this file, so a field nobody told went on wearing the edge that
+// says it can be used for the whole of a run (DEC-253).
+func (f *FieldEntry) Disable() {
+	f.Entry.Disable()
+	if f.onDisable != nil {
+		f.onDisable(true)
+	}
+}
+
+// Enable gives the field back and tells them so.
+func (f *FieldEntry) Enable() {
+	f.Entry.Enable()
+	if f.onDisable != nil {
+		f.onDisable(false)
+	}
+}
+
 // Field dresses a text field in the ground, the edge and the marks this window
 // gives every control, and it does so ONCE: asked again for the same field it
 // hands back the same object, the way OnScreen does on a button or a chooser.
@@ -184,10 +210,8 @@ func fieldWith(entry *FieldEntry, shown fyne.CanvasObject, leading fyne.CanvasOb
 		return entry.dressed
 	}
 
-	grounds, set := focusGrounds()
-	focused, hovered := false, false
-	entry.onFocus = func(here bool) { focused = here; set(focused, hovered) }
-	entry.onHover = func(here bool) { hovered = here; set(focused, hovered) }
+	grounds, look := textGrounds(entry.Disabled())
+	entry.onFocus, entry.onHover, entry.onDisable = look.focus, look.hover, look.disable
 
 	// The words are placed by this space rather than by the toolkit: eight from
 	// the left, to which the renderer adds its own four, which is where a
@@ -204,46 +228,80 @@ func fieldWith(entry *FieldEntry, shown fyne.CanvasObject, leading fyne.CanvasOb
 	return entry.dressed
 }
 
-// focusGrounds builds the four grounds a text control stands on - resting,
-// under the pointer, with the keyboard, and both - all but the first hidden,
-// and returns them with a way to say which is showing.
+// textLooks are the grounds a text control can stand on: resting, under the
+// pointer, with the keyboard, both, and out of reach.
+//
+// Five rather than eight, because out of reach is one ground whoever is on the
+// field. See paint.FieldGround for why.
+var textLooks = []paint.FieldLook{
+	{},
+	{Hovered: true},
+	{Focused: true},
+	{Focused: true, Hovered: true},
+	{Disabled: true},
+}
+
+// textGrounds builds the grounds a text control stands on, all but the one it
+// starts on hidden, and returns them with the look that says which is showing.
 //
 // It is the one drawing every text field in this window wears, so that a field
-// and the chooser or button beside it answer the pointer and the keyboard the
-// same way (DEC-215, DEC-237). The control that wears it wires its own focus
-// and pointer to the setter: the text field does, and so does the recipe
-// editor, which is the second text control and the reason this is a helper
-// rather than a block inside one of them.
-func focusGrounds() (grounds []fyne.CanvasObject, set func(focused, hovered bool)) {
-	resting := paint.FieldGround(false, false)
-	underPointer := paint.FieldGround(false, true)
-	withKeyboard := paint.FieldGround(true, false)
-	both := paint.FieldGround(true, true)
-	for _, ground := range []fyne.CanvasObject{underPointer, withKeyboard, both} {
-		ground.Hide()
-	}
-	current := resting
-	set = func(focused, hovered bool) {
-		wanted := resting
-		switch {
-		case focused && hovered:
-			wanted = both
-		case focused:
-			wanted = withKeyboard
-		case hovered:
-			wanted = underPointer
+// and the chooser or button beside it answer the pointer, the keyboard and
+// being out of reach the same way (DEC-215, DEC-237, DEC-253). The control that
+// wears it wires its own hooks to the look: the text field does, and so does
+// the recipe editor, which is the second text control and the reason this is a
+// helper rather than a block inside one of them.
+func textGrounds(disabled bool) ([]fyne.CanvasObject, *groundLook) {
+	shown := &groundLook{each: make(map[paint.FieldLook]fyne.CanvasObject, len(textLooks))}
+	grounds := make([]fyne.CanvasObject, 0, len(textLooks))
+	resting := paint.FieldLook{}
+	for _, look := range textLooks {
+		ground := paint.FieldGround(look)
+		if look != resting {
+			ground.Hide()
 		}
-		if wanted == current {
-			return
-		}
-		// Hidden first, and the order matters: hiding is what asks the window
-		// to draw again. Showing alone sets a flag and nothing else,
-		// container.go:186 of v2.8.1.
-		current.Hide()
-		wanted.Show()
-		current = wanted
+		shown.each[look] = ground
+		grounds = append(grounds, ground)
 	}
-	return []fyne.CanvasObject{resting, underPointer, withKeyboard, both}, set
+	shown.current = shown.each[resting]
+	shown.disable(disabled)
+	return grounds, shown
+}
+
+// groundLook is which of the grounds of one text control is showing, and the
+// states that decide it.
+//
+// The states are kept even while they change nothing: a field enabled with the
+// pointer resting on it and the keyboard in it has to come back under both,
+// not at rest.
+type groundLook struct {
+	look    paint.FieldLook
+	current fyne.CanvasObject
+	each    map[paint.FieldLook]fyne.CanvasObject
+}
+
+func (g *groundLook) focus(here bool)  { g.look.Focused = here; g.show() }
+func (g *groundLook) hover(here bool)  { g.look.Hovered = here; g.show() }
+func (g *groundLook) disable(off bool) { g.look.Disabled = off; g.show() }
+
+// show puts up the ground the states ask for. Out of reach wins over the
+// pointer and the keyboard, as it does on the chooser and the button.
+func (g *groundLook) show() {
+	wanted := g.look
+	if wanted.Disabled {
+		wanted = paint.FieldLook{Disabled: true}
+	}
+	ground := g.each[wanted]
+	if ground == g.current {
+		return
+	}
+	// Hidden first, and the order matters: hiding is what asks the window to
+	// draw again. Showing alone sets a flag and nothing else, container.go:186
+	// of v2.8.1. Both kinds of ground here ask on hiding: a container at
+	// container.go:96, and the bare rectangle a field out of reach stands on at
+	// canvas/rectangle.go:60.
+	g.current.Hide()
+	ground.Show()
+	g.current = ground
 }
 
 // bareField is this window's theme with the chrome of an input taken out of it.

@@ -315,9 +315,7 @@
 																		<container size="74x34">
 																			<rectangle size="74x34"/>
 																			<container size="74x34">
-																				<container size="74x34">
-																					<rectangle fillColor="button" pos="1,1" radius="6" size="72x32" strokeColor="inputBorder" strokeWidth="2"/>
-																				</container>
+																				<rectangle fillColor="button" radius="6" size="74x34"/>
 																				<container size="74x34">
 																					<widget pos="8,8" size="58x26" type="*container.ThemeOverride">
 																						<container size="58x26">
@@ -346,9 +344,7 @@
 																		<container size="63x34">
 																			<rectangle size="63x34"/>
 																			<container size="63x34">
-																				<container size="63x34">
-																					<rectangle fillColor="button" pos="1,1" radius="6" size="61x32" strokeColor="inputBorder" strokeWidth="2"/>
-																				</container>
+																				<rectangle fillColor="button" radius="6" size="63x34"/>
 																				<container size="63x34">
 																					<widget pos="8,8" size="47x26" type="*container.ThemeOverride">
 																						<container size="47x26">
@@ -646,9 +642,7 @@
 															<container size="80x34">
 																<rectangle size="80x34"/>
 																<container size="80x34">
-																	<container size="80x34">
-																		<rectangle fillColor="button" pos="1,1" radius="6" size="78x32" strokeColor="inputBorder" strokeWidth="2"/>
-																	</container>
+																	<rectangle fillColor="button" radius="6" size="80x34"/>
 																	<container size="80x34">
 																		<widget pos="8,8" size="64x26" type="*container.ThemeOverride">
 																			<container size="64x26">
@@ -709,9 +703,7 @@
 														<container pos="0,18" size="469x34">
 															<rectangle size="469x34"/>
 															<container size="469x34">
-																<container size="469x34">
-																	<rectangle fillColor="button" pos="1,1" radius="6" size="467x32" strokeColor="inputBorder" strokeWidth="2"/>
-																</container>
+																<rectangle fillColor="button" radius="6" size="469x34"/>
 																<container size="469x34">
 																	<widget pos="8,8" size="453x26" type="*container.ThemeOverride">
 																		<container size="453x26">
@@ -739,9 +731,7 @@
 												<container pos="0,18" size="692x34">
 													<rectangle size="692x34"/>
 													<container size="692x34">
-														<container size="692x34">
-															<rectangle fillColor="button" pos="1,1" radius="6" size="690x32" strokeColor="inputBorder" strokeWidth="2"/>
-														</container>
+														<rectangle fillColor="button" radius="6" size="692x34"/>
 														<container size="692x34">
 															<widget pos="8,8" size="676x26" type="*container.ThemeOverride">
 																<container size="676x26">
@@ -771,9 +761,7 @@
 													<container pos="0,18" size="562x34">
 														<rectangle size="562x34"/>
 														<container size="562x34">
-															<container size="562x34">
-																<rectangle fillColor="button" pos="1,1" radius="6" size="560x32" strokeColor="inputBorder" strokeWidth="2"/>
-															</container>
+															<rectangle fillColor="button" radius="6" size="562x34"/>
 															<container size="562x34">
 																<widget pos="8,8" size="546x26" type="*container.ThemeOverride">
 																	<container size="546x26">
