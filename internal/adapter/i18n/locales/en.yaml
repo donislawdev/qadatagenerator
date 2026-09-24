@@ -24,7 +24,10 @@ toolkit.folder: folder
 toolkit.new-folder: New folder
 toolkit.create-folder: Create folder
 toolkit.name: Name
-toolkit.parent: Parent folder
+# Short on purpose: the toolkit puts it in brackets in a cell of its file grid,
+# and "Parent folder" broke there as "(Parent fold" over "er)" on the live
+# window of 2026-09-24.
+toolkit.parent: Parent
 toolkit.show-hidden-files: Show hidden files
 toolkit.enter-filename: Enter a file name
 toolkit.ok: OK
