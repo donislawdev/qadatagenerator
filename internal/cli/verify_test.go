@@ -90,6 +90,27 @@ func TestOnlyAHardDisagreementReturnsTheExpectationCode(t *testing.T) {
 	}
 }
 
+// The detail of a finding is a sentence of its own, and a sentence begins with
+// a capital.
+//
+// 🔴 The line read "accepted although it should have been rejected. the value
+// was taken" (B-298), because the detail is written to follow other words.
+func TestTheDetailOfAFindingBeginsItsOwnSentence(t *testing.T) {
+	into := t.TempDir()
+	got := run(commandVerify,
+		manifestFor(t, into, catalog.Rejection, catalog.Hard),
+		responseFor(t, into, `{"spec_version":"0.1","dataset":{"rows_total":1},
+		 "rows":[{"row":1,"verdict":"accepted"}]}`))
+	if !strings.Contains(got.log, "should have been rejected. The value was taken") {
+		t.Errorf("the detail does not begin a sentence of its own. It said %q", got.log)
+	}
+
+	// A finding without a detail keeps its kind and gains no stray full stop.
+	if said := followedBy("kind", ""); said != "kind" {
+		t.Errorf("a finding without a detail reads %q, want %q", said, "kind")
+	}
+}
+
 // manifestAtVersion writes a sound manifest that names some other version of
 // the format, so that the version is the only thing under test.
 func manifestAtVersion(t *testing.T, into, spec string) string {

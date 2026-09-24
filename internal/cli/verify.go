@@ -4,6 +4,8 @@ import (
 	"flag"
 	"io"
 	"strconv"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/responsejson"
@@ -104,7 +106,7 @@ func say(out *streams, report verify.Report) {
 	}
 	out.note(noteVerifyCompared + strconv.Itoa(report.Compared) + word)
 	for _, finding := range report.Findings {
-		out.warn(placeOf(finding) + string(finding.Kind) + ". " + finding.Detail)
+		out.warn(placeOf(finding) + followedBy(string(finding.Kind), finding.Detail))
 	}
 	for _, open := range report.Unsettled {
 		out.warn("row " + strconv.Itoa(open.Row) + ", " + open.Field + ": " + open.Reason)
@@ -118,6 +120,23 @@ func say(out *streams, report verify.Report) {
 	for _, limit := range report.Limits {
 		out.detail(noteVerifyLimit + limit)
 	}
+}
+
+// followedBy puts the detail of a finding after its kind as a sentence of its
+// own.
+//
+// The detail is written to follow other words, so it begins in lower case, and
+// the line read "the dataset arrived incomplete. the dataset had 24 records..."
+// (B-298). Raising its first letter is safe here and not everywhere: every
+// detail the comparison writes begins with its own words ("the value", "the
+// application", "the manifest", "the response record", "the dataset"), never with a value from
+// somebody's data, where a capital would change what was sent.
+func followedBy(kind, detail string) string {
+	if detail == "" {
+		return kind
+	}
+	first, width := utf8.DecodeRuneInString(detail)
+	return kind + ". " + string(unicode.ToUpper(first)) + detail[width:]
 }
 
 // placeOf names where a finding is, and says nothing when it is about the
