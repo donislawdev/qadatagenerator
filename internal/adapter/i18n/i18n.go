@@ -39,6 +39,34 @@ type Key string
 const (
 	WindowTitle Key = "window.title"
 
+	// The words the toolkit draws itself: the dialog a file is chosen in, the
+	// menu a text field opens under the right button, and the dialog an error
+	// is shown in. Without these the toolkit takes the language of the SYSTEM,
+	// so on a Polish desktop the file dialog spoke Polish in the middle of an
+	// English interface (B-290). fynetheme.Speak hands them over.
+	ToolkitOpen            Key = "toolkit.open"
+	ToolkitSave            Key = "toolkit.save"
+	ToolkitCancel          Key = "toolkit.cancel"
+	ToolkitFile            Key = "toolkit.file"
+	ToolkitFolder          Key = "toolkit.folder"
+	ToolkitNewFolder       Key = "toolkit.new-folder"
+	ToolkitCreateFolder    Key = "toolkit.create-folder"
+	ToolkitName            Key = "toolkit.name"
+	ToolkitParent          Key = "toolkit.parent"
+	ToolkitShowHiddenFiles Key = "toolkit.show-hidden-files"
+	ToolkitEnterFilename   Key = "toolkit.enter-filename"
+	ToolkitOK              Key = "toolkit.ok"
+	ToolkitError           Key = "toolkit.error"
+	ToolkitYes             Key = "toolkit.yes"
+	ToolkitNo              Key = "toolkit.no"
+	ToolkitCut             Key = "toolkit.cut"
+	ToolkitCopy            Key = "toolkit.copy"
+	ToolkitPaste           Key = "toolkit.paste"
+	ToolkitSelectAll       Key = "toolkit.select-all"
+	ToolkitUndo            Key = "toolkit.undo"
+	ToolkitRedo            Key = "toolkit.redo"
+	ToolkitQuit            Key = "toolkit.quit"
+
 	ScreenAbout    Key = "screen.about"
 	ScreenManifest Key = "screen.manifest"
 	ScreenTake     Key = "screen.take"
@@ -685,6 +713,10 @@ const (
 // Keys is every key a screen may ask for, so a test can close the register
 // from the side the code is on.
 var Keys = []Key{
+	ToolkitOpen, ToolkitSave, ToolkitCancel, ToolkitFile, ToolkitFolder, ToolkitNewFolder,
+	ToolkitCreateFolder, ToolkitName, ToolkitParent, ToolkitShowHiddenFiles, ToolkitEnterFilename,
+	ToolkitOK, ToolkitError, ToolkitYes, ToolkitNo, ToolkitCut, ToolkitCopy, ToolkitPaste,
+	ToolkitSelectAll, ToolkitUndo, ToolkitRedo, ToolkitQuit,
 	WindowTitle, ScreenAbout, ScreenManifest, ScreenTake, ScreenRecipe, ScreenQuick,
 	SidebarGroupMake, SidebarGroupCheck, SidebarOffline,
 

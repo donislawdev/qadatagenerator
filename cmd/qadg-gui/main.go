@@ -69,6 +69,12 @@ func main() {
 	application.Settings().SetTheme(fynetheme.Current())
 
 	text := i18n.English
+	// The toolkit's own words, in the language of this window rather than of
+	// the desktop (B-290). A refusal leaves them in the desktop's language,
+	// which is worth a line on the error channel and not worth no window.
+	if err := fynetheme.Speak(text); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
 	window := application.NewWindow(text.T(i18n.WindowTitle))
 
 	frame := assemble(text, window, application.Clipboard())

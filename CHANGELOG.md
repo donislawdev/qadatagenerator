@@ -122,6 +122,13 @@ repository once they are released.
 
 ### Fixed
 
+- **The dialog you choose a file in, and the menu a text field opens under the
+  right mouse button, now speak the language of the window.** They used to
+  take the language of the operating system, so on a desktop set to another
+  language they spoke that language inside an English window. The names of
+  the places at the side of the file dialog, such as Home and Documents, stay
+  in English whatever the desktop.
+
 - **The card under the manifest table reads out the entry you chose.** It
   followed the pointer, so moving the mouse across the table changed what it
   said while the highlighted row stayed where you had clicked.

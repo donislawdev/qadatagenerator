@@ -11,6 +11,35 @@
 
 window.title: QA Data Generator
 
+# The words the toolkit draws itself, handed to it at start so that it speaks
+# the language of this window rather than the language of the desktop. The
+# toolkit joins the first pair into the title of its file dialog ("Open" and
+# "file" read "Open file"), which is why file and folder begin in lower case:
+# every other heading in this window is written as a sentence.
+toolkit.open: Open
+toolkit.save: Save
+toolkit.cancel: Cancel
+toolkit.file: file
+toolkit.folder: folder
+toolkit.new-folder: New folder
+toolkit.create-folder: Create folder
+toolkit.name: Name
+toolkit.parent: Parent folder
+toolkit.show-hidden-files: Show hidden files
+toolkit.enter-filename: Enter a file name
+toolkit.ok: OK
+toolkit.error: Error
+toolkit.yes: "Yes"
+toolkit.no: "No"
+toolkit.cut: Cut
+# tekst-ok: the item of the menu the toolkit opens on a text field, the same verb the Copy button of the quick screen says, with one meaning
+toolkit.copy: Copy
+toolkit.paste: Paste
+toolkit.select-all: Select all
+toolkit.undo: Undo
+toolkit.redo: Redo
+toolkit.quit: Quit
+
 # The headings the column groups the screen names under. They name what a
 # person came to do, which is why the screens sit in the order they do.
 sidebar.group.make: Make data
@@ -448,6 +477,7 @@ quick.label.gender: Gender
 quick.label.born: Born
 quick.label.count: How many
 quick.gender.any: any
+# tekst-ok: the same verb the toolkit's menu on a text field says in toolkit.copy, with one meaning
 quick.copy: Copy
 quick.again: Again
 quick.copied: The values are in the clipboard.
