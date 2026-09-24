@@ -1,21 +1,19 @@
 package manifestview
 
 import (
-	"strconv"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
-	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
 // The run as a whole: its envelope, which the card under the table says in
-// place of an entry when somebody asks for it, and the sentences a comparison
-// says about the whole file, in a strip over the table.
+// place of an entry when somebody asks for it, and what a comparison could not
+// see, which the card says the same way. What a comparison says about the
+// whole file stands in the band beside the file (DEC-251).
 //
 // # Why the envelope waits for a press
 //
@@ -48,21 +46,6 @@ func (v *View) runBlocks() []fyne.CanvasObject {
 		blocks = append(blocks, v.paragraph(v.text.T(i18n.ManifestRunWait)))
 	}
 	return append(blocks, v.envelope(append(append([]Field{}, fields...), counts...)))
-}
-
-// drawNotes fills the strip over the table with what a comparison says about
-// the whole file, and empties it while there is no comparison.
-//
-// The step is under the strip rather than over it, because what is over it is
-// the band, which keeps its own distance, and what is under it is the heading
-// of the table, which would otherwise stand against the last note.
-func (v *View) drawNotes() {
-	v.notesBox.Objects = nil
-	if v.hasResponse {
-		v.notesBox.Objects = []fyne.CanvasObject{paint.Pad(palette.NameStepHairline,
-			palette.NameStepGroup, palette.NameStepHairline, palette.NameStepHairline, v.notes())}
-	}
-	v.notesBox.Refresh()
 }
 
 // envelope lays the pairs out in as many columns as the theme says, label and
@@ -112,28 +95,14 @@ func form(fields []Field) fyne.CanvasObject {
 	return container.New(layout.NewFormLayout(), cells...)
 }
 
-// notes are the sentences of a comparison about the run as a whole, each with
-// the shape its colour asks for, and under them the section holding what the
-// comparison could not see.
+// told is a sentence with the shape its ink asks for beside it: a warning
+// sign for what needs attention, a check for what agreed, and nothing for a
+// plain fact.
 //
 // The shape rather than the colour on its own, for the reason measured for
 // this palette: the colours that carry meaning differ in hue while barely
 // differing in lightness, so somebody who does not separate hues sees one
 // shade of grey.
-func (v *View) notes() fyne.CanvasObject {
-	lines := make([]fyne.CanvasObject, 0, len(v.screen.Notes)+1)
-	for _, note := range v.screen.Notes {
-		lines = append(lines, v.told(note))
-	}
-	if len(v.screen.Limits) > 0 {
-		lines = append(lines, v.limits())
-	}
-	return paint.Column(palette.NameStepTight, lines...)
-}
-
-// told is a sentence with the shape its ink asks for beside it: a warning
-// sign for what needs attention, a check for what agreed, and nothing for a
-// plain fact.
 func (v *View) told(line Line) fyne.CanvasObject {
 	words := v.paragraphInk(line.Text, line.Color)
 	switch line.Color {
@@ -147,20 +116,19 @@ func (v *View) told(line Line) fyne.CanvasObject {
 	return words
 }
 
-// limits is the section holding what the comparison could not see, closed
-// until somebody opens it.
+// limitBlocks is what the comparison could not see, as the card reads it out.
 //
-// Closed, because these are sentences about the FORMAT of the response record
-// rather than about this run, three of them at two lines each, and every line
-// above the table is a row of the table gone. The count in the heading says
-// how much is there without opening it.
-func (v *View) limits() fyne.CanvasObject {
-	lines := make([]fyne.CanvasObject, 0, len(v.screen.Limits))
+// # Why in the card and not in a section over the table (DEC-251)
+//
+// These are sentences about the FORMAT of the response record rather than
+// about this run, three of them at two lines each. Over the table they were a
+// section that opened in place, and opening it made the window taller by what
+// it held, on top of the strip it stood in (B-299). The card is a fixed height
+// that scrolls inside, the same answer the envelope of the run got in DEC-249.
+func (v *View) limitBlocks() []fyne.CanvasObject {
+	blocks := make([]fyne.CanvasObject, 0, len(v.screen.Limits))
 	for _, limit := range v.screen.Limits {
-		lines = append(lines, v.paragraphInk(limit.Text, limit.Color))
+		blocks = append(blocks, v.paragraphInk(limit.Text, limit.Color))
 	}
-	title := v.text.T(i18n.ManifestHeadingLimits) + " (" + strconv.Itoa(len(v.screen.Limits)) + ")"
-	return parts.NewDisclosure(title, paint.Pad(palette.NameStepHairline, palette.NameStepHairline,
-		palette.NameStepHairline, palette.NameStepHairline,
-		paint.Card(palette.NameStepGroup, paint.Column(palette.NameStepHairline, lines...)))).OnScreen()
+	return blocks
 }

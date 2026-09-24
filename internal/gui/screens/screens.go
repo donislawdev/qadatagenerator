@@ -232,6 +232,9 @@ type State struct {
 	// where an entry stands until somebody asks for the run, so it is
 	// invisible in every other state for the same reason.
 	Envelope bool
+	// Limits puts what a comparison could not see in that same card, the third
+	// thing it holds since DEC-251, and needs a response to be open.
+	Limits bool
 	// Reading leaves the read of the file unanswered, which is the screen a
 	// person looks at while a large one is being walked.
 	//
@@ -359,6 +362,9 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	}
 	if state.Envelope {
 		view.ShowRun()
+	}
+	if state.Limits {
+		view.ShowLimits()
 	}
 	if state.NeedsSource && data.SourcePath != "" {
 		takeScreen.Open(data.SourcePath)

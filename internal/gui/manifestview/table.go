@@ -191,7 +191,7 @@ func (v *View) tableFocus(has bool) { v.tableFocused = has }
 // A key reaches this twice, once from the selection it makes and once from the
 // highlight that made it, and the second time there is nothing left to do.
 func (v *View) choose(entries *parts.KeyTable, cell widget.TableCellID) {
-	if v.hasHighlight && v.highlight == cell && v.hasSelected && v.selected == cell.Row && !v.showingRun {
+	if v.hasHighlight && v.highlight == cell && v.hasSelected && v.selected == cell.Row && v.showing == cardEntry {
 		return
 	}
 	previous, had := v.highlight, v.hasHighlight
@@ -204,13 +204,13 @@ func (v *View) choose(entries *parts.KeyTable, cell widget.TableCellID) {
 }
 
 // readOut makes the card under the table about one entry, in place of the run
-// if the run was what it said.
+// or the limits if either was what it said.
 func (v *View) readOut(row int) {
 	if row < 0 || row >= len(v.screen.Rows) {
 		return
 	}
-	if v.showingRun {
-		v.showingRun = false
+	if v.showing != cardEntry {
+		v.showing = cardEntry
 		v.detail.ScrollToTop()
 	}
 	v.selected, v.hasSelected = row, true

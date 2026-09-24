@@ -455,7 +455,7 @@ func TestTheSecondStateCarriesWhatItCouldNotSettleAndCouldNotSee(t *testing.T) {
 	if len(screen.Limits) == 0 {
 		t.Error("the screen states no limit against a record that carries neither stored values nor warnings")
 	}
-	if len(screen.Notes) == 0 {
+	if screen.NeverAnswered == 0 && !screen.Agreed && screen.Disagreed == 0 {
 		t.Error("the second state says nothing about the run as a whole")
 	}
 }
@@ -479,16 +479,16 @@ func TestAFindingAboutTheWholeDatasetIsNotHungOnOneRow(t *testing.T) {
 	if len(whole) == 0 {
 		t.Fatal("the comparison found nothing about the whole dataset, so this test checks nothing")
 	}
+	// Said as a count for the band beside the file since DEC-251, and the
+	// count is the comparison's own rather than a second subtraction.
+	if screen.NeverAnswered == 0 || screen.NeverAnswered != comparison.Report.NeverReacted {
+		t.Errorf("the screen counts %d records never answered where the comparison counted %d",
+			screen.NeverAnswered, comparison.Report.NeverReacted)
+	}
+	if screen.Agreed {
+		t.Error("the screen says nothing disagreed beside records nobody answered")
+	}
 	for _, detail := range whole {
-		found := false
-		for _, note := range screen.Notes {
-			if note.Text == sentence(detail) && note.Color == palette.StateDanger {
-				found = true
-			}
-		}
-		if !found {
-			t.Errorf("the screen does not say, as a note in the danger token, that %q", detail)
-		}
 		for _, line := range []Line{screen.Rows[0].Answer, screen.Rows[0].Finding} {
 			if strings.Contains(line.Text, detail) {
 				t.Error("a statement about the whole dataset is shown against one row of it")
@@ -506,19 +506,18 @@ func TestAFindingAboutTheWholeDatasetIsNotHungOnOneRow(t *testing.T) {
 // 🔴 Seen on the real window on 2026-09-23 (B-289): the note over the table
 // read "the dataset had 24 records...", because the comparison writes its
 // phrases to follow the words the command line puts in front of them. The
-// limits are the same kind of phrase on the same kind of line.
+// note became a count in the band (DEC-251), and the limits are the same kind
+// of phrase, each on a line of its own in the card.
 func TestASentenceOfTheComparisonOnALineOfItsOwnReadsAsOne(t *testing.T) {
 	promised := built(t, applied("d1", 1, catalog.Rejection, catalog.Hard))
 	actual := response.Record{SpecVersion: "0.1", Rows: []response.Row{{Number: 1, Verdict: response.Rejected}}}
 	comparison := Comparison{Record: actual, Report: verify.Compare(promised, actual)}
 	screen := Build(i18n.English, promised, &comparison)
 
-	standing := append(append([]Line{}, screen.Notes...), screen.Limits...)
-	if len(screen.Notes) == 0 || len(screen.Limits) == 0 {
-		t.Fatalf("the comparison left %d notes and %d limits, so this test checks nothing",
-			len(screen.Notes), len(screen.Limits))
+	if len(screen.Limits) == 0 {
+		t.Fatal("the comparison left no limits, so this test checks nothing")
 	}
-	for _, line := range standing {
+	for _, line := range screen.Limits {
 		first, _ := utf8.DecodeRuneInString(line.Text)
 		last, _ := utf8.DecodeLastRuneInString(line.Text)
 		if !unicode.IsUpper(first) || last != '.' {
@@ -557,7 +556,7 @@ func TestTheFirstStateClaimsNothingAboutAnyApplication(t *testing.T) {
 		t.Errorf("a manifest shown on its own carries %q and %q about an application",
 			screen.Rows[0].Answer.Text, screen.Rows[0].Finding.Text)
 	}
-	if len(screen.Notes) != 0 || len(screen.Unsettled) != 0 || len(screen.Limits) != 0 {
+	if screen.NeverAnswered != 0 || screen.Agreed || len(screen.Unsettled) != 0 || len(screen.Limits) != 0 {
 		t.Error("a manifest shown on its own carries the sections that belong to a comparison")
 	}
 	if screen.Compared != 0 || screen.Disagreed != 0 {

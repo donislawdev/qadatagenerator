@@ -185,9 +185,25 @@ type Screen struct {
 	// Run is the envelope, and Counts is how much of what was ordered happened.
 	Run    []Field
 	Counts []Field
-	// Notes are the sentences of the second state that belong to the run as a
-	// whole rather than to one row.
-	Notes []Line
+	// NeverAnswered is how many records of the dataset the response answers
+	// for none of, and Agreed that the comparison found nothing at all. Both
+	// are about the file as a whole rather than about one row, and both are
+	// said in the band beside the file, in a few words (DEC-251).
+	//
+	// 🔴 Facts rather than the sentences they were until 2026-09-24. The
+	// sentences stood in a strip over the table, and the strip made the window
+	// taller by what it held the moment a response was opened (B-299). The
+	// band has a slot of fixed height beside the file, and a count fits in it
+	// where a sentence did not.
+	//
+	// 🔴 What this assumes, and what breaks it: verify reports exactly one
+	// kind of finding that names no row, the shortfall of addShortfall, and
+	// its number arrives as Report.NeverReacted. A second kind of finding about
+	// the whole file would reach nothing here - the strip used to show any
+	// finding without a row, and a count shows only the one it counts. The day
+	// verify gains one, it needs a place on this screen in the same change.
+	NeverAnswered int
+	Agreed        bool
 	// Rows is one entry of the manifest each, in the order damage was
 	// attempted, which is deterministic for one seed.
 	Rows []Row
@@ -219,7 +235,8 @@ func Build(text i18n.Catalogue, promised manifest.Manifest, comparison *Comparis
 		Rows:   rowsOf(text, promised, comparison),
 	}
 	if comparison != nil {
-		screen.Notes = notesOf(text, comparison.Report)
+		screen.NeverAnswered = comparison.Report.NeverReacted
+		screen.Agreed = len(comparison.Report.Findings) == 0
 		screen.Compared = comparison.Report.Compared
 		screen.Disagreed = disagreedOf(comparison.Report)
 		screen.Unsettled = unsettledOf(comparison.Report)
@@ -632,36 +649,6 @@ func unsettledFor(report verify.Report, defect manifest.Defect) (verify.Unsettle
 		}
 	}
 	return verify.Unsettled{}, false
-}
-
-// notesOf is what the comparison says about the run as a whole.
-//
-// A finding with no row belongs here rather than beside an entry, and there is
-// one that behaves that way: records the application never reacted to at all
-// are counted from the dataset rather than from the damaged rows. Attaching it
-// to an entry would put a statement about the whole file on one arbitrary line
-// of it. How many entries were compared is not a note any more: it stands at
-// the heading of the table with the other counts.
-//
-// The detail stands alone, without the phrase for the kind in front of it. The
-// phrases are written for one row ("the application never answered for this
-// row"), and rendering showed one at the head of a sentence about the whole
-// dataset. The detail of a finding about the whole file is a sentence already.
-func notesOf(text i18n.Catalogue, report verify.Report) []Line {
-	var notes []Line
-	for _, finding := range report.Findings {
-		if finding.Row == 0 {
-			words := finding.Detail
-			if words == "" {
-				words = kindOf(text, finding.Kind)
-			}
-			notes = append(notes, Line{Text: sentence(words), Color: palette.StateDanger})
-		}
-	}
-	if len(report.Findings) == 0 {
-		notes = append(notes, Line{Text: text.T(i18n.VerifyAgreed), Color: palette.StateSuccess})
-	}
-	return notes
 }
 
 // disagreedOf counts the findings that belong to one entry each, which is what

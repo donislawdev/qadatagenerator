@@ -1,6 +1,7 @@
 package manifestview
 
 import (
+	"strconv"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -185,9 +186,9 @@ func TestChoosingAnEntryPutsItBackInPlaceOfTheRun(t *testing.T) {
 
 	view.ShowRun()
 	view.entries.Tapped(&fyne.PointEvent{Position: points[1]})
-	if view.showingRun || view.selected != 1 {
-		t.Errorf("a click on the entry chosen before left the card on the run %v, reading entry %d",
-			view.showingRun, view.selected+1)
+	if view.showing != cardEntry || view.selected != 1 {
+		t.Errorf("a click on the entry chosen before left the card showing %d, reading entry %d",
+			view.showing, view.selected+1)
 	}
 	if !saying(view.cardHeading, i18n.English.T(i18n.ManifestHeadingEntry)) {
 		t.Errorf("the card reads out an entry under a heading saying %q", texts(view.cardHeading))
@@ -195,11 +196,130 @@ func TestChoosingAnEntryPutsItBackInPlaceOfTheRun(t *testing.T) {
 
 	view.ShowRun()
 	view.about.Tapped(&fyne.PointEvent{})
-	if view.showingRun || view.selected != 1 {
-		t.Errorf("the button bringing the entry back left the card on the run %v, reading entry %d",
-			view.showingRun, view.selected+1)
+	if view.showing != cardEntry || view.selected != 1 {
+		t.Errorf("the button bringing the entry back left the card showing %d, reading entry %d",
+			view.showing, view.selected+1)
 	}
 	if !saying(view.detailBox, "entry 2 of 3") {
 		t.Errorf("the entry is back and the card says %q", texts(view.detailBox))
+	}
+}
+
+// partlyAnswered is a response to the three entries of threeEntries that
+// answers for one record of the dataset and stores no value, so the band has
+// records nobody answered to count and the card has limits to read out.
+func partlyAnswered() response.Record {
+	return response.Record{SpecVersion: "0.1", Rows: []response.Row{
+		{Number: 1, Verdict: response.Rejected},
+	}}
+}
+
+// Opening what an application did makes the window ask for no more height than
+// the manifest alone did, and neither does putting its limits in the card
+// (DEC-251).
+//
+// 🔴 The test B-299 would have been caught by, and there was none. Measured on
+// the real window on 2026-09-23: 1154 pixels with the manifest alone and 1208
+// once a response was open, past the 1170 the window opens at, because the
+// notes of a comparison stood in a strip over the table and a table keeps a
+// minimum of four rows under them.
+func TestOpeningAResponseDoesNotMakeTheWindowTaller(t *testing.T) {
+	view, window := threeEntries(t)
+	defer window.Close()
+	alone := view.Content().MinSize().Height
+
+	view.Compare(partlyAnswered(), "")
+	if len(view.screen.Limits) == 0 || view.screen.NeverAnswered == 0 {
+		t.Fatalf("the response this test is built on leaves nothing to say: %d limits, %d never answered",
+			len(view.screen.Limits), view.screen.NeverAnswered)
+	}
+	if compared := view.Content().MinSize().Height; compared > alone {
+		t.Errorf("a response makes the screen ask for %.0f units of height where the manifest alone asked for %.0f",
+			compared, alone)
+	}
+	view.ShowLimits()
+	if limited := view.Content().MinSize().Height; limited > alone {
+		t.Errorf("the limits in the card make the screen ask for %.0f units of height where the manifest alone asked for %.0f",
+			limited, alone)
+	}
+}
+
+// What a comparison could not see is a third thing the card holds, behind a
+// button of its own that carries the count, and the entry comes back by that
+// button, by a click, and by opening another manifest (DEC-251).
+func TestTheLimitsTakeThePlaceOfTheEntryAndComeBack(t *testing.T) {
+	view, window := threeEntries(t)
+	defer window.Close()
+	points := rowPoints(t, view)
+	view.entries.Tapped(&fyne.PointEvent{Position: points[0]})
+	view.Compare(partlyAnswered(), "")
+
+	count := " (" + strconv.Itoa(len(view.screen.Limits)) + ")"
+	if want := i18n.English.T(i18n.ManifestHeadingLimits) + count; view.seeLimits.Text != want {
+		t.Errorf("the button leading to the limits says %q, want %q", view.seeLimits.Text, want)
+	}
+	view.seeLimits.Tapped(&fyne.PointEvent{})
+	if view.showing != cardLimits || !saying(view.detailBox, view.screen.Limits[0].Text) {
+		t.Fatalf("the button left the card showing %d and saying %q", view.showing, texts(view.detailBox))
+	}
+	if view.seeLimits.Text != i18n.English.T(i18n.ManifestShowEntry) {
+		t.Errorf("while the card holds the limits its button says %q", view.seeLimits.Text)
+	}
+
+	view.seeLimits.Tapped(&fyne.PointEvent{})
+	if view.showing != cardEntry || !saying(view.detailBox, "entry 1 of 3") {
+		t.Errorf("the second press left the card showing %d and saying %q", view.showing, texts(view.detailBox))
+	}
+
+	view.ShowLimits()
+	view.entries.Tapped(&fyne.PointEvent{Position: points[0]})
+	if view.showing != cardEntry {
+		t.Errorf("a click on the entry chosen before left the card showing %d", view.showing)
+	}
+
+	// A new manifest has no comparison, so there are no limits to go on
+	// reading out, and the button leading to them goes with them.
+	view.ShowLimits()
+	view.Open(view.promised, "")
+	if view.showing == cardLimits || standsIn(view.cardHeading, view.seeLimits) {
+		t.Errorf("after another manifest was opened the card shows %d, button to the limits in the heading %v",
+			view.showing, standsIn(view.cardHeading, view.seeLimits))
+	}
+}
+
+// The band beside the response file says what the comparison found about the
+// file as a whole, with the shape of the verdict: how many records nobody
+// answered, or that nothing disagreed (DEC-251).
+func TestTheBandSaysWhatTheComparisonFoundAboutTheWholeFile(t *testing.T) {
+	view, window := threeEntries(t)
+	defer window.Close()
+	view.Compare(partlyAnswered(), "")
+	missing := strconv.Itoa(view.screen.NeverAnswered) + " " + i18n.English.T(i18n.ManifestFactsNeverAnswered)
+	if !saying(view.responseFacts, missing) {
+		t.Errorf("the band says %q where it should count %q", texts(view.responseFacts), missing)
+	}
+	if saying(view.responseFacts, i18n.English.T(i18n.ManifestFactsAgreed)) {
+		t.Error("the band says nothing disagreed beside records nobody answered")
+	}
+
+	// Every record answered, the two damaged ones rejected as the manifest
+	// expects and every other one accepted: nothing to count, nothing that
+	// disagreed, and the band says the second.
+	all := response.Record{SpecVersion: "0.1"}
+	for number := 1; number <= view.promised.Run().RowsTotal; number++ {
+		verdict := response.Accepted
+		if number <= 2 {
+			verdict = response.Rejected
+		}
+		all.Rows = append(all.Rows, response.Row{Number: number, Verdict: verdict})
+	}
+	view.Compare(all, "")
+	if !view.screen.Agreed {
+		t.Fatalf("a response agreeing everywhere was not taken as agreeing: %d never answered, band %q",
+			view.screen.NeverAnswered, texts(view.responseFacts))
+	}
+	if !saying(view.responseFacts, i18n.English.T(i18n.ManifestFactsAgreed)) ||
+		saying(view.responseFacts, i18n.English.T(i18n.ManifestFactsNeverAnswered)) {
+		t.Errorf("a response agreeing everywhere reads %q in the band", texts(view.responseFacts))
 	}
 }

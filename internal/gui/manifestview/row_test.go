@@ -332,7 +332,7 @@ func TestTheThemeAnswersForEveryColourThisScreenAsksFor(t *testing.T) {
 
 // lines is every coloured phrase a screen carries, wherever it stands.
 func lines(screen Screen) []Line {
-	all := append(append(append([]Line{}, screen.Notes...), screen.Unsettled...), screen.Limits...)
+	all := append(append([]Line{}, screen.Unsettled...), screen.Limits...)
 	for _, row := range screen.Rows {
 		all = append(all, row.Status, row.Expect, row.Certainty, row.Reason, row.Values, row.Answer, row.Finding)
 	}

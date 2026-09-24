@@ -12,6 +12,13 @@ repository once they are released.
 
 ### Changed
 
+- **Opening an application response no longer makes the Manifest browser
+  taller.** How many records the response never answered now stands beside
+  its file name, and when nothing disagreed the same place says so. What the
+  comparison could not see is read in the card under the table, from a button
+  in its heading that shows how many there are, the same way the envelope of
+  the run is. The table has the room the notes above it used to take.
+
 - **The window is drawn on a lighter graphite with a blue accent instead of a
   near black with violet.** The accent now also marks where things are, not
   only the one action a screen is for: the icons on buttons and in the column

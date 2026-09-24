@@ -82,18 +82,23 @@ type View struct {
 	manifestFacts *fyne.Container
 	responseFacts *fyne.Container
 
-	// The body: the strip of notes a comparison adds over the table, the tally
-	// at the heading of the table, the slot the table or the shape of one
-	// stands in, and the card under it with its heading, the button in that
-	// heading which puts the run in the card and takes it out again, and the
-	// title the heading was last drawn with.
-	notesBox    *fyne.Container
+	// The body: the tally at the heading of the table, the slot the table or
+	// the shape of one stands in, and the card under it with its heading, the
+	// two buttons in that heading which put the run or the limits of a
+	// comparison in the card and take them out again, and the title and the
+	// buttons the heading was last drawn with.
+	//
+	// There was a strip of notes over the table until 2026-09-24, and it made
+	// the window taller than the one it opened in the moment a response was
+	// opened (B-299). What it said went to the band and to the card (DEC-251).
 	tally       *fyne.Container
 	entriesBox  *fyne.Container
 	entries     *parts.KeyTable
 	cardHeading *fyne.Container
 	about       *parts.Button
+	seeLimits   *parts.Button
 	cardTitle   i18n.Key
+	headedLimit bool
 	detailBox   *fyne.Container
 	detail      *parts.KeyScroll
 	content     fyne.CanvasObject
@@ -144,11 +149,20 @@ type View struct {
 	highlight    widget.TableCellID
 	hasHighlight bool
 	tableFocused bool
-	// showingRun is the card saying what the run was rather than reading out
-	// an entry. Choosing an entry ends it, and so does the button that
-	// started it.
-	showingRun bool
+	// showing is what the card holds: an entry, what the run was, or what the
+	// comparison could not see. Choosing an entry puts the entry back, and so
+	// does the button that took it away.
+	showing cardShows
 }
+
+// cardShows is the one thing the card under the table says at a time.
+type cardShows int
+
+const (
+	cardEntry cardShows = iota
+	cardRun
+	cardLimits
+)
 
 // document says which of the two files a read or a failure was about.
 type document int
@@ -168,9 +182,8 @@ func New(text i18n.Catalogue, window fyne.Window, read Readers, load background.
 	view := &View{
 		text: text, window: window, read: read, load: load, clipboard: clipboard,
 		manifestFacts: container.NewStack(), responseFacts: container.NewStack(),
-		notesBox: container.NewStack(), tally: container.NewStack(),
-		entriesBox: container.NewStack(), cardHeading: container.NewStack(),
-		detailBox: container.NewStack(),
+		tally: container.NewStack(), entriesBox: container.NewStack(),
+		cardHeading: container.NewStack(), detailBox: container.NewStack(),
 	}
 	view.buildBand()
 	view.buildCommand()
@@ -201,8 +214,10 @@ func (v *View) lay() {
 	// 🔴 The heading is refilled as the card changes what it says, and the
 	// button in it is one object moved from one heading to the next, so that a
 	// keyboard standing on it is still standing on it after the press.
-	v.about = parts.NewButton(v.text.T(i18n.ManifestHeadingRun), v.toggleRun)
+	v.about = parts.NewButton(v.text.T(i18n.ManifestHeadingRun), func() { v.toggle(cardRun) })
 	v.about.Plain = true
+	v.seeLimits = parts.NewButton(v.text.T(i18n.ManifestHeadingLimits), func() { v.toggle(cardLimits) })
+	v.seeLimits.Plain = true
 	v.detail = parts.NewKeyScroll(v.detailBox)
 	card := paint.AtLeast(0, palette.EntryDetailHeight,
 		paint.Card(palette.NameStepGroup, v.detail.Framed()))
@@ -210,7 +225,7 @@ func (v *View) lay() {
 
 	body := paint.Pad(palette.NameStepSection, palette.NameStepSection,
 		palette.NameStepMajor, palette.NameStepMajor,
-		container.New(layout.NewBorderLayout(v.notesBox, foot, nil, nil), v.notesBox, middle, foot))
+		container.New(layout.NewBorderLayout(nil, foot, nil, nil), middle, foot))
 
 	band := v.fileBand()
 	v.terminal = v.commandBand()
@@ -239,6 +254,11 @@ func (v *View) Open(promised manifest.Manifest, path string) {
 	v.promised, v.hasPromise, v.manifestPath = promised, true, path
 	v.hasResponse, v.responsePath, v.answered = false, "", 0
 	v.screen = Build(v.text, promised, nil)
+	// A new manifest has no comparison, so a card reading out the limits of
+	// the last one would be reading out a comparison that is no longer open.
+	if v.showing == cardLimits {
+		v.showing = cardEntry
+	}
 	v.respond.Enable()
 	v.forgetSelection()
 	v.entries = nil
@@ -268,6 +288,11 @@ func (v *View) Compare(actual response.Record, path string) bool {
 	comparison := Comparison{Record: actual, Report: verify.Compare(v.promised, actual)}
 	v.screen = Build(v.text, v.promised, &comparison)
 	v.hasResponse, v.responsePath, v.answered = true, path, len(actual.Rows)
+	// A response that carries everything leaves nothing the comparison could
+	// not see, and the button that led to the limits is gone with them.
+	if v.showing == cardLimits && len(v.screen.Limits) == 0 {
+		v.showing = cardEntry
+	}
 	v.draw()
 	return true
 }
@@ -281,8 +306,22 @@ func (v *View) Compare(actual response.Record, path string) bool {
 // ignored by the toolkit - it selects nothing that is already selected - and
 // the card would go on saying what the run was under a person clicking an
 // entry to read it.
-func (v *View) ShowRun() {
-	v.showingRun = true
+func (v *View) ShowRun() { v.show(cardRun) }
+
+// ShowLimits puts what the comparison could not see in the card, which is what
+// the second button in the card's heading does, and it is exported for a
+// picture of that state. It does nothing without a comparison that has limits,
+// because the button that leads there does not exist then either.
+func (v *View) ShowLimits() {
+	if len(v.screen.Limits) == 0 {
+		return
+	}
+	v.show(cardLimits)
+}
+
+// show puts the run or the limits in the card in place of an entry.
+func (v *View) show(what cardShows) {
+	v.showing = what
 	if v.entries != nil {
 		v.entries.UnselectAll()
 	}
@@ -290,10 +329,11 @@ func (v *View) ShowRun() {
 	v.drawDetail()
 }
 
-// showEntry takes the run out of the card and puts back the entry chosen before
-// it, selected again in the table so that the selection and the card agree.
+// showEntry takes the run or the limits out of the card and puts back the
+// entry chosen before, selected again in the table so that the selection and
+// the card agree.
 func (v *View) showEntry() {
-	v.showingRun = false
+	v.showing = cardEntry
 	if v.entries != nil && v.hasSelected {
 		column := 0
 		if v.hasHighlight && v.highlight.Row == v.selected {
@@ -305,13 +345,14 @@ func (v *View) showEntry() {
 	v.drawDetail()
 }
 
-// toggleRun is the press of the button in the card's heading.
-func (v *View) toggleRun() {
-	if v.showingRun {
+// toggle is the press of one of the two buttons in the card's heading: it puts
+// its own view in the card, or the entry back when its view is already there.
+func (v *View) toggle(what cardShows) {
+	if v.showing == what {
 		v.showEntry()
 		return
 	}
-	v.ShowRun()
+	v.show(what)
 }
 
 // draw puts on the screen everything that depends on its state.
@@ -322,7 +363,6 @@ func (v *View) toggleRun() {
 // time. A comparison refreshes it in place.
 func (v *View) draw() {
 	v.drawBand()
-	v.drawNotes()
 	v.drawTally()
 	v.drawEntries()
 	v.drawDetail()

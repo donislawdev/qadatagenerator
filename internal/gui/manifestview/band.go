@@ -114,7 +114,44 @@ func (v *View) responseFactsNow() fyne.CanvasObject {
 	}
 	words := strconv.Itoa(v.answered) + " " + v.text.T(i18n.ManifestFactsOf) + " " +
 		strconv.Itoa(v.promised.Run().RowsTotal) + " " + v.text.T(i18n.ManifestFactsAnswered)
-	return v.named(v.responsePath, words, palette.TextSecondary)
+	facts := v.named(v.responsePath, words, palette.TextSecondary)
+	if verdict := v.fileVerdict(); verdict != nil {
+		return paint.Row(palette.NameStepTight, facts, verdict)
+	}
+	return facts
+}
+
+// fileVerdict is what the comparison says about the response as a whole, in
+// the few words the slot beside the file has room for: how many records it
+// never answered, or that it disagreed with nothing. Nothing when neither is
+// true, because then the tally at the heading of the table says it.
+//
+// # Why here and not in a strip over the table (DEC-251)
+//
+// The strip stood between the band and the table and was as tall as what it
+// said, so opening a response made the window taller than the one it opened
+// in (B-299). This slot is one line of fixed height whether it holds a count or
+// not. The shape goes with the words, since the two colours differ in hue far
+// more than in lightness and a hue on its own reaches nobody who does not
+// separate them (docs/17, 4.2).
+func (v *View) fileVerdict() fyne.CanvasObject {
+	switch {
+	case v.screen.NeverAnswered > 0:
+		return verdictFact(paint.IconAlert, palette.StateDanger,
+			strconv.Itoa(v.screen.NeverAnswered)+" "+v.text.T(i18n.ManifestFactsNeverAnswered))
+	case v.screen.Agreed:
+		return verdictFact(paint.IconCheck, palette.StateSuccess, v.text.T(i18n.ManifestFactsAgreed))
+	}
+	return nil
+}
+
+// verdictFact is one more fact after the dot, with the shape of its verdict
+// in front of the words.
+func verdictFact(icon, ink, words string) fyne.CanvasObject {
+	return paint.Row(palette.NameStepHairline,
+		paint.Middle(paint.Text(dot, palette.TypeBody, palette.TextSecondary)),
+		paint.Middle(paint.Icon(icon, ink, palette.IconSmall)),
+		paint.Middle(paint.Text(words, palette.TypeBody, ink)))
 }
 
 // named is the name of a file with a few words after it, or the words alone

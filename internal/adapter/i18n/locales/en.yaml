@@ -127,6 +127,10 @@ manifest.facts.answered: rows answered
 manifest.facts.reading: reading
 # tekst-ok: the same words take.file.unreadable puts beside a file, because the two bands say the same thing about a file
 manifest.facts.unreadable: could not be read
+# tekst-ok: words after a count beside the response file, not a sentence (DEC-251)
+manifest.facts.never-answered: never answered
+# tekst-ok: the verdict on a whole response file beside its name, not a sentence (DEC-251)
+manifest.facts.agreed: no disagreement
 
 # tekst-ok: words that stand after a number at the heading of the table, not sentences
 manifest.tally.ordered: ordered
@@ -217,7 +221,6 @@ manifest.failure.field-type-not-covered: no column of that kind
 manifest.failure.scheme-not-covered: scheme not covered
 manifest.failure.declined-by-mutator: the damage declined
 
-verify.agreed: The application answered the way the manifest expected, everywhere it could be judged.
 verify.no-answer: The response record says nothing about this row.
 verify.verdict.accepted: the application accepted this row
 verify.verdict.rejected: the application rejected this row

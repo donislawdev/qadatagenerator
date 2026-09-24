@@ -605,6 +605,14 @@ func browserStates() []State {
 			Envelope:      true,
 		},
 		{
+			Name:          "browser-limits",
+			Purpose:       "what a comparison could not see, in the card under the table in place of an entry",
+			Screen:        screenManifest,
+			NeedsManifest: true,
+			NeedsResponse: true,
+			Limits:        true,
+		},
+		{
 			Name:          "browser-focus-button",
 			Purpose:       "the keyboard on the button that opens a manifest",
 			Screen:        screenManifest,

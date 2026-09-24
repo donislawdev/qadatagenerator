@@ -97,6 +97,12 @@ type Report struct {
 	Unsettled []Unsettled
 	// Compared is how many applied entries were judged.
 	Compared int
+	// NeverReacted is how many records of the dataset the response record
+	// answers for none of, which is the number inside the one Missing finding
+	// that names no row. Carried as a number as well, so that a surface
+	// saying it in fewer words than the sentence does not subtract a second
+	// time and drift from the sentence.
+	NeverReacted int
 	// Limits is what this comparison could not see, given what the response
 	// record carried. It travels with the answer for the same reason the
 	// inference carries what it does not read: a report saying only what it
@@ -285,6 +291,7 @@ func (r *Report) addShortfall(promised manifest.Manifest, actual response.Record
 	// so a record that was read answers for at least one row and a dataset
 	// with more records than that has at least two.
 	missing := total - len(actual.Rows)
+	r.NeverReacted = missing
 	were := "were"
 	if missing == 1 {
 		were = "was"

@@ -363,6 +363,11 @@ const (
 	ManifestFactsAnswered   Key = "manifest.facts.answered"
 	ManifestFactsReading    Key = "manifest.facts.reading"
 	ManifestFactsUnreadable Key = "manifest.facts.unreadable"
+	// What a comparison says about the response file as a whole, beside the
+	// file rather than in a strip over the table (DEC-251): after a count, how
+	// many records it never answered, or alone, that it disagreed with nothing.
+	ManifestFactsNeverAnswered Key = "manifest.facts.never-answered"
+	ManifestFactsAgreed        Key = "manifest.facts.agreed"
 
 	// The tally at the heading of the table: how much of what was ordered
 	// happened, or once a response is open, how much of it could be judged
@@ -451,7 +456,6 @@ const (
 	ManifestFailureSchemeNotCovered    Key = "manifest.failure.scheme-not-covered"
 	ManifestFailureDeclinedByMutator   Key = "manifest.failure.declined-by-mutator"
 
-	VerifyAgreed          Key = "verify.agreed"
 	VerifyNoAnswer        Key = "verify.no-answer"
 	VerifyVerdictAccepted Key = "verify.verdict.accepted"
 	VerifyVerdictRejected Key = "verify.verdict.rejected"
@@ -756,6 +760,7 @@ var Keys = []Key{
 	ManifestWaitMutator, ManifestWaitPlace, ManifestWaitExpect, ManifestWaitStatus,
 	ManifestFactsEntry, ManifestFactsEntries, ManifestFactsSeed, ManifestFactsOf,
 	ManifestFactsAnswered, ManifestFactsReading, ManifestFactsUnreadable,
+	ManifestFactsNeverAnswered, ManifestFactsAgreed,
 	ManifestTallyOrdered, ManifestTallyApplied, ManifestTallyNotApplied,
 	ManifestTallyCompared, ManifestTallyDisagree, ManifestTallyNotSettled,
 	ManifestDetailWait, ManifestDetailSelect, ManifestDetailEntry,
@@ -817,7 +822,7 @@ var Keys = []Key{
 	TakeRefusalOverwriteSourceAllowed, TakeRefusalOverwriteSourceDo,
 	TakeRefusalUnnamed, TakeRefusalUnnamedWhy, TakeRefusalUnnamedDo,
 
-	VerifyAgreed, VerifyNoAnswer,
+	VerifyNoAnswer,
 	VerifyVerdictAccepted, VerifyVerdictRejected,
 	VerifyKindHole, VerifyKindOverzealous, VerifyKindSilent, VerifyKindMissing,
 

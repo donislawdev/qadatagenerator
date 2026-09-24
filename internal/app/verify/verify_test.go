@@ -232,6 +232,23 @@ func TestOneRecordNobodyReactedToIsSaidInTheSingular(t *testing.T) {
 		if !strings.HasSuffix(said, tc.want) {
 			t.Errorf("%d records and one answer read %q where it should end %q", tc.rows, said, tc.want)
 		}
+		// The same number as a number, for a surface that says it in fewer
+		// words. One source, so the two cannot come apart.
+		if report.NeverReacted != tc.rows-1 {
+			t.Errorf("%d records and one answer counted %d never reacted to, want %d",
+				tc.rows, report.NeverReacted, tc.rows-1)
+		}
+	}
+}
+
+// A dataset answered in full has nothing never reacted to, and the count says
+// nought rather than being left for a reader to work out.
+func TestADatasetAnsweredInFullCountsNothingNeverReactedTo(t *testing.T) {
+	report := verify.Compare(
+		promised(t, 1, damage(1, catalog.Rejection, catalog.Hard)),
+		answered(response.Row{Number: 1, Verdict: response.Rejected}))
+	if report.NeverReacted != 0 {
+		t.Errorf("one record answered out of one counted %d never reacted to", report.NeverReacted)
 	}
 }
 

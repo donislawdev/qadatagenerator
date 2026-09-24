@@ -332,8 +332,27 @@
 															<spacer size="820x8"/>
 															<container pos="0,8" size="820x16">
 																<container size="820x16">
-																	<text bold size="156x16">application-response.json</text>
-																	<text color="disabled" pos="164,0" size="131x16">· 4 of 6 rows answered</text>
+																	<container size="296x16">
+																		<text bold size="156x16">application-response.json</text>
+																		<text color="disabled" pos="164,0" size="131x16">· 4 of 6 rows answered</text>
+																	</container>
+																	<container pos="304,0" size="130x16">
+																		<container size="4x16">
+																			<spacer size="4x0"/>
+																			<text color="disabled" size="4x16">·</text>
+																			<spacer pos="0,16" size="4x0"/>
+																		</container>
+																		<container pos="8,0" size="15x16">
+																			<spacer size="15x0"/>
+																			<image fillMode="contain" rsc="circle-alert-ee626d-15.svg" size="15x15"/>
+																			<spacer pos="0,15" size="15x0"/>
+																		</container>
+																		<container pos="27,0" size="103x16">
+																			<spacer size="103x0"/>
+																			<text color="error" size="103x16">2 never answered</text>
+																			<spacer pos="0,16" size="103x0"/>
+																		</container>
+																	</container>
 																</container>
 															</container>
 															<spacer pos="0,25" size="820x8"/>
@@ -349,53 +368,7 @@
 						</container>
 						<container pos="0,149" size="1118x635">
 							<container pos="32,24" size="1054x587">
-								<container size="1054x86">
-									<container size="1054x86">
-										<container pos="4,4" size="1046x66">
-											<container size="1046x24">
-												<container size="27x24">
-													<container size="27x23">
-														<image fillMode="contain" pos="4,4" rsc="circle-alert-ee626d-15.svg" size="15x15"/>
-													</container>
-												</container>
-												<container pos="27,0" size="1019x24">
-													<widget size="1019x24" type="*widget.RichText">
-														<text color="error" pos="4,4" size="543x16">The dataset had 6 records and the response record answers for 4, so 2 were never reacted to.</text>
-													</widget>
-												</container>
-											</container>
-											<container pos="0,32" size="1046x34">
-												<widget size="1046x34" type="*parts.Button">
-													<container size="1046x34">
-														<container size="1046x34">
-															<rectangle size="1046x34"/>
-															<container size="1046x34">
-																<rectangle size="1046x34"/>
-																<container size="1046x34">
-																	<container pos="12,4" size="1022x26">
-																		<container size="250x26">
-																			<container size="15x26">
-																				<spacer size="15x5"/>
-																				<image fillMode="contain" pos="0,5" rsc="chevron-down-72abff-15.svg" size="15x15"/>
-																				<spacer pos="0,20" size="15x5"/>
-																			</container>
-																			<container pos="23,0" size="227x26">
-																				<spacer size="227x4"/>
-																				<text pos="0,4" size="227x16">What this comparison could not see (3)</text>
-																				<spacer pos="0,21" size="227x4"/>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</container>
-												</widget>
-											</container>
-										</container>
-									</container>
-								</container>
-								<container pos="0,86" size="1054x302">
+								<container size="1054x389">
 									<container size="1054x34">
 										<container pos="4,4" size="1046x18">
 											<container pos="108,0" size="667x18">
@@ -425,11 +398,11 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,34" size="1054x268">
-										<container size="1054x268">
-											<rectangle size="1054x268"/>
-											<container size="1054x268">
-												<widget size="1054x268" type="*parts.KeyTable">
+									<container pos="0,34" size="1054x355">
+										<container size="1054x355">
+											<rectangle size="1054x355"/>
+											<container size="1054x355">
+												<widget size="1054x355" type="*parts.KeyTable">
 													<widget size="1054x24" type="*widget.clip">
 														<container size="0x0">
 															<rectangle fillColor="headerBackground" size="1054x24"/>
@@ -447,7 +420,7 @@
 															</widget>
 														</container>
 													</widget>
-													<widget pos="0,24" size="0x243" type="*widget.clip">
+													<widget pos="0,24" size="0x330" type="*widget.clip">
 														<container size="0x0">
 														</container>
 													</widget>
@@ -456,16 +429,16 @@
 															<rectangle fillColor="headerBackground" size="21x24"/>
 														</container>
 													</widget>
-													<widget size="1054x268" type="*widget.clip">
+													<widget size="1054x355" type="*widget.clip">
 														<container size="0x0">
-															<widget pos="504,0" size="4x268" type="*widget.Separator">
-																<rectangle fillColor="separator" size="4x268"/>
+															<widget pos="504,0" size="4x355" type="*widget.Separator">
+																<rectangle fillColor="separator" size="4x355"/>
 															</widget>
-															<widget pos="688,0" size="4x268" type="*widget.Separator">
-																<rectangle fillColor="separator" size="4x268"/>
+															<widget pos="688,0" size="4x355" type="*widget.Separator">
+																<rectangle fillColor="separator" size="4x355"/>
 															</widget>
-															<widget pos="904,0" size="4x268" type="*widget.Separator">
-																<rectangle fillColor="separator" size="4x268"/>
+															<widget pos="904,0" size="4x355" type="*widget.Separator">
+																<rectangle fillColor="separator" size="4x355"/>
 															</widget>
 															<widget pos="0,47" size="1054x4" type="*widget.Separator">
 																<rectangle fillColor="separator" size="1054x4"/>
@@ -484,8 +457,8 @@
 															</widget>
 														</container>
 													</widget>
-													<widget pos="0,24" size="1054x243" type="*widget.Scroll">
-														<widget size="1054x243" type="*widget.tableCells">
+													<widget pos="0,24" size="1054x330" type="*widget.Scroll">
+														<widget size="1054x330" type="*widget.tableCells">
 															<widget size="506x24" type="*widget.RichText">
 																<text pos="4,4" size="143x16">L3.checksum.off_by_one</text>
 															</widget>
@@ -561,7 +534,7 @@
 														</widget>
 													</widget>
 												</widget>
-												<rectangle radius="6" size="1054x268" strokeWidth="2"/>
+												<rectangle radius="6" size="1054x355" strokeWidth="2"/>
 											</container>
 										</container>
 									</container>
@@ -575,11 +548,11 @@
 											</container>
 											<container pos="0,16" size="1054x50">
 												<container pos="4,4" size="1046x34">
-													<container pos="85,0" size="846x34">
-														<container pos="12,4" size="822x26">
-															<spacer size="822x12"/>
-															<rectangle fillColor="rgba(48,85,140,255)" pos="0,12" size="822x1"/>
-															<spacer pos="0,13" size="822x12"/>
+													<container pos="85,0" size="578x34">
+														<container pos="12,4" size="554x26">
+															<spacer size="554x12"/>
+															<rectangle fillColor="rgba(48,85,140,255)" pos="0,12" size="554x1"/>
+															<spacer pos="0,13" size="554x12"/>
 														</container>
 													</container>
 													<container size="85x34">
@@ -587,27 +560,50 @@
 														<text bold pos="0,7" size="85x18" textSize="14">Chosen entry</text>
 														<spacer pos="0,26" size="85x7"/>
 													</container>
-													<widget pos="931,0" size="114x34" type="*parts.Button">
-														<container size="114x34">
-															<container size="114x34">
-																<rectangle size="114x34"/>
-																<container size="114x34">
-																	<rectangle size="114x34"/>
-																	<container size="114x34">
-																		<container pos="16,4" size="82x26">
-																			<container pos="0,4" size="82x16">
-																				<container size="82x16">
-																					<spacer size="82x0"/>
-																					<text size="82x16">About this run</text>
-																					<spacer pos="0,16" size="82x0"/>
+													<container pos="664,0" size="381x34">
+														<widget size="259x34" type="*parts.Button">
+															<container size="259x34">
+																<container size="259x34">
+																	<rectangle size="259x34"/>
+																	<container size="259x34">
+																		<rectangle size="259x34"/>
+																		<container size="259x34">
+																			<container pos="16,4" size="227x26">
+																				<container pos="0,4" size="227x16">
+																					<container size="227x16">
+																						<spacer size="227x0"/>
+																						<text size="227x16">What this comparison could not see (3)</text>
+																						<spacer pos="0,16" size="227x0"/>
+																					</container>
 																				</container>
 																			</container>
 																		</container>
 																	</container>
 																</container>
 															</container>
-														</container>
-													</widget>
+														</widget>
+														<widget pos="267,0" size="114x34" type="*parts.Button">
+															<container size="114x34">
+																<container size="114x34">
+																	<rectangle size="114x34"/>
+																	<container size="114x34">
+																		<rectangle size="114x34"/>
+																		<container size="114x34">
+																			<container pos="16,4" size="82x26">
+																				<container pos="0,4" size="82x16">
+																					<container size="82x16">
+																						<spacer size="82x0"/>
+																						<text size="82x16">About this run</text>
+																						<spacer pos="0,16" size="82x0"/>
+																					</container>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</widget>
+													</container>
 												</container>
 											</container>
 										</container>

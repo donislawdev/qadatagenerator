@@ -138,8 +138,10 @@ func TestTheScreenDrawsInEveryState(t *testing.T) {
 	if view.entries == nil {
 		t.Error("the first state draws no table")
 	}
-	if len(view.notesBox.Objects) != 0 {
-		t.Error("the first state draws the notes that belong to a comparison")
+	never := i18n.English.T(i18n.ManifestFactsNeverAnswered)
+	if saying(view.responseFacts, never) || standsIn(view.cardHeading, view.seeLimits) {
+		t.Errorf("the first state says what belongs to a comparison: band %q, button to the limits %v",
+			texts(view.responseFacts), standsIn(view.cardHeading, view.seeLimits))
 	}
 
 	actual := response.Record{SpecVersion: "0.1", Rows: []response.Row{{Number: 1, Verdict: response.Accepted}}}
@@ -149,11 +151,37 @@ func TestTheScreenDrawsInEveryState(t *testing.T) {
 	if view.entries == nil {
 		t.Error("the second state draws no table")
 	}
-	// The strip under the envelope carries the notes and the limits of the
-	// second state, so it is never empty once a response is in.
-	if len(view.notesBox.Objects) == 0 {
-		t.Error("the second state draws no notes, so what the comparison could not see has nowhere to be")
+	// Two records and one answer: the band says one was never answered, and
+	// the heading of the card leads to what the comparison could not see,
+	// since a record without stored values leaves at least that (DEC-251).
+	if !saying(view.responseFacts, "1 "+never) {
+		t.Errorf("one of two records was never answered and the band says %q", texts(view.responseFacts))
 	}
+	if !standsIn(view.cardHeading, view.seeLimits) {
+		t.Errorf("the second state leads nowhere to what the comparison could not see, heading %q",
+			texts(view.cardHeading))
+	}
+}
+
+// standsIn reports whether an object is in a tree of containers.
+//
+// A button is looked for as an object rather than by its words, because the
+// walk over words stops at a widget: asked for the label of a button in the
+// heading, it answered "not there" whether the button was there or not, which
+// made the first version of these checks pass in the state they were written
+// to fail in.
+func standsIn(tree, object fyne.CanvasObject) bool {
+	if tree == object {
+		return true
+	}
+	if box, ok := tree.(*fyne.Container); ok {
+		for _, child := range box.Objects {
+			if standsIn(child, object) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // A column nobody defined is headed with nothing rather than taking the view
