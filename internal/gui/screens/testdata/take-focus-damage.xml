@@ -894,18 +894,18 @@
 																	<container size="306x64">
 																		<text bold color="focus" size="306x14" textSize="11">CARRIED OUT BY THIS BUILD, OF THOSE ORDERED</text>
 																		<container pos="0,22" size="306x16">
-																			<container size="177x16">
-																				<rectangle size="177x16"/>
-																				<text bold size="177x16">Field format (L2)</text>
+																			<container size="183x16">
+																				<rectangle size="183x16"/>
+																				<text bold size="183x16">Field format (L2)</text>
 																			</container>
-																			<text monospace pos="189,0" size="46x16">3 of 9</text>
+																			<text monospace pos="195,0" size="46x16">3 of 9</text>
 																		</container>
 																		<container pos="0,47" size="306x16">
-																			<container size="177x16">
-																				<rectangle size="177x16"/>
-																				<text bold size="177x16">Value meaning (L3)</text>
+																			<container size="183x16">
+																				<rectangle size="183x16"/>
+																				<text bold size="183x16">Value meaning (L3)</text>
 																			</container>
-																			<text monospace pos="189,0" size="46x16">3 of 7</text>
+																			<text monospace pos="195,0" size="46x16">3 of 7</text>
 																		</container>
 																	</container>
 																	<rectangle fillColor="separator" pos="0,76" size="306x1"/>

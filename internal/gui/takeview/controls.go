@@ -1,12 +1,10 @@
 package takeview
 
 import (
-	"strconv"
-
 	"fyne.io/fyne/v2"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
-	"github.com/donislawdev/qadatagenerator/internal/damage"
+	"github.com/donislawdev/qadatagenerator/internal/gui/damageparts"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
@@ -182,19 +180,11 @@ func (v *View) settingsColumn() fyne.CanvasObject {
 }
 
 // manifestChoices is every extra form of the manifest, with the absence of one
-// named rather than left blank.
-func (v *View) manifestChoices() []string {
-	return append([]string{v.text.T(i18n.TakeSettingNone)}, take.ManifestForms()...)
-}
+// named rather than left blank. The recipe screen offers the same list.
+func (v *View) manifestChoices() []string { return damageparts.FormChoices(v.text) }
 
-// formNamed turns what was picked back into what the mode takes, where the
-// name for no export is a word on screen and an empty setting underneath.
-func (v *View) formNamed(picked string) string {
-	if picked == v.text.T(i18n.TakeSettingNone) {
-		return ""
-	}
-	return picked
-}
+// formNamed turns what was picked back into what the mode takes.
+func (v *View) formNamed(picked string) string { return damageparts.FormNamed(v.text, picked) }
 
 // settingChanged redraws the answer to what a run would do, and the button
 // that would do it.
@@ -283,29 +273,15 @@ func (v *View) planContent() fyne.CanvasObject {
 		return v.refusal(refused)
 	}
 	planned := v.opened.Plan(v.chosen, v.described)
-	// The names stand in a column as wide as the longest of them, so that the
-	// figures line up and can be compared down the card.
-	names := paint.OptionNameWidth(v.layerLabels()...)
-	rows := []fyne.CanvasObject{paint.Caption(v.text.T(i18n.TakePlanCarried))}
-	for _, layer := range planned.ByLayer {
-		rows = append(rows, v.layerRow(layer, names))
-	}
+	// The names stand in a column as wide as the longest kind this screen
+	// offers rather than the longest ticked, so that ticking one does not move
+	// the figures of the others.
 	return paint.Column(palette.NameStepRelated,
-		paint.Column(palette.NameStepTight, rows...),
+		damageparts.PlanRows(v.text, planned.Planned, damageparts.NameWidth(v.text, v.layerCodes())),
 		paint.Hairline(palette.LineQuiet),
 		v.fact(i18n.TakePlanWrites,
 			listOf(planned.Writes)+" "+v.text.T(i18n.TakePlanWritesTo)+" "+planned.Out),
 		v.paragraph(v.text.T(i18n.TakePlanEveryOrder)))
-}
-
-// layerRow is one named kind of damage with how much of it this build carries
-// out: the name where the tick box has it, and "3 of 9" in figures, because a
-// figure is what somebody compares across rows.
-func (v *View) layerRow(layer damage.LayerPlan, names float32) fyne.CanvasObject {
-	return paint.Row(palette.NameStepRelated,
-		paint.AtLeast(names, 0, paint.Strong(v.labelOfLayer(layer.Layer), palette.TypeBody, palette.TextPrimary)),
-		paint.Mono(strconv.Itoa(layer.Implemented)+" "+v.text.T(i18n.TakePlanOf)+" "+
-			strconv.Itoa(layer.Ordered), palette.TypeBody, palette.TextPrimary))
 }
 
 // fact is a caption over a value, the way the panel beside the values on the

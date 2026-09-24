@@ -214,6 +214,15 @@ type State struct {
 	// put somebody's home in a file this repository keeps and would differ
 	// between two machines running the same guard.
 	Into string
+	// Form is the extra form of the manifest picked on the recipe editor, the
+	// way a person picks it from the list. Empty leaves the list at none.
+	Form string
+	// Wrote is what a run of the recipe editor left, for the states that show
+	// one. It presses that screen's button, so it also needs a recipe and a
+	// directory, or the screen would refuse the run it was asked for. It is a
+	// field of its own rather than Ran, because Ran presses the button of the
+	// take screen.
+	Wrote RecipeRun
 	// Quick is what is chosen on the screen that produces one value. It is a
 	// struct rather than four fields of this one, because every field of it is
 	// meaningless on any other screen and a state naming one of them by
@@ -288,14 +297,15 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 		Run:  outcomeOf(state.Ran),
 		Read: readingFor(state.Reading),
 	}, nil)
-	// 🔴 The way to write is handed in as nothing at all. A state of this list
-	// is a picture, and a picture that wrote a dataset would leave it either in
-	// this repository or in a directory whose name then appears in every stored
-	// tree. The button is drawn in whatever state it is in, which is what these
-	// pictures are of, and that the button really writes is held by a test in
-	// the screen's own package against a directory of its own.
-	recipeScreen := recipeview.New(text, recipeview.Checker(describedDamage()), nil,
-		background.Work{Read: readingFor(state.Checking)}, nil)
+	// 🔴 The way to write never writes. A state of this list is a picture, and a
+	// picture that wrote a dataset would leave it either in this repository or
+	// in a directory whose name then appears in every stored tree. For a state
+	// that shows what a run left it answers with what a run of that shape
+	// answers, and for every other state it is nothing at all. That the button
+	// really writes is held by a test in the screen's own package against a
+	// directory of its own.
+	recipeScreen := recipeview.New(text, recipeview.Checker(describedDamage()), recipeRunFor(state.Wrote),
+		background.Work{Read: readingFor(state.Checking), Produce: producedHere}, nil)
 	// The clipboard is nothing at all here, for the same reason the way to
 	// write is: a state of this list is a picture, and a picture that reached
 	// the clipboard of the machine taking it would change something outside
@@ -349,6 +359,7 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	if state.Generators {
 		recipeScreen.ShowGenerators()
 	}
+	settleRecipe(recipeScreen, state)
 	// The manifest and the record arrive parsed, so they are named here by the
 	// name a run gives its manifest and by a name a response record could
 	// carry, which is what a picture of this screen should show rather than

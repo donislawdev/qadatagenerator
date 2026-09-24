@@ -31,19 +31,11 @@ func sentence(words string) fyne.CanvasObject {
 
 // paragraph is a sentence that wraps to the width it is given, in the type of
 // the body and the ink of an explanation: what hangs under a problem, what a
-// run would write, what was not looked at.
-//
-// A label of the toolkit's rather than paint.Text, because paint.Text is a
-// piece of canvas and never wraps, and the sentences here are among the
-// longest on any screen of this window. The value inside is a list of
+// run would write, what was not looked at. The value inside is a list of
 // generator names or somebody's own key, and neither has a length this screen
-// decides.
+// decides, which is why it wraps.
 func (v *View) paragraph(words string) fyne.CanvasObject {
-	label := widget.NewLabel(words)
-	label.Wrapping = fyne.TextWrapWord
-	label.Importance = widget.LowImportance
-	label.SizeName = fyne.ThemeSizeName(palette.TypeBody)
-	return container.NewStack(label)
+	return paint.Paragraph(words)
 }
 
 // told is a headline with a shape beside it: the verdict on the recipe, or on

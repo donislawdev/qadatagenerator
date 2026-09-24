@@ -7,6 +7,69 @@
 // past another.
 package screens
 
+import (
+	"github.com/donislawdev/qadatagenerator/internal/app/generate"
+	"github.com/donislawdev/qadatagenerator/internal/damage"
+	"github.com/donislawdev/qadatagenerator/internal/gui/recipeview"
+	"github.com/donislawdev/qadatagenerator/internal/produce"
+)
+
+// RecipeRun is what a run of the recipe editor left, for the states that show
+// one.
+type RecipeRun int
+
+const (
+	// RecipeRanNothing is every state where nobody pressed the button.
+	RecipeRanNothing RecipeRun = iota
+	// RecipeRanDamaged is a run of a recipe with a policy that carried out part
+	// of its order, which is the answer that has the most to say: the files,
+	// the manifest among them, and every count including the shortfall.
+	RecipeRanDamaged
+)
+
+// What a sample run of a recipe with a policy did, as numbers rather than as a
+// run, for the reason the take screen's samples give: which rows a share of
+// them lands on is a draw, and a stored tree should be a statement about the
+// screen rather than about the draw. Three records damaged one defect each, of
+// which one kind this build carries out.
+const (
+	sampleRecipeRows    = 3
+	sampleRecipeOrdered = 3
+	sampleRecipeApplied = 1
+)
+
+// recipeRunFor is the way to write for a state, which never writes.
+func recipeRunFor(ran RecipeRun) recipeview.Write {
+	if ran == RecipeRanNothing {
+		return nil
+	}
+	return func([]byte, produce.Settings, generate.Halt) (produce.Written, error) {
+		return produce.Written{
+			Files:   produce.Writes([]string{"customer.csv"}, true, ""),
+			Rows:    sampleRecipeRows,
+			Damaged: true,
+			Counts:  damage.Counts{Requested: sampleRecipeOrdered, Applied: sampleRecipeApplied},
+		}, nil
+	}
+}
+
+// producedHere carries a run out where it is asked for, so that the screen has
+// finished answering by the time the picture is taken.
+func producedHere(work func() (produce.Written, error), done func(produce.Written, error)) {
+	done(work())
+}
+
+// settleRecipe takes the recipe editor the rest of the way, through the calls a
+// person makes: the form picked from its list, then the button.
+func settleRecipe(screen *recipeview.View, state State) {
+	if state.Form != "" {
+		screen.ChooseForm(state.Form)
+	}
+	if state.Wrote != RecipeRanNothing {
+		screen.Start()
+	}
+}
+
 // recipeStates are the states of the screen a recipe is written on.
 //
 // Split for the reason the screen next door was: the list outgrew the hard
@@ -81,6 +144,35 @@ func recipeStatesOfTheAnswer() []State {
 			Screen: screenRecipe,
 			Recipe: RefusedRecipe,
 		},
+		{
+			Name: "recipe-policy",
+			Purpose: "a recipe that orders damage, before anything is written: the manifest " +
+				"among the files, how much of each kind this build carries out, and a " +
+				"sentence saying the rows shown are the rows before the damage (DEC-252)",
+			Screen: screenRecipe,
+			Recipe: PolicyRecipe,
+			Into:   "a-directory",
+			Form:   "csv",
+		},
+		{
+			Name: "recipe-form-unused",
+			Purpose: "an extra form of the manifest picked for a recipe that orders no damage, " +
+				"which says that nothing will be exported rather than going grey",
+			Screen: screenRecipe,
+			Recipe: CleanRecipe,
+			Into:   "a-directory",
+			Form:   "csv",
+		},
+		{
+			Name: "recipe-ran-damaged",
+			Purpose: "what a run of a recipe with a policy left: the files with the manifest " +
+				"and the note, then every count, the shortfall marked rather than left to " +
+				"whoever compares two numbers",
+			Screen: screenRecipe,
+			Recipe: PolicyRecipe,
+			Into:   "a-directory",
+			Wrote:  RecipeRanDamaged,
+		},
 	}
 }
 
@@ -117,7 +209,7 @@ func recipeStatesOfTheKeyboard() []State {
 			Purpose:  "the keyboard on the preview itself, which is where the arrow keys move a cell at a time",
 			Screen:   screenRecipe,
 			Recipe:   CleanRecipe,
-			Keyboard: Keyboard{Tabs: 11},
+			Keyboard: Keyboard{Tabs: 12},
 		},
 		{
 			Name: "recipe-focus-button",
@@ -127,35 +219,35 @@ func recipeStatesOfTheKeyboard() []State {
 			Screen:   screenRecipe,
 			Recipe:   CleanRecipe,
 			Into:     "a-directory",
-			Keyboard: Keyboard{Tabs: 9},
+			Keyboard: Keyboard{Tabs: 10},
 		},
 		{
 			Name: "recipe-focus-example",
 			Purpose: "the keyboard on the offer of a recipe that runs, which is in the card " +
 				"on the empty screen and nowhere else",
 			Screen:   screenRecipe,
-			Keyboard: Keyboard{Tabs: 11},
+			Keyboard: Keyboard{Tabs: 12},
 		},
 		{
 			Name: "recipe-focus-generators",
 			Purpose: "the keyboard on the list of what this build can generate, which is a " +
 				"heading somebody opens rather than a wall of names nobody asked for",
 			Screen:   screenRecipe,
-			Keyboard: Keyboard{Tabs: 12},
+			Keyboard: Keyboard{Tabs: 13},
 		},
 		{
 			Name:     "recipe-focus-editor",
 			Purpose:  "the keyboard in the field the recipe is written in, which it can also leave",
 			Screen:   screenRecipe,
 			Recipe:   BrokenRecipe,
-			Keyboard: Keyboard{Tabs: 9},
+			Keyboard: Keyboard{Tabs: 10},
 		},
 		{
 			Name:     "recipe-focus-answer",
 			Purpose:  "the keyboard on the card holding the answer, which the toolkit's own scrolling area never lets it reach",
 			Screen:   screenRecipe,
 			Recipe:   BrokenRecipe,
-			Keyboard: Keyboard{Tabs: 10},
+			Keyboard: Keyboard{Tabs: 11},
 		},
 	}
 }

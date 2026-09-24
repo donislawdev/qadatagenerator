@@ -79,7 +79,9 @@ const commandPrompt = "$"
 // drawCommand writes the terminal line out again.
 //
 // The settings that ARE real here are written as they stand: the directory
-// somebody typed and whether they ticked replace. Only the file is an example,
+// somebody typed, whether they ticked replace, and the extra form of the
+// manifest they picked, which is --manifest in a terminal and is left out when
+// they picked none. Only the file is an example,
 // which is what keeps the rest of the line worth reading. It moves with the
 // settings, so it is written on every draw rather than once when the screen is
 // built - a bridge showing the directory somebody typed two edits ago is worse
@@ -88,6 +90,7 @@ func (v *View) drawCommand() {
 	v.commandText.SetText(commandline.New(commandline.Generate).
 		Flag(commandline.Out, v.out.Text).
 		Switch(commandline.Overwrite, v.replace.Checked).
+		Flag(commandline.Manifest, v.form).
 		Argument(v.text.T(i18n.RecipeCommandFile)).
 		String())
 }

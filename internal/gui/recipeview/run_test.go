@@ -1,12 +1,15 @@
 package recipeview_test
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestexport"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/recipeview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/screens"
@@ -125,6 +128,140 @@ func TestAScreenWithNowhereToWriteStartsNothing(t *testing.T) {
 
 	if _, _, ran := view.Written(); ran {
 		t.Error("a screen with nowhere to write started a run anyway")
+	}
+}
+
+// readyWith is the screen with the real check and the real way of writing, and
+// a recipe of the test's choosing on it.
+func readyWith(t *testing.T, recipe string) (*recipeview.View, string) {
+	t.Helper()
+	dir := t.TempDir()
+	view := recipeview.New(i18n.English, real(t), recipeview.Writer(),
+		background.Work{Read: background.ReadHere, Produce: produceHere}, nil)
+	view.Content()
+	view.SetRecipe(recipe)
+	view.SetOut(dir)
+	return view, dir
+}
+
+// 🔴 A recipe with a policy is damaged by this screen, with a manifest beside
+// the data, and the card says what the damage did.
+//
+// This is B-300 held against a disk from the window's side. Until 2026-09-24
+// the screen wrote such a recipe clean and wrote no manifest, while the command
+// line wrote it damaged, and nothing on either side said so. The run is now the
+// one both surfaces call (DEC-252), so what is asked here is that the screen
+// reaches it and says what came of it.
+func TestARecipeWithAPolicyIsDamagedByTheScreenAndItSaysWhatTheDamageDid(t *testing.T) {
+	view, dir := readyWith(t, screens.PolicyRecipe)
+
+	view.Start()
+
+	written, failed, ran := view.Written()
+	if !ran || failed != nil {
+		t.Fatalf("the run did not finish: ran %v, failed %v", ran, failed)
+	}
+	if !written.Damaged || written.Counts.Requested == 0 {
+		t.Errorf("a recipe ordering damage to every record ran as %+v", written.Counts)
+	}
+	if _, err := os.Stat(filepath.Join(dir, manifestjson.Name)); err != nil {
+		t.Errorf("a recipe with a policy left no manifest: %v", err)
+	}
+	drawn := spoken(rendered(t, view))
+	for _, key := range []i18n.Key{i18n.TakeResultOrdered, i18n.TakeResultApplied} {
+		if !strings.Contains(drawn, i18n.English.T(key)) {
+			t.Errorf("the card after a damaging run does not say %q", i18n.English.T(key))
+		}
+	}
+}
+
+// Every setting of a run reaches it from this screen, which is what parity
+// with generate --seed, --format and --manifest means here.
+//
+// # Why one test for three flags, and why two of them have no control
+//
+// The seed and the form of the output are written in the recipe, and the
+// window edits the recipe, so a control for either would be a second place to
+// say one thing two lines apart (DEC-199, DEC-252). What proves the parity for
+// them is that the value written in the text is the value the run used. The
+// extra form of the manifest belongs to a run rather than to a recipe
+// (DEC-163), so it is a control, and what proves it is the file it adds. All
+// three are read back out of what the run wrote, with values nobody would
+// arrive at by default, and the names on the card before the button are held
+// against the files that appeared.
+func TestEverySettingOfARunReachesItFromTheScreen(t *testing.T) {
+	const seed = "chosen-in-the-recipe"
+	view, dir := readyWith(t, `version: "0.1"
+seed: "`+seed+`"
+locale: pl-PL
+entities:
+  customer:
+    count: 3
+    fields:
+      pesel:
+        generator: pesel
+policy:
+  layers: [L3]
+  rows: 100%
+output:
+  format: json
+`)
+	form := manifestexport.Forms()[0]
+	view.ChooseForm(form)
+	before := spoken(rendered(t, view))
+
+	view.Start()
+
+	written, failed, ran := view.Written()
+	if !ran || failed != nil {
+		t.Fatalf("the run did not finish: ran %v, failed %v", ran, failed)
+	}
+	// The object form writes the whole dataset as one file, which no run of the
+	// comma separated form writes, so its presence is the format arriving.
+	if _, err := os.Stat(filepath.Join(dir, "dataset.json")); err != nil {
+		t.Errorf("output.format in the recipe did not reach the run: %v", err)
+	}
+	read, err := os.ReadFile(filepath.Join(dir, produce.RunNoteName))
+	if err != nil {
+		t.Fatalf("the run left no note: %v", err)
+	}
+	var note produce.RunNote
+	if err := json.Unmarshal(read, &note); err != nil {
+		t.Fatalf("the note cannot be read: %v", err)
+	}
+	if note.Seed != seed {
+		t.Errorf("the seed in the recipe did not reach the run: the note carries %q", note.Seed)
+	}
+	if _, err := os.Stat(filepath.Join(dir, manifestexport.FileFor(form))); err != nil {
+		t.Errorf("the extra form %q was chosen and its file is not there: %v", form, err)
+	}
+	for _, name := range written.Files {
+		if !strings.Contains(before, name) {
+			t.Errorf("the run wrote %q and the card did not say it would", name)
+		}
+	}
+}
+
+// An extra form of the manifest on a recipe that orders no damage says, before
+// the run and after it, that there is nothing to export, and nothing is.
+//
+// 🔴 The command line ignored --manifest here without a word (B-301), and a
+// window that greyed the choice out would say nothing either. The control
+// stays alive and the card speaks (DEC-252).
+func TestAnExtraFormOnARecipeWithoutAPolicySaysItHasNothingToExport(t *testing.T) {
+	view, dir := readyWith(t, screens.CleanRecipe)
+	view.ChooseForm(manifestexport.Forms()[0])
+	said := i18n.English.T(i18n.RecipeFormUnused)
+
+	if !strings.Contains(spoken(rendered(t, view)), said) {
+		t.Error("before the run the card does not say that the form has nothing to export")
+	}
+	view.Start()
+	if !strings.Contains(spoken(rendered(t, view)), said) {
+		t.Error("after the run the card does not say that no manifest was written")
+	}
+	if _, err := os.Stat(filepath.Join(dir, manifestjson.Name)); err == nil {
+		t.Error("a recipe without a policy left a manifest")
 	}
 }
 

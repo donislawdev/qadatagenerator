@@ -5,6 +5,8 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
 
 	theme "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
@@ -83,6 +85,29 @@ func Mono(words, rung, token string) *canvas.Text {
 // translator can write them, and this call goes away.
 func Caption(words string) *canvas.Text {
 	return Strong(strings.ToUpper(words), theme.TypeLabel, theme.TextCaption)
+}
+
+// Paragraph is a sentence that wraps to the width it is given, at the body rung
+// in the quieter ink the toolkit gives low importance.
+//
+// # Why a label rather than Text above
+//
+// It wraps, and canvas text cannot. Wrapping set on a label is still not
+// wrapping done: a row gives each child the width it asks for and a wrapping
+// label asks for its whole sentence, so every use of this belongs in a column.
+//
+// # Why it is here rather than on each screen
+//
+// The take screen and the recipe screen each built it, identically to the
+// character, and the part both of them show about damage would have been the
+// third copy (DEC-252). Three copies of one look is the point at which the look
+// stops having one place to change it.
+func Paragraph(words string) fyne.CanvasObject {
+	label := widget.NewLabel(words)
+	label.Wrapping = fyne.TextWrapWord
+	label.Importance = widget.LowImportance
+	label.SizeName = fyne.ThemeSizeName(theme.TypeBody)
+	return container.NewStack(label)
 }
 
 func styled(words, rung, token string, style fyne.TextStyle) *canvas.Text {

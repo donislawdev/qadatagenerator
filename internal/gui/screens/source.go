@@ -189,4 +189,23 @@ entities:
       placed_at:
         generator: birth_date
 `
+
+	// PolicyRecipe orders damage, which is the shape that makes the recipe
+	// screen say how much of an order this build carries out and write a
+	// manifest beside the data (DEC-252). Two kinds are named so that the plan
+	// is a list rather than one line, and every record is damaged so that the
+	// order is not a draw.
+	PolicyRecipe = `version: "0.1"
+seed: "sample"
+locale: pl-PL
+entities:
+  customer:
+    count: 3
+    fields:
+      pesel:
+        generator: pesel
+policy:
+  layers: [L2, L3]
+  rows: 100%
+`
 )

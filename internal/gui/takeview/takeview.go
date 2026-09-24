@@ -540,17 +540,10 @@ func (v *View) cut(words string) fyne.CanvasObject {
 }
 
 // paragraph is a sentence that wraps to the width it is given, in the type of
-// the body and the ink of an explanation.
-//
-// A label of the toolkit's rather than paint.Text, because paint.Text is a
-// piece of canvas and never wraps, and the sentences here are the longest on
-// any screen of this window.
+// the body and the ink of an explanation. It is the drawing next door, named
+// here so that the card reads as what it says.
 func (v *View) paragraph(words string) fyne.CanvasObject {
-	label := widget.NewLabel(words)
-	label.Wrapping = fyne.TextWrapWord
-	label.Importance = widget.LowImportance
-	label.SizeName = fyne.ThemeSizeName(palette.TypeBody)
-	return container.NewStack(label)
+	return paint.Paragraph(words)
 }
 
 // notice is a sentence with the mark of a warning before it, for the things a

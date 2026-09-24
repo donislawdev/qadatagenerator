@@ -2,15 +2,14 @@ package takeview
 
 import (
 	"errors"
-	"strconv"
 	"time"
 
 	"fyne.io/fyne/v2"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
-	"github.com/donislawdev/qadatagenerator/internal/damage"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
+	"github.com/donislawdev/qadatagenerator/internal/gui/damageparts"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/take"
@@ -401,66 +400,17 @@ func (v *View) outcome() fyne.CanvasObject {
 	}
 }
 
-// written says what a finished run produced.
-//
-// # Why every count and not the applied one
-//
-// A run where most of what was ordered went nowhere looks, from the applied
-// count alone, like a run that barely did anything. That is the state docs/17
-// calls a partial run, and it is the one this product exists to make visible, so
-// it is marked rather than left to whoever compares two numbers.
-//
-// The counts are written as bare numbers beside their labels rather than as
-// phrases of their own, because the label already names what is being counted
-// and the number is data rather than a sentence.
+// written says what a finished run produced: the files and where, then what
+// the damage did, every count and not only the applied one. The counts are the
+// same block the recipe screen shows after a run with a policy (DEC-252), and
+// their facts come from the run while the words are this window's.
 func (v *View) written() fyne.CanvasObject {
-	counts := v.result.Counts
 	lines := []fyne.CanvasObject{
 		v.fact(i18n.TakeResultWritten,
 			listOf(v.result.Written)+" "+v.text.T(i18n.TakeResultIn)+" "+v.result.Out),
 	}
-	// 🔴 A file this build will not read back is said HERE, before the counts,
-	// because it changes what the counts are worth: a manifest nobody can open
-	// on the next screen is a manifest that has to be read some other way. The
-	// fact comes from the run and the words are this surface's, which is the
-	// same split as every refusal on this screen.
-	if len(v.result.Oversized) > 0 {
-		lines = append(lines,
-			v.pair(i18n.TakeResultOversized, listOf(namesOf(v.result.Oversized))),
-			v.notice(i18n.TakeResultOversizedWhy))
-	}
-	lines = append(lines,
-		v.pair(i18n.TakeResultOrdered, strconv.Itoa(counts.Requested)),
-		v.pair(i18n.TakeResultApplied, strconv.Itoa(counts.Applied)))
-	if missing := counts.Missing(); missing > 0 {
-		lines = append(lines,
-			v.pair(i18n.TakeResultMissing, strconv.Itoa(missing)),
-			v.notice(i18n.TakeResultMissingWhy))
-	}
-	if counts.Unpartnered > 0 {
-		lines = append(lines,
-			v.pair(i18n.TakeResultUnpartnered, strconv.Itoa(counts.Unpartnered)),
-			v.paragraph(v.text.T(i18n.TakeResultUnpartneredWhy)))
-	}
+	lines = append(lines, damageparts.Counts(v.text, v.result.Counts, v.result.Oversized)...)
 	return paint.Column(palette.NameStepTight, lines...)
-}
-
-// pair is a label and the value beside it. Values are data rather than
-// interface text, so they are not keys.
-func (v *View) pair(label i18n.Key, value string) fyne.CanvasObject {
-	return paint.Row(palette.NameStepTight,
-		paint.Strong(v.text.T(label), palette.TypeBody, palette.TextPrimary),
-		paint.Text(value, palette.TypeBody, palette.TextSecondary))
-}
-
-// namesOf is the names of the files that are too large to read back, for the
-// sentence that lists them.
-func namesOf(big []damage.Oversize) []string {
-	names := make([]string, 0, len(big))
-	for _, one := range big {
-		names = append(names, one.Name)
-	}
-	return names
 }
 
 // told is a headline with a shape beside it.

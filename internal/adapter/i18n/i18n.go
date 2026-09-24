@@ -552,6 +552,11 @@ const (
 	RecipeIn            Key = "recipe.in"
 	RecipeRunStopped    Key = "recipe.run-stopped"
 	RecipeRunFailed     Key = "recipe.run-failed"
+	// What the card says about the damage a recipe orders (DEC-252): that the
+	// rows of the sample are the rows before it, and that an extra form of the
+	// manifest has nothing to export when the recipe orders none.
+	RecipeSampleBeforeDamage Key = "recipe.sample-before-damage"
+	RecipeFormUnused         Key = "recipe.form-unused"
 )
 
 // The keys of the Quick value screen.
@@ -838,6 +843,7 @@ var Keys = []Key{
 	RecipeCommandFile, RecipeCommandExample,
 	RecipePlanWrites, RecipeNeedDirectory, RecipeDirHint, RecipeWriting, RecipeStopping,
 	RecipeResultWritten, RecipeResultRows, RecipeIn, RecipeRunStopped, RecipeRunFailed,
+	RecipeSampleBeforeDamage, RecipeFormUnused,
 }
 
 // The catalogue travels inside the binary, because a window that needs a file

@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/gui/damageparts"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
@@ -45,6 +46,17 @@ func (v *View) buildBand() {
 	// writer of files exists to prevent, and a window is where an accidental
 	// second press is easiest.
 	v.replace = parts.NewCheck(v.text.T(i18n.RecipeReplace), func(bool) { v.settingChanged() })
+	// The extra form of the manifest is the one setting of a run the recipe
+	// does not carry: the form is a property of a run rather than of a recipe
+	// (DEC-163), so the command line takes it as --manifest and this screen as
+	// a choice. It is the same list the take screen offers (DEC-252), and it
+	// stays alive on a recipe that orders no damage, where the card says that
+	// there is nothing to export instead of the control going grey.
+	v.manifest = parts.NewSelect(damageparts.FormChoices(v.text), func(picked string) {
+		v.form = damageparts.FormNamed(v.text, picked)
+		v.settingChanged()
+	})
+	v.manifest.SetSelected(v.text.T(i18n.TakeSettingNone))
 	// The one action this screen is for, and the only filled button on it. Its
 	// fill stands 4.99 against the window ground, so unlike every outlined
 	// button beside it, it needs nothing added to be found.
@@ -68,7 +80,8 @@ func (v *View) settingsBand() fyne.CanvasObject {
 	out := labelled(v.text.T(i18n.RecipeWriteTo), parts.Standing(parts.Field(v.out)))
 	beside := paint.PadLeft(palette.NameStepRelated, paint.Row(palette.NameStepRelated,
 		container.NewVBox(drop, v.choose.OnScreen()),
-		container.NewVBox(drop, paint.AtLeast(0, palette.ControlHeight, v.replace.OnScreen()))))
+		container.NewVBox(drop, paint.AtLeast(0, palette.ControlHeight, v.replace.OnScreen())),
+		labelled(v.text.T(i18n.TakeSettingManifest), v.manifest.OnScreen())))
 	settings := container.New(layout.NewBorderLayout(nil, nil, nil, beside), out, beside)
 	action := paint.PadLeft(palette.NameStepGroup, container.NewVBox(drop, v.action))
 	// The sentence wraps, because it is the longest line on this screen and a
@@ -133,3 +146,7 @@ func (v *View) chooseDirectory() {
 // types into is what keeps those pictures pictures of a state somebody can get
 // to.
 func (v *View) SetOut(into string) { v.out.SetText(into) }
+
+// ChooseForm picks an extra form of the manifest, the way a person picking it
+// from the list would, for the same callers and the same reason as SetOut.
+func (v *View) ChooseForm(form string) { v.manifest.SetSelected(form) }

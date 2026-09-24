@@ -193,6 +193,29 @@ var WindowReach = map[string]Claim{
 			"says otherwise",
 		Test: "TestASecondRunRefusesToReplaceFilesUnlessItIsTold",
 	},
+	// 🔴 The three below waited for the editor from 2026-09-02 to 2026-09-24,
+	// and two of them have no control on purpose (DEC-199, DEC-252). The seed and
+	// the form of the output are written in the recipe, which is what this
+	// screen edits, so a control would be a second place to say one thing. The
+	// extra form of the manifest belongs to a run rather than to a recipe
+	// (DEC-163), so it is a control. One test reads all three back out of what
+	// the run wrote.
+	"generate --seed": {
+		Screen: "the seed: line of the recipe written on the screen, which the run reads, " +
+			"rather than a control beside it that would say the same thing a second time",
+		Test: "TestEverySettingOfARunReachesItFromTheScreen",
+	},
+	"generate --format": {
+		Screen: "the output.format: line of the recipe written on the screen, which the run " +
+			"reads, rather than a control beside it that would say the same thing a second time",
+		Test: "TestEverySettingOfARunReachesItFromTheScreen",
+	},
+	"generate --manifest": {
+		Screen: "the extra form of the manifest, as the same list the take screen offers, whose " +
+			"first entry names the absence of one. On a recipe that orders no damage the card " +
+			"says there is nothing to export rather than the list going grey",
+		Test: "TestEverySettingOfARunReachesItFromTheScreen",
+	},
 	"generate --dry-run": {
 		Screen: "the state the screen is in before the button is pressed: the first rows of " +
 			"every table and the names of the files a run would write. A window writes " +
@@ -212,11 +235,12 @@ var WindowReach = map[string]Claim{
 // 🔴 This map may only get smaller. It is the distance between the two
 // surfaces, and the ceiling below is that distance written as a number so that
 // it cannot grow by accident.
-var NotYetInWindow = map[string]string{
-	"generate --seed":     "waits for the editor",
-	"generate --format":   "waits for the editor",
-	"generate --manifest": "waits for the editor",
-}
+//
+// It is empty since 2026-09-24, and that is the state it was for rather than a
+// register nobody fills: every capability of the command line has an answer in
+// the window or a reason in MediumOnly. A new flag goes red in both directions
+// until somebody says which of the three it belongs in.
+var NotYetInWindow = map[string]string{}
 
 // MediumOnly is what belongs to a terminal rather than to the product, with the
 // reason each one has no counterpart in a window.
@@ -262,7 +286,12 @@ var MediumOnly = map[string]string{
 // control in this window carrying a hint: the vocabulary this build can
 // generate, and an example that runs. Two went, the verb and its two flags,
 // because the entry for them said in its own words what it was waiting for.
-const NotYetCeiling = 3
+//
+// It stood at 3 until 2026-09-24, when the recipe screen started carrying out
+// the policy of a recipe and gained the extra form of the manifest (DEC-252).
+// The last three went together: the seed and the form of the output as the
+// lines of the recipe the run reads, the manifest as a control.
+const NotYetCeiling = 0
 
 // MediumOnlyCeiling caps the exceptions for the same reason, one number lower
 // than nothing: three flags say how the output looks, and a fourth would be a

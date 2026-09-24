@@ -10,6 +10,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
+	"github.com/donislawdev/qadatagenerator/internal/gui/damageparts"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/produce"
@@ -167,7 +168,7 @@ func (v *View) freeze() { v.setControls(false) }
 func (v *View) thaw()   { v.setControls(true) }
 
 func (v *View) setControls(usable bool) {
-	for _, control := range []fyne.Disableable{v.out, v.choose, v.replace} {
+	for _, control := range []fyne.Disableable{v.out, v.choose, v.replace, v.manifest} {
 		if usable {
 			control.Enable()
 			continue
@@ -255,12 +256,24 @@ func (v *View) outcome() []fyne.CanvasObject {
 // sample gets them from the writer: which files a form produces is the writer's
 // decision, and a screen listing them from the recipe would be right about one
 // form and wrong about the next.
+//
+// A run of a recipe with a policy then says what the damage did, in the block
+// the take screen shows after its run, because the counts are the same facts
+// from the same engine (DEC-252). A run that was asked for an extra form of the
+// manifest and wrote none says so, the way the command line does.
 func (v *View) wrote() []fyne.CanvasObject {
-	return []fyne.CanvasObject{
+	lines := []fyne.CanvasObject{
 		v.told(paint.IconCheck, palette.StateSuccess, v.text.T(i18n.RecipeResultWritten)),
 		v.paragraph(listOf(v.written.Files) + " " + v.text.T(i18n.RecipeIn) + " " + v.out.Text),
 		v.fact(i18n.RecipeResultRows, strconv.Itoa(v.written.Rows)),
 	}
+	if v.written.Damaged {
+		lines = append(lines, paint.Column(palette.NameStepTight,
+			damageparts.Counts(v.text, v.written.Counts, v.written.Oversized)...))
+	} else if v.form != "" {
+		lines = append(lines, v.formUnused())
+	}
+	return lines
 }
 
 // listOf writes names the way a sentence does.

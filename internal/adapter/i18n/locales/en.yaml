@@ -327,7 +327,7 @@ take.file.more.columns: More columns than are accounted for here
 take.result.oversized: Too large to read back
 take.result.oversized.why: This run wrote a manifest larger than this build reads back, so the Manifest browser and verify will both refuse it. A manifest carries an entry for every record damaged and a description of every column, so damage fewer records or work on a narrower file.
 take.result.unpartnered: Never ordered at all
-take.result.unpartnered.why: Damage to the integrity of a set needs a second record to span, and this file has too few rows for it.
+take.result.unpartnered.why: Damage to the integrity of a set needs a second record to span, and there were too few rows for it.
 take.result.stopped: You stopped this run
 take.result.stopped.why: Nothing was written. Every file gets its real name only once a whole run has succeeded, so a run that ends early leaves nothing that looks complete.
 take.result.failed: This run did not finish
@@ -441,6 +441,8 @@ recipe.result.rows: Rows written
 recipe.in: in
 recipe.run-stopped: You stopped this run. Nothing was written, because every file gets its real name only once a whole run has succeeded.
 recipe.run-failed: This run did not finish, and nothing that looks complete was left behind.
+recipe.sample-before-damage: The rows below are shown before the policy damages them. The files a run writes carry the damage, and the manifest says which rows and how.
+recipe.form-unused: No manifest is written, because this recipe orders no damage. Add a policy section to the recipe to get one, or choose none.
 
 # The line that does the same thing in a terminal, shown on every screen that
 # produces something. It is what keeps the window and the command line one

@@ -51,6 +51,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/damage"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
+	"github.com/donislawdev/qadatagenerator/internal/gui/damageparts"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
@@ -170,6 +171,7 @@ type View struct {
 	out      *parts.FieldEntry
 	choose   *parts.Button
 	replace  *parts.Check
+	manifest *parts.Select
 	generate *parts.Button
 	stop     *parts.Button
 	action   *fyne.Container
@@ -545,7 +547,51 @@ func (v *View) clean() []fyne.CanvasObject {
 	if would := v.wouldWrite(); would != nil {
 		blocks = append(blocks, would)
 	}
+	blocks = append(blocks, v.damageOrdered()...)
 	return append(blocks, paint.Hairline(palette.LineQuiet))
+}
+
+// damageOrdered says what the policy of the recipe will do before anything is
+// written, or that an extra form of the manifest has nothing to export.
+//
+// # Why this is said before the button rather than only after it
+//
+// 🔴 Until 2026-09-24 this screen said nothing about a policy and wrote nothing
+// for one (B-300), so the one thing this product is for was missing from the
+// screen that describes a run before it happens. The command line answers the
+// same question on a dry run, and parity asks the window to answer it here,
+// with the same numbers from the same walk over the catalog (DEC-252).
+//
+// The rows under this stay clean on purpose, and the sentence says so. They
+// are the first rows the run generates, and the damage is drawn over the whole
+// run, so rows damaged here would be a promise about which rows get damaged
+// that nothing has checked.
+func (v *View) damageOrdered() []fyne.CanvasObject {
+	if !v.answer.Damaged {
+		if v.form == "" {
+			return nil
+		}
+		return []fyne.CanvasObject{v.formUnused()}
+	}
+	layers := make([]string, 0, len(v.answer.Planned.ByLayer))
+	for _, layer := range v.answer.Planned.ByLayer {
+		layers = append(layers, layer.Layer)
+	}
+	// The two sentences stand together under the plan, because they are one
+	// answer about what the run writes: an entry for every order, into files
+	// that carry the damage the rows below do not show.
+	return []fyne.CanvasObject{paint.Column(palette.NameStepRelated,
+		damageparts.PlanRows(v.text, v.answer.Planned, damageparts.NameWidth(v.text, layers)),
+		paint.Column(palette.NameStepTight,
+			v.paragraph(v.text.T(i18n.TakePlanEveryOrder)),
+			v.paragraph(v.text.T(i18n.RecipeSampleBeforeDamage))))}
+}
+
+// formUnused is the sentence saying that the extra form of the manifest has
+// nothing to export, with the mark of a warning: it is a setting somebody chose
+// that will do nothing, and the command line says the same about --manifest.
+func (v *View) formUnused() fyne.CanvasObject {
+	return paint.Marked(paint.IconWarn, palette.StateWarning, v.paragraph(v.text.T(i18n.RecipeFormUnused)))
 }
 
 // wouldWrite names the files a run would make and where, which is the answer a

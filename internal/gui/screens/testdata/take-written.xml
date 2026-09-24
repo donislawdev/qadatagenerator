@@ -916,7 +916,7 @@
 																		<widget size="306x41" type="*widget.Label">
 																			<widget size="306x41" type="*widget.RichText">
 																				<text color="disabled" pos="4,4" size="275x16">Damage to the integrity of a set needs a second</text>
-																				<text color="disabled" pos="4,20" size="293x16">record to span, and this file has too few rows for it.</text>
+																				<text color="disabled" pos="4,20" size="289x16">record to span, and there were too few rows for it.</text>
 																			</widget>
 																		</widget>
 																	</container>
