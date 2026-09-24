@@ -5,16 +5,17 @@ import "image/color"
 // The visual system the window is drawn with: two ladders of twelve shades, a
 // ladder of type sizes, and a register of tokens naming what each shade is for.
 //
-// # Why a second set of values beside the palette above
+// # Why this replaced the palette of the first window
 //
-// The palette above answers a different question and answers it well: which
-// colour carries which MEANING. An expectation of rejection is red because the
-// manifest says rejection, and that entry is measured against the window.
+// That palette, deleted with DEC-253 and kept as history in docs/17 section 5,
+// answered which colour carries which MEANING. An expectation of rejection was
+// red because the manifest says rejection, and that entry was measured against
+// the window.
 //
 // This file answers the question that made the owner call the window generic
 // on 2026-09-08: which colour carries which PLACE. A card apart from the
 // window, a control apart from the card, an edge apart from a divider. The
-// palette above has two shades of ground and one of text, so there was nothing
+// first palette had two shades of ground and one of text, so there was nothing
 // to say any of that with and every screen came out flat. Counting the shades
 // is what settled it rather than looking at them, and the count is the
 // diagnosis in docs/NAUKA-GUI.md section 6.1: this is a shortage of steps, not
@@ -154,10 +155,11 @@ var Accent = []Shade{
 
 // Semantic is the three colours that carry a verdict rather than a place.
 //
-// They are stated here rather than borrowed from the palette above because a
+// They were stated here rather than borrowed from the first palette because a
 // contrast is a statement about a PAIR, and these are read on the grounds of
-// this ladder while the palette above is measured against a window of another
-// colour. One entry serving both would report one number about two pairs.
+// this ladder while that palette was measured against a window of another
+// colour. One entry serving both would have reported one number about two
+// pairs.
 var Semantic = []Shade{
 	{"semantic.success", 0x3D, 0xA7, 0x66, "a value inside the range it belongs to, and a safe harbour a provider can claim"},
 	{"semantic.warning", 0xE8, 0xA3, 0x3D, "something to look at before trusting it"},
@@ -220,7 +222,7 @@ const (
 )
 
 // TokenNames is every token constant above, so a test can close the register
-// from the side the constants are on. The same reason ColorNames exists.
+// from the side the constants are on. The same reason StepNames exists.
 var TokenNames = []string{
 	BgWindow, BgSurface, BgControl, BgCurrent, BgCurrentHover, BgCurrentPressed,
 	BgHover, BgPressed, BgSelection, BgHeader,

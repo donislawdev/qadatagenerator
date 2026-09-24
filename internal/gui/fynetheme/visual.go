@@ -13,25 +13,20 @@ import (
 
 // Visual dresses the toolkit in the twelve step ladders and the embedded faces.
 //
-// # Why a second theme beside Dark rather than a change to it
+// # How it came to be the only theme
 //
-// Dark answers with the palette measured for the first window, and five screens
-// are drawn against it today. Changing its answers would move every colour in
-// all five at once and invalidate the stored tree of every state they are
-// guarded by, on a day when the screens themselves are not being moved. That is
-// a large red change with no green change beside it.
+// It was written beside Dark, the theme of the first window, rather than as a
+// change to it, because changing Dark would have moved every colour of five
+// screens at once on a day when none of them was being rebuilt. Each screen
+// moved onto this theme as it was rebuilt, the last on 2026-09-23, and Dark
+// was deleted with DEC-253.
 //
-// So this one exists alongside. The window keeps Dark until a screen has been
-// rebuilt on the new foundation, and each screen brings its own stored trees
-// with it as it moves. What would delete this comment: the last screen moving,
-// after which there is one theme again and it is this one.
-//
-// # What it answers that Dark does not
+// # What it answers that the toolkit's own theme does not
 //
 // Two things, and both were the reason the window looked like the toolkit.
 //
-// The faces. Dark hands font questions to the toolkit, which ships Noto Sans
-// and DejaVu Sans Mono. Half of the screen this was built for is generated
+// The faces. The toolkit ships Noto Sans and DejaVu Sans Mono, and Dark handed
+// every font question to it. Half of the screen this was built for is generated
 // values in the mono face, so that single answer carried most of the impression
 // the owner called generic.
 //
@@ -53,9 +48,9 @@ var _ fyne.Theme = Visual{}
 // claim that the toolkit paints that thing where a person can see it, and a
 // claim nobody checked is worse than a gap.
 //
-// A name absent here falls through to the toolkit's own dark theme, exactly as
-// it does in Dark, and for the same reason: the entries are what this project
-// has an opinion about.
+// A name absent here falls through to the toolkit's own dark theme, because the
+// entries are what this project has an opinion about and the rest are not
+// claimed to be measured.
 var tokenFor = map[fyne.ThemeColorName]string{
 	toolkit.ColorNameBackground:        palette.BgWindow,
 	toolkit.ColorNameForeground:        palette.TextPrimary,

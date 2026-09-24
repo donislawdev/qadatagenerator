@@ -11,12 +11,11 @@ import (
 //
 // # Why it is written here rather than taken from tools/kontrast.py
 //
-// That script is the bridge between docs/17 and the palette measured for the
-// first window, and it runs when somebody runs it. This ladder is measured on
-// every `go test`, which is the difference between a rule with a guard and a
-// rule with a habit. The two implementations are also a second hand on the
-// same arithmetic, and the pair has caught a wrong number in this project
-// before.
+// That script measures the same register a second time and runs when somebody
+// or the gate runs it. This ladder is measured on every `go test`, which is the
+// difference between a rule with a guard and a rule with a habit. The two
+// implementations are also a second hand on the same arithmetic, and the pair
+// has caught a wrong number in this project before.
 func luminance(c struct{ R, G, B uint8 }) float64 {
 	channel := func(v uint8) float64 {
 		f := float64(v) / 255
@@ -194,8 +193,25 @@ func TestEveryShadeIsNamedOnce(t *testing.T) {
 	}
 }
 
+// TestEveryColourIsFullyOpaque holds that every shade the window is drawn with
+// is opaque. A translucent shade would make every measured contrast a statement
+// about a blend that the measurement never saw.
+//
+// It asked the same of the first palette until that palette was deleted with
+// DEC-253, and moved here with the question rather than going with the palette.
+func TestEveryColourIsFullyOpaque(t *testing.T) {
+	ladders := [][]theme.Shade{theme.Neutral, theme.Accent, theme.Semantic, {theme.White}}
+	for _, ladder := range ladders {
+		for _, shade := range ladder {
+			if got := shade.NRGBA().A; got != 0xFF {
+				t.Errorf("%s is not opaque, its alpha is %#x", shade.Name, got)
+			}
+		}
+	}
+}
+
 // A shade with no sentence saying what it is for is a colour somebody added to
-// make one screen work. The same rule the palette above already holds.
+// make one screen work. The same rule the spacing scale holds.
 func TestEveryShadeStatesWhatItIsFor(t *testing.T) {
 	for _, ladder := range [][]theme.Shade{theme.Neutral, theme.Accent, theme.Semantic} {
 		for _, shade := range ladder {

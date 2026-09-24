@@ -118,8 +118,6 @@ var toolGuards = []Guard{
 	{"a spacing step survives the scaling factors a desktop applies", "TestEveryStepSurvivesTheCommonScalingFactors", "internal/gui/theme", ByMutation},
 	{"the scale never gives one distance two names", "TestEveryStepOfTheScaleIsUsedOnce", "internal/gui/theme", ByMutation},
 	{"a colour of the palette is never translucent, so its measured contrast is about what is shown", "TestEveryColourIsFullyOpaque", "internal/gui/theme", ByMutation},
-	{"the background is the reference of the measurement and never one of its subjects", "TestEveryNameInThePaletteIsUsedOnce", "internal/gui/theme", ByMutation},
-	{"a colour constant and a palette entry answer to each other", "TestEveryColourNameAndEntryAnswerToEachOther", "internal/gui/theme", ByMutation},
 
 	// --- the visual system: the ladders, the tokens and the icon loader -----
 	//
