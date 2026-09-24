@@ -12,6 +12,39 @@ repository once they are released.
 
 ### Changed
 
+- **The Manifest browser has been rebuilt so that the whole table fits the
+  window.** The table had six columns, and the two saying whether the damage
+  happened and why it did not were off screen unless you scrolled sideways. It
+  now has four: the damage, where it is, what was expected, and the outcome,
+  which says what the application did with the row once you open a response.
+  Everything else about an entry is read out in a card under the table, for the
+  entry you choose with a click or the keyboard. The button in the heading of
+  that card shows what the manifest says about the run in the same place, and a
+  second press goes back to the entry, so opening it no longer makes the window
+  taller. What a comparison could not check is in a section you can open over
+  the table, and the command that runs the same comparison in a terminal runs
+  along the foot.
+
+- **The Recipe screen has been rebuilt with its button in sight.** The button
+  that generates and the command line stood under the answer and fell below the
+  fold of an ordinary window. A strip along the top now holds where a run
+  writes, whether it may replace files already there, and the button. Under it
+  the screen is two equal halves: your recipe on the left, and on the right one
+  card saying what the recipe describes while you write it, or what the last
+  run did once you press the button. The divider between the halves is gone,
+  because the keyboard could not move it, and the recipe field shows where the
+  keyboard is with the same ring as every other field.
+
+- **The Take and corrupt screen has been rebuilt with its button in sight.** The
+  button that damages the file, the state of a run and its result sat below the
+  fold of a scrolling pane. The file, how it is read and the button now stand in
+  a strip along the top, the settings in a column on the left, and on the right
+  one card saying what a run would do, or what it did, over a panel saying what
+  the file holds. The kinds of damage are check boxes, and the card says for
+  each kind you ticked how much of it this build can carry out. Every setting
+  can be changed before a file is chosen, and changing one after a run brings
+  back the plan of the next run.
+
 - **The About screen has been rebuilt so that what you come for is on the first
   screen.** The versions and the licenses stand side by side in one card, under
   them the two sentences about the data you generate, and then the lists of what
@@ -84,6 +117,22 @@ repository once they are released.
   their full licence texts to a file you can keep.
 
 ### Fixed
+
+- **The card under the manifest table reads out the entry you chose.** It
+  followed the pointer, so moving the mouse across the table changed what it
+  said while the highlighted row stayed where you had clicked.
+
+- **Opening a response in the Manifest browser keeps the entry you had
+  chosen**, and your place in the table, instead of clearing both.
+
+- **A comparison missing one record says "1 was never reacted to"** rather than
+  "1 were", on the command line and in the window. The notes of a comparison in
+  the window begin with a capital letter, and the reason an entry was not
+  applied is joined to its kind by "because" rather than after a full stop.
+
+- **`qadg verify` begins the detail of a finding with a capital letter.** A
+  finding read "accepted although it should have been rejected. the value was
+  taken".
 
 - **The licence texts of the font and the icons are now inside the program.**
   They were in the source tree, which covers anybody who builds this tool, and
