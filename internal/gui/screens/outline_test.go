@@ -10,6 +10,7 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
+	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
 // TestEveryPressableControlDrawsItsOwnEdge walks every state of every screen and
@@ -74,7 +75,7 @@ func TestEveryPressableControlDrawsItsOwnEdge(t *testing.T) {
 			}
 			found++
 
-			drawn := edgesInFace(test.WidgetRenderer(object.(fyne.Widget)).Objects())
+			drawn := edgesInFace(test.WidgetRenderer(object.(fyne.Widget)).Objects(), control.focusIsNoEdge())
 			// 🔴 A chooser has no notion of importance, so the quiet cases are
 			// asked of the control rather than assumed of a button. Reading
 			// Importance off something that has none would have been a
@@ -94,21 +95,36 @@ func TestEveryPressableControlDrawsItsOwnEdge(t *testing.T) {
 	}
 }
 
-// edgesInFace says whether anything in this drawing paints a stroke.
+// edgesInFace says whether anything in this drawing paints a stroke, leaving
+// out the mark of focus when the control draws that mark without an edge.
 //
 // The same question edgeIn asks of a layout, asked of what a renderer holds.
 // Kept separate rather than folded into that one, because that one deliberately
 // stops two levels down to avoid mistaking a control's own fill for an edge,
 // and a face is a tree of our own shapes where every level is ours.
-func edgesInFace(objects []fyne.CanvasObject) bool {
+//
+// # 🔴 Why the mark of focus is left out for a plain button, added 2026-09-25
+//
+// A plain button has no edge, and in focus it draws an outline in mark.focus,
+// because focus has to show on every control that can hold the keyboard
+// (paint.ButtonFace, the branch for Plain). That outline is the mark of focus
+// and not an edge. This walk had never met one: it builds each screen without
+// a keyboard, so no control it walked was in focus until the catalogue of
+// controls (DEC-253) put one there, and it went red on exactly the two plain
+// buttons shown with the keyboard on them. Leaving the mark out for every
+// quiet control would have been simpler and would have hidden a disabled
+// control drawing a mark of focus, which it must never do, so it is left out
+// only for a control that says it draws one without an edge.
+func edgesInFace(objects []fyne.CanvasObject, focusIsNoEdge bool) bool {
+	mark := rgba(palette.Ink(palette.MarkFocus))
 	for _, object := range objects {
 		switch shape := object.(type) {
 		case *canvas.Rectangle:
-			if shape.StrokeWidth > 0 {
+			if shape.StrokeWidth > 0 && !(focusIsNoEdge && rgba(shape.StrokeColor) == mark) {
 				return true
 			}
 		case *fyne.Container:
-			if edgesInFace(shape.Objects) {
+			if edgesInFace(shape.Objects, focusIsNoEdge) {
 				return true
 			}
 		}
@@ -125,6 +141,9 @@ func edgesInFace(objects []fyne.CanvasObject) bool {
 // all.
 type outlined interface {
 	quiet() bool
+	// focusIsNoEdge says the control marks focus with an outline where it
+	// has no edge, so a stroke in mark.focus on it is that mark.
+	focusIsNoEdge() bool
 }
 
 // ourControl is the control this object is, if it is one of the two this window
@@ -165,9 +184,17 @@ func (b quietButton) quiet() bool {
 	return b.Disabled() || b.Plain
 }
 
+// focusIsNoEdge is a plain button somebody can use. A disabled one never holds
+// the keyboard, so a mark of focus on it is a fault this walk has to see.
+func (b quietButton) focusIsNoEdge() bool { return b.Plain && !b.Disabled() }
+
 type quietSelect struct{ *parts.Select }
 
 func (s quietSelect) quiet() bool { return s.Disabled() }
+
+// focusIsNoEdge is never true of a chooser: it has an edge whenever it can be
+// used, and focus recolours that edge.
+func (s quietSelect) focusIsNoEdge() bool { return false }
 
 // edgeIn is the outlining rectangle of this container.
 //
