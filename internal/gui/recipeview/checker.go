@@ -5,6 +5,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
+	"github.com/donislawdev/qadatagenerator/internal/damage"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/produce"
 )
@@ -71,6 +72,14 @@ func Checker(described catalog.Catalog) Check {
 			return answer
 		}
 		answer.Sample = sample
+		// The policy is read from the recipe the run will read, and the plan
+		// of it is the one the command line prints on a dry run. It costs a
+		// walk over a catalog already in memory, which is nothing next to the
+		// sample above.
+		if policy := decoded.Recipe.Policy; policy.Asks() {
+			answer.Damaged = true
+			answer.Planned = damage.PlanOf(policy.Layers, described)
+		}
 		return answer
 	}
 }

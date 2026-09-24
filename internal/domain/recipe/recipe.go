@@ -207,8 +207,15 @@ type Output struct {
 	Format        string
 	Dir           string
 	FilePerEntity bool
-	Encoding      string
-	Delimiter     string
+	// FilePerEntityGiven says the recipe wrote file_per_entity at all.
+	//
+	// A setting nobody wrote and one written as false are the same value and
+	// different intentions, and only the second is worth a note saying that the
+	// form asked for ignores it. The command line keeps the same distinction
+	// for its flags.
+	FilePerEntityGiven bool
+	Encoding           string
+	Delimiter          string
 }
 
 // Problem is one reason a recipe cannot be used, described in parts rather

@@ -376,13 +376,15 @@ var damageGuards = []Guard{
 	// The warning raised when a run writes one, which had no guard at all and
 	// named one of the two things that make a manifest grow.
 	{"the warning about a manifest too large to read back names both causes", "TestTheWarningAboutAManifestTooLargeToReadBackNamesBothCauses", "internal/cli", ByMutation},
-	{"a manifest inside the limit is not warned about", "TestAManifestInsideTheLimitIsNotWarnedAbout", "internal/cli", ByMutation},
 	// 🔴 The same warning, moved to where both surfaces can reach it. It was
 	// worked out on the command line alone, so the window said nothing at all
 	// and somebody damaging a wide file there met the refusal days later on
 	// another screen with nothing connecting it to the run that caused it. The
-	// run now carries the fact and each surface words it.
-	{"a run says which of the files it wrote will not be read back", "TestARunSaysWhichFilesWillNotBeReadBack", "internal/take", ByMutation},
+	// run now carries the fact and each surface words it. Since 2026-09-24 it is
+	// worked out once for both modes (DEC-252), and the same table holds the
+	// other side of it: a manifest inside the limit, a dataset and an export are
+	// never named, however large.
+	{"a run says which manifests it wrote will not be read back, and names nothing else", "TestARunSaysWhichFilesWillNotBeReadBack", "internal/damage", ByMutation},
 	// 🔴 The account of the columns, bounded on one side and held open on the
 	// other. An entry costs about 203 bytes, so 260 000 columns produced a
 	// 50.2 MB manifest that verify refused, with not one defect entry in it. A

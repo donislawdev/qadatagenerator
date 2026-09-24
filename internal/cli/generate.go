@@ -4,21 +4,19 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"fmt"
 	"io"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestexport"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/store"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
-	"github.com/donislawdev/qadatagenerator/internal/license"
-	"github.com/donislawdev/qadatagenerator/internal/version"
+	"github.com/donislawdev/qadatagenerator/internal/produce"
 )
 
 // generateFlags are the settings this verb takes beyond the cross cutting ones.
@@ -127,16 +125,22 @@ func generateFrom(out *streams, path string, own *generateFlags, flags crossCutt
 		return fail(out, err)
 	}
 
-	source := values.New(built.Locale, built.Seed)
-	plan, err := generate.Prepare(built, source)
+	prepared, err := produce.Prepare(built, values.New(built.Locale, built.Seed))
 	if err != nil {
 		return fail(out, err)
 	}
-	noteUnreadSettings(built, &plan)
+	plan := prepared.Plan()
+	settings := produce.Settings{
+		Into: outputDir(built), Replace: *own.overwrite, Manifest: *own.manifest,
+		Overrides: applied,
+	}
 
 	if *own.dryRun {
 		writePlan(out, plan, applied, flags, true)
 		for _, line := range plannedDamage(built) {
+			out.note(line)
+		}
+		for _, line := range unusedForm(built, settings) {
 			out.note(line)
 		}
 		return finish(out, codeOK)
@@ -146,17 +150,57 @@ func generateFrom(out *streams, path string, own *generateFlags, flags crossCutt
 	// this line nothing has been written and there is nothing to take back.
 	watcher := watchSignals()
 	defer watcher.release()
-	told, err := produce(built, plan, source, own, applied, watcher)
+	written, err := prepared.Write(settings, watcher, time.Now())
 	if err != nil {
 		return fail(out, err)
 	}
 	writePlan(out, plan, applied, flags, false)
 	// What the damage did goes after the counts of what was produced, because
 	// it is a statement about the same files and reads as one continuous answer.
-	for _, line := range told {
+	for _, line := range damageTold(built, written, settings) {
 		out.note(line)
 	}
 	return finish(out, codeOK)
+}
+
+// outputDir is where a run of this recipe writes, which is the working
+// directory when nothing says otherwise.
+func outputDir(built recipe.Recipe) string {
+	if built.Output.Dir == "" {
+		return "."
+	}
+	return built.Output.Dir
+}
+
+// damageTold is what the log says about the damage a finished run did, in the
+// order a person reads it: what was ordered and done, which manifest will not
+// be read back, and an extra form that had nothing to export.
+//
+// The facts come from the run and only the words are made here, because the
+// window says the same facts in its own language (DEC-252).
+func damageTold(built recipe.Recipe, written produce.Written, settings produce.Settings) []string {
+	var told []string
+	if written.Damaged {
+		told = summaryOf(written.Counts, settings.Manifest)
+	}
+	for _, big := range written.Oversized {
+		told = append(told, tooLargeSentence(big.Name, big.Bytes))
+	}
+	return append(told, unusedForm(built, settings)...)
+}
+
+// unusedForm says that an extra form of the manifest was asked for by a run
+// that writes no manifest.
+//
+// 🔴 The flag used to be ignored in silence: the run ended with nought, wrote no
+// manifest and said nothing about the flag (B-301). It is a correct setting
+// with nothing to act on, so it is said rather than refused, and the sentence
+// names what would give it something to act on.
+func unusedForm(built recipe.Recipe, settings produce.Settings) []string {
+	if !settings.FormUnused(built) {
+		return nil
+	}
+	return []string{fmt.Sprintf(noteFormUnused, settings.Manifest)}
 }
 
 // recipeAt reads a recipe and refuses one that cannot be used.
@@ -199,94 +243,32 @@ func recipeAt(out *streams, path string) (recipe.Recipe, int, bool) {
 // the recipe or the command line asked.
 const settingFormat = "output.format"
 
-// override is one setting the command line moved.
-//
-// It carries both sides rather than only the winner, because two runs of one
-// recipe giving different data with nothing saying why is the surprise this
-// record exists to remove.
-type override struct {
-	Setting    string `json:"setting"`
-	FromRecipe string `json:"from_recipe"`
-	FromFlag   string `json:"from_flag"`
-}
-
 // overrides applies the flags that carry a value and records what they moved.
-func overrides(built *recipe.Recipe, own *generateFlags) []override {
-	var applied []override
+//
+// The record goes to the run, which writes it into the note beside the data,
+// because two runs of one recipe giving different data with nothing saying why
+// is the surprise that note exists to remove.
+func overrides(built *recipe.Recipe, own *generateFlags) []produce.Override {
+	var applied []produce.Override
 	if own.given["seed"] {
-		applied = append(applied, override{"seed", built.Seed, *own.seed})
+		applied = append(applied, moved("seed", built.Seed, *own.seed))
 		built.Seed = *own.seed
 	}
 	if own.given["out"] {
-		applied = append(applied, override{"output.dir", built.Output.Dir, *own.out})
+		applied = append(applied, moved("output.dir", built.Output.Dir, *own.out))
 		built.Output.Dir = *own.out
 	}
 	if own.given["format"] {
-		applied = append(applied, override{settingFormat, built.Output.Format, *own.format})
+		applied = append(applied, moved(settingFormat, built.Output.Format, *own.format))
 		built.Output.Format = *own.format
 	}
 	return applied
 }
 
-// produce writes the dataset and the note beside it, or leaves nothing behind.
-//
-// The halt comes in as a parameter rather than being started here, so that this
-// path can be exercised with a stop somebody triggers on purpose. A run stopped
-// part way is one of the two endings this function has, and an ending that only
-// a real signal can reach is an ending nothing checks.
-func produce(built recipe.Recipe, plan generate.Plan, source values.Source,
-	own *generateFlags, applied []override, stop generate.Halt) ([]string, error) {
-	dir := built.Output.Dir
-	if dir == "" {
-		dir = "."
-	}
-	files := store.New(dir, *own.overwrite)
-	// Nothing this run made survives a failure. The rename that gives a file its
-	// real name happens once, at the end, so a run that stops here leaves no
-	// file that looks complete.
-	committed := false
-	defer func() {
-		if !committed {
-			files.Discard()
-		}
-	}()
-
-	writer, err := format.For(fileMaker{files}, built, stop)
-	if err != nil {
-		return nil, err
-	}
-	// A recipe with a policy has its damage done on the way to the disk, and
-	// the manifest joins this same set of files. The first pillar is untouched
-	// by this: a recipe without a policy gets the writer it always got.
-	writer, broken, err := withDamage(built, source, writer, files, *own.manifest)
-	if err != nil {
-		return nil, err
-	}
-	if err := generate.Run(plan, built, source, writer, stop); err != nil {
-		return nil, err
-	}
-	var told []string
-	if broken != nil {
-		if err := closeRecipeManifest(broken, built, plan, time.Now()); err != nil {
-			return nil, err
-		}
-		told = summaryOf(broken.Counts(), *own.manifest)
-	}
-	if err := writeRunNote(files, built, plan, applied); err != nil {
-		return nil, err
-	}
-	// Nothing is asked about a signal from here on. Everything is written and
-	// what remains is giving the files their real names, and a rename stopped
-	// half way through the set would leave exactly the half finished dataset
-	// this whole arrangement exists to prevent.
-	if err := files.Commit(); err != nil {
-		return nil, err
-	}
-	committed = true
-	if broken != nil {
-		told = append(told, tooLargeToReadBack(dir, *own.manifest)...)
-	}
-	return told, nil
+// moved is one override, named field by field so that the three calls above
+// read as the setting and its two sides.
+func moved(setting, fromRecipe, fromFlag string) produce.Override {
+	return produce.Override{Setting: setting, FromRecipe: fromRecipe, FromFlag: fromFlag}
 }
 
 // usableFormat refuses a form this build cannot write, before anything is
@@ -302,7 +284,7 @@ func produce(built recipe.Recipe, plan generate.Plan, source values.Source,
 // while the same command without --dry-run ended with three. And the refusal
 // said the recipe had asked for a word that came from the command line, which
 // sends somebody to edit a file that is correct.
-func usableFormat(built recipe.Recipe, applied []override) error {
+func usableFormat(built recipe.Recipe, applied []produce.Override) error {
 	switch built.Output.Format {
 	case "", formatCSV, formatJSON:
 		return nil
@@ -315,115 +297,6 @@ func usableFormat(built recipe.Recipe, applied []override) error {
 	}
 	return fault.New(fault.Config, "this build writes "+formatCSV+" and "+formatJSON+
 		", and "+asked+built.Output.Format)
-}
-
-// noteUnreadSettings records the settings this run carries and does not read.
-//
-// 🔴 file_per_entity decides the shape of the object form and means nothing to
-// the comma separated one, which writes a file per table whatever it says. The
-// setting did nothing and said nothing about doing nothing, in the format a
-// recipe gets when it asks for none, which is the silence this product exists
-// to find. The plan is the right place for it: the same sentence reaches the
-// log, the plan on the data channel and the record left beside the data.
-func noteUnreadSettings(built recipe.Recipe, plan *generate.Plan) {
-	if built.Output.FilePerEntity {
-		return
-	}
-	if built.Output.Format != "" && built.Output.Format != formatCSV {
-		return
-	}
-	plan.Notes = append(plan.Notes, generate.Note{
-		Where: "output.file_per_entity",
-		What: "the " + formatCSV + " form writes one file per table whatever this says, so it " +
-			"changes nothing here. The " + formatJSON + " form is the one that reads it",
-	})
-}
-
-// fileMaker adapts the set of files to what a writer asks for. The two
-// interfaces differ by one concrete type, and converting here keeps the writers
-// from knowing what a disk is.
-type fileMaker struct{ set *store.Set }
-
-func (m fileMaker) Create(name string) (format.WriteCloser, error) {
-	return m.set.Create(name)
-}
-
-// runNote is what travels beside the data.
-//
-// 🔴 It is not a manifest. The expectation manifest is the public contract of
-// the second pillar and has its own specification. This says what a run made,
-// what it did not do, and what the values in the files are, which is a smaller
-// thing with a different reader.
-type runNote struct {
-	Tool          string      `json:"tool_version"`
-	Catalog       string      `json:"catalog_version"`
-	Manifest      string      `json:"manifest_version"`
-	RecipeVersion string      `json:"recipe_schema_version"`
-	Seed          string      `json:"seed"`
-	Locale        string      `json:"locale"`
-	Tag           string      `json:"tag,omitempty"`
-	Tables        []noteTable `json:"tables"`
-	NotDone       []noteEntry `json:"not_done"`
-	Overrides     []override  `json:"overrides"`
-	SyntheticData string      `json:"synthetic_data"`
-}
-
-type noteTable struct {
-	Entity  string   `json:"entity"`
-	Rows    int      `json:"rows"`
-	Columns []string `json:"columns"`
-	Parent  string   `json:"parent,omitempty"`
-}
-
-type noteEntry struct {
-	Where string `json:"where"`
-	What  string `json:"what"`
-}
-
-// writeRunNote puts the record of the run beside the data.
-//
-// It goes into a file rather than only onto the log, because a log stays in the
-// pipeline and the data travels. Somebody holding a folder of records has to be
-// able to learn from the folder itself that the values in it describe nobody.
-func writeRunNote(files *store.Set, built recipe.Recipe, plan generate.Plan,
-	applied []override) error {
-	note := runNote{
-		Tool: version.Tool, Catalog: version.Catalog,
-		Manifest: version.Manifest, RecipeVersion: version.Recipe,
-		Seed: built.Seed, Locale: built.Locale, Tag: built.Tag,
-		Tables:        make([]noteTable, 0, len(plan.Entities)),
-		NotDone:       make([]noteEntry, 0, len(plan.Notes)),
-		Overrides:     applied,
-		SyntheticData: license.SyntheticDataNotice,
-	}
-	if note.Overrides == nil {
-		// A run with nothing overridden writes an empty list rather than a
-		// null, because somebody reading these files reads them all the same
-		// way and a type that changes with the flags is a trap for them.
-		note.Overrides = make([]override, 0)
-	}
-	for _, planned := range plan.Entities {
-		note.Tables = append(note.Tables, noteTable{
-			Entity: planned.Entity, Rows: planned.Rows,
-			Columns: planned.Columns, Parent: planned.Parent,
-		})
-	}
-	for _, skipped := range plan.Notes {
-		note.NotDone = append(note.NotDone, noteEntry{skipped.Where, skipped.What})
-	}
-
-	encoded, err := json.MarshalIndent(note, "", "  ")
-	if err != nil {
-		return fault.Wrap(fault.Runtime, err, "cannot write the run note")
-	}
-	file, err := files.Create(runNoteName)
-	if err != nil {
-		return err
-	}
-	if _, err := file.Write(append(encoded, '\n')); err != nil {
-		return fault.Wrap(fault.IO, err, "cannot write the run note")
-	}
-	return nil
 }
 
 // counted writes a number with its word, and the word agrees with the number.
@@ -446,7 +319,7 @@ func counted(number int, word string) string {
 // trial says the run wrote nothing, and it changes the last word of the summary
 // rather than the counts. A trial run saying rows written is a sentence that
 // sends somebody looking for files nobody wrote.
-func writePlan(out *streams, plan generate.Plan, applied []override, flags crossCutting, trial bool) {
+func writePlan(out *streams, plan generate.Plan, applied []produce.Override, flags crossCutting, trial bool) {
 	if *flags.json {
 		writeJSONPlan(out, plan, applied)
 		return
@@ -470,32 +343,24 @@ func writePlan(out *streams, plan generate.Plan, applied []override, flags cross
 		counted(plan.TotalRows(), "row") + ending)
 }
 
+// jsonPlan is the plan as a document, which is the part of the note beside the
+// data that a pipeline wants before a run rather than after it. It is built
+// from the same pieces as the note, so the two cannot describe one plan in two
+// shapes.
 type jsonPlan struct {
-	Seed      string      `json:"seed"`
-	Locale    string      `json:"locale"`
-	Tables    []noteTable `json:"tables"`
-	NotDone   []noteEntry `json:"not_done"`
-	Overrides []override  `json:"overrides"`
+	Seed      string              `json:"seed"`
+	Locale    string              `json:"locale"`
+	Tables    []produce.NoteTable `json:"tables"`
+	NotDone   []produce.NoteEntry `json:"not_done"`
+	Overrides []produce.Override  `json:"overrides"`
 }
 
-func writeJSONPlan(out *streams, plan generate.Plan, applied []override) {
+func writeJSONPlan(out *streams, plan generate.Plan, applied []produce.Override) {
 	document := jsonPlan{
 		Seed: plan.Seed, Locale: plan.Locale,
-		Tables:    make([]noteTable, 0, len(plan.Entities)),
-		NotDone:   make([]noteEntry, 0, len(plan.Notes)),
-		Overrides: applied,
-	}
-	if document.Overrides == nil {
-		document.Overrides = make([]override, 0)
-	}
-	for _, planned := range plan.Entities {
-		document.Tables = append(document.Tables, noteTable{
-			Entity: planned.Entity, Rows: planned.Rows,
-			Columns: planned.Columns, Parent: planned.Parent,
-		})
-	}
-	for _, skipped := range plan.Notes {
-		document.NotDone = append(document.NotDone, noteEntry{skipped.Where, skipped.What})
+		Tables:    produce.Tables(plan),
+		NotDone:   produce.NotDone(plan),
+		Overrides: produce.Overridden(applied),
 	}
 
 	encoded, err := json.Marshal(document)

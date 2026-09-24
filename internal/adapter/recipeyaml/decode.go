@@ -754,6 +754,7 @@ func (r *reader) output(node any) recipe.Output {
 			built.Dir, _ = r.text(where, item.Value)
 		case "file_per_entity":
 			built.FilePerEntity = r.flag(where, item.Value)
+			built.FilePerEntityGiven = true
 		case "encoding":
 			built.Encoding, _ = r.text(where, item.Value)
 		case "delimiter":

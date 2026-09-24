@@ -1,5 +1,5 @@
-// Package preview answers what a recipe would produce, by producing a little of
-// it and keeping none of it.
+// Package produce answers what a recipe would produce, by producing a little of
+// it and keeping none of it, and produces the whole of it when asked to.
 //
 // # Why this is a package of its own rather than a corner of the window
 //
@@ -116,7 +116,7 @@ func Preview(rec recipe.Recipe, values generate.Values, rows int) (Sample, error
 	if rows < 1 {
 		rows = DefaultRows
 	}
-	plan, err := generate.Prepare(rec, values)
+	plan, err := planOf(rec, values)
 	if err != nil {
 		return Sample{}, err
 	}

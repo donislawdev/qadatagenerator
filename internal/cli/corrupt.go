@@ -2,25 +2,12 @@ package cli
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/mutators"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/store"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
-	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/damage"
-	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
-	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
-	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
-	"github.com/donislawdev/qadatagenerator/internal/version"
 )
 
 // listOf writes names the way a sentence does.
@@ -101,19 +88,13 @@ func plannedDamage(built recipe.Recipe) []string {
 		// number.
 		return nil
 	}
-	ordered, implemented := 0, 0
-	for _, layer := range built.Policy.Layers {
-		for _, entry := range described.InLayer(catalog.Layer(layer)) {
-			ordered++
-			if _, has := mutators.Lookup(entry.ID); has {
-				implemented++
-			}
-		}
-	}
+	// The numbers are the ones the recipe screen and the damaging verb show,
+	// worked out by the same walk over the catalog (DEC-252).
+	planned := damage.PlanOf(built.Policy.Layers, described)
 	return []string{fmt.Sprintf(
 		"the policy draws on %s described in %s, and this build implements %d of them. "+
 			"A real run writes one manifest entry per ordered defect, applied or not",
-		kindsOfDamage(ordered), strings.Join(built.Policy.Layers, ", "), implemented)}
+		kindsOfDamage(planned.Ordered), strings.Join(built.Policy.Layers, ", "), planned.Implemented)}
 }
 
 // kindsOfDamage counts damage in words.
@@ -131,114 +112,22 @@ func kindsOfDamage(count int) string {
 	return strconv.Itoa(count) + " kinds of damage"
 }
 
-// withDamage wraps a writer so that the policy of a recipe is carried out on
-// the way to disk, and starts the manifest beside the data.
+// tooLargeSentence is how this surface says that one file will not be read
+// back.
 //
-// # Why the manifest joins the same set of files
-//
-// It goes through the same store as the data, so the rename that gives every
-// file its real name covers it too. A run stopped part way therefore leaves
-// neither a dataset nor a manifest, rather than a manifest describing records
-// nobody will find.
-func withDamage(built recipe.Recipe, source values.Source, writer generate.Writer,
-	files *store.Set, exportForm string) (generate.Writer, *damage.Run, error) {
-	if !built.Policy.Asks() {
-		return writer, nil, nil
-	}
-	described, err := catalogyaml.Load()
-	if err != nil {
-		return nil, nil, err
-	}
-	schema := values.SchemaOf(built, source)
-	run, err := damage.Start(damage.Ask{
-		Files: files, Next: writer, Described: described, Schema: schema,
-		Policy: built.Policy, Seed: built.Seed, Can: canDo(built, source, schema),
-		Schemes: source, Form: exportForm, WidestRows: widestCount(built),
-	})
-	if err != nil {
-		return nil, nil, err
-	}
-	return run.Writer(), run, nil
-}
-
-// widestCount is the largest number of rows any one entity will have.
-//
-// It sizes the row column of an export and nothing else. A recipe can describe
-// several entities and the manifest numbers rows within each, so the widest of
-// them is the widest number that can appear.
-func widestCount(built recipe.Recipe) int {
-	widest := 1
-	for _, entity := range built.Entities {
-		widest = max(widest, entity.Count)
-	}
-	return widest
-}
-
-// canDo gathers what this run is able to do, from every supplier taking part.
-//
-// # Why five suppliers rather than one
-//
-// DEC-89 corrected the belief that a provider declares what a mutator needs.
-// Most of the capabilities come from somewhere else: the writer owns the bytes
-// and the file shape, the schema owns what the data declares about itself, the
-// word lists own the kind of text they hold, and the engine owns what it can do
-// with no help. Reading them off a provider would leave ten mutators of L0 and
-// L1 permanently unapplied for a reason nobody chose.
-func canDo(built recipe.Recipe, source values.Source, schema recipe.SchemaView) capability.Set {
-	names := format.CapabilitiesOf(built.Output.Format)
-	names = append(names, recipe.CapabilitiesOf(schema)...)
-	names = append(names, values.CapabilitiesOf(built, source)...)
-	// The engine needs nothing external for this one, so it is the only
-	// capability that is present in every run.
-	names = append(names, capability.UnicodeNormalization)
-	return capability.NewSet(names...)
-}
-
-// closeRecipeManifest writes the envelope of a manifest produced beside
-// generated data.
-//
-// The counts come from what the run actually did rather than from what it meant
-// to do. Holding the envelope against the model happens where it is written,
-// which is the one place both modes pass through.
-// tooLargeToReadBack says so when a run has written a manifest this build
-// cannot load again.
-//
-// # Why it is measured after the file is in place rather than estimated
+// # Why the size is measured after the file is in place rather than estimated
 //
 // 🔴 The writer streams and has no ceiling, and the reader holds the whole
 // document while a comparison runs, so it stops at a size written beside it.
 // Nothing connected the two, and a run producing hundreds of thousands of
 // entries could leave a manifest that verify and the viewer both refuse. The
 // person who finds that out is the one running verify, days later, with the
-// run that made it long finished.
+// run that made it long finished. Both modes measure the file once it is on the
+// disk and hand the size here (damage.Oversized).
 //
-// The file is on the disk by the time this is asked, so the answer is its size
-// rather than a guess from a count of entries multiplied by a number somebody
-// wrote down once. An empty result means nothing is wrong, including the case
-// where the file cannot be measured at all: a run that has just succeeded must
-// not fail on the way out because of a warning about it.
-func tooLargeToReadBack(dir, form string) []string {
-	var lines []string
-	for _, name := range damage.Files(form) {
-		if !strings.HasSuffix(name, ".json") {
-			continue
-		}
-		info, err := os.Stat(filepath.Join(dir, name))
-		if err != nil || info.Size() <= manifestjson.MaxSize {
-			continue
-		}
-		lines = append(lines, tooLargeSentence(name, info.Size()))
-	}
-	return lines
-}
-
-// tooLargeSentence is how this surface says that one file will not be read
-// back.
-//
-// It is one function rather than one per caller because the take mode reaches
-// this through the run's own result and the other two verbs measure the
-// directory themselves, and two wordings for one fact is how the two surfaces
-// started drifting the last time.
+// It is one function rather than one per caller because both verbs that damage
+// reach this through the run's own result, and two wordings for one fact is how
+// the two surfaces started drifting the last time.
 //
 // 🔴 Both of the things that make a manifest grow are named, because only one
 // of them was and it is not the one that gets here first. A manifest carries an
@@ -252,20 +141,5 @@ func tooLargeSentence(name string, size int64) string {
 			"window will refuse it. A manifest carries an entry for every record damaged "+
 			"and a description of every column, so damage fewer records or work on a "+
 			"narrower file",
-		name, size, manifestjson.MaxSize)
-}
-
-func closeRecipeManifest(run *damage.Run, built recipe.Recipe, plan generate.Plan,
-	at time.Time) error {
-	envelope := manifest.Run{
-		GeneratedAt:    at.UTC().Format(time.RFC3339),
-		Seed:           built.Seed,
-		Locale:         built.Locale,
-		CatalogVersion: version.Catalog,
-		Recipe:         built.Name,
-		Tag:            built.Tag,
-		RowsTotal:      plan.TotalRows(),
-		RowsMutated:    run.RowsMutated(),
-	}
-	return run.Finish(envelope)
+		name, size, damage.ReadBackLimit)
 }

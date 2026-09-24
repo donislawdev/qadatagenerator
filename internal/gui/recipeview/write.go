@@ -1,6 +1,8 @@
 package recipeview
 
 import (
+	"time"
+
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/produce"
@@ -17,17 +19,23 @@ import (
 // the field somebody types into. One reading per press costs nothing next to
 // the run it starts.
 //
-// # What makes this the same run as the preview
+// # What makes this the same run as the preview and as the command line
 //
-// Everything below it. The plan, the engine, the writer and the way the writer
-// is chosen are the ones internal/produce uses for the sample, and the only
-// difference is that the bytes reach a disk. That is what lets the rows on
-// screen be a promise about the file rather than an illustration beside it.
+// Everything below it. The plan, the engine, the writer, the policy and the
+// manifest are the ones internal/produce assembles for qadg generate too, and
+// the only differences are where the settings of the run come from. That is
+// what lets the rows on screen be a promise about the file rather than an
+// illustration beside it, and a recipe with a policy give the same damage here
+// as in a terminal (DEC-252).
 func Writer() Write {
-	return func(recipe []byte, into string, replace bool,
+	return func(recipe []byte, settings produce.Settings,
 		stop generate.Halt) (produce.Written, error) {
 		decoded := decodeRecipe(recipe)
-		return produce.Write(decoded.Recipe,
-			values.New(decoded.Recipe.Locale, decoded.Recipe.Seed), into, replace, stop)
+		prepared, err := produce.Prepare(decoded.Recipe,
+			values.New(decoded.Recipe.Locale, decoded.Recipe.Seed))
+		if err != nil {
+			return produce.Written{}, err
+		}
+		return prepared.Write(settings, stop, time.Now())
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/damage"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
@@ -454,7 +455,7 @@ func (v *View) pair(label i18n.Key, value string) fyne.CanvasObject {
 
 // namesOf is the names of the files that are too large to read back, for the
 // sentence that lists them.
-func namesOf(big []take.Oversize) []string {
+func namesOf(big []damage.Oversize) []string {
 	names := make([]string, 0, len(big))
 	for _, one := range big {
 		names = append(names, one.Name)

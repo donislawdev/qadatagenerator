@@ -83,7 +83,7 @@ func writing(t *testing.T, window fyne.Window) (*View, *heldRun, *heldWatch) {
 // stillRun is a way of writing that answers without touching a disk, because
 // these tests are about what the window does while a run is going on rather
 // than about what the run produces.
-func stillRun([]byte, string, bool, generate.Halt) (produce.Written, error) {
+func stillRun([]byte, produce.Settings, generate.Halt) (produce.Written, error) {
 	return produce.Written{Files: []string{"customer.csv"}, Rows: 3}, nil
 }
 

@@ -48,6 +48,7 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
+	"github.com/donislawdev/qadatagenerator/internal/damage"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
@@ -93,6 +94,17 @@ type Answer struct {
 	// rest as impossible is how the next one would arrive as an approval drawn
 	// over a refusal.
 	Refused error
+	// Damaged says the recipe orders damage, so that a run writes a manifest
+	// beside the data and the rows of the sample are the rows before it.
+	Damaged bool
+	// Planned is how much of that damage this build carries out, split by the
+	// layers the policy names. It is empty when nothing is ordered.
+	//
+	// 🔴 The window said nothing about a policy before 2026-09-24, and wrote
+	// nothing for one either (B-300). A dry run on the command line says how
+	// much of the order this build can carry out, and this is the same answer,
+	// worked out by the same walk over the catalog (DEC-252).
+	Planned damage.Planned
 }
 
 // View is the screen and what it currently says about what is written on it.
@@ -161,6 +173,9 @@ type View struct {
 	generate *parts.Button
 	stop     *parts.Button
 	action   *fyne.Container
+	// form is the extra form of the manifest a run exports, as the run takes
+	// it: empty for none.
+	form string
 	// keys moves the keyboard off the button a run takes away and back when
 	// the run ends, the same way the take screen does.
 	keys parts.Handover
@@ -549,10 +564,14 @@ func (v *View) wouldWrite() fyne.CanvasObject {
 	if len(v.answer.Sample.Files) == 0 {
 		return nil
 	}
-	names := make([]string, 0, len(v.answer.Sample.Files))
+	data := make([]string, 0, len(v.answer.Sample.Files))
 	for _, file := range v.answer.Sample.Files {
-		names = append(names, file.Name)
+		data = append(data, file.Name)
 	}
+	// The manifest and the note beside the data are named by the function the
+	// run names them with, so that this list and the one after the run are one
+	// sentence rather than two that agree today.
+	names := produce.Writes(data, v.answer.Damaged, v.form)
 	if v.out.Text == "" {
 		return paint.Column(palette.NameStepHairline,
 			paint.Caption(v.text.T(i18n.RecipePlanWrites)),

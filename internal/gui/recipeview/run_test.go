@@ -50,14 +50,17 @@ func TestTheScreenWritesTheDatasetAndSaysWhatItWrote(t *testing.T) {
 	if failed != nil {
 		t.Fatalf("the run failed: %v", failed)
 	}
-	for _, name := range []string{"customer.csv", "order.csv"} {
+	// 🔴 The note beside the data is among them since 2026-09-24 (B-209): the
+	// folder a window leaves has to say about itself that its values describe
+	// nobody, the same as the folder a terminal leaves.
+	for _, name := range []string{"customer.csv", "order.csv", produce.RunNoteName} {
 		if _, err := os.Stat(filepath.Join(dir, name)); err != nil {
 			t.Errorf("the run did not leave %s behind: %v", name, err)
 		}
 	}
-	if len(written.Files) != 2 || written.Rows != 29 {
-		t.Errorf("this recipe is four customers and twenty five orders, and the run "+
-			"reported %d files and %d rows", len(written.Files), written.Rows)
+	if len(written.Files) != 3 || written.Rows != 29 {
+		t.Errorf("this recipe is four customers and twenty five orders with a note beside "+
+			"them, and the run reported %v and %d rows", written.Files, written.Rows)
 	}
 
 	drawn := rendered(t, view)

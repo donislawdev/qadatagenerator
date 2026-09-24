@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/damage"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
@@ -300,7 +301,7 @@ func (v *View) planContent() fyne.CanvasObject {
 // layerRow is one named kind of damage with how much of it this build carries
 // out: the name where the tick box has it, and "3 of 9" in figures, because a
 // figure is what somebody compares across rows.
-func (v *View) layerRow(layer take.LayerPlan, names float32) fyne.CanvasObject {
+func (v *View) layerRow(layer damage.LayerPlan, names float32) fyne.CanvasObject {
 	return paint.Row(palette.NameStepRelated,
 		paint.AtLeast(names, 0, paint.Strong(v.labelOfLayer(layer.Layer), palette.TypeBody, palette.TextPrimary)),
 		paint.Mono(strconv.Itoa(layer.Implemented)+" "+v.text.T(i18n.TakePlanOf)+" "+

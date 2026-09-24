@@ -25,15 +25,12 @@
 package take
 
 import (
-	"os"
 	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/infer"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
-	"github.com/donislawdev/qadatagenerator/internal/adapter/mutators"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/sourcecsv"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/store"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
@@ -285,60 +282,28 @@ func (o *Opened) HadByteOrderMark() bool { return o.file.HadByteOrderMark() }
 // forgot to mention it would be promising damage this mode cannot do.
 func (o *Opened) NotInferred() []string { return infer.NotInferred() }
 
-// Plan is what a run would do, without doing any of it.
+// Plan is what a run would do, without doing any of it: how much of the damage
+// ordered this build carries out, split by layer, and which files it would
+// leave where.
 //
-// It states what is certain rather than estimating. How many rows a share of
-// them comes to is a draw, and a number here that the real run then missed
-// would be worse than no number.
+// The split is a fact about the run rather than about a surface, so it is
+// worked out once, by the same walk over the catalog the recipe mode uses, and
+// both surfaces say it in their own words (DEC-245, DEC-252).
 type Plan struct {
-	// Ordered is how many kinds of damage the named layers describe.
-	Ordered int
-	// Implemented is how many of those this build can actually carry out.
-	Implemented int
-	// ByLayer is the same two numbers for each named layer, in the order the
-	// layers were named. The sums above are the sums of these.
-	//
-	// # Why the split is here rather than in a surface
-	//
-	// Two sums say that something is missing and not what. A person who
-	// ordered L2 and L3 and reads "6 of 16" cannot tell which of the two this
-	// build has barely started on, and that is the question rule 9 of the
-	// project exists to answer. The split is a fact about the run, so it is
-	// worked out once here and both surfaces say it in their own words
-	// (DEC-245).
-	ByLayer []LayerPlan
+	damage.Planned
 	// Writes are the files the run would leave behind.
 	Writes []string
 	// Out is where it would leave them.
 	Out string
 }
 
-// LayerPlan is what a run would do in one named layer.
-type LayerPlan struct {
-	// Layer is the code the policy named, as --layers takes it.
-	Layer string
-	// Ordered is how many kinds of damage the catalog describes in it, and
-	// Implemented how many of those this build carries out.
-	Ordered     int
-	Implemented int
-}
-
 // Plan says what the policy asks for and writes nothing.
 func (o *Opened) Plan(settings Settings, described catalog.Catalog) Plan {
-	coverage := mutators.Coverage{Described: described}
-	planned := Plan{
-		Out:    settings.Out,
-		Writes: append([]string{OutputName(o.path)}, damage.Files(settings.Manifest)...),
+	return Plan{
+		Planned: damage.PlanOf(settings.Layers, described),
+		Out:     settings.Out,
+		Writes:  append([]string{OutputName(o.path)}, damage.Files(settings.Manifest)...),
 	}
-	for _, layer := range settings.Layers {
-		inLayer := len(described.InLayer(catalog.Layer(layer)))
-		done := inLayer - coverage.Unimplemented(layer)
-		planned.Ordered += inLayer
-		planned.Implemented += done
-		planned.ByLayer = append(planned.ByLayer,
-			LayerPlan{Layer: layer, Ordered: inLayer, Implemented: done})
-	}
-	return planned
 }
 
 // Result is what a finished run left behind.
@@ -352,16 +317,7 @@ type Result struct {
 	// Oversized are the files this run wrote that this build will not read
 	// back, if any. It is a fact rather than a sentence, so that each surface
 	// says it in its own words.
-	Oversized []Oversize
-}
-
-// Oversize is one file a run wrote that is past what this build reads back.
-type Oversize struct {
-	// Name is the file, as it appears in Written.
-	Name string
-	// Bytes is how large it turned out to be. It is the measured size rather
-	// than an estimate, because the file exists by the time this is worked out.
-	Bytes int64
+	Oversized []damage.Oversize
 }
 
 // Corrupt runs the engine over the file and puts everything on the disk, or
@@ -409,47 +365,12 @@ func (o *Opened) Corrupt(settings Settings, described catalog.Catalog,
 		return Result{}, err
 	}
 	committed = true
-	onDisk := append([]string{written}, damage.Files(settings.Manifest)...)
 	return Result{
-		Written:   onDisk,
+		Written:   append([]string{written}, damage.Files(settings.Manifest)...),
 		Out:       settings.Out,
 		Counts:    run.Counts(),
-		Oversized: oversized(settings.Out, onDisk),
+		Oversized: damage.Oversized(settings.Out, settings.Manifest),
 	}, nil
-}
-
-// ReadBackLimit is how large a manifest this build reads back, which is the
-// number both surfaces have to state when they say a run wrote one too large.
-//
-// It is repeated here rather than reached for through the reader, so that a
-// screen saying it does not have to know which adapter holds it.
-const ReadBackLimit = manifestjson.MaxSize
-
-// oversized names the files a run wrote that this build will not read back.
-//
-// # Why this is worked out here and not on either surface
-//
-// It was worked out on the command line, which meant the window did not say it
-// at all: a person damaging a wide file in the window got a manifest, no
-// warning, and a refusal from the Manifest browser later with nothing
-// connecting the two. The size is the same fact on both surfaces, so it belongs
-// where both of them already look.
-//
-// A file that cannot be measured is left out rather than guessed at. A run that
-// has just succeeded must not fail on the way out over a warning about itself.
-func oversized(dir string, written []string) []Oversize {
-	var found []Oversize
-	for _, name := range written {
-		if filepath.Ext(name) != ".json" {
-			continue
-		}
-		info, err := os.Stat(filepath.Join(dir, name))
-		if err != nil || info.Size() <= ReadBackLimit {
-			continue
-		}
-		found = append(found, Oversize{Name: name, Bytes: info.Size()})
-	}
-	return found
 }
 
 // start assembles the writer, the engine and the manifest, and says what the

@@ -19,8 +19,10 @@ import (
 //
 // It takes the bytes on screen rather than anything this screen worked out from
 // them, so that the run reads the recipe the same way the check did and the
-// window holds no half decoded state between the two.
-type Write func(recipe []byte, into string, replace bool,
+// window holds no half decoded state between the two. The settings are the
+// ones that belong to a run rather than to the recipe: where it goes, whether
+// it may replace what is there, and the extra form of the manifest.
+type Write func(recipe []byte, settings produce.Settings,
 	stop generate.Halt) (produce.Written, error)
 
 // stage is what this screen is doing about a run, and what came of the last
@@ -71,7 +73,7 @@ func (v *View) Start() {
 	// the same reason one level up, and this is the half that does not depend
 	// on a control staying disabled.
 	recipe := []byte(v.editor.Text)
-	into, replace := v.out.Text, v.replace.Checked
+	settings := v.runSettings()
 	halt := background.NewStopper()
 	v.halt = halt
 	v.stage = stageRunning
@@ -84,8 +86,13 @@ func (v *View) Start() {
 	v.interceptClose()
 	v.watchForClosing()
 	v.work.Produce(func() (produce.Written, error) {
-		return v.write(recipe, into, replace, halt)
+		return v.write(recipe, settings, halt)
 	}, v.finished)
+}
+
+// runSettings is what the band says about the next run, as the run takes it.
+func (v *View) runSettings() produce.Settings {
+	return produce.Settings{Into: v.out.Text, Replace: v.replace.Checked, Manifest: v.form}
 }
 
 // Stop asks a run in flight to end, which is what the other button does.

@@ -127,13 +127,6 @@ const (
 	formatCSV  = format.NameCSV
 	formatJSON = format.NameJSON
 
-	// runNoteName is the file that travels beside the data.
-	//
-	// 🔴 Deliberately not called a manifest. That word belongs to the public
-	// contract of the second pillar, and a name taken in passing is a name that
-	// stays for years.
-	runNoteName = "run-note.json"
-
 	problemQuickUnknownGenerator    = "no generator called "
 	problemQuickUnknownGeneratorWhy = "the value asked for is not one this build can produce"
 	problemQuickUnknownGeneratorDo  = "qadg help generators lists every one with what it produces"
@@ -317,6 +310,12 @@ const (
 	noteDryRunLayer              = "in "
 	noteDryRunWrites             = "a real run would write "
 	noteDryRunEveryOrder         = "A real run writes one manifest entry per ordered defect, applied or not"
+
+	// noteFormUnused is said when an extra form of the manifest was asked for
+	// and the recipe orders no damage, so there is no manifest to export. It
+	// takes the form that was asked for (B-301, DEC-252).
+	noteFormUnused = "--manifest %s has nothing to export, because this recipe orders no damage " +
+		"and so no manifest is written. A policy section in the recipe is what makes a run write one"
 
 	// The two ways a run ends because something outside it said so. Both say
 	// what is on the disk afterwards, because that is the only thing the reader

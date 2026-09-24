@@ -9,9 +9,9 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
-	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
+	"github.com/donislawdev/qadatagenerator/internal/produce"
 )
 
 // stopsAfter is a halt that stops a run once it has been asked a given number
@@ -38,14 +38,16 @@ func TestARunStoppedPartWayLeavesNothingBehind(t *testing.T) {
 	out := filepath.Join(dir, "data")
 	built := decodedRecipe(t, recipeIn(t, dir, smallRecipe(out)))
 
-	source := values.New(built.Locale, built.Seed)
-	plan, err := generate.Prepare(built, source)
+	prepared, err := produce.Prepare(built, values.New(built.Locale, built.Seed))
 	if err != nil {
 		t.Fatalf("the plan was refused: %v", err)
 	}
 
+	// The settings are the ones this verb hands over when no flag is given, so
+	// the run under test is the one a terminal starts.
 	own := declareGenerate(flag.NewFlagSet(commandGenerate, flag.ContinueOnError))
-	_, stopped := produce(built, plan, source, own, nil, &stopsAfter{after: 2})
+	_, stopped := prepared.Write(produce.Settings{Into: outputDir(built), Replace: *own.overwrite},
+		&stopsAfter{after: 2}, time.Now())
 
 	if kind := fault.KindOf(stopped); kind != fault.Interrupted {
 		t.Fatalf("a stopped run ended as %v rather than as an interrupted one: %v", kind, stopped)

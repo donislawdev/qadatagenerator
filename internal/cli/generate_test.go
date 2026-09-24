@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/license"
+	"github.com/donislawdev/qadatagenerator/internal/produce"
 )
 
 // recipeAt writes a recipe into a directory and returns its path.
@@ -61,7 +62,7 @@ func TestGenerateWritesTheDatasetAndTheNoteBesideIt(t *testing.T) {
 	if got.data != "" {
 		t.Errorf("counts went to the data channel, which is for the dataset: %q", got.data)
 	}
-	for _, name := range []string{"customer.csv", "order.csv", runNoteName} {
+	for _, name := range []string{"customer.csv", "order.csv", produce.RunNoteName} {
 		if _, err := os.Stat(filepath.Join(out, name)); err != nil {
 			t.Errorf("no %s was written: %v", name, err)
 		}
@@ -77,11 +78,11 @@ func TestTheNoteSaysTheValuesAreSynthetic(t *testing.T) {
 		t.Fatalf("the run ended with %d: %s", got.code, got.log)
 	}
 
-	read, err := os.ReadFile(filepath.Join(out, runNoteName))
+	read, err := os.ReadFile(filepath.Join(out, produce.RunNoteName))
 	if err != nil {
 		t.Fatalf("cannot read the note: %v", err)
 	}
-	var note runNote
+	var note produce.RunNote
 	if err := json.Unmarshal(read, &note); err != nil {
 		t.Fatalf("the note is not a document a pipeline can read: %v", err)
 	}
@@ -141,7 +142,7 @@ func TestTheNoteSaysWhichSettingsTheCommandLineOverrode(t *testing.T) {
 	if got := run(commandGenerate, recipeIn(t, dir, smallRecipe(plain))); got.code != 0 {
 		t.Fatalf("the run with nothing overridden ended with %d: %s", got.code, got.log)
 	}
-	read, err := os.ReadFile(filepath.Join(plain, runNoteName))
+	read, err := os.ReadFile(filepath.Join(plain, produce.RunNoteName))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -151,13 +152,13 @@ func TestTheNoteSaysWhichSettingsTheCommandLineOverrode(t *testing.T) {
 }
 
 // noteIn reads the record of the run a verb left beside its data.
-func noteIn(t *testing.T, out string) runNote {
+func noteIn(t *testing.T, out string) produce.RunNote {
 	t.Helper()
-	read, err := os.ReadFile(filepath.Join(out, runNoteName))
+	read, err := os.ReadFile(filepath.Join(out, produce.RunNoteName))
 	if err != nil {
 		t.Fatalf("cannot read the note: %v", err)
 	}
-	var note runNote
+	var note produce.RunNote
 	if err := json.Unmarshal(read, &note); err != nil {
 		t.Fatalf("the note is not a document a pipeline can read: %v", err)
 	}

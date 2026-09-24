@@ -477,7 +477,7 @@ func outcomeOf(ran Ran) background.Run {
 			done(take.Result{}, fault.New(fault.IO, sampleFailure).DoInstead(sampleFailureInstead))
 		case RanOversized:
 			result := sampleRun(sampleOrdered)
-			result.Oversized = []take.Oversize{
+			result.Oversized = []damage.Oversize{
 				{Name: manifestjson.Name, Bytes: sampleOversizedBytes},
 			}
 			done(result, nil)

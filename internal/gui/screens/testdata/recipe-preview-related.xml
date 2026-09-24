@@ -510,7 +510,7 @@
 																	<container pos="0,18" size="479x24">
 																		<widget size="479x24" type="*widget.Label">
 																			<widget size="479x24" type="*widget.RichText">
-																				<text color="disabled" pos="4,4" size="157x16">customer.csv and order.csv</text>
+																				<text color="disabled" pos="4,4" size="242x16">customer.csv, order.csv and run-note.json</text>
 																			</widget>
 																		</widget>
 																	</container>

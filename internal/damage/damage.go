@@ -31,6 +31,9 @@
 package damage
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/donislawdev/qadatagenerator/internal/adapter/corrupted"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestexport"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
@@ -108,6 +111,109 @@ type Counts struct {
 
 // Missing is how many ordered defects never reached the data.
 func (c Counts) Missing() int { return c.Requested - c.Applied }
+
+// Planned is what a policy would do, without doing any of it.
+//
+// It states what is certain rather than estimating. How many rows a share of
+// them comes to is a draw, and a number here that the real run then missed
+// would be worse than no number.
+//
+// # Why this is worked out here rather than in each mode
+//
+// It was worked out twice: once by the mode that damages somebody else's file
+// and once by the command line for a recipe, by two different walks over the
+// catalog. The day a third caller arrived, the recipe screen, the choice was a
+// third walk or one answer, and three walks over one question is how a surface
+// comes to say "3 of 9" beside another saying "4 of 9" about the same policy.
+type Planned struct {
+	// Ordered is how many kinds of damage the named layers describe.
+	Ordered int
+	// Implemented is how many of those this build can actually carry out.
+	Implemented int
+	// ByLayer is the same two numbers for each named layer, in the order the
+	// layers were named. The sums above are the sums of these.
+	//
+	// Two sums say that something is missing and not what. A person who ordered
+	// L2 and L3 and reads "6 of 16" cannot tell which of the two this build has
+	// barely started on, and that is the question rule 9 of the project exists
+	// to answer (DEC-245).
+	ByLayer []LayerPlan
+}
+
+// LayerPlan is what a run would do in one named layer.
+type LayerPlan struct {
+	// Layer is the code the policy named, as --layers takes it.
+	Layer string
+	// Ordered is how many kinds of damage the catalog describes in it, and
+	// Implemented how many of those this build carries out.
+	Ordered     int
+	Implemented int
+}
+
+// PlanOf says what a policy naming these layers asks for and writes nothing.
+func PlanOf(layers []string, described catalog.Catalog) Planned {
+	coverage := mutators.Coverage{Described: described}
+	var planned Planned
+	for _, layer := range layers {
+		inLayer := len(described.InLayer(catalog.Layer(layer)))
+		done := inLayer - coverage.Unimplemented(layer)
+		planned.Ordered += inLayer
+		planned.Implemented += done
+		planned.ByLayer = append(planned.ByLayer,
+			LayerPlan{Layer: layer, Ordered: inLayer, Implemented: done})
+	}
+	return planned
+}
+
+// ReadBackLimit is how large a manifest this build reads back, which is the
+// number every surface has to state when it says a run wrote one too large.
+//
+// It is repeated here rather than reached for through the reader, so that a
+// surface saying it does not have to know which adapter holds it.
+const ReadBackLimit = manifestjson.MaxSize
+
+// Oversize is one file a run wrote that is past what this build reads back.
+type Oversize struct {
+	// Name is the file, as the run reported it.
+	Name string
+	// Bytes is how large it turned out to be. It is the measured size rather
+	// than an estimate, because the file exists by the time this is worked out.
+	Bytes int64
+}
+
+// Oversized names the files a run wrote that this build will not read back.
+//
+// # Why this is worked out here and not on either surface
+//
+// It was worked out on the command line, which meant the window did not say it
+// at all: a person damaging a wide file in the window got a manifest, no
+// warning, and a refusal from the Manifest browser later with nothing
+// connecting the two. The size is the same fact on both surfaces and in both
+// modes, so it belongs where all of them already look.
+//
+// 🔴 Only the documents a run writes AS its manifest are measured, and the
+// list of them is worked out here from the form rather than handed in. A
+// damaged file or a dataset is the thing somebody asked for and nothing reads
+// it back, so its size is not this warning's business however large it gets,
+// and the object form of a dataset ends in .json exactly like a manifest does.
+// A caller passing every file it wrote would have been warned about its data.
+//
+// A file that cannot be measured is left out rather than guessed at. A run that
+// has just succeeded must not fail on the way out over a warning about itself.
+func Oversized(dir, form string) []Oversize {
+	var found []Oversize
+	for _, name := range Files(form) {
+		if filepath.Ext(name) != ".json" {
+			continue
+		}
+		info, err := os.Stat(filepath.Join(dir, name))
+		if err != nil || info.Size() <= ReadBackLimit {
+			continue
+		}
+		found = append(found, Oversize{Name: name, Bytes: info.Size()})
+	}
+	return found
+}
 
 // Run is one damaging run in progress: what it writes through, what it records
 // and what it has counted so far.
