@@ -110,13 +110,12 @@ func (v *View) startFromExample() {
 
 // generatorsTitle names the list and says how many are in it.
 //
-// Both forms of the word, through the same helper the counters beside it use,
-// for the reason written there: a plural made by adding a letter was drawn on
-// this screen once and read back as "2 entitys".
+// Both forms of the word from the catalogue, the way the counters beside it
+// take theirs: a plural made by adding a letter was drawn on this screen once
+// and read back as "2 entitys".
 func (v *View) generatorsTitle() string {
 	return v.text.T(i18n.RecipeCanGenerate) + ", " +
-		counted(len(values.New("", "").Names()),
-			v.text.T(i18n.RecipeGenerator), v.text.T(i18n.RecipeGenerators))
+		v.text.Counted(len(values.New("", "").Names()), i18n.RecipeGenerator, i18n.RecipeGenerators)
 }
 
 // generatorsList is every generator this build carries, with what it produces,

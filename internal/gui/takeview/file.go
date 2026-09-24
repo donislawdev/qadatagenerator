@@ -77,8 +77,7 @@ func (v *View) account() []fyne.CanvasObject {
 	blocks := []fyne.CanvasObject{
 		paint.Column(palette.NameStepHairline,
 			paint.Strong(table.Entity, palette.TypeBody, palette.TextPrimary),
-			v.paragraph(counted(table.Rows, "record")+" "+dot+" "+
-				counted(len(table.Columns), "column"))),
+			v.paragraph(v.shape())),
 	}
 	blocks = append(blocks, v.warnings(len(table.Columns))...)
 	blocks = append(blocks,

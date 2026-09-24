@@ -165,6 +165,14 @@ const (
 	TakeFileOneColumn         Key = "take.file.one-column"
 	TakeFileNothingRecognised Key = "take.file.nothing-recognised"
 
+	// How many records and columns a file holds, beside its name in the band
+	// and at the head of the panel. Both forms of each word, for the reason the
+	// recipe screen gives at RecipeEntity.
+	TakeCountRecord  Key = "take.count.record"
+	TakeCountRecords Key = "take.count.records"
+	TakeCountColumn  Key = "take.count.column"
+	TakeCountColumns Key = "take.count.columns"
+
 	TakeSettingLayers    Key = "take.setting.layers"
 	TakeSettingRows      Key = "take.setting.rows"
 	TakeSettingPerRow    Key = "take.setting.per-row"
@@ -747,6 +755,7 @@ var Keys = []Key{
 	TakeFileTakenFor, TakeFileBecause, TakeFileAgreesWith,
 	TakeFileByteOrderMark, TakeFileNotWorkedOut, TakeFileNotInferred,
 	TakeFileOneColumn, TakeFileNothingRecognised,
+	TakeCountRecord, TakeCountRecords, TakeCountColumn, TakeCountColumns,
 	TakeLayerBytes, TakeLayerStructure, TakeLayerFormat, TakeLayerMeaning,
 	TakeLayerBetween, TakeLayerAcross, TakeLayerUnicode, TakeLayerUnusual,
 	TakeLayerCode, TakeLayersNote, TakePerRowExactlyOne, TakePerRowAny,
@@ -862,7 +871,11 @@ func (c Catalogue) T(key Key) string {
 // with the About screen on 2026-09-23. The two forms are the catalogue's, so
 // the choice between them belongs beside the catalogue. The same limit as the
 // note on QuickValuesCounted: a language whose number governs more than two
-// forms needs a count aware catalogue, not a third key.
+// forms needs a count aware catalogue, not a third key (B-184).
+//
+// Every screen counts through this since 2026-09-24 (B-294). The take screen
+// was the last, and it was also the one adding a letter to a word written in
+// the code, so its two words became keys on the way.
 func (c Catalogue) Counted(many int, one, rest Key) string {
 	if many == 1 {
 		return strconv.Itoa(many) + " " + c.T(one)

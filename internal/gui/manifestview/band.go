@@ -93,7 +93,7 @@ func (v *View) manifestFactsNow() fyne.CanvasObject {
 		return v.cut(v.text.T(i18n.ManifestEmpty))
 	}
 	run := v.promised.Run()
-	words := counted(len(v.screen.Rows), v.text.T(i18n.ManifestFactsEntry), v.text.T(i18n.ManifestFactsEntries)) +
+	words := v.text.Counted(len(v.screen.Rows), i18n.ManifestFactsEntry, i18n.ManifestFactsEntries) +
 		between + v.text.T(i18n.ManifestFactsSeed) + " " + run.Seed +
 		between + run.Locale
 	return v.named(v.manifestPath, words, palette.TextSecondary)
@@ -135,16 +135,6 @@ const (
 	dot     = "·"
 	between = " " + dot + " "
 )
-
-// counted writes a number with the thing it counts, in whichever form of the
-// word fits it. Both forms come from the catalogue rather than one of them
-// plus a letter, for the reason the recipe screen measured: "2 entitys".
-func counted(many int, one, rest string) string {
-	if many == 1 {
-		return "1 " + one
-	}
-	return strconv.Itoa(many) + " " + rest
-}
 
 func (v *View) chooseManifest() {
 	dialog.ShowFileOpen(func(chosen fyne.URIReadCloser, err error) {

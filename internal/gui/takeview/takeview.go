@@ -38,7 +38,6 @@ package takeview
 
 import (
 	"path/filepath"
-	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -434,9 +433,7 @@ func (v *View) drawFacts() {
 		// it from the fields beside it.
 		said = v.cut(v.text.T(i18n.TakeFileNone))
 	default:
-		table := v.opened.Table()
-		said = v.named(v.path, counted(table.Rows, "record")+" "+dot+" "+
-			counted(len(table.Columns), "column"), palette.TextSecondary)
+		said = v.named(v.path, v.shape(), palette.TextSecondary)
 	}
 	v.facts.Objects = []fyne.CanvasObject{said}
 	v.facts.Refresh()
@@ -568,12 +565,14 @@ func (v *View) marked(icon, ink string, words fyne.CanvasObject) fyne.CanvasObje
 	return paint.Marked(icon, ink, words)
 }
 
-// counted says how many of a thing there are, in the plural where there are
-// not exactly one. Values are data rather than interface text, so this is not
-// a key.
-func counted(many int, thing string) string {
-	if many == 1 {
-		return "1 " + thing
-	}
-	return strconv.Itoa(many) + " " + thing + "s"
+// shape says how many records and columns the file that was read holds. The
+// band and the panel both say it, so it is written once.
+//
+// Until 2026-09-24 the two words were written in the code and made plural by
+// adding a letter, which is text a translation could never reach and the rule
+// the recipe screen was bitten by with "2 entitys" (B-294).
+func (v *View) shape() string {
+	table := v.opened.Table()
+	return v.text.Counted(table.Rows, i18n.TakeCountRecord, i18n.TakeCountRecords) + " " + dot + " " +
+		v.text.Counted(len(table.Columns), i18n.TakeCountColumn, i18n.TakeCountColumns)
 }

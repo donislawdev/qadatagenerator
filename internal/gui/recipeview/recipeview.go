@@ -524,10 +524,8 @@ func (v *View) problems() []fyne.CanvasObject {
 func (v *View) clean() []fyne.CanvasObject {
 	verdict := paint.Column(palette.NameStepTight,
 		v.told(paint.IconCheck, palette.StateSuccess, v.text.T(i18n.RecipeNoObjections)),
-		v.paragraph(counted(v.answer.Report.Entities, v.text.T(i18n.RecipeEntity),
-			v.text.T(i18n.RecipeEntities))+", "+
-			counted(v.answer.Report.Fields, v.text.T(i18n.RecipeField),
-				v.text.T(i18n.RecipeFields))))
+		v.paragraph(v.text.Counted(v.answer.Report.Entities, i18n.RecipeEntity, i18n.RecipeEntities)+
+			", "+v.text.Counted(v.answer.Report.Fields, i18n.RecipeField, i18n.RecipeFields)))
 	blocks := []fyne.CanvasObject{verdict}
 	if would := v.wouldWrite(); would != nil {
 		blocks = append(blocks, would)
@@ -562,23 +560,6 @@ func (v *View) wouldWrite() fyne.CanvasObject {
 			v.paragraph(v.text.T(i18n.RecipeNeedDirectory)))
 	}
 	return v.fact(i18n.RecipePlanWrites, listOf(names)+" "+v.text.T(i18n.RecipeIn)+" "+v.out.Text)
-}
-
-// counted writes a number with the thing it counts, in whichever form of the
-// word fits it.
-//
-// 🔴 Both forms come from the catalogue rather than one of them plus a letter.
-// The letter was what this screen drew until 2026-09-02, and rendering read it
-// back: two entities came out as "2 entitys". English alone breaks that rule,
-// so this was never waiting for a language with three plural forms. What is
-// still waiting for one is B-184, because a language that needs a third form
-// needs a third key and a rule for choosing between them, and that is a
-// mechanism rather than a second word.
-func counted(many int, one, rest string) string {
-	if many == 1 {
-		return "1 " + one
-	}
-	return strconv.Itoa(many) + " " + rest
 }
 
 // unchecked says what this build did not look at.

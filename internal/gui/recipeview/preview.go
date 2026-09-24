@@ -77,11 +77,10 @@ func (v *View) writtenText() []fyne.CanvasObject {
 // alone. Somebody looking at three rows has seen the whole table.
 func (v *View) rowsShown(table produce.Table) string {
 	if !table.Cut() {
-		return counted(table.Total, v.text.T(i18n.RecipeRow), v.text.T(i18n.RecipeRows))
+		return v.text.Counted(table.Total, i18n.RecipeRow, i18n.RecipeRows)
 	}
 	return v.text.T(i18n.RecipeShowing) + " " + strconv.Itoa(len(table.Rows)) + " " +
-		v.text.T(i18n.RecipeOf) + " " + counted(table.Total, v.text.T(i18n.RecipeRow),
-		v.text.T(i18n.RecipeRows))
+		v.text.T(i18n.RecipeOf) + " " + v.text.Counted(table.Total, i18n.RecipeRow, i18n.RecipeRows)
 }
 
 // rows is the table itself.

@@ -214,6 +214,10 @@ take.heading.result: What this run did
 
 take.file.rows: Records
 take.file.columns: Columns
+take.count.record: record
+take.count.records: records
+take.count.column: column
+take.count.columns: columns
 take.file.nothing-declared: Nothing declared what these columns hold, so it was worked out by looking at the values.
 take.file.taken-for: taken for
 # tekst-ok: the word joining a basis the take screen was handed to what it explains, the same word manifest.detail.because joins the reason a run recorded with
