@@ -206,9 +206,9 @@ func (v *View) actionNow() fyne.CanvasObject {
 		v.generate.Disable()
 	}
 	// The primary button goes to the layout itself rather than through
-	// OnScreen. OnScreen exists to hand over the container Outlined builds, and
-	// this control draws its own fill and its own focus ring, so there is no
-	// edge beside it to hand over.
+	// OnScreen. OnScreen once handed over a container with an edge beside the
+	// button, and today it hands back the button too, because every button
+	// draws its own fill, edge and focus ring.
 	return v.generate
 }
 

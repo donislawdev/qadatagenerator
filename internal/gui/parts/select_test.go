@@ -77,9 +77,9 @@ func TestTheChooserIsOutlinedFromTheTokens(t *testing.T) {
 	}
 }
 
-// TestTheEdgeOfAFaceIsDrawnInsideTheControl is the rule TestTheEdgeIsDrawn
-// InsideTheControlItOutlines holds for parts.Outlined, asked of the drawing
-// that replaced it.
+// TestTheEdgeOfAFaceIsDrawnInsideTheControl is the rule a test of
+// parts.Outlined held until that edge was deleted with DEC-253, asked of the
+// drawing that replaced it.
 //
 // # 🔴 Why it had to be asked again, and how the fault was found
 //

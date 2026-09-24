@@ -126,8 +126,8 @@ func Middle(content fyne.CanvasObject) *fyne.Container {
 //
 // A band of chrome wants more room left and right than above and below, because
 // the window is wider than it is tall and the eye reads the margin as a
-// proportion. One value for all four sides is the case Inset next door already
-// covers.
+// proportion. One value for all four sides is the same call with one name
+// written four times.
 func Pad(top, bottom, left, right string, content fyne.CanvasObject) *fyne.Container {
 	return container.New(layout.NewCustomPaddedLayout(
 		theme.StepOf(top), theme.StepOf(bottom),

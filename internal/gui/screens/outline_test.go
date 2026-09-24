@@ -171,9 +171,9 @@ func (s quietSelect) quiet() bool { return s.Disabled() }
 
 // edgeIn is the outlining rectangle of this container.
 //
-// Two levels are read rather than one, because Outlined puts the rectangle
-// inside a padded container of the toolkit to hold the stroke inside the
-// control. The walk stops there rather than going the whole way down, so that
+// Two levels are read rather than one, because an edge is put inside a padded
+// container of the toolkit to hold the stroke inside the control - by the faces
+// in paint today, and by parts.Outlined until it was deleted with DEC-253. The walk stops there rather than going the whole way down, so that
 // a rectangle belonging to the control itself, which every button has for its
 // own fill, is never mistaken for an edge.
 //
@@ -216,8 +216,8 @@ func edgeIn(group *fyne.Container) *canvas.Rectangle {
 //
 // # Why it needs a guard of its own rather than a sentence
 //
-// The walk above finds controls by looking for the container Outlined builds.
-// The filled parts.Button is handed to a layout bare, so that walk passes over it
+// The walk above finds controls by looking for a container holding a drawn
+// edge. The filled parts.Button is handed to a layout bare, so that walk passes over it
 // without a word and stays green whatever happens to it. A rule with an
 // exception nobody checks is a rule that has quietly stopped covering the thing
 // it names, which in this repository has already happened to a register of
@@ -258,12 +258,12 @@ func TestTheFilledActionIsTheNamedExceptionToTheEdgeRule(t *testing.T) {
 			// this check. edgeIn answers about any rectangle among a
 			// container's children or grandchildren, which is exactly right
 			// where it was written, right after a container has been
-			// identified as one Outlined built. Asked of any container at all
-			// it also answers yes for the ground of a Card, and the first
-			// version here did ask that and reported four states that were
-			// perfectly correct. What Outlined actually produces is a stack
-			// holding the control and the edge as SIBLINGS, so that is what is
-			// looked for.
+			// identified as one parts.Outlined built. Asked of any container
+			// at all it also answers yes for the ground of a Card, and the
+			// first version here did ask that and reported four states that
+			// were perfectly correct. What Outlined produced, and what an edge
+			// beside a control would still be, is a stack holding the control
+			// and the edge as SIBLINGS, so that is what is looked for.
 			var slab *parts.Button
 			for _, child := range group.Objects {
 				if filled := filledAction(child); filled != nil {

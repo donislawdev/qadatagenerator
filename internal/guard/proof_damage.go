@@ -490,7 +490,6 @@ var damageGuards = []Guard{
 	{"a chooser opens on Enter as well as on the keys the toolkit answers, and still walks its options with the arrows", "TestTheChooserOpensOnEnterAsWellAsOnSpace", "internal/gui/parts", ByMutation},
 	{"a palette entry read on top of another entry names that entry, and the entry it names is one the palette has", "TestEveryColourReadOnAnotherSaysWhichOne", "internal/gui/theme", ByMutation},
 	{"a control somebody can use carries an edge of its own, so it is a control rather than a word", "TestEveryPressableControlDrawsItsOwnEdge", "internal/gui/screens", ByMutation},
-	{"the edge of a button is drawn inside it, on whole pixels, rather than half outside", "TestTheEdgeIsDrawnInsideTheControlItOutlines", "internal/gui/parts", ByMutation},
 	{"a register of which values take account of a consistency role says only what the values really do", "TestEveryGeneratorReadsExactlyTheRolesTheRegisterSays", "internal/adapter/values", ByMutation},
 	{"a role that register names is a role a recipe can bind", "TestARoleTheRegisterNamesIsARoleThatExists", "internal/adapter/values", ByMutation},
 	{"the screen that produces one value produces it by choosing, and copying it reaches the clipboard", "TestChoosingAValueProducesOneAndCopyingItReachesTheClipboard", "internal/gui/quickview", ByMutation},

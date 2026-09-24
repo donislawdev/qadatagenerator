@@ -332,8 +332,10 @@ func ButtonFace(look ButtonLook) fyne.CanvasObject {
 // edge. Ours sat at 0,0. The same row, two controls, two different edges - and
 // DEC-215 settled that this is a fault even when each passes on its own.
 //
-// parts.Outlined did this correctly for as long as the window used it, which is
-// why the distance already has a name in the theme.
+// parts.Outlined, the edge once laid over a stock button, did this correctly
+// for as long as the window used it, which is why the distance already has a
+// name in the theme. It was deleted with DEC-253, when nothing called it any
+// more.
 //
 // Nothing of ours lays anything out here: the toolkit's padded layout takes the
 // margin, which is the same reason Outlined nested two of its containers.
@@ -561,18 +563,4 @@ func FieldWidth(sample string) float32 {
 	// says 12 - which tools/odstepy.py reports as a distance nobody chose,
 	// correctly, and which nothing else would ever have noticed.
 	return float32(math.Ceil(float64(FieldFace(sample, theme.TypeBody, 0).MinSize().Width)))
-}
-
-// SearchFace is the look of the field a list is filtered with: the field face
-// with a magnifier before the text and the accent on its edge, because it is
-// the one control on an open panel that the keyboard starts in.
-func SearchFace(prompt string) fyne.CanvasObject {
-	ground := Bordered(theme.BgSurface, theme.MarkCurrent, theme.RadiusControl)
-	inner := container.NewBorder(nil, nil,
-		Pad(theme.NameStepHairline, theme.NameStepHairline, theme.NameStepHairline, theme.NameStepTight,
-			Middle(Icon(IconSearch, theme.TextSecondary, theme.IconSmall))), nil,
-		Middle(Text(prompt, theme.TypeBody, theme.TextSecondary)))
-	return AtLeast(0, theme.ControlHeight,
-		On(ground, Pad(theme.NameStepHairline, theme.NameStepHairline,
-			theme.NameStepRelated, theme.NameStepRelated, inner)))
 }
