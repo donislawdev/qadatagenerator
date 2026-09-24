@@ -17,12 +17,9 @@
 package shell
 
 import (
-	"strings"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
@@ -386,26 +383,33 @@ func (s *Shell) footnote() string {
 // the one inside words.
 const brandSeparator = "  ·  "
 
-// heading is one group name, drawn quieter than the names it groups.
+// heading is one group name, drawn as every other caption over a group is.
 //
-// A RichText rather than a Label, because a label takes the ordinary text
-// colour and a heading that shouts as loudly as its own contents has grouped
-// nothing. The colour and the size are asked for by name, so the one place
-// that answers for either is the palette.
+// # 🔴 Why it stopped being a RichText of its own on 2026-09-24
+//
+// It asked for its colour by the name text.subdued, which is an entry of the
+// palette that preceded the ladders. The theme the window runs on does not
+// know that name, so the lookup fell through to the ink of text read first,
+// and the heading this comment called quieter than the names it groups was
+// drawn exactly as loud as them for as long as the window had that theme.
+// Nothing failed, because a colour that resolves to something visible is
+// indistinguishable from one that resolves to the intended thing - the render
+// of the accent showed it, when every other caption changed colour and these
+// two did not.
+//
+// paint.Caption is the one drawing of a caption, capitals included, so the
+// reason the capitals were done here rather than in the catalogue still holds
+// and now lives beside that function.
+//
+// The inset is built from the same pieces an item is, the width of the bar and
+// then the two steps an item puts before its icon, so the heading starts where
+// the icons under it start and moves with them if either step changes. More
+// room above than below, because a heading belongs to what follows it.
 func heading(name string) fyne.CanvasObject {
-	// 🔴 Upper case, which is what the accepted drawing asks for and what
-	// separates a label naming a group from the names inside it. The drawing
-	// also spaces the letters out, and the toolkit has no way to say that, so
-	// the case is the part of it that can be carried.
-	//
-	// Done here rather than in the catalogue, because it is a matter of how the
-	// word is drawn and not of what it says. A translator writing a group name
-	// in capitals in the file would have it shouted twice on a surface that
-	// chose not to do this, and the command line is such a surface.
-	segment := &widget.TextSegment{Text: strings.ToUpper(name)}
-	segment.Style.ColorName = fyne.ThemeColorName(palette.NameTextSubdued)
-	segment.Style.SizeName = theme.SizeNameCaptionText
-	return widget.NewRichText(segment)
+	return paint.Pad(palette.NameStepRelated, palette.NameStepHairline,
+		palette.NameStepTight, palette.NameStepHairline,
+		paint.Lead(paint.Space(palette.MarkWidth, 0),
+			paint.PadLeft(palette.NameStepRelated, paint.Caption(name))))
 }
 
 // fixedWidth gives what it holds one width whatever is in it.

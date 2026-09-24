@@ -105,7 +105,7 @@ func Pill(words, token, icon string) fyne.CanvasObject {
 func SectionHeading(words string, actions fyne.CanvasObject) fyne.CanvasObject {
 	rule := Pad(theme.NameStepHairline, theme.NameStepHairline,
 		theme.NameStepRelated, theme.NameStepRelated,
-		Middle(Hairline(theme.LineQuiet)))
+		Middle(Hairline(theme.LineSection)))
 	return container.NewBorder(nil, nil,
 		Middle(Strong(words, theme.TypeSection, theme.TextPrimary)), actions, rule)
 }

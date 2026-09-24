@@ -74,6 +74,12 @@ type Button struct {
 	Leading bool
 	Plain   bool
 
+	// Current marks a plain button as the place the window is on, so the face
+	// draws the tinted ground under it in every state, the pointer's included.
+	// The sidebar sets it, and the reason it lives here rather than under the
+	// button is beside paint.ButtonLook.
+	Current bool
+
 	// Filled marks the one action a screen is for, drawn as a slab in the
 	// accent rather than as another outlined word among several. NewPrimaryButton
 	// sets it, and a screen has exactly one.
@@ -323,6 +329,7 @@ func (r *buttonRenderer) Refresh() {
 		Icon:     r.button.Icon,
 		Leading:  r.button.Leading,
 		Plain:    r.button.Plain,
+		Current:  r.button.Current,
 		Filled:   r.button.Filled,
 		Focused:  r.button.keyboardIsHere,
 		Disabled: r.button.Disabled(),

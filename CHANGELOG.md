@@ -12,6 +12,16 @@ repository once they are released.
 
 ### Changed
 
+- **The window is drawn on a lighter graphite with a blue accent instead of a
+  near black with violet.** The accent now also marks where things are, not
+  only the one action a screen is for: the icons on buttons and in the column
+  of screens, the headings over groups, the line under each section heading,
+  the header of the manifest table, and the screen that is open, which keeps
+  its colour when the pointer is on it. The red used for a rejection is a
+  little lighter, so it stays readable on the new ground. The headings over
+  the groups in the column of screens are now quieter than the names under
+  them, as they were meant to be.
+
 - **The button a screen is for now has the same margins as every other
   button**, so it is slightly wider, and when it cannot be pressed its label
   dims the way theirs does.

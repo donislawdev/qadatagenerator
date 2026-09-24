@@ -71,57 +71,85 @@ func (s Shade) NRGBA() color.NRGBA {
 
 // Neutral is the ladder every ground, edge and piece of text is drawn from.
 //
-// # Why it is warm rather than grey
+// # Why a cool graphite rather than a warm near-black
 //
-// A neutral built from equal channels is the ground of the toolkit's own dark
-// theme, and a window drawn on it looks like the toolkit. Bending the ladder
-// warm costs nothing, is invisible on any single element, and is the first
-// thing that makes the window look chosen rather than defaulted. A judgement
-// rather than a measurement, and written as one.
+// Until 2026-09-24 the ladder was bent warm and started at 0x100F0E. The owner
+// looked at the finished window and said the colours were bland: too black,
+// too grey, flat. Measured on the render the same day, 74 to 93 per cent of
+// every screen was within a few steps of black, and the difference between the
+// window and a card was too small to read as depth.
+//
+// So the ground rises to a graphite and the steps near the bottom are spread
+// further apart, which is where depth is read on a dark theme. The tint is
+// cool rather than warm because the accent above is cool, and a warm ground
+// under a cool accent reads as two palettes. How far the ground can rise is
+// not a taste: border.control has to clear 3.0 on the ground a pointer gives a
+// control, and mark.focus has to clear 3.0 against border.control, so every
+// step up at the bottom pushes the edge up and the focus mark towards white.
+// The steps are computed from a target luminance each, in OKLCH, rather than
+// picked by eye, and the register below is what says they still pass.
 var Neutral = []Shade{
-	{"neutral.1", 0x10, 0x0F, 0x0E, "the window itself"},
-	{"neutral.2", 0x18, 0x17, 0x16, "a ground set apart from the window: a card, the sidebar, a band of chrome"},
-	{"neutral.3", 0x20, 0x20, 0x1E, "the inside of a control at rest, and every other row of a list"},
-	{"neutral.4", 0x28, 0x27, 0x25, "the sidebar item naming the screen that is open"},
-	{"neutral.5", 0x31, 0x30, 0x2D, "the row under the pointer"},
-	{"neutral.6", 0x3B, 0x3A, 0x36, "the quiet line: between two rows, and around a card"},
-	{"neutral.7", 0x4A, 0x48, 0x42, "one step louder than the quiet line, for an edge that is found rather than followed"},
-	{"neutral.8", 0x61, 0x5F, 0x58, "the loudest shade that is still an edge rather than a mark"},
-	{"neutral.9", 0x6F, 0x6D, 0x65, "a filled shape carrying no text of its own"},
-	{"neutral.10", 0x80, 0x7E, 0x76, "the edge of a control, which has to be seen rather than followed"},
-	{"neutral.11", 0xB4, 0xB1, 0xA9, "text read second: a caption, a group heading, the sentence beside a value"},
-	{"neutral.12", 0xED, 0xEC, 0xE9, "text read first"},
+	{"neutral.1", 0x1B, 0x1E, 0x23, "the window itself"},
+	{"neutral.2", 0x24, 0x28, 0x2D, "a ground set apart from the window: a card, the sidebar, a band of chrome"},
+	{"neutral.3", 0x2B, 0x2F, 0x35, "the inside of a control at rest, and every other row of a list"},
+	{"neutral.4", 0x30, 0x34, 0x3A, "a ground one step louder than a control at rest, which no token takes today"},
+	{"neutral.5", 0x35, 0x3A, 0x41, "the row under the pointer"},
+	{"neutral.6", 0x3D, 0x42, 0x49, "the quiet line: between two rows, and around a card"},
+	{"neutral.7", 0x48, 0x4E, 0x56, "one step louder than the quiet line, for an edge that is found rather than followed"},
+	{"neutral.8", 0x57, 0x5E, 0x66, "the loudest shade that is still an edge rather than a mark"},
+	{"neutral.9", 0x66, 0x6D, 0x75, "a filled shape carrying no text of its own"},
+	{"neutral.10", 0x7D, 0x84, 0x8D, "the edge of a control, which has to be seen rather than followed"},
+	{"neutral.11", 0xAC, 0xB4, 0xBD, "text read second: the name above a field, the sentence beside a value"},
+	{"neutral.12", 0xEB, 0xEF, 0xF4, "text read first"},
 }
 
-// Accent is the ladder the one action of a screen is drawn from.
+// Accent is the ladder the one action of a screen is drawn from, and the
+// structure around it.
 //
-// # Why violet, and it is an argument rather than a taste
+// # Why not green, amber or red, and it is an argument rather than a taste
 //
 // This product already spends green, amber and red on things that MEAN
 // something: an expectation of acceptance, of a warning, of rejection. An
 // accent taken from any of those hues would put a colour saying press this
-// beside the same hue saying this was rejected. Violet is the hue furthest
-// from all three, so it can never be read as a verdict.
+// beside the same hue saying this was rejected.
 //
-// # Why almost none of it is spent
+// # Why blue, and it is a choice rather than an argument
 //
-// One filled shape per screen, and the mark on the sidebar item the window is
-// on. That is the entire budget. An accent spent on every control is the same
-// as no accent, which is the state the window was in before this file existed,
-// only louder.
+// Until 2026-09-24 it was violet, chosen as the hue furthest from all three.
+// The owner said the violet did not suit the window, and picked blue that day
+// from renders of the same screens in blue, teal and fuchsia, with the ladder
+// below identical in lightness for all three. Blue also shares the tint of
+// the graphite under it, so the two ladders read as one palette. Teal was the
+// most colourful of the three and fuchsia the one nearest the red of a
+// rejection, which is the one argument against a hue this comment can make.
+//
+// # How much of it is spent, changed on 2026-09-24
+//
+// Until then: one filled shape per screen and the mark on the sidebar item,
+// which measured as 0.1 to 1.2 per cent of the pixels of a screen, and the
+// owner called the result bland. He chose the accent in navigation and in
+// structure as well: the ground of the open screen in the sidebar, the icons
+// of the quiet controls, the captions over groups, the line under a section
+// heading, the header of a table. It is still not on text read first and not
+// on the grounds of controls, so the one filled action stays the loudest thing
+// on a screen.
+//
+// Every step is computed from a target luminance in OKLCH, shared by every
+// hue that was rendered, so the hue could change without one pair in the
+// register below moving.
 var Accent = []Shade{
-	{"accent.1", 0x14, 0x11, 0x1E, "the window, tinted, for a screen that is entirely about one action"},
-	{"accent.2", 0x1B, 0x16, 0x2B, "a ground set apart, tinted"},
-	{"accent.3", 0x24, 0x1C, 0x3C, "the inside of a chosen control at rest"},
-	{"accent.4", 0x2C, 0x22, 0x50, "that ground under the pointer"},
-	{"accent.5", 0x35, 0x2A, 0x60, "that ground while pressed"},
-	{"accent.6", 0x41, 0x34, 0x6F, "the quiet edge of a chosen control"},
-	{"accent.7", 0x51, 0x41, 0x86, "one step louder"},
-	{"accent.8", 0x65, 0x53, 0xA6, "the edge of the field a search is typed into"},
-	{"accent.9", 0x70, 0x59, 0xD6, "the fill of the one action a screen is for"},
-	{"accent.10", 0x7E, 0x68, 0xE2, "that fill under the pointer"},
-	{"accent.11", 0xA5, 0x94, 0xFF, "the accent where it has to be READ: an icon, a prompt, the mark on the current item"},
-	{"accent.12", 0xE0, 0xDA, 0xFF, "text on a tinted ground"},
+	{"accent.1", 0x1A, 0x21, 0x2B, "the window, tinted, for a screen that is entirely about one action"},
+	{"accent.2", 0x21, 0x2A, 0x39, "a ground set apart, tinted: the header of a table"},
+	{"accent.3", 0x25, 0x33, 0x48, "the inside of a chosen control at rest, and the sidebar item of the open screen"},
+	{"accent.4", 0x27, 0x39, 0x53, "that ground under the pointer"},
+	{"accent.5", 0x29, 0x3F, 0x5F, "that ground while pressed"},
+	{"accent.6", 0x2A, 0x47, 0x71, "the quiet edge of a chosen control"},
+	{"accent.7", 0x30, 0x55, 0x8C, "one step louder, and the line under a section heading"},
+	{"accent.8", 0x33, 0x6B, 0xBC, "the edge of the field a search is typed into"},
+	{"accent.9", 0x29, 0x71, 0xD5, "the fill of the one action a screen is for"},
+	{"accent.10", 0x3F, 0x85, 0xEC, "that fill under the pointer"},
+	{"accent.11", 0x72, 0xAB, 0xFF, "the accent where it has to be READ: an icon, a prompt, a caption, the mark on the current item"},
+	{"accent.12", 0xDA, 0xE8, 0xFE, "text on a tinted ground"},
 }
 
 // Semantic is the three colours that carry a verdict rather than a place.
@@ -133,14 +161,18 @@ var Accent = []Shade{
 var Semantic = []Shade{
 	{"semantic.success", 0x3D, 0xA7, 0x66, "a value inside the range it belongs to, and a safe harbour a provider can claim"},
 	{"semantic.warning", 0xE8, 0xA3, 0x3D, "something to look at before trusting it"},
-	{"semantic.danger", 0xE0, 0x55, 0x61, "a refusal, and a value outside what the schema allows"},
+	// Lightened on 2026-09-24 in the same hue, from 0xE05561. The graphite
+	// ground made the old red measure 4.13 on a card where a word needs 4.5.
+	{"semantic.danger", 0xEE, 0x62, 0x6D, "a refusal, and a value outside what the schema allows"},
 }
 
 // White is the one colour here that belongs to no ladder.
 //
 // It exists because the label on the accent fill is read ON that fill, and the
 // top of the neutral ladder is not light enough for it: neutral.12 on accent.9
-// measures 4.35 where WCAG 1.4.3 asks for 4.5. White measures 5.14. A ladder
+// measures 4.12 where WCAG 1.4.3 asks for 4.5. White measures 4.75. Both
+// re-measured on 2026-09-24 on the blue accent, and the violet one before it
+// gave 4.35 and 5.14, so the reason survived the change of hue. A ladder
 // bent so that its own top passes would be a ladder bent to fit one pair,
 // which is the same fault as a threshold lowered to fit a control.
 var White = Shade{"white", 0xFF, 0xFF, 0xFF, "the label on the accent fill, which the neutral ladder cannot carry"}
@@ -150,15 +182,20 @@ var White = Shade{"white", 0xFF, 0xFF, 0xFF, "the label on the accent fill, whic
 // A token says WHAT is being drawn and never how light it should be, so the
 // shade behind it moves here in one line rather than at every call site.
 const (
-	BgWindow    = "bg.window"
-	BgSurface   = "bg.surface"
-	BgControl   = "bg.control"
-	BgCurrent   = "bg.current"
-	BgHover     = "bg.hover"
-	BgPressed   = "bg.pressed"
-	BgSelection = "bg.selection"
+	BgWindow  = "bg.window"
+	BgSurface = "bg.surface"
+	BgControl = "bg.control"
+	BgCurrent = "bg.current"
+	// The two states of bg.current under a pointer, since 2026-09-24.
+	BgCurrentHover   = "bg.current-hover"
+	BgCurrentPressed = "bg.current-pressed"
+	BgHover          = "bg.hover"
+	BgPressed        = "bg.pressed"
+	BgSelection      = "bg.selection"
+	BgHeader         = "bg.header"
 
 	LineQuiet     = "line.quiet"
+	LineSection   = "line.section"
 	BorderControl = "border.control"
 	BorderPressed = "border.pressed"
 
@@ -168,10 +205,12 @@ const (
 	MarkCurrent = "mark.current"
 	MarkActive  = "mark.active"
 	MarkFocus   = "mark.focus"
+	InkIcon     = "ink.icon"
 
 	TextPrimary   = "text.primary"
 	TextSecondary = "text.secondary"
 	TextAccent    = "text.accent"
+	TextCaption   = "text.caption"
 	TextOnFill    = "text.on-fill"
 	TextOnMark    = "text.on-mark"
 
@@ -183,10 +222,11 @@ const (
 // TokenNames is every token constant above, so a test can close the register
 // from the side the constants are on. The same reason ColorNames exists.
 var TokenNames = []string{
-	BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed, BgSelection,
-	LineQuiet, BorderControl, BorderPressed,
-	FillPrimary, FillHover, FillPressed, MarkCurrent, MarkActive, MarkFocus,
-	TextPrimary, TextSecondary, TextAccent, TextOnFill, TextOnMark,
+	BgWindow, BgSurface, BgControl, BgCurrent, BgCurrentHover, BgCurrentPressed,
+	BgHover, BgPressed, BgSelection, BgHeader,
+	LineQuiet, LineSection, BorderControl, BorderPressed,
+	FillPrimary, FillHover, FillPressed, MarkCurrent, MarkActive, MarkFocus, InkIcon,
+	TextPrimary, TextSecondary, TextAccent, TextCaption, TextOnFill, TextOnMark,
 	StateSuccess, StateWarning, StateDanger,
 }
 
@@ -246,8 +286,15 @@ const (
 	// beside it, rather than a WCAG threshold quietly lowered to fit.
 	//
 	// Set at 2.5 rather than at 2.60, so the entry has somewhere to move
-	// within the ladder without the guard turning red, and low enough that
-	// neutral.8 would also pass if a later measurement prefers grey.
+	// within the ladder without the guard turning red.
+	//
+	// 🔴 Re-measured on 2026-09-24 on the graphite ladder, and the room is
+	// gone: accent.8 measures 2.54 against bg.control and 4.58 under text,
+	// because lifting the inside of a field pushes the first number down and
+	// the text on the selection pushes the second. The sentence that stood
+	// here also said neutral.8 would pass if grey were preferred. It no longer
+	// does, at 2.05. A later ground lifted any further has to be measured
+	// against this pair first.
 	ThresholdSelection = 2.5
 	// ThresholdStateChange is ours, and it answers a question WCAG does not
 	// ask: whether a person can see that a control changed under their pointer.
@@ -260,11 +307,21 @@ const (
 	// which is always underneath them: nobody ever sees a hovered button
 	// without having seen the same button a moment earlier.
 	//
-	// Set at 1.5, which the two steps chosen clear at 1.67 and 2.10.
+	// Set at 1.5, which the two steps chosen clear at 1.58 and 1.97 on the
+	// blue accent of 2026-09-24, and cleared at 1.67 and 2.10 on the violet.
 	ThresholdStateChange = 1.5
 )
 
 // Tokens is every token, the shade behind it, and what it is measured against.
+//
+// # Which numbers in the comments below are about today
+//
+// The ladders changed on 2026-09-24, from a warm near-black with a violet
+// accent to a cool graphite with a blue one. A number below that carries an
+// earlier date is a record of that day and was measured on the old ladders.
+// A number stated as what a pair measures NOW was re-measured on 2026-09-24,
+// and the test beside this file measures every pair on every run, so where
+// the two disagree the test is right.
 //
 // # The five entries that differ from the drawing the owner accepted
 //
@@ -275,8 +332,9 @@ const (
 //   - a quiet button drew its edge in neutral.7, measuring 1.44 against the
 //     row highlight it stands on. It is neutral.10 here, measuring 3.25.
 //   - group headings and captions were written in neutral.9, measuring 2.88.
-//     They are neutral.11 here, and their quietness moves off lightness and
+//     They became neutral.11, and their quietness moved off lightness and
 //     onto size and capitals, which the ladder of type sizes below carries.
+//     Since 2026-09-24 they are text.caption, in the accent.
 //   - the sentence beside a value was neutral.10, measuring 3.25 on the row
 //     under the pointer. It is neutral.11 here.
 //   - the mark on the current sidebar item was accent.9 on neutral.4, which
@@ -285,8 +343,9 @@ const (
 //   - the label on the accent fill was already white and stays white, which
 //     is the one of the five that needed no change.
 //
-// None of the five changes the direction: violet stays violet and quiet stays
-// quieter than loud. What changed is which rung of the ladder each one takes.
+// None of the five changed the direction: the accent stayed the accent and
+// quiet stayed quieter than loud. What changed is which rung of the ladder
+// each one took.
 var Tokens = []Token{
 	{BgWindow, "neutral.1", ThresholdGround, nil,
 		"the window, which everything else is measured against"},
@@ -294,19 +353,32 @@ var Tokens = []Token{
 		"a card, the sidebar and a band of chrome, set apart from the window by one step rather than by a shadow"},
 	{BgControl, "neutral.3", ThresholdGround, nil,
 		"the inside of a field or a chooser, and every other row of a list"},
-	{BgCurrent, "neutral.4", ThresholdGround, nil,
-		"the sidebar item naming the screen that is open"},
+	// Tinted since 2026-09-24, and neutral.4 until then. The owner chose the
+	// accent in navigation, and the open screen is the one place of it every
+	// screen shares. The chosen option of a panel stands on it too, so being
+	// chosen looks the same in both.
+	{BgCurrent, "accent.3", ThresholdGround, nil,
+		"the sidebar item naming the screen that is open, and the chosen option of a panel"},
+	// The pointer on the open screen, which is where it always is right after
+	// a click. Until these two existed the pointer put bg.hover there, a grey
+	// that covered the tint, and the live window of 2026-09-24 showed it.
+	{BgCurrentHover, "accent.4", ThresholdGround, nil,
+		"the sidebar item of the open screen with the pointer on it, still tinted"},
+	{BgCurrentPressed, "accent.5", ThresholdGround, nil,
+		"that item held down, one step further along the same tint"},
 	{BgHover, "neutral.5", ThresholdGround, nil,
 		"the row under the pointer, and the ground of any control the pointer is over"},
 	// 🔴 The ground of a control being pressed, and the one entry of this
 	// register whose NEIGHBOUR had to move with it.
 	//
 	// Radix puts the states of a control on steps 3 to 5, and this ladder
-	// spends 4 on the open screen of the sidebar, so a pressed control lands on
-	// 6. That step is the quiet line, which is the first sign it is being asked
-	// to do a second job, and the measurement says so outright: border.control
-	// stands 2.80 on it where WCAG 1.4.11 asks for 3.0. It clears 3.25 on
-	// bg.hover and falls off one step later.
+	// spent 4 on the open screen of the sidebar until that moved to the accent
+	// on 2026-09-24, so a pressed control lands on 6. That step is the quiet
+	// line, which is the first sign it is being asked to do a second job, and
+	// the measurement says so outright: border.control stands 2.68 on it where
+	// WCAG 1.4.11 asks for 3.0. It clears 3.03 on bg.hover and falls off one
+	// step later. Re-measured on the graphite. The warm ladder gave 2.80 and
+	// 3.25, the same shape.
 	//
 	// So a pressed control does not keep its resting edge. That is not a
 	// workaround for a shortage of steps - it is what pressing looks like here,
@@ -333,20 +405,30 @@ var Tokens = []Token{
 	// is measured against every ground any of those stand on, not just the
 	// inside of a field.
 	//
-	// Violet rather than the grey of neutral.8, which measures within a tenth
-	// of it: grey lands between bg.hover and bg.pressed, so a selection would
-	// look like a control the pointer happens to be over. Violet is the one
-	// hue in this palette that never carries a verdict, and selection is the
-	// only other thing in this window a person makes happen on purpose.
+	// The accent rather than the grey of neutral.8: grey lands between
+	// bg.hover and bg.pressed, so a selection would look like a control the
+	// pointer happens to be over. The accent is the one hue in this palette
+	// that never carries a verdict, and selection is the only other thing in
+	// this window a person makes happen on purpose. Written when the accent was
+	// violet, and the reason does not depend on which hue it is. Grey has also
+	// stopped passing since the graphite of 2026-09-24, at 2.05.
 	{BgSelection, "accent.8", ThresholdSelection, []string{BgWindow, BgSurface, BgControl},
 		"the ground under text somebody selected, and under the row or cell a list has marked"},
+	// The toolkit paints the header row of a table in its own dark grey when
+	// nobody answers for it, which on this ground was a band of a third colour
+	// belonging to neither ladder. Joined on 2026-09-24 with the accent in
+	// structure.
+	{BgHeader, "accent.2", ThresholdGround, nil,
+		"the header row of a table, tinted so the names of the columns read as structure rather than as data"},
 
 	{LineQuiet, "neutral.6", ThresholdGuide, []string{BgWindow, BgSurface},
 		"the line between two rows and the edge of a card, which the eye follows rather than reads"},
+	{LineSection, "accent.7", ThresholdGuide, []string{BgWindow, BgSurface},
+		"the line running from a section heading to the far edge, which says where a part of a screen begins"},
 	{BorderControl, "neutral.10", ThresholdControl, []string{BgWindow, BgSurface, BgControl, BgHover},
 		"the edge saying a shape is a control rather than a word, which DEC-211 settled has to be drawn"},
 	{BorderPressed, "neutral.11", ThresholdControl, []string{BgPressed},
-		"the edge of a control being pressed, which brightens because the resting edge measures 2.80 on the ground pressing gives it"},
+		"the edge of a control being pressed, which brightens because the resting edge measures 2.68 on the ground pressing gives it"},
 
 	{FillPrimary, "accent.9", ThresholdControl, []string{BgSurface},
 		"the fill of the one action a screen is for, which is the only thing carrying hierarchy here"},
@@ -386,9 +468,11 @@ var Tokens = []Token{
 	// there is no room for three. What a person has to see here is that
 	// something changed, and the resting fill is what it changed FROM.
 	//
-	//	rest     accent.9   white 5.14, and 3.49 against the band
-	//	hover    accent.7   white 8.57, 1.67 from rest
-	//	pressed  accent.6   white 10.79, 2.10 from rest
+	// Re-measured on 2026-09-24 on the blue accent:
+	//
+	//	rest     accent.9   white 4.75, and 3.12 against the band
+	//	hover    accent.7   white 7.49, 1.58 from rest
+	//	pressed  accent.6   white 9.38, 1.97 from rest
 	{FillHover, "accent.7", ThresholdStateChange, []string{FillPrimary},
 		"the fill of the one action of a screen while the pointer is on it, a shade down from where it rests"},
 	{FillPressed, "accent.6", ThresholdStateChange, []string{FillPrimary},
@@ -397,8 +481,8 @@ var Tokens = []Token{
 	// The grounds of a check box joined on 2026-09-15 (DEC-245): the mark in a
 	// ticked box is this shade, on the ground of a field and on that ground
 	// under the pointer. A MARK rather than text.accent, and the difference
-	// is measured: the same shade on bg.pressed is 4.49, which fails a label
-	// and passes a mark, and a tick is a mark.
+	// is measured: the same shade on bg.pressed is 4.33 (4.49 on the violet),
+	// which fails a label and passes a mark, and a tick is a mark.
 	{MarkCurrent, "accent.11", ThresholdControl, []string{BgSurface, BgCurrent, BgControl, BgHover, BgPressed},
 		"the bar beside the sidebar item the window is on, and the mark in a ticked check box"},
 	// 🔴 The one token measured against another MARK rather than against a
@@ -415,15 +499,16 @@ var Tokens = []Token{
 	//
 	// # Why the accent ladder cannot answer this
 	//
-	// Measured across it: accent.9 gives 1.26, accent.10 gives 1.04, accent.11
-	// gives 1.60. Only accent.12 clears the threshold, at 3.03, and its stated
-	// job is text on a tinted ground. So the mark rides the top of the neutral
-	// ladder, where it clears at 3.44 with room to spare.
+	// Measured across it, on the blue of 2026-09-24: accent.9 gives 1.26,
+	// accent.10 gives 1.04, accent.11 gives 1.62. Only accent.12 clears the
+	// threshold, at 3.05, and its stated job is text on a tinted ground. So the
+	// mark rides the top of the neutral ladder, where it clears at 3.27. The
+	// violet gave 1.26, 1.04, 1.60, 3.03 and 3.44, so the reason held across
+	// the change of hue.
 	//
 	// What this costs, said plainly: a ticked box and a focused field are not
-	// violet. The accent is spent on the one action of a screen instead, which
-	// is the budget this system already set, and a focus mark that cannot be
-	// seen is worse than one that is not tinted.
+	// in the accent. A focus mark that cannot be seen is worse than one that is
+	// not tinted.
 	{MarkActive, "neutral.12", ThresholdControl, []string{BorderControl, BgControl, BgSurface},
 		"what the toolkit paints on a stock control that is chosen or holds the keyboard, which has to differ from the resting edge it replaces"},
 
@@ -442,39 +527,62 @@ var Tokens = []Token{
 	//
 	// That last requirement is what settled the shade, and it settled it by
 	// killing the obvious answer. The accent this window reads with, accent.11,
-	// measures 1.60 against border.control, so a focused edge in it would be a
-	// colour change nobody could see. Measured across both ladders:
+	// measures 1.62 against border.control, so a focused edge in it would be a
+	// colour change nobody could see. Measured across both ladders, re-measured
+	// on the graphite and blue of 2026-09-24:
 	//
-	//	accent.11   1.60 against the resting edge   REFUSED
-	//	neutral.11  1.90                            REFUSED
-	//	accent.12   3.03                            taken
-	//	neutral.12  3.44, and it is white, which is what was refused
+	//	accent.11   1.62 against the resting edge   REFUSED
+	//	neutral.11  1.80                            REFUSED
+	//	accent.12   3.05                            taken
+	//	neutral.12  3.27, and it is white, which is what was refused
 	//
-	// So the edge is the top of the accent ladder: 3.03 against the edge it
-	// replaces, 12.16 against the inside of a field, 3.83 on the filled button
-	// and 3.15 on that fill under the pointer. One shade, every control, which
+	// So the edge is the top of the accent ladder: 3.05 against the edge it
+	// replaces, 10.86 against the inside of a field, 3.84 on the filled button
+	// and 6.05 on that fill under the pointer. One shade, every control, which
 	// is the whole point of it.
+	//
+	// 🔴 This pair is the one that decides how far the ground may rise. Lifting
+	// the ground lifts bg.hover, border.control has to clear 3.0 on bg.hover,
+	// and this shade has to clear 3.0 against border.control - so every step up
+	// at the bottom of the neutral ladder pushes this shade towards white. At
+	// 3.05 there is almost nothing left.
 	//
 	// bg.hover joined the grounds on 2026-09-14, the day the text field began
 	// answering the pointer: a field with the keyboard on it and the pointer
 	// over it draws this edge on that ground, as a quiet button already did.
 	// line.quiet joined the same day, because the frame of a scrolling area
 	// lands on the edge of the card it holds and recolours it.
+	// The three grounds of the open sidebar item joined on 2026-09-24, when
+	// that item began drawing its own ground: the keyboard on it draws this
+	// edge on whichever of the three the pointer has put it on.
 	{MarkFocus, "accent.12", ThresholdControl,
-		[]string{BorderControl, LineQuiet, BgWindow, BgSurface, BgControl, BgHover, FillPrimary, FillHover},
+		[]string{BorderControl, LineQuiet, BgWindow, BgSurface, BgControl, BgHover, FillPrimary, FillHover,
+			BgCurrent, BgCurrentHover, BgCurrentPressed},
 		"the edge of the control the keyboard is on, which every control shows the same way"},
+	// A mark rather than text, since an icon beside a label is found by its
+	// shape and read by the words next to it: WCAG 1.4.11, not 1.4.3.
+	{InkIcon, "accent.11", ThresholdControl, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgCurrentHover, BgCurrentPressed, BgHover, BgPressed},
+		"the icon on a quiet button and on a sidebar item, which is most of the accent a screen carries"},
 
-	{TextPrimary, "neutral.12", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed, BgSelection},
+	{TextPrimary, "neutral.12", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgCurrentHover, BgCurrentPressed, BgHover, BgPressed, BgSelection},
 		"the value, the label and every word read first"},
-	{TextSecondary, "neutral.11", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed},
-		"a caption, a group heading and the sentence explaining a value"},
+	// bg.header joined on 2026-09-24: the names of the columns of the manifest
+	// browser are written in this ink (manifestview/table.go, CreateHeader).
+	{TextSecondary, "neutral.11", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgHover, BgPressed, BgHeader},
+		"the name above a field and the sentence explaining a value, which captions shared until they took text.caption"},
 	// bg.hover joined the grounds on 2026-09-14 with the panel a kind is
 	// picked from: the chosen row keeps its accent name under the pointer,
 	// and the pointer moves the ground. Computed before it was added, since
 	// the test beside this file would otherwise have been the first to
-	// know: accent.11 on neutral.5 is 5.20.
+	// know: accent.11 on neutral.5 was 5.20, and is 4.90 on the graphite and
+	// blue of 2026-09-24.
 	{TextAccent, "accent.11", ThresholdText, []string{BgWindow, BgSurface, BgCurrent, BgHover},
-		"the prompt of a command line, the icon of the screen that is open, and the name of the kind that is chosen"},
+		"the prompt of a command line, the icon heading a card or a notice, and the name of the kind that is chosen"},
+	// Its own token rather than text.accent, although it is the same shade
+	// today: a caption is a heading over a group and the accent text is a
+	// thing chosen, and a later change to one should not move the other.
+	{TextCaption, "accent.11", ThresholdText, []string{BgWindow, BgSurface},
+		"a caption over a group: the heading of a column of the sidebar and the name of a fact on a card"},
 	{TextOnFill, "white", ThresholdText, []string{FillPrimary, FillHover, FillPressed},
 		"the label on the accent fill, measured on that fill rather than on the window"},
 	// 🔴 The second token measured on a MARK rather than on a ground, and it
@@ -509,10 +617,15 @@ var Tokens = []Token{
 	// So this is the ink for a light accent ground, whatever put the control on
 	// one. What would make that wrong is a ground arriving here that is light
 	// for some third reason and wants a different ink, and the measurement is
-	// the guard rather than the wording: 7.55 on mark.current and fill.pressed,
-	// 4.53 on fill.hover, where a label needs 4.5.
+	// the guard rather than the wording.
+	//
+	// 🔴 Corrected on 2026-09-24: the two fills are no longer here. They left
+	// when the states of the filled button went DOWN the ladder on 2026-09-09
+	// and kept white, which the grounds of text.on-fill say, and this comment
+	// went on naming them for two weeks. Today the one ground is mark.current,
+	// where this ink measures 7.15 on the blue (7.55 on the violet).
 	{TextOnMark, "neutral.1", ThresholdText, []string{MarkCurrent},
-		"the label and the icon on a light accent ground: the flood the toolkit paints on a focused control, and the fill a primary button takes under the pointer"},
+		"the label and the icon on a light accent ground: the flood the toolkit paints on a focused control"},
 
 	{StateSuccess, "semantic.success", ThresholdText, []string{BgWindow, BgSurface},
 		"a safe harbour, and a value inside the range it belongs to"},

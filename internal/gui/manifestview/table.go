@@ -136,8 +136,8 @@ func (v *View) guide() fyne.CanvasObject {
 // where the card used to follow it (B-287).
 //
 // 🔴 The keyboard SELECTS as it moves, rather than only highlighting. The
-// selection is the violet the toolkit paints, and a card following a highlight
-// the violet did not follow showed one entry beside the violet of another -
+// selection is the accent the toolkit paints, and a card following a highlight
+// the selection did not follow showed one entry beside the selection of another -
 // the picture B-287 was reported with, reached by keys instead of a pointer.
 // One mark for the entry the card is about, whichever way it was chosen.
 //

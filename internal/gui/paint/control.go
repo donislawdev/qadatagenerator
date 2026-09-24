@@ -63,6 +63,19 @@ type ButtonLook struct {
 	// generator list on 2026-09-05.
 	Plain bool
 
+	// Current marks a plain button naming the place the window is on, which
+	// stands on the tinted ground of bg.current in every state rather than on
+	// nothing.
+	//
+	// 🔴 A flag on the face since 2026-09-24, and before that a rectangle the
+	// sidebar item drew UNDER the button. The two could not agree: the face
+	// knew the pointer and not the place, the item knew the place and not the
+	// pointer, so a pointer on the open screen covered its tint with the grey of
+	// bg.hover. The live window showed it right after a click, which is when
+	// the pointer is always there, and the state list had said in writing that
+	// nothing photographed it.
+	Current bool
+
 	// Focused and Disabled are the states a person reaches with the keyboard,
 	// Hovered and Pressed the two they reach with a pointer.
 	//
@@ -91,13 +104,13 @@ type ButtonLook struct {
 // # Why the edge travels with the ground rather than staying put
 //
 // Because it cannot stay put, and that is measured rather than chosen.
-// border.control clears WCAG 1.4.11 at 3.25 on the ground a pointer gives a
-// control and falls to 2.80 one step later, which is where pressing puts it.
+// border.control clears WCAG 1.4.11 at 3.03 on the ground a pointer gives a
+// control and falls to 2.68 one step later, which is where pressing puts it.
 // The register carries the arithmetic beside bg.pressed.
 //
 // So this returns the pair rather than the ground, and every control asking for
 // one asks for both. A caller free to take the ground and keep its own edge is
-// a caller free to reintroduce that 2.80, in a place where nothing would fail.
+// a caller free to reintroduce that 2.68, in a place where nothing would fail.
 func pointerGround(hovered, pressed bool) (ground, edge string) {
 	switch {
 	case pressed:
@@ -106,6 +119,19 @@ func pointerGround(hovered, pressed bool) (ground, edge string) {
 		return theme.BgHover, theme.BorderControl
 	}
 	return "", theme.BorderControl
+}
+
+// currentGround is the ground a plain button naming the open place stands on,
+// in each state a pointer can put it in. The accent ladder carries the three
+// as steps 3, 4 and 5, which is the job the method gives those steps.
+func currentGround(hovered, pressed bool) string {
+	switch {
+	case pressed:
+		return theme.BgCurrentPressed
+	case hovered:
+		return theme.BgCurrentHover
+	}
+	return theme.BgCurrent
 }
 
 // filledGround is the fill the one action of a screen takes, and the ink its
@@ -130,14 +156,18 @@ func pointerGround(hovered, pressed bool) (ground, edge string) {
 // wrong question. It said there is no violet carrying both inks - true, and
 // beside the point, because the fill does not have to go up the ladder. NN/g
 // and every design system asked describe hover on a filled button as a slight
-// DARKENING. Going down keeps one ink for every state, measured:
+// DARKENING. Going down keeps one ink for every state. The steps are the ones
+// the register names beside fill.hover and fill.pressed, re-measured on the
+// blue of 2026-09-24:
 //
-//	rest     accent.9   white at 5.14
-//	hover    accent.8   white at 6.29
-//	pressed  accent.7   white at 8.57
+//	rest     accent.9   white at 4.75
+//	hover    accent.7   white at 7.49
+//	pressed  accent.6   white at 9.38
 //
-// Where the old direction gave 4.23 on hover, under the 4.5 a label answers to,
-// which is what forced the ink to move in the first place.
+// Until then this table named accent.8 and accent.7, one step off the
+// register, which is why it now points there rather than repeating it. The
+// old direction gave 4.23 on hover, under the 4.5 a label answers to, which is
+// what forced the ink to move in the first place.
 func filledGround(hovered, pressed bool) (fill, ink string) {
 	switch {
 	case pressed:
@@ -201,13 +231,16 @@ func ButtonFace(look ButtonLook) fyne.CanvasObject {
 		ground = Fill(fill, theme.RadiusControl)
 		if look.Focused {
 			// The one control with no edge at rest, so focus ADDS one rather
-			// than recolouring it. Same shade as everywhere else: 3.83 against
-			// the fill and 3.15 against the fill under the pointer.
+			// than recolouring it. Same shade as everywhere else: 3.84 against
+			// the fill and 6.05 against the fill under the pointer.
 			ground = inside(Bordered(fill, theme.MarkFocus, theme.RadiusControl))
 		}
 	case look.Plain:
 		// No edge at rest, so a pointer has only the ground to show with.
 		ground = Clear()
+		if look.Current {
+			under = currentGround(look.Hovered, look.Pressed)
+		}
 		if under != "" {
 			ground = Fill(under, theme.RadiusControl)
 		}
@@ -241,7 +274,15 @@ func ButtonFace(look ButtonLook) fyne.CanvasObject {
 
 	row := []fyne.CanvasObject{}
 	if look.Icon != "" {
-		row = append(row, Middle(Icon(look.Icon, ink, theme.IconSmall)))
+		// The icon takes the accent on every button that has no fill of its
+		// own, which is where most of the colour of a screen comes from since
+		// 2026-09-24. Not on the filled one, whose icon is read on the accent,
+		// and not on a disabled one, which must not look like it can be used.
+		iconInk := theme.InkIcon
+		if look.Filled || look.Disabled {
+			iconInk = ink
+		}
+		row = append(row, Middle(Icon(look.Icon, iconInk, theme.IconSmall)))
 	}
 	// The one action of a screen carries its label at the weight of a heading,
 	// which is how the window drew it for as long as it was a control of its

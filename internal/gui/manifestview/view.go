@@ -291,7 +291,7 @@ func (v *View) ShowRun() {
 }
 
 // showEntry takes the run out of the card and puts back the entry chosen before
-// it, selected again in the table so that the violet and the card agree.
+// it, selected again in the table so that the selection and the card agree.
 func (v *View) showEntry() {
 	v.showingRun = false
 	if v.entries != nil && v.hasSelected {

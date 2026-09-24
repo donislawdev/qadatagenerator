@@ -78,7 +78,10 @@ var tokenFor = map[fyne.ThemeColorName]string{
 	// measures 1.09, so a person selecting a seed saw nothing happen. The owner
 	// reported exactly that. bg.selection is measured against every ground the
 	// toolkit draws this colour on, and the arithmetic is beside the token.
-	toolkit.ColorNameSelection:         palette.BgSelection,
+	toolkit.ColorNameSelection: palette.BgSelection,
+	// The header row of the table the manifest browser draws, read in the
+	// source of 2.8.1 rather than assumed: widget/table.go:1226 and 1761.
+	toolkit.ColorNameHeaderBackground:  palette.BgHeader,
 	toolkit.ColorNameMenuBackground:    palette.BgSurface,
 	toolkit.ColorNameOverlayBackground: palette.BgSurface,
 	toolkit.ColorNameButton:            palette.BgControl,

@@ -59,8 +59,9 @@ func Mono(words, rung, token string) *canvas.Text {
 	return styled(words, rung, token, fyne.TextStyle{Monospace: true})
 }
 
-// Caption is a group heading: the smallest rung, in capitals, in the quieter of
-// the two text tokens.
+// Caption is a group heading: the smallest rung, in capitals, in the ink of a
+// caption. That ink was the quieter of the two text tokens until 2026-09-24,
+// when the owner chose the accent for the structure of a screen.
 //
 // # Why capitals rather than letter spacing
 //
@@ -81,7 +82,7 @@ func Mono(words, rung, token string) *canvas.Text {
 // file arrives, the capitals move INTO the translated string, where a
 // translator can write them, and this call goes away.
 func Caption(words string) *canvas.Text {
-	return Strong(strings.ToUpper(words), theme.TypeLabel, theme.TextSecondary)
+	return Strong(strings.ToUpper(words), theme.TypeLabel, theme.TextCaption)
 }
 
 func styled(words, rung, token string, style fyne.TextStyle) *canvas.Text {

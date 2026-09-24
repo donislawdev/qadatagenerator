@@ -264,16 +264,20 @@ func quickStatesOfThePanel() []State {
 //
 //   - the sidebar item has no edge in any state, so its ground is the only
 //     signal it owns, and the step from hovered to pressed is the smallest
-//     measurement in this whole system at 1.159.
+//     measurement in this whole system at 1.131 (1.159 on the warm ladder
+//     before 2026-09-24, so the graphite made it smaller still).
 //   - the quiet button has an edge, and pressing is the one state where that
-//     edge moves, because the resting one measures 2.80 on the ground pressing
+//     edge moves, because the resting one measures 2.68 on the ground pressing
 //     gives it.
 //   - the chooser has a ground of its own at rest, so its step under a pointer
-//     is smaller than a button's: 1.237 where a button on the window gets 1.451.
+//     is smaller than a button's: 1.174 where a button on the window gets 1.459
+//     (1.237 and 1.451 on the warm ladder).
 //   - the filled button is a different rule entirely. It is the one control
-//     whose INK moves with its ground, because no violet in this ladder above
-//     accent.9 carries a white label, and it needs both of its touched states
-//     because they are two different fills with two different arithmetics.
+//     whose whole FILL moves, down the accent ladder so the white label stays
+//     readable, and it needs both of its touched states because they are two
+//     different fills. Until 2026-09-24 this line said its ink moved with the
+//     ground, which stopped being true on 2026-09-09 when the fill turned to
+//     go down rather than up.
 //
 // So three of the six are a state held down and three are a pointer resting,
 // and the pairing is not symmetric on purpose: a control is photographed
@@ -300,9 +304,21 @@ func quickStatesOfThePointer() []State {
 			// clicking the open one does nothing at all, so a quieter answer
 			// there is honest rather than broken.
 			//
-			// What it costs is stated: nothing photographs the open item under
-			// a pointer, so nothing would notice if that 1.131 became 1.000.
+			// What it cost was stated here: nothing photographed the open item
+			// under a pointer, so nothing would notice if that step broke. On
+			// 2026-09-24 it broke in a way no number here predicted - the step
+			// stayed, the tint went, because the pointer's grey covered the
+			// open screen's blue - and the live window found it. The state
+			// after this one photographs it now.
 			Pointer: Pointer{Tabs: 2},
+		},
+		{
+			Name: "quick-pointer-sidebar-current",
+			Purpose: "the pointer on the item of the screen that is open, which keeps its tint " +
+				"under the pointer rather than turning the grey of any other item",
+			Screen:  screenQuick,
+			Quick:   Quick{Seed: "for-the-picture"},
+			Pointer: Pointer{Tabs: 1},
 		},
 		{
 			Name: "quick-pointer-sidebar-pressed",

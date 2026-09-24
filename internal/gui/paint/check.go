@@ -46,9 +46,10 @@ type CheckLook struct {
 // a chosen box keeps its ground and carries the mark in mark.current, which
 // the register measures on every ground the box stands on. mark.current
 // rather than text.accent, though both are accent.11: a tick is a mark and
-// answers to 3.0, and the same shade on the pressed ground measures 4.49,
-// which is one hundredth short of what a label needs and well past what a
-// mark needs. The token names the threshold, so the token is the difference.
+// answers to 3.0, and the same shade on the pressed ground measures 4.33 on
+// the graphite of 2026-09-24 (4.49 before it), which is short of what a label
+// needs and well past what a mark needs. The token names the threshold, so the
+// token is the difference.
 //
 // # Why disabled keeps the mark
 //

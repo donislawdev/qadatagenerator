@@ -81,7 +81,8 @@ func (r readable) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) col
 		// itself became mark.current when the window took the new theme, so
 		// the entry describing it had to move to the ladder as well or it
 		// would go on measuring a pair that is no longer on screen. It
-		// measures 7.55 there, where a label needs 4.5.
+		// measures 7.15 there on the blue of 2026-09-24, where a label
+		// needs 4.5.
 		return palette.Ink(palette.TextOnMark)
 	}
 	return beneath().Color(name, variant)

@@ -9,7 +9,7 @@
 								<container size="34x34">
 									<rectangle size="34x34"/>
 									<container size="34x34">
-										<rectangle fillColor="rgba(112,89,214,255)" radius="6" size="34x34"/>
+										<rectangle fillColor="rgba(41,113,213,255)" radius="6" size="34x34"/>
 										<container size="34x34">
 											<image fillMode="contain" pos="9,9" rsc="zap-ffffff-15.svg" size="15x15"/>
 										</container>
@@ -23,161 +23,165 @@
 							</container>
 						</container>
 						<container pos="0,62" size="220x838">
-							<widget size="220x22" type="*widget.RichText">
-								<text pos="4,4" size="58x14" textSize="11">MAKE DATA</text>
-							</widget>
-							<container pos="0,22" size="220x42">
+							<container size="220x30">
+								<container pos="8,12" size="208x14">
+									<container size="3x14">
+										<rectangle size="3x14"/>
+										<rectangle size="3x14"/>
+									</container>
+									<container pos="3,0" size="205x14">
+										<text bold color="focus" pos="12,0" size="193x14" textSize="11">MAKE DATA</text>
+									</container>
+								</container>
+							</container>
+							<container pos="0,30" size="220x42">
 								<container size="3x42">
 									<rectangle size="3x42"/>
 									<rectangle fillColor="focus" size="3x42"/>
 								</container>
 								<container pos="3,0" size="217x42">
-									<container pos="8,4" size="201x34">
-										<rectangle fillColor="rgba(40,39,37,255)" radius="6" size="201x34"/>
-										<widget size="201x34" type="*parts.Button">
+									<widget pos="8,4" size="201x34" type="*parts.Button">
+										<container size="201x34">
 											<container size="201x34">
+												<rectangle size="201x34"/>
 												<container size="201x34">
-													<rectangle size="201x34"/>
+													<rectangle fillColor="rgba(37,51,72,255)" radius="6" size="201x34"/>
 													<container size="201x34">
-														<rectangle size="201x34"/>
-														<container size="201x34">
-															<container pos="12,4" size="177x26">
-																<container size="90x26">
-																	<container size="15x26">
-																		<spacer size="15x5"/>
-																		<image fillMode="contain" pos="0,5" rsc="zap-edece9-15.svg" size="15x15"/>
-																		<spacer pos="0,20" size="15x5"/>
-																	</container>
-																	<container pos="23,0" size="67x26">
-																		<spacer size="67x4"/>
-																		<text pos="0,4" size="67x16">Quick value</text>
-																		<spacer pos="0,21" size="67x4"/>
-																	</container>
+														<container pos="12,4" size="177x26">
+															<container size="90x26">
+																<container size="15x26">
+																	<spacer size="15x5"/>
+																	<image fillMode="contain" pos="0,5" rsc="zap-72abff-15.svg" size="15x15"/>
+																	<spacer pos="0,20" size="15x5"/>
+																</container>
+																<container pos="23,0" size="67x26">
+																	<spacer size="67x4"/>
+																	<text pos="0,4" size="67x16">Quick value</text>
+																	<spacer pos="0,21" size="67x4"/>
 																</container>
 															</container>
 														</container>
 													</container>
 												</container>
 											</container>
-										</widget>
-									</container>
+										</container>
+									</widget>
 								</container>
 							</container>
-							<container pos="0,64" size="220x42">
+							<container pos="0,72" size="220x42">
 								<container size="3x42">
 									<rectangle size="3x42"/>
 									<rectangle size="3x42"/>
 								</container>
 								<container pos="3,0" size="217x42">
-									<container pos="8,4" size="201x34">
-										<rectangle radius="6" size="201x34"/>
-										<widget size="201x34" type="*parts.Button">
+									<widget pos="8,4" size="201x34" type="*parts.Button">
+										<container size="201x34">
 											<container size="201x34">
+												<rectangle size="201x34"/>
 												<container size="201x34">
 													<rectangle size="201x34"/>
 													<container size="201x34">
-														<rectangle size="201x34"/>
-														<container size="201x34">
-															<container pos="12,4" size="177x26">
-																<container size="120x26">
-																	<container size="15x26">
-																		<spacer size="15x5"/>
-																		<image fillMode="contain" pos="0,5" rsc="file-x-edece9-15.svg" size="15x15"/>
-																		<spacer pos="0,20" size="15x5"/>
-																	</container>
-																	<container pos="23,0" size="97x26">
-																		<spacer size="97x4"/>
-																		<text pos="0,4" size="97x16">Take and corrupt</text>
-																		<spacer pos="0,21" size="97x4"/>
-																	</container>
+														<container pos="12,4" size="177x26">
+															<container size="120x26">
+																<container size="15x26">
+																	<spacer size="15x5"/>
+																	<image fillMode="contain" pos="0,5" rsc="file-x-72abff-15.svg" size="15x15"/>
+																	<spacer pos="0,20" size="15x5"/>
+																</container>
+																<container pos="23,0" size="97x26">
+																	<spacer size="97x4"/>
+																	<text pos="0,4" size="97x16">Take and corrupt</text>
+																	<spacer pos="0,21" size="97x4"/>
 																</container>
 															</container>
 														</container>
 													</container>
 												</container>
 											</container>
-										</widget>
-									</container>
+										</container>
+									</widget>
 								</container>
 							</container>
-							<container pos="0,106" size="220x42">
+							<container pos="0,114" size="220x42">
 								<container size="3x42">
 									<rectangle size="3x42"/>
 									<rectangle size="3x42"/>
 								</container>
 								<container pos="3,0" size="217x42">
-									<container pos="8,4" size="201x34">
-										<rectangle radius="6" size="201x34"/>
-										<widget size="201x34" type="*parts.Button">
+									<widget pos="8,4" size="201x34" type="*parts.Button">
+										<container size="201x34">
 											<container size="201x34">
+												<rectangle size="201x34"/>
 												<container size="201x34">
 													<rectangle size="201x34"/>
 													<container size="201x34">
-														<rectangle size="201x34"/>
-														<container size="201x34">
-															<container pos="12,4" size="177x26">
-																<container size="62x26">
-																	<container size="15x26">
-																		<spacer size="15x5"/>
-																		<image fillMode="contain" pos="0,5" rsc="file-cog-edece9-15.svg" size="15x15"/>
-																		<spacer pos="0,20" size="15x5"/>
-																	</container>
-																	<container pos="23,0" size="39x26">
-																		<spacer size="39x4"/>
-																		<text pos="0,4" size="39x16">Recipe</text>
-																		<spacer pos="0,21" size="39x4"/>
-																	</container>
+														<container pos="12,4" size="177x26">
+															<container size="62x26">
+																<container size="15x26">
+																	<spacer size="15x5"/>
+																	<image fillMode="contain" pos="0,5" rsc="file-cog-72abff-15.svg" size="15x15"/>
+																	<spacer pos="0,20" size="15x5"/>
+																</container>
+																<container pos="23,0" size="39x26">
+																	<spacer size="39x4"/>
+																	<text pos="0,4" size="39x16">Recipe</text>
+																	<spacer pos="0,21" size="39x4"/>
 																</container>
 															</container>
 														</container>
 													</container>
 												</container>
 											</container>
-										</widget>
+										</container>
+									</widget>
+								</container>
+							</container>
+							<container pos="0,156" size="220x30">
+								<container pos="8,12" size="208x14">
+									<container size="3x14">
+										<rectangle size="3x14"/>
+										<rectangle size="3x14"/>
+									</container>
+									<container pos="3,0" size="205x14">
+										<text bold color="focus" pos="12,0" size="193x14" textSize="11">CHECK A RESULT</text>
 									</container>
 								</container>
 							</container>
-							<widget pos="0,148" size="220x22" type="*widget.RichText">
-								<text pos="4,4" size="85x14" textSize="11">CHECK A RESULT</text>
-							</widget>
-							<container pos="0,170" size="220x42">
+							<container pos="0,186" size="220x42">
 								<container size="3x42">
 									<rectangle size="3x42"/>
 									<rectangle size="3x42"/>
 								</container>
 								<container pos="3,0" size="217x42">
-									<container pos="8,4" size="201x34">
-										<rectangle radius="6" size="201x34"/>
-										<widget size="201x34" type="*parts.Button">
+									<widget pos="8,4" size="201x34" type="*parts.Button">
+										<container size="201x34">
 											<container size="201x34">
+												<rectangle size="201x34"/>
 												<container size="201x34">
 													<rectangle size="201x34"/>
 													<container size="201x34">
-														<rectangle size="201x34"/>
-														<container size="201x34">
-															<container pos="12,4" size="177x26">
-																<container size="124x26">
-																	<container size="15x26">
-																		<spacer size="15x5"/>
-																		<image fillMode="contain" pos="0,5" rsc="clipboard-check-edece9-15.svg" size="15x15"/>
-																		<spacer pos="0,20" size="15x5"/>
-																	</container>
-																	<container pos="23,0" size="101x26">
-																		<spacer size="101x4"/>
-																		<text pos="0,4" size="101x16">Manifest browser</text>
-																		<spacer pos="0,21" size="101x4"/>
-																	</container>
+														<container pos="12,4" size="177x26">
+															<container size="124x26">
+																<container size="15x26">
+																	<spacer size="15x5"/>
+																	<image fillMode="contain" pos="0,5" rsc="clipboard-check-72abff-15.svg" size="15x15"/>
+																	<spacer pos="0,20" size="15x5"/>
+																</container>
+																<container pos="23,0" size="101x26">
+																	<spacer size="101x4"/>
+																	<text pos="0,4" size="101x16">Manifest browser</text>
+																	<spacer pos="0,21" size="101x4"/>
 																</container>
 															</container>
 														</container>
 													</container>
 												</container>
 											</container>
-										</widget>
-									</container>
+										</container>
+									</widget>
 								</container>
 							</container>
-							<spacer pos="0,212" size="220x557"/>
+							<spacer pos="0,228" size="220x541"/>
 							<widget pos="0,769" size="220x4" type="*widget.Separator">
 								<rectangle fillColor="separator" size="220x4"/>
 							</widget>
@@ -187,35 +191,32 @@
 									<rectangle size="3x42"/>
 								</container>
 								<container pos="3,0" size="217x42">
-									<container pos="8,4" size="201x34">
-										<rectangle radius="6" size="201x34"/>
-										<widget size="201x34" type="*parts.Button">
+									<widget pos="8,4" size="201x34" type="*parts.Button">
+										<container size="201x34">
 											<container size="201x34">
+												<rectangle size="201x34"/>
 												<container size="201x34">
 													<rectangle size="201x34"/>
 													<container size="201x34">
-														<rectangle size="201x34"/>
-														<container size="201x34">
-															<container pos="12,4" size="177x26">
-																<container size="58x26">
-																	<container size="15x26">
-																		<spacer size="15x5"/>
-																		<image fillMode="contain" pos="0,5" rsc="info-edece9-15.svg" size="15x15"/>
-																		<spacer pos="0,20" size="15x5"/>
-																	</container>
-																	<container pos="23,0" size="35x26">
-																		<spacer size="35x4"/>
-																		<text pos="0,4" size="35x16">About</text>
-																		<spacer pos="0,21" size="35x4"/>
-																	</container>
+														<container pos="12,4" size="177x26">
+															<container size="58x26">
+																<container size="15x26">
+																	<spacer size="15x5"/>
+																	<image fillMode="contain" pos="0,5" rsc="info-72abff-15.svg" size="15x15"/>
+																	<spacer pos="0,20" size="15x5"/>
+																</container>
+																<container pos="23,0" size="35x26">
+																	<spacer size="35x4"/>
+																	<text pos="0,4" size="35x16">About</text>
+																	<spacer pos="0,21" size="35x4"/>
 																</container>
 															</container>
 														</container>
 													</container>
 												</container>
 											</container>
-										</widget>
-									</container>
+										</container>
+									</widget>
 								</container>
 							</container>
 							<container pos="0,815" size="220x22">
@@ -256,7 +257,7 @@
 																		<rectangle size="118x34"/>
 																		<container size="118x34">
 																			<container size="118x34">
-																				<rectangle fillColor="button" pos="1,1" radius="6" size="116x32" strokeColor="rgba(224,218,255,255)" strokeWidth="2"/>
+																				<rectangle fillColor="button" pos="1,1" radius="6" size="116x32" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
 																			</container>
 																			<container size="118x34">
 																				<container pos="12,4" size="98x26">
@@ -268,7 +269,7 @@
 																					<container pos="71,0" size="27x26">
 																						<container pos="8,4" size="15x18">
 																							<spacer size="15x1"/>
-																							<image fillMode="contain" pos="0,1" rsc="chevron-down-b4b1a9-15.svg" size="15x15"/>
+																							<image fillMode="contain" pos="0,1" rsc="chevron-down-acb4bd-15.svg" size="15x15"/>
 																							<spacer pos="0,16" size="15x1"/>
 																						</container>
 																					</container>
@@ -330,7 +331,7 @@
 																					<container pos="70,0" size="27x26">
 																						<container pos="8,4" size="15x18">
 																							<spacer size="15x1"/>
-																							<image fillMode="contain" pos="0,1" rsc="chevron-down-b4b1a9-15.svg" size="15x15"/>
+																							<image fillMode="contain" pos="0,1" rsc="chevron-down-acb4bd-15.svg" size="15x15"/>
 																							<spacer pos="0,16" size="15x1"/>
 																						</container>
 																					</container>
@@ -361,7 +362,7 @@
 																					<container pos="70,0" size="27x26">
 																						<container pos="8,4" size="15x18">
 																							<spacer size="15x1"/>
-																							<image fillMode="contain" pos="0,1" rsc="chevron-down-b4b1a9-15.svg" size="15x15"/>
+																							<image fillMode="contain" pos="0,1" rsc="chevron-down-acb4bd-15.svg" size="15x15"/>
 																							<spacer pos="0,16" size="15x1"/>
 																						</container>
 																					</container>
@@ -446,7 +447,7 @@
 																<container size="87x34">
 																	<rectangle size="87x34"/>
 																	<container size="87x34">
-																		<rectangle fillColor="rgba(112,89,214,255)" radius="6" size="87x34"/>
+																		<rectangle fillColor="rgba(41,113,213,255)" radius="6" size="87x34"/>
 																		<container size="87x34">
 																			<container pos="16,4" size="55x26">
 																				<container pos="0,4" size="55x16">
@@ -481,7 +482,7 @@
 													<container pos="62,0" size="460x34">
 														<container pos="12,4" size="436x26">
 															<spacer size="436x12"/>
-															<rectangle fillColor="separator" pos="0,12" size="436x1"/>
+															<rectangle fillColor="rgba(48,85,140,255)" pos="0,12" size="436x1"/>
 															<spacer pos="0,13" size="436x12"/>
 														</container>
 													</container>
@@ -532,7 +533,7 @@
 																				<container pos="0,4" size="55x16">
 																					<container size="15x16">
 																						<spacer size="15x0"/>
-																						<image fillMode="contain" rsc="refresh-cw-edece9-15.svg" size="15x15"/>
+																						<image fillMode="contain" rsc="refresh-cw-72abff-15.svg" size="15x15"/>
 																						<spacer pos="0,15" size="15x0"/>
 																					</container>
 																					<container pos="23,0" size="32x16">
@@ -824,7 +825,7 @@
 															<container size="298x18">
 																<container size="17x18">
 																	<spacer size="17x0"/>
-																	<image fillMode="contain" rsc="zap-a594ff-17.svg" size="17x17"/>
+																	<image fillMode="contain" rsc="zap-72abff-17.svg" size="17x17"/>
 																	<spacer pos="0,17" size="17x0"/>
 																</container>
 																<container pos="25,0" size="35x18">
@@ -834,11 +835,11 @@
 																</container>
 															</container>
 															<container pos="0,34" size="298x35">
-																<text bold color="disabled" size="298x14" textSize="11">PRODUCES</text>
+																<text bold color="focus" size="298x14" textSize="11">PRODUCES</text>
 																<text monospace pos="0,18" size="298x16">identifier (PL.pesel)</text>
 															</container>
 															<container pos="0,85" size="298x68">
-																<text bold color="disabled" size="298x14" textSize="11">FORMAT</text>
+																<text bold color="focus" size="298x14" textSize="11">FORMAT</text>
 																<text monospace pos="0,18" size="298x20" textSize="16">00000000000</text>
 																<container pos="0,43" size="298x24">
 																	<widget size="298x24" type="*widget.Label">
@@ -849,7 +850,7 @@
 																</container>
 															</container>
 															<container pos="0,169" size="298x77">
-																<text bold color="disabled" size="298x14" textSize="11">CHECK DIGIT</text>
+																<text bold color="focus" size="298x14" textSize="11">CHECK DIGIT</text>
 																<container pos="0,18" size="298x58">
 																	<widget size="298x58" type="*widget.Label">
 																		<widget size="298x58" type="*widget.RichText">
@@ -941,7 +942,7 @@
 																		<container pos="0,4" size="113x16">
 																			<container size="15x16">
 																				<spacer size="15x0"/>
-																				<image fillMode="contain" rsc="copy-edece9-15.svg" size="15x15"/>
+																				<image fillMode="contain" rsc="copy-72abff-15.svg" size="15x15"/>
 																				<spacer pos="0,15" size="15x0"/>
 																			</container>
 																			<container pos="23,0" size="90x16">
@@ -985,14 +986,14 @@
 								<container size="406x44">
 									<container pos="4,4" size="398x32">
 										<container size="398x32">
-											<rectangle fillColor="button" pos="1,1" radius="6" size="396x30" strokeColor="rgba(224,218,255,255)" strokeWidth="2"/>
+											<rectangle fillColor="button" pos="1,1" radius="6" size="396x30" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
 										</container>
 										<container size="398x32">
 											<container pos="8,8" size="382x24">
 												<container size="27x24">
 													<container pos="4,4" size="15x16">
 														<spacer size="15x0"/>
-														<image fillMode="contain" rsc="search-b4b1a9-15.svg" size="15x15"/>
+														<image fillMode="contain" rsc="search-acb4bd-15.svg" size="15x15"/>
 														<spacer pos="0,15" size="15x0"/>
 													</container>
 												</container>
@@ -1029,7 +1030,7 @@
 									<widget size="406x140" type="*widget.Scroll">
 										<container size="406x140">
 											<container size="406x26">
-												<text bold color="disabled" pos="12,8" size="390x14" textSize="11">POLAND</text>
+												<text bold color="focus" pos="12,8" size="390x14" textSize="11">POLAND</text>
 											</container>
 											<widget pos="0,30" size="406x34" type="*parts.TapRow">
 												<container size="406x34">
@@ -1038,7 +1039,7 @@
 														<container size="406x34">
 															<rectangle size="406x34"/>
 															<container size="406x34">
-																<rectangle pos="1,1" radius="6" size="404x32" strokeColor="rgba(224,218,255,255)" strokeWidth="2"/>
+																<rectangle pos="1,1" radius="6" size="404x32" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
 															</container>
 															<container size="406x34">
 																<container pos="12,4" size="382x26">
@@ -1072,7 +1073,7 @@
 													<container size="406x34">
 														<rectangle size="406x34"/>
 														<container size="406x34">
-															<rectangle fillColor="rgba(40,39,37,255)" radius="6" size="406x34"/>
+															<rectangle fillColor="rgba(37,51,72,255)" radius="6" size="406x34"/>
 															<container size="406x34">
 																<container pos="12,4" size="382x26">
 																	<container size="367x26">
@@ -1092,7 +1093,7 @@
 																	</container>
 																	<container pos="367,0" size="15x26">
 																		<spacer size="15x5"/>
-																		<image fillMode="contain" pos="0,5" rsc="check-a594ff-15.svg" size="15x15"/>
+																		<image fillMode="contain" pos="0,5" rsc="check-72abff-15.svg" size="15x15"/>
 																		<spacer pos="0,20" size="15x5"/>
 																	</container>
 																</container>

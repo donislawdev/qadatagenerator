@@ -58,8 +58,8 @@ func holds(colours []color.Color, wanted color.Color) bool {
 // 🔴 The filled button is painted from the two tokens that were measured as a
 // pair, and not from two colours that happen to look right.
 //
-// text.on-fill is read ON fill.primary and measures 5.14 there. neutral.12,
-// the ink every other label in this window uses, measures 4.35 on this fill and
+// text.on-fill is read ON fill.primary and measures 4.75 there. neutral.12,
+// the ink every other label in this window uses, measures 4.12 on this fill and
 // misses the 4.5 a label needs, so the one thing that could silently go wrong
 // here is somebody making this label consistent with its neighbours.
 //
@@ -74,7 +74,7 @@ func TestAFilledButtonPaintsItselfFromTheTokens(t *testing.T) {
 		t.Errorf("the label is not text.on-fill, it drew %v", inks)
 	}
 	if holds(inks, palette.Ink(palette.TextPrimary)) {
-		t.Error("the label took the ordinary text ink, which measures 4.35 on this fill and misses 4.5")
+		t.Error("the label took the ordinary text ink, which measures 4.12 on this fill and misses 4.5")
 	}
 
 	quiet, _ := drawnBy(NewButton("Copy", nil))
