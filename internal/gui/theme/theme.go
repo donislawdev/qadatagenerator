@@ -297,6 +297,15 @@ const EntryRowsAtLeast = 4
 // four.
 const EntryDetailHeight float32 = 132
 
+// CatalogueAreaRows is how many rows of a control's height an area of the
+// catalogue of controls is given: a table and a scrolling area (DEC-253).
+//
+// A choice with a reason rather than a measurement. Enough rows to show what
+// the area looks like with something in it, and fewer than the samples hold,
+// so the same picture also shows that it scrolls. What would change it: a page
+// of the catalogue that no longer fits the window it opens in.
+const CatalogueAreaRows = 4
+
 // PreviewColumnMin and PreviewColumnMax bound a column of the recipe preview.
 //
 // # Why bounds rather than a list of widths

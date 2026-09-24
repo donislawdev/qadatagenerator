@@ -184,17 +184,26 @@ func (v *View) valueRow(number, digits int, value string, banded bool) fyne.Canv
 			// The same word the button in the heading carries, because it is
 			// the same act on a smaller amount. A second word for it would be
 			// a second thing to learn.
-			return rowFace(number, digits, value, banded, hovered, v.text.T(i18n.QuickCopy))
+			return RowFace(number, digits, value, banded, hovered, v.text.T(i18n.QuickCopy))
 		},
 		func() { v.copyOne(value) })
 }
 
-// rowFace is the picture of one row, in whatever state it is in.
+// RowFace is the picture of one row, in whatever state it is in.
 //
 // It lives in this file rather than in paint for the reason the heading does:
 // it is the shape of THIS screen rather than a piece anything else would reach
 // for.
-func rowFace(number, digits int, value string, banded, hovered bool, hint string) fyne.CanvasObject {
+//
+// # Why it is exported, and who reads it
+//
+// The catalogue of controls (DEC-253). parts.TapRow draws nothing of its own
+// and asks the screen for its picture, so the catalogue can show the row under
+// the pointer only by asking for the picture this screen draws. It is the one
+// state of this row no picture had, since the keyboard never lands on a row and
+// the stored states reach a control through the keyboard. Drawing a row of its
+// own there would be a second picture of one control, and the two would drift.
+func RowFace(number, digits int, value string, banded, hovered bool, hint string) fyne.CanvasObject {
 	var ground fyne.CanvasObject = paint.Clear()
 	switch {
 	case hovered:

@@ -57,6 +57,53 @@ screen.manifest: Manifest browser
 screen.take: Take and corrupt
 screen.quick: Quick value
 
+# The catalogue of controls, which qadg-gui opens with -catalogue. It shows
+# every control of the window in every state it can be seen in. What stands on
+# the controls is sample data and is not in this file.
+catalogue.promise: catalogue of controls
+catalogue.group: Controls
+catalogue.page.buttons: Buttons
+catalogue.page.choosers: Choosers
+catalogue.page.checks: Check boxes
+catalogue.page.text: Text
+catalogue.page.lists: Lists
+catalogue.page.areas: Areas
+catalogue.control.button: Button
+catalogue.control.select: Chooser
+catalogue.control.check: Check box
+catalogue.control.taprow: Row of a value
+catalogue.control.field: Text field
+catalogue.control.editor: Text of several lines
+catalogue.control.table: Table
+catalogue.control.scroll: Scrolling area
+catalogue.control.disclosure: Section that opens
+catalogue.state.rest: At rest
+catalogue.state.pointer: Pointer on it
+catalogue.state.pressed: Pressed
+catalogue.state.focus: Keyboard on it
+catalogue.state.disabled: Out of reach
+catalogue.variant.outlined: Outlined
+catalogue.variant.icon: With an icon
+catalogue.variant.filled: Filled
+catalogue.variant.place: Sidebar item
+catalogue.variant.current: Current sidebar item
+catalogue.variant.long.label: Very long label
+catalogue.variant.nothing: Nothing chosen
+catalogue.variant.chosen: A value chosen
+catalogue.variant.long.value: Very long value
+catalogue.variant.off: Not ticked
+catalogue.variant.on: Ticked
+catalogue.variant.unbanded: Row without a band
+catalogue.variant.banded: Row with a band
+catalogue.variant.empty: Empty
+catalogue.variant.short: One word
+catalogue.variant.extreme: Wider than the field
+catalogue.variant.lines: Several lines, some too long
+catalogue.variant.rows: More rows than it shows
+catalogue.variant.closed: Closed
+catalogue.variant.opened: Open
+catalogue.variant.overflowed: More lines than it shows
+
 about.heading.versions: Versions
 about.heading.licenses: Licenses
 about.heading.components: Third party components

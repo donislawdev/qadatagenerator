@@ -31,11 +31,13 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/gui/about"
 	"github.com/donislawdev/qadatagenerator/internal/gui/assets"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
+	"github.com/donislawdev/qadatagenerator/internal/gui/catalogue"
 	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/quickview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/recipeview"
+	"github.com/donislawdev/qadatagenerator/internal/gui/screens"
 	"github.com/donislawdev/qadatagenerator/internal/gui/shell"
 	"github.com/donislawdev/qadatagenerator/internal/gui/takeview"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
@@ -65,6 +67,17 @@ func main() {
 		}
 	}()
 
+	// Asked before anything of the toolkit exists, so a refusal opens no
+	// window at all rather than one that closes again.
+	asked, err := arguments(os.Args[1:], os.Stdout)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(wrongInvocation)
+	}
+	if asked.help {
+		return
+	}
+
 	application := app.New()
 	application.Settings().SetTheme(fynetheme.Current())
 
@@ -77,31 +90,12 @@ func main() {
 	}
 	window := application.NewWindow(text.T(i18n.WindowTitle))
 
-	frame := assemble(text, window, application.Clipboard())
+	frame := frameFor(asked, text, window, application.Clipboard())
 
 	// Dropping is a property of the window rather than of a control, so the
 	// frame is what receives it and hands it to whichever screen is open.
 	window.SetOnDropped(frame.Dropped)
-
-	// 🔴 THE ONE WAY IN THAT docs/08 NAMES, AND THE LIMIT IT ARRIVES WITH.
-	// Scenario one describes a keyboard shortcut opening the palette, and
-	// DEC-202 left it out because nobody had measured whether it collides with
-	// the text field of the recipe editor. Measured on 2026-09-08, in the
-	// toolkit's own driver at internal/driver/glfw/window.go:865: if the
-	// control holding focus is a Shortcutable, the driver hands it the shortcut
-	// and RETURNS, so canvas.TypedShortcut is never reached. An entry is a
-	// Shortcutable and its handler silently ignores a name it does not know.
-	//
-	// So this works everywhere except while somebody is typing in a field, and
-	// that is written here rather than discovered. Making it work there too
-	// means overriding TypedShortcut on our own entry and forwarding the names
-	// the toolkit does not handle, which needs a copy of the toolkit's own
-	// register of shortcut names. A second copy of a register is the thing this
-	// project refuses, so the limit stands until somebody decides that trade.
-	window.Canvas().AddShortcut(
-		&desktop.CustomShortcut{KeyName: fyne.KeyK, Modifier: fyne.KeyModifierControl},
-		func(fyne.Shortcut) { frame.Reveal(text.T(i18n.ScreenQuick)) },
-	)
+	revealOnShortcut(window, frame, text)
 	window.SetContent(frame.Content())
 	// A window with no size of its own shrinks to what its content demands, and
 	// a scrolling container demands almost nothing. Running the first build
@@ -110,6 +104,48 @@ func main() {
 	// person can see.
 	window.Resize(fyne.NewSize(palette.StartWidth, palette.StartHeight))
 	window.ShowAndRun()
+}
+
+// frameFor is the frame the command line asked for: the catalogue of controls
+// with -catalogue, the window proper without it.
+//
+// Only one of the two is built. The window proper starts places of work and a
+// watch on the signal that closes it, and none of that belongs behind a view
+// of controls that does no work.
+func frameFor(asked launch, text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipboard) *shell.Shell {
+	if asked.catalogue {
+		// The samples come from the package the stored pictures take them
+		// from, so the window and the pictures of it show the same words.
+		return catalogue.Frame(text, brand(text), screens.CatalogueSamples())
+	}
+	return assemble(text, window, clipboard)
+}
+
+// revealOnShortcut opens the quick screen on Ctrl+K.
+//
+// 🔴 THE ONE WAY IN THAT docs/08 NAMES, AND THE LIMIT IT ARRIVES WITH.
+// Scenario one describes a keyboard shortcut opening the palette, and
+// DEC-202 left it out because nobody had measured whether it collides with
+// the text field of the recipe editor. Measured on 2026-09-08, in the
+// toolkit's own driver at internal/driver/glfw/window.go:865: if the
+// control holding focus is a Shortcutable, the driver hands it the shortcut
+// and RETURNS, so canvas.TypedShortcut is never reached. An entry is a
+// Shortcutable and its handler silently ignores a name it does not know.
+//
+// So this works everywhere except while somebody is typing in a field, and
+// that is written here rather than discovered. Making it work there too
+// means overriding TypedShortcut on our own entry and forwarding the names
+// the toolkit does not handle, which needs a copy of the toolkit's own
+// register of shortcut names. A second copy of a register is the thing this
+// project refuses, so the limit stands until somebody decides that trade.
+//
+// In the catalogue of controls the frame has no screen of that name, and
+// Reveal of a name it does not have does nothing.
+func revealOnShortcut(window fyne.Window, frame *shell.Shell, text i18n.Catalogue) {
+	window.Canvas().AddShortcut(
+		&desktop.CustomShortcut{KeyName: fyne.KeyK, Modifier: fyne.KeyModifierControl},
+		func(fyne.Shortcut) { frame.Reveal(text.T(i18n.ScreenQuick)) },
+	)
 }
 
 // saveReport is how the About screen puts the machine readable report on disk.
@@ -235,7 +271,13 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 		{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,
 			Content: about.Content(text, license.Current(), version.Current(),
 				saveReport(window), assets.Notice)},
-	}, shell.Brand{
+	}, brand(text))
+}
+
+// brand is the name, the mark and the version at the foot of the column, which
+// the catalogue of controls wears too, with a line of its own under the name.
+func brand(text i18n.Catalogue) shell.Brand {
+	return shell.Brand{
 		// The same name the window carries in its title bar, from the same key,
 		// so the two can never say different things.
 		Name: text.T(i18n.WindowTitle),
@@ -247,5 +289,5 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 		// program's.
 		Version: "v" + version.Current().Tool,
 		Promise: text.T(i18n.SidebarOffline),
-	})
+	}
 }

@@ -51,7 +51,8 @@ func All() []State {
 	states = append(states, quickStates()...)
 	states = append(states, quickStatesOfTheKeyboard()...)
 	states = append(states, quickStatesOfThePanel()...)
-	return append(states, quickStatesOfThePointer()...)
+	states = append(states, quickStatesOfThePointer()...)
+	return append(states, catalogueStates()...)
 }
 
 // quickStates are the states of the screen that produces one value.

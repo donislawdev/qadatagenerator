@@ -125,6 +125,15 @@ repository once they are released.
 
 ### Added
 
+- **`qadg-gui -catalogue` opens a catalogue of controls instead of the
+  window.** It shows every control the screens are built from, in every state
+  it can be seen in: at rest, under the pointer, pressed, with the keyboard on
+  it and out of reach, with very long text and values wider than a field. It
+  is meant for reviewing how the window looks and does no work. Any other flag
+  is refused with exit code 2 and a message on the error channel, and no
+  window opens, so a misspelt `-catalog` does not quietly open the ordinary
+  window. `qadg-gui -h` lists the flags.
+
 - **The About screen lists the reference data built into the program**: where
   the names, places and other lists come from, under which terms, the day those
   terms were read, and which lists came from each source. `--license` has

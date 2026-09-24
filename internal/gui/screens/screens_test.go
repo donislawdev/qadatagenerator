@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/test"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/gui/catalogue"
 	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
 )
 
@@ -353,12 +354,31 @@ func TestEveryStateOpensTheScreenItsNameSays(t *testing.T) {
 		"browser": screenManifest,
 		"about":   screenAbout,
 	}
+	// The catalogue of controls is a frame of its own, so its pages are named
+	// in full: the word before the dash names the frame, the word after it the
+	// page.
+	pageOfName := map[string]int{
+		"catalogue-buttons":  catalogue.PageButtons,
+		"catalogue-choosers": catalogue.PageChoosers,
+		"catalogue-checks":   catalogue.PageChecks,
+		"catalogue-text":     catalogue.PageText,
+		"catalogue-lists":    catalogue.PageLists,
+		"catalogue-areas":    catalogue.PageAreas,
+	}
 	for _, state := range All() {
 		prefix, _, split := strings.Cut(state.Name, "-")
 		if !split {
 			prefix = state.Name
 		}
+		if (prefix == "catalogue") != state.Catalogue {
+			t.Errorf("state %q opens the catalogue of controls: %v, and its name says otherwise, "+
+				"so the picture it stores is of a frame it was not written for", state.Name, state.Catalogue)
+			continue
+		}
 		wanted, named := screenOfPrefix[prefix]
+		if state.Catalogue {
+			wanted, named = pageOfName[state.Name]
+		}
 		if !named {
 			t.Errorf("state %q begins with %q, which names no screen, so nothing here can say "+
 				"which screen it meant to open", state.Name, prefix)

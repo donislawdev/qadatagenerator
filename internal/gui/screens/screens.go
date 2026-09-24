@@ -39,6 +39,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/gui/about"
 	"github.com/donislawdev/qadatagenerator/internal/gui/assets"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
+	"github.com/donislawdev/qadatagenerator/internal/gui/catalogue"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/quickview"
@@ -258,6 +259,11 @@ type State struct {
 	// Pointer is where the mouse is, applied after the window exists for the
 	// same reason and carried instead of a Keyboard rather than beside one.
 	Pointer Pointer
+	// Catalogue opens the catalogue of controls instead of the window proper,
+	// on the page Screen names (DEC-253). It is a flag rather than a screen of
+	// the column above, because the catalogue is a frame of its own, the one
+	// qadg-gui opens with -catalogue.
+	Catalogue bool
 }
 
 // Buildable reports whether this state can be drawn from the data given, and
@@ -280,6 +286,9 @@ func (s State) Buildable(data Data) (bool, string) {
 // The screen is put into its state through the same calls the file chooser
 // makes, so nothing here can reach a state a person cannot.
 func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
+	if state.Catalogue {
+		return catalogue.Content(text, brandOf(text), CatalogueSamples(), state.Screen)
+	}
 	// The clipboard is nothing at all, for the reason given at the other
 	// screens: a state of this list is a picture, and a picture that reached
 	// the clipboard of the machine taking it would change something outside
@@ -339,16 +348,7 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	// That they really write is held by the screen's own package.
 	column[screenAbout] = shell.Screen{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,
 		Content: about.Content(text, license.Current(), version.Current(), func([]byte) {}, assets.Notice)}
-	// The same brand the program carries, so a render shows what a person sees.
-	// This copy of the list has been wrong about the sidebar once already: it
-	// carried icons the program did not, and every picture anybody looked at
-	// showed them.
-	frame := shell.New(column, shell.Brand{
-		Name:    text.T(i18n.WindowTitle),
-		Mark:    paint.IconBolt,
-		Version: "v" + version.Current().Tool,
-		Promise: text.T(i18n.SidebarOffline),
-	})
+	frame := shell.New(column, brandOf(text))
 	settleQuick(quickScreen, state.Quick)
 	if state.Into != "" {
 		recipeScreen.SetOut(state.Into)
@@ -389,16 +389,20 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	return frame.Content()
 }
 
-// settle takes the screen that damages a file the rest of the way, once its
-// file has been read.
-//
-// 🔴 It is a call of its own rather than a branch inside Assemble, and the
-// reason is a mutation that went uncaught on 2026-09-01. Written as an early
-// return, this left Assemble with TWO calls asking the frame for a screen, and
-// the mutation aimed at the one that says every state renders on the first
-// screen then landed on a branch whose state is on the first screen anyway. A
-// guard that had been green for a fortnight was quietly answering about
-// nothing.
+// brandOf is the brand the program carries, so a render shows what a person
+// sees. This copy of the list has been wrong about the sidebar once already: it
+// carried icons the program did not, and every picture anybody looked at
+// showed them. The catalogue of controls wears it too, with its own line under
+// the name.
+func brandOf(text i18n.Catalogue) shell.Brand {
+	return shell.Brand{
+		Name:    text.T(i18n.WindowTitle),
+		Mark:    paint.IconBolt,
+		Version: "v" + version.Current().Tool,
+		Promise: text.T(i18n.SidebarOffline),
+	}
+}
+
 // settleQuick puts the screen that produces one value into the state asked for,
 // through the same calls a person makes.
 func settleQuick(screen *quickview.View, asked Quick) {
@@ -433,6 +437,16 @@ func settleQuick(screen *quickview.View, asked Quick) {
 	}
 }
 
+// settle takes the screen that damages a file the rest of the way, once its
+// file has been read.
+//
+// 🔴 It is a call of its own rather than a branch inside Assemble, and the
+// reason is a mutation that went uncaught on 2026-09-01. Written as an early
+// return, this left Assemble with TWO calls asking the frame for a screen, and
+// the mutation aimed at the one that says every state renders on the first
+// screen then landed on a branch whose state is on the first screen anyway. A
+// guard that had been green for a fortnight was quietly answering about
+// nothing.
 func settle(takeScreen *takeview.View, state State) {
 	// The failure is deliberately not swallowed into an empty screen: a state
 	// that says it needs a file and then draws one that has none is a picture

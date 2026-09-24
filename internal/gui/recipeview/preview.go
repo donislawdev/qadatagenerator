@@ -96,19 +96,17 @@ func (v *View) rows(table produce.Table) fyne.CanvasObject {
 	shown := table
 	built := parts.NewKeyTable(
 		func() (int, int) { return len(shown.Rows), len(shown.Columns) },
-		func() fyne.CanvasObject { return v.cell() },
+		func() fyne.CanvasObject { return paint.TableCell() },
 		func(cell widget.TableCellID, object fyne.CanvasObject) {
-			if text, ok := object.(*widget.RichText); ok {
-				v.setCell(text, v.cellText(shown, cell.Row, cell.Col))
-			}
+			paint.SetTableCell(object, v.cellText(shown, cell.Row, cell.Col))
 		},
 		nil,
 	)
 	built.ShowHeaderColumn = false
-	built.CreateHeader = func() fyne.CanvasObject { return v.cell() }
+	built.CreateHeader = func() fyne.CanvasObject { return paint.TableCell() }
 	built.UpdateHeader = func(cell widget.TableCellID, object fyne.CanvasObject) {
-		if text, ok := object.(*widget.RichText); ok && cell.Col < len(shown.Columns) {
-			v.setCell(text, shown.Columns[cell.Col])
+		if cell.Col < len(shown.Columns) {
+			paint.SetTableCell(object, shown.Columns[cell.Col])
 		}
 	}
 	for column := range shown.Columns {
@@ -139,20 +137,6 @@ func (v *View) rows(table produce.Table) fyne.CanvasObject {
 	return container.NewBorder(nil, nil, tall, nil, built.Framed())
 }
 
-// cell is one piece of text in the table, on one line and cut with an ellipsis.
-//
-// 🔴 Cut rather than wrapped, and never mid character. Values here are
-// deliberately multi byte: this tool generates for pl-PL and a whole module of
-// damage exists to produce characters outside the basic plane. Cutting by byte
-// puts invalid UTF-8 on screen, which this project has already repaired once in
-// a report.
-func (v *View) cell() *widget.RichText {
-	text := widget.NewRichTextWithText("")
-	text.Truncation = fyne.TextTruncateEllipsis
-	text.Wrapping = fyne.TextWrapOff
-	return text
-}
-
 // cellText is what one cell says.
 //
 // 🔴 An empty key naming a parent is not an empty value, it is a parent this
@@ -168,11 +152,6 @@ func (v *View) cellText(table produce.Table, row, column int) string {
 		return v.text.T(i18n.RecipeParentOutside)
 	}
 	return table.Rows[row][column]
-}
-
-func (v *View) setCell(text *widget.RichText, value string) {
-	text.Segments = []widget.RichTextSegment{&widget.TextSegment{Text: value}}
-	text.Refresh()
 }
 
 // written is a file shown as itself, in the one face that keeps columns of

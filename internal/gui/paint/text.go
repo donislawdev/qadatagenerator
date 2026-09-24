@@ -116,3 +116,35 @@ func styled(words, rung, token string, style fyne.TextStyle) *canvas.Text {
 	text.TextStyle = style
 	return text
 }
+
+// TableCell is one piece of text in a table, on one line and cut with an
+// ellipsis. SetTableCell writes into one, which is what a table asks for every
+// time it shows a cell again.
+//
+// 🔴 Cut rather than wrapped, and never mid character. Values in a table here
+// are deliberately multi byte: this tool generates for pl-PL and a whole module
+// of damage exists to produce characters outside the basic plane. Cutting by
+// byte puts invalid UTF-8 on screen, which this project has already repaired
+// once in a report.
+//
+// It was a method of the recipe screen until the catalogue of controls needed
+// the same cell on 2026-09-25 (DEC-253). A table in the catalogue drawn with a
+// cell of its own would be a table no screen shows.
+func TableCell() *widget.RichText {
+	text := widget.NewRichTextWithText("")
+	text.Truncation = fyne.TextTruncateEllipsis
+	text.Wrapping = fyne.TextWrapOff
+	return text
+}
+
+// SetTableCell writes words into a cell TableCell made, and does nothing to
+// anything else, since the cells come from a pool the toolkit hands back and
+// forth.
+func SetTableCell(cell fyne.CanvasObject, words string) {
+	text, isCell := cell.(*widget.RichText)
+	if !isCell {
+		return
+	}
+	text.Segments = []widget.RichTextSegment{&widget.TextSegment{Text: words}}
+	text.Refresh()
+}

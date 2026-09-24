@@ -719,9 +719,9 @@ const (
 	AboutSaveJSON Key = "about.save.json"
 )
 
-// Keys is every key a screen may ask for, so a test can close the register
-// from the side the code is on.
-var Keys = []Key{
+// windowKeys is every key the screens of the window may ask for. Keys, beside
+// the keys of the catalogue of controls, is what the test closes.
+var windowKeys = []Key{
 	ToolkitOpen, ToolkitSave, ToolkitCancel, ToolkitFile, ToolkitFolder, ToolkitNewFolder,
 	ToolkitCreateFolder, ToolkitName, ToolkitParent, ToolkitShowHiddenFiles, ToolkitEnterFilename,
 	ToolkitOK, ToolkitError, ToolkitYes, ToolkitNo, ToolkitCut, ToolkitCopy, ToolkitPaste,
