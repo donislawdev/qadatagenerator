@@ -595,7 +595,8 @@ var Tokens = []Token{
 	// everything drawn on it is read on mark.current and not on the ground the
 	// control stands on. Measured on 2026-09-05, before any of this: the
 	// ordinary text ink on that flood gave 1.56 where a label needs 4.5, which
-	// is what parts.Flooded was written to repair.
+	// is what parts.Flooded was written to repair. DEC-253 deleted it, since
+	// nothing in the window is flooded any more.
 	//
 	// # Why it is a token now and was a palette entry before
 	//

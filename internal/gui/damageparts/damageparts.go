@@ -78,15 +78,6 @@ func LayerLabel(text i18n.Catalogue, code string) string {
 	return fmt.Sprintf(text.T(i18n.TakeLayerCode), text.T(key), code)
 }
 
-// LayerLabels is a list of kinds of damage named, in the order given.
-func LayerLabels(text i18n.Catalogue, codes []string) []string {
-	labels := make([]string, 0, len(codes))
-	for _, code := range codes {
-		labels = append(labels, LayerLabel(text, code))
-	}
-	return labels
-}
-
 // FormChoices is every extra form of the manifest, with the absence of one named
 // rather than left blank.
 //

@@ -113,7 +113,7 @@ var HandmadeAllowed = map[string]Handmade{
 		Why: "three things it cannot do, each measured. The gap between an icon and its label comes " +
 			"from SizeNamePadding, which this window answers with nought on purpose, so an icon on a " +
 			"stock button touches its label. A focused one is flooded with the focus colour, measured " +
-			"at 1.56 for the label on it, which is why parts.Flooded had to exist. And its whole look " +
+			"at 1.56 for the label on it, which is why parts.Flooded had to exist until DEC-253 deleted it. And its whole look " +
 			"is the toolkit's, so the accepted drawing and the window were two drawings of one control " +
 			"and drifted until the owner saw them side by side",
 	},

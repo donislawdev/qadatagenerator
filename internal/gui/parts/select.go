@@ -33,8 +33,9 @@ import (
 //   - The focus mark. selectRenderer.bgColor at widget/select.go:432 floods the
 //     whole control with the focus colour, and the value written across it
 //     measures 1.56 where WCAG 1.4.3 asks for 4.5. No colour repairs that,
-//     which is what parts.Flooded exists to say, so this package overrode the
-//     theme of a scope around every chooser to change the ink of the value.
+//     which is what parts.Flooded said until DEC-253 deleted it, so this
+//     package overrode the theme of a scope around every chooser to change
+//     the ink of the value.
 //
 // Both patches are gone with this renderer, along with the height floor and the
 // scope they needed to live in. The register of pieces rebuilt here gains two

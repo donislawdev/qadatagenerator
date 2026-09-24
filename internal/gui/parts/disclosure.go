@@ -17,7 +17,8 @@ import (
 //
 // That mattered on 2026-09-05. A focused button is flooded with the focus
 // colour and its label measured 1.56 against the 4.5 of WCAG 1.4.3, and the
-// repair is a theme around the control, which Flooded explains. A theme can
+// repair was a theme around the control, which parts.Flooded carried until
+// DEC-253 deleted it with nothing left to flood. A theme can
 // only be given to a subtree, and the smallest subtree containing that heading
 // is the whole accordion, list included. Measured rather than assumed: the
 // rows of that list are widget.NewLabel, so they read the same colour name the

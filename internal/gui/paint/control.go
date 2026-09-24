@@ -481,7 +481,8 @@ type ChooserLook struct {
 //   - FOCUSED gains a ring inside the shape, in the ink of the value, drawn by
 //     the same helper the button uses. The toolkit's answer is to flood the
 //     whole control with the focus colour, measured at 1.56 for the value
-//     written on it, which is the entire reason parts.Flooded had to exist.
+//     written on it, which is the entire reason parts.Flooded existed until
+//     DEC-253 deleted it.
 func ChooserFace(look ChooserLook) fyne.CanvasObject {
 	ink := theme.TextPrimary
 	under, edge := pointerGround(look.Hovered, look.Pressed)

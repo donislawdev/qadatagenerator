@@ -49,8 +49,9 @@ import (
 //     that gap from the scale like every other gap here.
 //   - The focus mark. The toolkit floods a focused button with the focus
 //     colour, measured at 1.23 for the mark and 1.56 for the label on it, which
-//     is the whole reason parts.Flooded had to exist. A ring we draw needs no
-//     such repair and the ink of the label never has to change.
+//     is the whole reason parts.Flooded existed until DEC-253 deleted it with
+//     nothing left to flood. A ring we draw needs no such repair and the ink of
+//     the label never has to change.
 //   - The disabled state. One branch of one face, instead of an importance, a
 //     themed colour and a rectangle somebody has to remember to hide.
 type Button struct {
