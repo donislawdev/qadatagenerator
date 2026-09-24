@@ -254,11 +254,11 @@
 										<container pos="0,40" size="1054x52">
 											<container size="908x52">
 												<container size="129x52">
-													<container size="605x15">
-														<rectangle size="605x15"/>
-														<rectangle size="605x15"/>
+													<container size="129x14">
+														<rectangle size="129x14"/>
+														<rectangle size="129x14"/>
 													</container>
-													<widget pos="0,15" size="129x34" type="*parts.Button">
+													<widget pos="0,18" size="129x34" type="*parts.Button">
 														<container size="129x34">
 															<container size="129x34">
 																<rectangle size="129x34"/>
@@ -290,11 +290,11 @@
 												<container pos="129,0" size="779x52">
 													<container pos="12,0" size="767x52">
 														<container size="605x52">
-															<container size="605x15">
-																<rectangle size="605x15"/>
-																<rectangle size="605x15"/>
+															<container size="605x14">
+																<rectangle size="605x14"/>
+																<rectangle size="605x14"/>
 															</container>
-															<container pos="0,15" size="605x34">
+															<container pos="0,18" size="605x34">
 																<rectangle size="605x34"/>
 																<container size="605x34">
 																	<spacer size="605x8"/>
@@ -379,11 +379,11 @@
 											</container>
 											<container pos="908,0" size="145x52">
 												<container pos="16,0" size="129x52">
-													<container size="605x15">
-														<rectangle size="605x15"/>
-														<rectangle size="605x15"/>
+													<container size="129x14">
+														<rectangle size="129x14"/>
+														<rectangle size="129x14"/>
 													</container>
-													<container pos="0,15" size="129x34">
+													<container pos="0,18" size="129x34">
 														<widget size="129x34" type="*parts.Button">
 															<container size="129x34">
 																<container size="129x34">

@@ -435,11 +435,11 @@
 												</container>
 												<container pos="950,0" size="103x52">
 													<container pos="16,0" size="87x52">
-														<container size="87x15">
-															<rectangle size="87x15"/>
-															<rectangle size="87x15"/>
+														<container size="87x14">
+															<rectangle size="87x14"/>
+															<rectangle size="87x14"/>
 														</container>
-														<widget pos="0,15" size="87x34" type="*parts.Button">
+														<widget pos="0,18" size="87x34" type="*parts.Button">
 															<container size="87x34">
 																<container size="87x34">
 																	<rectangle size="87x34"/>

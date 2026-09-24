@@ -121,8 +121,31 @@ func SectionHeading(words string, actions fyne.CanvasObject) fyne.CanvasObject {
 // opens a gap between a label and the thing it names and is the single detail
 // that dates an interface to the nineteen nineties.
 func FieldLabel(words string, control fyne.CanvasObject) fyne.CanvasObject {
+	return Column(theme.NameStepHairline, fieldLabel(words), control)
+}
+
+// Unlabelled stands a control that has no label of its own level with the
+// controls beside it that FieldLabel put under theirs.
+//
+// # Why the room is measured on the label rather than read off the ladder
+//
+// It was read off the ladder until 2026-09-24: the size of the label's type
+// plus the hairline step, written out in three copies on three screens. A line
+// of text is taller than the size of its type, because it carries the ascent
+// and the descent, so every control without a label stood four units higher
+// than the field beside it. The live window showed it and no test did (B-310).
+// The room is now the height of the very object FieldLabel draws, in the same
+// column with the same gap, so the two cannot drift apart whatever the ladder
+// or the font does next.
+func Unlabelled(control fyne.CanvasObject) fyne.CanvasObject {
 	return Column(theme.NameStepHairline,
-		Text(words, theme.TypeLabel, theme.TextSecondary), control)
+		Space(0, fieldLabel("").MinSize().Height), control)
+}
+
+// fieldLabel is the words above a control, shared so that the label and the
+// room left where a label is missing are one object measured one way.
+func fieldLabel(words string) *canvas.Text {
+	return Text(words, theme.TypeLabel, theme.TextSecondary)
 }
 
 // Spacer takes the room left over on the axis it is laid out along.

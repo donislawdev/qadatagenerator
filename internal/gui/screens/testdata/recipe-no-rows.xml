@@ -287,11 +287,11 @@
 												<container pos="433,0" size="442x52">
 													<container pos="12,0" size="430x52">
 														<container size="108x52">
-															<container size="162x15">
-																<rectangle size="162x15"/>
-																<rectangle size="162x15"/>
+															<container size="108x14">
+																<rectangle size="108x14"/>
+																<rectangle size="108x14"/>
 															</container>
-															<widget pos="0,15" size="108x34" type="*parts.Button">
+															<widget pos="0,18" size="108x34" type="*parts.Button">
 																<container size="108x34">
 																	<container size="108x34">
 																		<rectangle size="108x34"/>
@@ -321,11 +321,11 @@
 															</widget>
 														</container>
 														<container pos="120,0" size="180x52">
-															<container size="162x15">
-																<rectangle size="162x15"/>
-																<rectangle size="162x15"/>
+															<container size="180x14">
+																<rectangle size="180x14"/>
+																<rectangle size="180x14"/>
 															</container>
-															<container pos="0,15" size="180x34">
+															<container pos="0,18" size="180x34">
 																<rectangle size="180x34"/>
 																<widget size="180x34" type="*parts.Check">
 																	<container size="180x34">
@@ -389,11 +389,11 @@
 											</container>
 											<container pos="875,0" size="178x52">
 												<container pos="16,0" size="162x52">
-													<container size="162x15">
-														<rectangle size="162x15"/>
-														<rectangle size="162x15"/>
+													<container size="162x14">
+														<rectangle size="162x14"/>
+														<rectangle size="162x14"/>
 													</container>
-													<container pos="0,15" size="162x34">
+													<container pos="0,18" size="162x34">
 														<widget size="162x34" type="*parts.Button">
 															<container size="162x34">
 																<container size="162x34">

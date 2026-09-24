@@ -271,14 +271,13 @@ func (v *View) heading(key i18n.Key) fyne.CanvasObject {
 // what the panel says the file holds, where every other setting changes only
 // what a run would do with it.
 func (v *View) fileBand() fyne.CanvasObject {
-	drop := paint.Space(0, palette.TypeSize(palette.TypeLabel)+palette.StepOf(palette.NameStepHairline))
-	choose := container.NewVBox(drop, v.chooseFile.OnScreen())
+	choose := paint.Unlabelled(v.chooseFile.OnScreen())
 	// 🔴 The facts take what the button and the fields leave, rather than
 	// standing in a row with them. In a row they were given the width they
 	// asked for, and the sentence about there being no file asked for more
 	// than the band had, so the fields walked under the button at the far
 	// end - seen on the first render of the state the screen opens in.
-	facts := container.NewVBox(drop, paint.AtLeast(0, palette.ControlHeight, paint.Middle(v.facts)))
+	facts := paint.Unlabelled(paint.AtLeast(0, palette.ControlHeight, paint.Middle(v.facts)))
 	reading := paint.Row(palette.NameStepRelated,
 		labelled(v.text.T(i18n.TakeSettingDelimiter),
 			paint.AtLeast(paint.FieldWidth(delimiterSample), 0, parts.Standing(parts.Field(v.delimiter)))),
@@ -287,7 +286,7 @@ func (v *View) fileBand() fyne.CanvasObject {
 	file := paint.Lead(choose,
 		paint.PadLeft(palette.NameStepRelated,
 			paint.Trail(facts, paint.PadLeft(palette.NameStepRelated, reading))))
-	action := container.NewVBox(drop, v.action)
+	action := paint.Unlabelled(v.action)
 	// The sentence wraps, because it is the longest line on this screen and a
 	// piece of canvas text would otherwise decide how narrow the window may be.
 	return paint.Band(paint.BandBelow, palette.NameStepGroup, palette.NameStepMajor,

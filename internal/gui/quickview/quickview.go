@@ -729,10 +729,10 @@ func (v *View) showRows(generator string) {
 
 	// The button stands beside the fields rather than under a label of its own,
 	// so it has to drop by the height of the label it does not have. The drop
-	// is read off the type ladder and the scale, not chosen.
-	action := container.NewVBox(
-		paint.Space(0, palette.TypeSize(palette.TypeLabel)+palette.StepOf(palette.NameStepHairline)),
-		v.generate)
+	// is measured on the label itself, not read off the type ladder: a line of
+	// text is taller than its type size, and the ladder left the button four
+	// units above the fields (B-310).
+	action := paint.Unlabelled(v.generate)
 
 	// 🔴 Objects in READING order, which is not the order container.NewBorder
 	// would produce. That helper appends the centre first, so the keyboard

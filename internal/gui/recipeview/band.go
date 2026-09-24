@@ -76,14 +76,13 @@ func (v *View) buildBand() {
 // value here nobody can retype from memory. Everything else takes the width it
 // asks for.
 func (v *View) settingsBand() fyne.CanvasObject {
-	drop := paint.Space(0, palette.TypeSize(palette.TypeLabel)+palette.StepOf(palette.NameStepHairline))
 	out := labelled(v.text.T(i18n.RecipeWriteTo), parts.Standing(parts.Field(v.out)))
 	beside := paint.PadLeft(palette.NameStepRelated, paint.Row(palette.NameStepRelated,
-		container.NewVBox(drop, v.choose.OnScreen()),
-		container.NewVBox(drop, paint.AtLeast(0, palette.ControlHeight, v.replace.OnScreen())),
+		paint.Unlabelled(v.choose.OnScreen()),
+		paint.Unlabelled(paint.AtLeast(0, palette.ControlHeight, v.replace.OnScreen())),
 		labelled(v.text.T(i18n.TakeSettingManifest), v.manifest.OnScreen())))
 	settings := container.New(layout.NewBorderLayout(nil, nil, nil, beside), out, beside)
-	action := paint.PadLeft(palette.NameStepGroup, container.NewVBox(drop, v.action))
+	action := paint.PadLeft(palette.NameStepGroup, paint.Unlabelled(v.action))
 	// The sentence wraps, because it is the longest line on this screen and a
 	// piece of canvas text would otherwise decide how narrow the window may be.
 	return paint.Band(paint.BandBelow, palette.NameStepGroup, palette.NameStepMajor,
