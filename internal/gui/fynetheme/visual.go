@@ -94,9 +94,9 @@ var tokenFor = map[fyne.ThemeColorName]string{
 	// arithmetic across the whole accent ladder beside the token.
 	//
 	// Nothing of ours reaches the accent fill through here, which is what makes
-	// the correction safe: paint.ButtonFace asks for fill.primary by name and
-	// parts.PrimaryButton paints itself, so this entry is read only by stock
-	// widgets.
+	// the correction safe: paint.ButtonFace asks for fill.primary by name, and
+	// the filled parts.Button is drawn by that face, so this entry is read only
+	// by stock widgets.
 	//
 	// Focus is deliberately NOT the same value: measured on 2026-08-18, a
 	// control painted in the colour focus arrives in has nothing left to show

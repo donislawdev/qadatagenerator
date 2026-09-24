@@ -52,7 +52,7 @@ func Card(heading string, aside fyne.CanvasObject, body fyne.CanvasObject) fyne.
 	// theme's separator entry, and a card has to draw the same line as the box
 	// around it. Two lines a shade apart on one card read as a mistake.
 	rule := canvas.NewRectangle(palette.Named(palette.NameRowDivider).NRGBA())
-	rule.SetMinSize(fyne.NewSize(0, palette.BorderThickness/2))
+	rule.SetMinSize(fyne.NewSize(0, palette.HairlineThickness))
 
 	head := container.NewVBox(
 		container.New(layout.NewCustomPaddedLayout(room, room, room, room), top),

@@ -40,7 +40,7 @@ import (
 //
 // # The third case, which this walk cannot see, and where it is held instead
 //
-// parts.PrimaryButton has no edge either, and it never reaches this walk at
+// The filled parts.Button has no edge either, and it never reaches this walk at
 // all: it is handed to a layout bare and its face carries no edge for the walk
 // to find. That is deliberate and it is why the guard below exists. A control
 // this one silently passes over is a control the promise in this name is no
@@ -136,9 +136,18 @@ type outlined interface {
 // to a layout bare left the walk without a word - which is how a guard about
 // every pressable control came to be silent about the one this project cares
 // most about. Asking the object what it is has no such gap.
+//
+// The filled button is left out, and not as a quiet one. It goes without an
+// edge at rest because its fill says it can be pressed, and gains one in focus,
+// so neither answer of quiet() describes it. That exception has a guard of its
+// own below. Until 2026-09-24 it was a type of its own and this switch never
+// saw it, so leaving it out here keeps what this walk has always covered.
 func ourControl(object fyne.CanvasObject) (outlined, string) {
 	switch typed := object.(type) {
 	case *parts.Button:
+		if typed.Filled {
+			return nil, ""
+		}
 		return quietButton{typed}, fmt.Sprintf("the button %q", typed.Text)
 	case *parts.Select:
 		return quietSelect{typed}, fmt.Sprintf("the chooser %q", typed.Selected)
@@ -208,7 +217,7 @@ func edgeIn(group *fyne.Container) *canvas.Rectangle {
 // # Why it needs a guard of its own rather than a sentence
 //
 // The walk above finds controls by looking for the container Outlined builds.
-// parts.PrimaryButton is handed to a layout bare, so that walk passes over it
+// The filled parts.Button is handed to a layout bare, so that walk passes over it
 // without a word and stays green whatever happens to it. A rule with an
 // exception nobody checks is a rule that has quietly stopped covering the thing
 // it names, which in this repository has already happened to a register of
@@ -235,7 +244,7 @@ func TestTheFilledActionIsTheNamedExceptionToTheEdgeRule(t *testing.T) {
 		content := Assemble(i18n.English, data, state)
 
 		walkTree(content, false, func(object fyne.CanvasObject, _ bool) {
-			if _, filled := object.(*parts.PrimaryButton); filled {
+			if filledAction(object) != nil {
 				slabs++
 			}
 		})
@@ -255,9 +264,9 @@ func TestTheFilledActionIsTheNamedExceptionToTheEdgeRule(t *testing.T) {
 			// perfectly correct. What Outlined actually produces is a stack
 			// holding the control and the edge as SIBLINGS, so that is what is
 			// looked for.
-			var slab *parts.PrimaryButton
+			var slab *parts.Button
 			for _, child := range group.Objects {
-				if filled, is := child.(*parts.PrimaryButton); is {
+				if filled := filledAction(child); filled != nil {
 					slab = filled
 					break
 				}
@@ -273,6 +282,15 @@ func TestTheFilledActionIsTheNamedExceptionToTheEdgeRule(t *testing.T) {
 
 	if slabs == 0 {
 		t.Error("no filled action stands on any screen, so the exception this file names describes nothing. " +
-			"Either a screen lost its one action or parts.PrimaryButton is unused, and the second is what the palette entry was added to stop")
+			"Either a screen lost its one action or no button is filled, and the second is what the palette entry was added to stop")
 	}
+}
+
+// filledAction is the object as the one action of a screen, or nil when it is
+// anything else, an ordinary button included.
+func filledAction(object fyne.CanvasObject) *parts.Button {
+	if button, is := object.(*parts.Button); is && button.Filled {
+		return button
+	}
+	return nil
 }

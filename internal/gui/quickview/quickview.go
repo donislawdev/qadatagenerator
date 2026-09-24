@@ -88,7 +88,7 @@ type View struct {
 	// It took that role from copy, which held it from 2026-09-08 only because
 	// it was then the sole thing here anybody presses on purpose. Copying is
 	// what a person does AFTER they have what they came for.
-	generate *parts.PrimaryButton
+	generate *parts.Button
 
 	// settings holds whichever fields the chosen kind actually reads, and it is
 	// refilled rather than hidden.

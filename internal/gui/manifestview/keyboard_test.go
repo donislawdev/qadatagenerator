@@ -221,15 +221,11 @@ func TestTheKeyboardMeetsTheButtonsBeforeTheEntries(t *testing.T) {
 
 // labelOf is the words on whatever button the keyboard is standing on.
 //
-// Two kinds of button carry a label in this window and neither is a subtype of
-// the other: the ordinary one wraps the toolkit's, and the filled one is drawn
-// here from primitives. A guard about ORDER should not have to be edited every
-// time one of them becomes the other, which is exactly what happened.
+// One kind of button carries a label in this window since 2026-09-24, when the
+// filled one became a flag on the ordinary one. There were two until then,
+// neither a subtype of the other, and this switched on both.
 func labelOf(focused fyne.Focusable) (string, bool) {
-	switch button := focused.(type) {
-	case *parts.Button:
-		return button.Text, true
-	case *parts.PrimaryButton:
+	if button, is := focused.(*parts.Button); is {
 		return button.Text, true
 	}
 	return "", false

@@ -158,7 +158,7 @@ type View struct {
 	out      *parts.FieldEntry
 	choose   *parts.Button
 	replace  *parts.Check
-	generate *parts.PrimaryButton
+	generate *parts.Button
 	stop     *parts.Button
 	action   *fyne.Container
 	// keys moves the keyboard off the button a run takes away and back when

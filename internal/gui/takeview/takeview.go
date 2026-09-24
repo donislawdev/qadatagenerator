@@ -168,7 +168,7 @@ type View struct {
 	overwrite *parts.Check
 
 	chooseFile *parts.Button
-	damage     *parts.PrimaryButton
+	damage     *parts.Button
 	stop       *parts.Button
 }
 

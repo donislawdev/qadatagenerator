@@ -77,7 +77,7 @@ type View struct {
 	// The band: the two buttons, kept because a read puts them out of reach
 	// and something has to hold them to do it, and the slot of facts beside
 	// each, refilled with what is known about the file.
-	open          *parts.PrimaryButton
+	open          *parts.Button
 	respond       *parts.Button
 	manifestFacts *fyne.Container
 	responseFacts *fyne.Container

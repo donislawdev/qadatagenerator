@@ -74,6 +74,11 @@ type Button struct {
 	Leading bool
 	Plain   bool
 
+	// Filled marks the one action a screen is for, drawn as a slab in the
+	// accent rather than as another outlined word among several. NewPrimaryButton
+	// sets it, and a screen has exactly one.
+	Filled bool
+
 	// keyboardIsHere is kept here rather than read from the canvas, because the
 	// canvas is wrong about it at exactly the moment it changes: a control
 	// redraws from inside FocusLost, before the focus manager has moved its own
@@ -112,6 +117,37 @@ var (
 func NewButton(label string, tapped func()) *Button {
 	button := &Button{Text: label, OnTapped: tapped}
 	button.ExtendBaseWidget(button)
+	return button
+}
+
+// NewPrimaryButton builds the one action a screen is for: the same button,
+// filled.
+//
+// # Why the toolkit could not be asked for this
+//
+// widget.HighImportance is the toolkit's own filled button and it was measured
+// and turned down on 2026-09-05. A focused one is blend(primary, focus), and the
+// blend at widget/button.go:453 collapses an opaque overlay to the overlay
+// itself, so the button goes from its resting fill to the flat focus colour: a
+// focus mark of 1.23 where WCAG 1.4.11 asks for 3.0.
+//
+// # 🔴 Why this is a flag on Button and no longer a control of its own
+//
+// It was one until 2026-09-24, with a renderer keeping three shapes and a label
+// in bold, while the accepted drawing of every screen built the same action out
+// of paint.ButtonFace with Filled set. So the mock and the window drew the one
+// button a screen is for twice, differently: a bold label and widths of its own
+// in the window, the face's label and widths in the drawing the owner accepted.
+// That is the drift Button stopped drawing through the toolkit to end, back in
+// one control. The copy also carried every key and pointer handler of Button a
+// second time. Now the look is one branch of one face, and a change to how
+// buttons look is a change in one place.
+//
+// What the fill is, the ink on it and why that ink is white rather than the
+// ink every other label uses are measured beside paint.FilledGround.
+func NewPrimaryButton(label string, tapped func()) *Button {
+	button := NewButton(label, tapped)
+	button.Filled = true
 	return button
 }
 
@@ -250,7 +286,7 @@ func (b *Button) CreateRenderer() fyne.WidgetRenderer {
 // # Why the face is rebuilt rather than repainted
 //
 // A renderer usually keeps its shapes and changes their colours, which is what
-// PrimaryButton next door does with three of them. This one holds a face that
+// the filled button did with three of them until 2026-09-24. This one holds a face that
 // is a small tree - a ground, maybe a ring, a row of an icon and some words -
 // and the tree itself differs between states: a disabled button has no ring and
 // no edge, and a button with no icon has no image in it.
@@ -287,6 +323,7 @@ func (r *buttonRenderer) Refresh() {
 		Icon:     r.button.Icon,
 		Leading:  r.button.Leading,
 		Plain:    r.button.Plain,
+		Filled:   r.button.Filled,
 		Focused:  r.button.keyboardIsHere,
 		Disabled: r.button.Disabled(),
 		Hovered:  r.button.pointerIsHere,

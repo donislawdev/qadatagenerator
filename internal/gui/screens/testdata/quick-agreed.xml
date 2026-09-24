@@ -246,7 +246,7 @@
 										<text color="disabled" size="1054x16">Nothing on this screen is written to a file.</text>
 										<container pos="0,32" size="1054x52">
 											<container size="1054x52">
-												<container size="966x52">
+												<container size="950x52">
 													<container size="566x52">
 														<container size="118x52">
 															<text color="disabled" size="118x14" textSize="11">Kind</text>
@@ -401,24 +401,24 @@
 															</container>
 														</container>
 													</container>
-													<container pos="566,0" size="399x52">
-														<container pos="12,0" size="387x52">
-															<text color="disabled" size="387x14" textSize="11">Seed</text>
-															<container pos="0,18" size="387x34">
-																<rectangle size="387x34"/>
-																<container size="387x34">
-																	<container size="387x34">
-																		<rectangle fillColor="button" pos="1,1" radius="6" size="385x32" strokeColor="inputBorder" strokeWidth="2"/>
+													<container pos="566,0" size="383x52">
+														<container pos="12,0" size="371x52">
+															<text color="disabled" size="371x14" textSize="11">Seed</text>
+															<container pos="0,18" size="371x34">
+																<rectangle size="371x34"/>
+																<container size="371x34">
+																	<container size="371x34">
+																		<rectangle fillColor="button" pos="1,1" radius="6" size="369x32" strokeColor="inputBorder" strokeWidth="2"/>
 																	</container>
-																	<container size="387x34">
-																		<widget pos="8,8" size="371x26" type="*container.ThemeOverride">
-																			<container size="371x26">
-																				<widget size="371x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="371x26"/>
-																					<rectangle radius="6" size="371x25"/>
-																					<widget size="371x26" type="*widget.Scroll">
-																						<widget size="371x26" type="*widget.entryContent">
-																							<widget size="371x26" type="*widget.RichText">
+																	<container size="371x34">
+																		<widget pos="8,8" size="355x26" type="*container.ThemeOverride">
+																			<container size="355x26">
+																				<widget size="355x26" type="*parts.FieldEntry">
+																					<rectangle radius="6" size="355x26"/>
+																					<rectangle radius="6" size="355x25"/>
+																					<widget size="355x26" type="*widget.Scroll">
+																						<widget size="355x26" type="*widget.entryContent">
+																							<widget size="355x26" type="*widget.RichText">
 																								<text pos="4,4" size="86x16">for-the-picture</text>
 																							</widget>
 																						</widget>
@@ -432,16 +432,32 @@
 														</container>
 													</container>
 												</container>
-												<container pos="966,0" size="87x52">
-													<container pos="16,0" size="71x52">
-														<container size="71x15">
-															<rectangle size="71x15"/>
-															<rectangle size="71x15"/>
+												<container pos="950,0" size="103x52">
+													<container pos="16,0" size="87x52">
+														<container size="87x15">
+															<rectangle size="87x15"/>
+															<rectangle size="87x15"/>
 														</container>
-														<widget pos="0,15" size="71x34" type="*parts.PrimaryButton">
-															<rectangle fillColor="rgba(112,89,214,255)" radius="5" size="71x34"/>
-															<rectangle pos="2,2" radius="3" size="67x30" strokeWidth="2"/>
-															<text alignment="center" bold color="foregroundOnPrimary" pos="0,8" size="71x16">Generate</text>
+														<widget pos="0,15" size="87x34" type="*parts.Button">
+															<container size="87x34">
+																<container size="87x34">
+																	<rectangle size="87x34"/>
+																	<container size="87x34">
+																		<rectangle fillColor="rgba(112,89,214,255)" radius="6" size="87x34"/>
+																		<container size="87x34">
+																			<container pos="16,4" size="55x26">
+																				<container pos="0,4" size="55x16">
+																					<container size="55x16">
+																						<spacer size="55x0"/>
+																						<text bold color="foregroundOnPrimary" size="55x16">Generate</text>
+																						<spacer pos="0,16" size="55x0"/>
+																					</container>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</container>
+															</container>
 														</widget>
 													</container>
 												</container>

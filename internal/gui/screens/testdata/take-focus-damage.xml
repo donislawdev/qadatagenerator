@@ -251,11 +251,11 @@
 											</widget>
 										</container>
 										<container pos="0,40" size="1054x52">
-											<container size="924x52">
+											<container size="908x52">
 												<container size="129x52">
-													<container size="621x15">
-														<rectangle size="621x15"/>
-														<rectangle size="621x15"/>
+													<container size="605x15">
+														<rectangle size="605x15"/>
+														<rectangle size="605x15"/>
 													</container>
 													<widget pos="0,15" size="129x34" type="*parts.Button">
 														<container size="129x34">
@@ -286,28 +286,28 @@
 														</container>
 													</widget>
 												</container>
-												<container pos="129,0" size="795x52">
-													<container pos="12,0" size="783x52">
-														<container size="621x52">
-															<container size="621x15">
-																<rectangle size="621x15"/>
-																<rectangle size="621x15"/>
+												<container pos="129,0" size="779x52">
+													<container pos="12,0" size="767x52">
+														<container size="605x52">
+															<container size="605x15">
+																<rectangle size="605x15"/>
+																<rectangle size="605x15"/>
 															</container>
-															<container pos="0,15" size="621x34">
-																<rectangle size="621x34"/>
-																<container size="621x34">
-																	<spacer size="621x8"/>
-																	<container pos="0,8" size="621x16">
-																		<container size="621x16">
+															<container pos="0,15" size="605x34">
+																<rectangle size="605x34"/>
+																<container size="605x34">
+																	<spacer size="605x8"/>
+																	<container pos="0,8" size="605x16">
+																		<container size="605x16">
 																			<text bold size="75x16">contacts.csv</text>
 																			<text color="disabled" pos="83,0" size="141x16">· 12 records · 5 columns</text>
 																		</container>
 																	</container>
-																	<spacer pos="0,25" size="621x8"/>
+																	<spacer pos="0,25" size="605x8"/>
 																</container>
 															</container>
 														</container>
-														<container pos="621,0" size="161x52">
+														<container pos="605,0" size="161x52">
 															<container pos="12,0" size="149x52">
 																<container size="74x52">
 																	<text color="disabled" size="74x14" textSize="11">Field separator</text>
@@ -376,17 +376,35 @@
 													</container>
 												</container>
 											</container>
-											<container pos="924,0" size="129x52">
-												<container pos="16,0" size="113x52">
-													<container size="621x15">
-														<rectangle size="621x15"/>
-														<rectangle size="621x15"/>
+											<container pos="908,0" size="145x52">
+												<container pos="16,0" size="129x52">
+													<container size="605x15">
+														<rectangle size="605x15"/>
+														<rectangle size="605x15"/>
 													</container>
-													<container pos="0,15" size="113x34">
-														<widget size="113x34" type="*parts.PrimaryButton">
-															<rectangle fillColor="rgba(112,89,214,255)" radius="5" size="113x34"/>
-															<rectangle pos="2,2" radius="3" size="109x30" strokeColor="rgba(224,218,255,255)" strokeWidth="2"/>
-															<text alignment="center" bold color="foregroundOnPrimary" pos="0,8" size="113x16">Damage this file</text>
+													<container pos="0,15" size="129x34">
+														<widget size="129x34" type="*parts.Button">
+															<container size="129x34">
+																<container size="129x34">
+																	<rectangle size="129x34"/>
+																	<container size="129x34">
+																		<container size="129x34">
+																			<rectangle fillColor="rgba(112,89,214,255)" pos="1,1" radius="6" size="127x32" strokeColor="rgba(224,218,255,255)" strokeWidth="2"/>
+																		</container>
+																		<container size="129x34">
+																			<container pos="16,4" size="97x26">
+																				<container pos="0,4" size="97x16">
+																					<container size="97x16">
+																						<spacer size="97x0"/>
+																						<text bold color="foregroundOnPrimary" size="97x16">Damage this file</text>
+																						<spacer pos="0,16" size="97x0"/>
+																					</container>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</container>
+															</container>
 														</widget>
 													</container>
 												</container>

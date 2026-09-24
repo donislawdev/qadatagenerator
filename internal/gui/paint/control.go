@@ -108,16 +108,16 @@ func pointerGround(hovered, pressed bool) (ground, edge string) {
 	return "", theme.BorderControl
 }
 
-// FilledGround is the fill the one action of a screen takes, and the ink its
+// filledGround is the fill the one action of a screen takes, and the ink its
 // label is read in on that fill.
 //
-// # Why this one is exported where pointerGround above is not
+// # Why it stopped being exported on 2026-09-24
 //
-// Because it has a second reader. parts.PrimaryButton keeps three shapes and
-// recolours them instead of rebuilding a face, so it cannot ask ButtonFace for
-// this pair and would otherwise carry a copy of the rule. A rule with two
-// copies is a rule that holds until somebody edits one of them, and this one
-// pairs a fill with the only ink that fill can carry.
+// It had a second reader: a filled button that kept three shapes of its own and
+// recoloured them, and so could not ask ButtonFace for this pair. That button
+// is a flag on parts.Button now and wears this face, so the pair has one reader
+// and the rule one copy, which is how a fill stays with the only ink it can
+// carry.
 //
 // # 🔴 Why the ink does NOT move with the fill, corrected on 2026-09-09
 //
@@ -138,7 +138,7 @@ func pointerGround(hovered, pressed bool) (ground, edge string) {
 //
 // Where the old direction gave 4.23 on hover, under the 4.5 a label answers to,
 // which is what forced the ink to move in the first place.
-func FilledGround(hovered, pressed bool) (fill, ink string) {
+func filledGround(hovered, pressed bool) (fill, ink string) {
 	switch {
 	case pressed:
 		return theme.FillPressed, theme.TextOnFill
@@ -166,12 +166,14 @@ func FilledGround(hovered, pressed bool) (fill, ink string) {
 //   - DISABLED loses both the fill and the edge and keeps a quiet label. An
 //     edge says a control can be used, so leaving it on the one thing nobody
 //     can press would make it the most findable thing on the screen.
-//   - FOCUSED gains a ring INSIDE the shape, in the same ink as the label. It
-//     is inside rather than around for the reason PrimaryButton records: a ring
-//     on the outer edge sits where the resting edge already is, and reads as
-//     the button having grown rather than as a mark.
+//   - FOCUSED turns the edge mark.focus, the shade every control in this
+//     window marks focus with, and a filled button, which has no edge at rest,
+//     gains one. Until 2026-09-09 this line described a ring inside the shape
+//     in the ink of the label, which the owner saw on the sheet of states and
+//     called awful, and the code below changed while this sentence did not
+//     until 2026-09-24.
 //
-// The ring is drawn by this face rather than by the toolkit, which is the whole
+// The mark is drawn by this face rather than by the toolkit, which is the whole
 // point of the control wearing it. The toolkit's own answer floods the control
 // with the focus colour, and that flood was measured at 1.23 for the mark and
 // 1.56 for the label under it.
@@ -195,7 +197,7 @@ func ButtonFace(look ButtonLook) fyne.CanvasObject {
 		ground = Clear()
 	case look.Filled:
 		var fill string
-		fill, ink = FilledGround(look.Hovered, look.Pressed)
+		fill, ink = filledGround(look.Hovered, look.Pressed)
 		ground = Fill(fill, theme.RadiusControl)
 		if look.Focused {
 			// The one control with no edge at rest, so focus ADDS one rather
@@ -241,7 +243,15 @@ func ButtonFace(look ButtonLook) fyne.CanvasObject {
 	if look.Icon != "" {
 		row = append(row, Middle(Icon(look.Icon, ink, theme.IconSmall)))
 	}
-	row = append(row, Middle(Text(look.Label, theme.TypeBody, ink)))
+	// The one action of a screen carries its label at the weight of a heading,
+	// which is how the window drew it for as long as it was a control of its
+	// own. Kept on 2026-09-24 when it came onto this face, so that removing a
+	// copy of the drawing did not also change what a person had been looking at.
+	label := Text(look.Label, theme.TypeBody, ink)
+	if look.Filled {
+		label = Strong(look.Label, theme.TypeBody, ink)
+	}
+	row = append(row, Middle(label))
 
 	// The gap between the icon and the words comes from the scale here, which
 	// is the difference between this face and the toolkit's button: the toolkit

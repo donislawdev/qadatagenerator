@@ -12,6 +12,10 @@ repository once they are released.
 
 ### Changed
 
+- **The button a screen is for now has the same margins as every other
+  button**, so it is slightly wider, and when it cannot be pressed its label
+  dims the way theirs does.
+
 - **The Manifest browser has been rebuilt so that the whole table fits the
   window.** The table had six columns, and the two saying whether the damage
   happened and why it did not were off screen unless you scrolled sideways. It

@@ -91,18 +91,22 @@ var HandmadeAllowed = map[string]Handmade{
 			"gives a side whatever width its content asks for, which is the thing being avoided: " +
 			"the column would change width when a screen is added or a name is translated",
 	},
-	"PrimaryButton": {
-		Instead: "widget.Button at widget.HighImportance, which is the toolkit's own filled button",
-		Why: "a focused one is blend(primary, focus) and the blend at widget/button.go:453 collapses " +
-			"an opaque overlay to the overlay itself, so the button goes from its resting fill to the " +
-			"flat focus colour: a focus mark of 1.23 where WCAG 1.4.11 asks for 3.0. It would repair " +
-			"one button per screen by breaking the mark on that same one",
+	"evenRows": {
+		Instead: "layout.NewGridLayoutWithRows, read on the source of v2.8.1 (layout/gridlayout.go), " +
+			"which also divides its height into equal cells",
+		Why: "it puts theme.Padding() between the cells, a value of the GLOBAL theme that this window " +
+			"answers with nought in one theme and with a step of the scale in the other, so the gap " +
+			"between the values on the quick screen would follow whichever theme happened to be set. " +
+			"And its minimum is the tallest child times the rows, where a list of values needs a floor " +
+			"per row that the window can fall back to when it has nothing to spare",
 	},
-	"primaryRenderer": {
-		Instead: "the renderer widget.Button builds for itself",
-		Why: "it is the renderer that performs the blend above. Deciding what focus looks like is the " +
-			"whole reason this control exists, and a renderer is the only place the toolkit lets " +
-			"anybody decide it",
+	"fitHeight": {
+		Instead: "container.NewVBox and layout.NewSpacer, and the scrolling container around them",
+		Why: "a box gives each child its minimum and not one pixel more, and a spacer stretches the " +
+			"gaps between children rather than the children, so nothing in the library grows a card " +
+			"with the window up to a ceiling per row and leaves the surplus undrawn. The surplus has " +
+			"to stay off the card because an empty framed box read as a failure on the render of " +
+			"2026-09-08 (450 pixels of empty interior at 1600 by 1180)",
 	},
 	"Button": {
 		Instead: "widget.Button, which this was an extension of until 2026-09-09",
@@ -205,6 +209,16 @@ var HandmadeAllowed = map[string]Handmade{
 // move onto paint, the owner chose it over widget.Check on a render of the
 // screen (DEC-245), and the screen is rendered with it before anything else
 // on that screen changes.
+//
+// 🔴 Held at 13 on 2026-09-24 while two entries went and two came, and the
+// swap is stated rather than folded in. The filled button stopped being a
+// control of its own and became a flag on Button, so PrimaryButton and its
+// renderer left. evenRows and fitHeight had been built in paint with their
+// case written beside them and never entered here, so this guard was red on
+// both and the red was carried from session to session as known noise. They
+// are entered now with what in the library was read and why it does not fit.
+// The ceiling did not have to move to admit them, which is the only reason it
+// did not: two layouts the toolkit lacks are not a control drawn over again.
 //
 // What lowers it again: a control going back to the library, which will happen
 // if the toolkit ever lets a caller supply the content of a button. Nothing
