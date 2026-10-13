@@ -193,12 +193,17 @@ func TestARunDoesNotLeaveTheKeyboardOnSomethingItPutOutOfReach(t *testing.T) {
 // place was gone. Measured on 2026-08-24, and on 2026-09-01 the two scrolling
 // areas took that moment away by being somewhere to stand.
 //
-// The branch it protected is still reachable and still worth protecting,
-// because the mouse also leaves the keyboard nowhere: the toolkit clears focus
-// on every tap. Somebody who begins a run from the keyboard and then stops it
-// with the pointer is standing nowhere and is owed a place, and telling them
-// apart from somebody who only ever used the pointer is what the screen
-// remembers rather than looks at.
+// The branch it protected is still reachable and still worth protecting:
+// somebody who begins a run from the keyboard and ends up standing nowhere
+// before it ends is owed a place, and telling them apart from somebody who
+// only ever used the pointer is what the screen remembers rather than looks at.
+//
+// 🔴 This used to stand the keyboard nowhere by tapping the button, on the
+// belief that the toolkit clears focus on every tap. On this screen's own
+// button it does not, so from at least Fyne v2.8.1 the test skipped itself on
+// every run and guarded nothing (measured 2026-10-13, B-319). It now takes
+// the keyboard away itself, which is the state the branch is about, however
+// a person arrives at it.
 func TestTheKeyboardIsGivenBackToSomebodyWhoReachedForTheMouse(t *testing.T) {
 	view, runs, canvas := onACanvas(t)
 	standOn(t, canvas, view.damage)
@@ -209,16 +214,12 @@ func TestTheKeyboardIsGivenBackToSomebodyWhoReachedForTheMouse(t *testing.T) {
 	}
 
 	test.Tap(view.stop)
-	if canvas.Focused() != nil {
-		t.Skipf("tapping a button no longer clears the keyboard, it left it on %s, so the "+
-			"moment this guard is about no longer exists", describe(canvas.Focused()))
-	}
+	canvas.Unfocus()
 
 	runs.carryOut(t)
 	if canvas.Focused() != fyne.Focusable(view.damage) {
-		t.Errorf("a run was started from the keyboard and stopped with the mouse, which "+
-			"left the keyboard nowhere, and the end of the run put it on %s",
-			describe(canvas.Focused()))
+		t.Errorf("a run was started from the keyboard and the keyboard was standing nowhere "+
+			"when it ended, and the end of the run put it on %s", describe(canvas.Focused()))
 	}
 }
 
