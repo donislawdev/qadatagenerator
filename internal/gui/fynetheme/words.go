@@ -17,7 +17,9 @@ import (
 // # How the list was made, and what is left out on purpose
 //
 // Read on the source of fyne v2.8.1: every call of lang.L and lang.X under
-// dialog, widget and the desktop driver. Left out are the colour picker
+// dialog, widget and the desktop driver. That reading missed the words of an
+// empty chooser, which a second reading on v2.8.2 found as the only word asked
+// for and not handed over (B-322). Left out are the colour picker
 // (Advanced, Confirm) and the calendar (the names of the days), which this
 // window never opens. The names of the places at the side of the file dialog
 // (Home, Documents, Downloads) are drawn by the toolkit without asking, so they
@@ -50,6 +52,7 @@ var toolkitWords = map[string]i18n.Key{
 	"Undo":              i18n.ToolkitUndo,
 	"Redo":              i18n.ToolkitRedo,
 	"Quit":              i18n.ToolkitQuit,
+	"(Select one)":      i18n.ToolkitSelectOne,
 }
 
 // Speak makes the toolkit say its own words in the language of this window

@@ -148,6 +148,12 @@ repository once they are released.
 
 ### Fixed
 
+- **The window no longer writes a translation error to the terminal at every
+  start on a desktop set to Polish.** The words a chooser shows before anything
+  is chosen were missing from the words the window gives the toolkit, so it
+  reported a failure for every chooser it built while showing the right words
+  anyway.
+
 - **Saving the report from the About screen now tells you when the file
   could not be finished.** A failure while closing the file was ignored, so a
   report that never fully reached the disk looked saved.

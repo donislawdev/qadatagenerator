@@ -40,8 +40,9 @@ const (
 	WindowTitle Key = "window.title"
 
 	// The words the toolkit draws itself: the dialog a file is chosen in, the
-	// menu a text field opens under the right button, and the dialog an error
-	// is shown in. Without these the toolkit takes the language of the SYSTEM,
+	// menu a text field opens under the right button, the dialog an error is
+	// shown in, and the words a chooser holds before anything is chosen.
+	// Without these the toolkit takes the language of the SYSTEM,
 	// so on a Polish desktop the file dialog spoke Polish in the middle of an
 	// English interface (B-290). fynetheme.Speak hands them over.
 	ToolkitOpen            Key = "toolkit.open"
@@ -66,6 +67,7 @@ const (
 	ToolkitUndo            Key = "toolkit.undo"
 	ToolkitRedo            Key = "toolkit.redo"
 	ToolkitQuit            Key = "toolkit.quit"
+	ToolkitSelectOne       Key = "toolkit.select-one"
 
 	ScreenAbout    Key = "screen.about"
 	ScreenManifest Key = "screen.manifest"
@@ -563,7 +565,7 @@ var windowKeys = []Key{
 	ToolkitOpen, ToolkitSave, ToolkitCancel, ToolkitFile, ToolkitFolder, ToolkitNewFolder,
 	ToolkitCreateFolder, ToolkitName, ToolkitParent, ToolkitShowHiddenFiles, ToolkitEnterFilename,
 	ToolkitOK, ToolkitError, ToolkitYes, ToolkitNo, ToolkitCut, ToolkitCopy, ToolkitPaste,
-	ToolkitSelectAll, ToolkitUndo, ToolkitRedo, ToolkitQuit,
+	ToolkitSelectAll, ToolkitUndo, ToolkitRedo, ToolkitQuit, ToolkitSelectOne,
 	WindowTitle, ScreenAbout, ScreenManifest, ScreenTake, ScreenRecipe, ScreenQuick,
 	SidebarGroupMake, SidebarGroupCheck, SidebarOffline,
 

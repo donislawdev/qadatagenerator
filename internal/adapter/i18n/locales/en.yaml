@@ -42,6 +42,14 @@ toolkit.select-all: Select all
 toolkit.undo: Undo
 toolkit.redo: Redo
 toolkit.quit: Quit
+# What a chooser shows before anything is chosen. Every chooser on the five
+# screens gets a choice when it is built, so only the catalogue of controls
+# shows these words, but the toolkit measures the width of each chooser on
+# them (B-261). They stay the
+# toolkit's own, to the letter, so no chooser changes width. Missing here, the
+# toolkit wrote a translation failure to the error stream at every start on a
+# Polish desktop (B-322).
+toolkit.select-one: "(Select one)"
 
 # The headings the column groups the screen names under. They name what a
 # person came to do, which is why the screens sit in the order they do.
