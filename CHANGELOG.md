@@ -148,6 +148,19 @@ repository once they are released.
 
 ### Fixed
 
+- **Saving the report from the About screen now tells you when the file
+  could not be finished.** A failure while closing the file was ignored, so a
+  report that never fully reached the disk looked saved.
+
+- **A dataset generated from the Recipe screen now says in run-note.json
+  which directory you chose.** The `overrides` list carries `output.dir`
+  with the directory from the recipe and the one from the Write to field,
+  the same entry `qadg generate --out` writes. The field is recorded under
+  `from_flag`, which now means a value from outside the recipe, given by a
+  flag or by the window. Before this the window left the list empty, so a run
+  from the window and the same run from the command line left different
+  notes.
+
 - **The dialog you choose a file in, and the menu a text field opens under the
   right mouse button, now speak the language of the window.** They used to
   take the language of the operating system, so on a desktop set to another
@@ -637,6 +650,13 @@ repository once they are released.
   refused rather than guessed at. If you meant ten, write `10`.
 
 ### Security
+
+- **This build now compiles with go1.27.2 and the window with Fyne v2.8.2,
+  and every library underneath is at its latest release.** go1.27.2 carries
+  security fixes to the standard library, among them `net/http` and `os`,
+  which the window reaches through the toolkit it draws with. A scan of this
+  build finds no known vulnerability. Nothing about how you run either tool
+  changes.
 
 - **This build now compiles with go1.26.6 and a newer `golang.org/x/net`.**
   Five vulnerabilities in the Go standard library and one in `x/net` were
