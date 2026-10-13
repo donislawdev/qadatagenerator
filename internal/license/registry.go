@@ -302,10 +302,10 @@ type Component struct {
 var ThirdParty = []Component{
 	{
 		Module:  "fyne.io/fyne/v2",
-		Version: "v2.8.1",
+		Version: "v2.8.2",
 		License: "BSD-3-Clause",
 		Source:  "https://fyne.io/fyne/v2",
-		Checked: "2026-09-02",
+		Checked: "2026-10-13",
 	},
 	{
 		Module:  "fyne.io/systray",
@@ -330,31 +330,24 @@ var ThirdParty = []Component{
 	},
 	{
 		Module:  "github.com/anthonynsimon/bild",
-		Version: "v0.14.0",
+		Version: "v0.17.1",
 		License: "MIT",
 		Source:  "https://github.com/anthonynsimon/bild",
-		Checked: "2026-08-12",
+		Checked: "2026-10-13",
 	},
 	{
 		Module:  "github.com/clipperhouse/uax29/v2",
-		Version: "v2.2.0",
+		Version: "v2.7.0",
 		License: "MIT",
 		Source:  "https://github.com/clipperhouse/uax29/v2",
-		Checked: "2026-08-12",
-	},
-	{
-		Module:  "github.com/davecgh/go-spew",
-		Version: "v1.1.1",
-		License: "ISC",
-		Source:  "https://github.com/davecgh/go-spew",
-		Checked: "2026-08-12",
+		Checked: "2026-10-13",
 	},
 	{
 		Module:  "github.com/fsnotify/fsnotify",
-		Version: "v1.9.0",
+		Version: "v1.10.1",
 		License: "BSD-3-Clause",
 		Source:  "https://github.com/fsnotify/fsnotify",
-		Checked: "2026-08-12",
+		Checked: "2026-10-13",
 	},
 	{
 		Module:  "github.com/fyne-io/gl-js",
@@ -379,10 +372,10 @@ var ThirdParty = []Component{
 	},
 	{
 		Module:  "github.com/fyne-io/oksvg",
-		Version: "v0.2.0",
+		Version: "v0.2.1-0.20260918172519-a9af55fa95d9",
 		License: "BSD-3-Clause",
 		Source:  "https://github.com/fyne-io/oksvg",
-		Checked: "2026-08-12",
+		Checked: "2026-10-13",
 	},
 	{
 		Module:  "github.com/go-gl/gl",
@@ -393,10 +386,10 @@ var ThirdParty = []Component{
 	},
 	{
 		Module:  "github.com/go-gl/glfw/v3.4/glfw",
-		Version: "v0.1.0-pre.1.0.20260707082822-2a407d02d01a",
+		Version: "v0.1.0-pre.2",
 		License: "BSD-3-Clause",
 		Source:  "https://github.com/go-gl/glfw/v3.4/glfw",
-		Checked: "2026-08-12",
+		Checked: "2026-10-13",
 	},
 	{
 		Module:  "github.com/go-text/render",
@@ -407,10 +400,10 @@ var ThirdParty = []Component{
 	},
 	{
 		Module:  "github.com/go-text/typesetting",
-		Version: "v0.3.4",
+		Version: "v0.3.5",
 		License: "BSD-3-Clause",
 		Source:  "https://github.com/go-text/typesetting",
-		Checked: "2026-08-12",
+		Checked: "2026-10-13",
 	},
 	{
 		Module:  "github.com/goccy/go-yaml",
@@ -421,10 +414,10 @@ var ThirdParty = []Component{
 	},
 	{
 		Module:  "github.com/godbus/dbus/v5",
-		Version: "v5.2.2",
+		Version: "v5.2.4",
 		License: "BSD-2-Clause",
 		Source:  "https://github.com/godbus/dbus/v5",
-		Checked: "2026-08-12",
+		Checked: "2026-10-13",
 	},
 	{
 		Module:  "github.com/hack-pad/go-indexeddb",
@@ -435,10 +428,10 @@ var ThirdParty = []Component{
 	},
 	{
 		Module:  "github.com/hack-pad/safejs",
-		Version: "v0.1.0",
+		Version: "v0.1.1",
 		License: "Apache-2.0",
 		Source:  "https://github.com/hack-pad/safejs",
-		Checked: "2026-08-12",
+		Checked: "2026-10-13",
 	},
 	{
 		Module:  "github.com/jeandeaual/go-locale",
@@ -456,10 +449,10 @@ var ThirdParty = []Component{
 	},
 	{
 		Module:  "github.com/mattn/go-runewidth",
-		Version: "v0.0.24",
+		Version: "v0.0.31",
 		License: "MIT",
 		Source:  "https://github.com/mattn/go-runewidth",
-		Checked: "2026-08-12",
+		Checked: "2026-10-13",
 	},
 	{
 		Module:  "github.com/nfnt/resize",
@@ -470,17 +463,10 @@ var ThirdParty = []Component{
 	},
 	{
 		Module:  "github.com/nicksnyder/go-i18n/v2",
-		Version: "v2.5.1",
+		Version: "v2.6.1",
 		License: "MIT",
 		Source:  "https://github.com/nicksnyder/go-i18n/v2",
-		Checked: "2026-08-12",
-	},
-	{
-		Module:  "github.com/pmezard/go-difflib",
-		Version: "v1.0.0",
-		License: "BSD-2-Clause",
-		Source:  "https://github.com/pmezard/go-difflib",
-		Checked: "2026-08-12",
+		Checked: "2026-10-13",
 	},
 	{
 		Module:  "github.com/rymdport/portal",
@@ -505,52 +491,55 @@ var ThirdParty = []Component{
 	},
 	{
 		Module:  "github.com/stretchr/testify",
-		Version: "v1.11.1",
+		Version: "v1.12.1",
 		License: "MIT",
 		Source:  "https://github.com/stretchr/testify",
-		Checked: "2026-08-12",
+		Checked: "2026-10-13",
 	},
 	{
 		Module:  "github.com/yuin/goldmark",
-		Version: "v1.8.2",
+		Version: "v1.8.6",
 		License: "MIT",
 		Source:  "https://github.com/yuin/goldmark",
-		Checked: "2026-08-12",
+		Checked: "2026-10-13",
+	},
+	{
+		// The YAML library the testing toolkit moved to from gopkg.in/yaml.v3,
+		// carrying the same two licenses: MIT for the files ported from
+		// libyaml and Apache-2.0 for the rest.
+		Module:  "go.yaml.in/yaml/v3",
+		Version: "v3.0.5",
+		License: "MIT AND Apache-2.0",
+		Source:  "https://go.yaml.in/yaml/v3",
+		Checked: "2026-10-13",
 	},
 	{
 		Module:  "golang.org/x/image",
-		Version: "v0.43.0",
+		Version: "v0.47.0",
 		License: "BSD-3-Clause",
 		Source:  "https://golang.org/x/image",
-		Checked: "2026-08-12",
+		Checked: "2026-10-13",
 	},
 	{
 		Module:  "golang.org/x/net",
-		Version: "v0.55.0",
+		Version: "v0.61.0",
 		License: "BSD-3-Clause",
 		Source:  "https://golang.org/x/net",
-		Checked: "2026-08-17",
+		Checked: "2026-10-13",
 	},
 	{
 		Module:  "golang.org/x/sys",
-		Version: "v0.45.0",
+		Version: "v0.49.0",
 		License: "BSD-3-Clause",
 		Source:  "https://golang.org/x/sys",
-		Checked: "2026-08-17",
+		Checked: "2026-10-13",
 	},
 	{
 		Module:  "golang.org/x/text",
-		Version: "v0.38.0",
+		Version: "v0.43.0",
 		License: "BSD-3-Clause",
 		Source:  "https://golang.org/x/text",
-		Checked: "2026-08-12",
-	},
-	{
-		Module:  "gopkg.in/yaml.v3",
-		Version: "v3.0.1",
-		License: "Apache-2.0",
-		Source:  "https://gopkg.in/yaml.v3",
-		Checked: "2026-08-12",
+		Checked: "2026-10-13",
 	},
 }
 

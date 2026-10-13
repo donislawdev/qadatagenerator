@@ -316,8 +316,8 @@
 						</container>
 						<container pos="0,107" size="1118x736">
 							<widget size="1118x736" type="*parts.KeyScroll">
-								<container size="1118x2086">
-									<container pos="32,24" size="1054x2038">
+								<container size="1118x2019">
+									<container pos="32,24" size="1054x1971">
 										<container size="1054x153">
 											<rectangle fillColor="menuBackground" radius="10" size="1054x153" strokeColor="separator" strokeWidth="2"/>
 											<container size="1054x153">
@@ -635,7 +635,7 @@
 												</container>
 											</container>
 										</container>
-										<container pos="0,765" size="1054x1273">
+										<container pos="0,765" size="1054x1205">
 											<container size="1054x18">
 												<container pos="155,0" size="840x18">
 													<container pos="12,4" size="816x10">
@@ -651,24 +651,24 @@
 												</container>
 												<container pos="995,0" size="58x18">
 													<spacer size="58x1"/>
-													<text color="disabled" pos="0,1" size="58x14" textSize="11">36 modules</text>
+													<text color="disabled" pos="0,1" size="58x14" textSize="11">34 modules</text>
 													<spacer pos="0,16" size="58x1"/>
 												</container>
 											</container>
-											<container pos="0,30" size="1054x1242">
+											<container pos="0,30" size="1054x1175">
 												<container size="1054x22">
 													<container pos="4,4" size="1046x14">
-														<text color="disabled" size="560x14" textSize="11">Module</text>
-														<container pos="560,0" size="485x14">
-															<container size="293x14">
-																<rectangle size="293x14"/>
-																<text color="disabled" size="293x14" textSize="11">Version</text>
+														<text color="disabled" size="551x14" textSize="11">Module</text>
+														<container pos="551,0" size="494x14">
+															<container size="261x14">
+																<rectangle size="261x14"/>
+																<text color="disabled" size="261x14" textSize="11">Version</text>
 															</container>
-															<container pos="309,0" size="82x14">
-																<rectangle size="82x14"/>
-																<text color="disabled" size="82x14" textSize="11">License</text>
+															<container pos="277,0" size="123x14">
+																<rectangle size="123x14"/>
+																<text color="disabled" size="123x14" textSize="11">License</text>
 															</container>
-															<container pos="407,0" size="77x14">
+															<container pos="417,0" size="77x14">
 																<rectangle size="77x14"/>
 																<text color="disabled" size="77x14" textSize="11">License read on</text>
 															</container>
@@ -679,19 +679,19 @@
 												<container pos="0,23" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">fyne.io/fyne/v2</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v2.8.1</text>
+															<text size="551x16">fyne.io/fyne/v2</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v2.8.2</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-3-Clause</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">BSD-3-Clause</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-09-02</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -701,17 +701,17 @@
 												<container pos="0,57" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">fyne.io/systray</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v1.12.3-0.20260810170012-af4e8e793ec4</text>
+															<text size="551x16">fyne.io/systray</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v1.12.3-0.20260810170012-af4e8e793ec4</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">Apache-2.0</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">Apache-2.0</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
 																	<text color="disabled" size="77x16">2026-09-02</text>
 																</container>
@@ -723,17 +723,17 @@
 												<container pos="0,91" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/BurntSushi/toml</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v1.6.0</text>
+															<text size="551x16">github.com/BurntSushi/toml</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v1.6.0</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">MIT</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">MIT</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
 																	<text color="disabled" size="77x16">2026-08-12</text>
 																</container>
@@ -745,17 +745,17 @@
 												<container pos="0,125" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/FyshOS/fancyfs</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.0.1</text>
+															<text size="551x16">github.com/FyshOS/fancyfs</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.0.1</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-3-Clause</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">BSD-3-Clause</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
 																	<text color="disabled" size="77x16">2026-08-17</text>
 																</container>
@@ -767,19 +767,19 @@
 												<container pos="0,158" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/anthonynsimon/bild</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.14.0</text>
+															<text size="551x16">github.com/anthonynsimon/bild</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.17.1</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">MIT</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">MIT</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -789,19 +789,19 @@
 												<container pos="0,192" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/clipperhouse/uax29/v2</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v2.2.0</text>
+															<text size="551x16">github.com/clipperhouse/uax29/v2</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v2.7.0</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">MIT</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">MIT</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -811,19 +811,19 @@
 												<container pos="0,226" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/davecgh/go-spew</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v1.1.1</text>
+															<text size="551x16">github.com/fsnotify/fsnotify</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v1.10.1</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">ISC</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">BSD-3-Clause</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -833,17 +833,17 @@
 												<container pos="0,260" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/fsnotify/fsnotify</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v1.9.0</text>
+															<text size="551x16">github.com/fyne-io/gl-js</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.2.1-0.20260315212741-029c47fd27e8</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-3-Clause</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">BSD-3-Clause</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
 																	<text color="disabled" size="77x16">2026-08-12</text>
 																</container>
@@ -855,17 +855,17 @@
 												<container pos="0,294" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/fyne-io/gl-js</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.2.1-0.20260315212741-029c47fd27e8</text>
+															<text size="551x16">github.com/fyne-io/glfw-js</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.4.0</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-3-Clause</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">MIT</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
 																	<text color="disabled" size="77x16">2026-08-12</text>
 																</container>
@@ -877,17 +877,17 @@
 												<container pos="0,328" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/fyne-io/glfw-js</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.4.0</text>
+															<text size="551x16">github.com/fyne-io/image</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.1.1</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">MIT</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">BSD-3-Clause</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
 																	<text color="disabled" size="77x16">2026-08-12</text>
 																</container>
@@ -899,19 +899,19 @@
 												<container pos="0,362" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/fyne-io/image</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.1.1</text>
+															<text size="551x16">github.com/fyne-io/oksvg</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.2.1-0.20260918172519-a9af55fa95d9</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-3-Clause</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">BSD-3-Clause</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -921,17 +921,17 @@
 												<container pos="0,396" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/fyne-io/oksvg</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.2.0</text>
+															<text size="551x16">github.com/go-gl/gl</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.0.0-20260331235117-4566fea9a276</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-3-Clause</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">MIT</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
 																	<text color="disabled" size="77x16">2026-08-12</text>
 																</container>
@@ -943,19 +943,19 @@
 												<container pos="0,430" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/go-gl/gl</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.0.0-20260331235117-4566fea9a276</text>
+															<text size="551x16">github.com/go-gl/glfw/v3.4/glfw</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.1.0-pre.2</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">MIT</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">BSD-3-Clause</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -965,17 +965,17 @@
 												<container pos="0,464" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/go-gl/glfw/v3.4/glfw</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.1.0-pre.1.0.20260707082822-2a407d02d01a</text>
+															<text size="551x16">github.com/go-text/render</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.2.1</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-3-Clause</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">BSD-3-Clause</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
 																	<text color="disabled" size="77x16">2026-08-12</text>
 																</container>
@@ -987,19 +987,19 @@
 												<container pos="0,498" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/go-text/render</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.2.1</text>
+															<text size="551x16">github.com/go-text/typesetting</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.3.5</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-3-Clause</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">BSD-3-Clause</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -1009,19 +1009,19 @@
 												<container pos="0,531" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/go-text/typesetting</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.3.4</text>
+															<text size="551x16">github.com/goccy/go-yaml</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v1.19.2</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-3-Clause</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">MIT</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
+																	<text color="disabled" size="77x16">2026-08-01</text>
 																</container>
 															</container>
 														</container>
@@ -1031,19 +1031,19 @@
 												<container pos="0,565" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/goccy/go-yaml</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v1.19.2</text>
+															<text size="551x16">github.com/godbus/dbus/v5</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v5.2.4</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">MIT</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">BSD-2-Clause</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-01</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -1053,17 +1053,17 @@
 												<container pos="0,599" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/godbus/dbus/v5</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v5.2.2</text>
+															<text size="551x16">github.com/hack-pad/go-indexeddb</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.3.2</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-2-Clause</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">Apache-2.0</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
 																	<text color="disabled" size="77x16">2026-08-12</text>
 																</container>
@@ -1075,19 +1075,19 @@
 												<container pos="0,633" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/hack-pad/go-indexeddb</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.3.2</text>
+															<text size="551x16">github.com/hack-pad/safejs</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.1.1</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">Apache-2.0</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">Apache-2.0</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -1097,17 +1097,17 @@
 												<container pos="0,667" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/hack-pad/safejs</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.1.0</text>
+															<text size="551x16">github.com/jeandeaual/go-locale</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.0.0-20250612000132-0ef82f21eade</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">Apache-2.0</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">MIT</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
 																	<text color="disabled" size="77x16">2026-08-12</text>
 																</container>
@@ -1119,17 +1119,17 @@
 												<container pos="0,701" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/jeandeaual/go-locale</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.0.0-20250612000132-0ef82f21eade</text>
+															<text size="551x16">github.com/jsummers/gobmp</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.0.0-20230614200233-a9de23ed2e25</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">MIT</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">MIT</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
 																	<text color="disabled" size="77x16">2026-08-12</text>
 																</container>
@@ -1141,19 +1141,19 @@
 												<container pos="0,735" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/jsummers/gobmp</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.0.0-20230614200233-a9de23ed2e25</text>
+															<text size="551x16">github.com/mattn/go-runewidth</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.0.31</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">MIT</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">MIT</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -1163,17 +1163,17 @@
 												<container pos="0,769" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/mattn/go-runewidth</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.0.24</text>
+															<text size="551x16">github.com/nfnt/resize</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.0.0-20180221191011-83c6a9932646</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">MIT</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">ISC</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
 																	<text color="disabled" size="77x16">2026-08-12</text>
 																</container>
@@ -1185,19 +1185,19 @@
 												<container pos="0,803" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/nfnt/resize</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.0.0-20180221191011-83c6a9932646</text>
+															<text size="551x16">github.com/nicksnyder/go-i18n/v2</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v2.6.1</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">ISC</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">MIT</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -1207,17 +1207,17 @@
 												<container pos="0,837" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/nicksnyder/go-i18n/v2</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v2.5.1</text>
+															<text size="551x16">github.com/rymdport/portal</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.4.2</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">MIT</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">Apache-2.0</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
 																	<text color="disabled" size="77x16">2026-08-12</text>
 																</container>
@@ -1229,17 +1229,17 @@
 												<container pos="0,870" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/pmezard/go-difflib</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v1.0.0</text>
+															<text size="551x16">github.com/srwiley/oksvg</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.0.0-20221011165216-be6e8873101c</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-2-Clause</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">BSD-3-Clause</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
 																	<text color="disabled" size="77x16">2026-08-12</text>
 																</container>
@@ -1251,17 +1251,17 @@
 												<container pos="0,904" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/rymdport/portal</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.4.2</text>
+															<text size="551x16">github.com/srwiley/rasterx</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.0.0-20220730225603-2ab79fcdd4ef</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">Apache-2.0</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">BSD-3-Clause</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
 																	<text color="disabled" size="77x16">2026-08-12</text>
 																</container>
@@ -1273,19 +1273,19 @@
 												<container pos="0,938" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/srwiley/oksvg</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.0.0-20221011165216-be6e8873101c</text>
+															<text size="551x16">github.com/stretchr/testify</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v1.12.1</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-3-Clause</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">MIT</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -1295,19 +1295,19 @@
 												<container pos="0,972" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/srwiley/rasterx</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.0.0-20220730225603-2ab79fcdd4ef</text>
+															<text size="551x16">github.com/yuin/goldmark</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v1.8.6</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-3-Clause</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">MIT</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -1317,19 +1317,19 @@
 												<container pos="0,1006" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/stretchr/testify</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v1.11.1</text>
+															<text size="551x16">go.yaml.in/yaml/v3</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v3.0.5</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">MIT</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">MIT AND Apache-2.0</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -1339,19 +1339,19 @@
 												<container pos="0,1040" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">github.com/yuin/goldmark</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v1.8.2</text>
+															<text size="551x16">golang.org/x/image</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.47.0</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">MIT</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">BSD-3-Clause</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -1361,19 +1361,19 @@
 												<container pos="0,1074" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">golang.org/x/image</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.43.0</text>
+															<text size="551x16">golang.org/x/net</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.61.0</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-3-Clause</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">BSD-3-Clause</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -1383,19 +1383,19 @@
 												<container pos="0,1108" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">golang.org/x/net</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.55.0</text>
+															<text size="551x16">golang.org/x/sys</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.49.0</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-3-Clause</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">BSD-3-Clause</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-17</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -1405,63 +1405,19 @@
 												<container pos="0,1142" size="1054x32">
 													<container pos="4,8" size="1046x16">
 														<container size="1046x16">
-															<text size="560x16">golang.org/x/sys</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.45.0</text>
+															<text size="551x16">golang.org/x/text</text>
+															<container pos="551,0" size="494x16">
+																<container size="261x16">
+																	<rectangle size="261x16"/>
+																	<text color="disabled" size="261x16">v0.43.0</text>
 																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-3-Clause</text>
+																<container pos="277,0" size="123x16">
+																	<rectangle size="123x16"/>
+																	<text size="123x16">BSD-3-Clause</text>
 																</container>
-																<container pos="407,0" size="77x16">
+																<container pos="417,0" size="77x16">
 																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-17</text>
-																</container>
-															</container>
-														</container>
-													</container>
-												</container>
-												<rectangle fillColor="separator" pos="0,1175" size="1054x1"/>
-												<container pos="0,1176" size="1054x32">
-													<container pos="4,8" size="1046x16">
-														<container size="1046x16">
-															<text size="560x16">golang.org/x/text</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v0.38.0</text>
-																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">BSD-3-Clause</text>
-																</container>
-																<container pos="407,0" size="77x16">
-																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
-																</container>
-															</container>
-														</container>
-													</container>
-												</container>
-												<rectangle fillColor="separator" pos="0,1209" size="1054x1"/>
-												<container pos="0,1210" size="1054x32">
-													<container pos="4,8" size="1046x16">
-														<container size="1046x16">
-															<text size="560x16">gopkg.in/yaml.v3</text>
-															<container pos="560,0" size="485x16">
-																<container size="293x16">
-																	<rectangle size="293x16"/>
-																	<text color="disabled" size="293x16">v3.0.1</text>
-																</container>
-																<container pos="309,0" size="82x16">
-																	<rectangle size="82x16"/>
-																	<text size="82x16">Apache-2.0</text>
-																</container>
-																<container pos="407,0" size="77x16">
-																	<rectangle size="77x16"/>
-																	<text color="disabled" size="77x16">2026-08-12</text>
+																	<text color="disabled" size="77x16">2026-10-13</text>
 																</container>
 															</container>
 														</container>
@@ -1475,8 +1431,8 @@
 									<linearGradient endColor="shadow" pos="0,-8" size="1118x8"/>
 								</widget>
 								<widget pos="1112,0" size="6x736" type="*widget.scrollBarArea">
-									<widget pos="3,0" size="3x259" type="*widget.scrollBar">
-										<rectangle fillColor="scrollbar" radius="6" size="3x259"/>
+									<widget pos="3,0" size="3x268" type="*widget.scrollBar">
+										<rectangle fillColor="scrollbar" radius="6" size="3x268"/>
 									</widget>
 								</widget>
 							</widget>

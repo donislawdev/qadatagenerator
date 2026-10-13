@@ -57,7 +57,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GOTOOLCHAIN: go1.26.6
+  GOTOOLCHAIN: go1.27.2
   # The detector is built on cgo and does not work without it, and the window
   # in this module needs cgo to compile at all. Both reasons point the same
   # way here. The promise that the shipped command line binary needs no C
@@ -73,7 +73,7 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.26.6"
+          go-version: "1.27.2"
 
       - uses: ./.github/actions/window-libraries
 
