@@ -25,6 +25,12 @@ import (
 // (Home, Documents, Downloads) are drawn by the toolkit without asking, so they
 // are English on every desktop and are not here either.
 //
+// Since 2026-10-14 the reading is no longer by hand.
+// TestTheWordsHandedToTheToolkitAreTheWordsItAsksFor reads the source this
+// binary was compiled from and fails on a word asked for and neither handed
+// over nor left out with a reason, and on a word here the toolkit no longer
+// asks for. What is left out, and why, is listed beside it.
+//
 // A word missing from this list falls back to the English written in the
 // toolkit's own source, which is the language of this window today. It stops
 // being harmless the day a second interface language arrives, and that is the

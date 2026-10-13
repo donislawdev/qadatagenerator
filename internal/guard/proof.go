@@ -567,4 +567,5 @@ var toolGuards = []Guard{
 	{"the card under the table of the manifest browser reads out the entry the keyboard stands on and follows it from row to row", "TestTheCardReadsOutTheEntryTheKeyboardStandsOn", "internal/gui/manifestview", ByMutation},
 	{"the terminal line of the manifest browser names both files once both are open, and until then says which name is an example and keeps its copy out of reach", "TestTheTerminalLineNamesBothFilesOrSaysWhichIsAnExample", "internal/gui/manifestview", ByMutation},
 	{"a manifest the browser could not read is named in the band beside the word that it could not be read, and the card under the table says what went wrong", "TestADocumentThatCouldNotBeReadIsNamedInTheBandAndExplainedInTheCard", "internal/gui/manifestview", ByMutation},
+	{"every word the toolkit asks for is handed to it or left out with a reason, and every word handed to it is one it still asks for", "TestTheWordsHandedToTheToolkitAreTheWordsItAsksFor", "internal/gui/fynetheme", ByMutation},
 }
