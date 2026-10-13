@@ -68,17 +68,9 @@ func runQuick(out *streams, arguments []string, global crossCutting) int {
 		return code
 	}
 
-	left := set.Args()
-	if named == "" && len(left) == 1 {
-		named, left = left[0], nil
-	}
-	if named == "" || len(left) > 0 {
-		return usage(out, problem{
-			what:    problemQuickArguments,
-			why:     problemQuickArgumentsWhy,
-			allowed: problemQuickArgumentsAllowed,
-			instead: problemQuickArgumentsDo,
-		})
+	named, arity := oneGenerator(named, set.Args())
+	if arity.what != "" {
+		return usage(out, arity)
 	}
 
 	if refusal, tooLong := seedRefused(*seed); tooLong {
@@ -91,6 +83,27 @@ func runQuick(out *streams, arguments []string, global crossCutting) int {
 	}
 
 	return writeValues(out, *locale, *seed, named, wanted, boundBy(set, *gender, *birthDate))
+}
+
+// oneGenerator is the one generator the command line named, whether it stood
+// before the flags or after them, or the refusal when there was not exactly one.
+//
+// Apart from runQuick because that function passed the limit on the length of
+// a function. The seam is the one wholeCount below already uses: the flags are
+// read there, and what the arguments left over mean is answered here.
+func oneGenerator(named string, left []string) (string, problem) {
+	if named == "" && len(left) == 1 {
+		named, left = left[0], nil
+	}
+	if named == "" || len(left) > 0 {
+		return "", problem{
+			what:    problemQuickArguments,
+			why:     problemQuickArgumentsWhy,
+			allowed: problemQuickArgumentsAllowed,
+			instead: problemQuickArgumentsDo,
+		}
+	}
+	return named, problem{}
 }
 
 // wholeCount reads how many values were asked for, and says which way the text

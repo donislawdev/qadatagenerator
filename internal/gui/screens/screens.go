@@ -321,6 +321,20 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	// itself. That the button really copies is held by a test in the screen's
 	// own package against a clipboard of its own.
 	quickScreen := quickview.New(text, nil)
+	frame := shell.New(screenColumn(text, quickScreen, takeScreen, recipeScreen, view), brandOf(text))
+	settleScreens(state, data, quickScreen, takeScreen, recipeScreen, view)
+	frame.Open(state.Screen)
+	return frame.Content()
+}
+
+// screenColumn is the column of screens the frame shows, each with its name,
+// its group and its icon.
+//
+// It and settleScreens are apart from Assemble because that function passed
+// the limit on the length of a function. Assemble still makes every screen and
+// opens the one asked for, so what a state reaches is decided in one place.
+func screenColumn(text i18n.Catalogue, quickScreen *quickview.View, takeScreen *takeview.View,
+	recipeScreen *recipeview.View, view *manifestview.View) []shell.Screen {
 	// The order is the one the window itself uses, and it has to stay that way:
 	// these pictures are of the window, so a list in a different order here
 	// would record a window nobody opens. The reason for the order is at the
@@ -348,7 +362,13 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	// That they really write is held by the screen's own package.
 	column[screenAbout] = shell.Screen{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,
 		Content: about.Content(text, license.Current(), version.Current(), func([]byte) {}, assets.Notice)}
-	frame := shell.New(column, brandOf(text))
+	return column
+}
+
+// settleScreens puts every screen into the state asked for, through the calls
+// a person makes, before the frame opens the one the state names.
+func settleScreens(state State, data Data, quickScreen *quickview.View, takeScreen *takeview.View,
+	recipeScreen *recipeview.View, view *manifestview.View) {
 	settleQuick(quickScreen, state.Quick)
 	if state.Into != "" {
 		recipeScreen.SetOut(state.Into)
@@ -385,8 +405,6 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 		// asks the screen for something only a finished read can give it.
 		settle(takeScreen, state)
 	}
-	frame.Open(state.Screen)
-	return frame.Content()
 }
 
 // brandOf is the brand the program carries, so a render shows what a person

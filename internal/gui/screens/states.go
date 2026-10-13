@@ -61,6 +61,15 @@ func All() []State {
 // asked without one, which is what it is for and what makes a picture of it
 // worthless as a guard unless the seed is fixed here.
 func quickStates() []State {
+	return append(quickStatesOfAValue(), quickStatesOfARefusal()...)
+}
+
+// quickStatesOfAValue are that screen with values on it.
+//
+// Apart from the refusals below because the list of both passed the limit on
+// the length of a function. Joined in this order, which is the order the list
+// had as one.
+func quickStatesOfAValue() []State {
 	return []State{
 		{
 			// 🔴 The state named quick-empty stood here until 2026-09-08 and is
@@ -112,6 +121,12 @@ func quickStates() []State {
 			// state meant to show a plain value showed a refusal instead.
 			Quick: Quick{Generator: "ssn", Seed: "for-the-picture"},
 		},
+	}
+}
+
+// quickStatesOfARefusal are that screen saying why it produced nothing.
+func quickStatesOfARefusal() []State {
+	return []State{
 		{
 			Name: "quick-unavailable",
 			Purpose: "a value this build carries no data for in the locale chosen, which " +
@@ -254,7 +269,7 @@ func quickStatesOfThePanel() []State {
 // was identical, to the last of 1,965,600 pixels, to one with the pointer in
 // empty space. The owner saw it by using the program.
 //
-// # Why six, and why these six
+// # Why seven, and why these seven
 //
 // One per thing that cannot be seen in any of the others, rather than one per
 // control. The rule for the ordinary controls is a single function - the ground
@@ -267,6 +282,9 @@ func quickStatesOfThePanel() []State {
 //     signal it owns, and the step from hovered to pressed is the smallest
 //     measurement in this whole system at 1.131 (1.159 on the warm ladder
 //     before 2026-09-24, so the graphite made it smaller still).
+//   - the item of the screen that is open keeps its tint under the pointer
+//     rather than turning the grey of any other item, which no picture of
+//     another item can show.
 //   - the quiet button has an edge, and pressing is the one state where that
 //     edge moves, because the resting one measures 2.68 on the ground pressing
 //     gives it.
@@ -280,7 +298,7 @@ func quickStatesOfThePanel() []State {
 //     ground, which stopped being true on 2026-09-09 when the fill turned to
 //     go down rather than up.
 //
-// So three of the six are a state held down and three are a pointer resting,
+// So three of the seven are a state held down and four are a pointer resting,
 // and the pairing is not symmetric on purpose: a control is photographed
 // pressed only where pressing shows something hovering does not.
 //
@@ -289,6 +307,16 @@ func quickStatesOfThePanel() []State {
 // time this screen gains or loses a control, and the walk is the only thing
 // that says so.
 func quickStatesOfThePointer() []State {
+	return append(quickStatesOfThePointerOnTheColumn(), quickStatesOfThePointerOnAControl()...)
+}
+
+// quickStatesOfThePointerOnTheColumn are the three pictures of the column of
+// screens under a pointer.
+//
+// Apart from the controls below because the list of both passed the limit on
+// the length of a function. Joined in this order, which is the order the list
+// had as one.
+func quickStatesOfThePointerOnTheColumn() []State {
 	return []State{
 		{
 			Name: "quick-pointer-sidebar",
@@ -329,6 +357,14 @@ func quickStatesOfThePointer() []State {
 			Quick:   Quick{Seed: "for-the-picture"},
 			Pointer: Pointer{Tabs: 2, Pressed: true},
 		},
+	}
+}
+
+// quickStatesOfThePointerOnAControl are the pictures of the controls of the
+// screen itself under a pointer: the chooser, the quiet button and the filled
+// one.
+func quickStatesOfThePointerOnAControl() []State {
+	return []State{
 		{
 			Name: "quick-pointer-chooser",
 			Purpose: "the pointer on a chooser, which already has a ground at rest and so moves " +
@@ -369,6 +405,7 @@ func quickStatesOfThePointer() []State {
 func takeStates() []State {
 	states := append(takeStatesBeforeARun(), takeStateOfThePointer()...)
 	states = append(states, takeStatesOfTheKeyboard()...)
+	states = append(states, takeStateOfReading()...)
 	states = append(states, takeStatesOfARun()...)
 	return append(states, takeStatesOfWhatARunLeft()...)
 }
@@ -484,6 +521,17 @@ func takeStatesOfTheKeyboard() []State {
 			Layers:      []string{"L2", "L3"},
 			Keyboard:    Keyboard{Tabs: 9},
 		},
+	}
+}
+
+// takeStateOfReading is the screen while the file is still being read.
+//
+// It closed the list of the keyboard above until that list passed the limit on
+// the length of a function, and it is no place for the keyboard to stand, so it
+// is a list of its own. It still comes right after the keyboard in takeStates,
+// which is where it stood.
+func takeStateOfReading() []State {
+	return []State{
 		{
 			Name: "take-reading",
 			Purpose: "a file being read, which for a file this mode is for means walking " +

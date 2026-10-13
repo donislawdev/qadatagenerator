@@ -236,33 +236,7 @@ func ButtonFace(look ButtonLook) fyne.CanvasObject {
 			ground = inside(Bordered(fill, theme.MarkFocus, theme.RadiusControl))
 		}
 	case look.Plain:
-		// No edge at rest, so a pointer has only the ground to show with.
-		ground = Clear()
-		if look.Current {
-			under = currentGround(look.Hovered, look.Pressed)
-		}
-		if under != "" {
-			ground = Fill(under, theme.RadiusControl)
-		}
-		if look.Focused && !look.Disabled {
-			// 🔴 Except for focus, which has to be visible on every control
-			// that can hold the keyboard. Caught by the sheet of every state of
-			// every control on 2026-09-09 and by nothing else: moving focus
-			// from a ring to an edge left this branch drawing no mark at all,
-			// since it is the one branch that draws no edge to recolour. The
-			// tree still said the button was focused, so no test could see it.
-			//
-			// 🔴 An OUTLINE when this button has no ground of its own, and that
-			// distinction cost a second render. Asking for a bordered shape
-			// with no fill token named fills it with the fallback, so a plain
-			// button in focus came out as a solid white block - which the sheet
-			// showed at once and which the tree, again, called a focused button.
-			if under == "" {
-				ground = inside(Outline(theme.MarkFocus, theme.RadiusControl))
-			} else {
-				ground = inside(Bordered(under, theme.MarkFocus, theme.RadiusControl))
-			}
-		}
+		ground = plainGround(look, under)
 	case under == "":
 		// An edge around nothing rather than a fill of its own. A quiet
 		// button stands on three grounds here, and any fill would be a
@@ -272,6 +246,53 @@ func ButtonFace(look ButtonLook) fyne.CanvasObject {
 		ground = inside(Bordered(under, edge, theme.RadiusControl))
 	}
 
+	return AtLeast(look.Width, theme.ControlHeight, container.NewStack(ground, buttonWords(look, ink)))
+}
+
+// plainGround is the ground of a plain button, the one kind with no edge at
+// rest.
+//
+// Apart from ButtonFace because that function passed the limit on the length
+// of a function, and this branch is the longest of its switch. under is the
+// ground the pointer gives any button, which a button naming the place the
+// window is on replaces with its own.
+func plainGround(look ButtonLook, under string) fyne.CanvasObject {
+	// No edge at rest, so a pointer has only the ground to show with.
+	var ground fyne.CanvasObject = Clear()
+	if look.Current {
+		under = currentGround(look.Hovered, look.Pressed)
+	}
+	if under != "" {
+		ground = Fill(under, theme.RadiusControl)
+	}
+	if look.Focused && !look.Disabled {
+		// 🔴 Except for focus, which has to be visible on every control
+		// that can hold the keyboard. Caught by the sheet of every state of
+		// every control on 2026-09-09 and by nothing else: moving focus
+		// from a ring to an edge left this branch drawing no mark at all,
+		// since it is the one branch that draws no edge to recolour. The
+		// tree still said the button was focused, so no test could see it.
+		//
+		// 🔴 An OUTLINE when this button has no ground of its own, and that
+		// distinction cost a second render. Asking for a bordered shape
+		// with no fill token named fills it with the fallback, so a plain
+		// button in focus came out as a solid white block - which the sheet
+		// showed at once and which the tree, again, called a focused button.
+		if under == "" {
+			ground = inside(Outline(theme.MarkFocus, theme.RadiusControl))
+		} else {
+			ground = inside(Bordered(under, theme.MarkFocus, theme.RadiusControl))
+		}
+	}
+	return ground
+}
+
+// buttonWords is the icon and the label of a button, with the room either side
+// of them, in the ink the ground of the button asked for.
+//
+// Apart from ButtonFace for the reason plainGround is: the ground and the words
+// are two halves of one face, and the face passed the limit with both inside.
+func buttonWords(look ButtonLook, ink string) fyne.CanvasObject {
 	row := []fyne.CanvasObject{}
 	if look.Icon != "" {
 		// The icon takes the accent on every button that has no fill of its
@@ -312,8 +333,7 @@ func ButtonFace(look ButtonLook) fyne.CanvasObject {
 			theme.NameStepRelated, theme.NameStepRelated,
 			container.New(layout.NewBorderLayout(nil, nil, words, nil), words))
 	}
-
-	return AtLeast(look.Width, theme.ControlHeight, container.NewStack(ground, inner))
+	return inner
 }
 
 // inside puts a shape far enough in from its own bounds that a stroke centred
@@ -495,7 +515,7 @@ func ChooserFace(look ChooserLook) fyne.CanvasObject {
 		// absence of one.
 		under = theme.BgControl
 	}
-	var ground fyne.CanvasObject = inside(Bordered(under, edge, theme.RadiusControl))
+	ground := inside(Bordered(under, edge, theme.RadiusControl))
 	switch {
 	case look.Disabled:
 		ink = theme.TextSecondary

@@ -713,6 +713,19 @@ func printLicense(out *streams, machineReadable bool) {
 		out.emit("    " + component.License + "  " + component.Source)
 	}
 
+	printLicensedData(out)
+	printLicensedAssets(out)
+
+	out.emit("")
+	out.emit(license.GeneratedDataNotice)
+	out.emit("")
+	out.emit(license.SyntheticDataNotice)
+}
+
+// printLicensedData is the part of the licence report that names the reference
+// data, apart from printLicense because that function passed the limit on the
+// length of a function.
+func printLicensedData(out *streams) {
 	// The reference data ships inside this binary, so whoever received the
 	// binary is the person its terms bind. Naming it only in the repository
 	// would put the notice where they will not look.
@@ -730,7 +743,11 @@ func printLicense(out *streams, machineReadable bool) {
 			out.emit("      " + list)
 		}
 	}
+}
 
+// printLicensedAssets is the part of the licence report that names the faces
+// and the icons, apart for the same reason as printLicensedData.
+func printLicensedAssets(out *streams) {
 	// The faces and the icons ship inside the window binary, and the licence
 	// of each asks for its notice to be kept with it. Naming them here is
 	// what makes this report answer for the whole product rather than for
@@ -744,11 +761,6 @@ func printLicense(out *streams, machineReadable bool) {
 		out.emit("  " + asset.Asset + " " + asset.Version)
 		out.emit("    " + asset.License + "  " + asset.Source)
 	}
-
-	out.emit("")
-	out.emit(license.GeneratedDataNotice)
-	out.emit("")
-	out.emit(license.SyntheticDataNotice)
 }
 
 // seedRefused is the four part refusal for a seed longer than the surfaces

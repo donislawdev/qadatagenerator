@@ -335,7 +335,16 @@ func (v *View) Recheck(recipe string) {
 
 	v.checking = true
 	v.draw()
+	v.judge(recipe, wanted)
+}
 
+// judge starts the check of one recipe on a place of work and puts its answer
+// on the screen, unless a later keystroke has asked the question again.
+//
+// Apart from Recheck because that function passed the limit on the length of
+// a function. wanted is the number of the question this answer is to, which
+// is what tells an answer still worth showing from one about an older recipe.
+func (v *View) judge(recipe string, wanted int) {
 	name := v.text.T(i18n.RecipeName)
 	data := []byte(recipe)
 	check := v.check

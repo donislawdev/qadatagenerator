@@ -63,8 +63,8 @@ func arguments(args []string, out io.Writer) (launch, error) {
 	switch {
 	case errors.Is(err, flag.ErrHelp):
 		asked.help = true
-		fmt.Fprintln(out, "Usage: qadg-gui [flags]")
-		fmt.Fprintln(out, "Opens the window. The flags are:")
+		_, _ = fmt.Fprintln(out, "Usage: qadg-gui [flags]")
+		_, _ = fmt.Fprintln(out, "Opens the window. The flags are:")
 		flags.SetOutput(out)
 		flags.PrintDefaults()
 		return asked, nil

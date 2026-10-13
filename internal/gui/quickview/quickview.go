@@ -152,7 +152,14 @@ func New(text i18n.Catalogue, clipboard Clipboard) *View {
 // Content is what the frame is given.
 func (v *View) Content() fyne.CanvasObject { return v.content }
 
-func (v *View) build() {
+// buildChoosers makes the three lists of the screen: the kind of value, the
+// locale it is drawn from and the gender.
+//
+// It and the two after it are apart from build because that function passed
+// the limit on the length of a function. Each makes one family of controls and
+// none of them lays anything out, so where things stand is still decided in one
+// place, which is lay.
+func (v *View) buildChoosers() {
 	v.chooser = parts.NewSelect(v.generators, func(string) { v.draw() })
 	v.chooser.SetChoices(v.choices(), v.panelWords())
 	// The data locale, beside the interface language and never the same
@@ -165,6 +172,11 @@ func (v *View) build() {
 		v.draw()
 	})
 	v.gender = parts.NewSelect(v.genderChoices(), func(string) { v.draw() })
+}
+
+// buildFields makes the three fields somebody types into: how many values, the
+// date of birth and the seed. None of them produces while being typed into.
+func (v *View) buildFields() {
 	// Typed, so it waits for the button like the seed does (DEC-235). Without
 	// that, typing 500 would produce at 5, at 50 and at 500.
 	v.howMany = parts.NewFieldEntry()
@@ -216,7 +228,11 @@ func (v *View) build() {
 	// Enter does the same as the button, because a person who typed a seed
 	// has their hands on the keyboard.
 	v.seedBox.OnSubmitted = func(string) { v.draw() }
+}
 
+// buildActions makes the buttons of the screen, the line a terminal would take
+// and the two marks saying that the clipboard was filled.
+func (v *View) buildActions() {
 	v.copy = parts.NewButton(v.text.T(i18n.QuickCopy), v.putInClipboard)
 	v.generate = parts.NewPrimaryButton(v.text.T(i18n.QuickGenerate), v.draw)
 	v.again = parts.NewButton(v.text.T(i18n.QuickAgain), v.drawAgain)
@@ -261,6 +277,14 @@ func (v *View) build() {
 	// thing was said last.
 	v.copied = paint.Text("", palette.TypeLabel, palette.TextSecondary)
 	v.commandCopied = paint.Text("", palette.TypeLabel, palette.TextSecondary)
+}
+
+// build makes the controls, lays them out and opens the screen on a value. The
+// order of those steps matters, and the comments inside say why.
+func (v *View) build() {
+	v.buildChoosers()
+	v.buildFields()
+	v.buildActions()
 
 	// 🔴 The values are no longer ONE label, changed on 2026-09-09.
 	//
@@ -534,7 +558,7 @@ func (v *View) produce() {
 	// 🔴 Asked BEFORE the request is built, because a request carries an int
 	// and the field carries text. The two questions - is this a number, and is
 	// this a number of values - keep their two answers: the first is the mode's
-	// CountFrom, the second is the mode's Check a few lines below, and only the
+	// CountFrom, the second is the mode's Check in ask below, and only the
 	// ceiling in between belongs to this screen.
 	wanted, saidAboutCount := v.countAsked()
 	if saidAboutCount != "" {
@@ -542,7 +566,16 @@ func (v *View) produce() {
 		v.told.SetText(saidAboutCount)
 		return
 	}
+	v.ask(chosen, wanted)
+}
 
+// ask hands the mode the request and puts what came back on the screen: the
+// values, or the sentence saying why there are none.
+//
+// Apart from produce because that function passed the limit on the length of a
+// function. The seam is where everything this screen decides on its own is
+// done and only the mode's answer is left.
+func (v *View) ask(chosen string, wanted int) {
 	asked := v.request(chosen, wanted)
 	if refusal := quick.Check(asked); refusal.Refused() {
 		v.values = nil
@@ -671,7 +704,17 @@ func (v *View) showRows(generator string) {
 		return
 	}
 	v.showing = showing
+	v.placeSettings(v.settingsRow(showing))
+}
 
+// settingsRow is the row of settings for the fields the chosen kind reads, the
+// seed last and given whatever room the others leave.
+//
+// It and placeSettings are apart from showRows because that function passed
+// the limit on the length of a function. The seam is the early return in
+// showRows: everything after it builds, and runs only when the fields on screen
+// have to change.
+func (v *View) settingsRow(showing map[string]bool) fyne.CanvasObject {
 	fixed := []fyne.CanvasObject{
 		labelled(v.text.T(i18n.QuickLabelValue), v.chooser.OnScreen()),
 		// Second, and above the settings that only some generators read,
@@ -726,7 +769,12 @@ func (v *View) showRows(generator string) {
 	seed := labelled(v.text.T(i18n.QuickLabelSeed), parts.Standing(parts.Field(v.seedBox)))
 	withSeed := container.New(layout.NewBorderLayout(nil, nil, settings, nil),
 		settings, paint.PadLeft(palette.NameStepRelated, seed))
+	return withSeed
+}
 
+// placeSettings puts the row of settings in the band with the one action of
+// the screen beside it.
+func (v *View) placeSettings(withSeed fyne.CanvasObject) {
 	// The button stands beside the fields rather than under a label of its own,
 	// so it has to drop by the height of the label it does not have. The drop
 	// is measured on the label itself, not read off the type ladder: a line of
@@ -958,11 +1006,4 @@ var refusedSays = map[quick.RefusalKind]i18n.Key{
 	quick.UnreadableGender: i18n.QuickRefusedGender,
 	quick.UnreadableDate:   i18n.QuickRefusedDate,
 	quick.CountNotPositive: i18n.QuickRefusedCount,
-}
-
-func subdued(text string) fyne.CanvasObject {
-	label := widget.NewLabel(text)
-	label.Importance = widget.LowImportance
-	label.Wrapping = fyne.TextWrapWord
-	return label
 }

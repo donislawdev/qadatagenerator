@@ -1,7 +1,6 @@
 package parts
 
 import (
-	"fmt"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -131,7 +130,7 @@ func TestChooserDrawsItsValue(t *testing.T) {
 	defer window.Close()
 	window.Resize(fyne.NewSize(611, 44))
 
-	markup := fmt.Sprintf("%s", test.RenderToMarkup(window.Canvas()))
+	markup := test.RenderToMarkup(window.Canvas())
 	if !contains(markup, "pesel") {
 		t.Errorf(
 			"the chosen value is not in the rendered markup, so the control is"+

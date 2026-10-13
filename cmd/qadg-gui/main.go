@@ -169,8 +169,15 @@ func saveReport(window fyne.Window) about.Saver {
 			if into == nil {
 				return
 			}
-			defer into.Close()
+			// The close is asked about as well as the write, because a file
+			// that fails to close may not be on the disk at all, and a report
+			// somebody saved and cannot find is the same silence.
 			if _, err := into.Write(contents); err != nil {
+				_ = into.Close()
+				dialog.ShowError(err, window)
+				return
+			}
+			if err := into.Close(); err != nil {
 				dialog.ShowError(err, window)
 			}
 		}, window)
@@ -223,6 +230,17 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 	// application behind it, and the clipboard of the toolkit asks for one.
 	value := quickview.New(text, clipboard)
 
+	return shell.New(sidebar(text, window, value, damage, editor, browser), brand(text))
+}
+
+// sidebar is the column of screens the frame shows, each with its name, its
+// group and its icon.
+//
+// Apart from assemble because that function passed the limit on the length of
+// a function. assemble decides which reader and which place of work each
+// screen gets, and this decides where each one stands.
+func sidebar(text i18n.Catalogue, window fyne.Window, value *quickview.View, damage *takeview.View,
+	editor *recipeview.View, browser *manifestview.View) []shell.Screen {
 	// # Why this order, which changed on 2026-09-08
 	//
 	// The editor was first until then, and the reason was recorded here: it was
@@ -259,7 +277,7 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 	// TestEverySidebarScreenCarriesAnIcon reads both copies out of the source
 	// and refuses either one going bare, so the register is closed in the only
 	// way two lists in two packages can be.
-	return shell.New([]shell.Screen{
+	return []shell.Screen{
 		{Name: text.T(i18n.ScreenQuick), Group: making, Icon: paint.IconBolt,
 			Content: value.Content()},
 		{Name: text.T(i18n.ScreenTake), Group: making, Icon: paint.IconBreak,
@@ -271,7 +289,7 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 		{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,
 			Content: about.Content(text, license.Current(), version.Current(),
 				saveReport(window), assets.Notice)},
-	}, brand(text))
+	}
 }
 
 // brand is the name, the mark and the version at the foot of the column, which

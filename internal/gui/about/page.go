@@ -50,7 +50,7 @@ func howMany(text i18n.Catalogue, many int, one, rest i18n.Key) string {
 // it at the end of the rule, the same heading that stands over the table of
 // the manifest browser.
 func section(heading, count string, body fyne.CanvasObject) fyne.CanvasObject {
-	var aside fyne.CanvasObject = paint.Spacer()
+	aside := paint.Spacer()
 	if count != "" {
 		aside = paint.Middle(paint.Text(count, palette.TypeLabel, palette.TextSecondary))
 	}

@@ -90,6 +90,17 @@ func recipeStates() []State {
 // produces nothing. The last two arrived with the preview, and neither of them
 // had anywhere to be drawn before it.
 func recipeStatesOfTheAnswer() []State {
+	return append(recipeStatesOfTheReading(), recipeStatesOfTheWriting()...)
+}
+
+// recipeStatesOfTheReading are the answers about what is written: nothing,
+// something wrong, something usable, something being judged, and the rows a
+// usable recipe would produce.
+//
+// Apart from the answers about writing below because the list of both passed
+// the limit on the length of a function. Joined in this order, which is the
+// order the list had as one.
+func recipeStatesOfTheReading() []State {
 	return []State{
 		{
 			Name:    "recipe-empty",
@@ -122,6 +133,14 @@ func recipeStatesOfTheAnswer() []State {
 			Screen: screenRecipe,
 			Recipe: RelatedRecipe,
 		},
+	}
+}
+
+// recipeStatesOfTheWriting are the answers about writing a usable recipe: ready
+// to write, nothing to write, refused by the plan, an order of damage, a form
+// with nothing to export, and what a run left.
+func recipeStatesOfTheWriting() []State {
+	return []State{
 		{
 			Name: "recipe-ready",
 			Purpose: "a recipe that can be used with somewhere to write it, which is the " +

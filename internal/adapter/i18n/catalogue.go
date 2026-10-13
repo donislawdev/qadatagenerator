@@ -5,8 +5,10 @@ package i18n
 //
 // # Why a file of their own
 //
-// i18n.go is past the ceiling on the length of a file, and a ceiling may be
-// lowered and never raised. These keys are a register of their own as well:
+// i18n.go was past the ceiling on the length of a file when they came, and a
+// ceiling may be lowered and never raised (the keys of the take screen left it
+// for take.go for the same reason). These keys are a register of their own as
+// well:
 // they name the controls of the window and their states, and nothing a person
 // working with data ever reads. What stands ON the controls of the catalogue
 // is not here. The long text and the extreme values are samples, kept in

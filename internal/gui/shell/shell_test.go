@@ -156,22 +156,6 @@ func TestTheKeyboardMeetsTheNamesBeforeTheScreen(t *testing.T) {
 	}
 }
 
-// importancePaints is every importance that gives a button a colour of its
-// own, and the colour it gives.
-//
-// 🔴 Read out of the toolkit rather than remembered, at widget/button.go:383
-// in fyne v2.8.0, where buttonColorNames turns an importance into a pair of
-// theme colours. Medium and Low are absent on purpose: Low leaves the label on
-// the ordinary foreground and asks for a background only while the focus or
-// the pointer is on it, and that background is the button colour rather than
-// any colour carrying meaning here.
-var importancePaints = map[widget.Importance]string{
-	widget.HighImportance:    "in the primary colour",
-	widget.DangerImportance:  "in the error colour",
-	widget.WarningImportance: "in the warning colour",
-	widget.SuccessImportance: "in the success colour",
-}
-
 // The screen a person is on is marked by a shape, not by a colour alone.
 //
 // 🔴 Colour alone was what it used to be, and it collided with the one other
