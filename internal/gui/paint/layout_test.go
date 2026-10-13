@@ -63,23 +63,32 @@ func TestACardOfRowsNeverGrowsPastTheRoomItWasGiven(t *testing.T) {
 // A card that always took its minimum would pass the test above and lose the
 // thing FitHeight exists for: spending spare height on the rows a person is
 // reading rather than leaving it blank underneath them.
+//
+// 🔴 Until 2026-10-14 it compared the card in a short window with the card in a
+// tall one, and the short window was so short that the clamp of the test above
+// cut the card to the room. A card that never grew past its floor was then
+// still taller in the tall window, by its own margins, and passed (B-320). So
+// each size is compared with what the card was promised there, not with the
+// other size.
 func TestACardOfRowsStillGrowsWithTheWindow(t *testing.T) {
 	const rows = 10
+	chrome := theme.StepOf(theme.NameStepTight) * 2
 	card := canvas.NewRectangle(nil)
 	holder := FitHeight(rows, theme.NameStepTight, card)
 
-	holder.Resize(fyne.NewSize(600, theme.RowHeightMin*rows))
-	tight := card.Size().Height
-	holder.Resize(fyne.NewSize(600, theme.RowHeightMax*rows*2))
-	roomy := card.Size().Height
-
-	if roomy <= tight {
-		t.Errorf("the card is %v tall in a short window and %v in a tall one, so it stopped "+
-			"spending spare height on its rows", tight, roomy)
+	// Between the floor and the ceiling of its rows the card takes all of the
+	// room, which is what growing with the window means.
+	between := (theme.RowHeightMin+theme.RowHeightMax)/2*rows + chrome
+	holder.Resize(fyne.NewSize(600, between))
+	if got := card.Size().Height; got != between {
+		t.Errorf("the card was offered %v, which its rows can fill, and took %v, so it "+
+			"stopped spending spare height on its rows", between, got)
 	}
 	// And it stops growing where the ceiling says, or a list of three values in
 	// a tall window becomes three bands the height of a hand.
-	if want := theme.RowHeightMax*rows + theme.StepOf(theme.NameStepTight)*2; roomy > want {
-		t.Errorf("the card grew to %v where its rows cap out at %v", roomy, want)
+	holder.Resize(fyne.NewSize(600, theme.RowHeightMax*rows*2))
+	if got, want := card.Size().Height, theme.RowHeightMax*rows+chrome; got != want {
+		t.Errorf("in a window twice as tall as its rows can use, the card is %v where its "+
+			"rows cap out at %v", got, want)
 	}
 }
