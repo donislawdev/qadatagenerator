@@ -71,11 +71,15 @@ func TestMain(m *testing.M) {
 //     with it the size of the bar, which is the only thing here that says a
 //     panel started overflowing.
 func TestEveryScreenStillDrawsWhatItDrewBefore(t *testing.T) {
+	trees, err := filepath.Abs("testdata")
+	if err != nil {
+		t.Fatal(err)
+	}
 	data := sampleWithSource(t)
 	for _, state := range All() {
 		t.Run(state.Name, func(t *testing.T) {
 			drawn := render(t, data, state)
-			stored := filepath.Join("testdata", state.Name+".xml")
+			stored := filepath.Join(trees, state.Name+".xml")
 			if *update {
 				// 🔴 Refused rather than allowed to write a weaker tree. A file
 				// written where no scroll bar is drawn has none in it, and it
@@ -86,7 +90,7 @@ func TestEveryScreenStillDrawsWhatItDrewBefore(t *testing.T) {
 						"scroll bar there and the file would lose one for every system. Write them on " +
 						"Windows or Linux")
 				}
-				if err := os.MkdirAll("testdata", 0o755); err != nil {
+				if err := os.MkdirAll(trees, 0o755); err != nil {
 					t.Fatal(err)
 				}
 				if err := os.WriteFile(stored, []byte(drawn), 0o644); err != nil {
@@ -273,14 +277,24 @@ func TestEveryStateCanBeBuiltFromTheSample(t *testing.T) {
 // The file is written into a directory of the test rather than kept in the
 // repository, because the screen it feeds reads whatever it is pointed at and a
 // committed file would be a second thing to keep in step with the readers.
+//
+// 🔴 The test moves into that directory and names the file without it. The
+// screen writes the path into its command line, so until 2026-10-14 every stored
+// tree of the take screen carried the temporary directory of the machine that
+// wrote it: C:\WINDOWS\TEMP under one shell here, a directory with the name of
+// the account under another, /tmp on the runners. The guard was red on every
+// machine but one, and on all three runners the day they came back (B-295).
+// Whoever reads files of the package after this call resolves them first.
 func sampleWithSource(t *testing.T) Data {
 	t.Helper()
 	data := Sample()
-	path, err := SampleFile(t.TempDir())
+	dir := t.TempDir()
+	path, err := SampleFile(dir)
 	if err != nil {
 		t.Fatalf("cannot write the file the take and corrupt screen reads: %v", err)
 	}
-	data.SourcePath = path
+	t.Chdir(dir)
+	data.SourcePath = filepath.Base(path)
 	return data
 }
 

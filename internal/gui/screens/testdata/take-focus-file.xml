@@ -1093,7 +1093,7 @@
 											<spacer size="892x4"/>
 											<widget pos="0,4" size="892x24" type="*widget.Label">
 												<widget size="892x24" type="*widget.RichText">
-													<text monospace pos="4,4" size="881x16">qadg corrupt --layers L2,L3 --per-row exactly_one --delimiter , --locale en-US --seed 0 --out . C:\WINDOWS\TEMP\…</text>
+													<text monospace pos="4,4" size="842x16">qadg corrupt --layers L2,L3 --per-row exactly_one --delimiter , --locale en-US --seed 0 --out . contacts.csv</text>
 												</widget>
 											</widget>
 											<spacer pos="0,29" size="892x4"/>
