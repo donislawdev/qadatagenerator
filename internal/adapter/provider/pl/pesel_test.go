@@ -203,8 +203,12 @@ func TestACheckDigitOfNoughtIsProducedRatherThanTen(t *testing.T) {
 			found = value
 		}
 	}
+	// 🔴 A failure and not a skip (B-319). About one value in ten ends in
+	// nought, so a sample of two thousand without one says the generator stopped
+	// producing that digit, which is the fault this test is about.
 	if found == "" {
-		t.Skip("no value with a check digit of nought turned up in the sample")
+		t.Fatal("no value with a check digit of nought turned up in 2000 rows, where about " +
+			"one in ten should")
 	}
 	if findings := oracle.CheckPESEL(found); len(findings) != 0 {
 		t.Fatalf("%s ends in nought and the independent validator refuses it: %v", found, findings)

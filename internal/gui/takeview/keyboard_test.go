@@ -235,10 +235,15 @@ func TestTheKeyboardIsGivenBackToSomebodyWhoReachedForTheMouse(t *testing.T) {
 func TestARunStartedWithTheMouseLeavesTheKeyboardAlone(t *testing.T) {
 	view, runs, canvas := onACanvas(t)
 
+	// 🔴 A failure and not a skip (B-319). The other guard of this family
+	// skipped itself on every run for as long as nobody looked, because its
+	// premise had stopped holding. If this one stops holding, somebody has to
+	// decide what the screen should do now, and green would not tell them.
 	test.Tap(view.damage)
 	if canvas.Focused() != nil {
-		t.Skipf("tapping a button no longer clears the keyboard, it left it on %s, so the "+
-			"two cases this guard tells apart are no longer alike", describe(canvas.Focused()))
+		t.Fatalf("tapping a button no longer clears the keyboard, it left it on %s, so the "+
+			"two cases this guard tells apart are no longer alike and the guard needs "+
+			"rewriting", describe(canvas.Focused()))
 	}
 	if view.stage != stageRunning {
 		t.Fatalf("tapping the button left the screen in stage %d rather than in a run", view.stage)

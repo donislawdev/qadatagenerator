@@ -168,8 +168,12 @@ func TestAKindWithoutDataInThisLocaleSaysWhyNot(t *testing.T) {
 				generator, quick.DefaultLocale, why, about.Unavailable)
 		}
 	}
+	// 🔴 A failure and not a skip (B-319). The day the last kind gets its data
+	// is a good day, and it is also the day this guard stops guarding, so it
+	// says so rather than going quiet.
 	if !found {
-		t.Skip("every kind this build carries can be produced in the default locale, so there is " +
-			"nothing here to describe as unavailable")
+		t.Fatal("every kind this build carries can be produced in the default locale, so " +
+			"nothing here is described as unavailable. Point this test at a locale or a " +
+			"kind that still lacks data")
 	}
 }

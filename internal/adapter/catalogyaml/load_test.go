@@ -102,8 +102,12 @@ func TestAnEmptyAfterValueIsAResultAndNotAGap(t *testing.T) {
 		t.Fatalf("load: %v", err)
 	}
 	entry, ok := loaded.Lookup("L2.string.empty")
+	// 🔴 A failure and not a skip (B-319). An identifier of a mutator is never
+	// removed, so its absence is a fault of its own, and a skip would have
+	// turned it green.
 	if !ok {
-		t.Skip("L2.string.empty is not in this catalog any more")
+		t.Fatal("L2.string.empty is not in this catalog any more, and an identifier of a " +
+			"mutator is deprecated rather than removed")
 	}
 	if entry.Example.After != "" {
 		t.Errorf("after is %q, and the mutator replaces a text value with an empty string",
