@@ -148,6 +148,13 @@ repository once they are released.
 
 ### Fixed
 
+- **`qadg generate` no longer cuts a log line short when a flag sets
+  something the recipe leaves out.** With `--out`, `--seed` or `--format` on
+  a recipe that does not set that value, the line ended on "rather than from
+  the recipe as" and nothing else. It now ends with "and the recipe does not
+  set it". A flag given with nothing after the equals sign, such as
+  `--seed=`, is now shown as an empty value instead of a gap.
+
 - **The window no longer writes a translation error to the terminal at every
   start on a desktop set to Polish.** The words a chooser shows before anything
   is chosen were missing from the words the window gives the toolkit, so it

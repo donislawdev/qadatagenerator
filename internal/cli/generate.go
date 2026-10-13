@@ -329,8 +329,7 @@ func writePlan(out *streams, plan generate.Plan, applied []produce.Override, fla
 		out.warn(skipped.Where + ": " + skipped.What)
 	}
 	for _, moved := range applied {
-		out.detail(moved.Setting + " came from the command line as " + moved.FromFlag +
-			" rather than from the recipe as " + moved.FromRecipe)
+		out.detail(overrideLine(moved))
 	}
 	for _, planned := range plan.Entities {
 		out.detail(planned.Entity + ": " + counted(planned.Rows, "row") + ", " +
@@ -342,6 +341,25 @@ func writePlan(out *streams, plan generate.Plan, applied []produce.Override, fla
 	}
 	out.note(counted(len(plan.Entities), "table") + ", " +
 		counted(plan.TotalRows(), "row") + ending)
+}
+
+// overrideLine says what one flag moved, as a whole sentence on either side.
+//
+// A recipe may leave a setting out, and a flag may be given with nothing after
+// the equals sign. Until 2026-10-14 both ended the line on a dangling "as ",
+// which reads as a log that was cut off (B-317). The record in the note keeps
+// the empty value as it is, because a program reading it wants the value and
+// not a sentence.
+func overrideLine(moved produce.Override) string {
+	given := moved.FromFlag
+	if given == "" {
+		given = "an empty value"
+	}
+	line := moved.Setting + " came from the command line as " + given
+	if moved.FromRecipe == "" {
+		return line + ", and the recipe does not set it"
+	}
+	return line + " rather than from the recipe as " + moved.FromRecipe
 }
 
 // jsonPlan is the plan as a document, which is the part of the note beside the

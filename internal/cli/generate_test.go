@@ -382,6 +382,57 @@ func TestAFlagThatOverridesTheRecipeSaysSo(t *testing.T) {
 	}
 }
 
+// A setting the recipe leaves out, or a flag given with nothing after the
+// equals sign, still gets a whole sentence in the log. Until 2026-10-14 both
+// ended the line on "as " and nothing else (B-317).
+func TestTheLineAboutAnOverrideIsWholeWhenOneSideIsEmpty(t *testing.T) {
+	const bare = `version: "0.1"
+locale: pl-PL
+entities:
+  customer:
+    count: 3
+    fields:
+      pesel: { generator: pesel }
+`
+	dir := t.TempDir()
+	named := recipeIn(t, dir, smallRecipe(filepath.Join(dir, "data")))
+	unnamed := recipeIn(t, t.TempDir(), bare)
+
+	cases := []struct {
+		name   string
+		args   []string
+		recipe string
+		want   []string
+	}{
+		{"both sides named", []string{"--seed", "another"}, named,
+			[]string{"seed came from the command line as another rather than from the recipe as test-seed"}},
+		{"the recipe sets none of them", []string{"--seed", "another", "--out", "elsewhere", "--format", "json"}, unnamed,
+			[]string{
+				"seed came from the command line as another, and the recipe does not set it",
+				"output.dir came from the command line as elsewhere, and the recipe does not set it",
+				"output.format came from the command line as json, and the recipe does not set it",
+			}},
+		{"the flag is empty", []string{"--seed="}, named,
+			[]string{"seed came from the command line as an empty value rather than from the recipe as test-seed"}},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			args := append([]string{commandGenerate, "--dry-run"}, c.args...)
+			got := run(append(args, c.recipe)...)
+			for _, line := range c.want {
+				if !strings.Contains(got.log, line) {
+					t.Errorf("the log does not say %q:\n%s", line, got.log)
+				}
+			}
+			for _, line := range strings.Split(got.log, "\n") {
+				if strings.HasSuffix(strings.TrimSpace(line), " as") {
+					t.Errorf("a line of the log stops halfway: %q", line)
+				}
+			}
+		})
+	}
+}
+
 // temporaries returns the part files a run may have left behind.
 func temporaries(t *testing.T, dir string) []string {
 	t.Helper()
