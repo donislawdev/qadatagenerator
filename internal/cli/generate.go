@@ -255,8 +255,9 @@ func overrides(built *recipe.Recipe, own *generateFlags) []produce.Override {
 		built.Seed = *own.seed
 	}
 	if own.given["out"] {
-		applied = append(applied, moved("output.dir", built.Output.Dir, *own.out))
-		built.Output.Dir = *own.out
+		// Through the run rather than here, because the window moves the same
+		// setting with its own field and the note has to say it the same way.
+		applied = append(applied, produce.MoveDir(built, *own.out))
 	}
 	if own.given["format"] {
 		applied = append(applied, moved(settingFormat, built.Output.Format, *own.format))
@@ -265,8 +266,8 @@ func overrides(built *recipe.Recipe, own *generateFlags) []produce.Override {
 	return applied
 }
 
-// moved is one override, named field by field so that the three calls above
-// read as the setting and its two sides.
+// moved is one override, named field by field so that the calls above read as
+// the setting and its two sides.
 func moved(setting, fromRecipe, fromFlag string) produce.Override {
 	return produce.Override{Setting: setting, FromRecipe: fromRecipe, FromFlag: fromFlag}
 }

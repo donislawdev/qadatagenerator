@@ -67,7 +67,33 @@ type NoteEntry struct {
 type Override struct {
 	Setting    string `json:"setting"`
 	FromRecipe string `json:"from_recipe"`
-	FromFlag   string `json:"from_flag"`
+	// FromFlag is the value that came from outside the recipe: a flag on the
+	// command line, or a control in the window (DEC-255). The name stayed when
+	// the window began to write here, because the note is a file on somebody's
+	// disk and a second name would split one record of one setting in two.
+	FromFlag string `json:"from_flag"`
+}
+
+// settingDir is the name the note gives the directory a run writes to.
+const settingDir = "output.dir"
+
+// MoveDir points a recipe at a directory given from outside it, and returns the
+// record of the move.
+//
+// # Why one function for both surfaces
+//
+// The command line moves the directory with --out and the window with its
+// field, and the note has to say the same of both (DEC-255). Until 2026-10-13
+// only the command line said it, and two runs of one recipe left two notes
+// that differed in nothing but this record (B-311). Kept in one place, the
+// name of the setting and what counts as a move cannot drift between them.
+//
+// A directory equal to the recipe's own is still a move, because it was given
+// from outside: the recipe could change under it and the run would not follow.
+func MoveDir(rec *recipe.Recipe, into string) Override {
+	moved := Override{Setting: settingDir, FromRecipe: rec.Output.Dir, FromFlag: into}
+	rec.Output.Dir = into
+	return moved
 }
 
 // Tables is the tables of a plan as the note and the machine readable plan

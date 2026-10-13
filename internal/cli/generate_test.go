@@ -151,6 +151,49 @@ func TestTheNoteSaysWhichSettingsTheCommandLineOverrode(t *testing.T) {
 	}
 }
 
+// A directory given on the command line is where the run writes, and the note
+// records it even when the recipe names the same one.
+//
+// The window records its field on every run, because the line it shows for a
+// terminal carries --out whenever the field holds anything, and the two notes
+// have to say the same thing of one run (DEC-255). This pins the half of that
+// promise that belongs to the command line: a flag that was given is a move,
+// whatever it moved to.
+//
+// 🔴 The case of another directory also asks where the files went. Until
+// 2026-10-13 no test did, and a mutation leaving the recipe pointing at its own
+// directory was green on every test of this package.
+func TestADirectoryFromTheCommandLineIsWhereTheRunWritesAndTheNoteSaysSo(t *testing.T) {
+	for _, each := range []struct {
+		name   string
+		inside func(dir string) string
+	}{
+		{"the recipe names the same directory", func(dir string) string { return filepath.Join(dir, "data") }},
+		{"the recipe names another directory", func(dir string) string { return filepath.Join(dir, "elsewhere") }},
+	} {
+		t.Run(each.name, func(t *testing.T) {
+			dir := t.TempDir()
+			out := filepath.ToSlash(filepath.Join(dir, "data"))
+			named := filepath.ToSlash(each.inside(dir))
+			path := recipeIn(t, dir, smallRecipe(named))
+
+			if got := run(commandGenerate, "--out", out, path); got.code != 0 {
+				t.Fatalf("the run ended with %d: %s", got.code, got.log)
+			}
+			note := noteIn(t, out)
+			want := produce.Override{Setting: "output.dir", FromRecipe: named, FromFlag: out}
+			if len(note.Overrides) != 1 || note.Overrides[0] != want {
+				t.Errorf("the note carries %+v rather than %+v", note.Overrides, want)
+			}
+			if named != out {
+				if _, err := os.Stat(named); err == nil {
+					t.Errorf("the run wrote into %s, which the flag moved it away from", named)
+				}
+			}
+		})
+	}
+}
+
 // noteIn reads the record of the run a verb left beside its data.
 func noteIn(t *testing.T, out string) produce.RunNote {
 	t.Helper()

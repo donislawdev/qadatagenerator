@@ -256,6 +256,24 @@ func TestTheNoteBesideTheDataSaysTheValuesAreSynthetic(t *testing.T) {
 	}
 }
 
+// Moving the directory records both sides and leaves the recipe pointing where
+// it was moved, which is what the settings of a run promise of the recipe handed
+// in: it already carries the values that won.
+func TestMovingTheDirectoryRecordsBothSidesAndMovesTheRecipe(t *testing.T) {
+	rec := related(1)
+	rec.Output.Dir = "from-the-recipe"
+
+	got := MoveDir(&rec, "from-outside")
+
+	want := Override{Setting: "output.dir", FromRecipe: "from-the-recipe", FromFlag: "from-outside"}
+	if got != want {
+		t.Errorf("the record of the move is %+v rather than %+v", got, want)
+	}
+	if rec.Output.Dir != "from-outside" {
+		t.Errorf("the recipe still points at %q after the move", rec.Output.Dir)
+	}
+}
+
 // 🔴 The note about file_per_entity is said only when the recipe wrote it.
 //
 // It was said whenever the setting was false, and false is also what a recipe

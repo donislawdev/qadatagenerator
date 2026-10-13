@@ -221,15 +221,7 @@ output:
 	if _, err := os.Stat(filepath.Join(dir, "dataset.json")); err != nil {
 		t.Errorf("output.format in the recipe did not reach the run: %v", err)
 	}
-	read, err := os.ReadFile(filepath.Join(dir, produce.RunNoteName))
-	if err != nil {
-		t.Fatalf("the run left no note: %v", err)
-	}
-	var note produce.RunNote
-	if err := json.Unmarshal(read, &note); err != nil {
-		t.Fatalf("the note cannot be read: %v", err)
-	}
-	if note.Seed != seed {
+	if note := noteIn(t, dir); note.Seed != seed {
 		t.Errorf("the seed in the recipe did not reach the run: the note carries %q", note.Seed)
 	}
 	if _, err := os.Stat(filepath.Join(dir, manifestexport.FileFor(form))); err != nil {
@@ -263,6 +255,53 @@ func TestAnExtraFormOnARecipeWithoutAPolicySaysItHasNothingToExport(t *testing.T
 	if _, err := os.Stat(filepath.Join(dir, manifestjson.Name)); err == nil {
 		t.Error("a recipe without a policy left a manifest")
 	}
+}
+
+// 🔴 The note a run from this screen leaves says that the directory came from
+// outside the recipe, the way the note from a terminal says it of --out
+// (DEC-255).
+//
+// Until 2026-10-13 it said nothing (B-311): one recipe through both surfaces
+// gave the same data and two notes that differed in this record alone. The
+// record has two sides, so there are two recipes: one naming no directory,
+// whose side is empty, and one naming a directory the field moved away from.
+// The second also asks that the run went where the field said, rather than
+// where the recipe did.
+func TestTheNoteSaysTheDirectoryCameFromTheScreenTheWayItSaysItOfTheFlag(t *testing.T) {
+	for _, each := range []struct {
+		name, recipe, fromRecipe string
+	}{
+		{"the recipe names no directory", screens.PolicyRecipe, ""},
+		{"the recipe names another directory", screens.PolicyRecipe + "output:\n  dir: elsewhere\n", "elsewhere"},
+	} {
+		t.Run(each.name, func(t *testing.T) {
+			view, dir := readyWith(t, each.recipe)
+
+			view.Start()
+
+			if _, failed, ran := view.Written(); !ran || failed != nil {
+				t.Fatalf("the run did not finish: ran %v, failed %v", ran, failed)
+			}
+			want := produce.Override{Setting: "output.dir", FromRecipe: each.fromRecipe, FromFlag: dir}
+			if note := noteIn(t, dir); len(note.Overrides) != 1 || note.Overrides[0] != want {
+				t.Errorf("the note carries %+v rather than %+v", note.Overrides, want)
+			}
+		})
+	}
+}
+
+// noteIn reads the record of the run this screen left beside its data.
+func noteIn(t *testing.T, dir string) produce.RunNote {
+	t.Helper()
+	read, err := os.ReadFile(filepath.Join(dir, produce.RunNoteName))
+	if err != nil {
+		t.Fatalf("the run left no note: %v", err)
+	}
+	var note produce.RunNote
+	if err := json.Unmarshal(read, &note); err != nil {
+		t.Fatalf("the note cannot be read: %v", err)
+	}
+	return note
 }
 
 // 🔴 The names on screen before the button is pressed are the names the run

@@ -27,12 +27,22 @@ import (
 // what lets the rows on screen be a promise about the file rather than an
 // illustration beside it, and a recipe with a policy give the same damage here
 // as in a terminal (DEC-252).
+//
+// # Why the directory is recorded as moved
+//
+// The field on this screen does what --out does in a terminal, and the note
+// beside the data says so the way it says it for the flag (DEC-255). It is
+// recorded exactly when the line this screen shows for a terminal carries
+// --out, which is whenever the field holds anything, so the note from the
+// window is the note that line would leave.
 func Writer() Write {
 	return func(recipe []byte, settings produce.Settings,
 		stop generate.Halt) (produce.Written, error) {
-		decoded := decodeRecipe(recipe)
-		prepared, err := produce.Prepare(decoded.Recipe,
-			values.New(decoded.Recipe.Locale, decoded.Recipe.Seed))
+		built := decodeRecipe(recipe).Recipe
+		if settings.Into != "" {
+			settings.Overrides = append(settings.Overrides, produce.MoveDir(&built, settings.Into))
+		}
+		prepared, err := produce.Prepare(built, values.New(built.Locale, built.Seed))
 		if err != nil {
 			return produce.Written{}, err
 		}
