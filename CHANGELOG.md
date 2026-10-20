@@ -18,6 +18,12 @@ repository once they are released.
   said nothing about the screen or the kind. The name now starts in line with
   the headings under it.
 
+- **The mark showing where the keyboard is is now blue instead of near
+  white**, on every control. In a list you pick from, the row the keyboard or
+  the pointer is on is shaded rather than outlined, the chosen row keeps its
+  tick, and the edge of the list is the quiet line a card has, so an open list
+  no longer reads as a stack of text fields.
+
 - **Opening an application response no longer makes the Manifest browser
   taller.** How many records the response never answered now stands beside
   its file name, and when nothing disagreed the same place says so. What the

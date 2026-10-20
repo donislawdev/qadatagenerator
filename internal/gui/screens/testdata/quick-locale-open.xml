@@ -319,7 +319,7 @@
 																		<rectangle size="117x34"/>
 																		<container size="117x34">
 																			<container size="117x34">
-																				<rectangle fillColor="button" pos="1,1" radius="6" size="115x32" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+																				<rectangle fillColor="button" pos="1,1" radius="6" size="115x32" strokeColor="focus" strokeWidth="2"/>
 																			</container>
 																			<container size="117x34">
 																				<container pos="12,4" size="97x26">
@@ -969,7 +969,7 @@
 			<container size="1342x900">
 				<widget pos="461,160" size="117x96" type="*parts.picker">
 					<container size="117x96">
-						<rectangle fillColor="menuBackground" radius="10" shadowBlurRadius="26" shadowColor="rgba(0,0,0,156)" shadowOffset="0,10" shadowSpread="2" shadowVariant="1" size="117x96" strokeColor="inputBorder" strokeWidth="2"/>
+						<rectangle fillColor="menuBackground" radius="10" shadowBlurRadius="26" shadowColor="rgba(0,0,0,156)" shadowOffset="0,10" shadowSpread="2" shadowVariant="1" size="117x96" strokeColor="separator" strokeWidth="2"/>
 						<container size="117x96">
 							<widget pos="12,12" size="93x72" type="*widget.Scroll">
 								<container size="93x72">
@@ -978,10 +978,7 @@
 											<container size="93x34">
 												<rectangle size="93x34"/>
 												<container size="93x34">
-													<rectangle fillColor="rgba(37,51,72,255)" radius="6" size="93x34"/>
-													<container size="93x34">
-														<rectangle pos="1,1" radius="6" size="91x32" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
-													</container>
+													<rectangle fillColor="rgba(39,57,83,255)" radius="6" size="93x34"/>
 													<container size="93x34">
 														<container pos="12,4" size="69x26">
 															<container size="54x26">

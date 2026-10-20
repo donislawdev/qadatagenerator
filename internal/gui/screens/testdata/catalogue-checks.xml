@@ -430,7 +430,7 @@
 																			<rectangle size="18x18"/>
 																			<container size="18x18">
 																				<container size="18x18">
-																					<rectangle fillColor="button" pos="1,1" radius="4" size="16x16" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+																					<rectangle fillColor="button" pos="1,1" radius="4" size="16x16" strokeColor="focus" strokeWidth="2"/>
 																				</container>
 																				<rectangle size="18x18"/>
 																			</container>
@@ -598,7 +598,7 @@
 																			<rectangle size="18x18"/>
 																			<container size="18x18">
 																				<container size="18x18">
-																					<rectangle fillColor="button" pos="1,1" radius="4" size="16x16" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+																					<rectangle fillColor="button" pos="1,1" radius="4" size="16x16" strokeColor="focus" strokeWidth="2"/>
 																				</container>
 																				<container size="18x18">
 																					<image fillMode="contain" pos="1,1" rsc="check-72abff-15.svg" size="15x15"/>
@@ -796,7 +796,7 @@
 																		<rectangle size="18x18"/>
 																		<container size="18x18">
 																			<container size="18x18">
-																				<rectangle fillColor="button" pos="1,1" radius="4" size="16x16" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+																				<rectangle fillColor="button" pos="1,1" radius="4" size="16x16" strokeColor="focus" strokeWidth="2"/>
 																			</container>
 																			<rectangle size="18x18"/>
 																		</container>

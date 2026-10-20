@@ -448,7 +448,7 @@
 																	<rectangle size="87x34"/>
 																	<container size="87x34">
 																		<container size="87x34">
-																			<rectangle fillColor="rgba(41,113,213,255)" pos="1,1" radius="6" size="85x32" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+																			<rectangle fillColor="rgba(41,113,213,255)" pos="1,1" radius="6" size="85x32" strokeColor="focus" strokeWidth="2"/>
 																		</container>
 																		<container size="87x34">
 																			<container pos="16,4" size="55x26">

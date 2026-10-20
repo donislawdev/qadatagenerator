@@ -447,7 +447,7 @@
 										</container>
 										<container pos="0,34" size="511x550">
 											<container size="511x550">
-												<rectangle fillColor="button" pos="1,1" radius="6" size="509x548" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+												<rectangle fillColor="button" pos="1,1" radius="6" size="509x548" strokeColor="focus" strokeWidth="2"/>
 											</container>
 											<container size="511x550">
 												<widget pos="8,8" size="495x534" type="*container.ThemeOverride">

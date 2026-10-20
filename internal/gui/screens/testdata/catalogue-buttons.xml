@@ -424,7 +424,7 @@
 																	<rectangle size="86x34"/>
 																	<container size="86x34">
 																		<container size="86x34">
-																			<rectangle pos="1,1" radius="6" size="84x32" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+																			<rectangle pos="1,1" radius="6" size="84x32" strokeColor="focus" strokeWidth="2"/>
 																		</container>
 																		<container size="86x34">
 																			<container pos="16,4" size="54x26">
@@ -594,7 +594,7 @@
 																	<rectangle size="109x34"/>
 																	<container size="109x34">
 																		<container size="109x34">
-																			<rectangle pos="1,1" radius="6" size="107x32" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+																			<rectangle pos="1,1" radius="6" size="107x32" strokeColor="focus" strokeWidth="2"/>
 																		</container>
 																		<container size="109x34">
 																			<container pos="16,4" size="77x26">
@@ -753,7 +753,7 @@
 																	<rectangle size="87x34"/>
 																	<container size="87x34">
 																		<container size="87x34">
-																			<rectangle fillColor="rgba(41,113,213,255)" pos="1,1" radius="6" size="85x32" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+																			<rectangle fillColor="rgba(41,113,213,255)" pos="1,1" radius="6" size="85x32" strokeColor="focus" strokeWidth="2"/>
 																		</container>
 																		<container size="87x34">
 																			<container pos="16,4" size="55x26">
@@ -917,7 +917,7 @@
 																	<rectangle size="101x34"/>
 																	<container size="101x34">
 																		<container size="101x34">
-																			<rectangle pos="1,1" radius="6" size="99x32" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+																			<rectangle pos="1,1" radius="6" size="99x32" strokeColor="focus" strokeWidth="2"/>
 																		</container>
 																		<container size="101x34">
 																			<container pos="12,4" size="77x26">
@@ -1091,7 +1091,7 @@
 																	<rectangle size="101x34"/>
 																	<container size="101x34">
 																		<container size="101x34">
-																			<rectangle fillColor="rgba(37,51,72,255)" pos="1,1" radius="6" size="99x32" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+																			<rectangle fillColor="rgba(37,51,72,255)" pos="1,1" radius="6" size="99x32" strokeColor="focus" strokeWidth="2"/>
 																		</container>
 																		<container size="101x34">
 																			<container pos="12,4" size="77x26">
@@ -1288,7 +1288,7 @@
 																<rectangle size="543x34"/>
 																<container size="543x34">
 																	<container size="543x34">
-																		<rectangle pos="1,1" radius="6" size="541x32" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+																		<rectangle pos="1,1" radius="6" size="541x32" strokeColor="focus" strokeWidth="2"/>
 																	</container>
 																	<container size="543x34">
 																		<container pos="16,4" size="511x26">

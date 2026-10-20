@@ -30,11 +30,12 @@ type OptionLook struct {
 	// and by the ink of the name, so it survives the ground changing under
 	// the pointer.
 	Chosen bool
-	// Current says the keyboard is on this option. Said by the edge, the way
-	// every control here says where the keyboard is (DEC-243).
+	// Current says the keyboard is on this option, and Hovered that the
+	// pointer is. Both are said by the ground, the way every menu says which
+	// row a press would pick. Until 2026-10-20 the keyboard drew an edge round
+	// the row, which made a list read as a stack of text fields, and the owner
+	// called it ugly (DEC-260).
 	Current bool
-	// Hovered says the pointer is on this option. Said by the ground, the way
-	// every control here says where the pointer is.
 	Hovered bool
 }
 
@@ -45,8 +46,11 @@ func OptionFace(look OptionLook) fyne.CanvasObject {
 	// The room for the mark is reserved on every row, chosen or not, so the
 	// detail column does not shift when the choice moves.
 	var mark fyne.CanvasObject = Space(theme.IconSmall, 0)
+	lit := look.Hovered || look.Current
 	switch {
-	case look.Hovered:
+	case lit && look.Chosen:
+		ground = Fill(theme.BgCurrentHover, theme.RadiusControl)
+	case lit:
 		ground = Fill(theme.BgHover, theme.RadiusControl)
 	case look.Chosen:
 		ground = Fill(theme.BgCurrent, theme.RadiusControl)
@@ -61,13 +65,9 @@ func OptionFace(look OptionLook) fyne.CanvasObject {
 		Middle(Mono(look.Detail, theme.TypeBody, theme.TextSecondary)))
 	inner := container.NewBorder(nil, nil, nil, mark, columns)
 
-	layers := []fyne.CanvasObject{ground}
-	if look.Current {
-		layers = append(layers, inside(Outline(theme.MarkFocus, theme.RadiusControl)))
-	}
-	layers = append(layers, Pad(theme.NameStepHairline, theme.NameStepHairline,
-		theme.NameStepRelated, theme.NameStepRelated, inner))
-	return AtLeast(0, theme.ControlHeight, container.NewStack(layers...))
+	return AtLeast(0, theme.ControlHeight, container.NewStack(ground,
+		Pad(theme.NameStepHairline, theme.NameStepHairline,
+			theme.NameStepRelated, theme.NameStepRelated, inner)))
 }
 
 // OptionNameWidth is how wide the column of names has to be to hold any of
@@ -100,8 +100,12 @@ func OptionHeading(words string) fyne.CanvasObject {
 // two the other way round, with the field a step DOWN from the panel, and
 // nothing in it could say so, because the mock's field was a picture and the
 // window's is parts.Field with a ground of its own.
+//
+// The edge is the quiet line a card wears rather than the edge of a control.
+// The shadow already lifts the panel off the screen, and the louder edge read
+// as one more white outline (DEC-260).
 func PanelGround() *canvas.Rectangle {
-	ground := Bordered(theme.BgSurface, theme.BorderControl, theme.RadiusCard)
+	ground := Bordered(theme.BgSurface, theme.LineQuiet, theme.RadiusCard)
 	ground.Shadow = PanelShadow()
 	return ground
 }

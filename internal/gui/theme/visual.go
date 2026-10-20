@@ -527,27 +527,15 @@ var Tokens = []Token{
 	// must differ from the UNFOCUSED state of the same control. Hover is a
 	// different thing and changes the ground instead.
 	//
-	// That last requirement is what settled the shade, and it settled it by
-	// killing the obvious answer. The accent this window reads with, accent.11,
-	// measures 1.62 against border.control, so a focused edge in it would be a
-	// colour change nobody could see. Measured across both ladders, re-measured
-	// on the graphite and blue of 2026-09-24:
-	//
-	//	accent.11   1.62 against the resting edge   REFUSED
-	//	neutral.11  1.80                            REFUSED
-	//	accent.12   3.05                            taken
-	//	neutral.12  3.27, and it is white, which is what was refused
-	//
-	// So the edge is the top of the accent ladder: 3.05 against the edge it
-	// replaces, 10.86 against the inside of a field, 3.84 on the filled button
-	// and 6.05 on that fill under the pointer. One shade, every control, which
-	// is the whole point of it.
-	//
-	// 🔴 This pair is the one that decides how far the ground may rise. Lifting
-	// the ground lifts bg.hover, border.control has to clear 3.0 on bg.hover,
-	// and this shade has to clear 3.0 against border.control - so every step up
-	// at the bottom of the neutral ladder pushes this shade towards white. At
-	// 3.05 there is almost nothing left.
+	// 🔴 Chosen by eye since 2026-10-20 (DEC-260), and the threshold is a floor
+	// that keeps the change visible at all rather than the reason for the
+	// shade. Until then it was accent.12, a near white, taken only because it
+	// was the one step clearing 3.0 against the resting edge. The owner looked
+	// at it on a field, said white does not belong there, and said a person
+	// using the window does not look at contrast the way this register did. So
+	// the edge is the accent the window reads with. Measured with
+	// tools/zeton.py on 2026-10-20: 1.62 against the resting edge, 2.03 on the
+	// filled button, 5.76 against the inside of a field, 6.34 on a card.
 	//
 	// bg.hover joined the grounds on 2026-09-14, the day the text field began
 	// answering the pointer: a field with the keyboard on it and the pointer
@@ -557,7 +545,7 @@ var Tokens = []Token{
 	// The three grounds of the open sidebar item joined on 2026-09-24, when
 	// that item began drawing its own ground: the keyboard on it draws this
 	// edge on whichever of the three the pointer has put it on.
-	{MarkFocus, "accent.12", ThresholdControl,
+	{MarkFocus, "accent.11", ThresholdStateChange,
 		[]string{BorderControl, LineQuiet, BgWindow, BgSurface, BgControl, BgHover, FillPrimary, FillHover,
 			BgCurrent, BgCurrentHover, BgCurrentPressed},
 		"the edge of the control the keyboard is on, which every control shows the same way"},

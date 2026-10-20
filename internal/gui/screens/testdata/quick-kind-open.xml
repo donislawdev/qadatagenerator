@@ -257,7 +257,7 @@
 																		<rectangle size="118x34"/>
 																		<container size="118x34">
 																			<container size="118x34">
-																				<rectangle fillColor="button" pos="1,1" radius="6" size="116x32" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+																				<rectangle fillColor="button" pos="1,1" radius="6" size="116x32" strokeColor="focus" strokeWidth="2"/>
 																			</container>
 																			<container size="118x34">
 																				<container pos="12,4" size="98x26">
@@ -969,13 +969,13 @@
 			<container size="1342x900">
 				<widget pos="256,160" size="430x470" type="*parts.picker">
 					<container size="430x470">
-						<rectangle fillColor="menuBackground" radius="10" shadowBlurRadius="26" shadowColor="rgba(0,0,0,156)" shadowOffset="0,10" shadowSpread="2" shadowVariant="1" size="430x470" strokeColor="inputBorder" strokeWidth="2"/>
+						<rectangle fillColor="menuBackground" radius="10" shadowBlurRadius="26" shadowColor="rgba(0,0,0,156)" shadowOffset="0,10" shadowSpread="2" shadowVariant="1" size="430x470" strokeColor="separator" strokeWidth="2"/>
 						<container size="430x470">
 							<container pos="12,12" size="406x446">
 								<container size="406x44">
 									<container pos="4,4" size="398x32">
 										<container size="398x32">
-											<rectangle fillColor="button" pos="1,1" radius="6" size="396x30" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+											<rectangle fillColor="button" pos="1,1" radius="6" size="396x30" strokeColor="focus" strokeWidth="2"/>
 										</container>
 										<container size="398x32">
 											<container pos="8,8" size="382x24">
@@ -1164,10 +1164,7 @@
 													<container size="406x34">
 														<rectangle size="406x34"/>
 														<container size="406x34">
-															<rectangle fillColor="rgba(37,51,72,255)" radius="6" size="406x34"/>
-															<container size="406x34">
-																<rectangle pos="1,1" radius="6" size="404x32" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
-															</container>
+															<rectangle fillColor="rgba(39,57,83,255)" radius="6" size="406x34"/>
 															<container size="406x34">
 																<container pos="12,4" size="382x26">
 																	<container size="367x26">

@@ -514,7 +514,7 @@
 														</widget>
 													</widget>
 												</widget>
-												<rectangle radius="6" size="1054x337" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+												<rectangle radius="6" size="1054x337" strokeColor="focus" strokeWidth="2"/>
 											</container>
 										</container>
 									</container>

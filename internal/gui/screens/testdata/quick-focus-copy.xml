@@ -503,7 +503,7 @@
 																	<rectangle size="61x34"/>
 																	<container size="61x34">
 																		<container size="61x34">
-																			<rectangle pos="1,1" radius="6" size="59x32" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+																			<rectangle pos="1,1" radius="6" size="59x32" strokeColor="focus" strokeWidth="2"/>
 																		</container>
 																		<container size="61x34">
 																			<container pos="16,4" size="29x26">

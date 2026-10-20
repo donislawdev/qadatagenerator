@@ -290,11 +290,12 @@ func TestThePanelStaysInsideTheCanvas(t *testing.T) {
 	}
 }
 
-// TestTheChosenRowIsMarkedAndTheKeyboardRowIsOutlined holds that the two
-// states are drawn, by reading the shapes of the faces rather than pixels: the
-// chosen row carries the icon of the check, and the keyboard row an outline in
-// the focus mark.
-func TestTheChosenRowIsMarkedAndTheKeyboardRowIsOutlined(t *testing.T) {
+// TestTheChosenRowIsMarkedAndTheKeyboardRowIsLit holds that the two states are
+// drawn, by reading the shapes of the faces rather than pixels: the chosen row
+// carries the icon of the check on the ground of the chosen, and the keyboard
+// row the ground a pointer gives a row. No row is outlined, because an outline
+// made the list read as a stack of text fields (DEC-260).
+func TestTheChosenRowIsMarkedAndTheKeyboardRowIsLit(t *testing.T) {
 	chooser, window := opened(t, "pesel")
 	press(t, window, fyne.KeyDown)
 	panel := chooser.panel
@@ -310,10 +311,27 @@ func TestTheChosenRowIsMarkedAndTheKeyboardRowIsOutlined(t *testing.T) {
 	if !hasIcon(chosen) || hasIcon(current) || hasIcon(resting) {
 		t.Errorf("the check stands on chosen %v, current %v, resting %v", hasIcon(chosen), hasIcon(current), hasIcon(resting))
 	}
-	if hasOutline(chosen) || !hasOutline(current) || hasOutline(resting) {
-		t.Errorf("the focus outline stands on chosen %v, current %v, resting %v",
+	if !hasGround(chosen, palette.BgCurrent) || !hasGround(current, palette.BgHover) ||
+		hasGround(resting, palette.BgCurrent) || hasGround(resting, palette.BgHover) {
+		t.Errorf("chosen on its ground %v, current lit %v, resting bare %v",
+			hasGround(chosen, palette.BgCurrent), hasGround(current, palette.BgHover),
+			!hasGround(resting, palette.BgCurrent) && !hasGround(resting, palette.BgHover))
+	}
+	if hasOutline(chosen) || hasOutline(current) || hasOutline(resting) {
+		t.Errorf("a focus outline stands on chosen %v, current %v, resting %v",
 			hasOutline(chosen), hasOutline(current), hasOutline(resting))
 	}
+}
+
+// hasGround says whether a picture holds a shape filled in the given token.
+func hasGround(object fyne.CanvasObject, token string) bool {
+	found := false
+	walkShapes(object, func(shape fyne.CanvasObject) {
+		if rectangle, ok := shape.(*canvas.Rectangle); ok && rectangle.FillColor == palette.Ink(token) {
+			found = true
+		}
+	})
+	return found
 }
 
 // hasIcon says whether a picture holds an image, which only the check is here.

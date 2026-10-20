@@ -197,7 +197,7 @@
 												<rectangle size="201x34"/>
 												<container size="201x34">
 													<container size="201x34">
-														<rectangle fillColor="rgba(37,51,72,255)" pos="1,1" radius="6" size="199x32" strokeColor="rgba(218,232,254,255)" strokeWidth="2"/>
+														<rectangle fillColor="rgba(37,51,72,255)" pos="1,1" radius="6" size="199x32" strokeColor="focus" strokeWidth="2"/>
 													</container>
 													<container size="201x34">
 														<container pos="12,4" size="177x26">
