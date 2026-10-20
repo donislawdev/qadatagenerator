@@ -176,16 +176,18 @@ func (v *View) kindsGrid() fyne.CanvasObject {
 // although it decides how the file is read, because the panel beside the steps
 // says when a file looks as if it was read with the wrong one.
 func (v *View) optionsBody() fyne.CanvasObject {
-	// The seed takes what the two fields before it leave: a seed is a value
-	// nobody can retype from memory, so it gets the room.
-	howMuch := paint.Lead(
-		paint.Row(palette.NameStepRelated,
-			labelled(v.text.T(i18n.TakeSettingRows),
-				paint.AtLeast(paint.FieldWidth(shareSample), 0, parts.Standing(parts.Field(v.share)))),
-			labelled(v.text.T(i18n.TakeSettingPerRow), v.perRow.OnScreen())),
-		paint.PadLeft(palette.NameStepRelated,
-			labelled(v.text.T(i18n.TakeSettingSeed), parts.Standing(parts.Field(v.seed)))))
-	leaveAlone := labelled(v.text.T(i18n.TakeSettingExclude), parts.Standing(parts.Field(v.exclude)))
+	// Every field as wide as the value it takes (DEC-261), the seed and the
+	// columns to spare measured from the samples the Quick screen shares, and
+	// what is left of each line left empty rather than lent to a field.
+	howMuch := paint.Row(palette.NameStepRelated,
+		labelled(v.text.T(i18n.TakeSettingRows),
+			paint.AtLeast(paint.FieldWidth(shareSample), 0, parts.Standing(parts.Field(v.share)))),
+		labelled(v.text.T(i18n.TakeSettingPerRow), v.perRow.OnScreen()),
+		labelled(v.text.T(i18n.TakeSettingSeed),
+			paint.AtLeast(paint.FieldWidth(paint.SeedSample), 0, parts.Standing(parts.Field(v.seed)))))
+	leaveAlone := paint.Lead(labelled(v.text.T(i18n.TakeSettingExclude),
+		paint.AtLeast(paint.FieldWidth(paint.NamesSample), 0, parts.Standing(parts.Field(v.exclude)))),
+		paint.Spacer())
 	reading := paint.Row(palette.NameStepRelated,
 		labelled(v.text.T(i18n.TakeSettingDelimiter),
 			paint.AtLeast(paint.FieldWidth(delimiterSample), 0, parts.Standing(parts.Field(v.delimiter)))),

@@ -966,6 +966,11 @@ const (
 	// for its edge, so the mark inside it is the small icon and nothing has to
 	// be scaled.
 	CheckBox float32 = 18
+	// CheckTick is the side of the tick inside a ticked box. Smaller than the
+	// small icon by a third, so that the filled box shows round it on every
+	// side: at the small icon's size the tick touched the edge of the box
+	// (DEC-261).
+	CheckTick float32 = 12
 	// StepDisc is the side of the disc carrying the number of a step, on a
 	// screen read from the top down (DEC-261). As tall as a line of the
 	// heading beside it and no taller, so the number reads as part of the

@@ -750,26 +750,24 @@ func (v *View) settingsRow(showing map[string]bool) fyne.CanvasObject {
 	// arithmetic: its width was the window minus four controls, whatever that
 	// happened to be. Measured from the face rather than written down, so it
 	// follows the type ladder.
-	settings := paint.Row(palette.NameStepRelated, fixed...)
-	// 🔴 The seed takes what is left BETWEEN the fields and the button, which is
-	// bounded on both sides - and that is the third arrangement this row has had
-	// today, each one refuted by a measurement.
+	// 🔴 The seed is as wide as a seed, the fourth arrangement this row has had,
+	// and the history is the reason for the sample it is measured from.
 	//
 	// It was the centre of a border with nothing on its right, so it ran to the
-	// edge of the window: giga long, said the owner. Given a width of its own
-	// instead, measured from the face of a thirty two character seed, it stopped
-	// fitting: the row is handed what the button leaves it, the sum of five
-	// fields asking for their own widths was 98 px more than that, and Fyne does
-	// not clip - so the field drew UNDER Generate in six states out of ten and
-	// nothing fell over. tools/wylewa.py --poziom found it, and only because the
-	// gap probe reported an ink distance of MINUS ninety eight.
-	//
-	// A centre cannot overflow the room it is given. The button on the right is
-	// what stops it running away, which is what a width of its own was for.
-	seed := labelled(v.text.T(i18n.QuickLabelSeed), parts.Standing(parts.Field(v.seedBox)))
-	withSeed := container.New(layout.NewBorderLayout(nil, nil, settings, nil),
-		settings, paint.PadLeft(palette.NameStepRelated, seed))
-	return withSeed
+	// edge of the window: giga long, said the owner. Given the width of a thirty
+	// two character seed, the row asked for 98 px more than the button left it
+	// in the states showing a gender and a date of birth, and Fyne does not clip,
+	// so the field drew under Generate (found by tools/wylewa.py --poziom). It
+	// was then the space between the fields and the button, which cannot
+	// overflow and was again as long as the window allowed - and on 2026-10-21
+	// the owner said the fields are of different lengths and each should fit
+	// the value it takes (DEC-261). paint.SeedSample is fourteen characters,
+	// eighteen fewer than the sample that overflowed, and the button now
+	// follows the seed rather than standing at the edge of the window, so the
+	// room after it is empty rather than lent to the field.
+	seed := labelled(v.text.T(i18n.QuickLabelSeed),
+		paint.AtLeast(paint.FieldWidth(paint.SeedSample), 0, parts.Standing(parts.Field(v.seedBox))))
+	return paint.Row(palette.NameStepRelated, append(fixed, seed)...)
 }
 
 // placeSettings puts the row of settings in the band with the one action of
@@ -799,9 +797,12 @@ func (v *View) placeSettings(withSeed fyne.CanvasObject) {
 	// stop being adjacent, so the gap count went DOWN, and a child drawing over
 	// its siblings is still inside its parent. The stored tree blessed it,
 	// because a pattern records what happened. The owner saw it.
+	//
+	// The button follows the seed since 2026-10-21 and the room after it is
+	// left empty, so that no field is handed width it has no value for.
 	padded := paint.PadLeft(palette.NameStepGroup, action)
 	v.settings.Objects = []fyne.CanvasObject{
-		container.New(layout.NewBorderLayout(nil, nil, nil, padded), withSeed, padded),
+		paint.Lead(container.NewHBox(withSeed, padded), paint.Spacer()),
 	}
 	v.settings.Refresh()
 }

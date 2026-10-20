@@ -406,11 +406,9 @@
 																			<container pos="0,8" size="18x18">
 																				<rectangle size="18x18"/>
 																				<container size="18x18">
+																					<rectangle fillColor="rgba(41,113,213,255)" radius="4" size="18x18"/>
 																					<container size="18x18">
-																						<rectangle fillColor="button" pos="1,1" radius="4" size="16x16" strokeColor="inputBorder" strokeWidth="2"/>
-																					</container>
-																					<container size="18x18">
-																						<image fillMode="contain" pos="1,1" rsc="check-72abff-15.svg" size="15x15"/>
+																						<image fillMode="contain" pos="3,3" rsc="check-ffffff-12.svg" size="12x12"/>
 																					</container>
 																				</container>
 																			</container>
@@ -432,11 +430,9 @@
 																			<container pos="0,8" size="18x18">
 																				<rectangle size="18x18"/>
 																				<container size="18x18">
+																					<rectangle fillColor="rgba(41,113,213,255)" radius="4" size="18x18"/>
 																					<container size="18x18">
-																						<rectangle fillColor="button" pos="1,1" radius="4" size="16x16" strokeColor="inputBorder" strokeWidth="2"/>
-																					</container>
-																					<container size="18x18">
-																						<image fillMode="contain" pos="1,1" rsc="check-72abff-15.svg" size="15x15"/>
+																						<image fillMode="contain" pos="3,3" rsc="check-ffffff-12.svg" size="12x12"/>
 																					</container>
 																				</container>
 																			</container>

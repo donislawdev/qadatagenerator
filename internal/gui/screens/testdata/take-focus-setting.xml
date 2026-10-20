@@ -406,11 +406,9 @@
 																			<container pos="0,8" size="18x18">
 																				<rectangle size="18x18"/>
 																				<container size="18x18">
+																					<rectangle fillColor="rgba(41,113,213,255)" radius="4" size="18x18"/>
 																					<container size="18x18">
-																						<rectangle fillColor="button" pos="1,1" radius="4" size="16x16" strokeColor="inputBorder" strokeWidth="2"/>
-																					</container>
-																					<container size="18x18">
-																						<image fillMode="contain" pos="1,1" rsc="check-72abff-15.svg" size="15x15"/>
+																						<image fillMode="contain" pos="3,3" rsc="check-ffffff-12.svg" size="12x12"/>
 																					</container>
 																				</container>
 																			</container>
@@ -432,11 +430,9 @@
 																			<container pos="0,8" size="18x18">
 																				<rectangle size="18x18"/>
 																				<container size="18x18">
+																					<rectangle fillColor="rgba(41,113,213,255)" radius="4" size="18x18"/>
 																					<container size="18x18">
-																						<rectangle fillColor="button" pos="1,1" radius="4" size="16x16" strokeColor="inputBorder" strokeWidth="2"/>
-																					</container>
-																					<container size="18x18">
-																						<image fillMode="contain" pos="1,1" rsc="check-72abff-15.svg" size="15x15"/>
+																						<image fillMode="contain" pos="3,3" rsc="check-ffffff-12.svg" size="12x12"/>
 																					</container>
 																				</container>
 																			</container>
@@ -577,92 +573,91 @@
 															<container pos="0,34" size="676x200">
 																<container pos="4,8" size="668x188">
 																	<container size="668x52">
-																		<container size="210x52">
-																			<container size="80x52">
-																				<text color="disabled" size="80x14" textSize="11">Share of records</text>
-																				<container pos="0,18" size="80x34">
+																		<container size="80x52">
+																			<text color="disabled" size="80x14" textSize="11">Share of records</text>
+																			<container pos="0,18" size="80x34">
+																				<rectangle size="80x34"/>
+																				<container size="80x34">
 																					<rectangle size="80x34"/>
 																					<container size="80x34">
-																						<rectangle size="80x34"/>
 																						<container size="80x34">
-																							<container size="80x34">
-																								<rectangle fillColor="button" pos="1,1" radius="6" size="78x32" strokeColor="focus" strokeWidth="2"/>
-																							</container>
-																							<container size="80x34">
-																								<widget pos="8,8" size="64x26" type="*container.ThemeOverride">
-																									<container size="64x26">
-																										<widget size="64x26" type="*parts.FieldEntry">
-																											<rectangle radius="6" size="64x26"/>
-																											<rectangle radius="6" size="64x25" strokeColor="foreground"/>
-																											<widget size="64x26" type="*widget.Scroll">
-																												<widget size="64x26" type="*widget.entryContent">
-																													<widget size="64x26" type="*widget.RichText">
-																														<text color="disabled" pos="4,4" size="0x16"></text>
-																													</widget>
-																													<widget size="64x26" type="*widget.RichText">
-																														<text pos="4,4" size="0x16"></text>
-																													</widget>
-																													<rectangle fillColor="foreground" pos="4,4" size="0x16"/>
+																							<rectangle fillColor="button" pos="1,1" radius="6" size="78x32" strokeColor="focus" strokeWidth="2"/>
+																						</container>
+																						<container size="80x34">
+																							<widget pos="8,8" size="64x26" type="*container.ThemeOverride">
+																								<container size="64x26">
+																									<widget size="64x26" type="*parts.FieldEntry">
+																										<rectangle radius="6" size="64x26"/>
+																										<rectangle radius="6" size="64x25" strokeColor="foreground"/>
+																										<widget size="64x26" type="*widget.Scroll">
+																											<widget size="64x26" type="*widget.entryContent">
+																												<widget size="64x26" type="*widget.RichText">
+																													<text color="disabled" pos="4,4" size="0x16"></text>
 																												</widget>
+																												<widget size="64x26" type="*widget.RichText">
+																													<text pos="4,4" size="0x16"></text>
+																												</widget>
+																												<rectangle fillColor="foreground" pos="4,4" size="0x16"/>
 																											</widget>
 																										</widget>
-																									</container>
-																								</widget>
-																							</container>
+																									</widget>
+																								</container>
+																							</widget>
 																						</container>
 																					</container>
 																				</container>
 																			</container>
-																			<container pos="92,0" size="117x52">
-																				<text color="disabled" size="117x14" textSize="11">Defects per record</text>
-																				<widget pos="0,18" size="117x34" type="*parts.Select">
+																		</container>
+																		<container pos="92,0" size="117x52">
+																			<text color="disabled" size="117x14" textSize="11">Defects per record</text>
+																			<widget pos="0,18" size="117x34" type="*parts.Select">
+																				<container size="117x34">
 																					<container size="117x34">
+																						<rectangle size="117x34"/>
 																						<container size="117x34">
-																							<rectangle size="117x34"/>
 																							<container size="117x34">
-																								<container size="117x34">
-																									<rectangle fillColor="button" pos="1,1" radius="6" size="115x32" strokeColor="inputBorder" strokeWidth="2"/>
-																								</container>
-																								<container size="117x34">
-																									<container pos="12,4" size="97x26">
-																										<container size="70x26">
-																											<spacer size="70x4"/>
-																											<text pos="0,4" size="70x16">Exactly one</text>
-																											<spacer pos="0,21" size="70x4"/>
-																										</container>
-																										<container pos="70,0" size="27x26">
-																											<container pos="8,4" size="15x18">
-																												<spacer size="15x1"/>
-																												<image fillMode="contain" pos="0,1" rsc="chevron-down-acb4bd-15.svg" size="15x15"/>
-																												<spacer pos="0,16" size="15x1"/>
-																											</container>
+																								<rectangle fillColor="button" pos="1,1" radius="6" size="115x32" strokeColor="inputBorder" strokeWidth="2"/>
+																							</container>
+																							<container size="117x34">
+																								<container pos="12,4" size="97x26">
+																									<container size="70x26">
+																										<spacer size="70x4"/>
+																										<text pos="0,4" size="70x16">Exactly one</text>
+																										<spacer pos="0,21" size="70x4"/>
+																									</container>
+																									<container pos="70,0" size="27x26">
+																										<container pos="8,4" size="15x18">
+																											<spacer size="15x1"/>
+																											<image fillMode="contain" pos="0,1" rsc="chevron-down-acb4bd-15.svg" size="15x15"/>
+																											<spacer pos="0,16" size="15x1"/>
 																										</container>
 																									</container>
 																								</container>
 																							</container>
 																						</container>
 																					</container>
-																				</widget>
-																			</container>
+																				</container>
+																			</widget>
 																		</container>
-																		<container pos="210,0" size="457x52">
-																			<container pos="12,0" size="445x52">
-																				<text color="disabled" size="445x14" textSize="11">Seed</text>
-																				<container pos="0,18" size="445x34">
-																					<rectangle size="445x34"/>
-																					<container size="445x34">
-																						<container size="445x34">
-																							<rectangle fillColor="button" pos="1,1" radius="6" size="443x32" strokeColor="inputBorder" strokeWidth="2"/>
+																		<container pos="222,0" size="134x52">
+																			<text color="disabled" size="134x14" textSize="11">Seed</text>
+																			<container pos="0,18" size="134x34">
+																				<rectangle size="134x34"/>
+																				<container size="134x34">
+																					<rectangle size="134x34"/>
+																					<container size="134x34">
+																						<container size="134x34">
+																							<rectangle fillColor="button" pos="1,1" radius="6" size="132x32" strokeColor="inputBorder" strokeWidth="2"/>
 																						</container>
-																						<container size="445x34">
-																							<widget pos="8,8" size="429x26" type="*container.ThemeOverride">
-																								<container size="429x26">
-																									<widget size="429x26" type="*parts.FieldEntry">
-																										<rectangle radius="6" size="429x26"/>
-																										<rectangle radius="6" size="429x25"/>
-																										<widget size="429x26" type="*widget.Scroll">
-																											<widget size="429x26" type="*widget.entryContent">
-																												<widget size="429x26" type="*widget.RichText">
+																						<container size="134x34">
+																							<widget pos="8,8" size="118x26" type="*container.ThemeOverride">
+																								<container size="118x26">
+																									<widget size="118x26" type="*parts.FieldEntry">
+																										<rectangle radius="6" size="118x26"/>
+																										<rectangle radius="6" size="117x25"/>
+																										<widget size="118x26" type="*widget.Scroll">
+																											<widget size="118x26" type="*widget.entryContent">
+																												<widget size="118x26" type="*widget.RichText">
 																													<text pos="4,4" size="7x16">0</text>
 																												</widget>
 																											</widget>
@@ -677,35 +672,41 @@
 																		</container>
 																	</container>
 																	<container pos="0,68" size="668x52">
-																		<text color="disabled" size="668x14" textSize="11">Columns to leave alone</text>
-																		<container pos="0,18" size="668x34">
-																			<rectangle size="668x34"/>
-																			<container size="668x34">
-																				<container size="668x34">
-																					<rectangle fillColor="button" pos="1,1" radius="6" size="666x32" strokeColor="inputBorder" strokeWidth="2"/>
-																				</container>
-																				<container size="668x34">
-																					<widget pos="8,8" size="652x26" type="*container.ThemeOverride">
-																						<container size="652x26">
-																							<widget size="652x26" type="*parts.FieldEntry">
-																								<rectangle radius="6" size="652x26"/>
-																								<rectangle radius="6" size="651x25"/>
-																								<widget size="652x26" type="*widget.Scroll">
-																									<widget size="652x26" type="*widget.entryContent">
-																										<widget size="652x26" type="*widget.RichText">
-																											<text color="disabled" pos="4,4" size="0x16"></text>
-																										</widget>
-																										<widget size="652x26" type="*widget.RichText">
-																											<text pos="4,4" size="0x16"></text>
+																		<container size="297x52">
+																			<text color="disabled" size="297x14" textSize="11">Columns to leave alone</text>
+																			<container pos="0,18" size="297x34">
+																				<rectangle size="297x34"/>
+																				<container size="297x34">
+																					<rectangle size="297x34"/>
+																					<container size="297x34">
+																						<container size="297x34">
+																							<rectangle fillColor="button" pos="1,1" radius="6" size="295x32" strokeColor="inputBorder" strokeWidth="2"/>
+																						</container>
+																						<container size="297x34">
+																							<widget pos="8,8" size="281x26" type="*container.ThemeOverride">
+																								<container size="281x26">
+																									<widget size="281x26" type="*parts.FieldEntry">
+																										<rectangle radius="6" size="281x26"/>
+																										<rectangle radius="6" size="280x25"/>
+																										<widget size="281x26" type="*widget.Scroll">
+																											<widget size="281x26" type="*widget.entryContent">
+																												<widget size="281x26" type="*widget.RichText">
+																													<text color="disabled" pos="4,4" size="0x16"></text>
+																												</widget>
+																												<widget size="281x26" type="*widget.RichText">
+																													<text pos="4,4" size="0x16"></text>
+																												</widget>
+																											</widget>
 																										</widget>
 																									</widget>
-																								</widget>
+																								</container>
 																							</widget>
 																						</container>
-																					</widget>
+																					</container>
 																				</container>
 																			</container>
 																		</container>
+																		<spacer pos="297,0" size="371x52"/>
 																	</container>
 																	<container pos="0,136" size="668x52">
 																		<container size="74x52">

@@ -32,6 +32,14 @@ repository once they are released.
   ground of its own instead of beside a thick bar, and every divider, the
   lines of a table included, is one unit thick instead of four. The title of a
   screen and the sentence explaining it now stand together on one ground.
+- **Every field is as wide as the value it takes.** A seed field is the width
+  of a seed on both screens that take one, and the list of columns to leave
+  alone the width of a few names, instead of running to the edge of the row.
+  On Quick value the Generate button follows the seed. Paths stay as wide as
+  their column.
+- **A ticked check box is filled** with the colour of the main button and
+  carries a smaller white tick, instead of a thin tick on a grey box that
+  touched its edge.
 - **The main button of a screen keeps its shape while it cannot be pressed**,
   as a grey button instead of a bold word, so it can be found before it is
   needed.

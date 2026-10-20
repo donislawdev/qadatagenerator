@@ -633,3 +633,25 @@ func FieldWidth(sample string) float32 {
 	// correctly, and which nothing else would ever have noticed.
 	return float32(math.Ceil(float64(FieldFace(sample, theme.TypeBody, 0).MinSize().Width)))
 }
+
+// Samples a field is measured from when more than one screen takes the same
+// kind of value, so that the same value is the same width wherever it is typed.
+//
+// # Why these, added on 2026-10-21 (DEC-261)
+//
+// The owner, looking at the window: the fields are of different lengths, and
+// the length of a field should fit the value it takes. A seed ran from the last
+// setting to the button on the Quick screen and to the edge of the column on
+// the damage screen, so the shortest value of a row had the longest field. A
+// seed is a word or a date somebody types and has to type again, and a list of
+// columns to spare is a few names. A path stays as wide as its column, because
+// a path is the one value here that is genuinely long.
+const (
+	// SeedSample is a seed of the kind somebody types: a word with a date.
+	// Fourteen characters, because the widest row of the Quick screen, with a
+	// gender and a date of birth, put its button twelve units into the margin
+	// of the window at eighteen, measured on the render of 2026-10-21.
+	SeedSample = "sprint-2026-10"
+	// NamesSample is a few column names, which is what is spared in practice.
+	NamesSample = "first_name, last_name, email, phone"
+)

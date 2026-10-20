@@ -408,7 +408,7 @@
 																						<rectangle pos="1,1" radius="4" size="16x16" strokeColor="separator" strokeWidth="2"/>
 																					</container>
 																					<container size="18x18">
-																						<image fillMode="contain" pos="1,1" rsc="check-acb4bd-15.svg" size="15x15"/>
+																						<image fillMode="contain" pos="3,3" rsc="check-acb4bd-12.svg" size="12x12"/>
 																					</container>
 																				</container>
 																			</container>
@@ -434,7 +434,7 @@
 																						<rectangle pos="1,1" radius="4" size="16x16" strokeColor="separator" strokeWidth="2"/>
 																					</container>
 																					<container size="18x18">
-																						<image fillMode="contain" pos="1,1" rsc="check-acb4bd-15.svg" size="15x15"/>
+																						<image fillMode="contain" pos="3,3" rsc="check-acb4bd-12.svg" size="12x12"/>
 																					</container>
 																				</container>
 																			</container>

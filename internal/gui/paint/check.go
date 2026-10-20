@@ -39,17 +39,17 @@ type CheckLook struct {
 // because at eighteen across a control's radius made it a circle - measured on
 // the render of 2026-09-15 before the first line of this file.
 //
-// # Why the mark is drawn in the accent and the box is NOT filled with it
+// # Why a ticked box is filled with the accent, since 2026-10-21
 //
-// A filled accent is reserved for the one action a screen is for. Eight boxes
-// filled with it would stand beside the filled button and compete with it, so
-// a chosen box keeps its ground and carries the mark in mark.current, which
-// the register measures on every ground the box stands on. mark.current
-// rather than text.accent, though both are accent.11: a tick is a mark and
-// answers to 3.0, and the same shade on the pressed ground measures 4.33 on
-// the graphite of 2026-09-24 (4.49 before it), which is short of what a label
-// needs and well past what a mark needs. The token names the threshold, so the
-// token is the difference.
+// Until that day a ticked box kept the grey ground of a field and carried a
+// thin tick in the accent, nearly as wide as the box, so the tick touched its
+// edge. The owner called it ugly (DEC-261, under DEC-260: the look decides).
+// A ticked box is now the filled ground of the main button with a white tick
+// smaller than the box, which is how the check boxes of every desktop system
+// look, and the states move that fill the way they move the button's. The
+// reason it was not filled - that a filled accent belongs to the one action of
+// a screen - lost to how it looked: a filled square of eighteen units does not
+// compete with a filled button, it reads as a different control.
 //
 // # Why disabled keeps the mark
 //
@@ -58,12 +58,20 @@ type CheckLook struct {
 // with - so it keeps its box and its mark and goes quiet: the edge in
 // line.quiet, the words and the mark in text.secondary.
 func CheckFace(look CheckLook) fyne.CanvasObject {
-	ink, markInk := theme.TextPrimary, theme.MarkCurrent
+	ink, markInk := theme.TextPrimary, theme.TextOnFill
 	var box fyne.CanvasObject
 	switch {
 	case look.Disabled:
 		ink, markInk = theme.TextSecondary, theme.TextSecondary
 		box = inside(Outline(theme.LineQuiet, theme.RadiusCheck))
+	case look.Checked:
+		fill, _ := filledGround(look.Hovered, look.Pressed)
+		box = Fill(fill, theme.RadiusCheck)
+		if look.Focused {
+			// The edge a filled button gains with focus, for the same reason:
+			// it has none at rest, so focus adds one.
+			box = inside(Bordered(fill, theme.MarkFocus, theme.RadiusCheck))
+		}
 	default:
 		under, edge := pointerGround(look.Hovered, look.Pressed)
 		if under == "" {
@@ -77,7 +85,7 @@ func CheckFace(look CheckLook) fyne.CanvasObject {
 
 	var mark fyne.CanvasObject = Clear()
 	if look.Checked {
-		mark = container.NewCenter(Icon(IconCheck, markInk, theme.IconSmall))
+		mark = container.NewCenter(Icon(IconCheck, markInk, theme.CheckTick))
 	}
 	square := AtLeast(theme.CheckBox, theme.CheckBox, container.NewStack(box, mark))
 

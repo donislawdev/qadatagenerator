@@ -501,11 +501,9 @@
 																		<container size="18x18">
 																			<rectangle size="18x18"/>
 																			<container size="18x18">
+																				<rectangle fillColor="rgba(41,113,213,255)" radius="4" size="18x18"/>
 																				<container size="18x18">
-																					<rectangle fillColor="button" pos="1,1" radius="4" size="16x16" strokeColor="inputBorder" strokeWidth="2"/>
-																				</container>
-																				<container size="18x18">
-																					<image fillMode="contain" pos="1,1" rsc="check-72abff-15.svg" size="15x15"/>
+																					<image fillMode="contain" pos="3,3" rsc="check-ffffff-12.svg" size="12x12"/>
 																				</container>
 																			</container>
 																		</container>
@@ -533,11 +531,9 @@
 																		<container size="18x18">
 																			<rectangle size="18x18"/>
 																			<container size="18x18">
+																				<rectangle fillColor="rgba(48,85,140,255)" radius="4" size="18x18"/>
 																				<container size="18x18">
-																					<rectangle fillColor="hover" pos="1,1" radius="4" size="16x16" strokeColor="inputBorder" strokeWidth="2"/>
-																				</container>
-																				<container size="18x18">
-																					<image fillMode="contain" pos="1,1" rsc="check-72abff-15.svg" size="15x15"/>
+																					<image fillMode="contain" pos="3,3" rsc="check-ffffff-12.svg" size="12x12"/>
 																				</container>
 																			</container>
 																		</container>
@@ -565,11 +561,9 @@
 																		<container size="18x18">
 																			<rectangle size="18x18"/>
 																			<container size="18x18">
+																				<rectangle fillColor="rgba(42,71,113,255)" radius="4" size="18x18"/>
 																				<container size="18x18">
-																					<rectangle fillColor="separator" pos="1,1" radius="4" size="16x16" strokeColor="disabled" strokeWidth="2"/>
-																				</container>
-																				<container size="18x18">
-																					<image fillMode="contain" pos="1,1" rsc="check-72abff-15.svg" size="15x15"/>
+																					<image fillMode="contain" pos="3,3" rsc="check-ffffff-12.svg" size="12x12"/>
 																				</container>
 																			</container>
 																		</container>
@@ -598,10 +592,10 @@
 																			<rectangle size="18x18"/>
 																			<container size="18x18">
 																				<container size="18x18">
-																					<rectangle fillColor="button" pos="1,1" radius="4" size="16x16" strokeColor="focus" strokeWidth="2"/>
+																					<rectangle fillColor="rgba(41,113,213,255)" pos="1,1" radius="4" size="16x16" strokeColor="focus" strokeWidth="2"/>
 																				</container>
 																				<container size="18x18">
-																					<image fillMode="contain" pos="1,1" rsc="check-72abff-15.svg" size="15x15"/>
+																					<image fillMode="contain" pos="3,3" rsc="check-ffffff-12.svg" size="12x12"/>
 																				</container>
 																			</container>
 																		</container>
@@ -633,7 +627,7 @@
 																					<rectangle pos="1,1" radius="4" size="16x16" strokeColor="separator" strokeWidth="2"/>
 																				</container>
 																				<container size="18x18">
-																					<image fillMode="contain" pos="1,1" rsc="check-acb4bd-15.svg" size="15x15"/>
+																					<image fillMode="contain" pos="3,3" rsc="check-acb4bd-12.svg" size="12x12"/>
 																				</container>
 																			</container>
 																		</container>
