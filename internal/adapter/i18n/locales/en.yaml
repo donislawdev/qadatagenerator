@@ -16,6 +16,7 @@ window.title: QA Data Generator
 # toolkit joins the first pair into the title of its file dialog ("Open" and
 # "file" read "Open file"), which is why file and folder begin in lower case:
 # every other heading in this window is written as a sentence.
+# tekst-ok: the verb on the button of the file dialog, while catalogue.variant.opened is the state of a section, so a translation may need two different words
 toolkit.open: Open
 toolkit.save: Save
 toolkit.cancel: Cancel
@@ -109,6 +110,7 @@ catalogue.variant.extreme: Wider than the field
 catalogue.variant.lines: Several lines, some too long
 catalogue.variant.rows: More rows than it shows
 catalogue.variant.closed: Closed
+# tekst-ok: the state of a section that shows what it holds, while toolkit.open is the verb on the button of the file dialog, so a translation may need two different words
 catalogue.variant.opened: Open
 catalogue.variant.overflowed: More lines than it shows
 
