@@ -39,10 +39,12 @@ func (v *View) aside(generator string) fyne.CanvasObject {
 	}
 	about := quick.Describe(generator, v.locale)
 
+	// The name of the kind stands alone at the head of the panel. A bolt
+	// stood beside it, the same one every kind wore, so it said nothing about
+	// the kind and drew the eye before the facts did. The owner had it removed
+	// on 2026-10-20.
 	blocks := []fyne.CanvasObject{
-		paint.Row(palette.NameStepTight,
-			paint.Middle(paint.Icon(paint.IconBolt, palette.TextAccent, palette.IconMedium)),
-			paint.Middle(paint.Strong(about.Generator, palette.TypeSection, palette.TextPrimary))),
+		paint.Strong(about.Generator, palette.TypeSection, palette.TextPrimary),
 		v.fact(i18n.QuickAboutProduces, produces(about)),
 	}
 

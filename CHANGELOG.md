@@ -12,6 +12,12 @@ repository once they are released.
 
 ### Changed
 
+- **The program's name at the top of the column of screens stands alone**, and
+  the name of a kind on the Quick value screen does too. Each had an icon of a
+  bolt beside it, which drew the eye before anything a person came to do and
+  said nothing about the screen or the kind. The name now starts in line with
+  the headings under it.
+
 - **Opening an application response no longer makes the Manifest browser
   taller.** How many records the response never answered now stands beside
   its file name, and when nothing disagreed the same place says so. What the

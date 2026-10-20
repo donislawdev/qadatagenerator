@@ -299,7 +299,6 @@ func brand(text i18n.Catalogue) shell.Brand {
 		// The same name the window carries in its title bar, from the same key,
 		// so the two can never say different things.
 		Name: text.T(i18n.WindowTitle),
-		Mark: paint.IconBolt,
 		// The tool's own version and not the catalog's or the manifest's. This
 		// window has four version numbers behind it and the About screen names
 		// them all, which is the right place for that: here there is room for

@@ -415,7 +415,6 @@ func settleScreens(state State, data Data, quickScreen *quickview.View, takeScre
 func brandOf(text i18n.Catalogue) shell.Brand {
 	return shell.Brand{
 		Name:    text.T(i18n.WindowTitle),
-		Mark:    paint.IconBolt,
 		Version: "v" + version.Current().Tool,
 		Promise: text.T(i18n.SidebarOffline),
 	}

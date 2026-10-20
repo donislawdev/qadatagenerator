@@ -11,7 +11,6 @@ import (
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 
-	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
@@ -232,7 +231,6 @@ func TestTheOpenScreenIsMarkedByAShapeRatherThanByColourAlone(t *testing.T) {
 func TestTheProductSaysWhatItIsAndWhatItPromises(t *testing.T) {
 	frame := New(screens(), Brand{
 		Name:    "QA Data Generator",
-		Mark:    paint.IconBolt,
 		Version: "v9.9.9",
 		Promise: "fully offline",
 	})

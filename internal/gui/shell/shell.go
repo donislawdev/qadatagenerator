@@ -80,9 +80,10 @@ type Screen struct {
 // presses anything, and the foot of the column is where somebody looks while
 // deciding whether to trust a window at all.
 type Brand struct {
-	// Name is the product's name and Mark the icon beside it.
+	// Name is the product's name. It stands alone, without an icon beside
+	// it: the tile that used to stand there drew the eye before anything a
+	// person came to do, and the owner had it removed on 2026-10-20.
 	Name string
-	Mark string
 	// Version is what this build is, and Promise what it does not do.
 	Version string
 	Promise string
@@ -345,24 +346,27 @@ func (s *Shell) column() fyne.CanvasObject {
 // brandMark is the product's name at the head of the column, or nothing when
 // the frame was not given one.
 //
-// The tile carries the accent, which is the one place on this screen where the
-// accent says "this is the program" rather than "this is the action". It is the
-// same shape the accepted drawing has: a rounded square of the fill colour with
-// the mark on it, and the name beside it at the weight a name is read first at.
+// The name starts where the headings of the groups start, because with the
+// tile gone it would otherwise be the one line in the column standing further
+// left than everything under it. The row keeps the height of a control, which
+// is the height the tile gave it, so nothing below the name moved when the tile
+// went.
 func (s *Shell) brandMark() fyne.CanvasObject {
 	if s.brand.Name == "" {
 		return nil
 	}
-	row := []fyne.CanvasObject{}
-	if s.brand.Mark != "" {
-		tile := paint.On(paint.Fill(palette.FillPrimary, palette.RadiusControl),
-			container.NewCenter(paint.Icon(s.brand.Mark, palette.TextOnFill, palette.IconSmall)))
-		row = append(row, paint.AtLeast(palette.ControlHeight, palette.ControlHeight, tile))
-	}
-	row = append(row, paint.Middle(paint.Strong(s.brand.Name, palette.TypeBody, palette.TextPrimary)))
 	return paint.Pad(palette.NameStepHairline, palette.NameStepSection,
-		palette.NameStepHairline, palette.NameStepHairline,
-		paint.Row(palette.NameStepRelated, row...))
+		palette.NameStepTight, palette.NameStepHairline,
+		paint.AtLeast(0, palette.ControlHeight, alongTheBar(
+			paint.Middle(paint.Strong(s.brand.Name, palette.TypeBody, palette.TextPrimary)))))
+}
+
+// alongTheBar puts words where the words of the column begin: past the room the
+// bar of the current screen takes, and one step after it. The headings of the
+// groups and the product's name both stand there, so it is said once.
+func alongTheBar(content fyne.CanvasObject) fyne.CanvasObject {
+	return paint.Lead(paint.Space(palette.MarkWidth, 0),
+		paint.PadLeft(palette.NameStepRelated, content))
 }
 
 // footnote is the version and the promise on one line.
@@ -408,8 +412,7 @@ const brandSeparator = "  ·  "
 func heading(name string) fyne.CanvasObject {
 	return paint.Pad(palette.NameStepRelated, palette.NameStepHairline,
 		palette.NameStepTight, palette.NameStepHairline,
-		paint.Lead(paint.Space(palette.MarkWidth, 0),
-			paint.PadLeft(palette.NameStepRelated, paint.Caption(name))))
+		alongTheBar(paint.Caption(name)))
 }
 
 // fixedWidth gives what it holds one width whatever is in it.
