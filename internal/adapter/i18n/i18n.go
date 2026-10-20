@@ -334,6 +334,9 @@ const (
 	RecipeHeadingDescribes Key = "recipe.heading.describes"
 	RecipeHeadingResult    Key = "recipe.heading.result"
 	RecipeHeadingProblems  Key = "recipe.heading.problems"
+	// RecipeStepGenerate heads the second of the two numbered steps the
+	// screen reads in since DEC-261. The first is RecipeHeadingRecipe.
+	RecipeStepGenerate Key = "recipe.step.generate"
 
 	RecipeNoObjections Key = "recipe.no-objections"
 	RecipeLine         Key = "recipe.line"
@@ -546,8 +549,9 @@ const (
 
 	// One line at the top of each screen saying what it is for. The column
 	// gives a screen its name, and a name is not a purpose: somebody opening
-	// this window for the first time reads "Take and corrupt" and learns
-	// nothing about what it would do to their file.
+	// this window for the first time read "Take and corrupt", the name of that
+	// screen until 2026-10-21, and learned nothing about what it would do to
+	// their file.
 	PurposeTake     Key = "purpose.take"
 	PurposeRecipe   Key = "purpose.recipe"
 	PurposeManifest Key = "purpose.manifest"
@@ -633,6 +637,7 @@ var windowKeys = []Key{
 	TakeChoose, TakeFileNone, TakeFileReading, TakeFileUnreadable, TakeFileWait, TakePlanWait,
 	TakeDrop, TakeUnreadable, TakeReading,
 	TakeHeadingFile, TakeHeadingSettings, TakeHeadingPlan, TakeHeadingResult,
+	TakeStepFile, TakeStepWrite, TakeMoreOptions,
 	TakeFileRows, TakeFileColumns, TakeFileNothingDeclared,
 	TakeFileTakenFor, TakeFileBecause, TakeFileAgreesWith,
 	TakeFileByteOrderMark, TakeFileNotWorkedOut, TakeFileNotInferred,
@@ -675,6 +680,7 @@ var windowKeys = []Key{
 	RecipeExample, RecipeCanGenerate, RecipeGenerator, RecipeGenerators,
 	RecipeNotIn, RecipeNothingToDrawFrom,
 	RecipeHeadingRecipe, RecipeHeadingDescribes, RecipeHeadingResult, RecipeHeadingProblems,
+	RecipeStepGenerate,
 	RecipeNoObjections, RecipeLine, RecipeAllowed, RecipeTry,
 	RecipeUnchecked, RecipeEntity, RecipeEntities, RecipeField, RecipeFields,
 	RecipeShowing, RecipeOf, RecipeRow, RecipeRows, RecipeNoRows, RecipeNoFields,

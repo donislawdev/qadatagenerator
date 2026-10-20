@@ -267,23 +267,19 @@ func (s *Shell) Showing() (int, bool) {
 // therefore told where the parts go, and the parts are handed over in the order
 // a person meets them.
 func (s *Shell) Content() fyne.CanvasObject {
-	column := s.column()
-	// 🔴 A rule between the column and the screen, which the accepted drawing
-	// has and the window did not. Without it the two meet on the same flat
-	// ground and the column reads as words floating beside the content rather
-	// than as a part of the frame. It is a separator rather than a rectangle of
-	// our own so that its colour and its thickness are the theme's answer, the
-	// same as every other line in the window.
-	//
-	// A row lays it out beside the column, and a row gives each child the full
-	// height, which is what turns a separator into a vertical rule.
-	side := container.NewHBox(column, widget.NewSeparator())
-	// The title carries the margin of the screen below it on three sides and
-	// none at the foot, so that the name lines up with the content under it and
-	// the gap between them is the screen's own top margin rather than two
-	// margins meeting.
-	margin := palette.StepOf(palette.NameStepSection)
-	titled := container.New(layout.NewCustomPaddedLayout(margin, 0, margin, margin), s.title)
+	// 🔴 The column stands on a ground of its own rather than beside a rule.
+	// Without either, the two meet on the same flat ground and the column reads
+	// as words floating beside the content. It was a rule until 2026-10-21, and
+	// the rule was four units thick and read as the handle of a splitter that
+	// does not move (DEC-261). A ground says the same thing with no line at all.
+	side := paint.On(paint.Fill(palette.BgSurface, 0), s.column())
+	// The title carries the side margin every screen gives its header and its
+	// content, so that the name starts where the words under it start. It was
+	// the section step while the header used the major one, and the name of
+	// every screen stood eight units left of the sentence explaining it.
+	top := palette.StepOf(palette.NameStepSection)
+	edge := palette.StepOf(palette.NameStepMajor)
+	titled := container.New(layout.NewCustomPaddedLayout(top, 0, edge, edge), s.title)
 	screen := container.New(layout.NewBorderLayout(titled, nil, nil, nil), titled, s.body)
 	return container.New(layout.NewBorderLayout(nil, nil, side, nil), side, screen)
 }
@@ -327,9 +323,12 @@ func (s *Shell) column() fyne.CanvasObject {
 	// The promise goes under the last name rather than beside it, because it
 	// belongs to the program and not to the screen above it.
 	if s.brand.Promise != "" {
-		items = append(items, paint.Pad(palette.NameStepHairline, palette.NameStepHairline,
+		// It starts where the names above it start and keeps off the foot of
+		// the window, rather than standing in the corner as it did until
+		// 2026-10-21, a step further left than anything else in the column.
+		items = append(items, paint.Pad(palette.NameStepHairline, palette.NameStepRelated,
 			palette.NameStepTight, palette.NameStepHairline,
-			paint.Text(s.footnote(), palette.TypeLabel, palette.TextSecondary)))
+			alongTheBar(paint.Text(s.footnote(), palette.TypeLabel, palette.TextSecondary))))
 	}
 	column := container.NewVBox(items...)
 	// 🔴 A border rather than another entry in the column, because the mark has

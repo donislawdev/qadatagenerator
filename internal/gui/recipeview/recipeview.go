@@ -241,9 +241,16 @@ func (v *View) lay() {
 	v.cardBox = paint.Column(palette.NameStepGroup)
 	v.card = parts.NewKeyScroll(container.NewVBox(paint.Card(palette.NameStepGroup, v.cardBox)))
 
-	recipeHeading := v.heading(i18n.RecipeHeadingRecipe)
-	left := container.New(layout.NewBorderLayout(recipeHeading, nil, nil, nil),
-		recipeHeading, v.editor.Framed())
+	// The recipe is the first step and where it goes the second, under it, so
+	// the column reads from the top down and ends on the button (DEC-261). The
+	// editor takes what the two leave.
+	steps := paint.StepHeadings(v.text.T(i18n.RecipeHeadingRecipe), v.text.T(i18n.RecipeStepGenerate))
+	recipeHeading := paint.Pad(palette.NameStepHairline, palette.NameStepRelated,
+		palette.NameStepHairline, palette.NameStepHairline, steps[0])
+	generate := paint.Pad(palette.NameStepSection, palette.NameStepHairline,
+		palette.NameStepHairline, palette.NameStepHairline, v.generateStep(steps[1]))
+	left := container.New(layout.NewBorderLayout(recipeHeading, generate, nil, nil),
+		recipeHeading, v.editor.Framed(), generate)
 	right := container.New(layout.NewBorderLayout(v.cardHeading, nil, nil, nil),
 		v.cardHeading, v.card.Framed())
 	// Two equal columns: as many columns as halves, so the count is read from
@@ -260,7 +267,7 @@ func (v *View) lay() {
 	body := paint.Pad(palette.NameStepSection, palette.NameStepSection,
 		palette.NameStepMajor, palette.NameStepMajor, columns)
 
-	band := v.settingsBand()
+	band := v.purposeBand()
 	v.command = v.commandBand()
 	v.content = container.New(layout.NewBorderLayout(band, v.command, nil, nil),
 		band, body, v.command)

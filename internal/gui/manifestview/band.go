@@ -53,19 +53,30 @@ func (v *View) fileBand() fyne.CanvasObject {
 	if wider := v.respond.OnScreen().MinSize().Width; wider > width {
 		width = wider
 	}
-	row := func(button, facts fyne.CanvasObject) fyne.CanvasObject {
-		return paint.Lead(paint.AtLeast(width, 0, button),
-			paint.PadLeft(palette.NameStepRelated,
-				paint.AtLeast(0, palette.ControlHeight, paint.Middle(facts))))
+	// Each row leads with the number of its step (DEC-261), so that the order
+	// is said before a word is read: a manifest first, then the answer.
+	row := func(step int, button, facts fyne.CanvasObject) fyne.CanvasObject {
+		return paint.Lead(paint.Middle(paint.StepMark(step)),
+			paint.PadLeft(palette.NameStepTight,
+				paint.Lead(paint.AtLeast(width, 0, button),
+					paint.PadLeft(palette.NameStepRelated,
+						paint.AtLeast(0, palette.ControlHeight, paint.Middle(facts))))))
+	}
+	// Numbered by their place in the list, for the reason paint.Steps gives.
+	files := []struct{ button, facts fyne.CanvasObject }{
+		{v.open, v.manifestFacts},
+		{v.respond.OnScreen(), v.responseFacts},
+	}
+	rows := make([]fyne.CanvasObject, 0, len(files))
+	for at, file := range files {
+		rows = append(rows, row(at+1, file.button, file.facts))
 	}
 	// The sentence wraps, because it is the longest line on this screen and a
 	// piece of canvas text would otherwise decide how narrow the window may be.
 	return paint.Band(paint.BandBelow, palette.NameStepGroup, palette.NameStepMajor,
 		paint.Column(palette.NameStepGroup,
 			v.paragraph(v.text.T(i18n.PurposeManifest)),
-			paint.Column(palette.NameStepTight,
-				row(v.open, v.manifestFacts),
-				row(v.respond.OnScreen(), v.responseFacts))))
+			paint.Column(palette.NameStepTight, rows...)))
 }
 
 // drawBand fills the two slots of facts with what is known about each file:
@@ -269,6 +280,9 @@ func (v *View) unreadable(err error) {
 	v.unread = err
 	v.drawBand()
 	v.drawDetail()
+	// The card is where the failure is said in full, so it is shown even with
+	// no manifest open, when it is otherwise put away.
+	v.foot.Show()
 }
 
 // freeze puts the two buttons out of reach for the length of a read.

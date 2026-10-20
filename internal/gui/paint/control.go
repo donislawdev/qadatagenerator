@@ -193,9 +193,11 @@ func filledGround(hovered, pressed bool) (fill, ink string) {
 //
 // # What each state looks like, and why
 //
-//   - DISABLED loses both the fill and the edge and keeps a quiet label. An
-//     edge says a control can be used, so leaving it on the one thing nobody
-//     can press would make it the most findable thing on the screen.
+//   - DISABLED loses the edge and keeps a quiet label. An edge says a control
+//     can be used, so leaving it on the one thing nobody can press would make
+//     it the most findable thing on the screen. The filled one keeps a grey
+//     fill instead of its accent since 2026-10-21 (DEC-261), so that the
+//     action of a screen is still a shape before it can be pressed.
 //   - FOCUSED turns the edge mark.focus, the shade every control in this
 //     window marks focus with, and a filled button, which has no edge at rest,
 //     gains one. Until 2026-09-09 this line described a ring inside the shape
@@ -223,8 +225,18 @@ func ButtonFace(look ButtonLook) fyne.CanvasObject {
 		// First, and it stays first. A control nobody can press does not answer
 		// a pointer, so a flag left set on it by a pointer that arrived before
 		// it was disabled must not reach the drawing.
+		//
+		// 🔴 The FILLED one keeps its shape, in grey, rather than losing it.
+		// Until 2026-10-21 it lost it, and the one action of a screen with
+		// nothing to act on yet read as a bold word: a person looking for what
+		// to press next could not find the button at all (DEC-261). A fill is
+		// not an edge, so the rule that an edge says a control can be used
+		// still holds, and every other button still goes without one.
 		ink = theme.TextSecondary
 		ground = Clear()
+		if look.Filled {
+			ground = Fill(theme.BgControl, theme.RadiusControl)
+		}
 	case look.Filled:
 		var fill string
 		fill, ink = filledGround(look.Hovered, look.Pressed)

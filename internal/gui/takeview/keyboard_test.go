@@ -14,6 +14,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
+	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
 // onACanvas is this screen in a window, with a file open and damage ticked.
@@ -69,20 +70,22 @@ const walkLength = 60
 func TestTheKeyboardMeetsTheFileBeforeEverythingItIsUsedFor(t *testing.T) {
 	view, _, canvas := onACanvas(t)
 
+	// The first stop is the scrolling column the three steps stand in, and the
+	// second the button that chooses a file, the first control of the first
+	// step (DEC-261).
+	canvas.FocusNext()
 	canvas.FocusNext()
 	first, isButton := canvas.Focused().(*parts.Button)
 	if !isButton || first != view.chooseFile {
-		t.Fatalf("the first thing the keyboard reaches is %s rather than the button that "+
-			"chooses a file, which is the control at the top of the screen",
+		t.Fatalf("the first control the keyboard reaches is %s rather than the button that "+
+			"chooses a file, which is the control of the first step",
 			describe(canvas.Focused()))
 	}
 
-	// From there the walk has to arrive at how the file is read, then at the
-	// act, and only then at what the act is made of, which is the order the
-	// band and the column under it are read in (DEC-245): the file and its
-	// reading stand together at the top with the one action beside them, the
-	// way the Quick screen keeps Generate beside what it produces from, and
-	// the settings of the damage stand under both.
+	// From there the walk has to arrive at what to damage, then at where the
+	// copy goes, and only then at the act, which is the order the numbered
+	// steps are read in since 2026-10-21. Until then the act stood in a band
+	// beside the file and the keyboard met it before the settings it uses.
 	reached := map[fyne.Focusable]int{}
 	for pressed := 1; pressed <= walkLength; pressed++ {
 		canvas.FocusNext()
@@ -93,19 +96,19 @@ func TestTheKeyboardMeetsTheFileBeforeEverythingItIsUsedFor(t *testing.T) {
 			reached[canvas.Focused()] = pressed
 		}
 	}
-	delimiter, damage, seed := reached[view.delimiter], reached[view.damage], reached[view.seed]
-	if delimiter == 0 || seed == 0 || damage == 0 {
-		t.Fatalf("one press of Tab per control did not reach the separator, the seed and the "+
-			"run: at %d, %d and %d", delimiter, seed, damage)
+	kind, out, damage := reached[view.layers[0].box], reached[view.out], reached[view.damage]
+	if kind == 0 || out == 0 || damage == 0 {
+		t.Fatalf("one press of Tab per control did not reach a kind of damage, the directory "+
+			"and the run: at %d, %d and %d", kind, out, damage)
 	}
-	if damage < delimiter {
-		t.Errorf("the keyboard reaches the button that damages the file at press %d and "+
-			"the separator the file is read with at press %d, so it offers the act before "+
-			"the file the act is about", damage, delimiter)
+	if out < kind {
+		t.Errorf("the keyboard reaches where the copy goes at press %d before what to damage "+
+			"at press %d, which is not the order the steps are read in", out, kind)
 	}
-	if seed < damage {
-		t.Errorf("the keyboard reaches a setting of the damage at press %d before the act at "+
-			"press %d, which is not the order the band and the column are read in", seed, damage)
+	if damage < out {
+		t.Errorf("the keyboard reaches the button that damages the file at press %d before "+
+			"where the copy goes at press %d, so it offers the act before what it acts on",
+			damage, out)
 	}
 }
 
@@ -154,6 +157,10 @@ func TestARunDoesNotLeaveTheKeyboardOnSomethingItPutOutOfReach(t *testing.T) {
 	} {
 		t.Run(where.what, func(t *testing.T) {
 			view, _, canvas := onACanvas(t)
+			// The seed and the number of defects are folded under More options
+			// until somebody opens them (DEC-261), and a folded control is out
+			// of reach of the keyboard for a reason of its own.
+			view.OpenOptions()
 			if where.reach == nil {
 				// The first tick box, reached the way a person reaches it: by
 				// pressing Tab until one is under the keyboard, past the band
@@ -398,7 +405,12 @@ func TestTheKeyboardCanBeSeenOnEveryKindOfControlHere(t *testing.T) {
 // smoothed edges of a rounded rectangle painted in the colour that was already
 // there, so something changed and nothing could be seen. A guard answering
 // "did anything change" would have called that a mark.
-const visibleMark = 3.0
+//
+// The floor is the one the register gives mark.focus since DEC-260, where the
+// owner put the look of the window before the 3.0 of a control edge. It stood
+// at 3.0 here until 2026-10-21, a day after the register moved, because the
+// change of focus colour ran only the tests aimed at it.
+const visibleMark = palette.ThresholdStateChange
 
 // coat is a colour that arrived where another colour was.
 //

@@ -12,6 +12,31 @@ repository once they are released.
 
 ### Changed
 
+- **Damage a file and Recipe read as numbered steps, with the button at the
+  end.** Damage a file is now 1 your file, 2 what to damage, 3 where the
+  damaged copy goes, and its button stands under the last step instead of in
+  the top right corner, where people seeing the window for the first time took
+  it for part of the header. Settings a first run does not need (share of
+  records, defects per record, seed, columns to leave alone, field separator,
+  data locale, extra manifest form) are folded under More options. Where the
+  copy goes has a Choose button for a folder. Recipe is 1 your recipe, 2 where
+  the dataset goes, with Generate this dataset under it, so it no longer asks
+  where to write before anything is written. Check results numbers its two
+  files 1 and 2 and keeps the card of the chosen entry out of sight until a
+  manifest is open.
+- **Two screens have plainer names.** Take and corrupt is now Damage a file and
+  Manifest browser is now Check results, under a group called Verify. The
+  command line is unchanged.
+- **The window has fewer lines.** Cards are a lighter ground without a frame,
+  section headings have no rule beside them, the column of screens stands on a
+  ground of its own instead of beside a thick bar, and every divider, the
+  lines of a table included, is one unit thick instead of four. The title of a
+  screen and the sentence explaining it now stand together on one ground.
+- **The main button of a screen keeps its shape while it cannot be pressed**,
+  as a grey button instead of a bold word, so it can be found before it is
+  needed.
+- **The Quick value screen says what it is for** before it says that nothing
+  on it is written to a file.
 - **The program's name at the top of the column of screens stands alone**, and
   the name of a kind on the Quick value screen does too. Each had an icon of a
   bolt beside it, which drew the eye before anything a person came to do and

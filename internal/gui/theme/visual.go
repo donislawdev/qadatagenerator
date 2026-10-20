@@ -966,6 +966,11 @@ const (
 	// for its edge, so the mark inside it is the small icon and nothing has to
 	// be scaled.
 	CheckBox float32 = 18
+	// StepDisc is the side of the disc carrying the number of a step, on a
+	// screen read from the top down (DEC-261). As tall as a line of the
+	// heading beside it and no taller, so the number reads as part of the
+	// heading rather than as a button.
+	StepDisc float32 = 22
 )
 
 var shadesByName = func() map[string]Shade {

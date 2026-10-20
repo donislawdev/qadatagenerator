@@ -101,7 +101,11 @@ type View struct {
 	headedLimit bool
 	detailBox   *fyne.Container
 	detail      *parts.KeyScroll
-	content     fyne.CanvasObject
+	// foot is the card under the table with its heading, put away while no
+	// manifest is open (DEC-261): it had nothing to read out, and it stood as a
+	// second card of sentences under the first, with a hole between them.
+	foot    fyne.CanvasObject
+	content fyne.CanvasObject
 
 	// The band at the foot: the terminal line, the button that copies it, the
 	// mark saying that it did, and the sentence saying which part of the line
@@ -221,11 +225,11 @@ func (v *View) lay() {
 	v.detail = parts.NewKeyScroll(v.detailBox)
 	card := paint.AtLeast(0, palette.EntryDetailHeight,
 		paint.Card(palette.NameStepGroup, v.detail.Framed()))
-	foot := container.New(layout.NewBorderLayout(v.cardHeading, nil, nil, nil), v.cardHeading, card)
+	v.foot = container.New(layout.NewBorderLayout(v.cardHeading, nil, nil, nil), v.cardHeading, card)
 
 	body := paint.Pad(palette.NameStepSection, palette.NameStepSection,
 		palette.NameStepMajor, palette.NameStepMajor,
-		container.New(layout.NewBorderLayout(nil, foot, nil, nil), middle, foot))
+		container.New(layout.NewBorderLayout(nil, v.foot, nil, nil), middle, v.foot))
 
 	band := v.fileBand()
 	v.terminal = v.commandBand()
@@ -367,6 +371,11 @@ func (v *View) draw() {
 	v.drawEntries()
 	v.drawDetail()
 	v.drawCommand()
+	if v.hasPromise {
+		v.foot.Show()
+	} else {
+		v.foot.Hide()
+	}
 }
 
 // forgetSelection lets go of the entry the card was reading out, because the

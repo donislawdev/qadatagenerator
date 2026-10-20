@@ -55,15 +55,15 @@ toolkit.select-one: "(Select one)"
 # The headings the column groups the screen names under. They name what a
 # person came to do, which is why the screens sit in the order they do.
 sidebar.group.make: Make data
-sidebar.group.check: Check a result
+sidebar.group.check: Verify
 
 # What this build promises before anybody presses anything. It stands under the
 # product's name at the foot of the column, beside the version.
 sidebar.offline: fully offline
 
 screen.about: About
-screen.manifest: Manifest browser
-screen.take: Take and corrupt
+screen.manifest: Check results
+screen.take: Damage a file
 screen.quick: Quick value
 
 # The catalogue of controls, which qadg-gui opens with -catalogue. It shows
@@ -300,6 +300,11 @@ take.reading: This file is being read, which means walking all of it. Nothing is
 
 take.heading.file: What this file holds
 take.heading.settings: What to damage
+# The screen reads in three numbered steps: the file, what to damage, where
+# the copy goes. The middle step is take.heading.settings.
+take.step.file: Your file
+take.step.write: Write the damaged copy
+take.more: More options
 take.heading.plan: What would happen
 # tekst-ok: the same heading over the same card on the recipe screen in recipe.heading.result, one wording
 take.heading.result: What this run did
@@ -379,10 +384,10 @@ take.result.in: in
 take.result.ordered: Defects ordered
 take.result.applied: Of those, applied
 take.result.missing: Could not be applied
-take.result.missing.why: The manifest names the reason for every one of them. Open it on the Manifest browser screen.
+take.result.missing.why: The manifest names the reason for every one of them. Open it on the Check results screen.
 take.file.more.columns: More columns than are accounted for here
 take.result.oversized: Too large to read back
-take.result.oversized.why: This run wrote a manifest larger than this build reads back, so the Manifest browser and verify will both refuse it. A manifest carries an entry for every record damaged and a description of every column, so damage fewer records or work on a narrower file.
+take.result.oversized.why: This run wrote a manifest larger than this build reads back, so the Check results screen and verify will both refuse it. A manifest carries an entry for every record damaged and a description of every column, so damage fewer records or work on a narrower file.
 take.result.unpartnered: Never ordered at all
 take.result.unpartnered.why: Damage to the integrity of a set needs a second record to span, and there were too few rows for it.
 take.result.stopped: You stopped this run
@@ -452,6 +457,8 @@ recipe.heading.describes: What it describes
 # tekst-ok: the same heading over the same card on the take screen in take.heading.result, one wording
 recipe.heading.result: What this run did
 recipe.heading.problems: Problems
+# The second numbered step, under the editor. The first is recipe.heading.recipe.
+recipe.step.generate: Write the dataset
 recipe.no-objections: No objections. This recipe can be used as it stands.
 recipe.line: line
 recipe.allowed: allowed
@@ -518,7 +525,7 @@ purpose.manifest: A manifest says what to expect from every record a run damaged
 purpose.about: Which build this is and the terms it comes under. qadg --version and qadg --license print the same facts.
 
 # The Quick value screen. One value, no recipe, nothing written.
-quick.nothing-written: Nothing on this screen is written to a file.
+quick.nothing-written: Make test values to copy into a form or a test. Nothing on this screen is written to a file.
 quick.label.value: Kind
 quick.heading.value: Value
 quick.heading.values-counted: values

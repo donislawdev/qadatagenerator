@@ -166,10 +166,15 @@ type View struct {
 	out       *parts.FieldEntry
 	manifest  *parts.Select
 	overwrite *parts.Check
+	// options folds away the settings a first run does not need (DEC-261).
+	options *parts.Disclosure
 
 	chooseFile *parts.Button
-	damage     *parts.Button
-	stop       *parts.Button
+	// chooseOut asks the system for the directory the copy goes to, beside the
+	// field a path can be typed or pasted into.
+	chooseOut *parts.Button
+	damage    *parts.Button
+	stop      *parts.Button
 }
 
 // Clipboard is the one thing this screen puts outside itself that is not a
@@ -240,59 +245,91 @@ func (v *View) lay() {
 			palette.NameStepHairline, palette.NameStepHairline,
 			paint.AtLeast(palette.AsideWidth, 0, v.panel)))
 
-	settingsHeading := v.heading(i18n.TakeHeadingSettings)
-	settings := container.New(layout.NewBorderLayout(settingsHeading, nil, nil, nil),
-		settingsHeading, container.NewVBox(v.settingsColumn()))
+	// The steps scroll inside their column, because opening the settings a
+	// first run does not need makes them taller than the window the owner
+	// keeps, and a column that grew instead would push the window's minimum
+	// past its size.
+	// Framed, so that the keyboard standing on the column shows a ring like
+	// every other scrolling area of the window does.
+	steps := parts.NewKeyScroll(v.stepsColumn()).Framed()
 
 	aside := paint.PadLeft(palette.NameStepSection, right)
 	body := paint.Pad(palette.NameStepSection, palette.NameStepSection,
 		palette.NameStepMajor, palette.NameStepMajor,
-		container.New(layout.NewBorderLayout(nil, nil, nil, aside), settings, aside))
+		container.New(layout.NewBorderLayout(nil, nil, nil, aside), steps, aside))
 
-	band := v.fileBand()
+	band := v.purposeBand()
 	v.content = container.New(layout.NewBorderLayout(band, v.terminal, nil, nil),
 		band, body, v.terminal)
 }
 
-// heading is the title of one column, with the line every section heading of
-// this window carries.
+// heading is the title over the card, which says whether it holds the plan of
+// the next run or what the last one did.
 func (v *View) heading(key i18n.Key) fyne.CanvasObject {
 	return paint.Pad(palette.NameStepHairline, palette.NameStepRelated,
 		palette.NameStepHairline, palette.NameStepHairline,
 		paint.SectionHeading(v.text.T(key), paint.Spacer()))
 }
 
-// fileBand is the band at the top: what the screen is for, then the file and
-// how it is read, and the one action at the right, dropped by the height of
-// the label it does not have so that it stands level with the fields.
+// purposeBand is the header under the name of the screen: what the screen is
+// for, and nothing else.
 //
-// The separator and the locale stand with the file rather than with the
-// settings, because they decide how the file is READ: changing either changes
-// what the panel says the file holds, where every other setting changes only
-// what a run would do with it.
-func (v *View) fileBand() fyne.CanvasObject {
-	choose := paint.Unlabelled(v.chooseFile.OnScreen())
-	// 🔴 The facts take what the button and the fields leave, rather than
-	// standing in a row with them. In a row they were given the width they
-	// asked for, and the sentence about there being no file asked for more
-	// than the band had, so the fields walked under the button at the far
-	// end - seen on the first render of the state the screen opens in.
-	facts := paint.Unlabelled(paint.AtLeast(0, palette.ControlHeight, paint.Middle(v.facts)))
-	reading := paint.Row(palette.NameStepRelated,
-		labelled(v.text.T(i18n.TakeSettingDelimiter),
-			paint.AtLeast(paint.FieldWidth(delimiterSample), 0, parts.Standing(parts.Field(v.delimiter)))),
-		labelled(v.text.T(i18n.TakeSettingLocale),
-			paint.AtLeast(paint.FieldWidth(localeSample), 0, parts.Standing(parts.Field(v.locale)))))
-	file := paint.Lead(choose,
-		paint.PadLeft(palette.NameStepRelated,
-			paint.Trail(facts, paint.PadLeft(palette.NameStepRelated, reading))))
-	action := paint.Unlabelled(v.action)
+// # Why the file and the button left it on 2026-10-21 (DEC-261)
+//
+// The band held the file, how it is read and the one action of the screen, in
+// its top right corner. A person seeing the window for the first time read the
+// band as the header it looks like and never found the button in it, and the
+// action stood above the settings it acts on. The steps under it now carry all
+// three, in the order they are done.
+func (v *View) purposeBand() fyne.CanvasObject {
 	// The sentence wraps, because it is the longest line on this screen and a
 	// piece of canvas text would otherwise decide how narrow the window may be.
 	return paint.Band(paint.BandBelow, palette.NameStepGroup, palette.NameStepMajor,
-		paint.Column(palette.NameStepGroup,
-			v.paragraph(v.text.T(i18n.PurposeTake)),
-			paint.Trail(file, paint.PadLeft(palette.NameStepGroup, action))))
+		v.paragraph(v.text.T(i18n.PurposeTake)))
+}
+
+// stepsColumn is the three steps of the screen, read from the top down: the
+// file, what to damage, where the damaged copy goes and the button that writes
+// it.
+func (v *View) stepsColumn() fyne.CanvasObject {
+	// 🔴 The facts take what the button leaves, rather than standing in a row
+	// with it. In a row they were given the width they asked for, and the
+	// sentence about there being no file asked for more than there was - seen
+	// on the first render of the state the screen opens in, when the band held
+	// it.
+	facts := paint.AtLeast(0, palette.ControlHeight, paint.Middle(v.facts))
+	file := paint.Lead(v.chooseFile.OnScreen(), paint.PadLeft(palette.NameStepRelated, facts))
+	damage := paint.Column(palette.NameStepRelated, v.kindsGrid(), v.options.OnScreen())
+	// The button stands at its own width at the start of the line, where the
+	// eye arrives after the last setting, rather than stretched across it.
+	write := paint.Column(palette.NameStepRelated,
+		paint.Trail(labelled(v.text.T(i18n.TakeSettingOut), parts.Standing(parts.Field(v.out))),
+			paint.PadLeft(palette.NameStepRelated, paint.Unlabelled(v.chooseOut.OnScreen()))),
+		paint.AtLeast(0, palette.ControlHeight, v.overwrite.OnScreen()),
+		paint.Lead(v.action, paint.Spacer()))
+	// Room on the right for the bar of the scrolling area, and a hairline on
+	// the left for the edge of a field, which is drawn outside its bounds and
+	// was cut by the edge of the scrolling area on the first render.
+	return paint.Pad(palette.NameStepHairline, palette.NameStepHairline,
+		palette.NameStepHairline, palette.NameStepGroup,
+		paint.Steps(palette.NameStepMajor,
+			paint.Step{Words: v.text.T(i18n.TakeStepFile), Body: file},
+			paint.Step{Words: v.text.T(i18n.TakeHeadingSettings), Body: damage},
+			paint.Step{Words: v.text.T(i18n.TakeStepWrite), Body: write}))
+}
+
+// chooseDirectory asks for the directory the damaged copy goes to, the way the
+// recipe screen asks for the one its dataset goes to.
+func (v *View) chooseDirectory() {
+	if v.window == nil || v.busy() {
+		return
+	}
+	dialog.ShowFolderOpen(func(chosen fyne.ListableURI, err error) {
+		if err != nil || chosen == nil {
+			return
+		}
+		v.out.SetText(chosen.Path())
+	}, v.window)
 }
 
 // Open reads a file and puts the screen into the state that shows it.

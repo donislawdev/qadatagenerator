@@ -1,7 +1,8 @@
 <canvas padded size="1342x900">
 	<content>
 		<container size="1342x900">
-			<container size="224x900">
+			<container size="220x900">
+				<rectangle fillColor="menuBackground" size="220x900"/>
 				<container size="220x900">
 					<container size="220x900">
 						<container size="220x62">
@@ -238,49 +239,48 @@
 									</widget>
 								</container>
 							</container>
-							<container pos="0,282" size="220x22">
-								<text color="disabled" pos="8,4" size="208x14" textSize="11">v0.1.0  ·  catalogue of controls</text>
+							<container pos="0,282" size="220x30">
+								<container pos="8,4" size="208x14">
+									<container size="3x14">
+										<rectangle size="3x14"/>
+										<rectangle size="3x14"/>
+									</container>
+									<container pos="3,0" size="205x14">
+										<text color="disabled" pos="12,0" size="193x14" textSize="11">v0.1.0  ·  catalogue of controls</text>
+									</container>
+								</container>
 							</container>
 						</container>
 					</container>
 				</container>
-				<widget pos="220,0" size="4x900" type="*widget.Separator">
-					<rectangle fillColor="separator" size="4x900"/>
-				</widget>
 			</container>
-			<container pos="224,0" size="1118x900">
-				<container size="1118x55">
-					<widget pos="24,24" size="1070x31" type="*widget.Label">
-						<widget size="1070x31" type="*widget.RichText">
+			<container pos="220,0" size="1122x900">
+				<container size="1122x55">
+					<widget pos="32,24" size="1058x31" type="*widget.Label">
+						<widget size="1058x31" type="*widget.RichText">
 							<text bold pos="4,4" size="77x23" textSize="18">Choosers</text>
 						</widget>
 					</widget>
 				</container>
-				<container pos="0,55" size="1118x844">
-					<container size="1118x844">
-						<container pos="32,24" size="1054x796">
-							<container size="1054x439">
-								<container size="1054x18">
-									<container pos="53,0" size="1000x18">
-										<container pos="12,4" size="976x10">
-											<spacer size="976x4"/>
-											<rectangle fillColor="rgba(48,85,140,255)" pos="0,4" size="976x1"/>
-											<spacer pos="0,5" size="976x4"/>
-										</container>
-									</container>
+				<container pos="0,55" size="1122x844">
+					<container size="1122x844">
+						<container pos="32,24" size="1058x796">
+							<container size="1058x439">
+								<container size="1058x18">
+									<spacer pos="53,0" size="1004x18"/>
 									<container size="53x18">
 										<spacer size="53x0"/>
 										<text bold size="53x18" textSize="14">Chooser</text>
 										<spacer pos="0,18" size="53x0"/>
 									</container>
 								</container>
-								<container pos="0,34" size="1054x122">
-									<container size="1054x22">
+								<container pos="0,34" size="1058x122">
+									<container size="1058x22">
 										<container size="107x22">
 											<rectangle size="107x22"/>
 											<rectangle size="107x22"/>
 										</container>
-										<container pos="107,0" size="946x22">
+										<container pos="107,0" size="950x22">
 											<container size="129x22">
 												<container pos="4,4" size="117x14">
 													<container size="117x14">
@@ -318,7 +318,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,30" size="1054x42">
+									<container pos="0,30" size="1058x42">
 										<container size="107x42">
 											<rectangle size="107x42"/>
 											<container size="107x42">
@@ -327,7 +327,7 @@
 												<spacer pos="0,29" size="107x12"/>
 											</container>
 										</container>
-										<container pos="107,0" size="946x42">
+										<container pos="107,0" size="950x42">
 											<container size="129x42">
 												<container pos="4,4" size="117x34">
 													<container size="117x34">
@@ -498,7 +498,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,80" size="1054x42">
+									<container pos="0,80" size="1058x42">
 										<container size="107x42">
 											<rectangle size="107x42"/>
 											<container size="107x42">
@@ -507,7 +507,7 @@
 												<spacer pos="0,29" size="107x12"/>
 											</container>
 										</container>
-										<container pos="107,0" size="946x42">
+										<container pos="107,0" size="950x42">
 											<container size="129x42">
 												<container pos="4,4" size="117x34">
 													<container size="117x34">
@@ -679,9 +679,9 @@
 										</container>
 									</container>
 								</container>
-								<container pos="0,172" size="1054x266">
-									<text size="1054x16">Very long value</text>
-									<container pos="0,24" size="1054x42">
+								<container pos="0,172" size="1058x266">
+									<text size="1058x16">Very long value</text>
+									<container pos="0,24" size="1058x42">
 										<container size="107x42">
 											<rectangle size="107x42"/>
 											<container size="107x42">
@@ -690,9 +690,9 @@
 												<spacer pos="0,28" size="107x13"/>
 											</container>
 										</container>
-										<container pos="107,0" size="946x42">
-											<container pos="4,4" size="934x34">
-												<container size="934x34">
+										<container pos="107,0" size="950x42">
+											<container pos="4,4" size="938x34">
+												<container size="938x34">
 													<widget size="558x34" type="*parts.Select">
 														<container size="558x34">
 															<container size="558x34">
@@ -725,7 +725,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,74" size="1054x42">
+									<container pos="0,74" size="1058x42">
 										<container size="107x42">
 											<rectangle size="107x42"/>
 											<container size="107x42">
@@ -734,9 +734,9 @@
 												<spacer pos="0,28" size="107x13"/>
 											</container>
 										</container>
-										<container pos="107,0" size="946x42">
-											<container pos="4,4" size="934x34">
-												<container size="934x34">
+										<container pos="107,0" size="950x42">
+											<container pos="4,4" size="938x34">
+												<container size="938x34">
 													<widget size="558x34" type="*parts.Select">
 														<container size="558x34">
 															<container size="558x34">
@@ -769,7 +769,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,124" size="1054x42">
+									<container pos="0,124" size="1058x42">
 										<container size="107x42">
 											<rectangle size="107x42"/>
 											<container size="107x42">
@@ -778,9 +778,9 @@
 												<spacer pos="0,28" size="107x13"/>
 											</container>
 										</container>
-										<container pos="107,0" size="946x42">
-											<container pos="4,4" size="934x34">
-												<container size="934x34">
+										<container pos="107,0" size="950x42">
+											<container pos="4,4" size="938x34">
+												<container size="938x34">
 													<widget size="558x34" type="*parts.Select">
 														<container size="558x34">
 															<container size="558x34">
@@ -813,7 +813,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,174" size="1054x42">
+									<container pos="0,174" size="1058x42">
 										<container size="107x42">
 											<rectangle size="107x42"/>
 											<container size="107x42">
@@ -822,9 +822,9 @@
 												<spacer pos="0,28" size="107x13"/>
 											</container>
 										</container>
-										<container pos="107,0" size="946x42">
-											<container pos="4,4" size="934x34">
-												<container size="934x34">
+										<container pos="107,0" size="950x42">
+											<container pos="4,4" size="938x34">
+												<container size="938x34">
 													<widget size="558x34" type="*parts.Select">
 														<container size="558x34">
 															<container size="558x34">
@@ -857,7 +857,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,224" size="1054x42">
+									<container pos="0,224" size="1058x42">
 										<container size="107x42">
 											<rectangle size="107x42"/>
 											<container size="107x42">
@@ -866,9 +866,9 @@
 												<spacer pos="0,28" size="107x13"/>
 											</container>
 										</container>
-										<container pos="107,0" size="946x42">
-											<container pos="4,4" size="934x34">
-												<container size="934x34">
+										<container pos="107,0" size="950x42">
+											<container pos="4,4" size="938x34">
+												<container size="938x34">
 													<widget size="558x34" type="*parts.Select">
 														<container size="558x34">
 															<container size="558x34">

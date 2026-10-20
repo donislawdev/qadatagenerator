@@ -2,6 +2,7 @@ package paint
 
 import (
 	"image/color"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -21,37 +22,43 @@ import (
 // into a band of chrome leaves exactly one framed thing, and it is the thing
 // the screen is for.
 //
-//	Card  - the result. A ground one step off the window, an edge, rounded.
-//	Band  - chrome. The same ground, touching the edges, square, a line under.
+//	Card  - the result. A ground one step off the window, rounded, no edge.
+//	Band  - chrome. At the top of a screen it is the header and has no ground
+//	        of its own, at the foot it is the ground of the sidebar.
 //	Pill  - a badge on data. Rounded to a capsule, in a colour that MEANS.
+//
+// 🔴 Fewer lines, by the owner's choice on 2026-10-21 (DEC-261). Every card,
+// every field, every button and every section heading had an edge, and the
+// window read as a drawing of boxes rather than as a tool. A card is now told
+// apart from the window by its ground alone, and an edge is kept for what a
+// person presses or types into.
 
-// Card is the one framed surface of a screen.
+// Card is the one raised surface of a screen.
 //
 // The padding is named by the caller because a card of rows and a card of
 // paragraphs want different room, and neither is more correct than the other.
 func Card(padding string, content fyne.CanvasObject) fyne.CanvasObject {
-	ground := Bordered(theme.BgSurface, theme.LineQuiet, theme.RadiusCard)
-	return On(ground, PadAll(padding, content))
+	return On(Fill(theme.BgSurface, theme.RadiusCard), PadAll(padding, content))
 }
 
 // Band is a strip of chrome touching the left and right edges of the window.
 //
-// # Why it is square and has a line rather than a frame
+// # Why the top one has no ground and the bottom one has no line
 //
-// A band is not content, so it must not look like content. Rounding it would
-// leave a sliver of window showing in each corner, which reads as a shape that
-// failed to fit, and framing it would make a second card. A single line along
-// the edge it meets the content on is the whole separation, and it is the
-// treatment every application with a toolbar uses.
-//
-// The line goes under a band at the top of a screen and over one at the bottom,
-// which is what edge names.
+// Until 2026-10-21 both had the ground of a card and a line along the content.
+// The band at the top then sat under the title of the screen as a second,
+// lighter strip, so the name of a screen hung above the words explaining it
+// rather than standing with them, and the window had three greys stacked in
+// stripes (DEC-261). The band at the top is now the rest of the header: the
+// same ground as the title, with the room under it saying where the content
+// starts. The band at the bottom keeps its ground, the same as the sidebar,
+// and the ground alone says it is chrome.
 func Band(edge string, padding, sides string, content fyne.CanvasObject) fyne.CanvasObject {
-	body := On(Fill(theme.BgSurface, 0), Pad(padding, padding, sides, sides, content))
+	inside := Pad(padding, padding, sides, sides, content)
 	if edge == BandBelow {
-		return container.NewBorder(nil, Hairline(theme.LineQuiet), nil, nil, body)
+		return inside
 	}
-	return container.NewBorder(Hairline(theme.LineQuiet), nil, nil, nil, body)
+	return On(Fill(theme.BgSurface, 0), inside)
 }
 
 // Which side of a band the line separating it from the content is drawn on.
@@ -93,21 +100,73 @@ func Pill(words, token, icon string) fyne.CanvasObject {
 		Row(theme.NameStepHairline, row...)))
 }
 
-// SectionHeading names one part of a screen, with a line running from the words
-// to the far edge and room at the end for the actions belonging to that part.
+// SectionHeading names one part of a screen, with room at the far end for the
+// actions belonging to that part.
 //
-// # Why the line rather than size alone
+// # Why no line any more
 //
-// The heading and the rows under it are two rungs apart on the type ladder, and
-// two rungs is not enough on its own to say where one section ends and the next
-// begins. The line does that in a way no font size can, and it costs nothing
-// but a pixel.
+// A line ran from the words to the far edge until 2026-10-21, to say where one
+// section ends. With a card under most headings and an edge on every control,
+// it was one more line in a window the owner found chaotic (DEC-261). The room
+// above a heading says where a section starts, and that is what the gap of a
+// group is for.
 func SectionHeading(words string, actions fyne.CanvasObject) fyne.CanvasObject {
-	rule := Pad(theme.NameStepHairline, theme.NameStepHairline,
-		theme.NameStepRelated, theme.NameStepRelated,
-		Middle(Hairline(theme.LineSection)))
 	return container.NewBorder(nil, nil,
-		Middle(Strong(words, theme.TypeSection, theme.TextPrimary)), actions, rule)
+		Middle(Strong(words, theme.TypeSection, theme.TextPrimary)), actions, Spacer())
+}
+
+// StepHeading names one step of a screen that is read from the top down, with
+// the number of the step in a disc before the words.
+//
+// # Why numbers, added on 2026-10-21 (DEC-261)
+//
+// The owner looked at the window as somebody seeing it for the first time and
+// could not tell where to start: the action of a screen stood in its top right
+// corner and the settings were one flat list. A number says the order before a
+// word is read, and the last step is where the button is.
+func StepHeading(number int, words string) fyne.CanvasObject {
+	return Row(theme.NameStepTight, Middle(StepMark(number)),
+		Middle(Strong(words, theme.TypeSection, theme.TextPrimary)))
+}
+
+// Step is one numbered step of a screen: the words of its heading and what
+// stands under them.
+type Step struct {
+	Words string
+	Body  fyne.CanvasObject
+}
+
+// Steps stands numbered steps one under another, the gap between them named by
+// the caller.
+//
+// Each is numbered by its place in the list rather than by a number written
+// beside it, so a step added, removed or moved renumbers the ones after it, and
+// a view writes no number at all.
+func Steps(gap string, steps ...Step) *fyne.Container {
+	column := make([]fyne.CanvasObject, 0, len(steps))
+	for at, step := range steps {
+		column = append(column, Column(theme.NameStepRelated, StepHeading(at+1, step.Words), step.Body))
+	}
+	return Column(gap, column...)
+}
+
+// StepHeadings is the headings of numbered steps that do not stand one under
+// another, numbered by their place in the list for the reason Steps gives.
+func StepHeadings(words ...string) []fyne.CanvasObject {
+	headings := make([]fyne.CanvasObject, 0, len(words))
+	for at, said := range words {
+		headings = append(headings, StepHeading(at+1, said))
+	}
+	return headings
+}
+
+// StepMark is the disc with the number of a step in it, on its own, for a step
+// whose first control says what it is better than a heading would: the two
+// buttons opening the two files of the screen that checks a result.
+func StepMark(number int) fyne.CanvasObject {
+	digit := container.NewCenter(Strong(strconv.Itoa(number), theme.TypeLabel, theme.TextAccent))
+	return AtLeast(theme.StepDisc, theme.StepDisc,
+		container.NewStack(Fill(theme.BgCurrent, theme.RadiusPill), digit))
 }
 
 // FieldLabel names a control, above it rather than beside it.

@@ -45,6 +45,13 @@ const (
 	TakeHeadingPlan     Key = "take.heading.plan"
 	TakeHeadingResult   Key = "take.heading.result"
 
+	// The first and the last of the three numbered steps the screen reads in
+	// since DEC-261. The middle one is TakeHeadingSettings. TakeMoreOptions
+	// heads the settings a first run does not need, folded away until asked.
+	TakeStepFile    Key = "take.step.file"
+	TakeStepWrite   Key = "take.step.write"
+	TakeMoreOptions Key = "take.more"
+
 	TakeFileRows              Key = "take.file.rows"
 	TakeFileColumns           Key = "take.file.columns"
 	TakeFileNothingDeclared   Key = "take.file.nothing-declared"

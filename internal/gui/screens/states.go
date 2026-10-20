@@ -432,6 +432,14 @@ func takeStatesBeforeARun() []State {
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 		},
+		{
+			Name:        "take-options",
+			Purpose:     "the settings a first run does not need, unfolded under the kinds of damage",
+			Screen:      screenTake,
+			NeedsSource: true,
+			Layers:      []string{"L2", "L3"},
+			Options:     true,
+		},
 	}
 }
 
@@ -456,10 +464,10 @@ func takeStateOfThePointer() []State {
 			Purpose: "the pointer on a control of a screen the states of the pointer were not " +
 				"built on, which is the only thing saying they are not a property of one screen",
 			Screen: screenTake,
-			// Six, from tools/klawiatura on this state: five names in the
-			// column and then the one control this screen has before a file
-			// has been chosen.
-			Pointer: Pointer{Tabs: 6},
+			// Seven, from tools/klawiatura on this state: five names in the
+			// column, the scrolling column of steps, and then the first
+			// control of the first step.
+			Pointer: Pointer{Tabs: 7},
 		},
 	}
 }
@@ -472,26 +480,28 @@ func takeStatesOfTheKeyboard() []State {
 		{
 			Name: "take-focus-file",
 			Purpose: "the keyboard on the button that chooses a file, which is the first " +
-				"thing on this screen it reaches and was for a while the last",
+				"control of the first step",
 			Screen:      screenTake,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 6},
+			Keyboard:    Keyboard{Tabs: 7},
 		},
-		// 🔴 Every count below is from tools/klawiatura on 2026-09-15, the day
-		// the screen moved onto paint (DEC-245) and its walk changed shape: the
-		// band holds the file, how it is read and the act, the column under it
-		// the settings of the damage, and the panel comes last. Taken from the
-		// walk rather than counted here, for the reason the quick screen's
-		// states give: a count from reading lands on the neighbour.
+		// 🔴 Every count below is from tools/klawiatura on 2026-10-21, the day
+		// the screen became three numbered steps (DEC-261) and its walk changed
+		// shape: the scrolling column of steps, the file, the kinds of damage,
+		// the heading of the folded settings and what it holds when open, where
+		// the copy goes with its folder chooser, the button, then the panel. Taken from the walk
+		// rather than counted here, for the reason the quick screen's states
+		// give: a count from reading lands on the neighbour.
 		{
 			Name: "take-focus-setting",
 			Purpose: "the keyboard in a text setting, the share of records, which is the " +
-				"first setting of the damage under the band",
+				"first of the settings folded under More options",
 			Screen:      screenTake,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 18},
+			Options:     true,
+			Keyboard:    Keyboard{Tabs: 17},
 		},
 		{
 			Name: "take-focus-choice",
@@ -500,7 +510,8 @@ func takeStatesOfTheKeyboard() []State {
 			Screen:      screenTake,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 19},
+			Options:     true,
+			Keyboard:    Keyboard{Tabs: 18},
 		},
 		{
 			Name: "take-focus-pane",
@@ -510,16 +521,16 @@ func takeStatesOfTheKeyboard() []State {
 			Screen:      screenTake,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 25},
+			Keyboard:    Keyboard{Tabs: 21},
 		},
 		{
 			Name: "take-focus-damage",
-			Purpose: "the keyboard on the button that damages the file, which stands in the " +
-				"band beside the file it is about, before the settings of the damage",
+			Purpose: "the keyboard on the button that damages the file, which stands at the " +
+				"foot of the last step, after everything it acts on",
 			Screen:      screenTake,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
-			Keyboard:    Keyboard{Tabs: 9},
+			Keyboard:    Keyboard{Tabs: 20},
 		},
 	}
 }
@@ -561,13 +572,12 @@ func takeStatesOfARun() []State {
 		{
 			Name: "take-focus-stop",
 			Purpose: "the keyboard on the way to stop a run, which stands where the button " +
-				"that started it stood and is the first thing on this screen it can " +
-				"reach while one is going on",
+				"that started it stood, at the foot of the last step",
 			Screen:      screenTake,
 			NeedsSource: true,
 			Layers:      []string{"L2", "L3"},
 			Ran:         RanInFlight,
-			Keyboard:    Keyboard{Tabs: 6},
+			Keyboard:    Keyboard{Tabs: 8},
 		},
 	}
 }

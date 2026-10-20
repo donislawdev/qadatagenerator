@@ -68,27 +68,38 @@ func (v *View) buildBand() {
 	v.keys = parts.Handover{Anchor: v.choose}
 }
 
-// settingsBand is the band: what the screen is for, then the directory with
-// the two controls beside it, and the one action at the right, dropped by the
-// height of the label it does not have so that it stands level with the field.
+// purposeBand is the header under the name of the screen: what the screen is
+// for, and nothing else.
 //
-// The field takes what the controls beside it leave, because a path is the one
-// value here nobody can retype from memory. Everything else takes the width it
-// asks for.
-func (v *View) settingsBand() fyne.CanvasObject {
-	out := labelled(v.text.T(i18n.RecipeWriteTo), parts.Standing(parts.Field(v.out)))
-	beside := paint.PadLeft(palette.NameStepRelated, paint.Row(palette.NameStepRelated,
-		paint.Unlabelled(v.choose.OnScreen()),
-		paint.Unlabelled(paint.AtLeast(0, palette.ControlHeight, v.replace.OnScreen())),
-		labelled(v.text.T(i18n.TakeSettingManifest), v.manifest.OnScreen())))
-	settings := container.New(layout.NewBorderLayout(nil, nil, nil, beside), out, beside)
-	action := paint.PadLeft(palette.NameStepGroup, paint.Unlabelled(v.action))
+// # Why the directory and the button left it on 2026-10-21 (DEC-261)
+//
+// The band asked where to write before anybody had written a recipe, and the
+// one action of the screen stood in its top right corner, where a person seeing
+// the window for the first time read it as part of the header. The recipe is
+// now the first step and where it goes the second, with the button after it.
+func (v *View) purposeBand() fyne.CanvasObject {
 	// The sentence wraps, because it is the longest line on this screen and a
 	// piece of canvas text would otherwise decide how narrow the window may be.
 	return paint.Band(paint.BandBelow, palette.NameStepGroup, palette.NameStepMajor,
-		paint.Column(palette.NameStepGroup,
-			v.paragraph(v.text.T(i18n.PurposeRecipe)),
-			container.New(layout.NewBorderLayout(nil, nil, nil, action), settings, action)))
+		v.paragraph(v.text.T(i18n.PurposeRecipe)))
+}
+
+// generateStep is the second step under its heading, under the recipe: where
+// the dataset goes, whether it may replace what is there, the extra form of the
+// manifest, and the button that generates.
+//
+// The field takes what the button beside it leaves, because a path is the one
+// value here nobody can retype from memory. Everything else takes the width it
+// asks for, and the button stands at its own width at the start of the last
+// line, where the eye arrives after the last setting.
+func (v *View) generateStep(heading fyne.CanvasObject) fyne.CanvasObject {
+	out := paint.Trail(labelled(v.text.T(i18n.RecipeWriteTo), parts.Standing(parts.Field(v.out))),
+		paint.PadLeft(palette.NameStepRelated, paint.Unlabelled(v.choose.OnScreen())))
+	how := paint.Row(palette.NameStepGroup,
+		paint.Unlabelled(paint.AtLeast(0, palette.ControlHeight, v.replace.OnScreen())),
+		labelled(v.text.T(i18n.TakeSettingManifest), v.manifest.OnScreen()))
+	return paint.Column(palette.NameStepRelated, heading, out, how,
+		container.New(layout.NewBorderLayout(nil, nil, v.action, nil), v.action))
 }
 
 // labelled names a control, above it rather than beside it.

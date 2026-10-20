@@ -1,7 +1,8 @@
 <canvas padded size="1342x900">
 	<content>
 		<container size="1342x900">
-			<container size="224x900">
+			<container size="220x900">
+				<rectangle fillColor="menuBackground" size="220x900"/>
 				<container size="220x900">
 					<container size="220x900">
 						<container size="220x62">
@@ -82,16 +83,16 @@
 													<rectangle size="201x34"/>
 													<container size="201x34">
 														<container pos="12,4" size="177x26">
-															<container size="120x26">
+															<container size="101x26">
 																<container size="15x26">
 																	<spacer size="15x5"/>
 																	<image fillMode="contain" pos="0,5" rsc="file-x-72abff-15.svg" size="15x15"/>
 																	<spacer pos="0,20" size="15x5"/>
 																</container>
-																<container pos="23,0" size="97x26">
-																	<spacer size="97x4"/>
-																	<text pos="0,4" size="97x16">Take and corrupt</text>
-																	<spacer pos="0,21" size="97x4"/>
+																<container pos="23,0" size="78x26">
+																	<spacer size="78x4"/>
+																	<text pos="0,4" size="78x16">Damage a file</text>
+																	<spacer pos="0,21" size="78x4"/>
 																</container>
 															</container>
 														</container>
@@ -143,7 +144,7 @@
 										<rectangle size="3x14"/>
 									</container>
 									<container pos="3,0" size="205x14">
-										<text bold color="focus" pos="12,0" size="193x14" textSize="11">CHECK A RESULT</text>
+										<text bold color="focus" pos="12,0" size="193x14" textSize="11">VERIFY</text>
 									</container>
 								</container>
 							</container>
@@ -161,16 +162,16 @@
 													<rectangle fillColor="rgba(37,51,72,255)" radius="6" size="201x34"/>
 													<container size="201x34">
 														<container pos="12,4" size="177x26">
-															<container size="124x26">
+															<container size="101x26">
 																<container size="15x26">
 																	<spacer size="15x5"/>
 																	<image fillMode="contain" pos="0,5" rsc="clipboard-check-72abff-15.svg" size="15x15"/>
 																	<spacer pos="0,20" size="15x5"/>
 																</container>
-																<container pos="23,0" size="101x26">
-																	<spacer size="101x4"/>
-																	<text pos="0,4" size="101x16">Manifest browser</text>
-																	<spacer pos="0,21" size="101x4"/>
+																<container pos="23,0" size="78x26">
+																	<spacer size="78x4"/>
+																	<text pos="0,4" size="78x16">Check results</text>
+																	<spacer pos="0,21" size="78x4"/>
 																</container>
 															</container>
 														</container>
@@ -181,11 +182,11 @@
 									</widget>
 								</container>
 							</container>
-							<spacer pos="0,228" size="220x541"/>
-							<widget pos="0,769" size="220x4" type="*widget.Separator">
-								<rectangle fillColor="separator" size="220x4"/>
+							<spacer pos="0,228" size="220x536"/>
+							<widget pos="0,764" size="220x1" type="*widget.Separator">
+								<rectangle fillColor="separator" size="220x1"/>
 							</widget>
-							<container pos="0,773" size="220x42">
+							<container pos="0,765" size="220x42">
 								<container size="3x42">
 									<rectangle size="3x42"/>
 									<rectangle size="3x42"/>
@@ -219,40 +220,57 @@
 									</widget>
 								</container>
 							</container>
-							<container pos="0,815" size="220x22">
-								<text color="disabled" pos="8,4" size="208x14" textSize="11">v0.1.0  ·  fully offline</text>
+							<container pos="0,807" size="220x30">
+								<container pos="8,4" size="208x14">
+									<container size="3x14">
+										<rectangle size="3x14"/>
+										<rectangle size="3x14"/>
+									</container>
+									<container pos="3,0" size="205x14">
+										<text color="disabled" pos="12,0" size="193x14" textSize="11">v0.1.0  ·  fully offline</text>
+									</container>
+								</container>
 							</container>
 						</container>
 					</container>
 				</container>
-				<widget pos="220,0" size="4x900" type="*widget.Separator">
-					<rectangle fillColor="separator" size="4x900"/>
-				</widget>
 			</container>
-			<container pos="224,0" size="1118x900">
-				<container size="1118x55">
-					<widget pos="24,24" size="1070x31" type="*widget.Label">
-						<widget size="1070x31" type="*widget.RichText">
-							<text bold pos="4,4" size="144x23" textSize="18">Manifest browser</text>
+			<container pos="220,0" size="1122x900">
+				<container size="1122x55">
+					<widget pos="32,24" size="1058x31" type="*widget.Label">
+						<widget size="1058x31" type="*widget.RichText">
+							<text bold pos="4,4" size="113x23" textSize="18">Check results</text>
 						</widget>
 					</widget>
 				</container>
-				<container pos="0,55" size="1118x844">
-					<container size="1118x844">
-						<container size="1118x149">
-							<container size="1118x148">
-								<rectangle fillColor="menuBackground" size="1118x148"/>
-								<container size="1118x148">
-									<container pos="32,16" size="1054x116">
-										<container size="1054x24">
-											<widget size="1054x24" type="*widget.Label">
-												<widget size="1054x24" type="*widget.RichText">
-													<text color="disabled" pos="4,4" size="868x16">A manifest says what to expect from every record a run damaged. Add the answer your application gave, and this screen says where the two disagree.</text>
-												</widget>
-											</widget>
+				<container pos="0,55" size="1122x844">
+					<container size="1122x844">
+						<container size="1122x148">
+							<container pos="32,16" size="1058x116">
+								<container size="1058x24">
+									<widget size="1058x24" type="*widget.Label">
+										<widget size="1058x24" type="*widget.RichText">
+											<text color="disabled" pos="4,4" size="868x16">A manifest says what to expect from every record a run damaged. Add the answer your application gave, and this screen says where the two disagree.</text>
+										</widget>
+									</widget>
+								</container>
+								<container pos="0,40" size="1058x76">
+									<container size="1058x34">
+										<container size="22x34">
+											<spacer size="22x6"/>
+											<container pos="0,6" size="22x22">
+												<rectangle size="22x22"/>
+												<container size="22x22">
+													<rectangle fillColor="rgba(37,51,72,255)" radius="999" size="22x22"/>
+													<container size="22x22">
+														<text bold color="focus" pos="7,3" size="6x14" textSize="11">1</text>
+													</container>
+												</container>
+											</container>
+											<spacer pos="0,28" size="22x6"/>
 										</container>
-										<container pos="0,40" size="1054x76">
-											<container size="1054x34">
+										<container pos="22,0" size="1036x34">
+											<container pos="8,0" size="1028x34">
 												<container size="221x34">
 													<rectangle size="221x34"/>
 													<widget size="221x34" type="*parts.Button">
@@ -277,24 +295,41 @@
 														</container>
 													</widget>
 												</container>
-												<container pos="221,0" size="832x34">
-													<container pos="12,0" size="820x34">
-														<rectangle size="820x34"/>
-														<container size="820x34">
-															<spacer size="820x4"/>
-															<container pos="0,4" size="820x24">
-																<widget size="820x24" type="*widget.Label">
-																	<widget size="820x24" type="*widget.RichText">
+												<container pos="221,0" size="806x34">
+													<container pos="12,0" size="794x34">
+														<rectangle size="794x34"/>
+														<container size="794x34">
+															<spacer size="794x4"/>
+															<container pos="0,4" size="794x24">
+																<widget size="794x24" type="*widget.Label">
+																	<widget size="794x24" type="*widget.RichText">
 																		<text color="disabled" pos="4,4" size="140x16">No manifest is open yet.</text>
 																	</widget>
 																</widget>
 															</container>
-															<spacer pos="0,29" size="820x4"/>
+															<spacer pos="0,29" size="794x4"/>
 														</container>
 													</container>
 												</container>
 											</container>
-											<container pos="0,42" size="1054x34">
+										</container>
+									</container>
+									<container pos="0,42" size="1058x34">
+										<container size="22x34">
+											<spacer size="22x6"/>
+											<container pos="0,6" size="22x22">
+												<rectangle size="22x22"/>
+												<container size="22x22">
+													<rectangle fillColor="rgba(37,51,72,255)" radius="999" size="22x22"/>
+													<container size="22x22">
+														<text bold color="focus" pos="7,3" size="6x14" textSize="11">2</text>
+													</container>
+												</container>
+											</container>
+											<spacer pos="0,28" size="22x6"/>
+										</container>
+										<container pos="22,0" size="1036x34">
+											<container pos="8,0" size="1028x34">
 												<container size="221x34">
 													<rectangle size="221x34"/>
 													<widget size="221x34" type="*parts.Button">
@@ -324,19 +359,19 @@
 														</container>
 													</widget>
 												</container>
-												<container pos="221,0" size="832x34">
-													<container pos="12,0" size="820x34">
-														<rectangle size="820x34"/>
-														<container size="820x34">
-															<spacer size="820x4"/>
-															<container pos="0,4" size="820x24">
-																<widget size="820x24" type="*widget.Label">
-																	<widget size="820x24" type="*widget.RichText">
+												<container pos="221,0" size="806x34">
+													<container pos="12,0" size="794x34">
+														<rectangle size="794x34"/>
+														<container size="794x34">
+															<spacer size="794x4"/>
+															<container pos="0,4" size="794x24">
+																<widget size="794x24" type="*widget.Label">
+																	<widget size="794x24" type="*widget.RichText">
 																		<text color="disabled" pos="4,4" size="131x16">Needs a manifest first.</text>
 																	</widget>
 																</widget>
 															</container>
-															<spacer pos="0,29" size="820x4"/>
+															<spacer pos="0,29" size="794x4"/>
 														</container>
 													</container>
 												</container>
@@ -345,26 +380,19 @@
 									</container>
 								</container>
 							</container>
-							<rectangle fillColor="separator" pos="0,148" size="1118x1"/>
 						</container>
-						<container pos="0,149" size="1118x694">
-							<container pos="32,24" size="1054x646">
-								<container size="1054x448">
-									<container size="1054x34">
-										<container pos="4,4" size="1046x18">
-											<container pos="108,0" size="599x18">
-												<container pos="12,4" size="575x10">
-													<spacer size="575x4"/>
-													<rectangle fillColor="rgba(48,85,140,255)" pos="0,4" size="575x1"/>
-													<spacer pos="0,5" size="575x4"/>
-												</container>
-											</container>
+						<container pos="0,148" size="1122x695">
+							<container pos="32,24" size="1058x647">
+								<container size="1058x647">
+									<container size="1058x34">
+										<container pos="4,4" size="1050x18">
+											<spacer pos="108,0" size="603x18"/>
 											<container size="108x18">
 												<spacer size="108x0"/>
 												<text bold size="108x18" textSize="14">Ordered damage</text>
 												<spacer pos="0,18" size="108x0"/>
 											</container>
-											<container pos="707,0" size="338x18">
+											<container pos="711,0" size="338x18">
 												<spacer size="338x1"/>
 												<container pos="0,1" size="338x14">
 													<text color="disabled" size="338x14" textSize="11">~ marks an expectation that depends on the rules of your application</text>
@@ -373,126 +401,54 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,34" size="1054x414">
-										<container size="1054x414">
-											<container size="1054x168">
-												<rectangle fillColor="menuBackground" radius="10" size="1054x168" strokeColor="separator" strokeWidth="2"/>
-												<container size="1054x168">
-													<container pos="16,16" size="1022x136">
-														<container size="1022x24">
-															<widget size="1022x24" type="*widget.Label">
-																<widget size="1022x24" type="*widget.RichText">
+									<container pos="0,34" size="1058x613">
+										<container size="1058x613">
+											<container size="1058x168">
+												<rectangle fillColor="menuBackground" radius="10" size="1058x168"/>
+												<container size="1058x168">
+													<container pos="16,16" size="1026x136">
+														<container size="1026x24">
+															<widget size="1026x24" type="*widget.Label">
+																<widget size="1026x24" type="*widget.RichText">
 																	<text color="disabled" pos="4,4" size="591x16">One line per damage a run ordered, in the order it attempted them. Each line carries these four things.</text>
 																</widget>
 															</widget>
 														</container>
-														<container pos="0,36" size="1022x99">
+														<container pos="0,36" size="1026x99">
 															<text bold pos="4,4" size="56x16">Damage</text>
-															<container pos="64,0" size="957x24">
-																<widget size="957x24" type="*widget.Label">
-																	<widget size="957x24" type="*widget.RichText">
+															<container pos="64,0" size="961x24">
+																<widget size="961x24" type="*widget.Label">
+																	<widget size="961x24" type="*widget.RichText">
 																		<text color="disabled" pos="4,4" size="510x16">The identifier of what was done, the same one the catalogue and the command line use.</text>
 																	</widget>
 																</widget>
 															</container>
 															<text bold pos="4,28" size="56x16">Where</text>
-															<container pos="64,24" size="957x24">
-																<widget size="957x24" type="*widget.Label">
-																	<widget size="957x24" type="*widget.RichText">
+															<container pos="64,24" size="961x24">
+																<widget size="961x24" type="*widget.Label">
+																	<widget size="961x24" type="*widget.RichText">
 																		<text color="disabled" pos="4,4" size="227x16">The record and the column it landed in.</text>
 																	</widget>
 																</widget>
 															</container>
 															<text bold pos="4,53" size="56x16">Expected</text>
-															<container pos="64,49" size="957x24">
-																<widget size="957x24" type="*widget.Label">
-																	<widget size="957x24" type="*widget.RichText">
+															<container pos="64,49" size="961x24">
+																<widget size="961x24" type="*widget.Label">
+																	<widget size="961x24" type="*widget.RichText">
 																		<text color="disabled" pos="4,4" size="700x16">What a correct application should do with that record. A ~ in front means it depends on the rules of your own application.</text>
 																	</widget>
 																</widget>
 															</container>
 															<text bold pos="4,78" size="56x16">Outcome</text>
-															<container pos="64,74" size="957x24">
-																<widget size="957x24" type="*widget.Label">
-																	<widget size="957x24" type="*widget.RichText">
+															<container pos="64,74" size="961x24">
+																<widget size="961x24" type="*widget.Label">
+																	<widget size="961x24" type="*widget.RichText">
 																		<text color="disabled" pos="4,4" size="725x16">Whether the run managed to apply the damage at all, and once a response is open, what your application did with the record.</text>
 																	</widget>
 																</widget>
 															</container>
 														</container>
 													</container>
-												</container>
-											</container>
-										</container>
-									</container>
-								</container>
-								<container pos="0,448" size="1054x198">
-									<container size="1054x66">
-										<container size="1054x66">
-											<container size="1054x16">
-												<rectangle size="1054x16"/>
-												<rectangle size="1054x16"/>
-											</container>
-											<container pos="0,16" size="1054x50">
-												<container pos="4,4" size="1046x34">
-													<container pos="85,0" size="846x34">
-														<container pos="12,4" size="822x26">
-															<spacer size="822x12"/>
-															<rectangle fillColor="rgba(48,85,140,255)" pos="0,12" size="822x1"/>
-															<spacer pos="0,13" size="822x12"/>
-														</container>
-													</container>
-													<container size="85x34">
-														<spacer size="85x7"/>
-														<text bold pos="0,7" size="85x18" textSize="14">Chosen entry</text>
-														<spacer pos="0,26" size="85x7"/>
-													</container>
-													<widget pos="931,0" size="114x34" type="*parts.Button">
-														<container size="114x34">
-															<container size="114x34">
-																<rectangle size="114x34"/>
-																<container size="114x34">
-																	<rectangle size="114x34"/>
-																	<container size="114x34">
-																		<container pos="16,4" size="82x26">
-																			<container pos="0,4" size="82x16">
-																				<container size="82x16">
-																					<spacer size="82x0"/>
-																					<text size="82x16">About this run</text>
-																					<spacer pos="0,16" size="82x0"/>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-												</container>
-											</container>
-										</container>
-									</container>
-									<container pos="0,66" size="1054x132">
-										<rectangle size="1054x132"/>
-										<container size="1054x132">
-											<rectangle fillColor="menuBackground" radius="10" size="1054x132" strokeColor="separator" strokeWidth="2"/>
-											<container size="1054x132">
-												<container pos="16,16" size="1022x100">
-													<widget size="1022x100" type="*parts.KeyScroll">
-														<container size="1022x100">
-															<container size="1022x100">
-																<container size="1022x41">
-																	<widget size="1022x41" type="*widget.Label">
-																		<widget size="1022x41" type="*widget.RichText">
-																			<text color="disabled" pos="4,4" size="989x16">Choose the manifest file a run left beside its dataset, and this screen shows what that run promised about the data. Click an entry, or move the keyboard onto one, and it is</text>
-																			<text color="disabled" pos="4,20" size="117x16">read out here in full.</text>
-																		</widget>
-																	</widget>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<rectangle radius="10" size="1022x100" strokeWidth="2"/>
 												</container>
 											</container>
 										</container>

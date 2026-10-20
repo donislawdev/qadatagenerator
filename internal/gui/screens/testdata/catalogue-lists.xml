@@ -1,7 +1,8 @@
 <canvas padded size="1342x900">
 	<content>
 		<container size="1342x900">
-			<container size="224x900">
+			<container size="220x900">
+				<rectangle fillColor="menuBackground" size="220x900"/>
 				<container size="220x900">
 					<container size="220x900">
 						<container size="220x62">
@@ -238,45 +239,44 @@
 									</widget>
 								</container>
 							</container>
-							<container pos="0,282" size="220x22">
-								<text color="disabled" pos="8,4" size="208x14" textSize="11">v0.1.0  ·  catalogue of controls</text>
+							<container pos="0,282" size="220x30">
+								<container pos="8,4" size="208x14">
+									<container size="3x14">
+										<rectangle size="3x14"/>
+										<rectangle size="3x14"/>
+									</container>
+									<container pos="3,0" size="205x14">
+										<text color="disabled" pos="12,0" size="193x14" textSize="11">v0.1.0  ·  catalogue of controls</text>
+									</container>
+								</container>
 							</container>
 						</container>
 					</container>
 				</container>
-				<widget pos="220,0" size="4x900" type="*widget.Separator">
-					<rectangle fillColor="separator" size="4x900"/>
-				</widget>
 			</container>
-			<container pos="224,0" size="1118x900">
-				<container size="1118x55">
-					<widget pos="24,24" size="1070x31" type="*widget.Label">
-						<widget size="1070x31" type="*widget.RichText">
+			<container pos="220,0" size="1122x900">
+				<container size="1122x55">
+					<widget pos="32,24" size="1058x31" type="*widget.Label">
+						<widget size="1058x31" type="*widget.RichText">
 							<text bold pos="4,4" size="38x23" textSize="18">Lists</text>
 						</widget>
 					</widget>
 				</container>
-				<container pos="0,55" size="1118x844">
-					<container size="1118x844">
-						<container pos="32,24" size="1054x796">
-							<container size="1054x231">
-								<container size="1054x18">
-									<container pos="93,0" size="960x18">
-										<container pos="12,4" size="936x10">
-											<spacer size="936x4"/>
-											<rectangle fillColor="rgba(48,85,140,255)" pos="0,4" size="936x1"/>
-											<spacer pos="0,5" size="936x4"/>
-										</container>
-									</container>
+				<container pos="0,55" size="1122x844">
+					<container size="1122x844">
+						<container pos="32,24" size="1058x796">
+							<container size="1058x231">
+								<container size="1058x18">
+									<spacer pos="93,0" size="964x18"/>
 									<container size="93x18">
 										<spacer size="93x0"/>
 										<text bold size="93x18" textSize="14">Row of a value</text>
 										<spacer pos="0,18" size="93x0"/>
 									</container>
 								</container>
-								<container pos="0,34" size="1054x90">
-									<text size="1054x16">Row without a band</text>
-									<container pos="0,24" size="1054x28">
+								<container pos="0,34" size="1058x90">
+									<text size="1058x16">Row without a band</text>
+									<container pos="0,24" size="1058x28">
 										<container size="131x28">
 											<rectangle size="131x28"/>
 											<container size="131x28">
@@ -285,12 +285,12 @@
 												<spacer pos="0,21" size="131x7"/>
 											</container>
 										</container>
-										<widget pos="131,0" size="922x28" type="*parts.TapRow">
-											<container size="922x28">
-												<container size="922x28">
-													<rectangle size="922x28"/>
-													<container size="922x28">
-														<container pos="16,4" size="890x20">
+										<widget pos="131,0" size="926x28" type="*parts.TapRow">
+											<container size="926x28">
+												<container size="926x28">
+													<rectangle size="926x28"/>
+													<container size="926x28">
+														<container pos="16,4" size="894x20">
 															<container size="70x20">
 																<container size="6x20">
 																	<spacer size="6x3"/>
@@ -303,14 +303,14 @@
 																	<spacer pos="0,20" size="47x0"/>
 																</container>
 															</container>
-															<rectangle pos="889,0" size="1x20"/>
+															<rectangle pos="893,0" size="1x20"/>
 														</container>
 													</container>
 												</container>
 											</container>
 										</widget>
 									</container>
-									<container pos="0,61" size="1054x28">
+									<container pos="0,61" size="1058x28">
 										<container size="131x28">
 											<rectangle size="131x28"/>
 											<container size="131x28">
@@ -319,12 +319,12 @@
 												<spacer pos="0,21" size="131x7"/>
 											</container>
 										</container>
-										<widget pos="131,0" size="922x28" type="*parts.TapRow">
-											<container size="922x28">
-												<container size="922x28">
-													<rectangle fillColor="hover" size="922x28"/>
-													<container size="922x28">
-														<container pos="16,4" size="890x20">
+										<widget pos="131,0" size="926x28" type="*parts.TapRow">
+											<container size="926x28">
+												<container size="926x28">
+													<rectangle fillColor="hover" size="926x28"/>
+													<container size="926x28">
+														<container pos="16,4" size="894x20">
 															<container size="70x20">
 																<container size="6x20">
 																	<spacer size="6x3"/>
@@ -337,7 +337,7 @@
 																	<spacer pos="0,20" size="47x0"/>
 																</container>
 															</container>
-															<container pos="865,0" size="24x20">
+															<container pos="869,0" size="24x20">
 																<spacer size="24x3"/>
 																<text color="disabled" pos="0,3" size="24x14" textSize="11">Copy</text>
 																<spacer pos="0,17" size="24x3"/>
@@ -349,9 +349,9 @@
 										</widget>
 									</container>
 								</container>
-								<container pos="0,140" size="1054x90">
-									<text size="1054x16">Row with a band</text>
-									<container pos="0,24" size="1054x28">
+								<container pos="0,140" size="1058x90">
+									<text size="1058x16">Row with a band</text>
+									<container pos="0,24" size="1058x28">
 										<container size="131x28">
 											<rectangle size="131x28"/>
 											<container size="131x28">
@@ -360,12 +360,12 @@
 												<spacer pos="0,21" size="131x7"/>
 											</container>
 										</container>
-										<widget pos="131,0" size="922x28" type="*parts.TapRow">
-											<container size="922x28">
-												<container size="922x28">
-													<rectangle fillColor="button" size="922x28"/>
-													<container size="922x28">
-														<container pos="16,4" size="890x20">
+										<widget pos="131,0" size="926x28" type="*parts.TapRow">
+											<container size="926x28">
+												<container size="926x28">
+													<rectangle fillColor="button" size="926x28"/>
+													<container size="926x28">
+														<container pos="16,4" size="894x20">
 															<container size="70x20">
 																<container size="6x20">
 																	<spacer size="6x3"/>
@@ -378,14 +378,14 @@
 																	<spacer pos="0,20" size="47x0"/>
 																</container>
 															</container>
-															<rectangle pos="889,0" size="1x20"/>
+															<rectangle pos="893,0" size="1x20"/>
 														</container>
 													</container>
 												</container>
 											</container>
 										</widget>
 									</container>
-									<container pos="0,61" size="1054x28">
+									<container pos="0,61" size="1058x28">
 										<container size="131x28">
 											<rectangle size="131x28"/>
 											<container size="131x28">
@@ -394,12 +394,12 @@
 												<spacer pos="0,21" size="131x7"/>
 											</container>
 										</container>
-										<widget pos="131,0" size="922x28" type="*parts.TapRow">
-											<container size="922x28">
-												<container size="922x28">
-													<rectangle fillColor="hover" size="922x28"/>
-													<container size="922x28">
-														<container pos="16,4" size="890x20">
+										<widget pos="131,0" size="926x28" type="*parts.TapRow">
+											<container size="926x28">
+												<container size="926x28">
+													<rectangle fillColor="hover" size="926x28"/>
+													<container size="926x28">
+														<container pos="16,4" size="894x20">
 															<container size="70x20">
 																<container size="6x20">
 																	<spacer size="6x3"/>
@@ -412,7 +412,7 @@
 																	<spacer pos="0,20" size="47x0"/>
 																</container>
 															</container>
-															<container pos="865,0" size="24x20">
+															<container pos="869,0" size="24x20">
 																<spacer size="24x3"/>
 																<text color="disabled" pos="0,3" size="24x14" textSize="11">Copy</text>
 																<spacer pos="0,17" size="24x3"/>
@@ -425,24 +425,18 @@
 									</container>
 								</container>
 							</container>
-							<container pos="0,255" size="1054x355">
-								<container size="1054x18">
-									<container pos="35,0" size="1018x18">
-										<container pos="12,4" size="994x10">
-											<spacer size="994x4"/>
-											<rectangle fillColor="rgba(48,85,140,255)" pos="0,4" size="994x1"/>
-											<spacer pos="0,5" size="994x4"/>
-										</container>
-									</container>
+							<container pos="0,255" size="1058x355">
+								<container size="1058x18">
+									<spacer pos="35,0" size="1022x18"/>
 									<container size="35x18">
 										<spacer size="35x0"/>
 										<text bold size="35x18" textSize="14">Table</text>
 										<spacer pos="0,18" size="35x0"/>
 									</container>
 								</container>
-								<container pos="0,34" size="1054x320">
-									<text size="1054x16">More rows than it shows</text>
-									<container pos="0,24" size="1054x144">
+								<container pos="0,34" size="1058x320">
+									<text size="1058x16">More rows than it shows</text>
+									<container pos="0,24" size="1058x144">
 										<container size="157x144">
 											<rectangle size="157x144"/>
 											<container size="157x144">
@@ -451,9 +445,9 @@
 												<spacer pos="0,79" size="157x64"/>
 											</container>
 										</container>
-										<container pos="157,0" size="896x144">
-											<container pos="4,4" size="884x136">
-												<container size="884x136">
+										<container pos="157,0" size="900x144">
+											<container pos="4,4" size="888x136">
+												<container size="888x136">
 													<container size="401x136">
 														<rectangle size="401x136"/>
 														<container size="401x136">
@@ -483,26 +477,26 @@
 																</widget>
 																<widget size="401x136" type="*widget.clip">
 																	<container size="0x0">
-																		<widget pos="46,0" size="4x136" type="*widget.Separator">
-																			<rectangle fillColor="separator" size="4x136"/>
+																		<widget pos="47,0" size="1x136" type="*widget.Separator">
+																			<rectangle fillColor="separator" size="1x136"/>
 																		</widget>
-																		<widget pos="148,0" size="4x136" type="*widget.Separator">
-																			<rectangle fillColor="separator" size="4x136"/>
+																		<widget pos="149,0" size="1x136" type="*widget.Separator">
+																			<rectangle fillColor="separator" size="1x136"/>
 																		</widget>
-																		<widget pos="0,47" size="401x4" type="*widget.Separator">
-																			<rectangle fillColor="separator" size="401x4"/>
+																		<widget pos="0,49" size="401x1" type="*widget.Separator">
+																			<rectangle fillColor="separator" size="401x1"/>
 																		</widget>
-																		<widget pos="0,72" size="401x4" type="*widget.Separator">
-																			<rectangle fillColor="separator" size="401x4"/>
+																		<widget pos="0,74" size="401x1" type="*widget.Separator">
+																			<rectangle fillColor="separator" size="401x1"/>
 																		</widget>
-																		<widget pos="0,97" size="401x4" type="*widget.Separator">
-																			<rectangle fillColor="separator" size="401x4"/>
+																		<widget pos="0,99" size="401x1" type="*widget.Separator">
+																			<rectangle fillColor="separator" size="401x1"/>
 																		</widget>
-																		<widget pos="0,122" size="401x4" type="*widget.Separator">
-																			<rectangle fillColor="separator" size="401x4"/>
+																		<widget pos="0,124" size="401x1" type="*widget.Separator">
+																			<rectangle fillColor="separator" size="401x1"/>
 																		</widget>
-																		<widget pos="0,147" size="401x4" type="*widget.Separator">
-																			<rectangle fillColor="separator" size="401x4"/>
+																		<widget pos="0,148" size="401x1" type="*widget.Separator">
+																			<rectangle fillColor="separator" size="401x1"/>
 																		</widget>
 																	</container>
 																</widget>
@@ -580,7 +574,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,176" size="1054x144">
+									<container pos="0,176" size="1058x144">
 										<container size="157x144">
 											<rectangle size="157x144"/>
 											<container size="157x144">
@@ -589,9 +583,9 @@
 												<spacer pos="0,79" size="157x64"/>
 											</container>
 										</container>
-										<container pos="157,0" size="896x144">
-											<container pos="4,4" size="884x136">
-												<container size="884x136">
+										<container pos="157,0" size="900x144">
+											<container pos="4,4" size="888x136">
+												<container size="888x136">
 													<container size="401x136">
 														<rectangle size="401x136"/>
 														<container size="401x136">
@@ -622,26 +616,26 @@
 																<widget size="401x136" type="*widget.clip">
 																	<container size="0x0">
 																		<rectangle fillColor="hover" pos="0,24" radius="6" size="48x24"/>
-																		<widget pos="46,0" size="4x136" type="*widget.Separator">
-																			<rectangle fillColor="separator" size="4x136"/>
+																		<widget pos="47,0" size="1x136" type="*widget.Separator">
+																			<rectangle fillColor="separator" size="1x136"/>
 																		</widget>
-																		<widget pos="148,0" size="4x136" type="*widget.Separator">
-																			<rectangle fillColor="separator" size="4x136"/>
+																		<widget pos="149,0" size="1x136" type="*widget.Separator">
+																			<rectangle fillColor="separator" size="1x136"/>
 																		</widget>
-																		<widget pos="0,47" size="401x4" type="*widget.Separator">
-																			<rectangle fillColor="separator" size="401x4"/>
+																		<widget pos="0,49" size="401x1" type="*widget.Separator">
+																			<rectangle fillColor="separator" size="401x1"/>
 																		</widget>
-																		<widget pos="0,72" size="401x4" type="*widget.Separator">
-																			<rectangle fillColor="separator" size="401x4"/>
+																		<widget pos="0,74" size="401x1" type="*widget.Separator">
+																			<rectangle fillColor="separator" size="401x1"/>
 																		</widget>
-																		<widget pos="0,97" size="401x4" type="*widget.Separator">
-																			<rectangle fillColor="separator" size="401x4"/>
+																		<widget pos="0,99" size="401x1" type="*widget.Separator">
+																			<rectangle fillColor="separator" size="401x1"/>
 																		</widget>
-																		<widget pos="0,122" size="401x4" type="*widget.Separator">
-																			<rectangle fillColor="separator" size="401x4"/>
+																		<widget pos="0,124" size="401x1" type="*widget.Separator">
+																			<rectangle fillColor="separator" size="401x1"/>
 																		</widget>
-																		<widget pos="0,147" size="401x4" type="*widget.Separator">
-																			<rectangle fillColor="separator" size="401x4"/>
+																		<widget pos="0,148" size="401x1" type="*widget.Separator">
+																			<rectangle fillColor="separator" size="401x1"/>
 																		</widget>
 																	</container>
 																</widget>

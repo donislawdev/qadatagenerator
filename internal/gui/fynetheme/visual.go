@@ -137,9 +137,8 @@ func (Visual) Color(name fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color {
 
 // stepFor maps the toolkit's spacing questions onto the closed scale.
 var stepFor = map[fyne.ThemeSizeName]string{
-	toolkit.SizeNameInnerPadding:       palette.NameStepHairline,
-	toolkit.SizeNameLineSpacing:        palette.NameStepHairline,
-	toolkit.SizeNameSeparatorThickness: palette.NameStepHairline,
+	toolkit.SizeNameInnerPadding: palette.NameStepHairline,
+	toolkit.SizeNameLineSpacing:  palette.NameStepHairline,
 }
 
 // rungFor lets a widget take a size from our ladder by name.
@@ -182,6 +181,12 @@ func (Visual) Size(name fyne.ThemeSizeName) float32 {
 	// mark that exists and one anybody can see.
 	case toolkit.SizeNameInputBorder:
 		return palette.BorderThickness
+	// A separator is a drawn line, so it is as thick as every other line in
+	// the window. It was the hairline STEP of the spacing scale until
+	// 2026-10-21, which is four units: the rule beside the column of screens
+	// and the dividers of every table read as grey bars rather than as lines.
+	case toolkit.SizeNameSeparatorThickness:
+		return palette.HairlineThickness
 	case toolkit.SizeNameText:
 		return palette.TypeSize(palette.TypeBody)
 	case toolkit.SizeNameInputRadius, toolkit.SizeNameSelectionRadius:

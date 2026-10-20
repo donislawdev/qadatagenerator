@@ -79,8 +79,14 @@ func (v *View) buildControls() {
 		v.settingChanged()
 	})
 
+	// Built after every control it holds, since the body is laid out once.
+	v.options = parts.NewDisclosure(v.text.T(i18n.TakeMoreOptions), v.optionsBody())
+
 	v.chooseFile = parts.NewButton(v.text.T(i18n.TakeChoose), v.choose)
 	v.chooseFile.ShowIcon(paint.IconFolder)
+	// The same words the recipe screen puts on its button for the same job.
+	v.chooseOut = parts.NewButton(v.text.T(i18n.RecipeChooseDir), v.chooseDirectory)
+	v.chooseOut.ShowIcon(paint.IconFolder)
 	v.damage = parts.NewPrimaryButton(v.text.T(i18n.TakeRun), v.Start)
 	v.stop = parts.NewButton(v.text.T(i18n.TakeStop), v.Stop)
 	// The button that chooses a file is the one control always in the tree,
@@ -133,9 +139,8 @@ func (v *View) entry(start string, keep func(string)) *parts.FieldEntry {
 	return field
 }
 
-// settingsColumn lays the settings out under a heading of their own: the
-// kinds in a grid that wraps to the width it is given, then the settings that
-// decide how much is damaged, then the ones that decide where it goes.
+// kindsGrid is the kinds of damage in a grid that wraps to the width it is
+// given.
 //
 // # Why a grid for the kinds
 //
@@ -144,7 +149,7 @@ func (v *View) entry(start string, keep func(string)) *parts.FieldEntry {
 // wraps them into as many columns as the width allows, two at the size the
 // owner keeps the window, and the cell is measured from the longest name, so
 // a translation that is longer costs a column rather than an overlap.
-func (v *View) settingsColumn() fyne.CanvasObject {
+func (v *View) kindsGrid() fyne.CanvasObject {
 	labels := make([]string, 0, len(v.layers))
 	for _, kind := range v.layers {
 		labels = append(labels, kind.box.Text)
@@ -155,13 +160,24 @@ func (v *View) settingsColumn() fyne.CanvasObject {
 	// the first render.
 	cell := fyne.NewSize(paint.CheckWidth(labels...)+palette.StepOf(palette.NameStepRelated),
 		palette.ControlHeight)
-	kinds := paint.Column(palette.NameStepHairline,
-		paint.Caption(v.text.T(i18n.TakeSettingLayers)),
-		paint.Grid(cell, v.layers.controls()...))
+	return paint.Grid(cell, v.layers.controls()...)
+}
 
-	// The seed takes what the two fields before it leave, and the directory
-	// what the chooser after it leaves: a seed and a path are the two values
-	// nobody can retype from memory, so they get the room.
+// optionsBody is the settings a first run does not need, which the screen
+// keeps folded under one heading until somebody opens it (DEC-261).
+//
+// # Why these and not the others
+//
+// Each of them has an answer that is right for somebody who has never run this
+// before: every record may be damaged, one defect each, seed nought, no column
+// spared, a comma between fields, the locale of the window, no extra form of
+// the manifest. What a person has to decide is which file, what to break and
+// where the copy goes, and those stay in sight. The separator is here as well,
+// although it decides how the file is read, because the panel beside the steps
+// says when a file looks as if it was read with the wrong one.
+func (v *View) optionsBody() fyne.CanvasObject {
+	// The seed takes what the two fields before it leave: a seed is a value
+	// nobody can retype from memory, so it gets the room.
 	howMuch := paint.Lead(
 		paint.Row(palette.NameStepRelated,
 			labelled(v.text.T(i18n.TakeSettingRows),
@@ -170,14 +186,22 @@ func (v *View) settingsColumn() fyne.CanvasObject {
 		paint.PadLeft(palette.NameStepRelated,
 			labelled(v.text.T(i18n.TakeSettingSeed), parts.Standing(parts.Field(v.seed)))))
 	leaveAlone := labelled(v.text.T(i18n.TakeSettingExclude), parts.Standing(parts.Field(v.exclude)))
-	where := paint.Trail(
-		labelled(v.text.T(i18n.TakeSettingOut), parts.Standing(parts.Field(v.out))),
-		paint.PadLeft(palette.NameStepRelated,
-			labelled(v.text.T(i18n.TakeSettingManifest), v.manifest.OnScreen())))
-	replace := paint.AtLeast(0, palette.ControlHeight, v.overwrite.OnScreen())
-
-	return paint.Column(palette.NameStepGroup, kinds, howMuch, leaveAlone, where, replace)
+	reading := paint.Row(palette.NameStepRelated,
+		labelled(v.text.T(i18n.TakeSettingDelimiter),
+			paint.AtLeast(paint.FieldWidth(delimiterSample), 0, parts.Standing(parts.Field(v.delimiter)))),
+		labelled(v.text.T(i18n.TakeSettingLocale),
+			paint.AtLeast(paint.FieldWidth(localeSample), 0, parts.Standing(parts.Field(v.locale)))),
+		labelled(v.text.T(i18n.TakeSettingManifest), v.manifest.OnScreen()))
+	return paint.Pad(palette.NameStepTight, palette.NameStepHairline,
+		palette.NameStepHairline, palette.NameStepHairline,
+		paint.Column(palette.NameStepGroup, howMuch, leaveAlone, reading))
 }
+
+// OpenOptions unfolds the settings a first run does not need, the way a person
+// pressing their heading would. Exported for the reason Open is: the guard
+// holding what every screen draws and the probe rendering them have to reach
+// the state with nobody pressing anything.
+func (v *View) OpenOptions() { v.options.Open() }
 
 // manifestChoices is every extra form of the manifest, with the absence of one
 // named rather than left blank. The recipe screen offers the same list.

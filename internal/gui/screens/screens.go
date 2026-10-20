@@ -200,6 +200,10 @@ type State struct {
 	// this reaches the state a person reaches by clicking and not one only this
 	// list can produce.
 	Layers []string
+	// Options unfolds the settings the take screen keeps folded until somebody
+	// asks for them (DEC-261), through the same call pressing their heading
+	// makes. A setting nobody can photograph is a setting nobody reviews.
+	Options bool
 	// Ran is what a run left behind, for the states that show one. A state with
 	// anything but RanNothing presses the button, so it also needs the kinds of
 	// damage above, or the screen would refuse the run it was asked for.
@@ -477,6 +481,9 @@ func settle(takeScreen *takeview.View, state State) {
 	}
 	if len(state.Layers) > 0 {
 		takeScreen.ChooseLayers(state.Layers)
+	}
+	if state.Options {
+		takeScreen.OpenOptions()
 	}
 	if state.Ran != RanNothing {
 		// The same call the button makes, so the state is one a person reaches

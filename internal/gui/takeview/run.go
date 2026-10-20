@@ -277,7 +277,7 @@ func (v *View) setControls(usable bool) {
 func (v *View) settingControls() []fyne.Disableable {
 	return []fyne.Disableable{
 		v.layers, v.share, v.perRow, v.exclude, v.delimiter, v.locale, v.seed,
-		v.out, v.manifest, v.overwrite,
+		v.out, v.chooseOut, v.manifest, v.overwrite,
 	}
 }
 

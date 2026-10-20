@@ -1,7 +1,8 @@
 <canvas padded size="1342x900">
 	<content>
 		<container size="1342x900">
-			<container size="224x900">
+			<container size="220x900">
+				<rectangle fillColor="menuBackground" size="220x900"/>
 				<container size="220x900">
 					<container size="220x900">
 						<container size="220x62">
@@ -238,49 +239,48 @@
 									</widget>
 								</container>
 							</container>
-							<container pos="0,282" size="220x22">
-								<text color="disabled" pos="8,4" size="208x14" textSize="11">v0.1.0  ·  catalogue of controls</text>
+							<container pos="0,282" size="220x30">
+								<container pos="8,4" size="208x14">
+									<container size="3x14">
+										<rectangle size="3x14"/>
+										<rectangle size="3x14"/>
+									</container>
+									<container pos="3,0" size="205x14">
+										<text color="disabled" pos="12,0" size="193x14" textSize="11">v0.1.0  ·  catalogue of controls</text>
+									</container>
+								</container>
 							</container>
 						</container>
 					</container>
 				</container>
-				<widget pos="220,0" size="4x900" type="*widget.Separator">
-					<rectangle fillColor="separator" size="4x900"/>
-				</widget>
 			</container>
-			<container pos="224,0" size="1118x900">
-				<container size="1118x55">
-					<widget pos="24,24" size="1070x31" type="*widget.Label">
-						<widget size="1070x31" type="*widget.RichText">
+			<container pos="220,0" size="1122x900">
+				<container size="1122x55">
+					<widget pos="32,24" size="1058x31" type="*widget.Label">
+						<widget size="1058x31" type="*widget.RichText">
 							<text bold pos="4,4" size="65x23" textSize="18">Buttons</text>
 						</widget>
 					</widget>
 				</container>
-				<container pos="0,55" size="1118x844">
-					<container size="1118x844">
-						<container pos="32,24" size="1054x796">
-							<container size="1054x589">
-								<container size="1054x18">
-									<container pos="43,0" size="1010x18">
-										<container pos="12,4" size="986x10">
-											<spacer size="986x4"/>
-											<rectangle fillColor="rgba(48,85,140,255)" pos="0,4" size="986x1"/>
-											<spacer pos="0,5" size="986x4"/>
-										</container>
-									</container>
+				<container pos="0,55" size="1122x844">
+					<container size="1122x844">
+						<container pos="32,24" size="1058x796">
+							<container size="1058x589">
+								<container size="1058x18">
+									<spacer pos="43,0" size="1014x18"/>
 									<container size="43x18">
 										<spacer size="43x0"/>
 										<text bold size="43x18" textSize="14">Button</text>
 										<spacer pos="0,18" size="43x0"/>
 									</container>
 								</container>
-								<container pos="0,34" size="1054x272">
-									<container size="1054x22">
+								<container pos="0,34" size="1058x272">
+									<container size="1058x22">
 										<container size="135x22">
 											<rectangle size="135x22"/>
 											<rectangle size="135x22"/>
 										</container>
-										<container pos="135,0" size="918x22">
+										<container pos="135,0" size="922x22">
 											<container size="121x22">
 												<container pos="4,4" size="109x14">
 													<container size="109x14">
@@ -318,7 +318,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,30" size="1054x42">
+									<container pos="0,30" size="1058x42">
 										<container size="135x42">
 											<rectangle size="135x42"/>
 											<container size="135x42">
@@ -327,7 +327,7 @@
 												<spacer pos="0,29" size="135x12"/>
 											</container>
 										</container>
-										<container pos="135,0" size="918x42">
+										<container pos="135,0" size="922x42">
 											<container size="121x42">
 												<container pos="4,4" size="109x34">
 													<container size="109x34">
@@ -473,7 +473,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,80" size="1054x42">
+									<container pos="0,80" size="1058x42">
 										<container size="135x42">
 											<rectangle size="135x42"/>
 											<container size="135x42">
@@ -482,7 +482,7 @@
 												<spacer pos="0,29" size="135x12"/>
 											</container>
 										</container>
-										<container pos="135,0" size="918x42">
+										<container pos="135,0" size="922x42">
 											<container size="121x42">
 												<container pos="4,4" size="109x34">
 													<container size="109x34">
@@ -653,7 +653,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,130" size="1054x42">
+									<container pos="0,130" size="1058x42">
 										<container size="135x42">
 											<rectangle size="135x42"/>
 											<container size="135x42">
@@ -662,7 +662,7 @@
 												<spacer pos="0,29" size="135x12"/>
 											</container>
 										</container>
-										<container pos="135,0" size="918x42">
+										<container pos="135,0" size="922x42">
 											<container size="121x42">
 												<container pos="4,4" size="109x34">
 													<container size="109x34">
@@ -781,7 +781,7 @@
 																<container size="87x34">
 																	<rectangle size="87x34"/>
 																	<container size="87x34">
-																		<rectangle size="87x34"/>
+																		<rectangle fillColor="button" radius="6" size="87x34"/>
 																		<container size="87x34">
 																			<container pos="16,4" size="55x26">
 																				<container pos="0,4" size="55x16">
@@ -802,7 +802,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,180" size="1054x42">
+									<container pos="0,180" size="1058x42">
 										<container size="135x42">
 											<rectangle size="135x42"/>
 											<container size="135x42">
@@ -811,7 +811,7 @@
 												<spacer pos="0,29" size="135x12"/>
 											</container>
 										</container>
-										<container pos="135,0" size="918x42">
+										<container pos="135,0" size="922x42">
 											<container size="121x42">
 												<container pos="4,4" size="109x34">
 													<container size="109x34">
@@ -976,7 +976,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,230" size="1054x42">
+									<container pos="0,230" size="1058x42">
 										<container size="135x42">
 											<rectangle size="135x42"/>
 											<container size="135x42">
@@ -985,7 +985,7 @@
 												<spacer pos="0,29" size="135x12"/>
 											</container>
 										</container>
-										<container pos="135,0" size="918x42">
+										<container pos="135,0" size="922x42">
 											<container size="121x42">
 												<container pos="4,4" size="109x34">
 													<container size="109x34">
@@ -1151,9 +1151,9 @@
 										</container>
 									</container>
 								</container>
-								<container pos="0,322" size="1054x266">
-									<text size="1054x16">Very long label</text>
-									<container pos="0,24" size="1054x42">
+								<container pos="0,322" size="1058x266">
+									<text size="1058x16">Very long label</text>
+									<container pos="0,24" size="1058x42">
 										<container size="135x42">
 											<rectangle size="135x42"/>
 											<container size="135x42">
@@ -1162,9 +1162,9 @@
 												<spacer pos="0,28" size="135x13"/>
 											</container>
 										</container>
-										<container pos="135,0" size="918x42">
-											<container pos="4,4" size="906x34">
-												<container size="906x34">
+										<container pos="135,0" size="922x42">
+											<container pos="4,4" size="910x34">
+												<container size="910x34">
 													<widget size="543x34" type="*parts.Button">
 														<container size="543x34">
 															<container size="543x34">
@@ -1192,7 +1192,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,74" size="1054x42">
+									<container pos="0,74" size="1058x42">
 										<container size="135x42">
 											<rectangle size="135x42"/>
 											<container size="135x42">
@@ -1201,9 +1201,9 @@
 												<spacer pos="0,28" size="135x13"/>
 											</container>
 										</container>
-										<container pos="135,0" size="918x42">
-											<container pos="4,4" size="906x34">
-												<container size="906x34">
+										<container pos="135,0" size="922x42">
+											<container pos="4,4" size="910x34">
+												<container size="910x34">
 													<widget size="543x34" type="*parts.Button">
 														<container size="543x34">
 															<container size="543x34">
@@ -1231,7 +1231,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,124" size="1054x42">
+									<container pos="0,124" size="1058x42">
 										<container size="135x42">
 											<rectangle size="135x42"/>
 											<container size="135x42">
@@ -1240,9 +1240,9 @@
 												<spacer pos="0,28" size="135x13"/>
 											</container>
 										</container>
-										<container pos="135,0" size="918x42">
-											<container pos="4,4" size="906x34">
-												<container size="906x34">
+										<container pos="135,0" size="922x42">
+											<container pos="4,4" size="910x34">
+												<container size="910x34">
 													<widget size="543x34" type="*parts.Button">
 														<container size="543x34">
 															<container size="543x34">
@@ -1270,7 +1270,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,174" size="1054x42">
+									<container pos="0,174" size="1058x42">
 										<container size="135x42">
 											<rectangle size="135x42"/>
 											<container size="135x42">
@@ -1279,9 +1279,9 @@
 												<spacer pos="0,28" size="135x13"/>
 											</container>
 										</container>
-										<container pos="135,0" size="918x42">
-											<container pos="4,4" size="906x34">
-												<container size="906x34">
+										<container pos="135,0" size="922x42">
+											<container pos="4,4" size="910x34">
+												<container size="910x34">
 													<widget size="543x34" type="*parts.Button">
 														<container size="543x34">
 															<container size="543x34">
@@ -1309,7 +1309,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,224" size="1054x42">
+									<container pos="0,224" size="1058x42">
 										<container size="135x42">
 											<rectangle size="135x42"/>
 											<container size="135x42">
@@ -1318,9 +1318,9 @@
 												<spacer pos="0,28" size="135x13"/>
 											</container>
 										</container>
-										<container pos="135,0" size="918x42">
-											<container pos="4,4" size="906x34">
-												<container size="906x34">
+										<container pos="135,0" size="922x42">
+											<container pos="4,4" size="910x34">
+												<container size="910x34">
 													<widget size="543x34" type="*parts.Button">
 														<container size="543x34">
 															<container size="543x34">

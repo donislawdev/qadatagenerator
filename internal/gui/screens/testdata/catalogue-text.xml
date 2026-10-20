@@ -1,7 +1,8 @@
 <canvas padded size="1342x900">
 	<content>
 		<container size="1342x900">
-			<container size="224x900">
+			<container size="220x900">
+				<rectangle fillColor="menuBackground" size="220x900"/>
 				<container size="220x900">
 					<container size="220x900">
 						<container size="220x62">
@@ -238,49 +239,48 @@
 									</widget>
 								</container>
 							</container>
-							<container pos="0,282" size="220x22">
-								<text color="disabled" pos="8,4" size="208x14" textSize="11">v0.1.0  ·  catalogue of controls</text>
+							<container pos="0,282" size="220x30">
+								<container pos="8,4" size="208x14">
+									<container size="3x14">
+										<rectangle size="3x14"/>
+										<rectangle size="3x14"/>
+									</container>
+									<container pos="3,0" size="205x14">
+										<text color="disabled" pos="12,0" size="193x14" textSize="11">v0.1.0  ·  catalogue of controls</text>
+									</container>
+								</container>
 							</container>
 						</container>
 					</container>
 				</container>
-				<widget pos="220,0" size="4x900" type="*widget.Separator">
-					<rectangle fillColor="separator" size="4x900"/>
-				</widget>
 			</container>
-			<container pos="224,0" size="1118x900">
-				<container size="1118x55">
-					<widget pos="24,24" size="1070x31" type="*widget.Label">
-						<widget size="1070x31" type="*widget.RichText">
+			<container pos="220,0" size="1122x900">
+				<container size="1122x55">
+					<widget pos="32,24" size="1058x31" type="*widget.Label">
+						<widget size="1058x31" type="*widget.RichText">
 							<text bold pos="4,4" size="35x23" textSize="18">Text</text>
 						</widget>
 					</widget>
 				</container>
-				<container pos="0,55" size="1118x844">
-					<container size="1118x844">
-						<container pos="32,24" size="1054x796">
-							<container size="1054x256">
-								<container size="1054x18">
-									<container pos="60,0" size="993x18">
-										<container pos="12,4" size="969x10">
-											<spacer size="969x4"/>
-											<rectangle fillColor="rgba(48,85,140,255)" pos="0,4" size="969x1"/>
-											<spacer pos="0,5" size="969x4"/>
-										</container>
-									</container>
+				<container pos="0,55" size="1122x844">
+					<container size="1122x844">
+						<container pos="32,24" size="1058x796">
+							<container size="1058x256">
+								<container size="1058x18">
+									<spacer pos="60,0" size="997x18"/>
 									<container size="60x18">
 										<spacer size="60x0"/>
 										<text bold size="60x18" textSize="14">Text field</text>
 										<spacer pos="0,18" size="60x0"/>
 									</container>
 								</container>
-								<container pos="0,34" size="1054x222">
-									<container size="1054x22">
+								<container pos="0,34" size="1058x222">
+									<container size="1058x22">
 										<container size="130x22">
 											<rectangle size="130x22"/>
 											<rectangle size="130x22"/>
 										</container>
-										<container pos="130,0" size="923x22">
+										<container pos="130,0" size="927x22">
 											<container size="101x22">
 												<container pos="4,4" size="89x14">
 													<container size="89x14">
@@ -311,7 +311,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,30" size="1054x42">
+									<container pos="0,30" size="1058x42">
 										<container size="130x42">
 											<rectangle size="130x42"/>
 											<container size="130x42">
@@ -320,7 +320,7 @@
 												<spacer pos="0,29" size="130x12"/>
 											</container>
 										</container>
-										<container pos="130,0" size="923x42">
+										<container pos="130,0" size="927x42">
 											<container size="101x42">
 												<container pos="4,4" size="89x34">
 													<container size="89x34">
@@ -470,7 +470,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,80" size="1054x42">
+									<container pos="0,80" size="1058x42">
 										<container size="130x42">
 											<rectangle size="130x42"/>
 											<container size="130x42">
@@ -479,7 +479,7 @@
 												<spacer pos="0,29" size="130x12"/>
 											</container>
 										</container>
-										<container pos="130,0" size="923x42">
+										<container pos="130,0" size="927x42">
 											<container size="101x42">
 												<container pos="4,4" size="89x34">
 													<container size="89x34">
@@ -617,7 +617,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,130" size="1054x42">
+									<container pos="0,130" size="1058x42">
 										<container size="130x42">
 											<rectangle size="130x42"/>
 											<container size="130x42">
@@ -626,7 +626,7 @@
 												<spacer pos="0,29" size="130x12"/>
 											</container>
 										</container>
-										<container pos="130,0" size="923x42">
+										<container pos="130,0" size="927x42">
 											<container size="101x42">
 												<container pos="4,4" size="89x34">
 													<container size="89x34">
@@ -796,7 +796,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,180" size="1054x42">
+									<container pos="0,180" size="1058x42">
 										<container size="130x42">
 											<rectangle size="130x42"/>
 											<container size="130x42">
@@ -805,7 +805,7 @@
 												<spacer pos="0,29" size="130x12"/>
 											</container>
 										</container>
-										<container pos="130,0" size="923x42">
+										<container pos="130,0" size="927x42">
 											<container size="101x42">
 												<container pos="4,4" size="89x34">
 													<container size="89x34">
@@ -977,28 +977,22 @@
 									</container>
 								</container>
 							</container>
-							<container pos="0,280" size="1054x237">
-								<container size="1054x18">
-									<container pos="128,0" size="925x18">
-										<container pos="12,4" size="901x10">
-											<spacer size="901x4"/>
-											<rectangle fillColor="rgba(48,85,140,255)" pos="0,4" size="901x1"/>
-											<spacer pos="0,5" size="901x4"/>
-										</container>
-									</container>
+							<container pos="0,280" size="1058x237">
+								<container size="1058x18">
+									<spacer pos="128,0" size="929x18"/>
 									<container size="128x18">
 										<spacer size="128x0"/>
 										<text bold size="128x18" textSize="14">Text of several lines</text>
 										<spacer pos="0,18" size="128x0"/>
 									</container>
 								</container>
-								<container pos="0,34" size="1054x203">
-									<container size="1054x22">
+								<container pos="0,34" size="1058x203">
+									<container size="1058x22">
 										<container size="178x22">
 											<rectangle size="178x22"/>
 											<rectangle size="178x22"/>
 										</container>
-										<container pos="178,0" size="875x22">
+										<container pos="178,0" size="879x22">
 											<container size="101x22">
 												<container pos="4,4" size="89x14">
 													<container size="89x14">
@@ -1029,7 +1023,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,30" size="1054x82">
+									<container pos="0,30" size="1058x82">
 										<container size="178x82">
 											<rectangle size="178x82"/>
 											<container size="178x82">
@@ -1038,7 +1032,7 @@
 												<spacer pos="0,49" size="178x32"/>
 											</container>
 										</container>
-										<container pos="178,0" size="875x82">
+										<container pos="178,0" size="879x82">
 											<container size="101x82">
 												<container pos="4,4" size="89x74">
 													<container size="89x74">
@@ -1176,7 +1170,7 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,121" size="1054x82">
+									<container pos="0,121" size="1058x82">
 										<container size="178x82">
 											<rectangle size="178x82"/>
 											<container size="178x82">
@@ -1185,7 +1179,7 @@
 												<spacer pos="0,49" size="178x32"/>
 											</container>
 										</container>
-										<container pos="178,0" size="875x82">
+										<container pos="178,0" size="879x82">
 											<container size="101x82">
 												<container pos="4,4" size="89x74">
 													<container size="89x74">

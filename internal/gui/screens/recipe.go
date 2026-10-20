@@ -232,13 +232,12 @@ func recipeStatesOfTheKeyboard() []State {
 		},
 		{
 			Name: "recipe-focus-button",
-			Purpose: "the keyboard on the button that writes, which since 2026-09-15 is in " +
-				"the band near the top rather than the last stop of the walk, because the " +
-				"band that holds it is read first",
+			Purpose: "the keyboard on the button that writes, which since 2026-10-21 " +
+				"closes the second step under the editor, after every setting it uses",
 			Screen:   screenRecipe,
 			Recipe:   CleanRecipe,
 			Into:     "a-directory",
-			Keyboard: Keyboard{Tabs: 10},
+			Keyboard: Keyboard{Tabs: 11},
 		},
 		{
 			Name: "recipe-focus-example",
@@ -259,7 +258,7 @@ func recipeStatesOfTheKeyboard() []State {
 			Purpose:  "the keyboard in the field the recipe is written in, which it can also leave",
 			Screen:   screenRecipe,
 			Recipe:   BrokenRecipe,
-			Keyboard: Keyboard{Tabs: 10},
+			Keyboard: Keyboard{Tabs: 6},
 		},
 		{
 			Name:     "recipe-focus-answer",
