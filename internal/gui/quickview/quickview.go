@@ -24,7 +24,6 @@ import (
 	"strings"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
@@ -60,10 +59,8 @@ type View struct {
 	// that the list on screen and the list the mode knows are one list.
 	generators []string
 	clipboard  Clipboard
-	// copied and commandCopied say that the clipboard was filled, each beside
-	// the button that filled it.
-	copied        *canvas.Text
-	commandCopied *canvas.Text
+	// confirmed is the control saying it filled the clipboard, nil for none.
+	confirmed confirmer
 
 	chooser *parts.Select
 	locales *parts.Select
@@ -189,8 +186,8 @@ func (v *View) buildFields() {
 	// copy into a terminal.
 	//
 	// The length comes from the ceiling rather than from a number written here,
-	// so a measurement that moves the ceiling moves this with it.
-	parts.Bounded(&v.howMany.Entry, len(strconv.Itoa(mostShown)), parts.Digits)
+	// so a decision that moves the ceiling moves this with it.
+	parts.Bounded(&v.howMany.Entry, countDigits, parts.Digits)
 	v.born = parts.NewFieldEntry()
 	// The characters a date is made of, for the same reason. The SHAPE is
 	// still the mode's to refuse, since 9999-99-99 is made of these characters
@@ -233,7 +230,11 @@ func (v *View) buildFields() {
 // buildActions makes the buttons of the screen, the line a terminal would take
 // and the two marks saying that the clipboard was filled.
 func (v *View) buildActions() {
-	v.copy = parts.NewButton(v.text.T(i18n.QuickCopy), v.putInClipboard)
+	// "Copy all" rather than "Copy" since 2026-10-21, at the owner's word: a
+	// row copies ONE value when clicked, so the button over the rows has to
+	// say that it takes every one of them.
+	v.copy = parts.NewButton(v.text.T(i18n.QuickCopyAll), v.putInClipboard)
+	v.copy.ShowIcon(paint.IconCopy)
 	v.generate = parts.NewPrimaryButton(v.text.T(i18n.QuickGenerate), v.draw)
 	v.again = parts.NewButton(v.text.T(i18n.QuickAgain), v.drawAgain)
 	v.again.ShowIcon(paint.IconAgain)
@@ -260,23 +261,17 @@ func (v *View) buildActions() {
 	v.copyCommand = parts.NewButton(v.text.T(i18n.CommandCopy), v.putCommandInClipboard)
 	v.copyCommand.ShowIcon(paint.IconCopy)
 
-	// 🔴 Two marks rather than one sentence, and they stand BESIDE the button
-	// that fills them. Changed on 2026-09-09 from the owner's report: "Copy
-	// command at the bottom has no message about copying, it is under the
-	// values and I do not expect it there".
-	//
-	// The message was never missing. It went into the sentence above the card,
-	// which is where this screen says everything else - about seven hundred
-	// pixels from the button at the foot that had just been pressed. A
-	// clipboard cannot be seen, so a person who does not find the confirmation
-	// has no way at all to tell a button that worked from one that did nothing.
-	//
-	// Filling that sentence had a second cost nobody asked for: it REPLACED
-	// what stood there, so copying a set of values silently deleted the warning
-	// that values may repeat. One label serving two purposes says whichever
-	// thing was said last.
-	v.copied = paint.Text("", palette.TypeLabel, palette.TextSecondary)
-	v.commandCopied = paint.Text("", palette.TypeLabel, palette.TextSecondary)
+	// 🔴 The button that filled the clipboard says so itself, for a moment
+	// (parts.Button.Confirm). A clipboard cannot be seen, so a person who finds
+	// no confirmation cannot tell a button that worked from one that did
+	// nothing - which is the owner's report of 2026-09-09 that put a sentence
+	// beside each button. That sentence then stayed until the next copy, still
+	// claiming the clipboard held what it held an hour ago, and the owner asked
+	// on 2026-10-21 for the button to say it instead. Before 2026-09-09 the
+	// message went into the sentence above the card, seven hundred pixels from
+	// the button, and replaced the warning that values may repeat.
+	v.copy.Confirmed = v.text.T(i18n.QuickCopied)
+	v.copyCommand.Confirmed = v.text.T(i18n.CommandCopied)
 }
 
 // build makes the controls, lays them out and opens the screen on a value. The
@@ -515,10 +510,7 @@ func (v *View) draw() {
 // produce works out the value and the line that would ask a terminal for it.
 func (v *View) produce() {
 	v.told.SetText("")
-	// A confirmation outlives the thing it confirmed otherwise: the clipboard
-	// still holds the old values, and the mark beside the button would say the
-	// new ones are in it.
-	v.forget()
+	v.unconfirm()
 	chosen := v.chooser.Selected
 	if chosen == "" {
 		v.values = nil
@@ -807,9 +799,20 @@ func (v *View) placeSettings(withSeed fyne.CanvasObject) {
 	v.settings.Refresh()
 }
 
-// countSample is the SHAPE of the largest count this screen takes, used to size
-// the field that holds one. The guard beside this file keeps the two in step.
-var countSample = strconv.Itoa(quick.MostShownAtOnce)
+// countDigits is how many digits the count field takes: ONE MORE than the
+// ceiling has.
+//
+// 🔴 One more since 2026-10-21. With exactly as many, a number over the ceiling
+// could not be typed at all, and the owner typing a million got the first five
+// digits of it - ten thousand values, and not a word about the zeros that went.
+// One digit more lets every number over the ceiling reach the screen, which
+// then refuses it in words and points at the command line, which takes any.
+var countDigits = len(strconv.Itoa(mostShown)) + 1
+
+// countSample is the SHAPE of the longest count the field takes, used to size
+// the field: the ceiling with one more digit. The guard beside this file keeps
+// it in step with countDigits.
+var countSample = strconv.Itoa(mostShown) + strconv.Itoa(0)
 
 // labelled names a control, above it rather than beside it.
 //
@@ -852,7 +855,7 @@ func (v *View) putInClipboard() {
 		return
 	}
 	v.clipboard.SetContent(v.Value())
-	v.say(v.copied, v.text.T(i18n.QuickCopied))
+	v.confirmOnly(v.copy)
 }
 
 // commandFor is the line that asks a terminal for what this screen is showing.
@@ -887,48 +890,51 @@ func (v *View) putCommandInClipboard() {
 		return
 	}
 	v.clipboard.SetContent(v.command.Text)
-	v.say(v.commandCopied, v.text.T(i18n.CommandCopied))
+	v.confirmOnly(v.copyCommand)
 }
 
 // copyOne puts a single value in the clipboard, which is what clicking a row
-// does.
-//
-// It says so on the same mark the Copy button uses, because the two are the
-// same act on a different amount: what was copied is named in the sentence, so
-// a person who clicked a row and a person who pressed Copy are not told the
-// same thing about different contents.
-func (v *View) copyOne(value string) {
+// does, and the row says so where the pointer is, in the word the Copy all
+// button uses: the same act on a smaller amount.
+func (v *View) copyOne(row *parts.TapRow, value string) {
 	if v.clipboard == nil {
 		return
 	}
 	v.clipboard.SetContent(value)
-	v.say(v.copied, v.text.T(i18n.QuickCopiedOne))
+	v.confirmOnly(row)
 }
 
-// say puts a word on one of the two marks and takes it off the other, so that
-// two confirmations can never stand at once claiming different things were
-// copied.
+// confirmer is a control that can say for a while that it filled the
+// clipboard, and stop saying it.
+type confirmer interface {
+	Confirm()
+	Settle()
+}
+
+// confirmOnly lets the control that filled the clipboard say so, and stops the
+// one that said it before.
 //
-// Drawn rather than hidden: canvas text with nothing in it occupies no room, so
-// the layout does not move when a mark appears, and there is no block to show
-// and hide.
-func (v *View) say(mark *canvas.Text, words string) {
-	for _, each := range []*canvas.Text{v.copied, v.commandCopied} {
-		if each == nil {
-			continue
-		}
-		if each == mark {
-			each.Text = words
-		} else {
-			each.Text = ""
-		}
-		each.Refresh()
+// 🔴 One at a time, as it was when the words stood beside the buttons: the
+// values and the command line are different things, and two controls saying
+// they filled the clipboard would say it holds both, when it holds whichever
+// was copied last.
+func (v *View) confirmOnly(next confirmer) {
+	if v.confirmed != nil && v.confirmed != next {
+		v.confirmed.Settle()
+	}
+	next.Confirm()
+	v.confirmed = next
+}
+
+// unconfirm stops whichever control is saying it filled the clipboard, which
+// is what a new set of values means: the clipboard no longer holds what is on
+// screen.
+func (v *View) unconfirm() {
+	if v.confirmed != nil {
+		v.confirmed.Settle()
+		v.confirmed = nil
 	}
 }
-
-// forget takes both marks down, which is what a new set of values means: what
-// is in the clipboard is no longer what is on screen.
-func (v *View) forget() { v.say(nil, "") }
 
 // mostShown is the largest number of values this screen draws at once.
 //

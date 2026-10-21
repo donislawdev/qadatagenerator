@@ -18,10 +18,14 @@ import (
 type OptionLook struct {
 	// Name is the word a person picks, and the word the chooser will show.
 	Name string
-	// Detail stands beside the name, and may be empty. On the quick screen
-	// it is the written form of a value of that kind, which is a fact rather
-	// than a sentence, and is read character by character.
+	// Detail stands beside the name, and may be empty. On the quick screen it
+	// is what a person calls that kind, beside the code a recipe uses. Until
+	// 2026-10-21 it was the written form of a value, a row of noughts the owner
+	// found told nobody anything (DEC-262).
 	Detail string
+	// Note stands at the far end of the row, in the smaller size, and may be
+	// empty: on the quick screen, how long a value of that kind is.
+	Note string
 	// NameWidth is a floor under the column of names, so that every detail in
 	// the panel starts on the same line. Measured from the widest name by
 	// OptionNameWidth rather than written down.
@@ -62,10 +66,15 @@ func OptionFace(look OptionLook) fyne.CanvasObject {
 
 	columns := Row(theme.NameStepRelated,
 		AtLeast(look.NameWidth, 0, Middle(Text(look.Name, theme.TypeBody, nameInk))),
-		Middle(Mono(look.Detail, theme.TypeBody, theme.TextSecondary)))
-	inner := container.NewBorder(nil, nil, nil, mark, columns)
+		Middle(Text(look.Detail, theme.TypeBody, theme.TextSecondary)))
+	end := mark
+	if look.Note != "" {
+		end = Row(theme.NameStepRelated,
+			Middle(Text(look.Note, theme.TypeLabel, theme.TextSecondary)), mark)
+	}
+	inner := container.NewBorder(nil, nil, nil, end, columns)
 
-	return AtLeast(0, theme.ControlHeight, container.NewStack(ground,
+	return AtLeast(0, theme.OptionHeight, container.NewStack(ground,
 		Pad(theme.NameStepHairline, theme.NameStepHairline,
 			theme.NameStepRelated, theme.NameStepRelated, inner)))
 }
@@ -85,9 +94,11 @@ func OptionNameWidth(names ...string) float32 {
 	return widest
 }
 
-// OptionHeading is the caption a group of options stands under.
+// OptionHeading is the caption a group of options stands under. A group step
+// above it, twice what it was until 2026-10-21, so a heading reads as the start
+// of a group rather than as one more row (the owner found the panel cramped).
 func OptionHeading(words string) fyne.CanvasObject {
-	return Pad(theme.NameStepTight, theme.NameStepHairline,
+	return Pad(theme.NameStepGroup, theme.NameStepHairline,
 		theme.NameStepRelated, theme.NameStepHairline, Caption(words))
 }
 

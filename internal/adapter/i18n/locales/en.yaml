@@ -513,7 +513,8 @@ recipe.form-unused: No manifest is written, because this recipe orders no damage
 # product rather than two that happen to share a name.
 command.heading: The same in a terminal
 command.copy: Copy command
-command.copied: Command copied
+# tekst-ok: the word the Copy all button and a row of the quick screen say once they have filled the clipboard, with one meaning
+command.copied: Copied
 
 # One line at the top of each screen saying what it is for. The column gives a
 # screen its name, and a name is not a purpose.
@@ -551,9 +552,10 @@ quick.label.count: How many
 quick.gender.any: any
 # tekst-ok: the same verb the toolkit's menu on a text field says in toolkit.copy, with one meaning
 quick.copy: Copy
+quick.copy-all: Copy all
 quick.again: Again
-quick.copied: The values are in the clipboard.
-quick.copied-one: That value is in the clipboard.
+# tekst-ok: the word every Copy command button says once it has filled the clipboard, in command.copied, with one meaning
+quick.copied: Copied
 quick.generate: Generate
 quick.may-repeat: Values are drawn rather than dealt, so some may repeat.
 quick.refused.generator: This build cannot produce that value.
@@ -568,8 +570,28 @@ quick.group.people: People
 quick.group.places: Places
 country.PL: Poland
 country.US: United States
-quick.pick.prompt: Type to filter, for example iban or pesel
+quick.pick.prompt: Type to filter, for example pesel or bank
 quick.pick.kinds: kinds
 quick.pick.matches: "%d of %d match"
 quick.pick.enter: Enter to pick
 quick.pick.nothing: Nothing matches. Try a shorter word, or a country.
+
+# What a person calls each kind, beside the code a recipe uses. One per
+# generator, and the quick screen's guard holds that every generator has one.
+kind.aba: Bank routing number
+kind.birth_date: Date of birth
+kind.city: City or town
+kind.ean: Product barcode number
+kind.first_name: Given name
+kind.gender: Female or male
+kind.iban: Bank account number
+kind.imei: Mobile device number
+kind.isbn: Book number
+kind.last_name: Family name
+kind.nip: Tax identification number
+kind.pesel: National ID number
+kind.postal_code: ZIP code
+kind.region: Province (voivodeship)
+kind.regon: Business register number
+kind.ssn: Social Security number
+kind.vin: Vehicle ID number

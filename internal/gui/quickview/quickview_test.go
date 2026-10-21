@@ -133,13 +133,13 @@ func TestChoosingAValueProducesOneAndCopyingItReachesTheClipboard(t *testing.T) 
 		t.Errorf("Copy put %q in the clipboard while %q was on screen",
 			clipboard.content, produced)
 	}
-	// 🔴 Asked of the mark BESIDE the button rather than of the sentence above
-	// the card, which is where this used to go until the owner reported on
-	// 2026-09-09 that he never found it. The distance was the fault, so the
-	// distance is what the guard is about.
-	if view.copied.Text != i18n.English.T(i18n.QuickCopied) {
-		t.Errorf("Copy said %q beside itself, where a clipboard nobody can see needs the screen to say it worked",
-			view.copied.Text)
+	// 🔴 Asked of the BUTTON rather than of the sentence above the card, which
+	// is where this went until the owner reported on 2026-09-09 that they never
+	// found it. The distance was the fault, so the distance is what the guard is
+	// about, and since 2026-10-21 the button says it itself.
+	if !view.copy.Confirming() || view.copy.Confirmed != i18n.English.T(i18n.QuickCopied) {
+		t.Errorf("Copy all does not say %q after filling the clipboard, where a clipboard "+
+			"nobody can see needs the screen to say it worked", i18n.English.T(i18n.QuickCopied))
 	}
 	// And it did not go into the sentence above the card as well. One label
 	// serving both is how copying a set of values silently deleted the warning
@@ -152,28 +152,29 @@ func TestChoosingAValueProducesOneAndCopyingItReachesTheClipboard(t *testing.T) 
 
 // 🔴 Two confirmations never stand at once.
 //
-// Each mark says a DIFFERENT thing was copied - a set of values, or a command
-// line. Both lit at the same time would say the clipboard holds two things, and
-// the one it actually holds is whichever button was pressed last.
+// Each button says a DIFFERENT thing was copied - a set of values, or a
+// command line. Both lit at the same time would say the clipboard holds two
+// things, and the one it actually holds is whichever button was pressed last.
 func TestOnlyTheLastThingCopiedSaysSo(t *testing.T) {
 	view := New(i18n.English, &heldClipboard{})
 	view.Choose("pesel")
 
 	view.putInClipboard()
 	view.putCommandInClipboard()
-	if view.copied.Text != "" {
-		t.Errorf("the values still say they were copied (%q) after the command was", view.copied.Text)
+	if view.copy.Confirming() {
+		t.Error("Copy all still says it copied after the command was")
 	}
-	if view.commandCopied.Text == "" {
-		t.Error("copying the command said nothing beside the button that did it")
+	if !view.copyCommand.Confirming() {
+		t.Error("copying the command said nothing on the button that did it")
 	}
 
 	// A new set of values means the clipboard no longer holds what is on
-	// screen, so neither mark may go on claiming it does.
+	// screen, so neither button may go on claiming it does.
+	view.putInClipboard()
 	view.Generate()
-	if view.copied.Text != "" || view.commandCopied.Text != "" {
-		t.Errorf("a fresh run left a confirmation standing: values %q, command %q",
-			view.copied.Text, view.commandCopied.Text)
+	if view.copy.Confirming() || view.copyCommand.Confirming() {
+		t.Errorf("a fresh run left a confirmation standing: values %v, command %v",
+			view.copy.Confirming(), view.copyCommand.Confirming())
 	}
 }
 
@@ -229,9 +230,37 @@ func TestATypedFieldWaitsForTheButtonAndAChoiceDoesNot(t *testing.T) {
 // seed field takes the room between the fields and the button now, because
 // giving it a width of its own made it draw under that button.
 func TestTheCountFieldIsSizedForTheLargestCountItTakes(t *testing.T) {
-	if countSample != strconv.Itoa(quick.MostShownAtOnce) {
-		t.Errorf("the field is sized for %q while the screen takes up to %d, so the "+
-			"widest number it accepts may not fit in it", countSample, quick.MostShownAtOnce)
+	if len(countSample) != countDigits {
+		t.Errorf("the field is sized for %q while it takes %d digits, so the "+
+			"widest number it accepts may not fit in it", countSample, countDigits)
+	}
+	if countDigits <= len(strconv.Itoa(quick.MostShownAtOnce)) {
+		t.Errorf("the field takes %d digits and the ceiling has as many, so a number over "+
+			"it is cut to fit without a word rather than refused", countDigits)
+	}
+}
+
+// 🔴 A count over the ceiling is refused in words, not cut to fit.
+//
+// The owner typed a million on 2026-10-21 and got ten thousand values: the field
+// dropped every digit past the fifth and the screen drew what was left.
+func TestACountOverTheCeilingIsRefusedRatherThanCut(t *testing.T) {
+	view := New(i18n.English, &heldClipboard{})
+	typed := strconv.Itoa(quick.MostShownAtOnce) + strconv.Itoa(0) + strconv.Itoa(0)
+	test.Type(view.howMany, typed)
+	view.Choose("pesel")
+	view.Generate()
+
+	if got := len(strings.Split(view.Value(), "\n")); view.Value() != "" && got > quick.MostShownAtOnce {
+		t.Errorf("the screen drew %d values, over the ceiling of %d", got, quick.MostShownAtOnce)
+	}
+	if view.Value() != "" {
+		t.Errorf("a count over the ceiling produced values, where it is refused: %q typed as %q",
+			typed, view.howMany.Text)
+	}
+	if !strings.Contains(view.told.Text, strconv.Itoa(quick.MostShownAtOnce)) {
+		t.Errorf("the refusal does not name the ceiling, so nobody learns what the screen takes: %q",
+			view.told.Text)
 	}
 }
 
@@ -589,8 +618,11 @@ func TestClickingOneValueCopiesThatValueAndNotTheSet(t *testing.T) {
 	if clipboard.content == view.Value() {
 		t.Error("clicking one row copied the whole set")
 	}
-	if view.copied.Text == "" {
-		t.Error("a clipboard nobody can see was filled without the screen saying so")
+	if !rows[2].Confirmed() {
+		t.Error("a clipboard nobody can see was filled without the row saying so")
+	}
+	if rows[1].Confirmed() || view.copy.Confirming() {
+		t.Error("something other than the row that was clicked says it was copied")
 	}
 }
 

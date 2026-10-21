@@ -312,7 +312,7 @@
 																</widget>
 																<widget pos="501,0" size="6x136" type="*widget.scrollBarArea">
 																	<widget pos="3,0" size="3x65" type="*widget.scrollBar">
-																		<rectangle fillColor="scrollbar" radius="6" size="3x65"/>
+																		<rectangle fillColor="scrollbar" radius="3" size="3x65"/>
 																	</widget>
 																</widget>
 															</widget>
@@ -359,7 +359,7 @@
 																</widget>
 																<widget pos="501,0" size="6x136" type="*widget.scrollBarArea">
 																	<widget pos="3,0" size="3x65" type="*widget.scrollBar">
-																		<rectangle fillColor="scrollbar" radius="6" size="3x65"/>
+																		<rectangle fillColor="scrollbar" radius="3" size="3x65"/>
 																	</widget>
 																</widget>
 															</widget>

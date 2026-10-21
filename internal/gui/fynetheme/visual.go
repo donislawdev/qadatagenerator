@@ -191,8 +191,12 @@ func (Visual) Size(name fyne.ThemeSizeName) float32 {
 		return palette.TypeSize(palette.TypeBody)
 	case toolkit.SizeNameInputRadius, toolkit.SizeNameSelectionRadius:
 		return palette.RadiusControl
+	case toolkit.SizeNameScrollBar:
+		return palette.ScrollBarThickness
+	case toolkit.SizeNameScrollBarSmall:
+		return palette.ScrollBarResting
 	case toolkit.SizeNameScrollBarRadius:
-		return palette.RadiusControl
+		return palette.ScrollBarRadius
 	}
 	return toolkit.DefaultTheme().Size(name)
 }

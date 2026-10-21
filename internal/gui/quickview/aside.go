@@ -1,8 +1,6 @@
 package quickview
 
 import (
-	"strconv"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
@@ -115,15 +113,10 @@ func produces(about quick.Description) string {
 // eleven claims in a translation file, where nothing could check any of them
 // against the values they describe.
 func (v *View) format(about quick.Description) fyne.CanvasObject {
-	places, letters := quick.Places(about.Mask)
-	said := i18n.QuickAboutDigits
-	if letters {
-		said = i18n.QuickAboutLettersOrDigits
-	}
 	return paint.Column(palette.NameStepHairline,
 		paint.Caption(v.text.T(i18n.QuickAboutFormat)),
 		paint.Mono(about.Mask, palette.TypeValue, palette.TextPrimary),
-		v.paragraph(strconv.Itoa(places)+" "+v.text.T(said)))
+		v.paragraph(v.length(about.Mask)))
 }
 
 // checkDigit says whether the number can catch a wrong character on its own.

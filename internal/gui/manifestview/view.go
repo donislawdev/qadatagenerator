@@ -2,7 +2,6 @@ package manifestview
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
@@ -107,14 +106,13 @@ type View struct {
 	foot    fyne.CanvasObject
 	content fyne.CanvasObject
 
-	// The band at the foot: the terminal line, the button that copies it, the
-	// mark saying that it did, and the sentence saying which part of the line
-	// is an example.
-	terminal      fyne.CanvasObject
-	command       *widget.Label
-	copyCommand   *parts.Button
-	commandCopied *canvas.Text
-	commandNote   fyne.CanvasObject
+	// The band at the foot: the terminal line, the button that copies it and
+	// says for a moment that it did, and the sentence saying which part of the
+	// line is an example.
+	terminal    fyne.CanvasObject
+	command     *widget.Label
+	copyCommand *parts.Button
+	commandNote fyne.CanvasObject
 
 	// What is on the screen: the manifest, the response beside it, and the
 	// names of the files they came from, which are empty for a document that

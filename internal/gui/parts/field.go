@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
@@ -54,9 +55,10 @@ import (
 //
 //   - the ground and the edge of an input are transparent, and this draws both,
 //     out of the tokens every other control uses
-//   - SizeNameInputBorder is nought, which makes the toolkit's edge disappear in
-//     every state INCLUDING focus, since the focused edge is drawn at that same
-//     thickness. That is what frees the focus mark
+//   - the edge the toolkit strokes round the field is put away (withoutEdge),
+//     in every state INCLUDING focus, since the focused edge is that same
+//     rectangle in another colour. That is what frees the focus mark. Until
+//     2026-10-21 it was given no width instead, which took the caret with it
 //
 // With the edge gone, where the words sit is this file's business, and the space
 // around the field is what places them: eight from the left plus the four the
@@ -218,7 +220,7 @@ func fieldWith(entry *FieldEntry, shown fyne.CanvasObject, leading fyne.CanvasOb
 	// chooser starts its word. Nothing at the foot, so the field keeps whatever
 	// height the row gives it.
 	step := palette.StepOf(palette.NameStepTight)
-	var typed fyne.CanvasObject = container.NewThemeOverride(shown, bareField{})
+	var typed fyne.CanvasObject = container.NewThemeOverride(shown, bareField{oneLine: true})
 	if leading != nil {
 		typed = container.New(layout.NewBorderLayout(nil, nil, leading, nil), leading, typed)
 	}
@@ -304,6 +306,50 @@ func (g *groundLook) show() {
 	g.current = ground
 }
 
+// withoutEdge is the toolkit's drawing of a text field with the edge it strokes
+// round itself put away, and nothing else changed.
+//
+// # Why the edge is put away rather than given no width
+//
+// Until 2026-10-21 the bare theme below set the width of that edge to nought,
+// which took the edge away in every state and the caret with it: widget.Entry
+// of v2.8.2 draws its caret as wide as the same number, widget/entry.go:1918.
+// The width is now the caret's, so the toolkit would draw its edge again - at
+// rest in a colour the bare theme makes transparent, but with the keyboard in
+// the field in the colour of the caret, and out of reach in the grey of
+// disabled words. Neither colour can be taken away without the caret or the
+// words.
+//
+// The edge is the one rectangle among the toolkit's objects that has a stroke,
+// widget/entry.go:183, and nothing in the toolkit shows it again once hidden:
+// it sets its colour and its size and never its visibility. The words stay
+// where they were, because the entry moves them in by the width of the edge and
+// its text takes the same number away again, widget/richtext.go:608.
+//
+// # 🔴 Why hidden here rather than cut by a clip, tried first on the same day
+//
+// A field spilling over an area that clips is how the window would hide the
+// edge, but not how a render of it would: the toolkit's software painter, which
+// draws every picture this project stores, moves a rounded rectangle clipped at
+// its top or left side INTO the clip rather than cutting it, at
+// internal/painter/software/draw.go in drawOblongStroke. The renders showed the
+// edge as a bent line inside every focused field, and the window would not have.
+// A picture that differs from the window is the fault GUI rule six names.
+func withoutEdge(drawing fyne.WidgetRenderer) fyne.WidgetRenderer {
+	for _, object := range drawing.Objects() {
+		if edge, ok := object.(*canvas.Rectangle); ok && edge.StrokeWidth > 0 {
+			edge.Hide()
+		}
+	}
+	return drawing
+}
+
+// CreateRenderer is the toolkit's drawing of the field without its edge. See
+// withoutEdge.
+func (f *FieldEntry) CreateRenderer() fyne.WidgetRenderer {
+	return withoutEdge(f.Entry.CreateRenderer())
+}
+
 // bareField is this window's theme with the chrome of an input taken out of it.
 //
 // # Why it asks the running application rather than naming a theme
@@ -312,30 +358,48 @@ func (g *groundLook) show() {
 // theme named here would go on answering with the old palette on the day the
 // next swap happens, with nothing failing: the field would simply be the one
 // control still wearing the previous window.
-type bareField struct{}
+//
+// oneLine is set for a field of one line. Such a field scrolls sideways under
+// a value longer than itself, and the toolkit draws a bar for that along its
+// foot: the owner measured it on 2026-10-21 as half the field under the
+// pointer, on the seed. A field of one line follows its caret on its own, so
+// the bar is given no width there and the recipe editor keeps its own.
+type bareField struct {
+	oneLine bool
+}
 
 var _ fyne.Theme = bareField{}
 
-// Color hides the two things this control draws itself and defers the rest.
+// Color hides the things this control draws itself, and the shadow, and defers
+// the rest.
+//
+// The shadow is what the toolkit lays along the side of a field where more of
+// the text lies out of sight. On a field of one line that is a dark smear at
+// its end, and on the recipe editor it was the shadow along its right side the
+// owner did not want on 2026-10-21. The caret moving and the bar of the editor
+// already say that there is more.
 func (b bareField) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
 	switch name {
-	case toolkit.ColorNameInputBackground, toolkit.ColorNameInputBorder:
+	case toolkit.ColorNameInputBackground, toolkit.ColorNameInputBorder, toolkit.ColorNameShadow:
 		return color.Transparent
 	}
 	return current().Color(name, variant)
 }
 
-// Size takes the toolkit's edge away, which is what lets the focus mark be the
-// same one every other control uses.
+// Size gives the toolkit's edge the width of the caret, and the bars of a
+// field of one line no width.
 //
-// 🔴 Nought rather than a smaller number, and it does two things at once. The
-// edge disappears in every state, focus included, since the toolkit draws that
-// edge at this thickness whatever colour it picks for it. And the words move to
-// the top of the field, because the renderer places them at twice this - which
-// is why the space above them is put back outside, where it can be chosen.
+// 🔴 The edge itself is put away by withoutEdge, so the focus mark stays the
+// one every other control uses. It was nought until 2026-10-21, see withoutEdge
+// for why that cost the caret.
 func (b bareField) Size(name fyne.ThemeSizeName) float32 {
-	if name == toolkit.SizeNameInputBorder {
-		return 0
+	switch name {
+	case toolkit.SizeNameInputBorder:
+		return palette.CaretThickness
+	case toolkit.SizeNameScrollBar, toolkit.SizeNameScrollBarSmall:
+		if b.oneLine {
+			return 0
+		}
 	}
 	return current().Size(name)
 }

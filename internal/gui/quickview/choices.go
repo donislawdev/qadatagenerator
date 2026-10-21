@@ -2,6 +2,7 @@ package quickview
 
 import (
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
@@ -39,7 +40,8 @@ func (v *View) choices() []parts.Choice {
 	for _, about := range described {
 		choices = append(choices, parts.Choice{
 			Value:  about.Generator,
-			Detail: about.Mask,
+			Detail: v.text.T(kindKey(about.Generator)),
+			Note:   v.length(about.Mask),
 			Group:  v.groupName(about.Group),
 		})
 	}
@@ -113,6 +115,31 @@ func (v *View) groupName(group quick.Group) string {
 // countryKey is the catalogue key naming a country, from its alpha-2 code.
 func countryKey(code string) i18n.Key {
 	return i18n.Key("country." + code)
+}
+
+// kindKey is the key of the catalogue naming a kind the way a person says it,
+// built the way countryKey is, with the same guard beside it.
+func kindKey(generator string) i18n.Key {
+	return i18n.Key("kind." + generator)
+}
+
+// length is how long a value written in this mask is, in words: eleven digits,
+// or twenty eight letters or digits. Nothing for a kind with no mask, such as
+// a name, whose length is not a fact about the kind.
+//
+// The count comes from quick.Places, so the mode reads the mask and this file
+// only chooses words for what it read. The panel and the card beside the
+// values say it with this one function, so the two cannot disagree.
+func (v *View) length(mask string) string {
+	if mask == "" {
+		return ""
+	}
+	places, letters := quick.Places(mask)
+	said := i18n.QuickAboutDigits
+	if letters {
+		said = i18n.QuickAboutLettersOrDigits
+	}
+	return strconv.Itoa(places) + " " + v.text.T(said)
 }
 
 // panelWords are what the panel says, in the language of this screen.

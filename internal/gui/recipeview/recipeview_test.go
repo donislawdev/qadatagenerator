@@ -184,6 +184,47 @@ func TestTheScreenSaysThatItIsChecking(t *testing.T) {
 	}
 }
 
+// A check of the next keystroke leaves the answer about the last one standing.
+//
+// 🔴 The owner reported on 2026-10-21 that the card blinked once a letter while
+// they typed: every keystroke replaced the answer with the sentence saying a
+// check is going on, and the answer came back a moment later. The second check
+// is held here so that the screen is asked in exactly that moment.
+func TestTypingDoesNotBlankTheAnswerWhileTheNextCheckRuns(t *testing.T) {
+	var answer []func()
+	check := real(t)
+	held := background.Work{Read: func(read func() func(), _ func(error) func()) {
+		answer = append(answer, read())
+	}}
+	view := recipeview.New(i18n.English, check, nil, held, nil)
+	view.Content()
+
+	view.SetRecipe(screens.BrokenRecipe)
+	if len(answer) != 1 {
+		t.Fatalf("expected one check in flight and there are %d", len(answer))
+	}
+	answer[0]()
+	report, _ := view.Report()
+	if len(report.Problems) == 0 {
+		t.Fatalf("the broken sample has no problems, so this test proves nothing")
+	}
+
+	view.SetRecipe(screens.BrokenRecipe + " ")
+	if !view.Checking() {
+		t.Fatalf("the second keystroke started no check")
+	}
+	drawn := spoken(rendered(t, view))
+	if strings.Contains(drawn, i18n.English.T(i18n.RecipeChecking)) {
+		t.Errorf("the answer on screen was replaced by the sentence about checking, " +
+			"which is the blink the owner reported")
+	}
+	// The place rather than the sentence, because the sentence wraps and the
+	// spoken line is cut into one piece per line drawn.
+	if !strings.Contains(drawn, report.Problems[0].Where) {
+		t.Errorf("the problem found a keystroke ago is gone while the next check runs:\n%s", drawn)
+	}
+}
+
 // What the screen draws says where each problem is, in words.
 //
 // The tree is asked rather than the model, because a line held in a report and

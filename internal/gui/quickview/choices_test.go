@@ -32,6 +32,24 @@ func TestEveryGroupHeadingIsWordedInTheCatalogue(t *testing.T) {
 	}
 }
 
+// Every kind the panel offers carries the name a person calls it, never a key.
+//
+// The same reason as the headings above: the key is built from the generator
+// when the panel is drawn, so the catalogue's own test cannot see a generator
+// that arrived without a name. This walks every kind in every locale.
+func TestEveryKindIsNamedInTheCatalogue(t *testing.T) {
+	view := New(i18n.English, &heldClipboard{})
+	for _, locale := range quick.Locales() {
+		view.UseLocale(locale)
+		for _, choice := range view.choices() {
+			if choice.Detail == "" || strings.HasPrefix(choice.Detail, "kind.") {
+				t.Errorf("%s in %s would stand beside %q, which is a key rather than its name",
+					choice.Value, locale, choice.Detail)
+			}
+		}
+	}
+}
+
 // The headings come in the order the comment on groupRank promises, and the
 // country of the locale comes first.
 func TestTheHeadingsStartWithTheCountryOfTheLocale(t *testing.T) {
@@ -70,14 +88,19 @@ func rankOfHeading(view *View, heading string) int {
 	return -1
 }
 
-// Every kind shows its written form beside it, and a kind without one shows
-// nothing rather than a word standing in for it.
-func TestAKindWithAMaskShowsItBesideItsName(t *testing.T) {
+// Every kind with a mask says at its end how long a value of it is, in the
+// words the card beside the values uses, and a kind without one says nothing
+// rather than a word standing in for it. Until 2026-10-21 the mask itself stood
+// beside the name, a row of noughts the owner found told nobody anything.
+func TestAKindWithAMaskSaysHowLongItIs(t *testing.T) {
 	view := New(i18n.English, &heldClipboard{})
 	for _, choice := range view.choices() {
 		about := quick.Describe(choice.Value, view.locale)
-		if choice.Detail != about.Mask {
-			t.Errorf("%s shows %q beside its name and its mask is %q", choice.Value, choice.Detail, about.Mask)
+		if want := view.length(about.Mask); choice.Note != want {
+			t.Errorf("%s says %q at its end, where its mask %q is %q", choice.Value, choice.Note, about.Mask, want)
+		}
+		if about.Mask != "" && choice.Note == "" {
+			t.Errorf("%s has the mask %q and says nothing about its length", choice.Value, about.Mask)
 		}
 	}
 }

@@ -2,6 +2,7 @@ package parts
 
 import (
 	"image/color"
+	"strings"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -9,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/test"
 
 	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
+	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
@@ -239,6 +241,65 @@ func TestADisabledButtonShowsNoEdge(t *testing.T) {
 	if edgesIn(drawnFace(button)) == 0 {
 		t.Error("a button that became pressable again did not get its edge back")
 	}
+}
+
+// 🔴 A button that filled the clipboard says so on itself, and the row beside it
+// does not move.
+//
+// The owner asked for it on 2026-10-21, in place of a sentence that stood
+// beside the button until the next copy. The width is asked for because a
+// button whose word changes length would push the buttons beside it each time
+// it is pressed and again when it settles.
+func TestAButtonSaysItWasConfirmedWithoutChangingItsWidth(t *testing.T) {
+	button := NewButton("Copy all", func() {})
+	button.ShowIcon(paint.IconCopy)
+	button.Confirmed = "Copied"
+	window := test.NewWindow(button)
+	t.Cleanup(window.Close)
+	before := button.MinSize()
+
+	button.Confirm()
+	if got := wordsOn(button); got != "Copied" {
+		t.Errorf("a confirmed button says %q, want %q", got, "Copied")
+	}
+	if after := button.MinSize(); after != before {
+		t.Errorf("the button is %v wide confirmed and %v before, so the row beside it moves",
+			after.Width, before.Width)
+	}
+
+	button.Settle()
+	if got := wordsOn(button); got != "Copy all" {
+		t.Errorf("a settled button says %q, want its own word back", got)
+	}
+
+	// A button with nothing to confirm says nothing new when asked to.
+	plain := NewButton("Again", func() {})
+	plain.Confirm()
+	if plain.Confirming() {
+		t.Error("a button with no word to confirm with claims to be confirming")
+	}
+}
+
+// wordsOn is every word a button draws right now, through its renderer.
+func wordsOn(button *Button) string {
+	var said []string
+	var walk func(fyne.CanvasObject)
+	walk = func(object fyne.CanvasObject) {
+		switch shape := object.(type) {
+		case *canvas.Text:
+			if shape.Text != "" {
+				said = append(said, shape.Text)
+			}
+		case *fyne.Container:
+			for _, child := range shape.Objects {
+				walk(child)
+			}
+		}
+	}
+	for _, object := range test.WidgetRenderer(button).Objects() {
+		walk(object)
+	}
+	return strings.Join(said, " ")
 }
 
 func TestAHeadingShowsNoEdge(t *testing.T) {

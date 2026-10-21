@@ -79,12 +79,8 @@ func (v *View) commandBand() fyne.CanvasObject {
 	return paint.Band(paint.BandAbove, palette.NameStepRelated, palette.NameStepMajor,
 		container.NewBorder(nil, nil,
 			paint.Middle(paint.Mono(commandPrompt, palette.TypeBody, palette.TextAccent)),
-			// The confirmation belongs HERE, beside the button that fills it,
-			// which is the whole of the change made on 2026-09-09. It used to
-			// go into the sentence above the card, seven hundred pixels away
-			// from the button somebody had just pressed.
-			paint.Row(palette.NameStepTight,
-				paint.Middle(v.commandCopied), paint.Middle(v.copyCommand.OnScreen())),
+			// The button says itself that the line was copied, for a moment.
+			paint.Middle(v.copyCommand.OnScreen()),
 			paint.Middle(v.command)))
 }
 
@@ -179,14 +175,29 @@ func (v *View) valuesCard(values []string) fyne.CanvasObject {
 // be twenty thousand copies of the same sentence in a list of values, which is
 // the state the manifest browser was in before its columns were cut down.
 func (v *View) valueRow(number, digits int, value string, banded bool) fyne.CanvasObject {
-	return parts.NewTapRow(
+	var row *parts.TapRow
+	row = parts.NewTapRow(
 		func(hovered bool) fyne.CanvasObject {
-			// The same word the button in the heading carries, because it is
-			// the same act on a smaller amount. A second word for it would be
-			// a second thing to learn.
-			return RowFace(number, digits, value, banded, hovered, v.text.T(i18n.QuickCopy))
+			// The words the button in the heading carries, because it is the
+			// same act on a smaller amount. A second pair of words for it would
+			// be a second thing to learn.
+			return RowFace(number, digits, value, banded, hovered, v.rowHint(row, hovered))
 		},
-		func() { v.copyOne(value) })
+		func() { v.copyOne(row, value) })
+	return row
+}
+
+// rowHint is what a row says beside its value: that a click copies it while
+// the pointer is on it, and that it was copied for a moment after the click,
+// wherever the pointer has gone. Nothing otherwise.
+func (v *View) rowHint(row *parts.TapRow, hovered bool) string {
+	switch {
+	case row != nil && row.Confirmed():
+		return v.text.T(i18n.QuickCopied)
+	case hovered:
+		return v.text.T(i18n.QuickCopy)
+	}
+	return ""
 }
 
 // RowFace is the picture of one row, in whatever state it is in.
@@ -218,7 +229,7 @@ func RowFace(number, digits int, value string, banded, hovered bool, hint string
 	index.Alignment = fyne.TextAlignTrailing
 
 	var said fyne.CanvasObject = paint.Clear()
-	if hovered {
+	if hint != "" {
 		said = paint.Middle(paint.Text(hint, palette.TypeLabel, palette.TextSecondary))
 	}
 
@@ -238,12 +249,7 @@ func RowFace(number, digits int, value string, banded, hovered bool, hint string
 // what somebody would say out loud and "Values (10)" is what a form would say.
 func (v *View) heading(count int) fyne.CanvasObject {
 	return paint.SectionHeading(v.countedValues(count),
-		// The mark stands to the LEFT of the buttons, so it appears between the
-		// heading and the button that fills it rather than off the edge of the
-		// card. Empty canvas text takes no room, so nothing moves when it is
-		// blank.
-		paint.Row(palette.NameStepTight,
-			paint.Middle(v.copied), v.copy.OnScreen(), v.again.OnScreen()))
+		paint.Row(palette.NameStepTight, v.copy.OnScreen(), v.again.OnScreen()))
 }
 
 // countedValues is the heading of the card, which says how many are under it.

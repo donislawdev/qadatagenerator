@@ -20,8 +20,12 @@ import (
 type Choice struct {
 	// Value is what is chosen, and what the chooser then shows.
 	Value string
-	// Detail stands beside the value in the panel, and may be empty.
+	// Detail stands beside the value in the panel, and may be empty. Typing in
+	// the search field finds it, so a kind is found by what a person calls it
+	// as well as by its code.
 	Detail string
+	// Note stands at the far end of the row, and may be empty.
+	Note string
 	// Group is the heading the value stands under. A list whose choices all
 	// leave it empty is flat, and opens without a search field or a foot.
 	Group string
@@ -127,7 +131,8 @@ func newPicker(choices []Choice, chosen string, words PanelWords,
 		p.buildGrouped()
 		return p
 	}
-	p.body = paint.On(paint.PanelGround(), paint.PadAll(palette.NameStepRelated, p.scroll))
+	p.body = paint.On(paint.PanelGround(),
+		paint.PadAll(palette.NameStepRelated, container.NewThemeOverride(p.scroll, bareField{})))
 	return p
 }
 
@@ -163,7 +168,7 @@ func (p *picker) buildRows() {
 		at, this := index, choice
 		row.tap = NewTapRow(func(hovered bool) fyne.CanvasObject {
 			return paint.OptionFace(paint.OptionLook{
-				Name: this.Value, Detail: this.Detail, NameWidth: nameWidth,
+				Name: this.Value, Detail: this.Detail, Note: this.Note, NameWidth: nameWidth,
 				Chosen: this.Value == p.chosen, Current: p.current == at, Hovered: hovered,
 			})
 		}, func() { p.pick(at) })
@@ -205,7 +210,12 @@ func (p *picker) buildGrouped() {
 	footer := container.New(layout.NewBorderLayout(rule, nil, nil, nil), rule,
 		paint.Pad(palette.NameStepTight, palette.NameStepHairline,
 			palette.NameStepRelated, palette.NameStepRelated, counts))
-	middle := container.NewStack(p.scroll, p.nothing)
+	// 🔴 No shadow along the edge the rows run under, since 2026-10-21: it lay
+	// over the half row at the foot of the panel and the owner read the pair as
+	// a list cut off. The panel now ends on a whole row (Fitted) and the bar at
+	// the side is what says there are more. The theme is the one the fields
+	// wear, whose shadow is transparent and whose bars are the window's.
+	middle := container.NewStack(container.NewThemeOverride(p.scroll, bareField{}), p.nothing)
 	// 🔴 The rows are the MIDDLE of the border and the field and the foot are
 	// its edges, and that is the rule this project paid for once: only what
 	// cannot grow may stand in an edge. An open list put in an edge gave the
@@ -449,6 +459,43 @@ func (p *picker) ContentHeight() float32 {
 	}
 	chrome := p.body.MinSize().Height - p.scroll.MinSize().Height
 	return chrome + p.list.MinSize().Height
+}
+
+// Fitted is the height under this one at which the panel ends on the foot of a
+// whole row, so that no row shows only its top half.
+//
+// The owner found the last row of the kinds cut in half on 2026-10-21. The
+// panel is as tall as its rows up to a ceiling and up to the room on the
+// screen, and either limit falls wherever it falls, so the rows the limit
+// leaves are counted here and the panel gives back the part of the one it
+// would have cut. It ends on a row and never on a heading, which with nothing
+// under it reads as a group that is empty. A panel too short for even one row
+// keeps the height it got, since a part of a row is still more than none.
+func (p *picker) Fitted(height float32) float32 {
+	if !p.scroll.Visible() {
+		return height
+	}
+	chrome := p.body.MinSize().Height - p.scroll.MinSize().Height
+	room := height - chrome
+	gap := palette.StepOf(palette.NameStepHairline)
+	reached, used := float32(0), float32(0)
+	for _, item := range p.list.Objects {
+		if !item.Visible() {
+			continue
+		}
+		end := used + item.MinSize().Height
+		if end > room {
+			break
+		}
+		if _, row := item.(*TapRow); row {
+			reached = end
+		}
+		used = end + gap
+	}
+	if reached == 0 {
+		return height
+	}
+	return chrome + reached
 }
 
 // CreateRenderer draws the panel built once above.

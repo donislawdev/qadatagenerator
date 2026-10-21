@@ -470,10 +470,14 @@ const (
 	QuickLabelGender Key = "quick.label.gender"
 	QuickLabelBorn   Key = "quick.label.born"
 	QuickGenderAny   Key = "quick.gender.any"
-	QuickCopy        Key = "quick.copy"
-	QuickAgain       Key = "quick.again"
-	QuickCopied      Key = "quick.copied"
-	QuickCopiedOne   Key = "quick.copied-one"
+	// QuickCopy is what a row of values says under the pointer, QuickCopyAll
+	// the button over them, and QuickCopied what either says for a moment once
+	// it has filled the clipboard (2026-10-21, in place of a sentence that stood
+	// beside the button until the next copy).
+	QuickCopy    Key = "quick.copy"
+	QuickCopyAll Key = "quick.copy-all"
+	QuickAgain   Key = "quick.again"
+	QuickCopied  Key = "quick.copied"
 	// QuickGenerate names the one action this screen is for.
 	//
 	// It exists because a field somebody TYPES into stopped producing on every
@@ -539,6 +543,28 @@ const (
 	QuickPickMatches Key = "quick.pick.matches"
 	QuickPickEnter   Key = "quick.pick.enter"
 	QuickPickNothing Key = "quick.pick.nothing"
+	// What a person calls each kind, standing beside the code a recipe uses in
+	// the panel a kind is picked from, and found by the search there (DEC-262,
+	// 2026-10-21). One per generator of the build. The key is built from the
+	// generator when the panel is drawn, so the guard beside the quick screen
+	// walks every generator and holds that each has its name here.
+	KindAba        Key = "kind.aba"
+	KindBirthDate  Key = "kind.birth_date"
+	KindCity       Key = "kind.city"
+	KindEan        Key = "kind.ean"
+	KindFirstName  Key = "kind.first_name"
+	KindGender     Key = "kind.gender"
+	KindIban       Key = "kind.iban"
+	KindImei       Key = "kind.imei"
+	KindIsbn       Key = "kind.isbn"
+	KindLastName   Key = "kind.last_name"
+	KindNip        Key = "kind.nip"
+	KindPesel      Key = "kind.pesel"
+	KindPostalCode Key = "kind.postal_code"
+	KindRegion     Key = "kind.region"
+	KindRegon      Key = "kind.regon"
+	KindSsn        Key = "kind.ssn"
+	KindVin        Key = "kind.vin"
 
 	// The line a person can paste into a terminal to get the same thing.
 	// docs/08 asks for this on every screen that produces something, and says
@@ -581,12 +607,14 @@ var windowKeys = []Key{
 	QuickAboutHarbour, QuickAboutUnavailable,
 	QuickLabelGender, QuickLabelBorn,
 	QuickLabelLocale, QuickLabelSeed,
-	QuickGenderAny, QuickCopy, QuickAgain, QuickCopied, QuickCopiedOne, QuickGenerate,
+	QuickGenderAny, QuickCopy, QuickCopyAll, QuickAgain, QuickCopied, QuickGenerate,
 	QuickLabelCount, QuickMayRepeat,
 	QuickRefusedGenerator, QuickRefusedRole, QuickRefusedGender, QuickRefusedDate,
 	QuickRefusedCount, QuickRefusedCountShape, QuickRefusedCountMany,
 	QuickGroupInternational, QuickGroupPeople, QuickGroupPlaces, CountryPL, CountryUS,
 	QuickPickPrompt, QuickPickKinds, QuickPickMatches, QuickPickEnter, QuickPickNothing,
+	KindAba, KindBirthDate, KindCity, KindEan, KindFirstName, KindGender, KindIban, KindImei,
+	KindIsbn, KindLastName, KindNip, KindPesel, KindPostalCode, KindRegion, KindRegon, KindSsn, KindVin,
 	CommandHeading, CommandCopy, CommandCopied,
 	PurposeTake, PurposeRecipe, PurposeManifest, PurposeAbout, AboutSaveJSON,
 

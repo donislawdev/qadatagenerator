@@ -336,15 +336,14 @@
 																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
 																			<container size="71x26">
 																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="71x26"/>
-																					<rectangle radius="6" size="70x25"/>
-																					<widget size="71x26" type="*widget.Scroll">
-																						<widget size="71x26" type="*widget.entryContent">
-																							<widget size="71x26" type="*widget.RichText">
-																								<text color="disabled" pos="4,4" size="0x16"></text>
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="71x22" type="*widget.entryContent">
+																							<widget size="71x22" type="*widget.RichText">
+																								<text color="disabled" pos="4,2" size="0x16"></text>
 																							</widget>
-																							<widget size="71x26" type="*widget.RichText">
-																								<text pos="4,4" size="0x16"></text>
+																							<widget size="71x22" type="*widget.RichText">
+																								<text pos="4,2" size="0x16"></text>
 																							</widget>
 																						</widget>
 																					</widget>
@@ -373,15 +372,14 @@
 																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
 																			<container size="71x26">
 																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="71x26"/>
-																					<rectangle radius="6" size="70x25"/>
-																					<widget size="71x26" type="*widget.Scroll">
-																						<widget size="71x26" type="*widget.entryContent">
-																							<widget size="71x26" type="*widget.RichText">
-																								<text color="disabled" pos="4,4" size="0x16"></text>
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="71x22" type="*widget.entryContent">
+																							<widget size="71x22" type="*widget.RichText">
+																								<text color="disabled" pos="4,2" size="0x16"></text>
 																							</widget>
-																							<widget size="71x26" type="*widget.RichText">
-																								<text pos="4,4" size="0x16"></text>
+																							<widget size="71x22" type="*widget.RichText">
+																								<text pos="4,2" size="0x16"></text>
 																							</widget>
 																						</widget>
 																					</widget>
@@ -410,17 +408,16 @@
 																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
 																			<container size="71x26">
 																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="71x26"/>
-																					<rectangle radius="6" size="70x25" strokeColor="foreground"/>
-																					<widget size="71x26" type="*widget.Scroll">
-																						<widget size="71x26" type="*widget.entryContent">
-																							<widget size="71x26" type="*widget.RichText">
-																								<text color="disabled" pos="4,4" size="0x16"></text>
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="71x22" type="*widget.entryContent">
+																							<widget size="71x22" type="*widget.RichText">
+																								<text color="disabled" pos="4,2" size="0x16"></text>
 																							</widget>
-																							<widget size="71x26" type="*widget.RichText">
-																								<text pos="4,4" size="0x16"></text>
+																							<widget size="71x22" type="*widget.RichText">
+																								<text pos="4,2" size="0x16"></text>
 																							</widget>
-																							<rectangle fillColor="foreground" pos="4,4" size="0x16"/>
+																							<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																						</widget>
 																					</widget>
 																				</widget>
@@ -446,15 +443,14 @@
 																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
 																			<container size="71x26">
 																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="71x26"/>
-																					<rectangle radius="6" size="70x25" strokeColor="disabled"/>
-																					<widget size="71x26" type="*widget.Scroll">
-																						<widget size="71x26" type="*widget.entryContent">
-																							<widget size="71x26" type="*widget.RichText">
-																								<text color="disabled" pos="4,4" size="0x16"></text>
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="71x22" type="*widget.entryContent">
+																							<widget size="71x22" type="*widget.RichText">
+																								<text color="disabled" pos="4,2" size="0x16"></text>
 																							</widget>
-																							<widget size="71x26" type="*widget.RichText">
-																								<text color="disabled" pos="4,4" size="0x16"></text>
+																							<widget size="71x22" type="*widget.RichText">
+																								<text color="disabled" pos="4,2" size="0x16"></text>
 																							</widget>
 																						</widget>
 																					</widget>
@@ -495,12 +491,11 @@
 																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
 																			<container size="71x26">
 																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="71x26"/>
-																					<rectangle radius="6" size="70x25"/>
-																					<widget size="71x26" type="*widget.Scroll">
-																						<widget size="71x26" type="*widget.entryContent">
-																							<widget size="71x26" type="*widget.RichText">
-																								<text pos="4,4" size="54x16">Generate</text>
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="71x22" type="*widget.entryContent">
+																							<widget size="71x22" type="*widget.RichText">
+																								<text pos="4,2" size="54x16">Generate</text>
 																							</widget>
 																						</widget>
 																					</widget>
@@ -529,12 +524,11 @@
 																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
 																			<container size="71x26">
 																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="71x26"/>
-																					<rectangle radius="6" size="70x25"/>
-																					<widget size="71x26" type="*widget.Scroll">
-																						<widget size="71x26" type="*widget.entryContent">
-																							<widget size="71x26" type="*widget.RichText">
-																								<text pos="4,4" size="54x16">Generate</text>
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="71x22" type="*widget.entryContent">
+																							<widget size="71x22" type="*widget.RichText">
+																								<text pos="4,2" size="54x16">Generate</text>
 																							</widget>
 																						</widget>
 																					</widget>
@@ -563,14 +557,13 @@
 																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
 																			<container size="71x26">
 																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="71x26"/>
-																					<rectangle radius="6" size="70x25" strokeColor="foreground"/>
-																					<widget size="71x26" type="*widget.Scroll">
-																						<widget size="71x26" type="*widget.entryContent">
-																							<widget size="71x26" type="*widget.RichText">
-																								<text pos="4,4" size="54x16">Generate</text>
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="71x22" type="*widget.entryContent">
+																							<widget size="71x22" type="*widget.RichText">
+																								<text pos="4,2" size="54x16">Generate</text>
 																							</widget>
-																							<rectangle fillColor="foreground" pos="4,4" size="0x16"/>
+																							<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																						</widget>
 																					</widget>
 																				</widget>
@@ -596,12 +589,11 @@
 																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
 																			<container size="71x26">
 																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="71x26"/>
-																					<rectangle radius="6" size="70x25" strokeColor="disabled"/>
-																					<widget size="71x26" type="*widget.Scroll">
-																						<widget size="71x26" type="*widget.entryContent">
-																							<widget size="71x26" type="*widget.RichText">
-																								<text color="disabled" pos="4,4" size="54x16">Generate</text>
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="71x22" type="*widget.entryContent">
+																							<widget size="71x22" type="*widget.RichText">
+																								<text color="disabled" pos="4,2" size="54x16">Generate</text>
 																							</widget>
 																						</widget>
 																					</widget>
@@ -642,20 +634,19 @@
 																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
 																			<container size="71x26">
 																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="71x26"/>
-																					<rectangle radius="6" size="70x25"/>
-																					<widget size="71x26" type="*widget.Scroll">
-																						<widget size="752x26" type="*widget.entryContent">
-																							<widget size="752x26" type="*widget.RichText">
-																								<text pos="4,4" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="752x22" type="*widget.entryContent">
+																							<widget size="752x22" type="*widget.RichText">
+																								<text pos="4,2" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
 																							</widget>
 																						</widget>
-																						<widget pos="71,0" size="0x26" type="*widget.Shadow">
-																							<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x26"/>
+																						<widget pos="71,0" size="0x22" type="*widget.Shadow">
+																							<linearGradient angle="270" pos="-8,0" size="8x22"/>
 																						</widget>
-																						<widget pos="0,20" size="71x6" type="*widget.scrollBarArea">
-																							<widget pos="0,3" size="12x3" type="*widget.scrollBar">
-																								<rectangle fillColor="scrollbar" radius="6" size="12x3"/>
+																						<widget pos="0,22" size="71x0" type="*widget.scrollBarArea">
+																							<widget size="6x0" type="*widget.scrollBar">
+																								<rectangle fillColor="scrollbar" radius="3" size="6x0"/>
 																							</widget>
 																						</widget>
 																					</widget>
@@ -684,20 +675,19 @@
 																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
 																			<container size="71x26">
 																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="71x26"/>
-																					<rectangle radius="6" size="70x25"/>
-																					<widget size="71x26" type="*widget.Scroll">
-																						<widget size="752x26" type="*widget.entryContent">
-																							<widget size="752x26" type="*widget.RichText">
-																								<text pos="4,4" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="752x22" type="*widget.entryContent">
+																							<widget size="752x22" type="*widget.RichText">
+																								<text pos="4,2" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
 																							</widget>
 																						</widget>
-																						<widget pos="71,0" size="0x26" type="*widget.Shadow">
-																							<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x26"/>
+																						<widget pos="71,0" size="0x22" type="*widget.Shadow">
+																							<linearGradient angle="270" pos="-8,0" size="8x22"/>
 																						</widget>
-																						<widget pos="0,20" size="71x6" type="*widget.scrollBarArea">
-																							<widget pos="0,3" size="12x3" type="*widget.scrollBar">
-																								<rectangle fillColor="scrollbar" radius="6" size="12x3"/>
+																						<widget pos="0,22" size="71x0" type="*widget.scrollBarArea">
+																							<widget size="6x0" type="*widget.scrollBar">
+																								<rectangle fillColor="scrollbar" radius="3" size="6x0"/>
 																							</widget>
 																						</widget>
 																					</widget>
@@ -726,21 +716,20 @@
 																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
 																			<container size="71x26">
 																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="71x26"/>
-																					<rectangle radius="6" size="70x25" strokeColor="foreground"/>
-																					<widget size="71x26" type="*widget.Scroll">
-																						<widget size="752x26" type="*widget.entryContent">
-																							<widget size="752x26" type="*widget.RichText">
-																								<text pos="4,4" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="752x22" type="*widget.entryContent">
+																							<widget size="752x22" type="*widget.RichText">
+																								<text pos="4,2" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
 																							</widget>
-																							<rectangle fillColor="foreground" pos="4,4" size="0x16"/>
+																							<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																						</widget>
-																						<widget pos="71,0" size="0x26" type="*widget.Shadow">
-																							<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x26"/>
+																						<widget pos="71,0" size="0x22" type="*widget.Shadow">
+																							<linearGradient angle="270" pos="-8,0" size="8x22"/>
 																						</widget>
-																						<widget pos="0,20" size="71x6" type="*widget.scrollBarArea">
-																							<widget pos="0,3" size="12x3" type="*widget.scrollBar">
-																								<rectangle fillColor="scrollbar" radius="6" size="12x3"/>
+																						<widget pos="0,22" size="71x0" type="*widget.scrollBarArea">
+																							<widget size="6x0" type="*widget.scrollBar">
+																								<rectangle fillColor="scrollbar" radius="3" size="6x0"/>
 																							</widget>
 																						</widget>
 																					</widget>
@@ -767,20 +756,19 @@
 																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
 																			<container size="71x26">
 																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="71x26"/>
-																					<rectangle radius="6" size="70x25" strokeColor="disabled"/>
-																					<widget size="71x26" type="*widget.Scroll">
-																						<widget size="752x26" type="*widget.entryContent">
-																							<widget size="752x26" type="*widget.RichText">
-																								<text color="disabled" pos="4,4" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="752x22" type="*widget.entryContent">
+																							<widget size="752x22" type="*widget.RichText">
+																								<text color="disabled" pos="4,2" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
 																							</widget>
 																						</widget>
-																						<widget pos="71,0" size="0x26" type="*widget.Shadow">
-																							<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x26"/>
+																						<widget pos="71,0" size="0x22" type="*widget.Shadow">
+																							<linearGradient angle="270" pos="-8,0" size="8x22"/>
 																						</widget>
-																						<widget pos="0,20" size="71x6" type="*widget.scrollBarArea">
-																							<widget pos="0,3" size="12x3" type="*widget.scrollBar">
-																								<rectangle fillColor="scrollbar" radius="6" size="12x3"/>
+																						<widget pos="0,22" size="71x0" type="*widget.scrollBarArea">
+																							<widget size="6x0" type="*widget.scrollBar">
+																								<rectangle fillColor="scrollbar" radius="3" size="6x0"/>
 																							</widget>
 																						</widget>
 																					</widget>
@@ -821,20 +809,19 @@
 																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
 																			<container size="71x26">
 																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="71x26"/>
-																					<rectangle radius="6" size="70x25"/>
-																					<widget size="71x26" type="*widget.Scroll">
-																						<widget size="519x26" type="*widget.entryContent">
-																							<widget size="519x26" type="*widget.RichText">
-																								<text pos="4,4" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="519x22" type="*widget.entryContent">
+																							<widget size="519x22" type="*widget.RichText">
+																								<text pos="4,2" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
 																							</widget>
 																						</widget>
-																						<widget pos="71,0" size="0x26" type="*widget.Shadow">
-																							<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x26"/>
+																						<widget pos="71,0" size="0x22" type="*widget.Shadow">
+																							<linearGradient angle="270" pos="-8,0" size="8x22"/>
 																						</widget>
-																						<widget pos="0,20" size="71x6" type="*widget.scrollBarArea">
-																							<widget pos="0,3" size="12x3" type="*widget.scrollBar">
-																								<rectangle fillColor="scrollbar" radius="6" size="12x3"/>
+																						<widget pos="0,22" size="71x0" type="*widget.scrollBarArea">
+																							<widget size="9x0" type="*widget.scrollBar">
+																								<rectangle fillColor="scrollbar" radius="3" size="9x0"/>
 																							</widget>
 																						</widget>
 																					</widget>
@@ -863,20 +850,19 @@
 																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
 																			<container size="71x26">
 																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="71x26"/>
-																					<rectangle radius="6" size="70x25"/>
-																					<widget size="71x26" type="*widget.Scroll">
-																						<widget size="519x26" type="*widget.entryContent">
-																							<widget size="519x26" type="*widget.RichText">
-																								<text pos="4,4" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="519x22" type="*widget.entryContent">
+																							<widget size="519x22" type="*widget.RichText">
+																								<text pos="4,2" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
 																							</widget>
 																						</widget>
-																						<widget pos="71,0" size="0x26" type="*widget.Shadow">
-																							<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x26"/>
+																						<widget pos="71,0" size="0x22" type="*widget.Shadow">
+																							<linearGradient angle="270" pos="-8,0" size="8x22"/>
 																						</widget>
-																						<widget pos="0,20" size="71x6" type="*widget.scrollBarArea">
-																							<widget pos="0,3" size="12x3" type="*widget.scrollBar">
-																								<rectangle fillColor="scrollbar" radius="6" size="12x3"/>
+																						<widget pos="0,22" size="71x0" type="*widget.scrollBarArea">
+																							<widget size="9x0" type="*widget.scrollBar">
+																								<rectangle fillColor="scrollbar" radius="3" size="9x0"/>
 																							</widget>
 																						</widget>
 																					</widget>
@@ -905,21 +891,20 @@
 																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
 																			<container size="71x26">
 																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="71x26"/>
-																					<rectangle radius="6" size="70x25" strokeColor="foreground"/>
-																					<widget size="71x26" type="*widget.Scroll">
-																						<widget size="519x26" type="*widget.entryContent">
-																							<widget size="519x26" type="*widget.RichText">
-																								<text pos="4,4" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="519x22" type="*widget.entryContent">
+																							<widget size="519x22" type="*widget.RichText">
+																								<text pos="4,2" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
 																							</widget>
-																							<rectangle fillColor="foreground" pos="4,4" size="0x16"/>
+																							<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																						</widget>
-																						<widget pos="71,0" size="0x26" type="*widget.Shadow">
-																							<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x26"/>
+																						<widget pos="71,0" size="0x22" type="*widget.Shadow">
+																							<linearGradient angle="270" pos="-8,0" size="8x22"/>
 																						</widget>
-																						<widget pos="0,20" size="71x6" type="*widget.scrollBarArea">
-																							<widget pos="0,3" size="12x3" type="*widget.scrollBar">
-																								<rectangle fillColor="scrollbar" radius="6" size="12x3"/>
+																						<widget pos="0,22" size="71x0" type="*widget.scrollBarArea">
+																							<widget size="9x0" type="*widget.scrollBar">
+																								<rectangle fillColor="scrollbar" radius="3" size="9x0"/>
 																							</widget>
 																						</widget>
 																					</widget>
@@ -946,20 +931,19 @@
 																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
 																			<container size="71x26">
 																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle radius="6" size="71x26"/>
-																					<rectangle radius="6" size="70x25" strokeColor="disabled"/>
-																					<widget size="71x26" type="*widget.Scroll">
-																						<widget size="519x26" type="*widget.entryContent">
-																							<widget size="519x26" type="*widget.RichText">
-																								<text color="disabled" pos="4,4" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="519x22" type="*widget.entryContent">
+																							<widget size="519x22" type="*widget.RichText">
+																								<text color="disabled" pos="4,2" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
 																							</widget>
 																						</widget>
-																						<widget pos="71,0" size="0x26" type="*widget.Shadow">
-																							<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x26"/>
+																						<widget pos="71,0" size="0x22" type="*widget.Shadow">
+																							<linearGradient angle="270" pos="-8,0" size="8x22"/>
 																						</widget>
-																						<widget pos="0,20" size="71x6" type="*widget.scrollBarArea">
-																							<widget pos="0,3" size="12x3" type="*widget.scrollBar">
-																								<rectangle fillColor="scrollbar" radius="6" size="12x3"/>
+																						<widget pos="0,22" size="71x0" type="*widget.scrollBarArea">
+																							<widget size="9x0" type="*widget.scrollBar">
+																								<rectangle fillColor="scrollbar" radius="3" size="9x0"/>
 																							</widget>
 																						</widget>
 																					</widget>
@@ -1046,15 +1030,14 @@
 																	<widget pos="8,8" size="71x58" type="*container.ThemeOverride">
 																		<container size="71x58">
 																			<widget size="71x58" type="*parts.Editor">
-																				<rectangle radius="6" size="71x58"/>
-																				<rectangle radius="6" size="70x58"/>
-																				<widget size="71x58" type="*widget.Scroll">
-																					<widget size="71x58" type="*widget.entryContent">
-																						<widget size="71x58" type="*widget.RichText">
-																							<text color="disabled" monospace pos="4,4" size="0x16"></text>
+																				<rectangle pos="2,2" radius="6" size="67x54"/>
+																				<widget pos="0,2" size="71x54" type="*widget.Scroll">
+																					<widget size="71x54" type="*widget.entryContent">
+																						<widget size="71x54" type="*widget.RichText">
+																							<text color="disabled" monospace pos="4,2" size="0x16"></text>
 																						</widget>
-																						<widget size="71x58" type="*widget.RichText">
-																							<text monospace pos="4,4" size="0x16"></text>
+																						<widget size="71x54" type="*widget.RichText">
+																							<text monospace pos="4,2" size="0x16"></text>
 																						</widget>
 																					</widget>
 																				</widget>
@@ -1080,15 +1063,14 @@
 																	<widget pos="8,8" size="71x58" type="*container.ThemeOverride">
 																		<container size="71x58">
 																			<widget size="71x58" type="*parts.Editor">
-																				<rectangle radius="6" size="71x58"/>
-																				<rectangle radius="6" size="70x58"/>
-																				<widget size="71x58" type="*widget.Scroll">
-																					<widget size="71x58" type="*widget.entryContent">
-																						<widget size="71x58" type="*widget.RichText">
-																							<text color="disabled" monospace pos="4,4" size="0x16"></text>
+																				<rectangle pos="2,2" radius="6" size="67x54"/>
+																				<widget pos="0,2" size="71x54" type="*widget.Scroll">
+																					<widget size="71x54" type="*widget.entryContent">
+																						<widget size="71x54" type="*widget.RichText">
+																							<text color="disabled" monospace pos="4,2" size="0x16"></text>
 																						</widget>
-																						<widget size="71x58" type="*widget.RichText">
-																							<text monospace pos="4,4" size="0x16"></text>
+																						<widget size="71x54" type="*widget.RichText">
+																							<text monospace pos="4,2" size="0x16"></text>
 																						</widget>
 																					</widget>
 																				</widget>
@@ -1114,17 +1096,16 @@
 																	<widget pos="8,8" size="71x58" type="*container.ThemeOverride">
 																		<container size="71x58">
 																			<widget size="71x58" type="*parts.Editor">
-																				<rectangle radius="6" size="71x58"/>
-																				<rectangle radius="6" size="70x58" strokeColor="foreground"/>
-																				<widget size="71x58" type="*widget.Scroll">
-																					<widget size="71x58" type="*widget.entryContent">
-																						<widget size="71x58" type="*widget.RichText">
-																							<text color="disabled" monospace pos="4,4" size="0x16"></text>
+																				<rectangle pos="2,2" radius="6" size="67x54"/>
+																				<widget pos="0,2" size="71x54" type="*widget.Scroll">
+																					<widget size="71x54" type="*widget.entryContent">
+																						<widget size="71x54" type="*widget.RichText">
+																							<text color="disabled" monospace pos="4,2" size="0x16"></text>
 																						</widget>
-																						<widget size="71x58" type="*widget.RichText">
-																							<text monospace pos="4,4" size="0x16"></text>
+																						<widget size="71x54" type="*widget.RichText">
+																							<text monospace pos="4,2" size="0x16"></text>
 																						</widget>
-																						<rectangle fillColor="foreground" pos="4,4" size="0x16"/>
+																						<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																					</widget>
 																				</widget>
 																			</widget>
@@ -1147,15 +1128,14 @@
 																	<widget pos="8,8" size="71x58" type="*container.ThemeOverride">
 																		<container size="71x58">
 																			<widget size="71x58" type="*parts.Editor">
-																				<rectangle radius="6" size="71x58"/>
-																				<rectangle radius="6" size="70x58" strokeColor="disabled"/>
-																				<widget size="71x58" type="*widget.Scroll">
-																					<widget size="71x58" type="*widget.entryContent">
-																						<widget size="71x58" type="*widget.RichText">
-																							<text color="disabled" monospace pos="4,4" size="0x16"></text>
+																				<rectangle pos="2,2" radius="6" size="67x54"/>
+																				<widget pos="0,2" size="71x54" type="*widget.Scroll">
+																					<widget size="71x54" type="*widget.entryContent">
+																						<widget size="71x54" type="*widget.RichText">
+																							<text color="disabled" monospace pos="4,2" size="0x16"></text>
 																						</widget>
-																						<widget size="71x58" type="*widget.RichText">
-																							<text color="disabled" monospace pos="4,4" size="0x16"></text>
+																						<widget size="71x54" type="*widget.RichText">
+																							<text color="disabled" monospace pos="4,2" size="0x16"></text>
 																						</widget>
 																					</widget>
 																				</widget>
@@ -1193,38 +1173,68 @@
 																	<widget pos="8,8" size="71x58" type="*container.ThemeOverride">
 																		<container size="71x58">
 																			<widget size="71x58" type="*parts.Editor">
-																				<rectangle radius="6" size="71x58"/>
-																				<rectangle radius="6" size="70x58"/>
-																				<widget size="71x58" type="*widget.Scroll">
-																					<widget size="717x193" type="*widget.entryContent">
-																						<widget size="717x193" type="*widget.RichText">
-																							<text monospace pos="4,4" size="70x16">entities:</text>
-																							<text monospace pos="4,20" size="85x16">  customer:</text>
-																							<text monospace pos="4,37" size="101x16">    count: 10</text>
-																							<text monospace pos="4,54" size="85x16">    fields:</text>
-																							<text monospace pos="4,71" size="265x16">      pesel: {generator: PL.pesel}</text>
-																							<text monospace pos="4,88" size="304x16">      last_name: {generator: last_name}</text>
-																							<text monospace pos="4,105" size="226x16">      city: {generator: city}</text>
-																							<text monospace pos="4,122" size="709x16">      note: {generator: text, length: 400, note: a line longer than any area that shows it}</text>
-																							<text monospace pos="4,139" size="85x16">corruption:</text>
-																							<text monospace pos="4,156" size="140x16">  layers: [L2, L3]</text>
-																							<text monospace pos="4,173" size="77x16">  share: 5</text>
+																				<rectangle pos="2,2" radius="6" size="67x54"/>
+																				<widget pos="0,2" size="71x54" type="*widget.Scroll">
+																					<widget size="71x849" type="*widget.entryContent">
+																						<widget size="71x849" type="*widget.RichText">
+																							<text monospace pos="4,2" size="62x16">entities</text>
+																							<text monospace pos="4,18" size="7x16">:</text>
+																							<text monospace pos="4,35" size="7x16"> </text>
+																							<text monospace pos="4,52" size="62x16">customer</text>
+																							<text monospace pos="4,69" size="7x16">:</text>
+																							<text monospace pos="4,86" size="23x16">   </text>
+																							<text monospace pos="4,103" size="46x16">count:</text>
+																							<text monospace pos="4,120" size="15x16">10</text>
+																							<text monospace pos="4,137" size="23x16">   </text>
+																							<text monospace pos="4,154" size="54x16">fields:</text>
+																							<text monospace pos="4,171" size="38x16">     </text>
+																							<text monospace pos="4,187" size="46x16">pesel:</text>
+																							<text monospace pos="4,204" size="62x16">{generat</text>
+																							<text monospace pos="4,221" size="23x16">or:</text>
+																							<text monospace pos="4,238" size="62x16">PL.pesel</text>
+																							<text monospace pos="4,255" size="7x16">}</text>
+																							<text monospace pos="4,272" size="38x16">     </text>
+																							<text monospace pos="4,289" size="62x16">last_nam</text>
+																							<text monospace pos="4,306" size="15x16">e:</text>
+																							<text monospace pos="4,323" size="62x16">{generat</text>
+																							<text monospace pos="4,340" size="23x16">or:</text>
+																							<text monospace pos="4,357" size="62x16">last_nam</text>
+																							<text monospace pos="4,373" size="15x16">e}</text>
+																							<text monospace pos="4,390" size="38x16">     </text>
+																							<text monospace pos="4,407" size="38x16">city:</text>
+																							<text monospace pos="4,424" size="62x16">{generat</text>
+																							<text monospace pos="4,441" size="23x16">or:</text>
+																							<text monospace pos="4,458" size="38x16">city}</text>
+																							<text monospace pos="4,475" size="38x16">     </text>
+																							<text monospace pos="4,492" size="38x16">note:</text>
+																							<text monospace pos="4,509" size="62x16">{generat</text>
+																							<text monospace pos="4,526" size="23x16">or:</text>
+																							<text monospace pos="4,543" size="38x16">text,</text>
+																							<text monospace pos="4,559" size="54x16">length:</text>
+																							<text monospace pos="4,576" size="31x16">400,</text>
+																							<text monospace pos="4,593" size="54x16">note: a</text>
+																							<text monospace pos="4,610" size="31x16">line</text>
+																							<text monospace pos="4,627" size="46x16">longer</text>
+																							<text monospace pos="4,644" size="62x16">than any</text>
+																							<text monospace pos="4,661" size="31x16">area</text>
+																							<text monospace pos="4,678" size="31x16">that</text>
+																							<text monospace pos="4,695" size="38x16">shows</text>
+																							<text monospace pos="4,712" size="23x16">it}</text>
+																							<text monospace pos="4,728" size="62x16">corrupti</text>
+																							<text monospace pos="4,745" size="23x16">on:</text>
+																							<text monospace pos="4,762" size="7x16"> </text>
+																							<text monospace pos="4,779" size="54x16">layers:</text>
+																							<text monospace pos="4,796" size="62x16">[L2, L3]</text>
+																							<text monospace pos="4,813" size="62x16">  share:</text>
+																							<text monospace pos="4,830" size="7x16">5</text>
 																						</widget>
 																					</widget>
-																					<widget pos="0,58" size="71x0" type="*widget.Shadow">
-																						<linearGradient endColor="shadow" pos="0,-8" size="71x8"/>
+																					<widget pos="0,54" size="71x0" type="*widget.Shadow">
+																						<linearGradient pos="0,-8" size="71x8"/>
 																					</widget>
-																					<widget pos="71,0" size="0x58" type="*widget.Shadow">
-																						<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x58"/>
-																					</widget>
-																					<widget pos="65,0" size="6x58" type="*widget.scrollBarArea">
-																						<widget pos="3,0" size="3x17" type="*widget.scrollBar">
-																							<rectangle fillColor="scrollbar" radius="6" size="3x17"/>
-																						</widget>
-																					</widget>
-																					<widget pos="0,52" size="71x6" type="*widget.scrollBarArea">
-																						<widget pos="0,3" size="12x3" type="*widget.scrollBar">
-																							<rectangle fillColor="scrollbar" radius="6" size="12x3"/>
+																					<widget pos="65,0" size="6x54" type="*widget.scrollBarArea">
+																						<widget pos="3,0" size="3x6" type="*widget.scrollBar">
+																							<rectangle fillColor="scrollbar" radius="3" size="3x6"/>
 																						</widget>
 																					</widget>
 																				</widget>
@@ -1250,38 +1260,68 @@
 																	<widget pos="8,8" size="71x58" type="*container.ThemeOverride">
 																		<container size="71x58">
 																			<widget size="71x58" type="*parts.Editor">
-																				<rectangle radius="6" size="71x58"/>
-																				<rectangle radius="6" size="70x58"/>
-																				<widget size="71x58" type="*widget.Scroll">
-																					<widget size="717x193" type="*widget.entryContent">
-																						<widget size="717x193" type="*widget.RichText">
-																							<text monospace pos="4,4" size="70x16">entities:</text>
-																							<text monospace pos="4,20" size="85x16">  customer:</text>
-																							<text monospace pos="4,37" size="101x16">    count: 10</text>
-																							<text monospace pos="4,54" size="85x16">    fields:</text>
-																							<text monospace pos="4,71" size="265x16">      pesel: {generator: PL.pesel}</text>
-																							<text monospace pos="4,88" size="304x16">      last_name: {generator: last_name}</text>
-																							<text monospace pos="4,105" size="226x16">      city: {generator: city}</text>
-																							<text monospace pos="4,122" size="709x16">      note: {generator: text, length: 400, note: a line longer than any area that shows it}</text>
-																							<text monospace pos="4,139" size="85x16">corruption:</text>
-																							<text monospace pos="4,156" size="140x16">  layers: [L2, L3]</text>
-																							<text monospace pos="4,173" size="77x16">  share: 5</text>
+																				<rectangle pos="2,2" radius="6" size="67x54"/>
+																				<widget pos="0,2" size="71x54" type="*widget.Scroll">
+																					<widget size="71x849" type="*widget.entryContent">
+																						<widget size="71x849" type="*widget.RichText">
+																							<text monospace pos="4,2" size="62x16">entities</text>
+																							<text monospace pos="4,18" size="7x16">:</text>
+																							<text monospace pos="4,35" size="7x16"> </text>
+																							<text monospace pos="4,52" size="62x16">customer</text>
+																							<text monospace pos="4,69" size="7x16">:</text>
+																							<text monospace pos="4,86" size="23x16">   </text>
+																							<text monospace pos="4,103" size="46x16">count:</text>
+																							<text monospace pos="4,120" size="15x16">10</text>
+																							<text monospace pos="4,137" size="23x16">   </text>
+																							<text monospace pos="4,154" size="54x16">fields:</text>
+																							<text monospace pos="4,171" size="38x16">     </text>
+																							<text monospace pos="4,187" size="46x16">pesel:</text>
+																							<text monospace pos="4,204" size="62x16">{generat</text>
+																							<text monospace pos="4,221" size="23x16">or:</text>
+																							<text monospace pos="4,238" size="62x16">PL.pesel</text>
+																							<text monospace pos="4,255" size="7x16">}</text>
+																							<text monospace pos="4,272" size="38x16">     </text>
+																							<text monospace pos="4,289" size="62x16">last_nam</text>
+																							<text monospace pos="4,306" size="15x16">e:</text>
+																							<text monospace pos="4,323" size="62x16">{generat</text>
+																							<text monospace pos="4,340" size="23x16">or:</text>
+																							<text monospace pos="4,357" size="62x16">last_nam</text>
+																							<text monospace pos="4,373" size="15x16">e}</text>
+																							<text monospace pos="4,390" size="38x16">     </text>
+																							<text monospace pos="4,407" size="38x16">city:</text>
+																							<text monospace pos="4,424" size="62x16">{generat</text>
+																							<text monospace pos="4,441" size="23x16">or:</text>
+																							<text monospace pos="4,458" size="38x16">city}</text>
+																							<text monospace pos="4,475" size="38x16">     </text>
+																							<text monospace pos="4,492" size="38x16">note:</text>
+																							<text monospace pos="4,509" size="62x16">{generat</text>
+																							<text monospace pos="4,526" size="23x16">or:</text>
+																							<text monospace pos="4,543" size="38x16">text,</text>
+																							<text monospace pos="4,559" size="54x16">length:</text>
+																							<text monospace pos="4,576" size="31x16">400,</text>
+																							<text monospace pos="4,593" size="54x16">note: a</text>
+																							<text monospace pos="4,610" size="31x16">line</text>
+																							<text monospace pos="4,627" size="46x16">longer</text>
+																							<text monospace pos="4,644" size="62x16">than any</text>
+																							<text monospace pos="4,661" size="31x16">area</text>
+																							<text monospace pos="4,678" size="31x16">that</text>
+																							<text monospace pos="4,695" size="38x16">shows</text>
+																							<text monospace pos="4,712" size="23x16">it}</text>
+																							<text monospace pos="4,728" size="62x16">corrupti</text>
+																							<text monospace pos="4,745" size="23x16">on:</text>
+																							<text monospace pos="4,762" size="7x16"> </text>
+																							<text monospace pos="4,779" size="54x16">layers:</text>
+																							<text monospace pos="4,796" size="62x16">[L2, L3]</text>
+																							<text monospace pos="4,813" size="62x16">  share:</text>
+																							<text monospace pos="4,830" size="7x16">5</text>
 																						</widget>
 																					</widget>
-																					<widget pos="0,58" size="71x0" type="*widget.Shadow">
-																						<linearGradient endColor="shadow" pos="0,-8" size="71x8"/>
+																					<widget pos="0,54" size="71x0" type="*widget.Shadow">
+																						<linearGradient pos="0,-8" size="71x8"/>
 																					</widget>
-																					<widget pos="71,0" size="0x58" type="*widget.Shadow">
-																						<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x58"/>
-																					</widget>
-																					<widget pos="65,0" size="6x58" type="*widget.scrollBarArea">
-																						<widget pos="3,0" size="3x17" type="*widget.scrollBar">
-																							<rectangle fillColor="scrollbar" radius="6" size="3x17"/>
-																						</widget>
-																					</widget>
-																					<widget pos="0,52" size="71x6" type="*widget.scrollBarArea">
-																						<widget pos="0,3" size="12x3" type="*widget.scrollBar">
-																							<rectangle fillColor="scrollbar" radius="6" size="12x3"/>
+																					<widget pos="65,0" size="6x54" type="*widget.scrollBarArea">
+																						<widget pos="3,0" size="3x6" type="*widget.scrollBar">
+																							<rectangle fillColor="scrollbar" radius="3" size="3x6"/>
 																						</widget>
 																					</widget>
 																				</widget>
@@ -1307,39 +1347,69 @@
 																	<widget pos="8,8" size="71x58" type="*container.ThemeOverride">
 																		<container size="71x58">
 																			<widget size="71x58" type="*parts.Editor">
-																				<rectangle radius="6" size="71x58"/>
-																				<rectangle radius="6" size="70x58" strokeColor="foreground"/>
-																				<widget size="71x58" type="*widget.Scroll">
-																					<widget size="717x193" type="*widget.entryContent">
-																						<widget size="717x193" type="*widget.RichText">
-																							<text monospace pos="4,4" size="70x16">entities:</text>
-																							<text monospace pos="4,20" size="85x16">  customer:</text>
-																							<text monospace pos="4,37" size="101x16">    count: 10</text>
-																							<text monospace pos="4,54" size="85x16">    fields:</text>
-																							<text monospace pos="4,71" size="265x16">      pesel: {generator: PL.pesel}</text>
-																							<text monospace pos="4,88" size="304x16">      last_name: {generator: last_name}</text>
-																							<text monospace pos="4,105" size="226x16">      city: {generator: city}</text>
-																							<text monospace pos="4,122" size="709x16">      note: {generator: text, length: 400, note: a line longer than any area that shows it}</text>
-																							<text monospace pos="4,139" size="85x16">corruption:</text>
-																							<text monospace pos="4,156" size="140x16">  layers: [L2, L3]</text>
-																							<text monospace pos="4,173" size="77x16">  share: 5</text>
+																				<rectangle pos="2,2" radius="6" size="67x54"/>
+																				<widget pos="0,2" size="71x54" type="*widget.Scroll">
+																					<widget size="71x849" type="*widget.entryContent">
+																						<widget size="71x849" type="*widget.RichText">
+																							<text monospace pos="4,2" size="62x16">entities</text>
+																							<text monospace pos="4,18" size="7x16">:</text>
+																							<text monospace pos="4,35" size="7x16"> </text>
+																							<text monospace pos="4,52" size="62x16">customer</text>
+																							<text monospace pos="4,69" size="7x16">:</text>
+																							<text monospace pos="4,86" size="23x16">   </text>
+																							<text monospace pos="4,103" size="46x16">count:</text>
+																							<text monospace pos="4,120" size="15x16">10</text>
+																							<text monospace pos="4,137" size="23x16">   </text>
+																							<text monospace pos="4,154" size="54x16">fields:</text>
+																							<text monospace pos="4,171" size="38x16">     </text>
+																							<text monospace pos="4,187" size="46x16">pesel:</text>
+																							<text monospace pos="4,204" size="62x16">{generat</text>
+																							<text monospace pos="4,221" size="23x16">or:</text>
+																							<text monospace pos="4,238" size="62x16">PL.pesel</text>
+																							<text monospace pos="4,255" size="7x16">}</text>
+																							<text monospace pos="4,272" size="38x16">     </text>
+																							<text monospace pos="4,289" size="62x16">last_nam</text>
+																							<text monospace pos="4,306" size="15x16">e:</text>
+																							<text monospace pos="4,323" size="62x16">{generat</text>
+																							<text monospace pos="4,340" size="23x16">or:</text>
+																							<text monospace pos="4,357" size="62x16">last_nam</text>
+																							<text monospace pos="4,373" size="15x16">e}</text>
+																							<text monospace pos="4,390" size="38x16">     </text>
+																							<text monospace pos="4,407" size="38x16">city:</text>
+																							<text monospace pos="4,424" size="62x16">{generat</text>
+																							<text monospace pos="4,441" size="23x16">or:</text>
+																							<text monospace pos="4,458" size="38x16">city}</text>
+																							<text monospace pos="4,475" size="38x16">     </text>
+																							<text monospace pos="4,492" size="38x16">note:</text>
+																							<text monospace pos="4,509" size="62x16">{generat</text>
+																							<text monospace pos="4,526" size="23x16">or:</text>
+																							<text monospace pos="4,543" size="38x16">text,</text>
+																							<text monospace pos="4,559" size="54x16">length:</text>
+																							<text monospace pos="4,576" size="31x16">400,</text>
+																							<text monospace pos="4,593" size="54x16">note: a</text>
+																							<text monospace pos="4,610" size="31x16">line</text>
+																							<text monospace pos="4,627" size="46x16">longer</text>
+																							<text monospace pos="4,644" size="62x16">than any</text>
+																							<text monospace pos="4,661" size="31x16">area</text>
+																							<text monospace pos="4,678" size="31x16">that</text>
+																							<text monospace pos="4,695" size="38x16">shows</text>
+																							<text monospace pos="4,712" size="23x16">it}</text>
+																							<text monospace pos="4,728" size="62x16">corrupti</text>
+																							<text monospace pos="4,745" size="23x16">on:</text>
+																							<text monospace pos="4,762" size="7x16"> </text>
+																							<text monospace pos="4,779" size="54x16">layers:</text>
+																							<text monospace pos="4,796" size="62x16">[L2, L3]</text>
+																							<text monospace pos="4,813" size="62x16">  share:</text>
+																							<text monospace pos="4,830" size="7x16">5</text>
 																						</widget>
-																						<rectangle fillColor="foreground" pos="4,4" size="0x16"/>
+																						<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																					</widget>
-																					<widget pos="0,58" size="71x0" type="*widget.Shadow">
-																						<linearGradient endColor="shadow" pos="0,-8" size="71x8"/>
+																					<widget pos="0,54" size="71x0" type="*widget.Shadow">
+																						<linearGradient pos="0,-8" size="71x8"/>
 																					</widget>
-																					<widget pos="71,0" size="0x58" type="*widget.Shadow">
-																						<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x58"/>
-																					</widget>
-																					<widget pos="65,0" size="6x58" type="*widget.scrollBarArea">
-																						<widget pos="3,0" size="3x17" type="*widget.scrollBar">
-																							<rectangle fillColor="scrollbar" radius="6" size="3x17"/>
-																						</widget>
-																					</widget>
-																					<widget pos="0,52" size="71x6" type="*widget.scrollBarArea">
-																						<widget pos="0,3" size="12x3" type="*widget.scrollBar">
-																							<rectangle fillColor="scrollbar" radius="6" size="12x3"/>
+																					<widget pos="65,0" size="6x54" type="*widget.scrollBarArea">
+																						<widget pos="3,0" size="3x6" type="*widget.scrollBar">
+																							<rectangle fillColor="scrollbar" radius="3" size="3x6"/>
 																						</widget>
 																					</widget>
 																				</widget>
@@ -1363,38 +1433,68 @@
 																	<widget pos="8,8" size="71x58" type="*container.ThemeOverride">
 																		<container size="71x58">
 																			<widget size="71x58" type="*parts.Editor">
-																				<rectangle radius="6" size="71x58"/>
-																				<rectangle radius="6" size="70x58" strokeColor="disabled"/>
-																				<widget size="71x58" type="*widget.Scroll">
-																					<widget size="717x193" type="*widget.entryContent">
-																						<widget size="717x193" type="*widget.RichText">
-																							<text color="disabled" monospace pos="4,4" size="70x16">entities:</text>
-																							<text color="disabled" monospace pos="4,20" size="85x16">  customer:</text>
-																							<text color="disabled" monospace pos="4,37" size="101x16">    count: 10</text>
-																							<text color="disabled" monospace pos="4,54" size="85x16">    fields:</text>
-																							<text color="disabled" monospace pos="4,71" size="265x16">      pesel: {generator: PL.pesel}</text>
-																							<text color="disabled" monospace pos="4,88" size="304x16">      last_name: {generator: last_name}</text>
-																							<text color="disabled" monospace pos="4,105" size="226x16">      city: {generator: city}</text>
-																							<text color="disabled" monospace pos="4,122" size="709x16">      note: {generator: text, length: 400, note: a line longer than any area that shows it}</text>
-																							<text color="disabled" monospace pos="4,139" size="85x16">corruption:</text>
-																							<text color="disabled" monospace pos="4,156" size="140x16">  layers: [L2, L3]</text>
-																							<text color="disabled" monospace pos="4,173" size="77x16">  share: 5</text>
+																				<rectangle pos="2,2" radius="6" size="67x54"/>
+																				<widget pos="0,2" size="71x54" type="*widget.Scroll">
+																					<widget size="71x849" type="*widget.entryContent">
+																						<widget size="71x849" type="*widget.RichText">
+																							<text color="disabled" monospace pos="4,2" size="62x16">entities</text>
+																							<text color="disabled" monospace pos="4,18" size="7x16">:</text>
+																							<text color="disabled" monospace pos="4,35" size="7x16"> </text>
+																							<text color="disabled" monospace pos="4,52" size="62x16">customer</text>
+																							<text color="disabled" monospace pos="4,69" size="7x16">:</text>
+																							<text color="disabled" monospace pos="4,86" size="23x16">   </text>
+																							<text color="disabled" monospace pos="4,103" size="46x16">count:</text>
+																							<text color="disabled" monospace pos="4,120" size="15x16">10</text>
+																							<text color="disabled" monospace pos="4,137" size="23x16">   </text>
+																							<text color="disabled" monospace pos="4,154" size="54x16">fields:</text>
+																							<text color="disabled" monospace pos="4,171" size="38x16">     </text>
+																							<text color="disabled" monospace pos="4,187" size="46x16">pesel:</text>
+																							<text color="disabled" monospace pos="4,204" size="62x16">{generat</text>
+																							<text color="disabled" monospace pos="4,221" size="23x16">or:</text>
+																							<text color="disabled" monospace pos="4,238" size="62x16">PL.pesel</text>
+																							<text color="disabled" monospace pos="4,255" size="7x16">}</text>
+																							<text color="disabled" monospace pos="4,272" size="38x16">     </text>
+																							<text color="disabled" monospace pos="4,289" size="62x16">last_nam</text>
+																							<text color="disabled" monospace pos="4,306" size="15x16">e:</text>
+																							<text color="disabled" monospace pos="4,323" size="62x16">{generat</text>
+																							<text color="disabled" monospace pos="4,340" size="23x16">or:</text>
+																							<text color="disabled" monospace pos="4,357" size="62x16">last_nam</text>
+																							<text color="disabled" monospace pos="4,373" size="15x16">e}</text>
+																							<text color="disabled" monospace pos="4,390" size="38x16">     </text>
+																							<text color="disabled" monospace pos="4,407" size="38x16">city:</text>
+																							<text color="disabled" monospace pos="4,424" size="62x16">{generat</text>
+																							<text color="disabled" monospace pos="4,441" size="23x16">or:</text>
+																							<text color="disabled" monospace pos="4,458" size="38x16">city}</text>
+																							<text color="disabled" monospace pos="4,475" size="38x16">     </text>
+																							<text color="disabled" monospace pos="4,492" size="38x16">note:</text>
+																							<text color="disabled" monospace pos="4,509" size="62x16">{generat</text>
+																							<text color="disabled" monospace pos="4,526" size="23x16">or:</text>
+																							<text color="disabled" monospace pos="4,543" size="38x16">text,</text>
+																							<text color="disabled" monospace pos="4,559" size="54x16">length:</text>
+																							<text color="disabled" monospace pos="4,576" size="31x16">400,</text>
+																							<text color="disabled" monospace pos="4,593" size="54x16">note: a</text>
+																							<text color="disabled" monospace pos="4,610" size="31x16">line</text>
+																							<text color="disabled" monospace pos="4,627" size="46x16">longer</text>
+																							<text color="disabled" monospace pos="4,644" size="62x16">than any</text>
+																							<text color="disabled" monospace pos="4,661" size="31x16">area</text>
+																							<text color="disabled" monospace pos="4,678" size="31x16">that</text>
+																							<text color="disabled" monospace pos="4,695" size="38x16">shows</text>
+																							<text color="disabled" monospace pos="4,712" size="23x16">it}</text>
+																							<text color="disabled" monospace pos="4,728" size="62x16">corrupti</text>
+																							<text color="disabled" monospace pos="4,745" size="23x16">on:</text>
+																							<text color="disabled" monospace pos="4,762" size="7x16"> </text>
+																							<text color="disabled" monospace pos="4,779" size="54x16">layers:</text>
+																							<text color="disabled" monospace pos="4,796" size="62x16">[L2, L3]</text>
+																							<text color="disabled" monospace pos="4,813" size="62x16">  share:</text>
+																							<text color="disabled" monospace pos="4,830" size="7x16">5</text>
 																						</widget>
 																					</widget>
-																					<widget pos="0,58" size="71x0" type="*widget.Shadow">
-																						<linearGradient endColor="shadow" pos="0,-8" size="71x8"/>
+																					<widget pos="0,54" size="71x0" type="*widget.Shadow">
+																						<linearGradient pos="0,-8" size="71x8"/>
 																					</widget>
-																					<widget pos="71,0" size="0x58" type="*widget.Shadow">
-																						<linearGradient angle="270" endColor="shadow" pos="-8,0" size="8x58"/>
-																					</widget>
-																					<widget pos="65,0" size="6x58" type="*widget.scrollBarArea">
-																						<widget pos="3,0" size="3x17" type="*widget.scrollBar">
-																							<rectangle fillColor="scrollbar" radius="6" size="3x17"/>
-																						</widget>
-																					</widget>
-																					<widget pos="0,52" size="71x6" type="*widget.scrollBarArea">
-																						<widget pos="0,3" size="12x3" type="*widget.scrollBar">
-																							<rectangle fillColor="scrollbar" radius="6" size="12x3"/>
+																					<widget pos="65,0" size="6x54" type="*widget.scrollBarArea">
+																						<widget pos="3,0" size="3x6" type="*widget.scrollBar">
+																							<rectangle fillColor="scrollbar" radius="3" size="3x6"/>
 																						</widget>
 																					</widget>
 																				</widget>

@@ -72,7 +72,22 @@ const (
 // only place it is written down. The guard beside this file holds the other
 // half - that asking Check for this many values is not a refusal.
 //
-// # Why twenty thousand
+// # 🔴 Why a thousand, lowered from twenty thousand on 2026-10-21 (DEC-262)
+//
+// The owner typed a million into the real window. The field took its first five
+// digits, so ten thousand values were drawn without a word about the rest, and
+// the whole window lagged under the pointer from then on. The measurement below
+// says why the number had been twenty thousand, and its own last paragraph says
+// what it left out, which is exactly what the owner ran into: a window that has
+// built the card still repaints and walks it on every move of the pointer.
+//
+// A thousand is the owner's choice, made on what this screen is for: values to
+// paste into a form or a test. A set larger than that is a file, and the line at
+// the foot of the screen carries no limit at all. Not measured against painting
+// either, and the margin is now a factor of twenty under the size that lagged.
+//
+// What follows is the measurement that set the number until then, kept because
+// the building half of it is still true.
 //
 // Measured on the card that draws them, three runs of ten at each size, median:
 //
@@ -93,7 +108,9 @@ const (
 // toolkit then spends painting half a million objects a frame is not measured,
 // so this number carries the margin of that ignorance. Verified by hand at the
 // size the window is kept: twenty thousand values are on screen and it answers.
-const MostShownAtOnce = 20000
+// (That sentence was about the window answering ONCE, and it did not survive
+// the owner using it, see the top of this comment.)
+const MostShownAtOnce = 1000
 
 // CountFrom reads how many values were asked for out of the text somebody
 // typed or passed on a flag.

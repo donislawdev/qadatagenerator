@@ -324,6 +324,7 @@ func (v *View) Recheck(recipe string) {
 	// run are still on the disk, and the manifest browser is where their
 	// detail lives. A run going on is not let go of, because it is the newer
 	// thing for as long as it goes on.
+	ranBefore := v.stage != stageReady
 	if !v.busy() {
 		v.forgetLastRun()
 	}
@@ -341,9 +342,26 @@ func (v *View) Recheck(recipe string) {
 	}
 
 	v.checking = true
-	v.draw()
+	// 🔴 An answer already on the screen STAYS there until the next one
+	// arrives, changed on 2026-10-21. Until then every keystroke put the
+	// sentence saying a check is going on in place of the answer, and the
+	// answer came back a moment later, so the whole card blinked once a
+	// letter while somebody typed. The owner called it the most distracting
+	// thing on the screen. The sentence is for the first check, when there is
+	// nothing yet to keep. The button is left as it stands as well, for the
+	// same blink: Start refuses while a check is going on, so a press in
+	// those milliseconds does nothing rather than run what nobody has seen
+	// judged. A last run let go of above is the one thing redrawn at once,
+	// because what it said is no longer true.
+	if !v.judgedBefore() || ranBefore {
+		v.draw()
+	}
 	v.judge(recipe, wanted)
 }
+
+// judgedBefore reports whether the card holds an answer about some recipe,
+// which is what a check going on may leave standing.
+func (v *View) judgedBefore() bool { return v.checked || v.crashed != nil }
 
 // judge starts the check of one recipe on a place of work and puts its answer
 // on the screen, unless a later keystroke has asked the question again.
@@ -440,7 +458,7 @@ func (v *View) drawCard() {
 func (v *View) answerContent() []fyne.CanvasObject {
 	var blocks []fyne.CanvasObject
 	switch {
-	case v.checking:
+	case v.checking && !v.judgedBefore():
 		blocks = append(blocks, v.paragraph(v.text.T(i18n.RecipeChecking)))
 	case v.crashed != nil:
 		blocks = append(blocks, v.crash()...)

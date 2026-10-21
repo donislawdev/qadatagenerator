@@ -36,12 +36,13 @@ import (
 //
 // Every other control in this window is reachable by keyboard and this one is
 // not. The reason is the ceiling of the screen it lives on: quick draws up to
-// MostShownAtOnce values, which is twenty thousand, and a focusable row would
-// put twenty thousand stops in the Tab order. A person tabbing out of the seed
-// field would be pressing Tab for the rest of the afternoon, which is worse for
-// a keyboard than having no stop at all.
+// MostShownAtOnce values, which was twenty thousand when this was written and
+// is a thousand since 2026-10-21, and a focusable row would put that many stops
+// in the Tab order. A person tabbing out of the seed field would be pressing Tab
+// for the rest of the afternoon, which is worse for a keyboard than having no
+// stop at all.
 //
-// What the keyboard still has: the Copy button in the heading, which takes the
+// What the keyboard still has: the Copy all button in the heading, which takes the
 // whole set. What it does not have is one value out of many, and that is
 // written down in B-268 with the shape of the answer - a list widget of the
 // toolkit, which holds ONE stop and moves a highlight inside itself with the
@@ -55,6 +56,9 @@ type TapRow struct {
 	OnTapped func()
 
 	pointerIsHere bool
+	// confirm is whether the row says, for a while, that a click did what it
+	// says (see confirmation). Draw reads it through Confirmed.
+	confirm confirmation
 }
 
 // The interfaces the driver asks about by type, asserted here so that dropping
@@ -98,6 +102,17 @@ func (r *TapRow) MouseOut() {
 // Hovered says whether the pointer is on this row, for a test that would
 // otherwise have to read pixels.
 func (r *TapRow) Hovered() bool { return r.pointerIsHere }
+
+// Confirm redraws the row as having done what a click on it does, for
+// two palette.ConfirmationLeg, the way Button.Confirm does.
+func (r *TapRow) Confirm() { r.confirm.start(r.Refresh) }
+
+// Settle takes that back at once.
+func (r *TapRow) Settle() { r.confirm.end(r.Refresh) }
+
+// Confirmed says whether the row is saying that now, which is what its picture
+// reads.
+func (r *TapRow) Confirmed() bool { return r.confirm.on }
 
 // CreateRenderer draws the row.
 func (r *TapRow) CreateRenderer() fyne.WidgetRenderer {

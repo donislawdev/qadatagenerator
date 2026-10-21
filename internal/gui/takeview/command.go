@@ -43,7 +43,7 @@ func (v *View) buildCommand() {
 	v.command.Truncation = fyne.TextTruncateEllipsis
 	v.copyCommand = parts.NewButton(v.text.T(i18n.CommandCopy), v.putCommandInClipboard)
 	v.copyCommand.ShowIcon(paint.IconCopy)
-	v.commandCopied = paint.Text("", palette.TypeLabel, palette.TextSecondary)
+	v.copyCommand.Confirmed = v.text.T(i18n.CommandCopied)
 }
 
 // commandBand is the band at the foot of the screen holding the line and the
@@ -54,8 +54,7 @@ func (v *View) commandBand() fyne.CanvasObject {
 	return paint.Band(paint.BandAbove, palette.NameStepRelated, palette.NameStepMajor,
 		container.NewBorder(nil, nil,
 			paint.Middle(paint.Mono(commandPrompt, palette.TypeBody, palette.TextAccent)),
-			paint.Row(palette.NameStepTight,
-				paint.Middle(v.commandCopied), paint.Middle(v.copyCommand.OnScreen())),
+			paint.Middle(v.copyCommand.OnScreen()),
 			paint.Middle(v.command)))
 }
 
@@ -121,6 +120,5 @@ func (v *View) putCommandInClipboard() {
 		return
 	}
 	v.clipboard.SetContent(v.command.Text)
-	v.commandCopied.Text = v.text.T(i18n.CommandCopied)
-	v.commandCopied.Refresh()
+	v.copyCommand.Confirm()
 }

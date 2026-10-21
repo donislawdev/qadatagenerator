@@ -94,12 +94,15 @@ var (
 func NewEditor(changed func(string)) *Editor {
 	editor := &Editor{}
 	editor.MultiLine = true
-	// The same wrapping the toolkit's own multi line constructor uses. A recipe
-	// is written in lines that mean something, so a long one is clipped and
-	// scrolled to rather than folded. Clipping also keeps the field from asking
-	// for the width of its longest line, which is how one control has already
-	// pushed four settings off this window.
-	editor.Wrapping = fyne.TextWrap(fyne.TextTruncateClip)
+	// 🔴 Folded at a word, changed on 2026-10-21. Until then a long line was
+	// clipped and scrolled to sideways, the toolkit's own default, on the
+	// argument that a recipe is written in lines that mean something. The owner
+	// typed into it and found a line running off the field under a shadow, with
+	// nothing to say where it went: a line nobody can see the end of is worse
+	// than one folded under itself. Folding also keeps what clipping was chosen
+	// for, a field that does not ask for the width of its longest line, since a
+	// folding entry scrolls only up and down, widget/entry.go:1940.
+	editor.Wrapping = fyne.TextWrapWord
 	// Monospace, because what goes in here is indented text and indentation is
 	// what says which key belongs to which. In a proportional font two lines
 	// indented by the same number of spaces do not line up, so the one thing a
@@ -123,9 +126,8 @@ func (e *Editor) AcceptsTab() bool { return false }
 // the reason the single line field is: the grounds hold the focus, and dressing
 // it twice would hand the keyboard to a ground nobody mounted (B-279).
 //
-// The words are placed by this padding rather than by the toolkit: the bare
-// theme sets the input border to nought, which moves the text to the top left,
-// so a step of the scale on every side puts it back where a field's text sits.
+// The words are placed by this padding rather than by the toolkit: a step of
+// the scale on every side, which is where a field's text sits.
 func (e *Editor) Framed() fyne.CanvasObject {
 	if e.dressed != nil {
 		return e.dressed
@@ -137,6 +139,12 @@ func (e *Editor) Framed() fyne.CanvasObject {
 	inside := container.New(layout.NewCustomPaddedLayout(step, step, step, step), typed)
 	e.dressed = container.NewStack(append(grounds, inside)...)
 	return e.dressed
+}
+
+// CreateRenderer is the toolkit's drawing of the editor without its edge, the
+// same as the field of one line. See withoutEdge.
+func (e *Editor) CreateRenderer() fyne.WidgetRenderer {
+	return withoutEdge(e.Entry.CreateRenderer())
 }
 
 // FocusGained tells the grounds the keyboard is here, then lets the toolkit

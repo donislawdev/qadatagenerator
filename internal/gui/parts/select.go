@@ -335,6 +335,13 @@ func (s *Select) fit() {
 	at := fyne.CurrentApp().Driver().AbsolutePositionForObject(s)
 	wanted := fyne.NewSize(s.panel.Width(s.Size().Width), s.panel.ContentHeight())
 	position, size := place(canvas.Size(), at, s.Size(), wanted, s.panel.MinSize().Height)
+	if fitted := s.panel.Fitted(size.Height); fitted < size.Height {
+		// A panel opened above the chooser keeps its foot against it.
+		if position.Y < at.Y {
+			position.Y += size.Height - fitted
+		}
+		size.Height = fitted
+	}
 	s.panel.Resize(size)
 	s.panel.Move(position)
 }

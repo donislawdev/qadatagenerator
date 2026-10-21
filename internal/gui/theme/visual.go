@@ -1,6 +1,9 @@
 package theme
 
-import "image/color"
+import (
+	"image/color"
+	"time"
+)
 
 // The visual system the window is drawn with: two ladders of twelve shades, a
 // ladder of type sizes, and a register of tokens naming what each shade is for.
@@ -853,10 +856,20 @@ const ControlHeight float32 = 34
 // beside it. What would change them: a second column wider than a mask, or a
 // window opened smaller than StartHeight, where the panel takes the room it
 // has rather than this.
+//
+// 🔴 That happened on 2026-10-21 and the width went from 430 to 480: a row of
+// the kinds now carries a name a person says beside the code, and the length on
+// the right, at the owner's word. The longest row, iban with its name and
+// "28 letters or digits", needs about 440.
 const (
-	PanelWidth  float32 = 430
+	PanelWidth  float32 = 480
 	PanelHeight float32 = 470
 )
+
+// OptionHeight is how tall a row of a panel is, which is a little more than a
+// control: a row is read in a column of its like rather than beside other
+// controls, and the owner found the column of kinds cramped on 2026-10-21.
+const OptionHeight float32 = 40
 
 // BadgeWashAlpha is how faintly a verdict colour is drawn under text of that
 // same colour.
@@ -924,6 +937,50 @@ const (
 // What would change it: a display scale where a rectangle of one stops landing
 // on whole pixels, which is the same thing that would change the other value.
 const HairlineThickness float32 = 1
+
+// CaretThickness is how wide the caret of a text field is drawn.
+//
+// # Why it is a token of its own, read in the toolkit source
+//
+// widget.Entry of v2.8.2 draws its caret as wide as SizeNameInputBorder,
+// widget/entry.go:1918, the same number it strokes its own edge with. Every
+// field of this window set that number to nought so that the toolkit's edge
+// would disappear, and the caret disappeared with it: the stored tree of a
+// field with the keyboard in it held a rectangle 0 wide. The owner reported it
+// on 2026-10-21 as not seeing where they were typing in the recipe.
+//
+// Two, the width of every stroke in this window, which is three pixels at the
+// owner's scale of 1.5. What would change it: a caret that has to be found on a
+// ground lighter than the one fields stand on today.
+const CaretThickness float32 = 2
+
+// The width of a scroll bar while the pointer is on it or drags it, and while
+// a list is only being scrolled.
+//
+// # Why thinner than the toolkit's
+//
+// The toolkit widens its bar to twelve under the pointer, and the owner said on
+// 2026-10-21 that the bar looked thick while they scrolled. Six still gives the
+// pointer a target the width of the bar at rest twice over, which is how wide
+// the toolkit makes the area that answers it. The bar at rest stays at the
+// toolkit's three, named here so that both numbers are read in one place.
+//
+// ScrollBarRadius is half the wider of the two, so the bar is a pill at either
+// width rather than a rectangle with its corners clipped.
+const (
+	ScrollBarThickness float32 = 6
+	ScrollBarResting   float32 = 3
+	ScrollBarRadius    float32 = 3
+)
+
+// ConfirmationLeg is half of how long a control says it did something a person
+// cannot see, such as filling the clipboard, before it says its own word again.
+// The count runs forth and back, one leg each way (the why is beside
+// parts.confirmation), so the word stands for one and a half seconds: long
+// enough to be read after the eye has come back from the pointer and short
+// enough to be gone before the next thing is done. It is a judgement rather
+// than a measurement.
+const ConfirmationLeg = 750 * time.Millisecond
 
 // IconGrid and IconStrokeInFile are facts about the icon set rather than
 // decisions of ours.

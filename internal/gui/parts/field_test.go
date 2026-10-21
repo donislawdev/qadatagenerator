@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/test"
 	toolkit "fyne.io/fyne/v2/theme"
 
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
@@ -186,6 +187,89 @@ func TestATextControlOutOfReachLooksLikeAChooserOutOfReach(t *testing.T) {
 					each.name, resting, back)
 			}
 		})
+	}
+}
+
+// 🔴 A text control with the keyboard in it shows where the next letter goes,
+// and draws no edge of the toolkit's own in any state.
+//
+// The owner could not see where they were typing on 2026-10-21: the caret of
+// widget.Entry is as wide as the edge it strokes round itself, and every field
+// here gave that edge no width. The edge is now put away instead, so the same
+// walk asks both halves: the caret has width, and nothing the toolkit strokes
+// is shown with the keyboard in the field or with the field out of reach.
+func TestATextControlShowsItsCaretAndNoEdgeOfTheToolkit(t *testing.T) {
+	for _, each := range textControls() {
+		t.Run(each.name, func(t *testing.T) {
+			control, dress := each.build()
+			window := test.NewWindow(dress())
+			t.Cleanup(window.Close)
+			window.Canvas().Focus(control)
+			drawn := control.(fyne.Widget)
+
+			if got := widestCaretIn(drawn); got < palette.CaretThickness {
+				t.Errorf("%s with the keyboard in it draws its caret %v wide, want %v",
+					each.name, got, palette.CaretThickness)
+			}
+			if edges := toolkitEdgesIn(drawn); edges != 0 {
+				t.Errorf("%s with the keyboard in it shows %d edges of the toolkit's own "+
+					"inside the window's ring", each.name, edges)
+			}
+			control.Disable()
+			if edges := toolkitEdgesIn(drawn); edges != 0 {
+				t.Errorf("%s out of reach shows %d edges of the toolkit's own", each.name, edges)
+			}
+		})
+	}
+}
+
+// widestCaretIn is the widest visible bar, taller than it is wide and filled
+// with something, inside a control's own drawing. That is what a caret is: the
+// ground the toolkit lays under the words is there too, in any shape a small
+// window gives it, but transparent, since the window draws its own.
+func widestCaretIn(control fyne.CanvasObject) float32 {
+	widest := float32(0)
+	walkDrawing(control, func(shape *canvas.Rectangle) {
+		size := shape.Size()
+		if shape.FillColor == nil || shape.StrokeWidth > 0 || size.Height <= size.Width {
+			return
+		}
+		if _, _, _, alpha := shape.FillColor.RGBA(); alpha > 0 && size.Width > widest {
+			widest = size.Width
+		}
+	})
+	return widest
+}
+
+// toolkitEdgesIn counts the visible shapes with a stroke inside a control's own
+// drawing, which is where the toolkit keeps its edge and the window keeps none.
+func toolkitEdgesIn(control fyne.CanvasObject) int {
+	found := 0
+	walkDrawing(control, func(shape *canvas.Rectangle) {
+		if shape.StrokeWidth > 0 {
+			found++
+		}
+	})
+	return found
+}
+
+// walkDrawing visits every visible rectangle a control draws, through the
+// renderers of the widgets inside it.
+func walkDrawing(object fyne.CanvasObject, visit func(*canvas.Rectangle)) {
+	if object == nil || !object.Visible() {
+		return
+	}
+	switch shape := object.(type) {
+	case *canvas.Rectangle:
+		visit(shape)
+	case *fyne.Container:
+		for _, child := range shape.Objects {
+			walkDrawing(child, visit)
+		}
+	case fyne.Widget:
+		for _, child := range test.WidgetRenderer(shape).Objects() {
+			walkDrawing(child, visit)
+		}
 	}
 }
 

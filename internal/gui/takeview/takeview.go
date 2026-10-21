@@ -40,7 +40,6 @@ import (
 	"path/filepath"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
@@ -79,14 +78,13 @@ type View struct {
 	// clipboard is where the line that would do this in a terminal goes, or
 	// nothing when this screen is being rendered rather than shown.
 	clipboard Clipboard
-	// command is that line, the button beside it copies it, and the mark
-	// beside the button says that it did.
-	command       *widget.Label
-	copyCommand   *parts.Button
-	commandCopied *canvas.Text
-	terminal      fyne.CanvasObject
-	opened        *take.Opened
-	path          string
+	// command is that line, and the button beside it copies it and says, for a
+	// moment, that it did.
+	command     *widget.Label
+	copyCommand *parts.Button
+	terminal    fyne.CanvasObject
+	opened      *take.Opened
+	path        string
 
 	// reading is the file being read right now, and nothing while none is.
 	//

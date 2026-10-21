@@ -86,6 +86,16 @@ type Button struct {
 	// sets it, and a screen has exactly one.
 	Filled bool
 
+	// Confirmed is what the button says for a while after Confirm, with a tick
+	// in place of its icon: the word for something done that a person cannot
+	// see, such as a clipboard filled. Empty for a button whose effect shows on
+	// the screen. The button is as wide as the longer of its two words, so
+	// nothing beside it moves when it changes.
+	Confirmed string
+
+	// confirm is whether Confirmed is what it says now, and the count back.
+	confirm confirmation
+
 	// keyboardIsHere is kept here rather than read from the canvas, because the
 	// canvas is wrong about it at exactly the moment it changes: a control
 	// redraws from inside FocusLost, before the focus manager has moved its own
@@ -182,6 +192,21 @@ func (b *Button) ShowIcon(name string) {
 }
 
 // Tapped presses the button, unless it cannot be pressed.
+// Confirm makes the button say Confirmed, with a tick, for
+// two palette.ConfirmationLeg, and then its own word again. See confirmation.
+func (b *Button) Confirm() {
+	if b.Confirmed != "" {
+		b.confirm.start(b.Refresh)
+	}
+}
+
+// Settle makes the button say its own word again at once.
+func (b *Button) Settle() { b.confirm.end(b.Refresh) }
+
+// Confirming reports whether the button says Confirmed now, for a test that
+// asks the button rather than its picture.
+func (b *Button) Confirming() bool { return b.confirm.on }
+
 func (b *Button) Tapped(*fyne.PointEvent) {
 	if b.Disabled() || b.OnTapped == nil {
 		return
@@ -325,7 +350,7 @@ func (r *buttonRenderer) Layout(size fyne.Size) {
 func (r *buttonRenderer) MinSize() fyne.Size { return r.holder.MinSize() }
 
 func (r *buttonRenderer) Refresh() {
-	face := paint.ButtonFace(paint.ButtonLook{
+	look := paint.ButtonLook{
 		Label:    r.button.Text,
 		Icon:     r.button.Icon,
 		Leading:  r.button.Leading,
@@ -336,7 +361,18 @@ func (r *buttonRenderer) Refresh() {
 		Disabled: r.button.Disabled(),
 		Hovered:  r.button.pointerIsHere,
 		Pressed:  r.button.pointerIsDown,
-	})
+	}
+	if r.button.Confirmed != "" {
+		// As wide as the wider of the two words, measured on the face that
+		// draws each, so the row beside it stays where it is when it changes.
+		said := look
+		said.Label, said.Icon = r.button.Confirmed, paint.IconCheck
+		look.Width = max(paint.ButtonFace(look).MinSize().Width, paint.ButtonFace(said).MinSize().Width)
+		if r.button.confirm.on {
+			look.Label, look.Icon = said.Label, said.Icon
+		}
+	}
+	face := paint.ButtonFace(look)
 	if r.holder == nil {
 		r.holder = container.NewStack(face)
 		return

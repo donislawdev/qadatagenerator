@@ -167,7 +167,11 @@ func valueRow(banded bool) builder {
 			value = samples.Values[0]
 		}
 		made := parts.NewTapRow(func(hovered bool) fyne.CanvasObject {
-			return quickview.RowFace(1, 1, value, banded, hovered, text.T(i18n.QuickCopy))
+			hint := ""
+			if hovered {
+				hint = text.T(i18n.QuickCopy)
+			}
+			return quickview.RowFace(1, 1, value, banded, hovered, hint)
 		}, nil)
 		return made, made
 	}

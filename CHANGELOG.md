@@ -12,6 +12,30 @@ repository once they are released.
 
 ### Changed
 
+- **A Copy button says Copied on itself for a moment.** Copy all, Copy command
+  and a clicked row of values show Copied with a tick for one and a half
+  seconds and then their own word again. The sentence that used to stand
+  beside the button and stay until the next copy is gone. Only the control
+  that copied last says it, so the window never claims the clipboard holds two
+  things.
+- **The button over the quick values is Copy all, with the copy icon.** A
+  click on one row copies that one value, so the button says it takes them
+  all.
+- **Quick value shows at most 1000 values, and says so when asked for more.**
+  The field takes one digit more than that, so a larger number is refused in
+  words that point to the command line below, which takes any number. Until
+  now the field silently kept the first five digits, so typing a million drew
+  ten thousand values and the window lagged.
+- **The list of kinds names each kind and says how long its values are.** A
+  row reads pesel, National ID number, 11 digits instead of pesel beside a row
+  of zeros. Typing in the search field also finds a kind by its name, such as
+  bank. The list ends on a whole row with no shadow over the last one, and the
+  rows and group headings have more room.
+- **The recipe editor wraps long lines** instead of running them off the right
+  edge under a shadow.
+- **Scroll bars are thinner.** Six units wide under the pointer instead of
+  twelve.
+
 - **Damage a file and Recipe read as numbered steps, with the button at the
   end.** Damage a file is now 1 your file, 2 what to damage, 3 where the
   damaged copy goes, and its button stands under the last step instead of in
@@ -192,6 +216,16 @@ repository once they are released.
   their full licence texts to a file you can keep.
 
 ### Fixed
+
+- **Every text field shows where you are typing again.** The text cursor was
+  drawn zero units wide in every field of the window, the recipe editor
+  included, so it could not be seen.
+- **The recipe card no longer blinks while you type.** Every keystroke used to
+  replace the answer with Checking this recipe and bring it back a moment
+  later. The last answer now stays until the next one arrives.
+- **A field with a long value no longer shows a scroll bar inside itself.**
+  The seed field showed a bar over half its height under the pointer. A field
+  of one line follows its cursor and draws no bar and no shadow.
 
 - **`qadg generate` no longer cuts a log line short when a flag sets
   something the recipe leaves out.** With `--out`, `--seed` or `--format` on

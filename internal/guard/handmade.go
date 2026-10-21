@@ -69,6 +69,26 @@ type Handmade struct {
 // reach the drawing, and controls that draw themselves, which costs these
 // entries - and chose the second knowing the price.
 var HandmadeAllowed = map[string]Handmade{
+	// The two text controls answer CreateRenderer with the toolkit's OWN
+	// renderer, one rectangle of it hidden. Nothing is drawn again, but the
+	// method is what this guard reads, and rightly: it is the seam through which
+	// a control is taken over.
+	"FieldEntry": {
+		Instead: "widget.Entry drawn as it is, with SizeNameInputBorder set to nought by a theme " +
+			"handed to the field alone, which is how its edge was put away until 2026-10-21",
+		Why: "the toolkit draws its caret as wide as that same number, widget/entry.go:1918 of v2.8.2, " +
+			"so the edge went and the caret with it - the owner could not see where they typed. With " +
+			"the width given back, the edge returns in the colour of the caret under the keyboard and in " +
+			"the grey of disabled words out of reach, and neither colour can be taken away alone. A clip " +
+			"cutting the edge off was tried the same day and the software painter of the toolkit moves a " +
+			"clipped rounded rectangle INTO the clip, so every render lied. Hiding the one stroked " +
+			"rectangle among the renderer's objects is the smallest change that keeps both",
+	},
+	"Editor": {
+		Instead: "widget.Entry drawn as it is, the same as FieldEntry",
+		Why: "the same caret and the same edge, in the recipe editor, which the owner was typing into " +
+			"when they reported it. One helper, parts.withoutEdge, does it for both",
+	},
 	"TapRow": {
 		Instead: "widget.List, which holds a highlight, moves it with the arrow keys and only builds " +
 			"the rows that are visible",
@@ -220,10 +240,16 @@ var HandmadeAllowed = map[string]Handmade{
 // The ceiling did not have to move to admit them, which is the only reason it
 // did not: two layouts the toolkit lacks are not a control drawn over again.
 //
+// 🔴 Raised from 13 to 15 on 2026-10-21 for FieldEntry and Editor, and the
+// raise is not a control drawn over again: both hand back the toolkit's own
+// renderer with its edge hidden, so that the caret has a width (the entries say
+// why). It is still two entries, so it is still stated rather than folded in.
+//
 // What lowers it again: a control going back to the library, which will happen
-// if the toolkit ever lets a caller supply the content of a button. Nothing
+// if the toolkit ever lets a caller supply the content of a button, or draws
+// its caret at a width of its own rather than the width of its edge. Nothing
 // else does.
-const HandmadeCeiling = 13
+const HandmadeCeiling = 15
 
 // Handmades reports every layout and widget written inside the window, and
 // every register entry naming one that is no longer there.

@@ -297,12 +297,11 @@
 																	<widget pos="8,8" size="47x26" type="*container.ThemeOverride">
 																		<container size="47x26">
 																			<widget size="47x26" type="*parts.FieldEntry">
-																				<rectangle radius="6" size="47x26"/>
-																				<rectangle radius="6" size="46x25"/>
-																				<widget size="47x26" type="*widget.Scroll">
-																					<widget size="47x26" type="*widget.entryContent">
-																						<widget size="47x26" type="*widget.RichText">
-																							<text pos="4,4" size="15x16">10</text>
+																				<rectangle pos="2,2" radius="6" size="43x22"/>
+																				<widget pos="0,2" size="47x22" type="*widget.Scroll">
+																					<widget size="47x22" type="*widget.entryContent">
+																						<widget size="47x22" type="*widget.RichText">
+																							<text pos="4,2" size="15x16">10</text>
 																						</widget>
 																					</widget>
 																				</widget>
@@ -359,12 +358,11 @@
 																	<widget pos="8,8" size="118x26" type="*container.ThemeOverride">
 																		<container size="118x26">
 																			<widget size="118x26" type="*parts.FieldEntry">
-																				<rectangle radius="6" size="118x26"/>
-																				<rectangle radius="6" size="117x25"/>
-																				<widget size="118x26" type="*widget.Scroll">
-																					<widget size="118x26" type="*widget.entryContent">
-																						<widget size="118x26" type="*widget.RichText">
-																							<text pos="4,4" size="86x16">for-the-picture</text>
+																				<rectangle pos="2,2" radius="6" size="114x22"/>
+																				<widget pos="0,2" size="118x22" type="*widget.Scroll">
+																					<widget size="118x22" type="*widget.entryContent">
+																						<widget size="118x22" type="*widget.RichText">
+																							<text pos="4,2" size="86x16">for-the-picture</text>
 																						</widget>
 																					</widget>
 																				</widget>
@@ -419,33 +417,33 @@
 										<container size="700x82">
 											<container pos="4,4" size="692x66">
 												<container size="692x34">
-													<spacer pos="62,0" size="464x34"/>
+													<spacer pos="62,0" size="432x34"/>
 													<container size="62x34">
 														<spacer size="62x7"/>
 														<text bold pos="0,7" size="62x18" textSize="14">10 values</text>
 														<spacer pos="0,26" size="62x7"/>
 													</container>
-													<container pos="526,0" size="165x34">
-														<container size="0x34">
-															<spacer size="0x9"/>
-															<text color="disabled" pos="0,9" size="0x14" textSize="11"></text>
-															<spacer pos="0,24" size="0x9"/>
-														</container>
-														<widget pos="8,0" size="61x34" type="*parts.Button">
-															<container size="61x34">
-																<container size="61x34">
-																	<rectangle size="61x34"/>
-																	<container size="61x34">
-																		<container size="61x34">
-																			<rectangle fillColor="separator" pos="1,1" radius="6" size="59x32" strokeColor="disabled" strokeWidth="2"/>
+													<container pos="494,0" size="197x34">
+														<widget size="101x34" type="*parts.Button">
+															<container size="101x34">
+																<container size="101x34">
+																	<rectangle size="101x34"/>
+																	<container size="101x34">
+																		<container size="101x34">
+																			<rectangle fillColor="separator" pos="1,1" radius="6" size="99x32" strokeColor="disabled" strokeWidth="2"/>
 																		</container>
-																		<container size="61x34">
-																			<container pos="16,4" size="29x26">
-																				<container pos="0,4" size="29x16">
-																					<container size="29x16">
-																						<spacer size="29x0"/>
-																						<text size="29x16">Copy</text>
-																						<spacer pos="0,16" size="29x0"/>
+																		<container size="101x34">
+																			<container pos="16,4" size="69x26">
+																				<container pos="0,4" size="69x16">
+																					<container size="15x16">
+																						<spacer size="15x0"/>
+																						<image fillMode="contain" rsc="copy-72abff-15.svg" size="15x15"/>
+																						<spacer pos="0,15" size="15x0"/>
+																					</container>
+																					<container pos="23,0" size="46x16">
+																						<spacer size="46x0"/>
+																						<text size="46x16">Copy all</text>
+																						<spacer pos="0,16" size="46x0"/>
 																					</container>
 																				</container>
 																			</container>
@@ -454,7 +452,7 @@
 																</container>
 															</container>
 														</widget>
-														<widget pos="77,0" size="87x34" type="*parts.Button">
+														<widget pos="109,0" size="87x34" type="*parts.Button">
 															<container size="87x34">
 																<container size="87x34">
 																	<rectangle size="87x34"/>
@@ -828,58 +826,51 @@
 							<rectangle fillColor="menuBackground" size="1122x58"/>
 							<container size="1122x58">
 								<container pos="32,12" size="1058x34">
-									<container pos="7,0" size="896x34">
-										<spacer size="896x4"/>
-										<widget pos="0,4" size="896x24" type="*widget.Label">
-											<widget size="896x24" type="*widget.RichText">
+									<container pos="7,0" size="904x34">
+										<spacer size="904x4"/>
+										<widget pos="0,4" size="904x24" type="*widget.Label">
+											<widget size="904x24" type="*widget.RichText">
 												<text monospace pos="4,4" size="491x16">qadg quick --count 10 --locale en-US --seed for-the-picture ssn</text>
 											</widget>
 										</widget>
-										<spacer pos="0,29" size="896x4"/>
+										<spacer pos="0,29" size="904x4"/>
 									</container>
 									<container size="7x34">
 										<spacer size="7x8"/>
 										<text color="focus" monospace pos="0,8" size="7x16">$</text>
 										<spacer pos="0,25" size="7x8"/>
 									</container>
-									<container pos="904,0" size="153x34">
-										<container size="0x34">
-											<spacer size="0x9"/>
-											<text color="disabled" pos="0,9" size="0x14" textSize="11"></text>
-											<spacer pos="0,24" size="0x9"/>
-										</container>
-										<container pos="8,0" size="145x34">
-											<spacer size="145x0"/>
-											<widget size="145x34" type="*parts.Button">
+									<container pos="912,0" size="145x34">
+										<spacer size="145x0"/>
+										<widget size="145x34" type="*parts.Button">
+											<container size="145x34">
 												<container size="145x34">
+													<rectangle size="145x34"/>
 													<container size="145x34">
-														<rectangle size="145x34"/>
 														<container size="145x34">
-															<container size="145x34">
-																<rectangle pos="1,1" radius="6" size="143x32" strokeColor="inputBorder" strokeWidth="2"/>
-															</container>
-															<container size="145x34">
-																<container pos="16,4" size="113x26">
-																	<container pos="0,4" size="113x16">
-																		<container size="15x16">
-																			<spacer size="15x0"/>
-																			<image fillMode="contain" rsc="copy-72abff-15.svg" size="15x15"/>
-																			<spacer pos="0,15" size="15x0"/>
-																		</container>
-																		<container pos="23,0" size="90x16">
-																			<spacer size="90x0"/>
-																			<text size="90x16">Copy command</text>
-																			<spacer pos="0,16" size="90x0"/>
-																		</container>
+															<rectangle pos="1,1" radius="6" size="143x32" strokeColor="inputBorder" strokeWidth="2"/>
+														</container>
+														<container size="145x34">
+															<container pos="16,4" size="113x26">
+																<container pos="0,4" size="113x16">
+																	<container size="15x16">
+																		<spacer size="15x0"/>
+																		<image fillMode="contain" rsc="copy-72abff-15.svg" size="15x15"/>
+																		<spacer pos="0,15" size="15x0"/>
+																	</container>
+																	<container pos="23,0" size="90x16">
+																		<spacer size="90x0"/>
+																		<text size="90x16">Copy command</text>
+																		<spacer pos="0,16" size="90x0"/>
 																	</container>
 																</container>
 															</container>
 														</container>
 													</container>
 												</container>
-											</widget>
-											<spacer pos="0,34" size="145x0"/>
-										</container>
+											</container>
+										</widget>
+										<spacer pos="0,34" size="145x0"/>
 									</container>
 								</container>
 							</container>
