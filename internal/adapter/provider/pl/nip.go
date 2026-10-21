@@ -65,6 +65,35 @@ const (
 	// the remainder no digit can hold.
 	nipModulus      = 11
 	nipNoCheckDigit = 10
+
+	// nipOfficeDigits is how many digits each place of the office code is
+	// drawn from, one to nine, and nipOfficeCodes is how many codes that makes
+	// over its three places.
+	//
+	// # Why no nought, when the scheme's arithmetic does not care
+	//
+	// The first three digits are the code of the tax office, and two secondary
+	// sources read on 2026-10-21 (infor.pl and fakturownia.pl, both describing
+	// the NIP to their readers) say such a code is made of the digits one to
+	// nine, one of them adding that a nought has been allowed in the second
+	// place in exceptional cases since 2014. No official list of codes was
+	// found. Before that day a code was drawn from all thousand, and 368 of 2000
+	// numbers carried a nought in the first or third place, which an
+	// application checking the office would refuse although the check digit
+	// was right. Drawing from the strictest reading costs nothing, because a
+	// number valid under it is valid under the looser one as well.
+	//
+	// 🔴 Validate is deliberately not narrowed the same way. It reads numbers
+	// out of somebody else's file, a real NIP with a nought in the second place
+	// exists by the second source, and refusing it on the strength of two
+	// secondary sources would be a defect reported in a value that has none.
+	nipOfficeDigits = 9
+	nipOfficeCodes  = nipOfficeDigits * nipOfficeDigits * nipOfficeDigits
+	// nipSerialLength is how many digits are drawn after the office and before
+	// the ninth, which is chosen, and nipSerialCodes is how many values they
+	// can take.
+	nipSerialLength = 5
+	nipSerialCodes  = 100000
 )
 
 // nipWeights are applied to the first nine digits, in the order the source
@@ -120,11 +149,17 @@ func (n NIP) Generate(req provider.Request) (string, error) {
 		}, bound))
 	}
 
-	// The first eight digits are drawn as one number, then the ninth is chosen
-	// only from the values that leave a remainder a digit can hold. There is no
-	// retry loop: the choice is made from a list that is never empty, so the
-	// answer stays one draw per place rather than an unknown number of them.
-	digits := appendFixed(make([]int, 0, nipLength), draw(":nip-body", 100000000), nipBodyLength-1)
+	// The office comes first, then five digits drawn as one number, then the
+	// ninth is chosen only from the values that leave a remainder a digit can
+	// hold. There is no retry loop: the choice is made from a list that is never
+	// empty, so the answer stays one draw per place rather than an unknown
+	// number of them.
+	digits := make([]int, 0, nipLength)
+	office := draw(":nip-office", nipOfficeCodes)
+	for divisor := nipOfficeCodes / nipOfficeDigits; divisor > 0; divisor /= nipOfficeDigits {
+		digits = append(digits, 1+office/divisor%nipOfficeDigits)
+	}
+	digits = appendFixed(digits, draw(":nip-body", nipSerialCodes), nipSerialLength)
 	allowed := nipAllowedNinthDigits(digits)
 	digits = append(digits, allowed[draw(":nip-ninth", int64(len(allowed)))])
 

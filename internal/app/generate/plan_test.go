@@ -39,6 +39,8 @@ func (v knownValues) Names() []string { return v.generators }
 
 func (v knownValues) RoleOf(string) (string, bool) { return "", false }
 
+func (v knownValues) RolesRead(string) []string { return nil }
+
 func (v knownValues) TypeOf(generator string) (string, bool) {
 	kind, ok := v.types[generator]
 	return kind, ok

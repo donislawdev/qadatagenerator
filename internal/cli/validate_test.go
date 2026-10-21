@@ -611,6 +611,44 @@ entities:
 	}
 }
 
+// validate says what a run would leave undone and what it would keep without a
+// rule, in the lines generate prints, because both verbs describe one run.
+//
+// 🔴 Until 2026-10-21 validate worked the plan out and threw its notes away, so
+// it answered can be used about a rule half of which does nothing, while the
+// dry run of the same file warned about it.
+func TestValidateSaysWhatTheRunWouldNotDoAndWhatItWouldKeep(t *testing.T) {
+	path := recipeFile(t, `version: "0.1"
+seed: "s"
+locale: pl-PL
+entities:
+  customer:
+    count: 2
+    fields:
+      first_name: { generator: first_name }
+      gender:     { generator: gender }
+      nip:        { generator: nip }
+    consistency:
+      - nip matches: [gender]
+`)
+	checked := run(commandValidate, path)
+	planned := run(commandGenerate, "--dry-run", path)
+	if checked.code != int(codeOK) {
+		t.Fatalf("validate refused a usable recipe with %d: %s", checked.code, checked.log)
+	}
+	for _, line := range []string{
+		"nip is asked to agree with gender, and nip takes no account of gender",
+		"customer: first_name follows gender, though no rule says so",
+	} {
+		if !strings.Contains(checked.log, line) {
+			t.Errorf("validate does not say %q:\n%s", line, checked.log)
+		}
+		if !strings.Contains(planned.log, line) {
+			t.Errorf("the dry run does not say %q:\n%s", line, planned.log)
+		}
+	}
+}
+
 // rowsIn pulls the one number a pattern captures out of a log.
 func rowsIn(t *testing.T, log, pattern string) int {
 	t.Helper()

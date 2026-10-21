@@ -72,6 +72,10 @@ type Plan struct {
 	Entities []dataset.Table
 	// Notes are the things this run will not do.
 	Notes []Note
+	// Implied are the agreements this run keeps that no rule in the recipe
+	// wrote, so that whoever reads the plan is told which columns follow which
+	// rather than finding out from the data.
+	Implied []Implied
 	// Seed, Locale and Tag are carried so that the run note can state what the
 	// dataset was made from without reading the recipe again.
 	Seed   string
@@ -131,6 +135,9 @@ func Prepare(rec recipe.Recipe, values Values) (Plan, error) {
 		if err := checkGenerators(entity, values, rec.Locale, &plan); err != nil {
 			return Plan{}, err
 		}
+		if err := refuseChains(entity, values); err != nil {
+			return Plan{}, err
+		}
 		planned, err := planEntity(entity, produced, source)
 		if err != nil {
 			return Plan{}, err
@@ -140,6 +147,10 @@ func Prepare(rec recipe.Recipe, values Values) (Plan, error) {
 		}
 		total += planned.Rows
 		plan.Notes = append(plan.Notes, notesFor(entity, values)...)
+		plan.Notes = append(plan.Notes, unsure(entity, values)...)
+		for _, rule := range implied(entity, values) {
+			plan.Implied = append(plan.Implied, Implied{Entity: entity.Name, Rule: rule})
+		}
 		produced[entity.Name] = planned
 		plan.Entities = append(plan.Entities, planned)
 	}
@@ -386,23 +397,60 @@ func checkGenerators(entity recipe.Entity, values Values, locale string, plan *P
 // A rule binding a field to one the identifier cannot carry is a declaration
 // with nothing in it. The provider sees only its own side and would ignore it,
 // which is the one place in this code where something would happen quietly.
+//
+// 🔴 The same holds from the other side, and until 2026-10-21 only the first
+// side was asked. A rule such as nip matches: [gender] binds a column that does
+// play a role to a generator that takes no account of it, so the number was
+// drawn as if the rule were not there and nothing said so. Measured on the real
+// binary that day: validate called it usable and generate wrote it without a
+// word, and the same went for a city asked to match a gender.
 func notesFor(entity recipe.Entity, values Values) []Note {
 	var notes []Note
 	for _, rule := range entity.Consistency {
 		where := "entities." + entity.Name + ".consistency." + rule.Field
+		subject, _ := entity.Field(rule.Field)
 		for _, with := range rule.With {
 			field, known := entity.Field(with)
 			if !known {
 				continue
 			}
-			if _, plays := values.RoleOf(field.Generator); !plays {
+			role, plays := values.RoleOf(field.Generator)
+			switch {
+			case !plays:
 				notes = append(notes, Note{where, rule.Field + " is asked to agree with " + with +
 					", and " + with + " plays no role an identifier can read, so the two are " +
 					"generated independently"})
+			case subject.Generator != "" && !reads(values, subject.Generator, role):
+				notes = append(notes, Note{where, rule.Field + " is asked to agree with " + with +
+					", and " + subject.Generator + " takes no account of " + role +
+					", so the two are generated independently"})
 			}
 		}
 	}
 	return notes
+}
+
+// reads reports whether a generator takes account of a role.
+func reads(values Values, generator, role string) bool {
+	for _, read := range values.RolesRead(generator) {
+		if read == role {
+			return true
+		}
+	}
+	return false
+}
+
+// refuseChains refuses a declared rule resting on a column another rule binds,
+// in the words the run uses, so that validate refuses what generate would.
+func refuseChains(entity recipe.Entity, values Values) error {
+	rules := Rules(entity, values)
+	bound := boundFields(rules)
+	for _, rule := range rules {
+		if err := chained(entity, rule, bound, values); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // inDependencyOrder returns the entities with parents before children.

@@ -626,7 +626,7 @@
 																				<widget pos="0,24" size="481x123" type="*widget.Scroll">
 																					<widget size="481x123" type="*widget.tableCells">
 																						<widget size="96x24" type="*widget.RichText">
-																							<text pos="4,4" size="35x16">Julian</text>
+																							<text pos="4,4" size="57x16">Arkadiusz</text>
 																						</widget>
 																						<widget pos="96,0" size="96x24" type="*widget.RichText">
 																							<text pos="4,4" size="28x16">male</text>
@@ -635,7 +635,7 @@
 																							<text pos="4,4" size="85x16">77062336613</text>
 																						</widget>
 																						<widget pos="0,24" size="96x24" type="*widget.RichText">
-																							<text pos="4,4" size="42x16">Gabriel</text>
+																							<text pos="4,4" size="38x16">Wiktor</text>
 																						</widget>
 																						<widget pos="96,24" size="96x24" type="*widget.RichText">
 																							<text pos="4,4" size="28x16">male</text>
@@ -644,7 +644,7 @@
 																							<text pos="4,4" size="85x16">48120288430</text>
 																						</widget>
 																						<widget pos="0,49" size="96x24" type="*widget.RichText">
-																							<text pos="4,4" size="39x16">Marcel</text>
+																							<text pos="4,4" size="42x16">Rozalia</text>
 																						</widget>
 																						<widget pos="96,49" size="96x24" type="*widget.RichText">
 																							<text pos="4,4" size="40x16">female</text>
@@ -653,7 +653,7 @@
 																							<text pos="4,4" size="85x16">67082548028</text>
 																						</widget>
 																						<widget pos="0,74" size="96x24" type="*widget.RichText">
-																							<text pos="4,4" size="48x16">Nataniel</text>
+																							<text pos="4,4" size="35x16">Bruno</text>
 																						</widget>
 																						<widget pos="96,74" size="96x24" type="*widget.RichText">
 																							<text pos="4,4" size="28x16">male</text>

@@ -129,21 +129,28 @@ func TestWhatThisBuildSaysItCanProduceIsWhatItProduces(t *testing.T) {
 }
 
 // A Polish surname inflects with the gender of the bearer, so a woman must
-// never be given the masculine form.
+// never be given the masculine form, and must be given the feminine one.
 //
-// 🔴 What this test does NOT assert, and the reason is a property of the data
-// rather than of the code. The corpus carries 200 masculine surnames, half of
-// them the inflecting kind, and 3690 that do not inflect. It carries no
-// feminine inflecting forms at all, so no woman in a generated dataset ever
-// receives one. Building them by rewriting the masculine ending would be a rule
-// this project invented rather than took from anywhere, so it is recorded as a
-// limit instead of coded. Asserting a feminine form here would have frozen an
-// expectation the data cannot meet.
+// 🔴 Until 2026-10-21 this test asserted the first half only and said why: the
+// corpus carries no feminine forms, and building them was called a rule this
+// project would invent. It is the rule of the language, Kowalski and Kowalska,
+// and the header of the masculine list said from the start that the feminine
+// form is derived by rule. Measured that day before the change: no woman in a
+// thousand rows had a surname ending in ska, and about one in a hundred had a
+// masculine adjective such as Mały or Brudny.
 func TestAPolishSurnameNeverGivesAWomanTheMasculineForm(t *testing.T) {
 	source := values.New("pl-PL", "surnames")
-	masculine := 0
+	masculine, feminine := 0, 0
+	listedMasculine, found := corpus.Load("pl-PL", "last-names-male")
+	if !found {
+		t.Fatal("this build carries no masculine surnames for pl-PL")
+	}
+	masculineList := make(map[string]bool, len(listedMasculine))
+	for _, name := range listedMasculine {
+		masculineList[name] = true
+	}
 
-	for row := int64(0); row < 400; row++ {
+	for row := int64(0); row < 2000; row++ {
 		female := ask(values.LastName, "last_name", row)
 		female.Agrees = provider.NewAgreement(map[string]string{
 			provider.RoleGender: string(provider.Female)})
@@ -151,8 +158,23 @@ func TestAPolishSurnameNeverGivesAWomanTheMasculineForm(t *testing.T) {
 		if err != nil {
 			t.Fatalf("row %d: %v", row, err)
 		}
-		if inflectsMasculine(drawn) {
+		if inflectsMasculine(drawn) || strings.HasSuffix(drawn, "y") || strings.HasSuffix(drawn, "i") {
 			t.Errorf("row %d gave a woman the masculine form %q", row, drawn)
+		}
+		// Counted against the masculine list rather than by ending, because the
+		// list of surnames that do not inflect carries a few ending in ska of
+		// its own, Kuska and Gryska, and counting by ending let a build without
+		// a single feminine form pass. Found by a mutation that removed them.
+		if trimmed, isFeminine := strings.CutSuffix(drawn, "a"); isFeminine && masculineList[trimmed+"i"] {
+			feminine++
+		}
+
+		neither := ask(values.LastName, "last_name", row)
+		if drawn, err = source.Produce(neither); err != nil {
+			t.Fatalf("row %d: %v", row, err)
+		}
+		if inflectsMasculine(drawn) || strings.HasSuffix(drawn, "y") {
+			t.Errorf("row %d gave a person of no stated gender the masculine form %q", row, drawn)
 		}
 
 		male := ask(values.LastName, "last_name", row)
@@ -168,6 +190,10 @@ func TestAPolishSurnameNeverGivesAWomanTheMasculineForm(t *testing.T) {
 	if masculine == 0 {
 		t.Error("no man received an inflecting surname in four hundred draws, so this test would " +
 			"pass against a build that never reaches the masculine list at all")
+	}
+	if feminine == 0 {
+		t.Error("no woman received a surname ending in ska in two thousand draws, so the " +
+			"feminine form of an inflecting surname is never reached")
 	}
 }
 

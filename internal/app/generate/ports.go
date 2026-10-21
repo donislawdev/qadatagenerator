@@ -96,6 +96,14 @@ type Values interface {
 	// column, because a recipe may call a column anything and half of them
 	// will not be in English.
 	RoleOf(generator string) (string, bool)
+	// RolesRead returns the roles a generator takes account of in the locale
+	// this source draws in, sorted.
+	//
+	// It is what lets a run keep a person consistent without a rule saying
+	// so. A first name beside a gender column follows it because the first
+	// name reads the gender, and only the source knows which generator reads
+	// what, and in Polish a surname reads it while in English it does not.
+	RolesRead(generator string) []string
 	// Produce returns one value.
 	Produce(req Request) (string, error)
 }

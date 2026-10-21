@@ -331,3 +331,27 @@ func TestTheConstrainedNinthDigitStillVaries(t *testing.T) {
 		t.Fatalf("the ninth digit took only %d different values over five hundred rows", len(seen))
 	}
 }
+
+// The code of the tax office is drawn from the digits one to nine, the
+// strictest reading the sources give, and every one of the nine still appears
+// in each of its three places.
+//
+// 🔴 Measured on 2026-10-21 before the change: 368 of 2000 generated numbers
+// carried a nought in the first or third place of the office code.
+func TestTheOfficeCodeCarriesNoNoughtAndUsesEveryOtherDigit(t *testing.T) {
+	seen := [3]map[byte]bool{{}, {}, {}}
+	for row := int64(0); row < 2000; row++ {
+		value := generateNIP(t, row)
+		for place := range seen {
+			if value[place] == '0' {
+				t.Fatalf("row %d gives %s, with a nought in place %d of the office code", row, value, place+1)
+			}
+			seen[place][value[place]] = true
+		}
+	}
+	for place, digits := range seen {
+		if len(digits) != 9 {
+			t.Errorf("place %d of the office code took %d different digits, not nine", place+1, len(digits))
+		}
+	}
+}

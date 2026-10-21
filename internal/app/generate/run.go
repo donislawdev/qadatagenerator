@@ -65,6 +65,9 @@ func writeTable(planned dataset.Table, entity recipe.Entity, values Values, writ
 		return err
 	}
 	taken := newUniqueSet(entity)
+	// Worked out once per table rather than per row, because the answer
+	// depends on the recipe and the build and on nothing a row holds.
+	rules := Rules(entity, values)
 	for row := 0; row < planned.Rows; row++ {
 		// A table left without its End is not a problem here: what a stopped run
 		// wrote never gets its real name, so an unfinished table is thrown away
@@ -72,7 +75,7 @@ func writeTable(planned dataset.Table, entity recipe.Entity, values Values, writ
 		if ended := stop.Stopped(); ended != nil {
 			return ended
 		}
-		built, err := buildRow(entity, row, values, source, taken)
+		built, err := buildRow(entity, rules, row, values, source, taken)
 		if err != nil {
 			return err
 		}
@@ -93,10 +96,13 @@ func writeTable(planned dataset.Table, entity recipe.Entity, values Values, writ
 // rule come second, because the second kind is generated from the first. A rule
 // pointing at a field that is itself bound is refused rather than resolved in
 // whatever order the recipe happened to list them.
-func buildRow(entity recipe.Entity, row int, values Values, source seed.Source,
-	taken uniqueSet) ([]string, error) {
+//
+// The rules are the ones the run keeps, declared and implied together, which
+// is why they arrive as an argument rather than being read off the entity.
+func buildRow(entity recipe.Entity, rules []recipe.Rule, row int, values Values,
+	source seed.Source, taken uniqueSet) ([]string, error) {
 	built := make(map[string]string, len(entity.Fields))
-	bound := boundFields(entity)
+	bound := boundFields(rules)
 
 	for _, field := range entity.Fields {
 		if bound[field.Name] {
@@ -109,7 +115,7 @@ func buildRow(entity recipe.Entity, row int, values Values, source seed.Source,
 		built[field.Name] = value
 	}
 
-	for _, rule := range entity.Consistency {
+	for _, rule := range rules {
 		field, known := entity.Field(rule.Field)
 		if !known {
 			continue
@@ -133,17 +139,25 @@ func buildRow(entity recipe.Entity, row int, values Values, source seed.Source,
 }
 
 // agreementFor gathers what a bound field has to agree with, keyed by role.
+//
+// # Why an empty value binds nothing
+//
+// A column with a share of empty values is blank in some rows, and a blank
+// says nothing about the person. Until 2026-10-21 it was bound all the same,
+// so a recipe giving the gender ten per cent of empty values and a PESEL that
+// matches it stopped on the first blank row, because no scheme can encode a
+// gender of nothing. The value is now left unbound in that row, the way it is
+// in a recipe with no gender column at all: the PESEL draws a gender and a
+// first name is drawn from both lists.
 func agreementFor(rule recipe.Rule, entity recipe.Entity, built map[string]string,
 	bound map[string]bool, values Values) (provider.Agreement, error) {
+	if err := chained(entity, rule, bound, values); err != nil {
+		return provider.Agreement{}, err
+	}
 	roles := make(map[string]string, len(rule.With))
 	for _, with := range rule.With {
-		if bound[with] {
-			return provider.Agreement{}, fault.New(fault.Config, "entities."+entity.Name+
-				".consistency: "+rule.Field+" has to agree with "+with+
-				", which is itself bound by a rule, and this build resolves one level")
-		}
 		field, known := entity.Field(with)
-		if !known {
+		if !known || built[with] == "" {
 			continue
 		}
 		role, plays := values.RoleOf(field.Generator)
@@ -223,15 +237,6 @@ func leftEmpty(field recipe.Field, at seed.Coordinate, source seed.Source) bool 
 		Entity: at.Entity, Row: at.Row, Field: at.Field, Purpose: "empty",
 	}, parts)
 	return float64(drawn) < field.EmptyShare*parts/100
-}
-
-// boundFields names the fields a consistency rule produces.
-func boundFields(entity recipe.Entity) map[string]bool {
-	bound := make(map[string]bool, len(entity.Consistency))
-	for _, rule := range entity.Consistency {
-		bound[rule.Field] = true
-	}
-	return bound
 }
 
 // uniqueSet remembers what a unique field has already produced.

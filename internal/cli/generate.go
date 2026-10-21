@@ -300,6 +300,22 @@ func usableFormat(built recipe.Recipe, applied []produce.Override) error {
 		", and "+asked+built.Output.Format)
 }
 
+// impliedLine says which columns a field follows without a rule saying so.
+//
+// A detail rather than a warning, because nothing is wrong: the run keeps the
+// agreement a person expects. It is said at all because a reader comparing the
+// data with the recipe would otherwise find an agreement the recipe does not
+// mention, and the same line in validate and in generate keeps the two from
+// describing one run in two ways.
+func impliedLine(kept generate.Implied) string {
+	with := kept.Rule.With
+	follows := strings.Join(with, ", ")
+	if last := len(with) - 1; last > 0 {
+		follows = strings.Join(with[:last], ", ") + " and " + with[last]
+	}
+	return kept.Entity + ": " + kept.Rule.Field + " follows " + follows + ", though no rule says so"
+}
+
 // counted writes a number with its word, and the word agrees with the number.
 //
 // A line reading one columns is a small thing that tells a reader nobody looked
@@ -334,6 +350,9 @@ func writePlan(out *streams, plan generate.Plan, applied []produce.Override, fla
 	for _, planned := range plan.Entities {
 		out.detail(planned.Entity + ": " + counted(planned.Rows, "row") + ", " +
 			counted(len(planned.Columns), "column"))
+	}
+	for _, kept := range plan.Implied {
+		out.detail(impliedLine(kept))
 	}
 	ending := summaryWritten
 	if trial {

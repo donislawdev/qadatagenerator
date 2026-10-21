@@ -5,7 +5,7 @@
     "row": 0,
     "field": "nip",
     "purpose": "value",
-    "value": "5659396047"
+    "value": "1479396055"
   },
   {
     "seed": "release-2026-08",
@@ -13,7 +13,7 @@
     "row": 1,
     "field": "nip",
     "purpose": "value",
-    "value": "0772871858"
+    "value": "5962871858"
   },
   {
     "seed": "release-2026-08",
@@ -21,7 +21,7 @@
     "row": 2,
     "field": "nip",
     "purpose": "value",
-    "value": "1896326032"
+    "value": "7196326027"
   },
   {
     "seed": "release-2026-08",
@@ -29,7 +29,7 @@
     "row": 999,
     "field": "nip",
     "purpose": "value",
-    "value": "6396605501"
+    "value": "3726605509"
   },
   {
     "seed": "release-2026-08",
@@ -37,7 +37,7 @@
     "row": 123456,
     "field": "nip",
     "purpose": "value",
-    "value": "7717145890"
+    "value": "7327145899"
   },
   {
     "seed": "another-seed",
@@ -45,7 +45,7 @@
     "row": 0,
     "field": "nip",
     "purpose": "value",
-    "value": "5165727824"
+    "value": "5645727824"
   },
   {
     "seed": "another-seed",
@@ -53,6 +53,6 @@
     "row": 1,
     "field": "nip",
     "purpose": "value",
-    "value": "0815183155"
+    "value": "6525183144"
   }
 ]

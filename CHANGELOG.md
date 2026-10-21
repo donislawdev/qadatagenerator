@@ -12,6 +12,24 @@ repository once they are released.
 
 ### Changed
 
+- **A person in a dataset agrees with itself without a rule saying so.** A
+  first name and a Polish surname follow the gender column, and a PESEL
+  follows the date of birth and the gender, whenever the entity has exactly one
+  column of each. A rule you write still counts and is completed with what it
+  leaves out, so a recipe that already wrote its rules out produces the same
+  data. Two gender columns bind neither, and the run says which field was left
+  following nothing. validate and generate both print what followed what. Until
+  now only written rules were kept, so the example recipe in the window gave a
+  woman the name Piotr in about half its rows. Datasets made from recipes
+  without rules come out different with the same seed.
+- **A Polish woman gets the feminine form of a surname.** Kowalski becomes
+  Kowalska, and the surnames that do not change with gender, such as Adamczyk,
+  go to women too. Masculine adjectives such as Mały or Brudny go to men only.
+  Men draw exactly what they drew before, so only the surnames of women and of
+  rows without a gender moved.
+- **A NIP never has a nought in the code of its tax office.** The first three
+  digits are drawn from one to nine. Every generated NIP moved. Reading a NIP
+  out of a file accepts the same numbers as before.
 - **A Copy button says Copied on itself for a moment.** Copy all, Copy command
   and a clicked row of values show Copied with a tick for one and a half
   seconds and then their own word again. The sentence that used to stand
@@ -217,6 +235,15 @@ repository once they are released.
 
 ### Fixed
 
+- **A blank in a gender or date of birth column no longer stops the run.** A
+  column with a share of empty values left a PESEL bound to it with nothing to
+  encode, and the run ended on the first blank row. A blank now binds nothing
+  in that row.
+- **validate says what generate says about the rules.** It used to answer can
+  be used about a recipe whose rules generate then refused, and kept quiet
+  about a rule that does nothing. Both now print the same refusals and the same
+  warnings, including a new one for a rule the generator takes no account of,
+  such as nip matches gender.
 - **Every text field shows where you are typing again.** The text cursor was
   drawn zero units wide in every field of the window, the recipe editor
   included, so it could not be seen.

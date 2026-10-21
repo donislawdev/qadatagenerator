@@ -172,6 +172,16 @@ func alsoAskTheEngine(report *validate.Report, rec recipe.Recipe,
 // and a new one that says neither turns the build red.
 type whatARunWouldDo struct {
 	tables, rows int
+	// notes are what a run of this recipe would not do, and implied are the
+	// agreements it would keep with no rule written for them.
+	//
+	// 🔴 Both were worked out here and thrown away until 2026-10-21, so a rule
+	// such as pesel matches: [first_name, gender] was answered can be used by
+	// this verb while generate warned that half of it does nothing. Two verbs
+	// asked about one recipe answered differently, which is the drift asking
+	// the plan here exists to prevent.
+	notes   []generate.Note
+	implied []generate.Implied
 	// wrong is a fault of the recipe that only the engine asks about.
 	wrong error
 	// cannot is a recipe that is right and could not be carried out.
@@ -196,7 +206,8 @@ func askThePlan(rec recipe.Recipe) whatARunWouldDo {
 	plan, err := generate.Prepare(rec, values.New(rec.Locale, rec.Seed))
 	switch {
 	case err == nil:
-		return whatARunWouldDo{tables: len(plan.Entities), rows: plan.TotalRows()}
+		return whatARunWouldDo{tables: len(plan.Entities), rows: plan.TotalRows(),
+			notes: plan.Notes, implied: plan.Implied}
 	case fault.KindOf(err) == fault.Config:
 		return whatARunWouldDo{wrong: err}
 	default:
@@ -295,6 +306,14 @@ func writeReport(out *streams, report validate.Report, outlook whatARunWouldDo) 
 		out.warn(outlook.cannot.Error())
 		out.note(report.Name + summaryValidUnrunnable)
 		return
+	}
+	// The same lines generate writes, in the same order, for the reason the
+	// count below uses the dry run's words.
+	for _, skipped := range outlook.notes {
+		out.warn(skipped.Where + ": " + skipped.What)
+	}
+	for _, kept := range outlook.implied {
+		out.detail(impliedLine(kept))
 	}
 	out.note(report.Name + summaryValid + understood(report.Entities, report.Fields))
 	// What a run would write, said in the same words the dry run uses, because

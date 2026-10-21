@@ -1,6 +1,9 @@
 package values
 
-import "github.com/donislawdev/qadatagenerator/internal/domain/recipe"
+import (
+	"github.com/donislawdev/qadatagenerator/internal/app/generate"
+	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
+)
 
 // Schema is a recipe seen as a shape of data, with the type of every field
 // filled in and the numbering scheme named wherever there is one.
@@ -90,8 +93,21 @@ func (s Schema) EntityNames() []string { return s.rec.EntityNames() }
 // ParentsOf returns what the engine may know about the relations of an entity.
 func (s Schema) ParentsOf(entity string) []recipe.ParentInfo { return s.rec.ParentsOf(entity) }
 
-// RulesOf returns the consistency rules declared for an entity.
-func (s Schema) RulesOf(entity string) []recipe.Rule { return s.rec.RulesOf(entity) }
+// RulesOf returns the consistency rules a run of an entity keeps, the declared
+// ones followed by the ones the entity implies.
+//
+// 🔴 Not the declared ones alone, and the reason is the one rule serving both
+// pillars. The run keeps an implied agreement, so the data holds it, so the
+// corruption engine has something real to pull apart. Answering with the
+// declared rules here would leave a dataset that agrees with itself and a
+// policy told there is nothing in it that agrees.
+func (s Schema) RulesOf(entity string) []recipe.Rule {
+	found, known := s.rec.Entity(entity)
+	if !known {
+		return s.rec.RulesOf(entity)
+	}
+	return generate.Rules(found, s.source)
+}
 
 // PrimaryKeyOf returns the fields identifying a record, empty when none was
 // declared.

@@ -177,6 +177,38 @@ func Joined(locale, first, second string) ([]string, bool) {
 	return entries, true
 }
 
+// derived is every list built out of others by a caller, keyed by locale and
+// the name the caller gave it. It is separate from joined for the reason joined
+// is separate from held: a different list under a different key.
+var derived sync.Map
+
+// Derived returns a list a caller builds out of the lists of a locale, building
+// it once.
+//
+// The building belongs to the caller, because what turns a masculine surname
+// into a feminine one is knowledge about a language and not about files, and
+// keeping it out of here keeps this package a loader. The caching belongs here
+// for the reason written at held: a list is asked for once per value, and
+// building it each time made a column of surnames thirty times slower once
+// already.
+//
+// The same rule binds what comes back: it is shared, and nobody may write
+// through it. A build answering false is remembered as well, so a missing list
+// is reported on every call rather than built again and again.
+func Derived(locale, name string, build func(locale string) ([]string, bool)) ([]string, bool) {
+	key := locale + "/" + name
+	if kept, found := derived.Load(key); found {
+		entries, _ := kept.([]string)
+		return entries, len(entries) > 0
+	}
+	entries, ok := build(locale)
+	if !ok {
+		entries = nil
+	}
+	derived.Store(key, entries)
+	return entries, len(entries) > 0
+}
+
 // parse reads the entries out of a list file.
 //
 // The carriage return is trimmed although every file in this repository is

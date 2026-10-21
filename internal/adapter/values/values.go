@@ -579,16 +579,114 @@ func genderOf(bound string) provider.Gender {
 //
 // Polish surnames inflect: a family name ending in ski is noted for a man and
 // ska for a woman, so a list drawn without regard to the gender column produces
-// records a Polish reader sees as wrong at a glance. The unisex list is the one
-// that does not inflect and is correct for either.
+// records a Polish reader sees as wrong at a glance.
+//
+// # What each gender draws from
+//
+// A man draws from both lists as they are written, which is what he drew
+// before 2026-10-21, so no man's surname moved that day. A woman draws the
+// surnames either gender can carry together with the feminine form of every
+// one that inflects, and a row whose gender says nothing draws the first part
+// alone. Measured on that day before the change: a woman never received a
+// surname ending in ska in a thousand rows, and about one in a hundred received
+// a masculine adjective such as Mały or Brudny, which the list of surnames that
+// do not inflect carried among them.
 func (s Source) lastName(req generate.Request) (string, error) {
 	if !strings.HasPrefix(s.locale, "pl") {
 		return s.draw("last-names", req)
 	}
-	if bound, _ := req.Agrees.Value(provider.RoleGender); genderOf(bound) == provider.Male {
+	switch given, _ := req.Agrees.Value(provider.RoleGender); genderOf(given) {
+	case provider.Male:
 		return s.drawEither("last-names-male", "last-names-unisex", req)
+	case provider.Female:
+		return s.drawDerived(feminineSurnames, feminineOf, req)
+	default:
+		return s.drawDerived(neutralSurnames, neutralOf, req)
 	}
-	return s.draw("last-names-unisex", req)
+}
+
+// The names of the two surname lists built rather than read. They appear in a
+// message only when no entry is short enough for a column, which is where a
+// reader needs to know which list was meant.
+const (
+	feminineSurnames = "last-names-feminine"
+	neutralSurnames  = "last-names-neutral"
+)
+
+// neutralOf builds the Polish surnames a person of either gender can carry.
+//
+// Two sources, both filtered. From the list of surnames that do not inflect it
+// leaves out every one ending in y or i, because that is the ending of the
+// masculine adjective, Mały or Leśny, whose feminine form is Mała or Leśna.
+// The filter is wider than the adjectives and that is chosen: a few of the
+// names it drops do not inflect at all, and dropping them costs a woman a few
+// surnames out of thousands, while keeping one that inflects gives her the
+// form of a man. From the masculine list it takes the half that does not
+// inflect, Adamczyk or Wójcik, which belongs to a woman as much as to a man.
+func neutralOf(locale string) ([]string, bool) {
+	unisex, haveUnisex := corpus.Load(locale, "last-names-unisex")
+	masculine, haveMasculine := corpus.Load(locale, "last-names-male")
+	if !haveUnisex || !haveMasculine {
+		return nil, false
+	}
+	entries := make([]string, 0, len(unisex)+len(masculine))
+	for _, name := range unisex {
+		if !strings.HasSuffix(name, "y") && !strings.HasSuffix(name, "i") {
+			entries = append(entries, name)
+		}
+	}
+	for _, name := range masculine {
+		if !inflects(name) {
+			entries = append(entries, name)
+		}
+	}
+	return entries, true
+}
+
+// feminineOf builds the Polish surnames a woman can carry: the neutral ones and
+// the feminine form of every masculine surname that inflects.
+//
+// The form is made by the rule of the language rather than read from a list,
+// and that is what the masculine list was taken for: its header says the
+// feminine form is derived by rule. Kowalski is Kowalska, Nowicki is Nowicka
+// and Zawadzki is Zawadzka, so the last letter becomes a, and nothing else in
+// the name changes.
+func feminineOf(locale string) ([]string, bool) {
+	entries, haveNeutral := neutralOf(locale)
+	masculine, haveMasculine := corpus.Load(locale, "last-names-male")
+	if !haveNeutral || !haveMasculine {
+		return nil, false
+	}
+	for _, name := range masculine {
+		if inflects(name) {
+			entries = append(entries, strings.TrimSuffix(name, "i")+"a")
+		}
+	}
+	return entries, true
+}
+
+// inflects reports whether a Polish surname is the masculine form of a name
+// that changes with the gender of its bearer.
+func inflects(name string) bool {
+	return strings.HasSuffix(name, "ski") || strings.HasSuffix(name, "cki") ||
+		strings.HasSuffix(name, "dzki")
+}
+
+// drawDerived takes one entry out of a list built from others.
+func (s Source) drawDerived(list string, build func(string) ([]string, bool),
+	req generate.Request) (string, error) {
+	entries, found := corpus.Derived(s.locale, list, build)
+	if !found {
+		// Named in the words the plan uses, so the run and the plan say the
+		// same sentence about the same missing list.
+		// A build that found both lists and kept nothing of them has no such
+		// sentence, so it is named as the list that came out empty.
+		if fine, why := surnameLists(s.locale); !fine {
+			return "", fault.New(fault.Config, why)
+		}
+		return "", fault.New(fault.Config, noList(list, s.locale))
+	}
+	return s.pick(entries, list, req)
 }
 
 // gender draws one of the two values a numbering scheme can encode.
