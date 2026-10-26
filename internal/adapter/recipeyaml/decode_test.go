@@ -281,6 +281,27 @@ func TestProblems(t *testing.T) {
 			where: "locale",
 			what:  "does not know de-DE",
 		},
+		// The three delimiters since 2026-10-26. The first passed validate and
+		// was refused by generate, the other two passed both and wrote a file
+		// whose records and fields could not be told apart.
+		{
+			name:  "a delimiter of two characters",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y }\noutput:\n  delimiter: ab\n",
+			where: "output.delimiter",
+			what:  "other than a quote or a line end",
+		},
+		{
+			name:  "a line feed for a delimiter",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y }\noutput:\n  delimiter: \"\\n\"\n",
+			where: "output.delimiter",
+			what:  "other than a quote or a line end",
+		},
+		{
+			name:  "a quote for a delimiter",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y }\noutput:\n  delimiter: '\"'\n",
+			where: "output.delimiter",
+			what:  "other than a quote or a line end",
+		},
 		{
 			name:  "a format this build cannot write",
 			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y }\noutput:\n  format: xlsx\n",

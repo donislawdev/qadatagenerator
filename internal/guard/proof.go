@@ -574,4 +574,9 @@ var toolGuards = []Guard{
 	{"a directory standing where a file of the dataset goes is refused before any work, with replacing allowed or not", "TestADirectoryUnderTheNameIsRefusedBeforeAnythingIsWritten", "internal/adapter/store", ByMutation},
 	{"a source named after a file the run leaves beside the data is never written over, whatever form of the manifest was asked for", "TestASourceNamedAfterTheManifestIsNotWrittenOver", "internal/take", ByMutation},
 	{"two names for one file that text cannot tell apart are seen as one once the file exists", "TestALinkToTheSourceIsSeenAsTheSource", "internal/take", ByMutation},
+	{"a record of one blank field is written so that a reader still reads a record", "TestABlankRecordOfOneColumnIsStillARecord", "internal/adapter/format", ByMutation},
+	{"a separator is one character other than a quote, a line end or a zero byte", "TestASeparatorIsOneCharacterTheFormatDoesNotAlreadyUse", "internal/domain/dataset", ByMutation},
+	{"a field described by type alone that cannot hold the shortest value of its type is refused before the run", "TestALimitTooShortForTheTypeIsRefusedBeforeTheRun", "internal/adapter/values", ByMutation},
+	{"the tree in one file never gives one object two members of the same name", "TestATreeRefusesAParentFieldNamedAfterAChild", "internal/adapter/format", ByMutation},
+	{"a value in a copied command reaches the shell as one argument and as nothing else", "TestAValueReachesTheShellAsOneArgumentAndNothingElse", "internal/commandline", ByMutation},
 }

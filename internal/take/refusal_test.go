@@ -52,6 +52,8 @@ func TestEachUnusableSettingIsRefusedForItsOwnReason(t *testing.T) {
 		{"a delimiter of two characters", func(s *Settings) { s.Delimiter = "||" },
 			UnreadableDelimiter},
 		{"a delimiter of none", func(s *Settings) { s.Delimiter = "" }, UnreadableDelimiter},
+		{"a line feed for a delimiter", func(s *Settings) { s.Delimiter = "\n" }, UnreadableDelimiter},
+		{"a quote for a delimiter", func(s *Settings) { s.Delimiter = `"` }, UnreadableDelimiter},
 		// The form named here is one the specification lists and this build does
 		// not write, which is the one somebody is most likely to try.
 		{"a manifest form this build does not write",

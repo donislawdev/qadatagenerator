@@ -262,13 +262,13 @@ func Open(path string, settings Settings) (*Opened, error) {
 	// somebody was typing. A screen puts a separator under a person's cursor,
 	// so the empty value between two keystrokes is ordinary rather than
 	// exotic.
-	separator := []rune(settings.Delimiter)
-	if len(separator) != 1 {
+	separator, usable := dataset.UsableSeparator(settings.Delimiter)
+	if !usable {
 		return nil, fault.New(fault.Config,
-			"the field separator has to be one character and this run was given "+
-				strconv.Quote(settings.Delimiter))
+			"the field separator has to be one character other than a quote or a line end, "+
+				"and this run was given "+strconv.Quote(settings.Delimiter))
 	}
-	file, err := sourcecsv.Open(path, separator[0])
+	file, err := sourcecsv.Open(path, separator)
 	if err != nil {
 		return nil, err
 	}

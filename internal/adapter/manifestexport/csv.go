@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"io"
 	"strconv"
+	"unicode/utf8"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
@@ -118,12 +119,22 @@ func (c *CSV) writeRow(cells []string) {
 // so this holds for the first pass and can stop holding on the second. That is
 // written down in the threat model rather than left for somebody to find, and
 // it is a reason to read the canonical manifest when the answer matters.
+//
+// # Why the first character rather than the first byte, and why these
+//
+// 🔴 Until 2026-10-26 the first byte was compared, and a line feed and the full
+// width forms of the four formula characters went through. The list is the one
+// the OWASP page on CSV injection gives, read on 2026-10-26
+// (community.owasp.org/attacks/CSV_Injection): it names the line feed beside the
+// carriage return, and the full width forms as formulas in some locales, such
+// as Japanese ones. Found by an outside review on 2026-10-22 from a column name
+// of somebody else's file, written to this report unprotected. The four full
+// width forms are each three bytes, so comparing a byte could never have
+// matched them.
 func neutralise(value string) string {
-	if value == "" {
-		return value
-	}
-	switch value[0] {
-	case '=', '+', '-', '@', '\t', '\r':
+	first, _ := utf8.DecodeRuneInString(value)
+	switch first {
+	case '=', '+', '-', '@', '\t', '\r', '\n', '＝', '＋', '－', '＠':
 		return "'" + value
 	}
 	return value

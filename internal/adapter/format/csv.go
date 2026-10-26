@@ -2,6 +2,7 @@ package format
 
 import (
 	"bufio"
+	"strconv"
 	"strings"
 
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
@@ -127,8 +128,20 @@ func newLines(to WriteCloser, delimiter string) lines {
 }
 
 // write puts one row down, quoting the fields that need it.
+//
+// # Why a row of one empty field is written as two quotes
+//
+// 🔴 Written as it stands, it is an empty line, and a reader of this format
+// skips an empty line rather than reading a record from it. A table of one
+// column with blank values came back with fewer records than the run said it
+// wrote, and corrupt refused the file as having a header and no rows. Found by
+// an outside review on 2026-10-22. Two quotes are an empty field to every
+// reader and cannot be taken for the end of a line.
 func (l lines) write(fields []string) error {
 	var line strings.Builder
+	if len(fields) == 1 && fields[0] == "" {
+		line.WriteString(`""`)
+	}
 	for index, field := range fields {
 		if index > 0 {
 			line.WriteString(l.delimiter)
@@ -160,8 +173,6 @@ func (l lines) flush() error {
 	return nil
 }
 
-// usableDelimiter refuses one that is not a single character, and defaults to a
-// comma.
 // Delimiter is the character this build separates values with for a recipe.
 //
 // It is exported so that whoever reads those bytes back reads them the way they
@@ -176,13 +187,20 @@ func Delimiter(rec recipe.Recipe) (rune, error) {
 	return []rune(given)[0], nil
 }
 
+// usableDelimiter refuses a delimiter the format cannot be split on, and
+// defaults to a comma.
+//
+// The rule is dataset.UsableSeparator, the one the recipe and the reader of
+// somebody else's file ask as well. It stays here although the recipe is now
+// refused earlier, because a recipe built by a screen rather than read from a
+// file reaches this writer without passing the reader of recipes.
 func usableDelimiter(given, from string) (string, error) {
 	if given == "" {
 		return ",", nil
 	}
-	if len([]rune(given)) != 1 {
-		return "", fault.New(fault.Config, "the delimiter has to be one character and "+
-			from+given)
+	if _, usable := dataset.UsableSeparator(given); !usable {
+		return "", fault.New(fault.Config, "the delimiter has to be one character other than "+
+			"a quote or a line end, and "+from+strconv.Quote(given))
 	}
 	return given, nil
 }

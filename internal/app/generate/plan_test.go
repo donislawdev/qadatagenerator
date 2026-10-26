@@ -57,6 +57,8 @@ func (v knownValues) ProducesType(kind string) bool {
 
 func (v knownValues) Produce(generate.Request) (string, error) { return "", nil }
 
+func (v knownValues) TypeFits(string, int) (bool, string) { return true, "" }
+
 func (v knownValues) CanProduce(generator, locale string) (bool, string) {
 	if v.missing[generator] == locale {
 		return false, "this build has no " + generator + " for " + locale

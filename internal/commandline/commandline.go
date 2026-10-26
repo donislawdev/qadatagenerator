@@ -24,7 +24,10 @@
 // of them changed.
 package commandline
 
-import "strings"
+import (
+	"runtime"
+	"strings"
+)
 
 // The name of the tool and the verbs a window has an equivalent for.
 const (
@@ -117,17 +120,79 @@ func (l *Line) String() string {
 	return strings.Join(append([]string{Tool, l.verb}, l.parts...), " ")
 }
 
-// quote wraps a value that would otherwise arrive as more than one argument.
+// quote writes a value so that the shell it is pasted into reads it as one
+// argument and as nothing else.
 //
-// A path with a space in it is the ordinary case on this desktop, not an edge
-// one: the folder a person writes to is under Documents more often than not.
-// A value already carrying a double quote is left alone rather than escaped,
-// because the escaping differs between the shells this line may be pasted into
-// and a line that is wrong in one of them is worse than a line that is plainly
-// unquoted.
+// # Why every value outside a short list is quoted, not only one with a space
+//
+// 🔴 Until 2026-10-26 only a space or a tab was quoted, in double quotes, and a
+// value carrying a double quote was left bare. The value is very often the name
+// of a file somebody else handed over, and a name is allowed to carry what a
+// shell reads as code: in PowerShell a name holding a command separator and
+// Get-Date ran a second command, and "sample$(Write-Output SAFE).csv" ran one
+// inside the quotes, because double quotes there still expand. Found by an outside review on 2026-10-22, which
+// gave the line to the parser of PowerShell and counted the commands. Nothing
+// here runs the line, so the harm needed a person to paste it, and the window
+// offers it for exactly that.
+//
+// # Why single quotes in both shells, and what differs between them
+//
+// The owner chose on 2026-10-26 the syntax of the shell a desktop opens by
+// default: PowerShell on Windows, sh elsewhere (DEC-266). In both, text in
+// single quotes is taken as it stands. The one character that has to be
+// written differently is the single quote itself, so that is the only part
+// that follows the system. A line pasted into cmd.exe gets the quotes as part
+// of the value and fails to find the file, which runs nothing.
+//
+// What may stay bare is what neither shell gives a meaning to. The comma is not
+// on the list although sh would allow it: PowerShell reads an unquoted comma
+// as a list, which is the same trap rule 16 of the project notes for an equals
+// sign beside one. Keeping one list for both systems is also what keeps the
+// recorded lines of the screens the same on every system.
 func quote(value string) string {
-	if !strings.ContainsAny(value, " \t") || strings.Contains(value, `"`) {
+	return quoteFor(value, runtime.GOOS == "windows")
+}
+
+// quoteFor is quote for a named system, so that a test on one system can read
+// what the other gets.
+func quoteFor(value string, windows bool) string {
+	if bare(value, windows) {
 		return value
 	}
-	return `"` + value + `"`
+	if windows {
+		// PowerShell takes five characters as a single quote, and a quote
+		// inside a quoted value is written twice.
+		return "'" + powerShellQuotes.Replace(value) + "'"
+	}
+	return "'" + strings.ReplaceAll(value, "'", `'\''`) + "'"
+}
+
+// powerShellQuotes doubles every character PowerShell reads as a single quote:
+// the plain one and four typographic forms of it.
+//
+// Measured on 2026-10-26 with the parser of PowerShell 7 rather than taken from
+// memory: each of the four, left single inside quotes, closed them and gave the
+// line a second command, and a double quote there did not.
+var powerShellQuotes = strings.NewReplacer(
+	"'", "''", "‘", "‘‘", "’", "’’",
+	"‚", "‚‚", "‛", "‛‛")
+
+// bare reports whether a value means only itself in both shells as it stands.
+//
+// ASCII letters and digits and eight marks, with the backslash as well on
+// Windows, where it separates the parts of a path and means nothing to
+// PowerShell. Everything else is quoted, including every character outside
+// ASCII, because PowerShell reads some of them as quotes and dashes.
+func bare(value string, windows bool) bool {
+	for _, character := range value {
+		switch {
+		case character >= 'a' && character <= 'z', character >= 'A' && character <= 'Z',
+			character >= '0' && character <= '9':
+		case strings.ContainsRune("_-./:=+%", character):
+		case character == '\\' && windows:
+		default:
+			return false
+		}
+	}
+	return true
 }

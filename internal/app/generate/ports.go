@@ -79,6 +79,15 @@ type Values interface {
 	// this from the run instead would mean either a failure late or a quiet
 	// blank column, and the blank column is what this project calls silence.
 	ProducesType(kind string) bool
+	// TypeFits reports whether a field described by that type alone can hold
+	// a value in the length it declares, and says why not when it cannot.
+	//
+	// 🔴 Asked by the plan since 2026-10-26. A decimal declared three
+	// characters long passed every check, and the run wrote 0.44 into every
+	// row, four characters each, because the shortest decimal this build makes
+	// is a digit, a point and two places. Only whoever builds the value knows
+	// how short it can be, so the answer is here rather than in the plan.
+	TypeFits(kind string, maxLength int) (bool, string)
 	// CanProduce reports whether this build can fill a field with that
 	// generator in a locale, and says why not when it cannot.
 	//

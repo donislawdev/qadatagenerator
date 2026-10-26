@@ -64,7 +64,50 @@ func NewJSON(files Files, rec recipe.Recipe, stop generate.Halt) (*JSON, error) 
 	if err := usableEncoding(rec.Output.Encoding); err != nil {
 		return nil, err
 	}
+	if err := NestingCollision(rec); err != nil {
+		return nil, err
+	}
 	return &JSON{files: files, rec: rec, keys: newKeys(), stop: stop}, nil
+}
+
+// NestingCollision refuses a recipe whose tree would give one object two
+// members of the same name.
+//
+// # Why only the tree, and why this direction
+//
+// In one file the children of a record are written inside it, under the name
+// of their entity, after its own fields. A parent with a field named after a
+// child entity therefore got the field and then the array under one name, and
+// the run ended with success. Found by an outside review on 2026-10-22. What a
+// reader does with two members of one name is up to the reader, which is why
+// it is refused rather than renamed. The other direction, a child with a field
+// named after its parent, is ParentColumnCollision and holds in every form. A
+// file per entity writes no tree, so nothing collides there.
+//
+// It is exported so that validate can ask the question the writer asks, and the
+// two cannot answer differently about one recipe.
+func NestingCollision(rec recipe.Recipe) error {
+	if rec.Output.Format != NameJSON || rec.Output.FilePerEntity {
+		return nil
+	}
+	for _, parent := range rec.Entities {
+		for _, child := range rec.Entities {
+			if len(child.Parents) == 0 || child.Parents[0].Entity != parent.Name {
+				continue
+			}
+			for _, field := range parent.Fields {
+				if field.Name != child.Name {
+					continue
+				}
+				return fault.New(fault.Config, "entities."+parent.Name+".fields."+field.Name+
+					": the field has the name of the entity "+child.Name+", whose records are "+
+					"written inside each "+parent.Name+" under that name, so one object would "+
+					"hold two members called "+field.Name).
+					DoInstead("rename the field, or set output.file_per_entity to write each table to its own file")
+			}
+		}
+	}
+	return nil
 }
 
 // Begin starts a table.

@@ -19,12 +19,14 @@ package recipeyaml
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/ast"
 	"github.com/goccy/go-yaml/parser"
 
+	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
 	"github.com/donislawdev/qadatagenerator/internal/version"
@@ -759,6 +761,16 @@ func (r *reader) output(node any) recipe.Output {
 			built.Encoding, _ = r.text(where, item.Value)
 		case "delimiter":
 			built.Delimiter, _ = r.text(where, item.Value)
+			// 🔴 Asked here as well as by the writer since 2026-10-26. Until
+			// then validate said a recipe could be used and generate refused
+			// its delimiter, and a line feed passed both. The same rule as the
+			// writer's, so the two cannot disagree again.
+			if _, usable := dataset.UsableSeparator(built.Delimiter); built.Delimiter != "" && !usable {
+				r.report(where, "the delimiter has to be one character other than a quote or a "+
+					"line end, and the recipe gives "+strconv.Quote(built.Delimiter),
+					"one character other than a quote or a line end, such as a comma, a semicolon or a tab",
+					"leave the line out for a comma")
+			}
 		default:
 			r.report(where, "the output section has no such key", strings.Join(outputKeys, ", "),
 				"remove the line or check the spelling")

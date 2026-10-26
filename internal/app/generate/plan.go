@@ -374,6 +374,11 @@ func checkGenerators(entity recipe.Entity, values Values, locale string, plan *P
 			plan.Notes = append(plan.Notes, Note{where,
 				"this build produces no value for a field declared only as " +
 					strconv.Quote(field.Type) + ", so the column will be empty"})
+		case field.Generator == "" && field.HasMaxLength:
+			if fine, why := values.TypeFits(field.Type, field.MaxLength); !fine {
+				return fault.New(fault.Config, where+": "+why).
+					DoInstead("raise max_length, or describe the field with a generator")
+			}
 		case field.Generator == "":
 			continue
 		case !values.Known(field.Generator):

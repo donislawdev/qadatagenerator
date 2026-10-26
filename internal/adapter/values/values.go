@@ -319,15 +319,21 @@ func (s Source) ProducesType(kind string) bool {
 // about it either, so a declared column arrived empty and no part of the run
 // mentioned it. That is silence in the first pillar, found while planning the
 // second.
+//
+// 🔴 The length is held against the limit on both paths. Until 2026-10-26 it was
+// held only after a named generator, and a field described by type alone went
+// round it: a decimal limited to three characters got four in every row.
 func (s Source) Produce(req generate.Request) (string, error) {
-	if req.Generator == "" {
-		return s.fromType(req)
+	produce, made := s.fromType, req.Type
+	if req.Generator != "" {
+		known, found := producers[req.Generator]
+		if !found {
+			return "", fault.New(fault.Config, "no generator called "+req.Generator)
+		}
+		produce = func(req generate.Request) (string, error) { return known.produce(s, req) }
+		made = req.Generator
 	}
-	known, found := producers[req.Generator]
-	if !found {
-		return "", fault.New(fault.Config, "no generator called "+req.Generator)
-	}
-	value, err := known.produce(s, req)
+	value, err := produce(req)
 	if err != nil {
 		return "", err
 	}
@@ -336,7 +342,31 @@ func (s Source) Produce(req generate.Request) (string, error) {
 	}
 	return "", fault.New(fault.Data, fmt.Sprintf(
 		"%s produced a value of %d %s for %s, which accepts %d. Raise the limit or change the generator",
-		req.Generator, measure(value, req.Unit), req.Unit, req.At.Field, req.MaxLength))
+		made, measure(value, req.Unit), req.Unit, req.At.Field, req.MaxLength))
+}
+
+// decimalPlaces is how many places a decimal described by type alone carries.
+//
+// Two, because that is what money and every rate in a business system carry,
+// and because a decimal with a varying number of places is a different value
+// on every row for reasons the reader cannot see.
+const decimalPlaces = 2
+
+// TypeFits reports whether a field of this type can hold a value in the
+// length it declares.
+//
+// The shortest integer is one digit, and the shortest decimal is one digit, a
+// point and the places. Every character of both is a single byte, so the unit
+// the length is counted in does not change the answer.
+func (s Source) TypeFits(kind string, maxLength int) (bool, string) {
+	switch {
+	case kind == TypeInteger && maxLength < 1:
+		return false, fmt.Sprintf("an integer needs at least one digit, and the field accepts %d", maxLength)
+	case kind == TypeDecimal && maxLength < decimalPlaces+2:
+		return false, fmt.Sprintf("a decimal needs at least %d characters, a digit, a point and %d places, "+
+			"and the field accepts %d", decimalPlaces+2, decimalPlaces, maxLength)
+	}
+	return true, ""
 }
 
 // Digits a number gets when the field declares no maximum length.
@@ -369,16 +399,16 @@ func (s Source) fromType(req generate.Request) (string, error) {
 	case TypeInteger:
 		return strconv.FormatInt(s.wholeNumber(req, digits), 10), nil
 	case TypeDecimal:
-		// Two places, because that is what money and every rate in a business
-		// system carry, and because a decimal with a varying number of places
-		// is a different value on every row for reasons the reader cannot see.
-		const places = 2
-		if digits <= places {
-			return "", fault.New(fault.Data, fmt.Sprintf(
-				"%s accepts %d %s, and a decimal needs room for a point and two places",
-				req.At.Field, req.MaxLength, req.Unit))
+		// 🔴 Room for a digit as well as the point and the places. The check
+		// read digits <= places until 2026-10-26, which let three through:
+		// nought digits were drawn for the whole part, the number came back
+		// as 0, and 0.44 is four characters in a field accepting three. The
+		// plan refuses such a field first, through TypeFits, and this stays
+		// for a request that did not come through a plan.
+		if fine, why := s.TypeFits(TypeDecimal, digits); !fine {
+			return "", fault.New(fault.Data, req.At.Field+": "+why)
 		}
-		whole := s.wholeNumber(req, digits-places-1)
+		whole := s.wholeNumber(req, digits-decimalPlaces-1)
 		fraction := s.seed.IntN(coordinate(req, ":fraction"), 100)
 		return fmt.Sprintf("%d.%02d", whole, fraction), nil
 	default:

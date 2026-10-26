@@ -408,10 +408,10 @@ take.refusal.unknown-layer: This build describes no damage of this kind
 take.refusal.unknown-layer.why: A kind with nothing described in it would order a run that produced nothing while looking as though it had.
 take.refusal.unknown-layer.do: Choose a kind from the list above.
 
-take.refusal.delimiter: The field separator has to be one character
-take.refusal.delimiter.why: It is the character that separates the fields of one line, both when this reads the file and when it writes it back.
-take.refusal.delimiter.allowed: One character, such as a comma or a semicolon
-take.refusal.delimiter.do: Put a single character in the field separator above.
+take.refusal.delimiter: The field separator has to be one character other than a quote or a line end
+take.refusal.delimiter.why: It is the character that separates the fields of one line, both when this reads the file and when it writes it back, and a quote or a line end already means something there.
+take.refusal.delimiter.allowed: One character other than a quote or a line end, such as a comma, a semicolon or a tab
+take.refusal.delimiter.do: Put a single character other than a quote in the field separator above.
 
 # tekst-ok: the forms this build writes come from the exporter at run time, take.Check fills Allowed and the screen shows them
 take.refusal.manifest-form: This build does not write a manifest in that form

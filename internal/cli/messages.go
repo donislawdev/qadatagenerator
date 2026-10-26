@@ -247,9 +247,9 @@ const (
 	problemCorruptPerRowWhy = "anything else would be read as one defect per row, so a misspelling would quietly reduce the damage and the run would still succeed"
 	problemCorruptPerRowDo  = "qadg corrupt --per-row any --layers L2,L3 records.csv"
 
-	problemCorruptDelimiter        = "the delimiter has to be one character and this run was given "
-	problemCorruptDelimiterWhy     = "it is the character that separates the fields of one line, both when this reads the file and when it writes it back"
-	problemCorruptDelimiterAllowed = "one character, such as a comma or a semicolon"
+	problemCorruptDelimiter        = "the delimiter has to be one character other than a quote or a line end, and this run was given "
+	problemCorruptDelimiterWhy     = "it is the character that separates the fields of one line, both when this reads the file and when it writes it back, and a quote or a line end already means something there"
+	problemCorruptDelimiterAllowed = "one character other than a quote or a line end, such as a comma, a semicolon or a tab"
 	// The semicolon here is the VALUE of a flag rather than punctuation in a
 	// sentence, and it is the one every European spreadsheet writes, so an
 	// example using anything else would be an example nobody needs.

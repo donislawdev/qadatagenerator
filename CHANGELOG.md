@@ -233,8 +233,32 @@ repository once they are released.
   them. The About screen shows the same two entries, and a button there writes
   their full licence texts to a file you can keep.
 
+### Security
+
+- **A copied command can no longer carry a second command in a file name.**
+  The line offered for copying quoted a value only when it had a space, so a
+  file whose name held a command separator and a command put that command
+  into the line. Every value outside a short list of characters is now in single
+  quotes, written for PowerShell on Windows and for sh elsewhere.
+- **The manifest table guards a few more ways of starting a formula.** A column
+  name opening with a line feed or with a full width equals, plus, minus or at
+  sign went into the spreadsheet form unprotected.
+- **Built with Go 1.27.3**, which fixes a flaw in certificate checking that the
+  earlier version carried into the window binary through a library.
+
 ### Fixed
 
+- **A record of one blank field is still a record.** A table of one column
+  with blank values was written as empty lines, which a reader skips, so the
+  file read back with no records.
+- **A delimiter has to be one character other than a quote or a line end.** A
+  line feed was accepted and gave a file in which records and fields could not
+  be told apart. A delimiter of two characters used to pass validate and then
+  stop generate. Both now refuse the same delimiters.
+- **A parent field named after a child entity is refused for the nested object
+  form.** The parent object held the field and the children under one name.
+- **A decimal limited to fewer than four characters is refused before the
+  run.** A limit of three gave values such as 0.44 in every row.
 - **A failed run with replacing allowed no longer deletes the earlier result.**
   When writing the second file of a dataset failed, the first file of the
   previous dataset was gone, because it had already been replaced and the new

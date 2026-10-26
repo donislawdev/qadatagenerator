@@ -1,6 +1,7 @@
 package format_test
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"strings"
 	"testing"
@@ -10,6 +11,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
 // held is a set of files that never touches a disk, so that a writer can be
@@ -444,6 +446,47 @@ d`}, Parent: dataset.NoParent}); err != nil {
 	}
 }
 
+// A table of one column with blank values reads back with every record it was
+// written with.
+//
+// Reproduced by an outside review on 2026-10-22: three blank rows were written
+// as three empty lines, a reader of the format skips an empty line, and the
+// file read back as a header and no records.
+func TestABlankRecordOfOneColumnIsStillARecord(t *testing.T) {
+	files := newHeld()
+	rec := recipe.Recipe{Seed: "s", Locale: "en-US",
+		Output: recipe.Output{FilePerEntity: true},
+		Entities: []recipe.Entity{{Name: "t", Count: 3, HasCount: true,
+			Fields: []recipe.Field{{Name: "name"}}}}}
+	writer, err := format.NewCSV(files, rec)
+	if err != nil {
+		t.Fatalf("the writer was refused: %v", err)
+	}
+	planned := dataset.Table{Entity: "t", Columns: []string{"name"}, Rows: 3}
+	if err := writer.Begin(planned); err != nil {
+		t.Fatal(err)
+	}
+	for range 3 {
+		if err := writer.Write(dataset.Record{Values: []string{""}, Parent: dataset.NoParent}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := writer.End(planned); err != nil {
+		t.Fatal(err)
+	}
+	written := files.written["t.csv"].String()
+	records, err := csv.NewReader(strings.NewReader(written)).ReadAll()
+	if err != nil {
+		t.Fatalf("the file does not read back: %v\n%q", err, written)
+	}
+	if len(records) != 4 {
+		t.Errorf("a header and three blank records read back as %d lines: %q", len(records), written)
+	}
+	if written != "name\n\"\"\n\"\"\n\"\"\n" {
+		t.Errorf("the bytes are %q", written)
+	}
+}
+
 func column(t *testing.T, text string, index int) []string {
 	t.Helper()
 	var taken []string
@@ -543,6 +586,40 @@ func TestTheFlatObjectFormWritesOneFilePerTable(t *testing.T) {
 	}
 	if strings.Contains(files.written["customer.json"].String(), `"order"`) {
 		t.Error("the flat form nested a child inside its parent")
+	}
+}
+
+// A parent with a field named after one of its children is refused by the
+// writer of the tree, and by nobody else, because only the tree puts the two
+// under one name.
+//
+// Reproduced by an outside review on 2026-10-22: the object of a parent held
+// "child": "469479" and then "child": [...], and the run ended with success.
+func TestATreeRefusesAParentFieldNamedAfterAChild(t *testing.T) {
+	rec := recipe.Recipe{Seed: "s", Locale: "en-US",
+		Output: recipe.Output{Format: format.NameJSON},
+		Entities: []recipe.Entity{
+			{Name: "parent", Count: 2, HasCount: true,
+				Fields: []recipe.Field{{Name: "child", Type: "integer"}}},
+			{Name: "child", Parents: []recipe.Parent{{Entity: "parent", Min: 1, Max: 1}},
+				Fields: []recipe.Field{{Name: "n", Type: "integer"}}},
+		}}
+	_, err := format.NewJSON(newHeld(), rec, generate.NeverStops{})
+	if err == nil {
+		t.Fatal("a tree with two members called child in one object was accepted")
+	}
+	if fault.KindOf(err) != fault.Config || !strings.Contains(err.Error(), "entities.parent.fields.child") {
+		t.Errorf("the refusal is %v with %q", fault.KindOf(err), err)
+	}
+
+	for _, other := range []recipe.Output{
+		{Format: format.NameJSON, FilePerEntity: true},
+		{Format: format.NameCSV},
+	} {
+		rec.Output = other
+		if err := format.NestingCollision(rec); err != nil {
+			t.Errorf("%+v writes no tree and was refused: %v", other, err)
+		}
 	}
 }
 

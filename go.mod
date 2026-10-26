@@ -6,7 +6,7 @@ module github.com/donislawdev/qadatagenerator
 // Pinned, not a minimum. Determinism is an unbreakable rule in this project,
 // so the toolchain that produced a dataset is part of what has to be
 // reproducible. CI pins the same version through GOTOOLCHAIN.
-go 1.27.2
+go 1.27.3
 
 require (
 	fyne.io/fyne/v2 v2.8.2

@@ -79,9 +79,13 @@ func TestEveryOrderedEntryHasARowAndSaysWhetherItHappened(t *testing.T) {
 func TestAValueASpreadsheetWouldRunIsWrittenSoItShows(t *testing.T) {
 	var out strings.Builder
 	table := manifestexport.NewCSV(&out)
-	for at, field := range []string{
-		`=cmd|" /C calc"!A0`, "+1+1", "-2+3", "@SUM(A1:A9)", "pesel", "id",
-	} {
+	// The line feed and the four full width forms since 2026-10-26, after an
+	// outside review wrote "\n=1+1" and "＝1+1" through as column names.
+	opening := []string{
+		`=cmd|" /C calc"!A0`, "+1+1", "-2+3", "@SUM(A1:A9)",
+		"\n=1+1", "＝1+1", "＋1+1", "－2+3", "＠SUM(A1:A9)",
+	}
+	for at, field := range append(append([]string{}, opening...), "pesel", "id") {
 		table.Add(applied(at+1, field, "L3.checksum.off_by_one"))
 	}
 	if err := table.Finish(); err != nil {
@@ -89,15 +93,15 @@ func TestAValueASpreadsheetWouldRunIsWrittenSoItShows(t *testing.T) {
 	}
 
 	rows := read(t, out.String())
-	if len(rows) != 6 {
-		t.Fatalf("six entries were ordered and the file has %d rows", len(rows))
+	if len(rows) != len(opening)+2 {
+		t.Fatalf("%d entries were ordered and the file has %d rows", len(opening)+2, len(rows))
 	}
-	for _, row := range rows[:4] {
+	for _, row := range rows[:len(opening)] {
 		if !strings.HasPrefix(row["field"], "'") {
 			t.Errorf("%q opens a formula and was written as it stands", row["field"])
 		}
 	}
-	for _, row := range rows[4:] {
+	for _, row := range rows[len(opening):] {
 		if strings.HasPrefix(row["field"], "'") {
 			t.Errorf("%q is an ordinary name and was altered anyway", row["field"])
 		}

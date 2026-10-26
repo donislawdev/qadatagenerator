@@ -7,6 +7,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/mutators"
 	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
+	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 )
 
 // RefusalKind is a request this mode will not carry out, named rather than
@@ -33,7 +34,8 @@ const (
 	NoLayers
 	// UnknownLayer names a layer this build describes no damage in.
 	UnknownLayer
-	// UnreadableDelimiter is a field separator that is not one character.
+	// UnreadableDelimiter is a field separator the format cannot be split on:
+	// not one character, or a quote, a line end or a zero byte.
 	UnreadableDelimiter
 	// UnknownManifestForm asks for an export this build does not write.
 	UnknownManifestForm
@@ -147,7 +149,7 @@ func checkLayers(settings Settings, described catalog.Catalog) Refusal {
 
 // checkValues refuses a value this build cannot read, one setting at a time.
 func checkValues(settings Settings) Refusal {
-	if len([]rune(settings.Delimiter)) != 1 {
+	if _, usable := dataset.UsableSeparator(settings.Delimiter); !usable {
 		return Refusal{Kind: UnreadableDelimiter, Value: settings.Delimiter}
 	}
 	if !manifestexport.Usable(settings.Manifest) {

@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/mutators"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
@@ -204,6 +205,11 @@ type whatARunWouldDo struct {
 // that runs it, which is where somebody who overrode one will be reading.
 func askThePlan(rec recipe.Recipe) whatARunWouldDo {
 	plan, err := generate.Prepare(rec, values.New(rec.Locale, rec.Seed))
+	// The writer of the tree refuses a parent field named after a child, and
+	// validate asks it the same question so that the two verbs agree.
+	if err == nil {
+		err = format.NestingCollision(rec)
+	}
 	switch {
 	case err == nil:
 		return whatARunWouldDo{tables: len(plan.Entities), rows: plan.TotalRows(),
