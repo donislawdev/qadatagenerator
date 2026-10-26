@@ -1,10 +1,13 @@
 package take
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestexport"
+	"github.com/donislawdev/qadatagenerator/internal/damage"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 )
 
@@ -134,10 +137,12 @@ func TestARefusalCarriesWhatWouldHaveBeenTaken(t *testing.T) {
 // instead of meeting. The comment on CheckOutput says exactly this, and the
 // measurement agrees with it.
 //
-// So no test can show that refusal firing while the name is built this way, and
-// writing one that appeared to would mean testing something else by accident.
-// What shows it can fire is a mutation that changes how the name is built,
-// which is where that proof lives.
+// So no test can show that refusal firing for the damaged file while the name
+// is built this way, and writing one that appeared to would mean testing
+// something else by accident. What shows it can fire is a mutation that changes
+// how the name is built, which is where that proof lives. The same refusal for
+// the manifest beside it is reachable, and is shown by
+// TestASourceNamedAfterTheManifestIsNotWrittenOver.
 //
 // What is left here is worth keeping on its own. A check that never fires is
 // one careless line away from being a check that always fires, and this one
@@ -175,6 +180,47 @@ func TestTwoNamesForOnePlaceAreSeenAsOne(t *testing.T) {
 				"stands between a damaged file and the records it was made from",
 				given.what, given.left, given.right, got)
 		}
+	}
+}
+
+// A source named after a file the run leaves beside the data is refused,
+// whatever form of the manifest was asked for.
+//
+// Reproduced by an outside review on 2026-10-22: a source called
+// expectation-manifest.csv, damaged with --overwrite into its own directory and
+// the manifest exported as a table, was replaced by that table and the run
+// ended with success. The suffix protected the damaged file and nothing
+// protected the manifest.
+func TestASourceNamedAfterTheManifestIsNotWrittenOver(t *testing.T) {
+	dir := t.TempDir()
+	for _, form := range append([]string{""}, manifestexport.Forms()...) {
+		for _, name := range damage.Files(form) {
+			settings := usable()
+			settings.Out, settings.Manifest = dir, form
+			source := filepath.Join(dir, name)
+			if refusal := CheckOutput(source, settings); refusal.Kind != WouldOverwriteSource {
+				t.Errorf("with the manifest as %q, a source called %s in the output directory "+
+					"was not refused, and the run would write over it", form, name)
+			}
+		}
+	}
+}
+
+// Two names for one file that text cannot tell apart are still seen as one,
+// once the file exists.
+func TestALinkToTheSourceIsSeenAsTheSource(t *testing.T) {
+	dir := t.TempDir()
+	source := filepath.Join(dir, "contacts.csv")
+	if err := os.WriteFile(source, []byte("name\nAlice\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	linked := filepath.Join(dir, "other.csv")
+	if err := os.Link(source, linked); err != nil {
+		t.Skipf("this file system makes no hard links: %v", err)
+	}
+	if !sameFile(linked, source) {
+		t.Error("a hard link to the source was taken for another file, so a run writing to it " +
+			"would replace the records it was made from")
 	}
 }
 

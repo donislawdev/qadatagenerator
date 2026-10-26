@@ -569,4 +569,9 @@ var toolGuards = []Guard{
 	{"the terminal line of the manifest browser names both files once both are open, and until then says which name is an example and keeps its copy out of reach", "TestTheTerminalLineNamesBothFilesOrSaysWhichIsAnExample", "internal/gui/manifestview", ByMutation},
 	{"a manifest the browser could not read is named in the band beside the word that it could not be read, and the card under the table says what went wrong", "TestADocumentThatCouldNotBeReadIsNamedInTheBandAndExplainedInTheCard", "internal/gui/manifestview", ByMutation},
 	{"every word the toolkit asks for is handed to it or left out with a reason, and every word handed to it is one it still asks for", "TestTheWordsHandedToTheToolkitAreTheWordsItAsksFor", "internal/gui/fynetheme", ByMutation},
+	{"a run undone while replacing gives the earlier file back rather than leaving nothing under its name", "TestAnUndoneReplacementGivesTheEarlierFileBack", "internal/adapter/store", ByMutation},
+	{"a replacement that succeeds keeps no hidden copy of what it replaced", "TestAReplacementThatSucceedsLeavesNoCopyBehind", "internal/adapter/store", ByMutation},
+	{"a directory standing where a file of the dataset goes is refused before any work, with replacing allowed or not", "TestADirectoryUnderTheNameIsRefusedBeforeAnythingIsWritten", "internal/adapter/store", ByMutation},
+	{"a source named after a file the run leaves beside the data is never written over, whatever form of the manifest was asked for", "TestASourceNamedAfterTheManifestIsNotWrittenOver", "internal/take", ByMutation},
+	{"two names for one file that text cannot tell apart are seen as one once the file exists", "TestALinkToTheSourceIsSeenAsTheSource", "internal/take", ByMutation},
 }

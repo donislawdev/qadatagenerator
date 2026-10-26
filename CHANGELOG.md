@@ -235,6 +235,23 @@ repository once they are released.
 
 ### Fixed
 
+- **A failed run with replacing allowed no longer deletes the earlier result.**
+  When writing the second file of a dataset failed, the first file of the
+  previous dataset was gone, because it had already been replaced and the new
+  one was then taken back. The earlier file is now moved aside first and put
+  back if the run is undone.
+- **A directory standing where a file of the dataset goes is refused before
+  anything is written.** It used to be found at the very end, after the whole
+  dataset had been produced.
+- **corrupt no longer writes over a source named after its own manifest.** A
+  file called expectation-manifest.csv, damaged with --overwrite into its own
+  directory, was replaced by the manifest table and the run ended with success.
+  Every file a run writes is now held against the source, including a second
+  name for the same file such as a link.
+- **Two runs writing to one directory without --overwrite can no longer
+  replace each other.** A run checked that the name was free before taking it,
+  so a run finishing in between could have its result replaced. The name is
+  now checked after it is taken.
 - **A blank in a gender or date of birth column no longer stops the run.** A
   column with a share of empty values left a PESEL bound to it with nothing to
   encode, and the run ended on the first blank row. A blank now binds nothing

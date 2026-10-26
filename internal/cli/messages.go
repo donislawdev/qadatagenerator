@@ -265,7 +265,7 @@ const (
 	// stays because the day somebody changes how that name is built is the day
 	// it is the only thing between that change and somebody losing their file.
 	problemCorruptWouldOverwrite        = "this run would write over the file it is reading, "
-	problemCorruptWouldOverwriteWhy     = "the damaged records would replace the records they were made from, and nothing could bring the file back"
+	problemCorruptWouldOverwriteWhy     = "a file this run writes, the damaged records or the manifest, would replace the file they were made from, and nothing could bring it back"
 	problemCorruptWouldOverwriteAllowed = "an output directory that is not where the source file is"
 	problemCorruptWouldOverwriteDo      = "qadg corrupt --out ./damaged --layers L2,L3 records.csv"
 

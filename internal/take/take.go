@@ -25,6 +25,7 @@
 package take
 
 import (
+	"os"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -180,29 +181,37 @@ func OutputName(source string) string {
 
 // CheckOutput refuses a run that would write over the file it is reading.
 //
-// # Why both the suffix and the check
+// # Every file the run writes, not only the damaged one
 //
-// The suffix makes the collision impossible by construction, so this can never
-// fire while the name is built that way. It stays because it guards something
-// that cannot be taken back: this is the only mode that reads and writes at
-// once, and the day somebody changes how the name is built, a redundant check
-// is what stands between that change and a person losing the file they handed
-// over. It has a mutation of its own for the same reason.
+// 🔴 The suffix keeps the damaged file apart from its source by construction,
+// and until 2026-10-26 that file was the only one asked about. The manifest
+// and its export are written into the same directory under names fixed by this
+// tool, so a source called expectation-manifest.csv, damaged with --overwrite
+// into its own directory, was replaced by the table of the manifest and the run
+// ended with success. Found by an outside review on 2026-10-22. Every name the
+// run writes is now held against the source, through the same function that
+// names them to the person afterwards.
+//
+// The check against the damaged file stays although the suffix makes it
+// unreachable, because it guards something that cannot be taken back: the day
+// somebody changes how the name is built, it is what stands between that change
+// and a person losing the file they handed over.
 func CheckOutput(source string, settings Settings) Refusal {
-	if sameFile(filepath.Join(settings.Out, OutputName(source)), source) {
-		return Refusal{Kind: WouldOverwriteSource, Value: source}
+	for _, name := range append([]string{OutputName(source)}, damage.Files(settings.Manifest)...) {
+		if sameFile(filepath.Join(settings.Out, name), source) {
+			return Refusal{Kind: WouldOverwriteSource, Value: source}
+		}
 	}
 	return Refusal{}
 }
 
-// sameFile reports whether two paths name one place, as far as comparing text
-// can tell.
+// sameFile reports whether two paths name one place.
 //
-// It compares cleaned absolute paths. That answers the case this guards, which
-// is a directory and a name that meet, and it does not answer links or two
-// mounts of one volume. Saying so here is cheaper than a reader assuming it
-// covers more: what covers the rest is the suffix above, which keeps the two
-// names apart whatever the file system thinks.
+// The text is compared first, which answers a directory and a name that meet
+// before anything exists. When both exist, the file system is asked as well,
+// which answers what text cannot: one name in two cases on a system that does
+// not tell them apart, and a link. Two mounts of one volume are still not
+// answered, and saying so is cheaper than a reader assuming they are.
 func sameFile(written, source string) bool {
 	left, err := filepath.Abs(written)
 	if err != nil {
@@ -212,7 +221,15 @@ func sameFile(written, source string) bool {
 	if err != nil {
 		return false
 	}
-	return filepath.Clean(left) == filepath.Clean(right)
+	if filepath.Clean(left) == filepath.Clean(right) {
+		return true
+	}
+	there, err := os.Stat(left)
+	if err != nil {
+		return false
+	}
+	read, err := os.Stat(right)
+	return err == nil && os.SameFile(there, read)
 }
 
 // Opened is somebody else's file, read once and understood as far as looking at

@@ -95,7 +95,7 @@ func (s *Set) Create(name string) (*os.File, error) {
 //
 // # Why this is separate from claim, which answers the same question
 //
-// 🔴 claim answers it about somebody else and steps aside entirely when
+// 🔴 claim answers it about somebody else and takes no marker when
 // overwriting is allowed, because overwriting says a file already on the disk
 // may be replaced. It never said a run may replace its own work, and until
 // 2026-08-26 it did: two things written under one name both reached Commit,
@@ -161,12 +161,7 @@ func (s *Set) marker(name string) string {
 // the alternative is a lock that expires and stops meaning anything.
 func (s *Set) claim(name, final string) error {
 	if s.overwrite {
-		return nil
-	}
-	if _, err := os.Stat(final); err == nil {
-		return fault.New(fault.IO,
-			final+" already exists, and nothing has been written").
-			DoInstead("delete it, choose another directory, or allow replacing")
+		return replaceable(final)
 	}
 
 	marker := s.marker(name)
@@ -184,7 +179,47 @@ func (s *Set) claim(name, final string) error {
 		return fault.Wrap(fault.IO, err, "cannot close "+marker)
 	}
 	s.reserved[marker] = true
+	// 🔴 Asked only once the marker is ours, never before. Until 2026-10-26 it
+	// was asked first, and that answer is older than the marker: a run that
+	// found the name free, and then lost the moment before taking the marker to
+	// another run that finished and tidied its own marker away, held a marker
+	// for a name that was no longer free and replaced that run's result at
+	// Commit. Reported by an outside review on 2026-10-22 from the order of the
+	// calls, not from a race anybody saw. Asked after, the answer cannot be
+	// overtaken by a run of this tool, because any other run has to get past
+	// the same marker first.
+	if err := absent(final); err != nil {
+		s.release(marker)
+		return err
+	}
 	return nil
+}
+
+// absent refuses a destination that already holds something.
+func absent(final string) error {
+	if _, err := os.Lstat(final); err == nil {
+		return fault.New(fault.IO,
+			final+" already exists, and nothing has been written").
+			DoInstead("delete it, choose another directory, or allow replacing")
+	}
+	return nil
+}
+
+// replaceable refuses, before any work, a destination that replacing cannot
+// reach.
+//
+// A directory under the name a file is meant to take cannot be renamed over,
+// and until 2026-10-26 that was found at Commit, after the whole dataset had
+// been written. It is a fact about the disk known at the start, so the start is
+// where it is said.
+func replaceable(final string) error {
+	held, err := os.Lstat(final)
+	if err != nil || !held.IsDir() {
+		return nil
+	}
+	return fault.New(fault.IO,
+		final+" is a directory, which a file of the dataset cannot replace, and nothing has been written").
+		DoInstead("move the directory away, or choose another directory to write to")
 }
 
 // release gives a claimed name back. It reports nothing, because it runs on a
@@ -218,6 +253,22 @@ func (s *Set) release(marker string) {
 // still leaves the halfway state, because nothing short of writing the whole set
 // into one directory and renaming that directory would fix it. That is stated
 // rather than implied, and the alternative is in the backlog.
+//
+// # Why a file being replaced is moved aside first rather than renamed over
+//
+// 🔴 Putting a run back only returns the directory to what it held before when
+// nothing was there before. With replacing allowed, the first rename used to
+// land on the earlier file and destroy it, and putting the new file back then
+// left NOTHING under that name: a failure on the second file of a set deleted
+// the first file of the previous result. Found by an outside review on
+// 2026-10-22, reproduced there with a directory in the way of the second name.
+//
+// So the earlier file is renamed to a hidden name beside it before the new one
+// takes its place, put back if the run is undone, and removed once every file
+// is in place. A machine losing power between those two renames leaves the
+// earlier file under the hidden name rather than nowhere, which is the halfway
+// state worth having: rubbish beside a result can be tidied, a result that is
+// gone cannot be had back.
 func (s *Set) Commit() error {
 	for _, file := range s.open {
 		if err := file.Close(); err != nil {
@@ -226,25 +277,81 @@ func (s *Set) Commit() error {
 	}
 	s.open = nil
 
-	moved := make([]string, 0, len(s.pending))
+	moved := make([]placed, 0, len(s.pending))
 	for _, temporary := range sortedKeys(s.pending) {
 		final := s.pending[temporary]
-		if err := os.Rename(temporary, final); err != nil {
-			return fault.Wrap(fault.IO, err, "cannot put "+final+" in place"+s.putBack(moved))
+		earlier, err := s.setAside(final)
+		if err != nil {
+			return fault.Wrap(fault.IO, err, "cannot move the earlier "+final+" aside"+
+				s.putBack(moved))
 		}
-		moved = append(moved, temporary)
+		if err := os.Rename(temporary, final); err != nil {
+			undone := append(moved, placed{temporary: "", earlier: earlier, final: final})
+			return fault.Wrap(fault.IO, err, "cannot put "+final+" in place"+s.putBack(undone))
+		}
+		moved = append(moved, placed{temporary: temporary, earlier: earlier, final: final})
 	}
 
-	for _, temporary := range moved {
-		final := s.pending[temporary]
-		delete(s.pending, temporary)
+	for _, done := range moved {
+		delete(s.pending, done.temporary)
+		// The earlier file has been replaced for good, which is what replacing
+		// was allowed to do. Failing to remove the copy kept on the way is not
+		// a failure of the run: every file is in place, and the copy is a
+		// hidden file beside them rather than a missing one.
+		if done.earlier != "" {
+			_ = os.Remove(done.earlier)
+		}
 		// Once the real file is in place it is the thing that stops the next
 		// run, so the marker has done its job and goes. Leaving it would block
 		// every later run against a directory that now legitimately holds a
 		// result.
-		s.release(filepath.Join(filepath.Dir(final), "."+filepath.Base(final)+".claim"))
+		s.release(s.marker(filepath.Base(done.final)))
 	}
 	return nil
+}
+
+// placed is one file Commit has put under its real name, together with where
+// the file it replaced is waiting.
+type placed struct {
+	// temporary is where the new file came from, and empty for the file whose
+	// own rename failed, which has nothing to take back.
+	temporary string
+	// earlier is the hidden name of the file this one replaced, and empty when
+	// the name was free.
+	earlier string
+	final   string
+}
+
+// setAside moves a file already sitting under the name aside, and says where
+// it went. A name holding nothing gives an empty answer and no error.
+//
+// The hidden name is created rather than made up, so that it cannot be a file
+// somebody else already has, and the rename then replaces that empty file,
+// which every supported system does on rename.
+//
+// A directory is left where it is. Create refuses one that is there at the
+// start, so a directory here arrived during the run, and moving somebody's
+// directory to a hidden name is not what replacing a file was allowed to do. The
+// rename onto it fails and the run is undone, as it was before this existed.
+func (s *Set) setAside(final string) (string, error) {
+	held, err := os.Lstat(final)
+	if err != nil || held.IsDir() {
+		return "", nil
+	}
+	holder, err := os.CreateTemp(s.dir, "."+filepath.Base(final)+".*.old")
+	if err != nil {
+		return "", err
+	}
+	earlier := holder.Name()
+	if err := holder.Close(); err != nil {
+		_ = os.Remove(earlier)
+		return "", err
+	}
+	if err := os.Rename(final, earlier); err != nil {
+		_ = os.Remove(earlier)
+		return "", err
+	}
+	return earlier, nil
 }
 
 // putBack undoes the renames that succeeded, and says what it could not undo.
@@ -253,19 +360,37 @@ func (s *Set) Commit() error {
 // that is already failing and the reader needs one sentence naming both the
 // failure and what is still on the disk because of it. Silence here would be the
 // worst of the three: a directory holding files nobody was told about.
-func (s *Set) putBack(moved []string) string {
-	var stuck []string
+func (s *Set) putBack(moved []placed) string {
+	var stuck, kept []string
 	for index := len(moved) - 1; index >= 0; index-- {
-		temporary := moved[index]
-		if err := os.Rename(s.pending[temporary], temporary); err != nil {
-			stuck = append(stuck, s.pending[temporary])
+		done := moved[index]
+		if done.temporary != "" {
+			if err := os.Rename(done.final, done.temporary); err != nil {
+				stuck = append(stuck, done.final)
+				if done.earlier != "" {
+					kept = append(kept, done.earlier)
+				}
+				continue
+			}
+		}
+		if done.earlier == "" {
+			continue
+		}
+		if err := os.Rename(done.earlier, done.final); err != nil {
+			kept = append(kept, done.earlier)
 		}
 	}
-	if len(stuck) == 0 {
-		return ""
+	said := ""
+	if len(stuck) > 0 {
+		sort.Strings(stuck)
+		said += ". These were written and could not be taken back: " + strings.Join(stuck, ", ")
 	}
-	sort.Strings(stuck)
-	return ". These were written and could not be taken back: " + strings.Join(stuck, ", ")
+	if len(kept) > 0 {
+		sort.Strings(kept)
+		said += ". The files they were to replace are kept under these names: " +
+			strings.Join(kept, ", ")
+	}
+	return said
 }
 
 // Discard removes everything this run made. It is what a signal handler calls,

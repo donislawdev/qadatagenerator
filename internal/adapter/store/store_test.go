@@ -310,6 +310,107 @@ func TestARenameThatFailsTakesTheEarlierOnesBack(t *testing.T) {
 	}
 }
 
+// A run that is undone while replacing gives the earlier result back, rather
+// than leaving nothing where it stood.
+//
+// Reproduced by an outside review on 2026-10-22: with replacing allowed, the
+// first rename destroyed the earlier a.csv, putting the new one back emptied
+// the name, and a failure on the second file of the set deleted the first file
+// of the previous result.
+func TestAnUndoneReplacementGivesTheEarlierFileBack(t *testing.T) {
+	dir := t.TempDir()
+	earlier := filepath.Join(dir, "a.csv")
+	if err := os.WriteFile(earlier, []byte("ORIGINAL DATA"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	set := store.New(dir, true)
+	first, err := set.Create("a.csv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := first.WriteString("new"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := set.Create("b.csv"); err != nil {
+		t.Fatal(err)
+	}
+	blocked := filepath.Join(dir, "b.csv")
+	if err := os.Mkdir(blocked, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(blocked, "in the way"), []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := set.Commit(); err == nil {
+		t.Fatal("a rename onto a directory succeeded, so this test proves nothing")
+	}
+	set.Discard()
+
+	held, err := os.ReadFile(earlier)
+	if err != nil {
+		t.Fatalf("the file the run was replacing is gone after the run was undone: %v", err)
+	}
+	if string(held) != "ORIGINAL DATA" {
+		t.Errorf("a.csv holds %q after the run was undone, and held %q before it",
+			held, "ORIGINAL DATA")
+	}
+	if left := remaining(t, dir); len(left) != 2 || left[0] != "a.csv" || left[1] != "b.csv" {
+		t.Errorf("the directory holds %v rather than what it held before the run", left)
+	}
+}
+
+// A replacement that succeeds keeps no copy of what it replaced.
+func TestAReplacementThatSucceedsLeavesNoCopyBehind(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "a.csv"), []byte("old"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	set := store.New(dir, true)
+	file, err := set.Create("a.csv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := file.WriteString("new"); err != nil {
+		t.Fatal(err)
+	}
+	if err := set.Commit(); err != nil {
+		t.Fatal(err)
+	}
+	held, err := os.ReadFile(filepath.Join(dir, "a.csv"))
+	if err != nil || string(held) != "new" {
+		t.Errorf("a.csv holds %q (%v) after replacing it with %q", held, err, "new")
+	}
+	if left := remaining(t, dir); len(left) != 1 {
+		t.Errorf("the directory holds %v, and the copy of what was replaced should be gone", left)
+	}
+}
+
+// A directory standing where a file of the dataset is to go is refused before
+// any work, rather than found at the end of the run.
+func TestADirectoryUnderTheNameIsRefusedBeforeAnythingIsWritten(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.Mkdir(filepath.Join(dir, "a.csv"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for _, overwrite := range []bool{false, true} {
+		set := store.New(dir, overwrite)
+		_, err := set.Create("a.csv")
+		set.Discard()
+		if err == nil {
+			t.Errorf("overwrite=%v: a directory under the name was accepted", overwrite)
+			continue
+		}
+		if fault.KindOf(err) != fault.IO || !strings.Contains(err.Error(), "nothing has been written") {
+			t.Errorf("overwrite=%v: the refusal reads %q with the kind %v", overwrite, err,
+				fault.KindOf(err))
+		}
+	}
+	if left := remaining(t, dir); len(left) != 1 {
+		t.Errorf("a refused run left %v behind", left)
+	}
+}
+
 // remaining names what a directory holds.
 func remaining(t *testing.T, dir string) []string {
 	t.Helper()

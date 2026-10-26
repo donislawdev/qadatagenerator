@@ -429,7 +429,7 @@ take.refusal.per-row.why: Anything else would be read as one defect per record, 
 take.refusal.per-row.do: Choose a setting from the list above.
 
 take.refusal.overwrite-source: This run would write over the file it is reading
-take.refusal.overwrite-source.why: The damaged records would replace the records they were made from, and nothing could bring the file back.
+take.refusal.overwrite-source.why: A file this run writes, the damaged records or the manifest, would replace the file they were made from, and nothing could bring it back.
 take.refusal.overwrite-source.allowed: A directory that is not where the file itself sits
 take.refusal.overwrite-source.do: Choose another directory to write to.
 
