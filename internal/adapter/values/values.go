@@ -325,12 +325,19 @@ func (s Source) ProducesType(kind string) bool {
 // round it: a decimal limited to three characters got four in every row.
 func (s Source) Produce(req generate.Request) (string, error) {
 	produce, made := s.fromType, req.Type
-	if req.Generator != "" {
+	switch {
+	case len(req.Values) > 0:
+		produce, made = s.fromValues, "the list under values"
+	case req.Generator != "":
 		known, found := producers[req.Generator]
 		if !found {
 			return "", fault.New(fault.Config, "no generator called "+req.Generator)
 		}
-		produce = func(req generate.Request) (string, error) { return known.produce(s, req) }
+		build := known.produce
+		if known.entries != nil {
+			build = fromEntries(known.entries)
+		}
+		produce = func(req generate.Request) (string, error) { return build(s, req) }
 		made = req.Generator
 	}
 	value, err := produce(req)
@@ -466,8 +473,17 @@ type producer func(Source, generate.Request) (string, error)
 // the provider beside the function means one entry answers both, and adding a
 // generator cannot leave the second answer behind.
 type generator struct {
-	// produce makes the value.
+	// produce makes the value. A generator drawing from a word list leaves it
+	// nil and says which entries it draws from instead.
 	produce producer
+	// entries names the entries a request draws from, before the limit on
+	// length is applied.
+	//
+	// 🔴 One function answers both the draw and the question of how many
+	// values there are (DomainOf), since 2026-10-26. Two would be a place for
+	// the run to draw a name the domain does not hold, and a unique field
+	// walking that domain would then promise a free value that was taken.
+	entries listed
 	// behind is the identifier provider this draws on, when there is one. A
 	// generator drawing from a word list or from arithmetic leaves it nil.
 	behind provider.Provider
@@ -529,16 +545,16 @@ const (
 // producers is the registry. It is a map rather than a switch so that the list
 // of names and the list of implementations cannot drift apart.
 var producers = map[string]generator{
-	FirstName: {produce: Source.firstName, list: "first-names",
+	FirstName: {entries: Source.firstNames, list: "first-names",
 		needs: fromLists("first-names-female", "first-names-male"),
 		reads: everywhere(provider.RoleGender), topic: TopicPeople},
-	LastName: {produce: Source.lastName, list: "last-names", needs: surnameLists,
+	LastName: {entries: Source.lastNames, list: "last-names", needs: surnameLists,
 		reads: whereSurnamesInflect, topic: TopicPeople},
 	Gender:    {produce: Source.gender, topic: TopicPeople},
 	BirthDate: {produce: Source.birthDate, topic: TopicPeople},
-	City: {produce: fromList("cities"), list: "cities", needs: fromLists("cities"),
+	City: {entries: fromList("cities"), list: "cities", needs: fromLists("cities"),
 		topic: TopicPlaces},
-	Region: {produce: fromList("regions"), list: "regions", needs: fromLists("regions"),
+	Region: {entries: fromList("regions"), list: "regions", needs: fromLists("regions"),
 		topic: TopicPlaces},
 	PostalCode: {produce: Source.postalCode, behind: us.Postal{}, needs: postalRegister},
 	Pesel: {produce: fromProvider(pl.PESEL{}), behind: pl.PESEL{},
@@ -561,19 +577,19 @@ func fromProvider(p provider.Provider) producer {
 	}
 }
 
-// fromList draws an entry out of a word list.
-func fromList(name string) producer {
-	return func(s Source, req generate.Request) (string, error) {
-		return s.draw(name, req)
+// fromList names the entries of one word list.
+func fromList(name string) listed {
+	return func(s Source, _ generate.Request) (listing, error) {
+		return s.entriesOf(name)
 	}
 }
 
-// firstName draws a name of the gender the row already carries.
+// firstNames names the first names of the gender the row already carries.
 //
 // A row whose gender says nothing draws from the two lists together rather than
 // from one of them, because picking a side quietly would make every dataset
 // without a gender column read as one sex.
-func (s Source) firstName(req generate.Request) (string, error) {
+func (s Source) firstNames(req generate.Request) (listing, error) {
 	// 🔴 The bound value is PARSED rather than compared. Until 2026-09-06 this
 	// compared it against the word female itself, while the scheme behind a
 	// PESEL accepted eleven spellings, so a recipe binding f got a PESEL of a
@@ -581,11 +597,11 @@ func (s Source) firstName(req generate.Request) (string, error) {
 	// one declared rule, two answers.
 	switch bound, _ := req.Agrees.Value(provider.RoleGender); genderOf(bound) {
 	case provider.Female:
-		return s.draw("first-names-female", req)
+		return s.entriesOf("first-names-female")
 	case provider.Male:
-		return s.draw("first-names-male", req)
+		return s.entriesOf("first-names-male")
 	default:
-		return s.drawEither("first-names-female", "first-names-male", req)
+		return s.entriesEither("first-names-female", "first-names-male")
 	}
 }
 
@@ -604,8 +620,8 @@ func genderOf(bound string) provider.Gender {
 	return provider.Unknown
 }
 
-// lastName draws a surname, and in Polish that depends on the gender of the
-// bearer.
+// lastNames names the surnames a row draws from, and in Polish that depends on
+// the gender of the bearer.
 //
 // Polish surnames inflect: a family name ending in ski is noted for a man and
 // ska for a woman, so a list drawn without regard to the gender column produces
@@ -621,17 +637,17 @@ func genderOf(bound string) provider.Gender {
 // surname ending in ska in a thousand rows, and about one in a hundred received
 // a masculine adjective such as Mały or Brudny, which the list of surnames that
 // do not inflect carried among them.
-func (s Source) lastName(req generate.Request) (string, error) {
+func (s Source) lastNames(req generate.Request) (listing, error) {
 	if !strings.HasPrefix(s.locale, "pl") {
-		return s.draw("last-names", req)
+		return s.entriesOf("last-names")
 	}
 	switch given, _ := req.Agrees.Value(provider.RoleGender); genderOf(given) {
 	case provider.Male:
-		return s.drawEither("last-names-male", "last-names-unisex", req)
+		return s.entriesEither("last-names-male", "last-names-unisex")
 	case provider.Female:
-		return s.drawDerived(feminineSurnames, feminineOf, req)
+		return s.entriesDerived(feminineSurnames, feminineOf)
 	default:
-		return s.drawDerived(neutralSurnames, neutralOf, req)
+		return s.entriesDerived(neutralSurnames, neutralOf)
 	}
 }
 
@@ -702,22 +718,12 @@ func inflects(name string) bool {
 		strings.HasSuffix(name, "dzki")
 }
 
-// drawDerived takes one entry out of a list built from others.
-func (s Source) drawDerived(list string, build func(string) ([]string, bool),
-	req generate.Request) (string, error) {
-	entries, found := corpus.Derived(s.locale, list, build)
-	if !found {
-		// Named in the words the plan uses, so the run and the plan say the
-		// same sentence about the same missing list.
-		// A build that found both lists and kept nothing of them has no such
-		// sentence, so it is named as the list that came out empty.
-		if fine, why := surnameLists(s.locale); !fine {
-			return "", fault.New(fault.Config, why)
-		}
-		return "", fault.New(fault.Config, noList(list, s.locale))
-	}
-	return s.pick(entries, list, req)
-}
+// The years a date of birth is drawn from, both included. Named once, because
+// the draw and the domain a unique column walks have to agree on them.
+const (
+	earliestBirth = 1930
+	latestBirth   = 2007
+)
 
 // gender draws one of the two values a numbering scheme can encode.
 func (s Source) gender(req generate.Request) (string, error) {
@@ -735,11 +741,7 @@ func (s Source) gender(req generate.Request) (string, error) {
 // without reading. Reporting that is the business of the validator, which
 // already does it.
 func (s Source) birthDate(req generate.Request) (string, error) {
-	const (
-		earliest = 1930
-		latest   = 2007
-	)
-	year := earliest + int(s.seed.IntN(coordinate(req, ":year"), latest-earliest+1))
+	year := earliestBirth + int(s.seed.IntN(coordinate(req, ":year"), latestBirth-earliestBirth+1))
 	month := 1 + int(s.seed.IntN(coordinate(req, ":month"), 12))
 	day := 1 + int(s.seed.IntN(coordinate(req, ":day"), int64(daysIn(year, month))))
 	return fmt.Sprintf("%04d-%02d-%02d", year, month, day), nil
@@ -825,55 +827,6 @@ func (s Source) CanProduce(generator, locale string) (bool, string) {
 		return true, ""
 	}
 	return known.needs(locale)
-}
-
-// draw takes one entry out of a named list, honouring a maximum length by
-// choosing among the entries that fit.
-//
-// Choosing rather than truncating is the whole point. A truncated name is a
-// value this tool invented, and inventing values is what the second pillar does
-// on purpose and the first must never do by accident.
-func (s Source) draw(list string, req generate.Request) (string, error) {
-	entries, found := corpus.Load(s.locale, list)
-	if !found {
-		return "", fault.New(fault.Config, noList(list, s.locale))
-	}
-	return s.pick(entries, list, req)
-}
-
-// drawEither draws from two lists as if they were one, without concatenating
-// them on every call.
-func (s Source) drawEither(first, second string, req generate.Request) (string, error) {
-	entries, found := corpus.Joined(s.locale, first, second)
-	if !found {
-		// Named one at a time rather than as a pair, so that the sentence is
-		// the one the plan gives for the same list and the reader is told which
-		// of the two is missing rather than that one of them is.
-		if _, carried := corpus.Load(s.locale, first); !carried {
-			return "", fault.New(fault.Config, noList(first, s.locale))
-		}
-		return "", fault.New(fault.Config, noList(second, s.locale))
-	}
-	return s.pick(entries, first, req)
-}
-
-// pick chooses one entry, from those that fit when a limit is declared.
-func (s Source) pick(entries []string, list string, req generate.Request) (string, error) {
-	if req.HasMaxLength {
-		fitting := entries[:0:0]
-		for _, entry := range entries {
-			if measure(entry, req.Unit) <= req.MaxLength {
-				fitting = append(fitting, entry)
-			}
-		}
-		entries = fitting
-	}
-	if len(entries) == 0 {
-		return "", fault.New(fault.Data, fmt.Sprintf(
-			"no entry of %s for %s is short enough for %s, which accepts %d %s",
-			list, s.locale, req.At.Field, req.MaxLength, req.Unit))
-	}
-	return entries[s.seed.IntN(req.At, int64(len(entries)))], nil
 }
 
 // fits reports whether a value is within the declared maximum length.

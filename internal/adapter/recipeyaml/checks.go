@@ -51,18 +51,36 @@ func (r *reader) checkField(built recipe.Field, where string) {
 			"", "add max_length, or remove counted_in")
 	}
 
+	r.checkSource(built, where)
+}
+
+// checkSource asks whether the field names exactly one place its value comes
+// from.
+//
+// A list under values is such a place on its own, and it may carry a type
+// beside it, which then says what every entry is (DEC-266). A generator or an
+// expression beside a list would be a second place, and whichever won at
+// generation time would be the tool deciding which one the user meant. The
+// list counts as given whenever the key was there, which valueList holds by
+// never answering nil, so a list whose entries were all refused is not also
+// reported as no source at all.
+func (r *reader) checkSource(built recipe.Field, where string) {
 	sources := 0
 	for _, source := range []string{built.Type, built.Generator, built.Expression} {
 		if source != "" {
 			sources++
 		}
 	}
-	switch sources {
-	case 0:
+	listed := built.Values != nil
+	switch {
+	case listed && (built.Generator != "" || built.Expression != ""):
+		r.report(where+".values", "the field draws from the list under values and also names a generator or an expression",
+			"values on its own, or values with a type", "keep the one you meant")
+	case listed:
+	case sources == 0:
 		r.report(where, "the field does not say where its value comes from",
-			"type, generator, expression", "give the field one of them")
-	case 1:
-	default:
+			"type, generator, expression, values", "give the field one of them")
+	case sources > 1:
 		r.report(where, "the field says twice where its value comes from",
 			"exactly one of type, generator, expression", "keep the one you meant")
 	}
@@ -95,6 +113,14 @@ func (r *reader) checkPrimaryKey(entity recipe.Entity, where string) {
 				"name each field once, or name the second field you meant")
 		}
 		seen[name] = true
+		// 🔴 A blank part identifies nothing, and a database refuses a key
+		// with an empty column in it before it ever compares two of them. The
+		// run holds the key whole since 2026-10-26, and a part that is blank by
+		// design would be a key the recipe itself declared broken.
+		if field, _ := entity.Field(name); field.HasEmptyShare && field.EmptyShare > 0 {
+			r.report(at, "the key includes "+name+", which is asked to be empty in some rows", "",
+				"drop empty from "+name+", or take it out of the key")
+		}
 	}
 }
 

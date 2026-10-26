@@ -536,28 +536,27 @@ func TestAUniqueFieldNeverRepeatsAValue(t *testing.T) {
 	}
 }
 
-// A field with fewer possible values than rows cannot be unique, and the run
-// says so with the arithmetic rather than looping for the impossible.
+// A field with fewer possible values than rows cannot be unique, and the plan
+// says so with the arithmetic before a row is written.
+//
+// 🔴 The run used to find out after twenty draws and say the field had fewer
+// values than the rows, which it did not know. A gender has two, and the plan
+// knows that since 2026-10-26, so the refusal moved forward and gained the
+// number it was guessing at.
 func TestAUniqueFieldWithTooFewValuesIsRefusedWithTheArithmetic(t *testing.T) {
 	rec := sample(t, true, 0)
 	rec.Entities[0].Count = 500
 	rec.Entities[0].Fields = append(rec.Entities[0].Fields,
 		recipe.Field{Name: "sex", Generator: "gender", Unique: true})
 
-	source := values.New(rec.Locale, rec.Seed)
-	plan, err := generate.Prepare(rec, source)
-	if err != nil {
-		t.Fatalf("the plan was refused: %v", err)
-	}
-	writer, err := format.NewCSV(newHeld(), rec)
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = generate.Run(plan, rec, source, writer, generate.NeverStops{})
+	_, err := generate.Prepare(rec, values.New(rec.Locale, rec.Seed))
 	if err == nil {
-		t.Fatal("five hundred rows of a field with two possible values were accepted")
+		t.Fatal("five hundred rows of a field with two possible values were planned")
 	}
-	for _, part := range []string{"sex", "unique", "500"} {
+	if fault.KindOf(err) != fault.Data {
+		t.Errorf("the refusal is %v, and a recipe that is valid and cannot be produced is data", fault.KindOf(err))
+	}
+	for _, part := range []string{"sex", "unique", "can take 2 ", "500 rows"} {
 		if !strings.Contains(err.Error(), part) {
 			t.Errorf("the refusal does not carry %q: %v", part, err)
 		}

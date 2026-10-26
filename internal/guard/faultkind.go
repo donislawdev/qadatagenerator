@@ -52,9 +52,9 @@ var RefusalKinds = map[string]string{
 	"internal/adapter/store.usableName Config":               "the name comes from the recipe, and a name that cannot become a file is the recipe asking for something impossible before any data exists",
 	"internal/adapter/store.Set.ownName Config":              "an entity is named after a file the run itself leaves, so the recipe asks for two things under one name. The names this tool reserves are fixed, which makes the recipe the only end anybody can move",
 	"internal/adapter/values.Source.Produce Config":          "the recipe names a generator this build does not have, which is a spelling in a document rather than a limit of the data",
-	"internal/adapter/values.Source.draw Config":             "the recipe asks for a list this build carries for no locale, so the pair of locale and field is what has to change",
-	"internal/adapter/values.Source.drawEither Config":       "the same as draw, for a field drawing from two lists at once",
-	"internal/adapter/values.Source.drawDerived Config":      "the same as draw, for a list this build makes out of two it carries, such as the surnames a Polish woman can bear",
+	"internal/adapter/values.Source.entriesOf Config":        "the recipe asks for a list this build carries for no locale, so the pair of locale and field is what has to change. Called draw until 2026-10-26, when the draw and the domain of a unique column began reading the entries through one function",
+	"internal/adapter/values.Source.entriesEither Config":    "the same as entriesOf, for a field drawing from two lists at once",
+	"internal/adapter/values.Source.entriesDerived Config":   "the same as entriesOf, for a list this build makes out of two it carries, such as the surnames a Polish woman can bear",
 	"internal/adapter/values.Source.fromType Config":         "the recipe declares a type this build produces no values for, and the answer is to give the field a generator",
 	"internal/adapter/values.Source.postalCode Config":       "the recipe asks for postal codes in a locale this build has no register for, which is a setting of the recipe",
 	"internal/app/corrupt.Selector.somethingToDamage Config": "the policy excludes every field there is, so the policy asks for damage it has itself made impossible",
@@ -62,6 +62,7 @@ var RefusalKinds = map[string]string{
 	"internal/app/corrupt.shareOf Config":                    "policy.rows is not a share this build can read, or is outside nought to a hundred. Both are the policy being wrong",
 	"internal/app/generate.chained Config":                   "a consistency rule points at a field that is itself bound by a rule, and this build resolves one level. The recipe has to be written differently. Moved out of agreementFor on 2026-10-21, when the plan began asking it too, so that validate refuses what generate refuses",
 	"internal/app/generate.checkGenerators Config":           "the recipe names a generator this build does not have",
+	"internal/app/generate.checkListed Config":               "an entry the recipe wrote under values is not of the type beside it or is longer than the field accepts, so the entry or the declaration is what has to change",
 	"internal/app/generate.inDependencyOrder Config":         "the relations form a loop, so the recipe describes an order that cannot exist",
 	"internal/app/generate.planEntity Config":                "an entity belongs to one this run does not produce, so the recipe names something that is not there",
 	"internal/app/generate.refuseSecondParent Config":        "an entity belongs to more than one, and this build produces one relation per entity",
@@ -86,7 +87,10 @@ var RefusalKinds = map[string]string{
 	"internal/app/generate.reachable Data":                   "the count of a child cannot be reached by any deal of its parents, so the recipe is valid and its arithmetic does not work out",
 	"internal/app/generate.withinReach Data":                 "the relation reads correctly and asks for more rows than this build can hold a plan for, which is the engine answering whether a run can be carried out rather than the reader answering whether a recipe is well formed",
 	"internal/cli.alsoAskTheEngine Config":                   "the engine found something wrong with the recipe that the reader of the document could not see, and it is counted with the rest of the problems because it is one of them. A refusal saying instead that a correct recipe cannot be carried out never reaches here and leaves as a warning beside an answer of yes",
-	"internal/app/generate.uniqueValue Data":                 "a unique field ran out of values while drawing, which is the definition of a valid recipe that cannot be satisfied",
+	"internal/app/generate.checkDomains Data":                "the values of a field are known and are fewer than its rows need, a unique one or none at all, so the recipe is valid and asks for more than it can have. The plan says it before a row is written since 2026-10-26",
+	"internal/app/generate.checkKey Data":                    "the fields of the primary key can make fewer different keys than the table has rows, which is the same answer as checkDomains for the key held whole",
+	"internal/app/generate.tableRun.walkUnique Data":         "a unique field ran out of values while drawing, which is the definition of a valid recipe that cannot be satisfied. Called uniqueValue until 2026-10-26, when running out of luck began to walk to a free value where the values are known",
+	"internal/app/generate.keySet.walk Data":                 "the primary key ran out of keys while building rows again, the same answer as walkUnique for the key held whole",
 }
 
 // FaultSite is one place in the product that refuses with a kind, named the way

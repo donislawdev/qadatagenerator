@@ -24,6 +24,34 @@ type knownValues struct {
 	// missing names the generators this stub cannot fill, by locale, which is
 	// the pair a build can carry one half of.
 	missing map[string]string
+	// domains are how many values a generator or a type can take, keyed by
+	// its name. A name missing here has a domain the stub does not know, and a
+	// list under values is known by its length.
+	domains map[string]int64
+	// refused are the entries under values this stub does not accept, each
+	// with the reason it gives.
+	refused map[string]string
+}
+
+func (v knownValues) DomainOf(req generate.Request) (generate.Domain, bool) {
+	size, known := int64(len(req.Values)), len(req.Values) > 0
+	if !known {
+		name := req.Generator
+		if name == "" {
+			name = req.Type
+		}
+		size, known = v.domains[name]
+	}
+	return generate.Domain{Key: "stub", Size: size, At: func(at int64) string {
+		return strconv.FormatInt(at, 10)
+	}}, known
+}
+
+func (v knownValues) Accepts(_ generate.Request, value string) (bool, string) {
+	if why, refused := v.refused[value]; refused {
+		return false, why
+	}
+	return true, ""
 }
 
 func (v knownValues) Known(generator string) bool {
@@ -333,6 +361,79 @@ func TestARelationThisBuildCanPlanForIsNotRefused(t *testing.T) {
 	if plan.TotalRows() < 3 {
 		t.Errorf("the plan counts %d rows for three parents and their children",
 			plan.TotalRows())
+	}
+}
+
+// An entry under values the field cannot hold is refused before a row exists,
+// by its place in the list and in the words the source gives.
+func TestAListEntryTheFieldCannotHoldIsRefusedByItsPlace(t *testing.T) {
+	values := knownValues{refused: map[string]string{"x7": `"x7" is not a whole number`}}
+	rec := oneEntity(recipe.Field{Name: "tier", Type: "integer", Values: []string{"1", "x7"}})
+
+	_, err := generate.Prepare(rec, values)
+
+	if fault.KindOf(err) != fault.Config || !strings.Contains(err.Error(), "fields.tier.values[1]") ||
+		!strings.Contains(err.Error(), "is not a whole number") {
+		t.Fatalf("the entry that does not fit was not refused by its place: %v", err)
+	}
+}
+
+// A unique field whose values are known to be fewer than the rows is refused
+// with the arithmetic, and one that has exactly enough is planned.
+func TestAUniqueFieldWithTooFewKnownValuesIsRefusedBeforeTheRun(t *testing.T) {
+	values := knownValues{generators: []string{"tier"}, domains: map[string]int64{"tier": 3}}
+	for _, test := range []struct {
+		rows    int
+		refused bool
+	}{{3, false}, {4, true}} {
+		rec := oneEntity(recipe.Field{Name: "tier", Generator: "tier", Unique: true})
+		rec.Entities[0].Count = test.rows
+
+		_, err := generate.Prepare(rec, values)
+
+		if refused := err != nil; refused != test.refused {
+			t.Fatalf("%d rows of three values: refused %v (%v)", test.rows, refused, err)
+		}
+		if test.refused && (fault.KindOf(err) != fault.Data || !strings.Contains(err.Error(), "can take 3") ||
+			!strings.Contains(err.Error(), "4 rows")) {
+			t.Errorf("the refusal does not carry the arithmetic as data: %v", err)
+		}
+	}
+}
+
+// A key is held whole, so its parts may repeat on their own, and the plan
+// refuses a table with more rows than the parts can make different keys.
+func TestAKeyIsRefusedWhenItsFieldsCannotMakeEnoughKeys(t *testing.T) {
+	values := knownValues{generators: []string{"a", "b"}, domains: map[string]int64{"a": 2, "b": 3}}
+	for _, test := range []struct {
+		rows    int
+		refused bool
+	}{{6, false}, {7, true}} {
+		rec := oneEntity(recipe.Field{Name: "a", Generator: "a"}, recipe.Field{Name: "b", Generator: "b"})
+		rec.Entities[0].Count = test.rows
+		rec.Entities[0].PrimaryKey = []string{"a", "b"}
+
+		_, err := generate.Prepare(rec, values)
+
+		if refused := err != nil; refused != test.refused {
+			t.Fatalf("%d rows of a key of two by three: refused %v (%v)", test.rows, refused, err)
+		}
+		if test.refused && !strings.Contains(err.Error(), "can make 6 different keys") {
+			t.Errorf("the refusal does not carry the arithmetic: %v", err)
+		}
+	}
+}
+
+// A field a rule binds draws from a domain that depends on the row, so the
+// plan leaves it to the run rather than refusing on the domain of no row.
+func TestAFieldARuleBindsIsLeftToTheRun(t *testing.T) {
+	values := knownValues{generators: []string{"tier", "sex"}, domains: map[string]int64{"tier": 1}}
+	rec := oneEntity(recipe.Field{Name: "tier", Generator: "tier", Unique: true},
+		recipe.Field{Name: "sex", Generator: "sex"})
+	rec.Entities[0].Consistency = []recipe.Rule{{Field: "tier", Kind: recipe.Matches, With: []string{"sex"}}}
+
+	if _, err := generate.Prepare(rec, values); err != nil {
+		t.Fatalf("a bound field was refused on a domain it may not have: %v", err)
 	}
 }
 

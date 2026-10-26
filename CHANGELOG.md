@@ -12,6 +12,21 @@ repository once they are released.
 
 ### Changed
 
+- **The primary key of an entity is held whole.** Two rows no longer share a
+  key, while its fields may still repeat on their own. A row whose key repeats
+  is built again with new values for the fields of the key, and every other
+  column of that row comes out the same. A field of the key may not be asked
+  to be empty. Datasets whose key repeated come out different in those rows
+  with the same seed.
+- **A unique column that runs out of luck takes the next free value.** Where
+  the tool knows every value a field can take, a list under values, a number
+  described by its type, a gender, a date of birth or a word list, generate
+  refuses a unique column with more rows than values before anything is
+  written, and says how many there are. A table as large as all the values is
+  produced whole, the same way every time, where twenty draws in a row that
+  landed on taken values used to stop it. For an identifier the tool does not
+  count the values and says so, rather than saying there are fewer than the
+  rows.
 - **A policy with only_when is refused until conditions are evaluated.** It
   used to run with a warning and damage every row, the ones the condition
   left out included. Leave columns alone with exclude_fields instead.
@@ -215,6 +230,13 @@ repository once they are released.
 
 ### Added
 
+- **A field can draw from a list written in the recipe.** Write the values
+  under values, on their own or with a type, such as
+  `status: { values: ["active", "closed"] }`. With a type of integer, decimal
+  or date every entry has to be one, and an entry longer than max_length is
+  refused, both before anything is written. A generator or an expression
+  beside the list, an empty list, an empty entry and an entry written twice
+  are refused.
 - **`qadg-gui -catalogue` opens a catalogue of controls instead of the
   window.** It shows every control the screens are built from, in every state
   it can be seen in: at rest, under the pointer, pressed, with the keyboard on
@@ -256,6 +278,9 @@ repository once they are released.
 
 ### Fixed
 
+- **A field no value fits is refused before anything is written.** A city
+  limited to one character used to pass validate and then stop generate on
+  the first row. validate now warns in the words generate uses.
 - **A recipe that names no seed or locale can be damaged.** It used to pass
   validate and then end generate as an internal defect after every row was
   produced. Such a recipe is now read with the seed 0 and the locale en-US,

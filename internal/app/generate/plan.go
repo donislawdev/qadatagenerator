@@ -145,6 +145,9 @@ func Prepare(rec recipe.Recipe, values Values) (Plan, error) {
 		if !fitsWithTheRest(total, planned.Rows) {
 			return Plan{}, tooManyRows(planned.Entity)
 		}
+		if err := checkDomains(entity, planned.Rows, values); err != nil {
+			return Plan{}, err
+		}
 		total += planned.Rows
 		plan.Notes = append(plan.Notes, notesFor(entity, values)...)
 		plan.Notes = append(plan.Notes, unsure(entity, values)...)
@@ -361,6 +364,10 @@ func checkGenerators(entity recipe.Entity, values Values, locale string, plan *P
 	for _, field := range entity.Fields {
 		where := "entities." + entity.Name + ".fields." + field.Name
 		switch {
+		case len(field.Values) > 0:
+			if err := checkListed(entity.Name, field, where, values); err != nil {
+				return err
+			}
 		case field.Expression != "":
 			plan.Notes = append(plan.Notes, Note{where,
 				"expressions are not evaluated by this build, so the column will be empty"})
@@ -395,6 +402,99 @@ func checkGenerators(entity recipe.Entity, values Values, locale string, plan *P
 		}
 	}
 	return nil
+}
+
+// checkListed refuses an entry of a list under values that the field cannot
+// hold, naming the entry by its place in the list.
+func checkListed(entity string, field recipe.Field, where string, values Values) error {
+	request := requestFor(entity, field, 0, "value")
+	for index, entry := range field.Values {
+		if fine, why := values.Accepts(request, entry); !fine {
+			return fault.New(fault.Config, fmt.Sprintf("%s.values[%d]: %s", where, index, why)).
+				DoInstead("change the entry, or the type or max_length it has to fit")
+		}
+	}
+	return nil
+}
+
+// checkDomains refuses a field whose values are known and are too few for the
+// rows planned, with the arithmetic, before a row is written.
+//
+// # Which fields are asked
+//
+// A field no rule binds, so that its domain is the same in every row. A field
+// a rule binds draws from a domain that depends on the row, a name for a woman
+// or for a man, and is asked by the run when it gets there. A column this build
+// leaves blank is not asked either, because the plan already says it will be
+// empty and refusing it would refuse the example the format documents.
+//
+// A domain with nothing in it is refused in the sentence the run would give on
+// the first row, by asking the source for that row the way the run asks. Two
+// sentences for one failure would be two places for the plan and the run to
+// part company.
+func checkDomains(entity recipe.Entity, rows int, values Values) error {
+	if rows == 0 {
+		return nil
+	}
+	bound := boundFields(Rules(entity, values))
+	for _, field := range entity.Fields {
+		if bound[field.Name] || leftBlank(field, values) || alwaysEmpty(field) {
+			continue
+		}
+		request := requestFor(entity.Name, field, 0, "value")
+		domain, known := values.DomainOf(request)
+		switch {
+		case !known:
+		case domain.Size == 0:
+			if _, err := values.Produce(request); err != nil {
+				return err
+			}
+		case field.Unique && int64(rows) > domain.Size:
+			return fault.New(fault.Data, fmt.Sprintf(
+				"entities.%s.fields.%s is unique and can take %d different values, and the table has %d rows",
+				entity.Name, field.Name, domain.Size, rows)).
+				DoInstead("lower the count, drop unique, or widen what the field draws from")
+		}
+	}
+	return checkKey(entity, rows, bound, values)
+}
+
+// alwaysEmpty reports whether every row leaves the field blank by its share.
+func alwaysEmpty(field recipe.Field) bool {
+	return field.HasEmptyShare && field.EmptyShare >= 100 && !field.Required
+}
+
+// checkKey refuses a primary key whose parts cannot make as many different
+// keys as the table has rows, when every part is free of any rule and its
+// values are known.
+func checkKey(entity recipe.Entity, rows int, bound map[string]bool, values Values) error {
+	parts, held := keyParts(entity, values)
+	if !held {
+		return nil
+	}
+	keys := int64(1)
+	for _, part := range parts {
+		if bound[part.Name] {
+			return nil
+		}
+		domain, known := values.DomainOf(requestFor(entity.Name, part, 0, "value"))
+		if !known {
+			return nil
+		}
+		if keys > int64(rows)/max(domain.Size, 1) {
+			// Already more keys than rows, and multiplying further could only
+			// overflow on the way to the same answer.
+			return nil
+		}
+		keys *= domain.Size
+	}
+	if keys >= int64(rows) {
+		return nil
+	}
+	return fault.New(fault.Data, fmt.Sprintf(
+		"entities.%s.primary_key: the fields of the key can make %d different keys, and the table has %d rows",
+		entity.Name, keys, rows)).
+		DoInstead("lower the count, add a field to the key, or widen what its fields draw from")
 }
 
 // notesFor reports the consistency rules this run cannot honour.

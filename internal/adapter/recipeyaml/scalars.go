@@ -214,6 +214,49 @@ func (r *reader) list(where string, node any) []string {
 	return values
 }
 
+// valueList reads the list a field draws from.
+//
+// An empty entry and an entry written twice are refused rather than kept
+// (DEC-266). A blank in the list would be a blank row that required and unique
+// know nothing about, while the share under empty already says how many rows
+// are blank. An entry written twice has no meaning this build gives it, and
+// refusing it now leaves room to give it one later, where accepting it would
+// freeze whatever it happened to do.
+//
+// The answer is never nil once the key is there, even when nothing in it could
+// be read, so that the field is not also told it names no source. That one is
+// already reported here, entry by entry.
+func (r *reader) valueList(where string, node any) []string {
+	values := []string{}
+	entries, ok := r.sequence(where, node)
+	if !ok {
+		return values
+	}
+	if len(entries) == 0 {
+		r.report(where, "the list of values is empty", "at least one value",
+			"write the values the field draws from, or remove values")
+		return values
+	}
+	seen := make(map[string]bool, len(entries))
+	for index, entry := range entries {
+		at := fmt.Sprintf("%s[%d]", where, index)
+		value, ok := r.text(at, entry)
+		switch {
+		case !ok:
+		case value == "":
+			r.report(at, "the entry is empty", "a value of at least one character",
+				"remove it, and give the field a share under empty if some rows should be blank")
+		case seen[value]:
+			r.report(at, "the list names "+strconv.Quote(value)+" twice", "each value once",
+				"remove the second one")
+		default:
+			seen[value] = true
+			values = append(values, value)
+		}
+	}
+	return values
+}
+
 // listOrOne accepts both a list and a single value, because a rule tying one
 // field to one other field reads better as postal_code matches: city than as a
 // list of one.

@@ -10,16 +10,17 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
-// uniqueTries is how many times a unique field is drawn again before the run
-// gives up.
+// uniqueTries is how many times a unique field is drawn again, and how many
+// times a row is built again for its key, before the run stops drawing.
 //
 // # Why a limit rather than drawing until it works
 //
 // A field asked to be unique across more rows than it has possible values can
 // never be satisfied, and a loop looking for the impossible looks exactly like
-// a slow run. The limit turns that into a named failure with the arithmetic in
-// it, which is the difference between a tool a person can act on and one they
-// have to kill.
+// a slow run. The limit turns that into a named outcome. Where the values are
+// known the run then walks to a free one, and where they are not it says what
+// happened, which is the difference between a tool a person can act on and one
+// they have to kill.
 //
 // Twenty is high enough that an ordinary collision costs nothing and low enough
 // that a hopeless field is reported in the same second.
@@ -64,10 +65,7 @@ func writeTable(planned dataset.Table, entity recipe.Entity, values Values, writ
 	if err := writer.Begin(planned); err != nil {
 		return err
 	}
-	taken := newUniqueSet(entity)
-	// Worked out once per table rather than per row, because the answer
-	// depends on the recipe and the build and on nothing a row holds.
-	rules := Rules(entity, values)
+	table := newTableRun(planned, entity, values, source)
 	for row := 0; row < planned.Rows; row++ {
 		// A table left without its End is not a problem here: what a stopped run
 		// wrote never gets its real name, so an unfinished table is thrown away
@@ -75,7 +73,7 @@ func writeTable(planned dataset.Table, entity recipe.Entity, values Values, writ
 		if ended := stop.Stopped(); ended != nil {
 			return ended
 		}
-		built, err := buildRow(entity, rules, row, values, source, taken)
+		built, err := table.row(row)
 		if err != nil {
 			return err
 		}
@@ -90,52 +88,119 @@ func writeTable(planned dataset.Table, entity recipe.Entity, values Values, writ
 	return writer.End(planned)
 }
 
-// buildRow produces one record.
+// tableRun is what the rows of one table share while they are produced.
+type tableRun struct {
+	entity recipe.Entity
+	rows   int
+	// rules are the ones the run keeps, declared and implied together, worked
+	// out once per table rather than per row, because the answer depends on
+	// the recipe and the build and on nothing a row holds.
+	rules  []recipe.Rule
+	bound  map[string]bool
+	values Values
+	source seed.Source
+	taken  *uniqueSet
+	// key is nil when the run does not hold the primary key, see keyParts.
+	key *keySet
+}
+
+func newTableRun(planned dataset.Table, entity recipe.Entity, values Values, source seed.Source) *tableRun {
+	rules := Rules(entity, values)
+	table := &tableRun{entity: entity, rows: planned.Rows, rules: rules, bound: boundFields(rules),
+		values: values, source: source, taken: newUniqueSet(entity)}
+	if parts, held := keyParts(entity, values); held {
+		table.key = newKeySet(parts)
+	}
+	return table
+}
+
+// row produces one record, holding the primary key when the run holds it.
+//
+// # Why the whole row is built again for its key
+//
+// A key that repeats is a property of the row, not of one value, and the parts
+// of a key can be bound to other columns: a PESEL follows the date of birth and
+// the gender. Building the row again with the parts of the key drawn at a new
+// address, and everything else at its own, gives the same values everywhere
+// else and lets every agreement be worked out once more from what changed. What
+// unique columns claimed in the attempt is given back first, so the second
+// build sees the table as the first one did.
+func (t *tableRun) row(row int) ([]string, error) {
+	for attempt := 0; attempt < uniqueTries; attempt++ {
+		built, err := t.build(row, attempt, nil)
+		if err != nil {
+			return nil, err
+		}
+		if t.key == nil || t.key.claim(built) {
+			t.taken.keep()
+			return t.ordered(built), nil
+		}
+		t.taken.release()
+	}
+	forced, err := t.key.walk(t, row)
+	if err != nil {
+		return nil, err
+	}
+	built, err := t.build(row, 0, forced)
+	if err != nil {
+		return nil, err
+	}
+	t.key.claim(built)
+	t.taken.keep()
+	return t.ordered(built), nil
+}
+
+// build produces the values of one row.
 //
 // Fields that agree with nothing come first and fields bound by a consistency
 // rule come second, because the second kind is generated from the first. A rule
 // pointing at a field that is itself bound is refused rather than resolved in
 // whatever order the recipe happened to list them.
 //
-// The rules are the ones the run keeps, declared and implied together, which
-// is why they arrive as an argument rather than being read off the entity.
-func buildRow(entity recipe.Entity, rules []recipe.Rule, row int, values Values,
-	source seed.Source, taken uniqueSet) ([]string, error) {
-	built := make(map[string]string, len(entity.Fields))
-	bound := boundFields(rules)
-
-	for _, field := range entity.Fields {
-		if bound[field.Name] {
+// Forced values are the parts of a key the run chose by walking, and they take
+// the place of a draw.
+func (t *tableRun) build(row, attempt int, forced map[string]string) (map[string]string, error) {
+	built := make(map[string]string, len(t.entity.Fields))
+	for _, field := range t.entity.Fields {
+		if t.bound[field.Name] {
 			continue
 		}
-		value, err := oneValue(entity, field, row, values, source, taken, provider.Agreement{})
+		if value, chosen := forced[field.Name]; chosen {
+			built[field.Name] = value
+			continue
+		}
+		value, err := t.oneValue(field, row, attempt, provider.Agreement{})
 		if err != nil {
 			return nil, err
 		}
 		built[field.Name] = value
 	}
 
-	for _, rule := range rules {
-		field, known := entity.Field(rule.Field)
+	for _, rule := range t.rules {
+		field, known := t.entity.Field(rule.Field)
 		if !known {
 			continue
 		}
-		agreement, err := agreementFor(rule, entity, built, bound, values)
+		agreement, err := agreementFor(rule, t.entity, built, t.bound, t.values)
 		if err != nil {
 			return nil, err
 		}
-		value, err := oneValue(entity, field, row, values, source, taken, agreement)
+		value, err := t.oneValue(field, row, attempt, agreement)
 		if err != nil {
 			return nil, err
 		}
 		built[field.Name] = value
 	}
+	return built, nil
+}
 
-	ordered := make([]string, 0, len(entity.Fields))
-	for _, field := range entity.Fields {
+// ordered lays the values of a row out in the order of the fields.
+func (t *tableRun) ordered(built map[string]string) []string {
+	ordered := make([]string, 0, len(t.entity.Fields))
+	for _, field := range t.entity.Fields {
 		ordered = append(ordered, built[field.Name])
 	}
-	return ordered, nil
+	return ordered
 }
 
 // agreementFor gathers what a bound field has to agree with, keyed by role.
@@ -170,27 +235,46 @@ func agreementFor(rule recipe.Rule, entity recipe.Entity, built map[string]strin
 }
 
 // oneValue produces the value of one field, honouring emptiness and uniqueness.
-func oneValue(entity recipe.Entity, field recipe.Field, row int, values Values,
-	source seed.Source, taken uniqueSet, agrees provider.Agreement) (string, error) {
-	at := seed.Coordinate{Entity: entity.Name, Row: int64(row), Field: field.Name, Purpose: "value"}
-	if leftEmpty(field, at, source) {
+//
+// A part of the key built again for its key is drawn at an address of its own,
+// value:key#1 and on, and every other field at the address it always has.
+func (t *tableRun) oneValue(field recipe.Field, row, attempt int, agrees provider.Agreement) (string, error) {
+	purpose := "value"
+	if attempt > 0 && t.key.holds(field.Name) {
+		purpose = fmt.Sprintf("value:key#%d", attempt)
+	}
+	request := requestFor(t.entity.Name, field, row, purpose)
+	request.Agrees = agrees
+	if leftEmpty(field, request.At, t.source) {
 		return "", nil
 	}
-	if field.Generator == "" && !values.ProducesType(field.Type) {
+	if leftBlank(field, t.values) {
 		// An expression, or a type this build cannot fill. Both are named in
 		// the plan, so the empty column is stated rather than silent.
 		return "", nil
 	}
+	if !field.Unique {
+		return t.values.Produce(request)
+	}
+	return t.uniqueValue(field, request)
+}
 
-	request := Request{
-		Generator: field.Generator, Type: field.Type, At: at, Agrees: agrees,
+// requestFor is what the source is asked for one field, the same question from
+// the plan and from the run.
+func requestFor(entity string, field recipe.Field, row int, purpose string) Request {
+	return Request{
+		Generator: field.Generator, Type: field.Type, Values: field.Values,
+		At:        seed.Coordinate{Entity: entity, Row: int64(row), Field: field.Name, Purpose: purpose},
 		MaxLength: field.MaxLength, HasMaxLength: field.HasMaxLength,
 		Unit: string(field.Unit()),
 	}
-	if !field.Unique {
-		return values.Produce(request)
-	}
-	return uniqueValue(entity, field, request, values, taken)
+}
+
+// leftBlank reports whether this build leaves the field empty in every row,
+// because it is an expression or a type with nothing to fill it.
+func leftBlank(field recipe.Field, values Values) bool {
+	return field.Expression != "" ||
+		(field.Generator == "" && len(field.Values) == 0 && !values.ProducesType(field.Type))
 }
 
 // uniqueValue draws again until the value is one no earlier row took.
@@ -202,26 +286,59 @@ func oneValue(entity recipe.Entity, field recipe.Field, row int, values Values,
 // instead of drawing, would make every row depend on every earlier one for the
 // value itself rather than only for the retry, and that breaks the promise that
 // adding a field leaves the other columns where they were.
-func uniqueValue(entity recipe.Entity, field recipe.Field, request Request, values Values,
-	taken uniqueSet) (string, error) {
+func (t *tableRun) uniqueValue(field recipe.Field, request Request) (string, error) {
+	base := request.At.Purpose
 	for try := 0; try < uniqueTries; try++ {
 		attempt := request
 		if try > 0 {
-			attempt.At.Purpose = fmt.Sprintf("value:unique#%d", try)
+			attempt.At.Purpose = fmt.Sprintf("%s:unique#%d", base, try)
 		}
-		value, err := values.Produce(attempt)
+		value, err := t.values.Produce(attempt)
 		if err != nil {
 			return "", err
 		}
-		if taken.claim(field.Name, value) {
+		if t.taken.claim(field.Name, value) {
 			return value, nil
 		}
 	}
-	return "", fault.New(fault.Data, fmt.Sprintf(
-		"entities.%s.fields.%s is unique and %d draws in a row landed on a value already used. "+
-			"The field has fewer possible values than the %d rows asked for. Lower the count, "+
-			"drop the uniqueness, or widen what the field draws from",
-		entity.Name, field.Name, uniqueTries, entity.Count))
+	return t.walkUnique(field, request)
+}
+
+// walkUnique takes the next free value of a known domain, from a place the
+// seed draws, once drawing has run out of luck.
+func (t *tableRun) walkUnique(field recipe.Field, request Request) (string, error) {
+	where := "entities." + t.entity.Name + ".fields." + field.Name
+	domain, known := t.values.DomainOf(request)
+	if !known {
+		return "", fault.New(fault.Data, fmt.Sprintf(
+			"%s is unique and %d draws in a row landed on a value already used, at row %d of %d. "+
+				"This build does not count how many values the field can take, so it cannot tell "+
+				"whether any are left", where, uniqueTries, request.At.Row+1, t.rows)).
+			DoInstead("lower the count, drop unique, or draw the field from a list under values")
+	}
+	walker := t.taken.walkerFor(field.Name, domain)
+	start := t.drawnPlace(request.At, request.At.Purpose+":unique#walk", domain.Size)
+	place, found := walker.next(start, func(at int64) bool {
+		return t.taken.free(field.Name, domain.At(at))
+	})
+	if !found {
+		return "", fault.New(fault.Data, fmt.Sprintf(
+			"%s is unique and every one of the %d values it can take in this row is already used, "+
+				"at row %d of %d", where, domain.Size, request.At.Row+1, t.rows)).
+			DoInstead("lower the count, drop unique, or widen what the field draws from")
+	}
+	value := domain.At(place)
+	t.taken.claim(field.Name, value)
+	return value, nil
+}
+
+// drawnPlace is where a walk starts, drawn at an address of its own.
+func (t *tableRun) drawnPlace(at seed.Coordinate, purpose string, size int64) int64 {
+	if size <= 0 {
+		return 0
+	}
+	return t.source.IntN(seed.Coordinate{Entity: at.Entity, Row: at.Row, Field: at.Field,
+		Purpose: purpose}, size)
 }
 
 // leftEmpty decides whether this row leaves the field blank.
@@ -237,30 +354,4 @@ func leftEmpty(field recipe.Field, at seed.Coordinate, source seed.Source) bool 
 		Entity: at.Entity, Row: at.Row, Field: at.Field, Purpose: "empty",
 	}, parts)
 	return float64(drawn) < field.EmptyShare*parts/100
-}
-
-// uniqueSet remembers what a unique field has already produced.
-type uniqueSet map[string]map[string]bool
-
-func newUniqueSet(entity recipe.Entity) uniqueSet {
-	set := make(uniqueSet)
-	for _, field := range entity.Fields {
-		if field.Unique {
-			set[field.Name] = make(map[string]bool)
-		}
-	}
-	return set
-}
-
-// claim records a value and reports whether it was free.
-func (s uniqueSet) claim(field, value string) bool {
-	seen, tracked := s[field]
-	if !tracked {
-		return true
-	}
-	if seen[value] {
-		return false
-	}
-	seen[value] = true
-	return true
 }

@@ -48,6 +48,29 @@ type Request struct {
 	// Unit is how MaxLength is counted. The three units disagree on exactly the
 	// values this tool exists to produce.
 	Unit string
+	// Values is the list the recipe wrote under the field, empty when it wrote
+	// none. A field with a list draws from it and from nothing else.
+	Values []string
+}
+
+// Domain is every value a request can produce, when the source knows them all.
+//
+// # Why a size and a function rather than a list
+//
+// A whole number of six digits has a million values, and a list of them would
+// cost a run more memory than the dataset it writes. The run needs two things
+// from a domain, how large it is and the value at one place in it, and both are
+// arithmetic for a number and a lookup for a word list.
+type Domain struct {
+	// Key names the domain, so that two rows drawing from the same one share
+	// what was learned about it. A first name has two of them, one for each
+	// gender, and a row of a woman has nothing to learn from a row of a man.
+	Key string
+	// Size is how many values there are. Nought means none fits the field.
+	Size int64
+	// At returns the value at a place from nought to Size-1. The order is the
+	// domain's own and stays the same for the same request.
+	At func(index int64) string
 }
 
 // Values is where a generated value comes from.
@@ -113,6 +136,20 @@ type Values interface {
 	// name reads the gender, and only the source knows which generator reads
 	// what, and in Polish a surname reads it while in English it does not.
 	RolesRead(generator string) []string
+	// DomainOf returns every value the request can produce in the field it
+	// describes, after its limit on length and its agreement with the row, and
+	// whether the source knows them all.
+	//
+	// 🔴 Asked since 2026-10-26. A unique field used to give up after twenty
+	// draws in a row landed on taken values and said the field had fewer values
+	// than the rows asked for, which the run did not know. Where the answer is
+	// known the plan refuses with the arithmetic before a row is written and the
+	// run walks to a free value instead of giving up. Only the source knows how
+	// many values a word list holds after the filter, so the question is here.
+	DomainOf(req Request) (Domain, bool)
+	// Accepts reports whether a value written in the recipe under values can
+	// stand in the field the request describes, and says why not when it cannot.
+	Accepts(req Request, value string) (bool, string)
 	// Produce returns one value.
 	Produce(req Request) (string, error)
 }

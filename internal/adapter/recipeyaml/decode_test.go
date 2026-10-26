@@ -159,6 +159,29 @@ func TestTheDocumentedShapeIsAccepted(t *testing.T) {
 	}
 }
 
+// A list under values is where a value comes from on its own, and a type
+// beside it says what every entry is (DEC-266). Until 2026-10-26 the reader
+// carried the list and refused the field for naming no source.
+func TestAListUnderValuesIsASourceOnItsOwnOrWithAType(t *testing.T) {
+	result := decode(t, `
+version: "0.1"
+entities:
+  account:
+    count: 3
+    fields:
+      status: { values: ["active", "closed", "frozen"] }
+      tier:   { type: integer, values: ["1", "2"] }
+`)
+	account, _ := result.Recipe.Entity("account")
+	status, _ := account.Field("status")
+	if strings.Join(status.Values, ",") != "active,closed,frozen" {
+		t.Errorf("the list did not reach the model in the order written: %q", status.Values)
+	}
+	if tier, _ := account.Field("tier"); tier.Type != "integer" || len(tier.Values) != 2 {
+		t.Errorf("the type beside the list was lost: %+v", tier)
+	}
+}
+
 // Column order follows the recipe, so a field list that comes back sorted
 // would quietly reorder somebody's output.
 func TestFieldOrderIsTheOrderTheUserWrote(t *testing.T) {

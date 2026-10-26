@@ -254,20 +254,8 @@ func Decode(data []byte) Result {
 		return reader.result(recipe.Recipe{})
 	}
 
-	// 🔴 Tokenized here and handed to the parser, rather than handed over as
-	// bytes, because ParseBytes is exactly these two calls and the depth has to
-	// be read in between. The tokens are the parser's own view of the document,
-	// so the depth counted from them is the depth it will build, quotes and
-	// comments included. See deepestFlow for why the bytes alone do not do.
-	tokens := lexer.Tokenize(string(data))
-	if refusedForFlowNesting(reader, tokens) {
-		return reader.result(recipe.Recipe{})
-	}
-
-	file, err := parser.Parse(tokens, 0)
-	if err != nil {
-		reader.report("", "the file is not valid YAML: "+firstLine(err.Error()), "",
-			"check the indentation and that every key ends with a colon")
+	file, ok := parsed(reader, data)
+	if !ok {
 		return reader.result(recipe.Recipe{})
 	}
 	// Where each place was written, taken from the tree this same parse
@@ -308,6 +296,28 @@ func Decode(data []byte) Result {
 
 	built := reader.recipe(top)
 	return reader.result(built)
+}
+
+// parsed turns the bytes into the parser's tree, or refuses the file and
+// reports why.
+//
+// 🔴 Tokenized here and handed to the parser, rather than handed over as bytes,
+// because ParseBytes is exactly these two calls and the depth has to be read in
+// between. The tokens are the parser's own view of the document, so the depth
+// counted from them is the depth it will build, quotes and comments included.
+// See deepestFlow for why the bytes alone do not do.
+func parsed(reader *reader, data []byte) (*ast.File, bool) {
+	tokens := lexer.Tokenize(string(data))
+	if refusedForFlowNesting(reader, tokens) {
+		return nil, false
+	}
+	file, err := parser.Parse(tokens, 0)
+	if err != nil {
+		reader.report("", "the file is not valid YAML: "+firstLine(err.Error()), "",
+			"check the indentation and that every key ends with a colon")
+		return nil, false
+	}
+	return file, true
 }
 
 // singleDocument returns the one document carrying content, or refuses the
@@ -611,7 +621,7 @@ func (r *reader) fieldKey(built *recipe.Field, where, key string, value any) {
 	case "empty":
 		built.EmptyShare, built.HasEmptyShare = r.share(where+".empty", value)
 	case "values":
-		built.Values = r.list(where+".values", value)
+		built.Values = r.valueList(where+".values", value)
 	default:
 		// A generator setting, such as the age range of a date of birth. It is
 		// kept rather than refused, because the format documents this shape,
