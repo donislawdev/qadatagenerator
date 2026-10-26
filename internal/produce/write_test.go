@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/damage"
@@ -253,6 +254,93 @@ func TestTheNoteBesideTheDataSaysTheValuesAreSynthetic(t *testing.T) {
 	}
 	if len(note.Overrides) != 1 || note.Overrides[0] != applied[0] {
 		t.Errorf("the note carries overrides %+v rather than the one handed in", note.Overrides)
+	}
+}
+
+// readNote is the record a run left beside its data.
+func readNote(t *testing.T, dir string) RunNote {
+	t.Helper()
+	read, err := os.ReadFile(filepath.Join(dir, RunNoteName))
+	if err != nil {
+		t.Fatalf("the run left no note: %v", err)
+	}
+	var note RunNote
+	if err := json.Unmarshal(read, &note); err != nil {
+		t.Fatalf("the note is not a document a pipeline can read: %v", err)
+	}
+	return note
+}
+
+// decoded is a recipe read the way every surface reads one.
+func decoded(t *testing.T, text string) recipe.Recipe {
+	t.Helper()
+	result := recipeyaml.Decode([]byte(text))
+	if !result.Valid() {
+		t.Fatalf("the recipe was refused: %+v", result.Problems)
+	}
+	return result.Recipe
+}
+
+// A recipe that names no seed and asks for damage is damaged, and the record
+// beside the data names the seed and the locale the run used.
+//
+// Reproduced by an outside review on 2026-10-22: validate called such a recipe
+// usable and generate ended as an internal defect after producing every row,
+// because the manifest envelope refused an empty seed.
+func TestARecipeWithoutASeedIsDamagedWithTheSeedItIsReadWith(t *testing.T) {
+	rec := decoded(t, `
+version: "0.1"
+entities:
+  t:
+    count: 2
+    fields:
+      n: { type: integer }
+policy:
+  layers: [L2]
+  rows: 100%
+`)
+	dir := t.TempDir()
+	if _, err := writeInto(rec, Settings{Into: dir}); err != nil {
+		t.Fatalf("a recipe without a seed could not be damaged: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, manifestjson.Name)); err != nil {
+		t.Errorf("the run left no manifest: %v", err)
+	}
+	note := readNote(t, dir)
+	if note.Seed != recipe.DefaultSeed || note.Locale != recipe.DefaultLocale {
+		t.Errorf("the note says seed %q and locale %q, and the run drew with %q and %q",
+			note.Seed, note.Locale, recipe.DefaultSeed, recipe.DefaultLocale)
+	}
+}
+
+// A setting the reader carried without reading is in the record beside the
+// data, not only in what validate printed.
+//
+// Reproduced by an outside review on 2026-10-22: a date of birth limited to one
+// year got dates from other decades, validate warned about the two settings,
+// and the note said nothing was left undone.
+func TestTheNoteNamesWhatTheReaderCarriedWithoutReading(t *testing.T) {
+	rec := decoded(t, `
+version: "0.1"
+seed: "review"
+entities:
+  t:
+    count: 2
+    fields:
+      born: { generator: birth_date, min: "2000-01-01", max: "2000-12-31" }
+`)
+	dir := t.TempDir()
+	if _, err := writeInto(rec, Settings{Into: dir}); err != nil {
+		t.Fatalf("the run failed: %v", err)
+	}
+	var said []string
+	for _, entry := range readNote(t, dir).NotDone {
+		said = append(said, entry.Where)
+	}
+	for _, where := range []string{"entities.t.fields.born.max", "entities.t.fields.born.min"} {
+		if !slices.Contains(said, where) {
+			t.Errorf("the note leaves out %s, and lists %v", where, said)
+		}
 	}
 }
 

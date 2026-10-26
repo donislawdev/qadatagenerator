@@ -281,6 +281,15 @@ func TestProblems(t *testing.T) {
 			where: "locale",
 			what:  "does not know de-DE",
 		},
+		// Refused since 2026-10-26 (DEC-266) while conditions are not
+		// evaluated. It used to pass with a warning, and the run damaged every
+		// row, the ones the condition left out included.
+		{
+			name:  "a condition on which rows to damage",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y }\npolicy:\n  layers: [L2]\n  only_when: \"false\"\n",
+			where: "policy.only_when",
+			what:  "does not evaluate conditions yet",
+		},
 		// The three delimiters since 2026-10-26. The first passed validate and
 		// was refused by generate, the other two passed both and wrote a file
 		// whose records and fields could not be told apart.
@@ -777,6 +786,9 @@ func TestARecipeNestedTooDeeplyIsRefusedBeforeParsing(t *testing.T) {
 
 // The policy is the second pillar's half of a recipe, and every key of it has
 // to survive the read or the run does something other than what was asked.
+//
+// only_when is not among them since 2026-10-26: it is refused while conditions
+// are not evaluated (DEC-266), and the table of refusals holds that case.
 func TestThePolicySurvivesTheRead(t *testing.T) {
 	decoded := recipeyaml.Decode([]byte(`
 version: "0.1"
@@ -791,7 +803,6 @@ policy:
   rows: 5%
   per_row: exactly_one
   exclude_fields: [id]
-  only_when: "country == 'PL'"
 `))
 	if len(decoded.Problems) > 0 {
 		t.Fatalf("a recipe with a policy was refused: %v", decoded.Problems)
@@ -803,7 +814,7 @@ policy:
 	if len(policy.Layers) != 2 || policy.Layers[0] != "L2" || policy.Layers[1] != "L3" {
 		t.Errorf("layers came back as %v", policy.Layers)
 	}
-	if policy.Rows != "5%" || policy.PerRow != "exactly_one" || policy.OnlyWhen != "country == 'PL'" {
+	if policy.Rows != "5%" || policy.PerRow != "exactly_one" {
 		t.Errorf("policy came back as %+v", policy)
 	}
 	if len(policy.ExcludeFields) != 1 || policy.ExcludeFields[0] != "id" {

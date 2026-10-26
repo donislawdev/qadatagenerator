@@ -109,12 +109,21 @@ func Tables(plan generate.Plan) []NoteTable {
 	return tables
 }
 
-// NotDone is what a plan says the run will not do, as the note and the machine
-// readable plan carry it.
-func NotDone(plan generate.Plan) []NoteEntry {
-	entries := make([]NoteEntry, 0, len(plan.Notes))
+// NotDone is what a run will not do, as the note and the machine readable plan
+// carry it: what the plan says, and after it what the reader of the recipe
+// carried without reading.
+//
+// 🔴 The second half since 2026-10-26. The record beside the data said nothing
+// was left undone for a recipe whose date of birth asked for a range this
+// build does not read, while validate warned about exactly that. Found by an
+// outside review on 2026-10-22.
+func NotDone(plan generate.Plan, unchecked []recipe.Unchecked) []NoteEntry {
+	entries := make([]NoteEntry, 0, len(plan.Notes)+len(unchecked))
 	for _, skipped := range plan.Notes {
 		entries = append(entries, NoteEntry{skipped.Where, skipped.What})
+	}
+	for _, skipped := range unchecked {
+		entries = append(entries, NoteEntry{skipped.Where, skipped.What + " - " + skipped.Reason})
 	}
 	return entries
 }
@@ -145,7 +154,7 @@ func writeRunNote(files *store.Set, rec recipe.Recipe, plan generate.Plan,
 		Manifest: version.Manifest, RecipeVersion: version.Recipe,
 		Seed: rec.Seed, Locale: rec.Locale, Tag: rec.Tag,
 		Tables:        Tables(plan),
-		NotDone:       NotDone(plan),
+		NotDone:       NotDone(plan, rec.Unchecked),
 		Overrides:     Overridden(applied),
 		SyntheticData: license.SyntheticDataNotice,
 	}

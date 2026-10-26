@@ -8,6 +8,24 @@ package recipe
 
 import "sort"
 
+// What a recipe that leaves the seed or the locale out is read with.
+//
+// # Why fixed, and why here
+//
+// Decided by the owner on 2026-10-26 (DEC-266). Until then a recipe with no
+// seed drew its data from the empty text and its manifest was refused at the
+// end of the run, after the whole dataset had been produced, because an
+// envelope without a seed says the run cannot be repeated. A seed that is the
+// same every time keeps the promise that one recipe gives one dataset, which a
+// drawn seed would not in a pipeline nobody reads the log of. "0" is what
+// corrupt has always used when nobody said. The locale is the one the source of
+// values already fell back to. Both live in the model so that the reader of
+// recipes, the run and the record beside the data cannot each pick their own.
+const (
+	DefaultSeed   = "0"
+	DefaultLocale = "en-US"
+)
+
 // Recipe is one description of a dataset.
 //
 // The order of entities and of fields inside them is the order the user wrote,
@@ -15,17 +33,31 @@ import "sort"
 // pull request has to stay small, which is the whole point of keeping recipes
 // beside the tests.
 type Recipe struct {
-	Version  string
-	Seed     string
-	Locale   string
-	Name     string
-	Tag      string
-	Entities []Entity
-	Output   Output
+	Version string
+	Seed    string
+	// SeedGiven says whether the recipe wrote the seed, since a recipe that
+	// did not carries DefaultSeed and the two read the same. The record of an
+	// override needs the difference: a seed from the command line replaces
+	// nothing the recipe said when the recipe said nothing.
+	SeedGiven bool
+	Locale    string
+	Name      string
+	Tag       string
+	Entities  []Entity
+	Output    Output
 	// Policy is what to damage, empty when the recipe asks for correct data
 	// only. The first pillar is useful on its own, so a recipe with no policy
 	// is an ordinary recipe rather than an incomplete one.
 	Policy Policy
+	// Unchecked is what the reader of the recipe carried without reading,
+	// such as a setting of a generator this build does not understand.
+	//
+	// 🔴 It travels with the recipe since 2026-10-26. It used to stay with the
+	// reader, and generate takes the recipe alone, so validate warned that a
+	// date of birth would ignore its range while generate wrote dates outside
+	// it without a word and the record beside the data said nothing was left
+	// undone. Found by an outside review on 2026-10-22.
+	Unchecked []Unchecked
 }
 
 // Policy is what a run should break.
@@ -54,9 +86,11 @@ type Policy struct {
 	ExcludeFields []string
 	// OnlyWhen is the condition a row has to meet before it is damaged.
 	//
-	// It is carried and not evaluated. Expressions are not implemented, and a
-	// run that quietly ignored this would damage rows the recipe excluded, so
-	// a recipe carrying one is told plainly that it was not applied.
+	// Expressions are not implemented, so a recipe carrying one is refused
+	// rather than run (DEC-266, 2026-10-26). It used to be run with a warning,
+	// and the run damaged every row, including the ones the condition left
+	// out. A pipeline reads the exit code and not the warning, so a warning
+	// was a run doing more than it was asked with success at the end.
 	OnlyWhen string
 }
 

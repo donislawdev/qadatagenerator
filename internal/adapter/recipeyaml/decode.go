@@ -397,6 +397,16 @@ func (r *reader) result(built recipe.Recipe) Result {
 		}
 		return r.unchecked[i].What < r.unchecked[j].What
 	})
+	// The defaults are written into the recipe here, once, so that every
+	// surface reading it gets the same seed and locale without a second rule
+	// of its own (DEC-266).
+	if built.Seed == "" {
+		built.Seed = recipe.DefaultSeed
+	}
+	if built.Locale == "" {
+		built.Locale = recipe.DefaultLocale
+	}
+	built.Unchecked = r.unchecked
 	return Result{Recipe: built, Problems: r.problems, Unchecked: r.unchecked, Lines: r.lines}
 }
 
@@ -416,6 +426,7 @@ func (r *reader) recipe(top yaml.MapSlice) recipe.Recipe {
 			built.Version, _ = r.text(key, item.Value)
 		case "seed":
 			built.Seed, _ = r.text(key, item.Value)
+			built.SeedGiven = true
 			// Reported here rather than where the recipe is used, so that
 			// validate names it among every other problem at once. The rule and
 			// the arithmetic behind the number live in the domain.
@@ -735,6 +746,15 @@ func (r *reader) policy(node any) recipe.Policy {
 			built.ExcludeFields = r.listOrOne(where, item.Value)
 		case "only_when":
 			built.OnlyWhen, _ = r.text(where, item.Value)
+			// 🔴 Refused while expressions are not evaluated (DEC-266). It
+			// used to be run with a warning, and the run damaged every row,
+			// the ones the condition left out included.
+			if strings.TrimSpace(built.OnlyWhen) != "" {
+				r.report(where, "this build does not evaluate conditions yet, so it cannot "+
+					"damage only the rows that meet one, and damaging every row instead "+
+					"would do more than the recipe asks", "",
+					"remove only_when, and leave columns alone with exclude_fields")
+			}
 		default:
 			r.report(where, "the policy section has no such key", strings.Join(policyKeys, ", "),
 				"remove the line or check the spelling")

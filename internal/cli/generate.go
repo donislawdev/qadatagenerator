@@ -136,7 +136,7 @@ func generateFrom(out *streams, path string, own *generateFlags, flags crossCutt
 	}
 
 	if *own.dryRun {
-		writePlan(out, plan, applied, flags, true)
+		writePlan(out, plan, built.Unchecked, applied, flags, true)
 		for _, line := range plannedDamage(built) {
 			out.note(line)
 		}
@@ -154,7 +154,7 @@ func generateFrom(out *streams, path string, own *generateFlags, flags crossCutt
 	if err != nil {
 		return fail(out, err)
 	}
-	writePlan(out, plan, applied, flags, false)
+	writePlan(out, plan, built.Unchecked, applied, flags, false)
 	// What the damage did goes after the counts of what was produced, because
 	// it is a statement about the same files and reads as one continuous answer.
 	for _, line := range damageTold(built, written, settings) {
@@ -251,7 +251,14 @@ const settingFormat = "output.format"
 func overrides(built *recipe.Recipe, own *generateFlags) []produce.Override {
 	var applied []produce.Override
 	if own.given["seed"] {
-		applied = append(applied, moved("seed", built.Seed, *own.seed))
+		// The side of the recipe is what it wrote, not the default it carries
+		// when it wrote nothing, or the record would say a flag replaced a
+		// seed nobody gave.
+		fromRecipe := built.Seed
+		if !built.SeedGiven {
+			fromRecipe = ""
+		}
+		applied = append(applied, moved("seed", fromRecipe, *own.seed))
 		built.Seed = *own.seed
 	}
 	if own.given["out"] {
@@ -336,14 +343,19 @@ func counted(number int, word string) string {
 // trial says the run wrote nothing, and it changes the last word of the summary
 // rather than the counts. A trial run saying rows written is a sentence that
 // sends somebody looking for files nobody wrote.
-func writePlan(out *streams, plan generate.Plan, applied []produce.Override, flags crossCutting, trial bool) {
+func writePlan(out *streams, plan generate.Plan, unchecked []recipe.Unchecked,
+	applied []produce.Override, flags crossCutting, trial bool) {
 	if *flags.json {
-		writeJSONPlan(out, plan, applied)
+		writeJSONPlan(out, plan, unchecked, applied)
 		return
 	}
 	for _, skipped := range plan.Notes {
 		out.warn(skipped.Where + ": " + skipped.What)
 	}
+	// What the reader carried without reading, in the words validate uses,
+	// since 2026-10-26. A run used to say nothing about a setting validate
+	// warned it would ignore, and then ignore it.
+	writeUnchecked(out, unchecked)
 	for _, moved := range applied {
 		out.detail(overrideLine(moved))
 	}
@@ -393,11 +405,12 @@ type jsonPlan struct {
 	Overrides []produce.Override  `json:"overrides"`
 }
 
-func writeJSONPlan(out *streams, plan generate.Plan, applied []produce.Override) {
+func writeJSONPlan(out *streams, plan generate.Plan, unchecked []recipe.Unchecked,
+	applied []produce.Override) {
 	document := jsonPlan{
 		Seed: plan.Seed, Locale: plan.Locale,
 		Tables:    produce.Tables(plan),
-		NotDone:   produce.NotDone(plan),
+		NotDone:   produce.NotDone(plan, unchecked),
 		Overrides: produce.Overridden(applied),
 	}
 

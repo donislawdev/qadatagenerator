@@ -12,6 +12,9 @@ repository once they are released.
 
 ### Changed
 
+- **A policy with only_when is refused until conditions are evaluated.** It
+  used to run with a warning and damage every row, the ones the condition
+  left out included. Leave columns alone with exclude_fields instead.
 - **A person in a dataset agrees with itself without a rule saying so.** A
   first name and a Polish surname follow the gender column, and a PESEL
   follows the date of birth and the gender, whenever the entity has exactly one
@@ -253,6 +256,15 @@ repository once they are released.
 
 ### Fixed
 
+- **A recipe that names no seed or locale can be damaged.** It used to pass
+  validate and then end generate as an internal defect after every row was
+  produced. Such a recipe is now read with the seed 0 and the locale en-US,
+  and both are written to the manifest and the record of the run.
+- **generate says which settings it does not read, as validate does.** A
+  setting of a generator this build does not understand, such as a range for
+  a date of birth, was warned about by validate and passed over in silence by
+  generate. generate now prints the same warning, and the record of the run
+  lists the setting among what was not done.
 - **A record of one blank field is still a record.** A table of one column
   with blank values was written as empty lines, which a reader skips, so the
   file read back with no records.

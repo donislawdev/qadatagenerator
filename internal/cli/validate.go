@@ -276,6 +276,27 @@ func decodeRecipe(data []byte) validate.Decoded {
 // not the data the tool produces, and a later --json has to be able to put
 // machine readable findings on standard output without a word of prose above
 // them.
+// writeUnchecked says what was carried without being read, in one form for
+// validate and for generate.
+//
+// The headline carries the count and, when the detail below it is being
+// suppressed, says how to see it.
+//
+// It used to be a fixed sentence with the entries underneath it on a channel
+// that --quiet silences. That left the one combination worth avoiding: a
+// warning saying something was skipped, with nothing anywhere saying what. A
+// warning has to be complete on its own, because the line beneath it is not
+// guaranteed to arrive.
+func writeUnchecked(out *streams, unchecked []recipe.Unchecked) {
+	if len(unchecked) == 0 {
+		return
+	}
+	out.warn(uncheckedHeadline(len(unchecked), out.hidesDetail()))
+	for _, skipped := range unchecked {
+		out.detail(skipped.Where + ": " + skipped.What + " - " + skipped.Reason)
+	}
+}
+
 func writeReport(out *streams, report validate.Report, outlook whatARunWouldDo) {
 	for _, found := range report.Problems {
 		// A problem with the file as a whole has no place inside it, and
@@ -287,20 +308,7 @@ func writeReport(out *streams, report validate.Report, outlook whatARunWouldDo) 
 		out.report(problem{what: what, allowed: found.Allowed, instead: found.Hint})
 	}
 
-	// The headline carries the count and, when the detail below it is being
-	// suppressed, says how to see it.
-	//
-	// It used to be a fixed sentence with the entries underneath it on a
-	// channel that --quiet silences. That left the one combination worth
-	// avoiding: a warning saying something was skipped, with nothing anywhere
-	// saying what. A warning has to be complete on its own, because the line
-	// beneath it is not guaranteed to arrive.
-	if len(report.Unchecked) > 0 {
-		out.warn(uncheckedHeadline(len(report.Unchecked), out.hidesDetail()))
-		for _, skipped := range report.Unchecked {
-			out.detail(skipped.Where + ": " + skipped.What + " - " + skipped.Reason)
-		}
-	}
+	writeUnchecked(out, report.Unchecked)
 
 	if !report.Usable() {
 		return

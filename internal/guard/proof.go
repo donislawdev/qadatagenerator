@@ -580,4 +580,6 @@ var toolGuards = []Guard{
 	{"the tree in one file never gives one object two members of the same name", "TestATreeRefusesAParentFieldNamedAfterAChild", "internal/adapter/format", ByMutation},
 	{"a value in a copied command reaches the shell as one argument and as nothing else", "TestAValueReachesTheShellAsOneArgumentAndNothingElse", "internal/commandline", ByMutation},
 	{"a bracket inside a string or a comment closes nothing, so it buys no room for nesting past the limit", "TestABracketInsideAStringOrACommentBuysNoRoom", "internal/adapter/recipeyaml", ByMutation},
+	{"a recipe naming no seed is read with a fixed one, so asking for damage leaves a manifest rather than an internal defect", "TestARecipeWithoutASeedIsDamagedWithTheSeedItIsReadWith", "internal/produce", ByMutation},
+	{"the record beside the data names every setting the reader of the recipe carried without reading", "TestTheNoteNamesWhatTheReaderCarriedWithoutReading", "internal/produce", ByMutation},
 }

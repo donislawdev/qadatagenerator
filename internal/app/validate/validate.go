@@ -282,13 +282,9 @@ func whatThePolicyWillNotDo(rec recipe.Recipe, described Catalog) []recipe.Unche
 			}
 		}
 	}
-	if strings.TrimSpace(rec.Policy.OnlyWhen) != "" {
-		notes = append(notes, recipe.Unchecked{
-			Where:  "policy.only_when",
-			What:   "the condition on which rows to damage",
-			Reason: "expressions are not evaluated in this build, so every row is eligible",
-		})
-	}
+	// A condition on which rows to damage is not noted here since 2026-10-26:
+	// the reader of recipes refuses it while expressions are not evaluated
+	// (DEC-266), so a recipe carrying one never reaches this.
 	return notes
 }
 

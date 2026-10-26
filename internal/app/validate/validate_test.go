@@ -196,7 +196,7 @@ func TestAPolicyNamingALayerWithNoDamageIsRefused(t *testing.T) {
 func TestAPolicyIsToldWhatThisBuildWillNotDoYet(t *testing.T) {
 	decoder := func([]byte) validate.Decoded {
 		return validate.Decoded{Recipe: recipe.Recipe{
-			Policy: recipe.Policy{Layers: []string{"L2", "L3"}, OnlyWhen: "country == 'PL'"},
+			Policy: recipe.Policy{Layers: []string{"L2", "L3"}},
 		}}
 	}
 	report, err := validate.Run(decoder, validate.Source{Name: "r.yaml"}, everyNameKnown{}, someLayers{})
@@ -214,9 +214,6 @@ func TestAPolicyIsToldWhatThisBuildWillNotDoYet(t *testing.T) {
 	}
 	if strings.Contains(joined, "in L2") {
 		t.Errorf("a layer this build implements was reported as waiting: %s", joined)
-	}
-	if !strings.Contains(joined, "expressions are not evaluated") {
-		t.Errorf("nothing says the condition is ignored: %s", joined)
 	}
 }
 
