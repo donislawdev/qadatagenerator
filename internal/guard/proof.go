@@ -579,4 +579,5 @@ var toolGuards = []Guard{
 	{"a field described by type alone that cannot hold the shortest value of its type is refused before the run", "TestALimitTooShortForTheTypeIsRefusedBeforeTheRun", "internal/adapter/values", ByMutation},
 	{"the tree in one file never gives one object two members of the same name", "TestATreeRefusesAParentFieldNamedAfterAChild", "internal/adapter/format", ByMutation},
 	{"a value in a copied command reaches the shell as one argument and as nothing else", "TestAValueReachesTheShellAsOneArgumentAndNothingElse", "internal/commandline", ByMutation},
+	{"a bracket inside a string or a comment closes nothing, so it buys no room for nesting past the limit", "TestABracketInsideAStringOrACommentBuysNoRoom", "internal/adapter/recipeyaml", ByMutation},
 }

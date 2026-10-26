@@ -24,6 +24,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/ast"
+	"github.com/goccy/go-yaml/lexer"
 	"github.com/goccy/go-yaml/parser"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
@@ -253,7 +254,17 @@ func Decode(data []byte) Result {
 		return reader.result(recipe.Recipe{})
 	}
 
-	file, err := parser.ParseBytes(data, 0)
+	// 🔴 Tokenized here and handed to the parser, rather than handed over as
+	// bytes, because ParseBytes is exactly these two calls and the depth has to
+	// be read in between. The tokens are the parser's own view of the document,
+	// so the depth counted from them is the depth it will build, quotes and
+	// comments included. See deepestFlow for why the bytes alone do not do.
+	tokens := lexer.Tokenize(string(data))
+	if refusedForFlowNesting(reader, tokens) {
+		return reader.result(recipe.Recipe{})
+	}
+
+	file, err := parser.Parse(tokens, 0)
 	if err != nil {
 		reader.report("", "the file is not valid YAML: "+firstLine(err.Error()), "",
 			"check the indentation and that every key ends with a colon")

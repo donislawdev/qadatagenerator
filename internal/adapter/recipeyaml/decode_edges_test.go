@@ -105,6 +105,32 @@ func TestNestingIsCountedAcrossBothKindsOfBracket(t *testing.T) {
 	}
 }
 
+// A closing bracket that is part of a string or of a comment does not close
+// anything, so it cannot buy room for more nesting.
+//
+// Found by an outside review on 2026-10-22: the scan over bytes counted the
+// bracket in "]" as a closing one, so x: ["]", ["]", ... nested 8192 levels in
+// 57 350 bytes while reading as one level, and the parser took 445 MiB. Two
+// hundred levels here, for the reason the siblings give.
+func TestABracketInsideAStringOrACommentBuysNoRoom(t *testing.T) {
+	const levels = 200
+	for _, given := range []struct{ name, recipe string }{
+		{"a double quoted bracket",
+			"x: " + strings.Repeat(`["]", `, levels) + "0" + strings.Repeat("]", levels)},
+		{"a single quoted bracket",
+			"x: " + strings.Repeat(`[']', `, levels) + "0" + strings.Repeat("]", levels)},
+		{"a bracket after a comment mark",
+			"x: " + strings.Repeat("[ # ]\n  ", levels) + "0" + strings.Repeat("]", levels) + "\n"},
+	} {
+		result := recipeyaml.Decode([]byte(given.recipe))
+		if result.Valid() || len(result.Problems) != 1 ||
+			!strings.Contains(result.Problems[0].What, "nests brackets 200 deep") {
+			t.Errorf("%s: %d levels were not refused for their depth: %+v", given.name, levels,
+				result.Problems)
+		}
+	}
+}
+
 // Nesting a recipe actually uses has to survive, or the guard is refusing the
 // format rather than an attack. A field written inline is one level and a list
 // of values inside it is two.

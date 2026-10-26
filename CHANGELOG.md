@@ -235,6 +235,11 @@ repository once they are released.
 
 ### Security
 
+- **A recipe can no longer nest past the depth limit by hiding closing
+  brackets in strings.** A closing bracket inside quotes or after a comment
+  mark lowered the count, so a recipe of 57 KB nesting 8192 levels reached the
+  parser and took about 445 MB. The depth is now counted from what the parser
+  reads, and the same recipe is refused at about 28 MB.
 - **A copied command can no longer carry a second command in a file name.**
   The line offered for copying quoted a value only when it had a space, so a
   file whose name held a command separator and a command put that command

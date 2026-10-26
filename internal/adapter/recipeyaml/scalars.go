@@ -10,6 +10,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml/token"
 
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
@@ -406,9 +407,7 @@ func refusedForNesting(r *reader, data []byte) bool {
 	// One pass over bytes already in hand, comparing four characters, which is
 	// free next to what it refuses.
 	if depth := deepestNesting(data); depth > MaxNestingDepth {
-		r.report("", fmt.Sprintf("the recipe nests brackets %d deep and this build reads at most %d", depth, MaxNestingDepth),
-			fmt.Sprintf("nesting up to %d deep, counting square brackets and braces together", MaxNestingDepth),
-			"nothing written by hand nests anywhere near this deep, so check that the file is a recipe and not something else")
+		reportNesting(r, depth)
 		return true
 	}
 
@@ -423,6 +422,62 @@ func refusedForNesting(r *reader, data []byte) bool {
 	}
 
 	return false
+}
+
+// reportNesting is the one sentence for a recipe that nests too deep, however
+// the depth was counted.
+func reportNesting(r *reader, depth int) {
+	r.report("", fmt.Sprintf("the recipe nests brackets %d deep and this build reads at most %d", depth, MaxNestingDepth),
+		fmt.Sprintf("nesting up to %d deep, counting square brackets and braces together", MaxNestingDepth),
+		"nothing written by hand nests anywhere near this deep, so check that the file is a recipe and not something else")
+}
+
+// refusedForFlowNesting refuses a document whose brackets and braces nest
+// deeper than the limit, as the parser will read them.
+func refusedForFlowNesting(r *reader, tokens token.Tokens) bool {
+	if depth := deepestFlow(tokens); depth > MaxNestingDepth {
+		reportNesting(r, depth)
+		return true
+	}
+	return false
+}
+
+// deepestFlow returns the deepest the flow collections of a document nest,
+// counted from its tokens.
+//
+// # Why the tokens and not the bytes
+//
+// The tokens are what the parser builds the tree from, so the depth counted
+// here is the depth it would build: a bracket inside quotes or after a comment
+// mark is part of a string token and moves nothing. Counting bytes had to guess
+// that and guessed wrong in one direction (deepestNesting above). Teaching the
+// byte scan about quoting would have been a second reader of YAML to keep in
+// step with the first, and the first was already running.
+//
+// # What it costs
+//
+// Nothing that was not paid before, because the parser tokenized the bytes
+// itself and now takes these tokens instead. Measured on 2026-10-26 on the
+// shape from the outside review, allocations, median of five after one
+// discarded: 2048 levels 2.2 MiB, 4096 levels 4.3 MiB, 8192 levels 8.9 MiB in
+// about 8 ms, growing in step with the input, while parsing 4096 levels took
+// 59.1 MiB and the review measured 445 MiB at 8192.
+func deepestFlow(tokens token.Tokens) int {
+	depth, deepest := 0, 0
+	for _, each := range tokens {
+		switch each.Type {
+		case token.SequenceStartType, token.MappingStartType:
+			depth++
+			if depth > deepest {
+				deepest = depth
+			}
+		case token.SequenceEndType, token.MappingEndType:
+			if depth > 0 {
+				depth--
+			}
+		}
+	}
+	return deepest
 }
 
 // mark is the byte order mark Notepad writes at the head of a file by default.
@@ -521,12 +576,20 @@ func stripBOM(data []byte) []byte {
 // counters would each stay under the limit while the document reached twice it,
 // which is the arithmetic a hostile recipe is written to find.
 //
-// A bracket inside a quoted string counts towards the depth as well. That is
-// deliberate and it errs in the safe direction, because a quoted bracket costs
-// the parser nothing: the scan can therefore refuse a recipe nobody would
-// write, and can never accept one that is a bomb. Teaching it about quoting
-// would buy a case that does not occur and cost a second parser to keep
-// correct.
+// A bracket inside a quoted string counts towards the depth as well, which
+// errs in the safe direction for an opening one: the scan can refuse a recipe
+// nobody would write.
+//
+// # 🔴 What this scan is NOT, since 2026-10-26
+//
+// It is a cheap first pass, not the limit. A sentence stood here until that day
+// saying the scan "can never accept one that is a bomb", and it was false: a
+// CLOSING bracket inside quotes lowers the count as well, so a recipe of the
+// shape x: ["]", ["]", ... nests as deep as it likes and reads as one level.
+// An outside review measured 8192 levels in 57 350 bytes passing it, and 445
+// MiB taken by the parser. The limit is now held by deepestFlow, on the tokens
+// the parser is about to read. This pass stays because it refuses the plain
+// spelling without allocating anything, which the tokens cannot.
 func deepestNesting(data []byte) int {
 	depth, deepest := 0, 0
 	for _, symbol := range data {
