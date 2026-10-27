@@ -88,7 +88,7 @@ func TestASampleIsTheFirstRowsTheRunItselfWouldWrite(t *testing.T) {
 	rec := related(60)
 	whole := wholeRun(t, rec)
 
-	sample, err := Preview(rec, values.New(rec.Locale, rec.Seed), 7)
+	sample, err := Preview(rec, values.New(rec.Locale, rec.Seed), 7, generate.NeverStops{})
 	if err != nil {
 		t.Fatalf("the sample could not be made: %v", err)
 	}
@@ -125,7 +125,7 @@ func TestTheKeyNamingTheParentIsTheOneTheRunWrites(t *testing.T) {
 	rec := related(60)
 	whole := wholeRun(t, rec)
 
-	sample, err := Preview(rec, values.New(rec.Locale, rec.Seed), 5)
+	sample, err := Preview(rec, values.New(rec.Locale, rec.Seed), 5, generate.NeverStops{})
 	if err != nil {
 		t.Fatalf("the sample could not be made: %v", err)
 	}
@@ -174,7 +174,7 @@ func TestTheKeyNamingTheParentIsTheOneTheRunWrites(t *testing.T) {
 // count of nought is a table that says so rather than an empty rectangle.
 func TestATableSaysWhetherItWasCutOrIsSimplyShort(t *testing.T) {
 	rec := related(3)
-	sample, err := Preview(rec, values.New(rec.Locale, rec.Seed), DefaultRows)
+	sample, err := Preview(rec, values.New(rec.Locale, rec.Seed), DefaultRows, generate.NeverStops{})
 	if err != nil {
 		t.Fatalf("the sample could not be made: %v", err)
 	}
@@ -213,7 +213,8 @@ func TestASampleLeavesNothingBehind(t *testing.T) {
 	dir := t.TempDir()
 	t.Chdir(dir)
 
-	if _, err := Preview(related(60), values.New("pl-PL", "preview-seed"), DefaultRows); err != nil {
+	if _, err := Preview(related(60), values.New("pl-PL", "preview-seed"), DefaultRows,
+		generate.NeverStops{}); err != nil {
 		t.Fatalf("the sample could not be made: %v", err)
 	}
 
@@ -230,6 +231,35 @@ func TestASampleLeavesNothingBehind(t *testing.T) {
 	}
 }
 
+// counting is a Halt that never stops and counts how often it was asked.
+type counting struct{ asked int }
+
+func (c *counting) Stopped() error {
+	c.asked++
+	return nil
+}
+
+// 🔴 The stop of a preview reaches the plan, which is the part of a preview
+// that is not short: it shares the children of every parent out before a row
+// is cut. Until 2026-10-27 the plan was handed a stop that never answers, so a
+// check of the recipe screen that a newer keystroke had made stale planned to
+// the end (B-341).
+//
+// The run of a cut preview asks once a row, at most twice DefaultRows here, so
+// a count above the forty parents can only come from the plan asking once a
+// parent.
+func TestTheStopOfAPreviewReachesThePlan(t *testing.T) {
+	stop := &counting{}
+	if _, err := Preview(related(60), values.New("pl-PL", "preview-seed"), DefaultRows,
+		stop); err != nil {
+		t.Fatalf("the sample could not be made: %v", err)
+	}
+	if stop.asked <= 40 {
+		t.Errorf("a preview of forty parents asked whether to stop %d times, so the plan was "+
+			"not asked at all", stop.asked)
+	}
+}
+
 // A recipe the plan refuses is refused here, with the failure the plan gave,
 // rather than turning into an empty sample. An empty sample would read on
 // screen as a recipe that produces nothing, which is a different sentence.
@@ -238,7 +268,8 @@ func TestARecipeThePlanRefusesIsRefusedHere(t *testing.T) {
 	rec.Entities[1].Fields = append(rec.Entities[1].Fields,
 		recipe.Field{Name: "customer", Generator: "first_name"})
 
-	if _, err := Preview(rec, values.New(rec.Locale, rec.Seed), DefaultRows); err == nil {
+	if _, err := Preview(rec, values.New(rec.Locale, rec.Seed), DefaultRows,
+		generate.NeverStops{}); err == nil {
 		t.Fatal("a recipe whose relation and field want one column produced a sample")
 	} else if !strings.Contains(err.Error(), "customer") {
 		t.Errorf("the refusal does not name the column both things want: %v", err)

@@ -25,11 +25,12 @@
 // So the first pass counts and samples, and the second pass damages. Between
 // them this holds a count and a bounded sample per column, and not one record.
 // The cost is stated rather than hidden: the file is read twice, and a stream
-// that cannot be rewound therefore cannot be a source.
+// that cannot be rewound therefore cannot be a source. Since 2026-10-27 one is
+// refused by name before it is read, rather than read once and found to hold
+// nothing the second time. The limits on what one pass holds are in limits.go.
 package sourcecsv
 
 import (
-	"bufio"
 	"encoding/csv"
 	"errors"
 	"io"
@@ -38,6 +39,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
 	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
@@ -75,8 +77,7 @@ type File struct {
 	// does not describe.
 	hadByteOrderMark bool
 
-	reading *os.File
-	rows    *csv.Reader
+	reading *pass
 	row     int
 }
 
@@ -84,9 +85,14 @@ type File struct {
 //
 // It leaves nothing open. The second pass opens the file again, so a caller
 // that surveys a file and then decides not to damage it holds no handle.
-func Open(path string, delimiter rune) (*File, error) {
+//
+// stop is asked between records, because this pass walks all of a file whose
+// size somebody else chose. A window asks a newer question while one is being
+// read, and the read it no longer wants ends at the next record rather than at
+// the end of the file. Until 2026-10-27 nothing could end it (B-341).
+func Open(path string, delimiter rune, stop corrupt.Halt) (*File, error) {
 	file := &File{path: path, delimiter: delimiter}
-	if err := file.survey(); err != nil {
+	if err := file.survey(stop); err != nil {
 		return nil, err
 	}
 	return file, nil
@@ -107,12 +113,12 @@ func (f *File) HadByteOrderMark() bool { return f.hadByteOrderMark }
 // The second pass is opened here rather than in Open, so that the handle exists
 // only while records are being taken.
 func (f *File) Next() (dataset.Record, bool, error) {
-	if f.rows == nil {
+	if f.reading == nil {
 		if err := f.startReading(); err != nil {
 			return dataset.Record{}, false, err
 		}
 	}
-	fields, err := f.rows.Read()
+	fields, err := f.reading.next()
 	if errors.Is(err, io.EOF) {
 		if f.row < f.table.Rows {
 			return dataset.Record{}, false, f.changedUnderneath(
@@ -125,8 +131,9 @@ func (f *File) Next() (dataset.Record, bool, error) {
 		// The handle goes before the refusal travels. A walk that ends in a
 		// failure ends here, and leaving it open holds the file against whoever
 		// tries to clean up after the run.
+		line := f.reading.line
 		_ = f.Close()
-		return dataset.Record{}, false, f.readFailure(err)
+		return dataset.Record{}, false, f.readFailure(err, line)
 	}
 	f.row++
 	// Caught here rather than at the end, because a record past the count is a
@@ -178,8 +185,8 @@ func (f *File) Close() error {
 	if f.reading == nil {
 		return nil
 	}
-	handle := f.reading
-	f.reading, f.rows = nil, nil
+	handle := f.reading.handle
+	f.reading = nil
 	if err := handle.Close(); err != nil {
 		return fault.Wrap(fault.IO, err, "cannot close "+f.path)
 	}
@@ -188,30 +195,37 @@ func (f *File) Close() error {
 
 // survey is the first pass: it counts the rows and keeps a bounded sample of
 // every column.
-func (f *File) survey() error {
-	handle, reader, header, err := f.openAndReadHeader()
+func (f *File) survey(stop corrupt.Halt) error {
+	reading, header, err := f.openAndReadHeader()
 	if err != nil {
 		return err
 	}
-	defer func() { _ = handle.Close() }()
+	defer func() { _ = reading.handle.Close() }()
 
 	f.table = dataset.Table{Entity: EntityOf(f.path), Columns: header}
 	f.samples = make([]dataset.Sample, len(header))
+	// room is what each column may still keep, in bytes. It is shared out
+	// equally, because nothing is known about a column before its values are.
+	room := make([]int, len(header))
 	for at, name := range header {
 		f.samples[at] = dataset.Sample{Field: name}
+		room[at] = SampleBytes / len(header)
 	}
 
 	rows := 0
 	for {
-		fields, err := reader.Read()
+		if err := stop.Stopped(); err != nil {
+			return err
+		}
+		fields, err := reading.next()
 		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
-			return f.readFailure(err)
+			return f.readFailure(err, reading.line)
 		}
 		rows++
-		f.gather(fields, rows)
+		f.gather(fields, rows, room)
 	}
 	f.table.Rows = rows
 	if rows == 0 {
@@ -227,7 +241,13 @@ func (f *File) survey() error {
 // The record number travels with the value, because a column with a gap in it
 // keeps fewer values than the rows above it and anything reading two columns
 // side by side would otherwise compare one record against another.
-func (f *File) gather(fields []string, row int) {
+//
+// 🔴 A column takes no value after the first one that does not fit its room,
+// even a shorter one. What is kept is then the first values of the column and
+// nothing else, which is what infer says when it writes "the first N of M".
+// A value is copied rather than kept as it came, because the parser cuts every
+// field of a record out of one string and a kept slice keeps all of it.
+func (f *File) gather(fields []string, row int, room []int) {
 	for at := range f.samples {
 		if at >= len(fields) {
 			continue
@@ -238,10 +258,17 @@ func (f *File) gather(fields []string, row int) {
 			continue
 		}
 		f.samples[at].NonEmpty++
-		if len(f.samples[at].Values) < SampleCap {
-			f.samples[at].Values = append(f.samples[at].Values, value)
-			f.samples[at].Rows = append(f.samples[at].Rows, row)
+		if len(f.samples[at].Values) >= SampleCap {
+			continue
 		}
+		cost := len(value) + valueCost
+		if cost > room[at] {
+			room[at] = 0
+			continue
+		}
+		room[at] -= cost
+		f.samples[at].Values = append(f.samples[at].Values, strings.Clone(value))
+		f.samples[at].Rows = append(f.samples[at].Rows, row)
 	}
 }
 
@@ -252,16 +279,16 @@ func (f *File) gather(fields []string, row int) {
 // columns a manifest names come from the first reading and the values come from
 // the second, so two different headers mean the two describe different files.
 func (f *File) startReading() error {
-	handle, reader, header, err := f.openAndReadHeader()
+	reading, header, err := f.openAndReadHeader()
 	if err != nil {
 		return err
 	}
 	if !sameColumns(header, f.table.Columns) {
-		_ = handle.Close()
+		_ = reading.handle.Close()
 		return f.changedUnderneath("its columns were " + strings.Join(f.table.Columns, ", ") +
 			" when it was surveyed and are " + fault.Shorten(strings.Join(header, ", ")) + " now")
 	}
-	f.reading, f.rows, f.row = handle, reader, 0
+	f.reading, f.row = reading, 0
 	return nil
 }
 
@@ -281,42 +308,48 @@ func sameColumns(left, right []string) bool {
 
 // openAndReadHeader opens the file and takes its first record as the column
 // names, which is the one thing both passes do the same way.
-func (f *File) openAndReadHeader() (*os.File, *csv.Reader, []string, error) {
+func (f *File) openAndReadHeader() (*pass, []string, error) {
+	// Asked of the path before it is opened, because opening a pipe waits for
+	// whoever writes into it, and of the handle after, because the path may
+	// have been pointed somewhere else in between.
+	if err := f.regular(os.Stat(f.path)); err != nil {
+		return nil, nil, err
+	}
 	handle, err := os.Open(f.path)
 	if err != nil {
-		return nil, nil, nil, fault.Wrap(fault.IO, err, "cannot read "+f.path)
+		return nil, nil, fault.Wrap(fault.IO, err, "cannot read "+f.path)
 	}
-	reader := csv.NewReader(bufio.NewReader(handle))
-	reader.Comma = f.delimiter
-	// Every record has to have as many fields as the header. The reader
-	// enforces it once FieldsPerRecord is left at zero and the header has been
-	// read, which turns a ragged file into a refusal naming the line rather
-	// than into rows whose columns have quietly shifted.
-	reader.FieldsPerRecord = 0
-	reader.LazyQuotes = false
-	// Reusing the slice would hand the same backing array to every record, and
-	// the corruption engine writes into the record it is given.
-	reader.ReuseRecord = false
+	if err := f.regular(handle.Stat()); err != nil {
+		_ = handle.Close()
+		return nil, nil, err
+	}
+	reading := newPass(handle, f.delimiter)
 
-	header, err := reader.Read()
+	header, err := reading.next()
 	if errors.Is(err, io.EOF) {
 		_ = handle.Close()
-		return nil, nil, nil, fault.New(fault.Data, f.path+" is empty. This mode reads a header "+
+		return nil, nil, fault.New(fault.Data, f.path+" is empty. This mode reads a header "+
 			"row and then the records under it, so give a file that has both")
 	}
 	if err != nil {
 		_ = handle.Close()
-		return nil, nil, nil, f.readFailure(err)
+		return nil, nil, f.readFailure(err, reading.line)
+	}
+	// Before anything is kept per column, because that is what the limit is
+	// for.
+	if len(header) > MaxColumns {
+		_ = handle.Close()
+		return nil, nil, f.tooWide(len(header))
 	}
 	if problem := usableHeader(header, f.path); problem != nil {
 		_ = handle.Close()
-		return nil, nil, nil, problem
+		return nil, nil, problem
 	}
 	if strings.HasPrefix(header[0], byteOrderMark) {
 		f.hadByteOrderMark = true
 		header[0] = strings.TrimPrefix(header[0], byteOrderMark)
 	}
-	return handle, reader, header, nil
+	return reading, header, nil
 }
 
 // usableHeader refuses a header this mode cannot name columns from.
@@ -327,9 +360,10 @@ func (f *File) openAndReadHeader() (*os.File, *csv.Reader, []string, error) {
 // the file the reader is looking at.
 //
 // 🔴 The name goes into the sentence through Shorten, because it is untrusted
-// text of unbounded length. A file has no size limit here and cannot have one,
-// since this mode exists for large ones, so a column name may be as long as the
-// file. Measured on 2026-08-11 before this: a name of sixty four kilobytes came
+// text far longer than a sentence. A file has no size limit here and cannot
+// have one, since this mode exists for large ones, so until 2026-10-27 a column
+// name could be as long as the file, and it can still be as long as
+// MaxRecordBytes. Measured on 2026-08-11 before this: a name of sixty four kilobytes came
 // back as a refusal of sixty five thousand nine hundred and twenty seven bytes,
 // straight into somebody's build log. Same class as the report that grew with a
 // hostile recipe, reached by the third road.
@@ -358,8 +392,12 @@ func usableHeader(header []string, path string) error {
 // about the line.
 //
 // The wording of the library names the line and the column, which is the part
-// worth keeping, and it is the only part somebody can act on.
-func (f *File) readFailure(err error) error {
+// worth keeping, and it is the only part somebody can act on. A record too long
+// is the one refusal the library does not word, and line is where it starts.
+func (f *File) readFailure(err error, line int) error {
+	if errors.Is(err, errTooLong) {
+		return f.tooLong(line)
+	}
 	var badField *csv.ParseError
 	if errors.As(err, &badField) {
 		// 🔴 The move says what to do and never which control does it, because

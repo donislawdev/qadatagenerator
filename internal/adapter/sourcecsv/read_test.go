@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/sourcecsv"
+	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
 	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
@@ -43,7 +44,7 @@ func allRows(t *testing.T, file *sourcecsv.File) [][]string {
 
 func TestAFileIsReadIntoATableAndItsRecords(t *testing.T) {
 	path := written(t, "contacts.csv", "id,name\n1,Ada\n2,Grace\n")
-	file, err := sourcecsv.Open(path, ',')
+	file, err := sourcecsv.Open(path, ',', corrupt.NeverStops{})
 	if err != nil {
 		t.Fatalf("cannot open an ordinary file: %v", err)
 	}
@@ -69,7 +70,7 @@ func TestAFileIsReadIntoATableAndItsRecords(t *testing.T) {
 // asks for it before the first row is damaged.
 func TestTheRowCountIsKnownBeforeTheFirstRecord(t *testing.T) {
 	path := written(t, "contacts.csv", "a\n1\n2\n3\n4\n5\n")
-	file, err := sourcecsv.Open(path, ',')
+	file, err := sourcecsv.Open(path, ',', corrupt.NeverStops{})
 	if err != nil {
 		t.Fatalf("cannot open: %v", err)
 	}
@@ -86,7 +87,7 @@ func TestTheRowCountIsKnownBeforeTheFirstRecord(t *testing.T) {
 // side uses a real parser rather than splitting on a character.
 func TestQuotedFieldsSurviveTheWayTheyWereWritten(t *testing.T) {
 	path := written(t, "notes.csv", "id,note\n1,\"a, b\"\n2,\"line\nbreak\"\n3,\"say \"\"hi\"\"\"\n")
-	file, err := sourcecsv.Open(path, ',')
+	file, err := sourcecsv.Open(path, ',', corrupt.NeverStops{})
 	if err != nil {
 		t.Fatalf("cannot open: %v", err)
 	}
@@ -105,7 +106,7 @@ func TestQuotedFieldsSurviveTheWayTheyWereWritten(t *testing.T) {
 // describe.
 func TestBrokenQuotingIsRefusedRatherThanSalvaged(t *testing.T) {
 	path := written(t, "broken.csv", "id,note\n1,\"unclosed\n2,fine\n")
-	if _, err := sourcecsv.Open(path, ','); err == nil {
+	if _, err := sourcecsv.Open(path, ',', corrupt.NeverStops{}); err == nil {
 		t.Fatal("a file with broken quoting was read as though it were fine")
 	}
 }
@@ -114,7 +115,7 @@ func TestBrokenQuotingIsRefusedRatherThanSalvaged(t *testing.T) {
 // columns that have quietly shifted.
 func TestARaggedRowIsRefused(t *testing.T) {
 	path := written(t, "ragged.csv", "a,b,c\n1,2,3\n4,5\n")
-	_, err := sourcecsv.Open(path, ',')
+	_, err := sourcecsv.Open(path, ',', corrupt.NeverStops{})
 	if err == nil {
 		t.Fatal("a row short of a field was accepted")
 	}
@@ -124,7 +125,7 @@ func TestARaggedRowIsRefused(t *testing.T) {
 }
 
 func TestAFileWithNothingInItIsRefused(t *testing.T) {
-	if _, err := sourcecsv.Open(written(t, "empty.csv", ""), ','); err == nil {
+	if _, err := sourcecsv.Open(written(t, "empty.csv", ""), ',', corrupt.NeverStops{}); err == nil {
 		t.Error("an empty file was accepted")
 	}
 }
@@ -133,7 +134,7 @@ func TestAFileWithNothingInItIsRefused(t *testing.T) {
 // to damage and a run that wrote an empty file with a manifest beside it would
 // look like a run that did something.
 func TestAHeaderWithNoRecordsIsRefused(t *testing.T) {
-	_, err := sourcecsv.Open(written(t, "headings.csv", "a,b\n"), ',')
+	_, err := sourcecsv.Open(written(t, "headings.csv", "a,b\n"), ',', corrupt.NeverStops{})
 	if err == nil {
 		t.Fatal("a file of headings alone was accepted")
 	}
@@ -158,7 +159,7 @@ func TestAHeaderThatCannotNameAColumnIsRefused(t *testing.T) {
 		{"blank.csv", "a,,c\n1,2,3\n", "no name"},
 		{"twice.csv", "a,b,a\n1,2,3\n", "two columns"},
 	} {
-		_, err := sourcecsv.Open(written(t, given.name, given.content), ',')
+		_, err := sourcecsv.Open(written(t, given.name, given.content), ',', corrupt.NeverStops{})
 		if err == nil {
 			t.Errorf("%s was accepted", given.name)
 			continue
@@ -174,7 +175,7 @@ func TestAHeaderThatCannotNameAColumnIsRefused(t *testing.T) {
 // no policy could exclude and no manifest reader could match.
 func TestAByteOrderMarkIsTakenOffAndReported(t *testing.T) {
 	path := written(t, "excel.csv", "\ufeffid,name\n1,Ada\n")
-	file, err := sourcecsv.Open(path, ',')
+	file, err := sourcecsv.Open(path, ',', corrupt.NeverStops{})
 	if err != nil {
 		t.Fatalf("cannot open: %v", err)
 	}
@@ -202,7 +203,7 @@ func TestAByteOrderMarkIsTakenOffAndReported(t *testing.T) {
 // what a run says about itself, beside the encoding and the line endings.
 func TestABlankCellIsCountedAndABlankLineIsNotEvenARecord(t *testing.T) {
 	path := written(t, "gaps.csv", "a\n1\n\n2\n \n3\n")
-	file, err := sourcecsv.Open(path, ',')
+	file, err := sourcecsv.Open(path, ',', corrupt.NeverStops{})
 	if err != nil {
 		t.Fatalf("cannot open: %v", err)
 	}
@@ -230,7 +231,7 @@ func TestTheSampleIsCappedAndTheCountIsNot(t *testing.T) {
 	for row := 0; row < rows; row++ {
 		file.WriteString("x\n")
 	}
-	opened, err := sourcecsv.Open(written(t, "long.csv", file.String()), ',')
+	opened, err := sourcecsv.Open(written(t, "long.csv", file.String()), ',', corrupt.NeverStops{})
 	if err != nil {
 		t.Fatalf("cannot open: %v", err)
 	}
@@ -251,7 +252,7 @@ func TestTheSampleIsCappedAndTheCountIsNot(t *testing.T) {
 // Another delimiter is read as asked. This is exactly where an import falls
 // over, so it is a setting rather than a detail.
 func TestAnotherDelimiterIsRead(t *testing.T) {
-	file, err := sourcecsv.Open(written(t, "euro.csv", "a;b\n1;2\n"), ';') // punctuation: test data
+	file, err := sourcecsv.Open(written(t, "euro.csv", "a;b\n1;2\n"), ';', corrupt.NeverStops{}) // punctuation: test data
 	if err != nil {
 		t.Fatalf("cannot open a semicolon separated file: %v", err)
 	}
@@ -264,7 +265,7 @@ func TestAnotherDelimiterIsRead(t *testing.T) {
 // A record carries no parent, because one file is one table. A writer handed
 // something else would put a column of relations into a flat file.
 func TestARecordFromAFileBelongsToNobody(t *testing.T) {
-	file, err := sourcecsv.Open(written(t, "flat.csv", "a\n1\n"), ',')
+	file, err := sourcecsv.Open(written(t, "flat.csv", "a\n1\n"), ',', corrupt.NeverStops{})
 	if err != nil {
 		t.Fatalf("cannot open: %v", err)
 	}
@@ -281,7 +282,7 @@ func TestARecordFromAFileBelongsToNobody(t *testing.T) {
 // Closing twice is the ordinary case rather than a mistake: a walk that reaches
 // the end closes itself, and the caller that opened the file closes it too.
 func TestClosingTwiceIsAllowed(t *testing.T) {
-	file, err := sourcecsv.Open(written(t, "short.csv", "a\n1\n"), ',')
+	file, err := sourcecsv.Open(written(t, "short.csv", "a\n1\n"), ',', corrupt.NeverStops{})
 	if err != nil {
 		t.Fatalf("cannot open: %v", err)
 	}
@@ -324,7 +325,7 @@ func TestALongColumnNameDoesNotComeBackAsALongMessage(t *testing.T) {
 	huge := strings.Repeat("k", nameLength)
 	path := written(t, "wide.csv", huge+","+huge+"\n1,2\n")
 
-	_, err := sourcecsv.Open(path, ',')
+	_, err := sourcecsv.Open(path, ',', corrupt.NeverStops{})
 	if err == nil {
 		t.Fatal("two columns of one name were accepted, so no manifest location could name either")
 	}
@@ -378,7 +379,7 @@ func TestAFileReplacedBetweenTheTwoReadingsIsRefused(t *testing.T) {
 	} {
 		t.Run(given.what, func(t *testing.T) {
 			path := written(t, "moving.csv", given.first)
-			file, err := sourcecsv.Open(path, ',')
+			file, err := sourcecsv.Open(path, ',', corrupt.NeverStops{})
 			if err != nil {
 				t.Fatalf("the first reading refused a good file: %v", err)
 			}
@@ -415,7 +416,7 @@ func TestAFileReplacedBetweenTheTwoReadingsIsRefused(t *testing.T) {
 // above did not buy itself by refusing everything.
 func TestAFileThatDidNotChangeIsReadToTheEnd(t *testing.T) {
 	path := written(t, "still.csv", "a,b\n1,2\n3,4\n5,6\n")
-	file, err := sourcecsv.Open(path, ',')
+	file, err := sourcecsv.Open(path, ',', corrupt.NeverStops{})
 	if err != nil {
 		t.Fatal(err)
 	}

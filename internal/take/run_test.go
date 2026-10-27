@@ -1,6 +1,7 @@
 package take
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -58,6 +59,23 @@ func sourceFile(t *testing.T, dir string) string {
 	return path
 }
 
+// 🔴 The stop handed to Open reaches the reading, which walks the whole file.
+//
+// A window asks again on every character of a separator, and until 2026-10-27
+// the read it no longer wanted walked to the end while the newer one waited
+// (B-341). The reading asks once a record, so two records are read here.
+func TestAReadingToldToStopEndsBeforeTheWholeFileIsRead(t *testing.T) {
+	stop := &stopAfter{records: 2}
+	_, err := Open(sourceFile(t, t.TempDir()), usable(), stop)
+	if !errors.Is(err, errStoppedForTheTest) {
+		t.Fatalf("a reading told to stop ended with %v", err)
+	}
+	if stop.asked != 3 {
+		t.Errorf("the reading asked whether to stop %d times for two records of %d", stop.asked,
+			sourceRows)
+	}
+}
+
 // 🔴 A run made after one that was stopped damages the whole file rather than
 // the part of it that was left.
 //
@@ -82,7 +100,7 @@ func TestARunMadeAfterAStoppedOneDamagesTheWholeFile(t *testing.T) {
 	settings := usable()
 	settings.Out = filepath.Join(dir, "stopped")
 
-	opened, err := Open(source, settings)
+	opened, err := Open(source, settings, corrupt.NeverStops{})
 	if err != nil {
 		t.Fatalf("the file could not be read: %v", err)
 	}
@@ -172,7 +190,7 @@ func TestTheAccountOfTheColumnsStopsAtAWidthAndSaysHowWideTheFileWas(t *testing.
 			settings := usable()
 			settings.Out = filepath.Join(dir, "out")
 
-			opened, err := Open(wideFile(t, dir, given.columns), settings)
+			opened, err := Open(wideFile(t, dir, given.columns), settings, corrupt.NeverStops{})
 			if err != nil {
 				t.Fatalf("the file could not be read: %v", err)
 			}

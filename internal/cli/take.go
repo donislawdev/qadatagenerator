@@ -9,6 +9,7 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/infer"
+	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 )
@@ -134,7 +135,10 @@ func corruptFile(out *streams, path string, own *takeFlags) int {
 		return usage(out, refusalOf(refusal))
 	}
 
-	opened, err := take.Open(path, settings)
+	// Nothing here watches signals yet, so an interrupt during the reading ends
+	// the process the way it would end any other, and nothing has been written
+	// to take back. The watch starts in writeDamaged, where there is.
+	opened, err := take.Open(path, settings, corrupt.NeverStops{})
 	if err != nil {
 		return fail(out, err)
 	}

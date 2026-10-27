@@ -28,8 +28,12 @@ func (h *heldPlace) answer(t *testing.T, nth int) {
 }
 
 // asking is a question that records which one it was when it is read.
-func asking(read *[]string, name string) func() func() {
-	return func() func() {
+func asking(read *[]string, name string) func(*Stopper) func() {
+	return func(stale *Stopper) func() {
+		// Asked where the reading happens, as a real reading asks it. In the
+		// test with a goroutine that is what the race detector has to see
+		// beside the queue stopping it from the other side.
+		_ = stale.Stopped()
 		*read = append(*read, name)
 		return func() {}
 	}
@@ -83,14 +87,109 @@ func TestAReadThatComesApartFreesTheQueue(t *testing.T) {
 	queue.Ask(asking(&read, "first"), func(error) func() {
 		return func() { crashed = true }
 	})
-	queue.Ask(asking(&read, "second"), noCrash)
 	place.crashes[0](errors.New("the reading came apart"))()
 	if !crashed {
 		t.Fatal("the screen's way out of a crash was not taken")
 	}
-	if len(place.reads) != 2 {
+
+	// A crash of a question already asked again is dropped like its answer
+	// would be, and still frees the queue for the one waiting.
+	staleCrash := false
+	queue.Ask(asking(&read, "second"), func(error) func() {
+		return func() { staleCrash = true }
+	})
+	queue.Ask(asking(&read, "third"), noCrash)
+	place.crashes[1](errors.New("the reading came apart"))()
+	if staleCrash {
+		t.Error("the crash of a question asked again was drawn over the newer one")
+	}
+	if len(place.reads) != 3 {
 		t.Fatalf("the read that came apart left the question behind it unasked: %d reads",
 			len(place.reads))
+	}
+}
+
+// 🔴 A question asked again is told to stop, and what it answers is dropped.
+//
+// Until 2026-10-27 a reading in flight ran to its end while the newer question
+// waited behind it, and only the screen's own count kept its answer off the
+// screen (B-341). A reading that asks the Stopper between records now ends at
+// the next one.
+func TestAQuestionAskedAgainIsStoppedAndItsAnswerDropped(t *testing.T) {
+	place := &heldPlace{}
+	queue := NewLatest(place.read)
+	var stops []*Stopper
+	var drawn []string
+	question := func(name string) func(*Stopper) func() {
+		return func(stale *Stopper) func() {
+			stops = append(stops, stale)
+			return func() { drawn = append(drawn, name) }
+		}
+	}
+
+	queue.Ask(question("first"), noCrash)
+	queue.Ask(question("second"), noCrash)
+	queue.Ask(question("third"), noCrash)
+	place.answer(t, 0)
+	if stops[0].Stopped() == nil {
+		t.Error("the question in flight was not told that it had been asked again")
+	}
+	if len(drawn) != 0 {
+		t.Errorf("the answer to a question asked again was drawn: %q", drawn)
+	}
+
+	place.answer(t, 1)
+	if stops[1].Stopped() != nil {
+		t.Error("the newest question was told to stop while nothing newer had been asked")
+	}
+	if len(drawn) != 1 || drawn[0] != "third" {
+		t.Errorf("the screen drew %q, and the one answer worth drawing is the newest", drawn)
+	}
+}
+
+// A forgotten question is told to stop, its answer is dropped, and a question
+// waiting behind it is never asked.
+//
+// The recipe screen forgets when it is emptied, which asks nothing new, so
+// nothing else would supersede the check in flight.
+func TestAForgottenQuestionIsStoppedAndNothingWaitingIsAsked(t *testing.T) {
+	place := &heldPlace{}
+	queue := NewLatest(place.read)
+	var stops []*Stopper
+	var drawn []string
+	question := func(name string) func(*Stopper) func() {
+		return func(stale *Stopper) func() {
+			stops = append(stops, stale)
+			return func() { drawn = append(drawn, name) }
+		}
+	}
+
+	// Nothing newer is asked before forgetting, so forgetting is the only
+	// thing that can stop the question in flight.
+	queue.Ask(question("first"), noCrash)
+	queue.Forget()
+	place.answer(t, 0)
+	if stops[0].Stopped() == nil {
+		t.Error("the forgotten question in flight was not told to stop")
+	}
+	if len(drawn) != 0 {
+		t.Errorf("after forgetting, the screen drew %q", drawn)
+	}
+
+	// A question waiting behind the one in flight is let go as well.
+	queue.Ask(question("second"), noCrash)
+	queue.Ask(question("third"), noCrash)
+	queue.Forget()
+	place.answer(t, 1)
+	if len(drawn) != 0 || len(place.reads) != 2 {
+		t.Errorf("after forgetting, the screen drew %q and the queue asked %d questions", drawn,
+			len(place.reads))
+	}
+
+	queue.Ask(question("fourth"), noCrash)
+	place.answer(t, 2)
+	if len(drawn) != 1 || drawn[0] != "fourth" {
+		t.Errorf("a question asked after forgetting was answered as %q", drawn)
 	}
 }
 
@@ -104,7 +203,7 @@ func TestAReadWithNothingToDoStillFreesTheQueue(t *testing.T) {
 	queue := NewLatest(place.read)
 	var read []string
 
-	queue.Ask(func() func() { return nil }, noCrash)
+	queue.Ask(func(*Stopper) func() { return nil }, noCrash)
 	queue.Ask(asking(&read, "second"), noCrash)
 	answer := place.reads[0]()
 	if answer == nil {

@@ -51,7 +51,7 @@ func TestWhatIsWrittenBeginsWithTheRowsThePreviewShowed(t *testing.T) {
 	rec := related(60)
 	source := values.New(rec.Locale, rec.Seed)
 
-	sample, err := Preview(rec, source, 7)
+	sample, err := Preview(rec, source, 7, generate.NeverStops{})
 	if err != nil {
 		t.Fatalf("the preview could not be made: %v", err)
 	}

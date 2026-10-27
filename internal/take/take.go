@@ -251,7 +251,11 @@ type Opened struct {
 // than the contents: a screen keeps the file open while somebody chooses
 // settings, and a run that never starts must not have read a large file into
 // memory for nothing.
-func Open(path string, settings Settings) (*Opened, error) {
+//
+// stop is asked between the records of the reading, which walks the whole file.
+// Working out what the columns hold comes after it and is not asked, because
+// its cost grows with the columns rather than the rows (B-344).
+func Open(path string, settings Settings, stop corrupt.Halt) (*Opened, error) {
 	// 🔴 The separator is held against the same rule Check holds it against,
 	// and this is the second place rather than the first. Every caller is meant
 	// to have been refused already, so this line should be unreachable.
@@ -268,7 +272,7 @@ func Open(path string, settings Settings) (*Opened, error) {
 			"the field separator has to be one character other than a quote or a line end, "+
 				"and this run was given "+strconv.Quote(settings.Delimiter))
 	}
-	file, err := sourcecsv.Open(path, separator)
+	file, err := sourcecsv.Open(path, separator, stop)
 	if err != nil {
 		return nil, err
 	}

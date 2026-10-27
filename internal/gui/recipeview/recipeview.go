@@ -47,6 +47,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
 	"github.com/donislawdev/qadatagenerator/internal/damage"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
@@ -67,7 +68,10 @@ import (
 // uses, so a recipe called clean here is a recipe called clean there. A screen
 // that built its own answer would be a second implementation of the rule, and
 // this project has paid for one of those already.
-type Check func(name string, data []byte) Answer
+//
+// stale says that a newer keystroke has asked the question again. What it
+// answers then is never shown, so a check may end wherever it asks.
+type Check func(name string, data []byte, stale generate.Halt) Answer
 
 // Answer is everything this screen learned about one recipe.
 //
@@ -135,21 +139,17 @@ type View struct {
 	// valid recipe has one, and drawing them alike would tell somebody their
 	// blank window had been approved.
 	checked bool
-	// asked counts the checks asked for, so that an answer which is no longer
-	// the latest question is dropped rather than drawn.
+	// checks is the queue every check goes through, so that the letters typed
+	// during one check stop it and wait for it rather than each starting a
+	// parse of their own beside it. The reasons stand on background.Latest,
+	// which also drops the answer to a check asked again, and to every check
+	// asked before the screen was emptied.
 	//
 	// 🔴 Superseding rather than refusing, for the reason the screen next door
 	// records: a recipe is typed one character at a time and every character
 	// asks the question again. Refusing the new question would leave the answer
 	// on screen describing a recipe that is no longer in the field, which is
 	// the worst of the three outcomes because it looks like an answer.
-	//
-	// Read and written only on the thread that draws, which is what lets it be
-	// a plain number rather than anything with a lock around it.
-	asked int
-	// checks is the queue every check goes through, so that the letters typed
-	// during one check wait for it rather than each starting a parse of their
-	// own beside it. The reasons stand on background.Latest.
 	checks *background.Latest
 	// checking is true while a check is in flight, so the screen can say so.
 	checking bool
@@ -318,8 +318,6 @@ func (v *View) Report() (validate.Report, bool) { return v.answer.Report, v.chec
 // when reading somebody else's file, and it looks the same from outside: the
 // window stops answering and nothing says why.
 func (v *View) Recheck(recipe string) {
-	v.asked++
-	wanted := v.asked
 	// 🔴 What the last run did is let go of on the first keystroke after it
 	// (DEC-246). The card says one thing: what the recipe describes, or what
 	// the last press did, whichever is newer, and a result kept beside a
@@ -334,8 +332,11 @@ func (v *View) Recheck(recipe string) {
 
 	// An empty screen is not a recipe with no problems. It gets a sentence
 	// saying what to do, which is point eight of the GUI checklist, and no
-	// check is started for it.
+	// check is started for it. A check still going on is about a recipe that is
+	// no longer in the field, so the queue is told to forget it, or its answer
+	// would arrive later and be drawn over the empty screen.
 	if recipe == "" {
+		v.checks.Forget()
 		v.checking = false
 		v.checked = false
 		v.answer = Answer{}
@@ -359,7 +360,7 @@ func (v *View) Recheck(recipe string) {
 	if !v.judgedBefore() || ranBefore {
 		v.draw()
 	}
-	v.judge(recipe, wanted)
+	v.judge(recipe)
 }
 
 // judgedBefore reports whether the card holds an answer about some recipe,
@@ -370,20 +371,15 @@ func (v *View) judgedBefore() bool { return v.checked || v.crashed != nil }
 // on the screen, unless a later keystroke has asked the question again.
 //
 // Apart from Recheck because that function passed the limit on the length of
-// a function. wanted is the number of the question this answer is to, which
-// is what tells an answer still worth showing from one about an older recipe.
-func (v *View) judge(recipe string, wanted int) {
+// a function. An answer about an older recipe never arrives here: the queue
+// drops it, because asking again or emptying the screen told it to.
+func (v *View) judge(recipe string) {
 	name := v.text.T(i18n.RecipeName)
 	data := []byte(recipe)
 	check := v.check
-	v.checks.Ask(func() func() {
-		report := check(name, data)
+	v.checks.Ask(func(stale *background.Stopper) func() {
+		report := check(name, data, stale)
 		return func() {
-			if wanted != v.asked {
-				// A later keystroke has already asked the question again, so
-				// this answer is about a recipe nobody has on screen.
-				return
-			}
 			v.checking = false
 			v.checked = true
 			v.answer = report
@@ -397,9 +393,6 @@ func (v *View) judge(recipe string, wanted int) {
 		// somebody wrote. This is a sentence about us, and putting our defect
 		// under their heading is the dishonesty this whole tool argues against.
 		return func() {
-			if wanted != v.asked {
-				return
-			}
 			v.checking = false
 			v.checked = true
 			v.answer = Answer{}

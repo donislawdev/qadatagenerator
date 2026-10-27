@@ -25,9 +25,13 @@
 // going on. Those three are exactly what a person is owed while they wait, so
 // this is not a choice about speed.
 //
-// Measured on 2026-08-26 in the neighbouring package: a hundred thousand rows
-// of four columns took 11.7 seconds to walk. A window doing that where the
-// button was pressed is a window the desktop offers to kill.
+// Measured on 2026-10-27: three million rows of four columns, 109 MB, take
+// about 0.6 seconds to read, and this mode exists for files larger than that.
+// A window doing that where the button was pressed is a window that freezes
+// for as long as the file is large. Until that day this paragraph cited 11.7
+// seconds for a hundred thousand rows, which was a measurement of GENERATING
+// rows with word lists read again for every cell, carried over from
+// internal/guard/concurrency.go as though it were the reading.
 //
 // # Why a panic stops here rather than anywhere
 //
@@ -281,6 +285,10 @@ var ErrStopped = errors.New("stopped from the window")
 // command line makes for a signal. The run itself decides where it may stop,
 // so the files are removed on the goroutine that made them and nothing races
 // with a write in progress.
+//
+// Latest uses the same thing for a reading that a newer question has made
+// stale, because it is the same event seen from the other end: somebody on
+// the screen no longer wants what is being worked out.
 type Stopper struct {
 	// stopping is closed once somebody has asked. Closing rather than sending
 	// is what makes the answer repeatable: a send can be taken once, and the

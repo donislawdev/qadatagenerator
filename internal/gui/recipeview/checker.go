@@ -4,6 +4,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/mutators"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
+	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
 	"github.com/donislawdev/qadatagenerator/internal/damage"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
@@ -31,7 +32,7 @@ import (
 // validate.Run. The command line does it in internal/cli/validate.go and the
 // values are the same values.
 func Checker(described catalog.Catalog) Check {
-	return func(name string, data []byte) Answer {
+	return func(name string, data []byte, stale generate.Halt) Answer {
 		// Read once and handed to both. The use case takes a decoder rather
 		// than a document, so a closure over what was already read keeps it
 		// from knowing that recipes are YAML while costing one reading instead
@@ -62,12 +63,14 @@ func Checker(described catalog.Catalog) Check {
 		// nobody asked for, and the whole worth of the preview is that it is
 		// the run.
 		sample, err := produce.Preview(decoded.Recipe, values.New(decoded.Recipe.Locale,
-			decoded.Recipe.Seed), produce.DefaultRows)
+			decoded.Recipe.Seed), produce.DefaultRows, stale)
 		if err != nil {
 			// A recipe validate approved and the plan refuses. That gap is
 			// smaller than it was, because one of its cases was closed on
 			// 2026-09-02, and treating what is left as impossible is how the
-			// next one would arrive drawn as an approval.
+			// next one would arrive drawn as an approval. A check stopped
+			// because the recipe was typed again ends here too, and its
+			// answer is dropped by the queue rather than drawn.
 			answer.Refused = err
 			return answer
 		}

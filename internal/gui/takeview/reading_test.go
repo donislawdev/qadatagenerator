@@ -8,6 +8,7 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/take"
@@ -60,12 +61,13 @@ func screenWaitingOnAFile(t *testing.T, window fyne.Window) (*View, *heldReads, 
 //
 // 🔴 It did not until 2026-09-01. take.Open walks the whole of somebody else's
 // file, and it was called where the file chooser answered, which is the thread
-// the toolkit draws on. Measured next door on 2026-08-26 at 11.7 seconds for a
-// hundred thousand rows of four columns, and a file this mode exists for is
-// bigger than that. For all of it the window repainted nothing, answered no
-// key, and offered nothing to press. The file beside this one had spelled out
-// exactly why a RUN may not happen there, and nobody had applied the same
-// sentence to the read that comes before it.
+// the toolkit draws on. Reading three million rows of four columns takes about
+// 0.6 seconds (measured on 2026-10-27), and a file this mode exists for can be
+// far bigger than that. The 11.7 seconds this sentence cited until then were a
+// measurement of generating rows, not of reading them. For all of it the
+// window repainted nothing, answered no key, and offered nothing to press. The
+// file beside this one had spelled out exactly why a RUN may not happen there,
+// and nobody had applied the same sentence to the read that comes before it.
 //
 // The second half is point eight of the GUI checklist. A window that has not
 // answered yet and a window with nothing to say look alike, so the one that is
@@ -97,6 +99,86 @@ func TestReadingAFileHappensSomewhereOtherThanTheThreadThatDraws(t *testing.T) {
 	}
 	if said := texts(view.Content()); saying(said, i18n.English.T(i18n.TakeReading)) {
 		t.Error("the screen still says it is reading after the read has answered")
+	}
+}
+
+// 🔴 A read asked again is told to stop, so a newer file or separator waits for
+// the next record of the old read rather than for all of it.
+//
+// Until 2026-10-27 the read in flight walked the whole file while the newer one
+// waited behind it, and only then was its answer thrown away (B-341).
+func TestAReadAskedAgainIsToldToStop(t *testing.T) {
+	window := test.NewWindow(nil)
+	defer window.Close()
+	described, err := catalogyaml.Load()
+	if err != nil {
+		t.Fatalf("the catalog inside this binary could not be read: %v", err)
+	}
+	var stale []bool
+	opener := func(path string, settings take.Settings, stop corrupt.Halt) (*take.Opened, error) {
+		stale = append(stale, stop.Stopped() != nil)
+		return take.Open(path, settings, stop)
+	}
+	reads := &heldReads{}
+	view := New(i18n.English, window, described, opener, background.Work{
+		Run: (&held{}).background, Read: reads.read,
+	}, nil)
+	view.Content()
+
+	source := sourceFile(t, t.TempDir())
+	view.Open(source)
+	view.Open(source)
+	reads.answer(t, 0)
+	reads.answer(t, 1)
+	if len(stale) != 2 || !stale[0] || stale[1] {
+		t.Errorf("the reads were told to stop %v, and only the one asked again should be", stale)
+	}
+	if view.opened == nil {
+		t.Error("the newest read answered and the screen does not hold the file")
+	}
+}
+
+// 🔴 A separator typed while a newly chosen file is read goes to that file.
+//
+// Until 2026-10-27 the screen sent the file whose reading had already answered
+// to the reader again. With a file on screen before, the screen then ended on
+// that one rather than on the file chosen last. With none, the chosen file was
+// read under the separator the field no longer showed.
+func TestASeparatorTypedWhileAChosenFileIsReadGoesToThatFile(t *testing.T) {
+	for _, given := range []struct {
+		what   string
+		before bool
+	}{
+		{"with a file on the screen before it", true},
+		{"with no file before it", false},
+	} {
+		t.Run(given.what, func(t *testing.T) {
+			window := test.NewWindow(nil)
+			defer window.Close()
+			view, reads, _ := screenWaitingOnAFile(t, window)
+			answered := 0
+			if given.before {
+				view.Open(sourceFile(t, t.TempDir()))
+				reads.answer(t, 0)
+				answered = 1
+			}
+
+			chosen := sourceFile(t, t.TempDir())
+			view.Open(chosen)
+			view.delimiter.SetText(separator)
+			// Each answer lets the queue ask the question waiting behind it, so
+			// the list grows while it is answered.
+			for ; answered < len(reads.waiting); answered++ {
+				reads.answer(t, answered)
+			}
+			if view.path != chosen || view.opened == nil {
+				t.Fatalf("the screen holds %q, and the file chosen last was %q", view.path, chosen)
+			}
+			if columns := len(view.opened.Table().Columns); columns != 3 {
+				t.Errorf("the chosen file was read into %d columns, so not with the separator "+
+					"in the field", columns)
+			}
+		})
 	}
 }
 
@@ -193,9 +275,9 @@ func TestAnAnswerAboutAFileNobodyIsWaitingForIsNotDrawn(t *testing.T) {
 // A separator typed while the file is being read waits for that read rather
 // than reading the file again beside it.
 //
-// 🔴 Every character of the separator reads the whole file, measured at 11.7
-// seconds for a hundred thousand rows, and until 2026-10-27 every one of them
-// started at once and ran to its end, side by side. Correcting one separator
+// 🔴 Every character of the separator reads the whole file, and until
+// 2026-10-27 every one of them started at once and ran to its end, side by
+// side. Correcting one separator
 // to another by selecting it and typing three characters walked the file three
 // times at the same moment, and two of the answers were thrown away.
 func TestASeparatorTypedWhileTheFileIsReadWaitsForTheRead(t *testing.T) {

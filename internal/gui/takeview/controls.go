@@ -264,6 +264,19 @@ func (v *View) settingChanged() {
 // answering the keyboard exactly while somebody is typing into it.
 func (v *View) reopen() {
 	v.drawCommand()
+	// 🔴 A file chosen and still being read is the one the newest question is
+	// about, so the separator goes to it, and by the road a chosen file takes.
+	// Until 2026-10-27 this read v.path alone, which is the file whose reading
+	// has ANSWERED. A separator typed while a newly chosen file was read sent
+	// the previous file to the reader, the answer about the chosen one was
+	// dropped as stale, and the screen ended on a file the person had moved
+	// away from. With no file before it the separator never reached the read at
+	// all, and the screen described the file under a setting it no longer
+	// showed.
+	if v.reading != "" && v.reading != v.path {
+		v.Open(v.reading)
+		return
+	}
 	if v.path == "" {
 		return
 	}

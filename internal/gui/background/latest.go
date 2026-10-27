@@ -18,59 +18,86 @@ package background
 // question behind what is on screen, and a question nobody would look at the
 // answer to is never asked.
 //
-// # What it does not do
+// # Why the question in flight is stopped
 //
-// It does not stop the question in flight. A reading already going on runs to
-// its end and the screen then drops its answer, by the count of questions it
-// keeps for itself. Stopping it would need the reading to look up between
-// records, and none of the readings asked through this does.
+// A newer question makes the one in flight a question nobody will look at the
+// answer to, and until 2026-10-27 it ran to its end anyway while the newer one
+// waited behind it (B-341). So every question is handed a Stopper of its own,
+// and asking again stops the one in flight: a reading that asks it between
+// records ends at the next one, and the queue drops what it answers, because
+// that answer is about something nobody has on screen. Reading somebody's file
+// asks between records. Judging a recipe asks while the plan shares rows out,
+// and not while the document is parsed, which happens inside a library.
 //
 // # Why it needs no lock
 //
 // Ask is called on the thread that draws and the answer of a place of work
 // arrives there too, which is the only place the state below is read or
 // written. The goroutine doing the reading only builds the function that will
-// run there.
+// run there, and only reads the Stopper it was handed, whose channel lives in
+// background.go with the reasons stated there.
 type Latest struct {
 	read Read
-	// asking says that a question has been handed to the place of work and its
-	// answer has not come back.
-	asking bool
+	// asking is the Stopper of the question handed to the place of work whose
+	// answer has not come back, or nothing while there is none.
+	asking *Stopper
 	// waiting is the newest question asked while one was in flight, or nothing.
 	waiting *question
 }
 
 type question struct {
-	read    func() func()
+	read    func(stale *Stopper) func()
 	crashed func(error) func()
 }
 
 // NewLatest makes a queue in front of one place of work.
 func NewLatest(read Read) *Latest { return &Latest{read: read} }
 
-// Ask is the port Read with the two rules above.
-func (l *Latest) Ask(read func() func(), crashed func(error) func()) {
-	if l.asking {
+// Ask is the port Read with the rules above. read is handed the Stopper that
+// says its question has been asked again.
+func (l *Latest) Ask(read func(stale *Stopper) func(), crashed func(error) func()) {
+	if l.asking != nil {
+		l.asking.Stop()
 		l.waiting = &question{read: read, crashed: crashed}
 		return
 	}
-	l.asking = true
-	l.read(func() func() { return l.after(read()) },
-		func(err error) func() { return l.after(crashed(err)) })
+	stale := NewStopper()
+	l.asking = stale
+	l.read(func() func() { return l.after(stale, read(stale)) },
+		func(err error) func() { return l.after(stale, crashed(err)) })
+}
+
+// Forget lets go of every question asked so far: the one in flight is told to
+// stop and its answer is dropped, and the one waiting is never asked.
+//
+// It is for a screen that stops wanting an answer without asking anything new,
+// which the recipe screen does when it is emptied. Without it that screen kept
+// a count of its own beside the queue, and two ways of telling a stale answer
+// apart are one more than anybody can check.
+func (l *Latest) Forget() {
+	if flight := l.asking; flight != nil {
+		flight.Stop()
+	}
+	l.waiting = nil
 }
 
 // after is what goes back to the thread that draws: the screen's own answer,
-// and then the question that waited for it.
+// unless its question was asked again meanwhile, and then the question that
+// waited for it.
 //
 // 🔴 It is never nothing, even when the screen has nothing to do. A place of
 // work handed nothing hands nothing back, so the queue would stay asking for
 // ever and every later question would wait behind an answer that is never
 // coming. A reading that comes apart arrives here as well, by the second
 // function, which is what keeps a panic from leaving the queue stuck.
-func (l *Latest) after(act func()) func() {
+//
+// The answer of a question asked again is dropped whether or not the reading
+// noticed, because a reading that finished before it could is about the same
+// thing nobody is looking at.
+func (l *Latest) after(stale *Stopper, act func()) func() {
 	return func() {
-		l.asking = false
-		if act != nil {
+		l.asking = nil
+		if act != nil && !stale.Asked() {
 			act()
 		}
 		if next := l.waiting; next != nil {

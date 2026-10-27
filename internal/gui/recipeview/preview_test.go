@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
 	"github.com/donislawdev/qadatagenerator/internal/gui/recipeview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/screens"
@@ -142,7 +143,7 @@ func TestTheCountsOnScreenUseTheRightFormOfEachWord(t *testing.T) {
 // past a sample depend on a draw and a test that waits for one is a test that
 // passes for a reason nobody chose.
 func TestAParentOutsideTheSampleIsNamedRatherThanLeftBlank(t *testing.T) {
-	view := here(t, func(string, []byte) recipeview.Answer {
+	view := here(t, func(string, []byte, generate.Halt) recipeview.Answer {
 		return recipeview.Answer{
 			Report: validate.Report{Entities: 1, Fields: 1},
 			Sample: produce.Sample{Tables: []produce.Table{{
@@ -165,11 +166,52 @@ func TestAParentOutsideTheSampleIsNamedRatherThanLeftBlank(t *testing.T) {
 	}
 }
 
+// counting is a Halt that never stops and counts how often it was asked.
+type counting struct{ asked int }
+
+func (c *counting) Stopped() error {
+	c.asked++
+	return nil
+}
+
+// 🔴 The real check hands its stop to the preview, whose plan shares the
+// children of forty parents out before a row is cut.
+//
+// A sample of ten rows a table asks at most twenty times while it is run, so
+// a count above the forty parents can only come from the plan, which asks once
+// a parent. Until 2026-10-27 the preview was handed a stop that never answers
+// (B-341).
+func TestTheRealCheckHandsItsStopToThePreview(t *testing.T) {
+	stop := &counting{}
+	answer := real(t)(i18n.English.T(i18n.RecipeName), []byte(`version: "0.1"
+seed: "stop"
+locale: pl-PL
+entities:
+  customer:
+    count: 40
+    fields:
+      pesel:
+        generator: pesel
+  order:
+    belongs_to: { customer: 0-8 }
+    fields:
+      placed:
+        generator: birth_date
+`), stop)
+	if answer.Refused != nil || !answer.Report.Usable() {
+		t.Fatalf("this recipe cannot be run: %v %v", answer.Refused, answer.Report.Problems)
+	}
+	if stop.asked <= 40 {
+		t.Errorf("a check of forty parents asked whether to stop %d times, so the plan was not "+
+			"asked at all", stop.asked)
+	}
+}
+
 // sampleOf is what the real check produces for a recipe, so that a test can
 // hold the screen against it.
 func sampleOf(t *testing.T, recipe string) produce.Sample {
 	t.Helper()
-	answer := real(t)(i18n.English.T(i18n.RecipeName), []byte(recipe))
+	answer := real(t)(i18n.English.T(i18n.RecipeName), []byte(recipe), generate.NeverStops{})
 	if answer.Refused != nil {
 		t.Fatalf("this recipe cannot be run: %v", answer.Refused)
 	}

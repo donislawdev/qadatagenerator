@@ -46,6 +46,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
@@ -60,7 +61,10 @@ import (
 // that way: every state of this screen then has a way in that needs no disk,
 // including the states worth checking, which are the ones nobody wants to keep
 // a file around for.
-type Opener func(path string, settings take.Settings) (*take.Opened, error)
+//
+// stale says that the screen has asked a newer question, and the reading ends
+// at the next record once it does.
+type Opener func(path string, settings take.Settings, stale corrupt.Halt) (*take.Opened, error)
 
 // View is the screen and what it is currently looking at.
 //
@@ -94,20 +98,17 @@ type View struct {
 	// away. The separator is read again on every keystroke, and a person who
 	// corrects a comma to a semicolon after a run has not undone the run.
 	reading string
-	// asked counts the reads asked for, so that an answer which is no longer
-	// the latest question is dropped rather than drawn.
+	// reads is the queue every read of this screen goes through, so that a
+	// separator typed during a read stops it and waits for it rather than
+	// walking the file beside it. Each character reads the whole file, and
+	// before 2026-10-27 every one of them did so at once. The reasons stand on
+	// background.Latest, which also drops the answer to a read asked again.
 	//
 	// 🔴 Superseding rather than refusing, and the separator is why. It is
-	// typed one character at a time and each character reads the whole file, so
-	// a keystroke arriving during a read is ordinary. Refusing it would leave
-	// the file read under one separator while the field on screen showed
-	// another, which is the screen describing a file nobody has.
-	asked int
-	// reads is the queue every read of this screen goes through, so that a
-	// separator typed during a read waits for it rather than walking the file
-	// beside it. Each character reads the whole file, measured at 11.7 seconds
-	// for a hundred thousand rows on 2026-08-26, and before 2026-10-27 every
-	// one of them did so at once. The reasons stand on background.Latest.
+	// typed one character at a time, so a keystroke arriving during a read is
+	// ordinary. Refusing it would leave the file read under one separator while
+	// the field on screen showed another, which is the screen describing a file
+	// nobody has.
 	reads *background.Latest
 	// unread is what the last attempt to read a file ended with, kept so that a
 	// caller assembling this screen without a person can say what went wrong
@@ -348,11 +349,12 @@ func (v *View) chooseDirectory() {
 //
 // 🔴 It used to hand back the failure of the read, and it cannot any more,
 // because the read no longer happens here. Reading a file this mode is for
-// means walking all of it: measured at 11.7 seconds for a hundred thousand
-// rows, which on the thread that draws is a window that stops repainting, stops
-// answering the keyboard and offers nothing to do about it. So the read is
-// handed to the place of work and what it found arrives later. What went wrong
-// is on the screen, and Unread carries it for a caller with nobody looking.
+// means walking all of it, about 0.6 seconds for three million rows measured
+// on 2026-10-27 and longer for a larger file, which on the thread that draws
+// is a window that stops repainting, stops answering the keyboard and offers
+// nothing to do about it. So the read is handed to the place of work and what
+// it found arrives later. What went wrong is on the screen, and Unread carries
+// it for a caller with nobody looking.
 func (v *View) Open(path string) {
 	if v.busy() {
 		// Nothing may take the file away from a run that is walking it. The
@@ -391,22 +393,18 @@ func (v *View) Unread() error { return v.unread }
 // question. The queue keeps one read in flight, and a separator typed while it
 // goes on makes that read an answer to a question nobody is asking any more:
 // the field already shows the next character, and the read about it is the one
-// waiting.
+// waiting. The queue tells the read in flight to stop and drops its answer.
+// Until 2026-10-27 this screen kept a count of its own for the dropping, and
+// from that day the count could never drop anything the queue had not, because
+// every read it counted was a question asked of the queue.
 func (v *View) startReading(path string, answer func(*take.Opened, error)) {
-	v.asked++
-	wanted := v.asked
 	v.reading, v.tried = path, path
 	v.unread = nil
 	v.drawReading()
 	settings := v.chosen
-	v.reads.Ask(func() func() {
-		opened, err := v.openFile(path, settings)
+	v.reads.Ask(func(stale *background.Stopper) func() {
+		opened, err := v.openFile(path, settings, stale)
 		return func() {
-			if wanted != v.asked {
-				// A later question was asked, so this answer is about a
-				// file, or a separator, nobody is waiting for any more.
-				return
-			}
 			v.reading = ""
 			v.unread = err
 			answer(opened, err)
@@ -416,9 +414,6 @@ func (v *View) startReading(path string, answer func(*take.Opened, error)) {
 		// failure of the same kind as a file that cannot be read, and is
 		// shown the same way.
 		return func() {
-			if wanted != v.asked {
-				return
-			}
 			v.reading = ""
 			v.unread = err
 			answer(nil, err)

@@ -112,29 +112,27 @@ type Sample struct {
 // The failure it returns is whatever the plan, the writer or the run said, with
 // its kind intact, so that a caller can tell a recipe that cannot be used from
 // a build that cannot do what it asks.
-func Preview(rec recipe.Recipe, values generate.Values, rows int) (Sample, error) {
+//
+// stop is how a screen ends a preview that a newer key press has made stale.
+// The plan is the part it matters for, because the plan shares the children of
+// every parent out before a row is cut. A run of ten rows a table is over
+// before anybody could stop it, and is handed the same stop anyway, so that one
+// question has one answer everywhere it is asked.
+func Preview(rec recipe.Recipe, values generate.Values, rows int, stop generate.Halt) (Sample, error) {
 	if rows < 1 {
 		rows = DefaultRows
 	}
-	// 🔴 Nothing can ask this to stop, the plan included, and the plan is the
-	// part that is not short: it shares the children of every parent out before
-	// a row is cut. What stops a check that a newer key press has made stale is
-	// a question of the screen asking, and it is not answered yet (B-341).
-	plan, err := planOf(rec, values, generate.NeverStops{})
+	plan, err := planOf(rec, values, stop)
 	if err != nil {
 		return Sample{}, err
 	}
 
 	held := newHeld()
-	// A run of ten rows a table is over before anybody could stop it, and a port
-	// that answers `carry on` says that plainly. The writer is told the same
-	// thing as the run, because the one that writes at the end asks the question
-	// itself.
-	writer, err := format.For(held, rec, generate.NeverStops{})
+	writer, err := format.For(held, rec, stop)
 	if err != nil {
 		return Sample{}, err
 	}
-	if err := generate.Run(cut(plan, rows), rec, values, writer, generate.NeverStops{}); err != nil {
+	if err := generate.Run(cut(plan, rows), rec, values, writer, stop); err != nil {
 		return Sample{}, err
 	}
 

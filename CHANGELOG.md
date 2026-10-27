@@ -35,6 +35,23 @@ repository once they are released.
 
 ### Fixed
 
+- **corrupt reads at most 1 MiB as one record and refuses a longer one,
+  naming the line it starts on.** A quote left open near the top of a large
+  file used to read the rest of the file into memory before anything was said
+  about the quote, and a record of nothing but separators cost about 300 MiB
+  at 4 MiB. A file wider than 16,384 columns is refused as well.
+- **What corrupt keeps to work out what the columns hold is bounded in bytes,
+  not only in number.** A short value kept from a long record used to keep the
+  whole record in memory. A column with long values is now judged on its first
+  values that fit, and the report says how many.
+- **A directory, a device or a pipe given to corrupt is refused by name.**
+  Reading the console as a source used to wait for somebody to type, and NUL
+  was reported as an empty file.
+- **In the window a newer separator, file or recipe stops the reading or the
+  check still going on** instead of waiting for it to finish.
+- **A separator typed while a newly chosen file was still being read goes to
+  that file.** Until now it went to the file shown before it, or the chosen
+  file was read with the old separator.
 - **A relation is planned in a number for every parent rather than for every
   child.** validate, a dry run and the preview on the recipe screen no longer
   hold the parent of every child row before anything is written. Validating a

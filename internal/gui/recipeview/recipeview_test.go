@@ -10,6 +10,7 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
@@ -105,7 +106,7 @@ func TestAProblemReachesTheScreenWithItsLine(t *testing.T) {
 // select what they wrote and delete it.
 func TestAnEmptyScreenIsNotAnApprovedOne(t *testing.T) {
 	var asked int
-	view := here(t, func(string, []byte) recipeview.Answer {
+	view := here(t, func(string, []byte, generate.Halt) recipeview.Answer {
 		asked++
 		return recipeview.Answer{}
 	})
@@ -138,7 +139,7 @@ func TestAnAnswerAboutARecipeNobodyIsWaitingForIsNotDrawn(t *testing.T) {
 	later := background.Work{Read: func(read func() func(), _ func(error) func()) {
 		answer = append(answer, read())
 	}}
-	view := recipeview.New(i18n.English, func(_ string, data []byte) recipeview.Answer {
+	view := recipeview.New(i18n.English, func(_ string, data []byte, _ generate.Halt) recipeview.Answer {
 		// The report names the recipe it was asked about, so the assertion
 		// below is about WHICH answer was kept rather than about how many.
 		return recipeview.Answer{Report: validate.Report{Name: string(data)}}
@@ -168,6 +169,60 @@ func TestAnAnswerAboutARecipeNobodyIsWaitingForIsNotDrawn(t *testing.T) {
 	}
 }
 
+// 🔴 An answer that arrives after the screen was emptied is not drawn over it.
+//
+// Emptying the screen asks nothing new, so nothing supersedes the check in
+// flight, and the screen tells the queue to forget it. Until 2026-10-27 a count
+// of the screen's own did this, beside the queue doing the same for every other
+// stale answer.
+func TestAnAnswerArrivingAfterTheRecipeWasClearedIsNotDrawn(t *testing.T) {
+	var held []func() func()
+	later := background.Work{Read: func(read func() func(), _ func(error) func()) {
+		held = append(held, read)
+	}}
+	view := recipeview.New(i18n.English, func(_ string, data []byte, _ generate.Halt) recipeview.Answer {
+		return recipeview.Answer{Report: validate.Report{Name: string(data)}}
+	}, nil, later, nil)
+	view.Content()
+
+	view.SetRecipe("first")
+	view.SetRecipe("")
+	held[0]()()
+	if report, checked := view.Report(); checked {
+		t.Errorf("the screen was emptied and then drew the answer about %q over it", report.Name)
+	}
+	if view.Checking() {
+		t.Error("the emptied screen says a check is going on")
+	}
+}
+
+// 🔴 A check asked again is told to stop, so a letter typed during the check of
+// a large recipe waits for the next place the check asks rather than for all
+// of it (B-341).
+func TestACheckAskedAgainIsToldToStop(t *testing.T) {
+	var held []func() func()
+	later := background.Work{Read: func(read func() func(), _ func(error) func()) {
+		held = append(held, read)
+	}}
+	var stale []bool
+	view := recipeview.New(i18n.English, func(_ string, _ []byte, stop generate.Halt) recipeview.Answer {
+		stale = append(stale, stop.Stopped() != nil)
+		return recipeview.Answer{}
+	}, nil, later, nil)
+	view.Content()
+
+	view.SetRecipe("first")
+	view.SetRecipe("second")
+	held[0]()()
+	if len(held) != 2 {
+		t.Fatalf("the check of the recipe in the field was never asked for: %d checks", len(held))
+	}
+	held[1]()()
+	if len(stale) != 2 || !stale[0] || stale[1] {
+		t.Errorf("the checks were told to stop %v, and only the one asked again should be", stale)
+	}
+}
+
 // Letters typed during a check wait for it, and only the last of them is
 // checked.
 //
@@ -181,7 +236,7 @@ func TestLettersTypedDuringACheckWaitForIt(t *testing.T) {
 		answer = append(answer, read())
 	}}
 	var asked []string
-	view := recipeview.New(i18n.English, func(_ string, data []byte) recipeview.Answer {
+	view := recipeview.New(i18n.English, func(_ string, data []byte, _ generate.Halt) recipeview.Answer {
 		asked = append(asked, string(data))
 		return recipeview.Answer{Report: validate.Report{Name: string(data)}}
 	}, nil, later, nil)
@@ -207,7 +262,7 @@ func TestLettersTypedDuringACheckWaitForIt(t *testing.T) {
 // look identical, and the sentence is the only thing that tells them apart.
 func TestTheScreenSaysThatItIsChecking(t *testing.T) {
 	waiting := background.Work{Read: func(func() func(), func(error) func()) {}}
-	view := recipeview.New(i18n.English, func(string, []byte) recipeview.Answer {
+	view := recipeview.New(i18n.English, func(string, []byte, generate.Halt) recipeview.Answer {
 		return recipeview.Answer{}
 	}, nil, waiting, nil)
 	view.Content()
@@ -344,7 +399,7 @@ func TestACheckThatComesApartIsDrawnAsADefectOfThisBuildRatherThanARefusal(t *te
 	crashing := background.Work{Read: func(_ func() func(), crashed func(error) func()) {
 		crashed(fault.FromPanic("the checker came apart"))()
 	}}
-	view := recipeview.New(i18n.English, func(string, []byte) recipeview.Answer {
+	view := recipeview.New(i18n.English, func(string, []byte, generate.Halt) recipeview.Answer {
 		return recipeview.Answer{}
 	}, nil, crashing, nil)
 	view.Content()
@@ -382,7 +437,7 @@ func TestACheckThatFinishesTakesTheCrashOffTheScreen(t *testing.T) {
 		}
 		read()()
 	}}
-	view := recipeview.New(i18n.English, func(string, []byte) recipeview.Answer {
+	view := recipeview.New(i18n.English, func(string, []byte, generate.Halt) recipeview.Answer {
 		return recipeview.Answer{}
 	}, nil, work, nil)
 	view.Content()

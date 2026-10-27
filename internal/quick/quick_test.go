@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
+	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/produce"
 )
@@ -40,7 +41,8 @@ func TestTheValueIsTheOneARecipeWouldProduce(t *testing.T) {
 		asked := Request{Generator: generator, Locale: DefaultLocale, Seed: seed, Count: rows}
 		fromMode, modeErr := Run(asked)
 
-		sample, err := produce.Preview(recipeFor(generator, seed), values.New(DefaultLocale, seed), rows)
+		sample, err := produce.Preview(recipeFor(generator, seed), values.New(DefaultLocale, seed), rows,
+			generate.NeverStops{})
 		if err != nil {
 			// A generator this build has no data for in this locale is refused
 			// by both, which is agreement of the kind this test is about. What

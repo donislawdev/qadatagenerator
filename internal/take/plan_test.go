@@ -2,6 +2,8 @@ package take
 
 import (
 	"testing"
+
+	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
 )
 
 // The plan of a run says, for each layer that was named, how much of it this
@@ -21,7 +23,7 @@ func TestThePlanSplitsWhatItWouldDoByLayerInTheOrderTheLayersWereNamed(t *testin
 	dir := t.TempDir()
 	settings := usable()
 	settings.Layers = []string{"L3", "L2"}
-	opened, err := Open(sourceFile(t, dir), settings)
+	opened, err := Open(sourceFile(t, dir), settings, corrupt.NeverStops{})
 	if err != nil {
 		t.Fatalf("the file could not be read: %v", err)
 	}
