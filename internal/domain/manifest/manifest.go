@@ -244,6 +244,20 @@ type Run struct {
 	// RowsTotal and RowsMutated describe the dataset.
 	RowsTotal   int
 	RowsMutated int
+	// Entities is every table of the dataset with the rows it had, in the
+	// order the run made them, and the rows add up to RowsTotal.
+	//
+	// It is how a response record about two tables is held to each of them
+	// rather than to their sum, and it is the only place a table no damage
+	// reached is named at all, since no entry stands in it (DEC-266). Empty in
+	// a manifest written to 0.1, which did not carry it.
+	Entities []Entity
+}
+
+// Entity is one table of the dataset and how many rows it had.
+type Entity struct {
+	Name string
+	Rows int
 }
 
 // ColumnsDescribed is how many columns of a file this build accounts for one by
@@ -430,6 +444,11 @@ func New(specVersion string, run Run, defects []Defect) (Manifest, []string) {
 			"the envelope says %d rows were mutated and the entries name %d",
 			run.RowsMutated, mutated))
 	}
+	named := map[string]bool{}
+	for _, defect := range defects {
+		defect.NameEntities(named)
+	}
+	problems = append(problems, run.Unlisted(named)...)
 	if len(problems) > 0 {
 		sort.Strings(problems)
 		return Manifest{}, problems
@@ -437,6 +456,56 @@ func New(specVersion string, run Run, defects []Defect) (Manifest, []string) {
 	kept := make([]Defect, len(defects))
 	copy(kept, defects)
 	return Manifest{specVersion: specVersion, run: run, defects: kept}, nil
+}
+
+// NameEntities adds every entity this entry stands in to a set, its own place
+// and the places it is related to.
+//
+// A set the caller keeps rather than a list returned, because the writer of a
+// manifest sees the entries one at a time and holds them to the envelope only
+// at the end, when the entries are already on a disk.
+//
+// A row named without its entity is recorded as the empty name. In a dataset
+// of one table that row is in the only table there is, and in a dataset of
+// several it is in none of them, which only the envelope can tell.
+func (d Defect) NameEntities(into map[string]bool) {
+	for _, place := range append([]Location{d.Location}, d.Location.Related...) {
+		if place.Entity != "" || place.Row > 0 {
+			into[place.Entity] = true
+		}
+	}
+}
+
+// Unlisted reports every entity the entries name and the envelope does not
+// list, sorted. It reports nothing for an envelope listing no entity at all,
+// which is a manifest written to 0.1, since whether the list is required is a
+// question about the version the manifest is written to.
+//
+// A row named without its entity is refused only beside several entities. A
+// response record names a row by its table, so an entry standing in no table
+// of several is one no answer can ever reach, and verify would report it as a
+// row the application never saw.
+func (r Run) Unlisted(named map[string]bool) []string {
+	if len(r.Entities) == 0 {
+		return nil
+	}
+	listed := make(map[string]bool, len(r.Entities))
+	for _, entity := range r.Entities {
+		listed[entity.Name] = true
+	}
+	var problems []string
+	for name := range named {
+		switch {
+		case name == "" && len(r.Entities) > 1:
+			problems = append(problems, fmt.Sprintf("an entry stands in a row without naming its "+
+				"entity, and the envelope lists %d", len(r.Entities)))
+		case name != "" && !listed[name]:
+			problems = append(problems, fmt.Sprintf(
+				"an entry stands in the entity %q, which the envelope does not list", name))
+		}
+	}
+	sort.Strings(problems)
+	return problems
 }
 
 // countRowsMutated counts the distinct rows carrying applied damage, so that

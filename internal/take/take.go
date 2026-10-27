@@ -437,6 +437,9 @@ func (o *Opened) envelope(settings Settings, run *damage.Run, at time.Time) mani
 		Inference:      o.inference(),
 		RowsTotal:      o.file.Table().Rows,
 		RowsMutated:    run.RowsMutated(),
+		// One file is one table, named the way every entry of this run names
+		// it, so a response record about it may leave the entity out.
+		Entities: []manifest.Entity{{Name: o.file.Table().Entity, Rows: o.file.Table().Rows}},
 	}
 }
 

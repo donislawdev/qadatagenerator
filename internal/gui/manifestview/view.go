@@ -287,7 +287,17 @@ func (v *View) Compare(actual response.Record, path string) bool {
 	if !v.hasPromise {
 		return false
 	}
-	comparison := Comparison{Record: actual, Report: verify.Compare(v.promised, actual)}
+	// A record whose rows do not fit the dataset is refused here as it is by
+	// verify, and said where a record that could not be read is said, with the
+	// file named in the band. The comparison already on screen stays, because
+	// nothing about it changed.
+	report, err := verify.Compare(v.promised, actual)
+	if err != nil {
+		v.tried, v.triedWhat = path, theResponse
+		v.unreadable(err)
+		return false
+	}
+	comparison := Comparison{Record: actual, Report: report}
 	v.screen = Build(v.text, v.promised, &comparison)
 	v.hasResponse, v.responsePath, v.answered = true, path, len(actual.Rows)
 	// A response that carries everything leaves nothing the comparison could

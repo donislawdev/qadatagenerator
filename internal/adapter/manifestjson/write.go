@@ -40,12 +40,15 @@ type Writer struct {
 	to      io.Writer
 	written int
 	err     error
+	// named is every entity the entries stand in, held to the list in the
+	// envelope once the envelope arrives.
+	named map[string]bool
 }
 
 // New starts a manifest document and writes everything that is known before the
 // first entry.
 func New(to io.Writer, specVersion string) *Writer {
-	w := &Writer{to: to}
+	w := &Writer{to: to, named: map[string]bool{}}
 	w.write("{\n")
 	w.write(fmt.Sprintf("  %s: %s,\n", quoted("spec_version"), mustEncode(specVersion)))
 	w.write(fmt.Sprintf("  %s: [", quoted("defects")))
@@ -81,6 +84,7 @@ func (w *Writer) Add(defect manifest.Defect) {
 	}
 	w.write(separator + string(encoded))
 	w.written++
+	defect.NameEntities(w.named)
 }
 
 // Finish closes the document with the envelope.
@@ -91,6 +95,18 @@ func (w *Writer) Add(defect manifest.Defect) {
 func (w *Writer) Finish(run manifest.Run, requested, applied int) error {
 	if w.err != nil {
 		return w.err
+	}
+	// The list of entities is what a response record about several tables is
+	// held to, so an envelope without it, or one leaving out a table an entry
+	// stands in, is a manifest verify could only read as the sum of its tables.
+	// The entries are on the disk already, so this is the last moment a
+	// refusal still keeps the document from being read as a promise.
+	if len(run.Entities) == 0 {
+		return fault.New(fault.Runtime, "this run built a manifest envelope that lists no entity")
+	}
+	if unlisted := run.Unlisted(w.named); len(unlisted) > 0 {
+		return fault.New(fault.Runtime, "this run built a manifest envelope that cannot be "+
+			"recorded: "+unlisted[0])
 	}
 	if w.written > 0 {
 		w.write("\n  ")

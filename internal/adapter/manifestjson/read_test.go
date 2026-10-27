@@ -26,7 +26,7 @@ import (
 func written(t *testing.T, defects ...manifest.Defect) (manifest.Manifest, error) {
 	t.Helper()
 	var buffer bytes.Buffer
-	writer := manifestjson.New(&buffer, "0.1")
+	writer := manifestjson.New(&buffer, "0.2")
 	applied := 0
 	for _, defect := range defects {
 		writer.Add(defect)
@@ -37,6 +37,7 @@ func written(t *testing.T, defects ...manifest.Defect) (manifest.Manifest, error
 	run := manifest.Run{
 		GeneratedAt: "2026-08-17T00:00:00Z", Seed: "s", Locale: "pl-PL",
 		CatalogVersion: "0.1", RowsTotal: 60, RowsMutated: applied,
+		Entities: []manifest.Entity{{Name: "customer", Rows: 60}},
 	}
 	if err := writer.Finish(run, len(defects), applied); err != nil {
 		t.Fatalf("the manifest could not be written: %v", err)
@@ -203,5 +204,53 @@ func TestAResponseRecordOpenedAsAManifestIsToldApart(t *testing.T) {
 	if _, err := manifestjson.Load(empty); err != nil {
 		t.Errorf("a manifest of a run that ordered no damage was refused: %v.\nThis tool writes such "+
 			"a manifest itself, so refusing to read one is a rule that contradicts the writer", err)
+	}
+}
+
+// 🔴 The list of entities is required from the version that added it, and held
+// to the count beside it and to the entries under it (DEC-266).
+//
+// A manifest written to 0.1 never carried the list and is read without it. One
+// written to 0.2 or later without it is a document verify could hold only to the
+// sum of its tables, and one whose list disagrees with itself would hold rows to
+// tables of the wrong size, so both are refused.
+func TestTheListOfEntitiesIsRequiredFromTheVersionThatAddedIt(t *testing.T) {
+	entry := `{"id":"d1","location":{"entity":"customer","row":1,"field":"pesel"},` +
+		`"mutator":"L3.checksum.off_by_one","layer":"L3","applied":true,"value_before":"a",` +
+		`"value_after":"b","expectation":"rejection","confidence":"hard","rationale":"r"}`
+	for _, given := range []struct {
+		what     string
+		version  string
+		entities string
+		says     string
+	}{
+		{"0.1 without a list", "0.1", "", ""},
+		{"0.2 with the list", "0.2", `,"entities":[{"entity":"customer","rows_total":2},{"entity":"order","rows_total":3}]`, ""},
+		{"0.2 without a list", "0.2", "", "lists no entity"},
+		{"a later minor version without a list", "0.3", "", "lists no entity"},
+		{"a list that does not add up", "0.2", `,"entities":[{"entity":"customer","rows_total":4}]`, "do not add up"},
+		{"a list leaving out the table of an entry", "0.2", `,"entities":[{"entity":"order","rows_total":5}]`, "does not list"},
+		{"one table listed twice", "0.2", `,"entities":[{"entity":"customer","rows_total":2},{"entity":"customer","rows_total":3}]`, "twice"},
+	} {
+		t.Run(given.what, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "expectation-manifest.json")
+			document := `{"spec_version":"` + given.version + `","defects":[` + entry + `],` +
+				`"run":{"generated_at":"2026-10-27T00:00:00Z","seed":"s","locale":"pl-PL",` +
+				`"catalog_version":"0.1","rows_total":5` + given.entities + `,"rows_mutated":1,` +
+				`"defects_requested":1,"defects_applied":1}}`
+			if err := os.WriteFile(path, []byte(document), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			read, err := manifestjson.Load(path)
+			switch {
+			case given.says == "" && err != nil:
+				t.Fatalf("a manifest of %s was refused: %v", given.what, err)
+			case given.says == "" && given.entities != "" && len(read.Run().Entities) != 2:
+				t.Errorf("the entities came back as %+v", read.Run().Entities)
+			case given.says != "" && (err == nil || !strings.Contains(err.Error(), given.says)):
+				t.Errorf("a manifest of %s came back with %v, and should be refused saying %q",
+					given.what, err, given.says)
+			}
+		})
 	}
 }

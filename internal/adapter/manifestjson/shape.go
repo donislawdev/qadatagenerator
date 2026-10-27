@@ -90,9 +90,18 @@ type runDocument struct {
 	Source           string             `json:"source,omitempty"`
 	Inference        *inferenceDocument `json:"schema_inference,omitempty"`
 	RowsTotal        int                `json:"rows_total"`
+	Entities         []entityDocument   `json:"entities"`
 	RowsMutated      int                `json:"rows_mutated"`
 	DefectsRequested int                `json:"defects_requested"`
 	DefectsApplied   int                `json:"defects_applied"`
+}
+
+// entityDocument is one table of the dataset. It stands right after the count
+// of rows it breaks down, so that a person reading the envelope finds the two
+// side by side.
+type entityDocument struct {
+	Entity    string `json:"entity"`
+	RowsTotal int    `json:"rows_total"`
 }
 
 // defectOf turns one entry into the document shape.
@@ -150,14 +159,31 @@ func locationOf(location manifest.Location) locationDocument {
 }
 
 func runOf(run manifest.Run, requested, applied int) runDocument {
+	entities := make([]entityDocument, 0, len(run.Entities))
+	for _, entity := range run.Entities {
+		entities = append(entities, entityDocument{Entity: entity.Name, RowsTotal: entity.Rows})
+	}
 	return runDocument{
 		GeneratedAt: run.GeneratedAt, Seed: run.Seed, Locale: run.Locale,
 		CatalogVersion: run.CatalogVersion, Recipe: run.Recipe,
 		Policy: run.Policy, Tag: run.Tag, Source: run.Source,
 		Inference: inferenceOf(run.Inference),
-		RowsTotal: run.RowsTotal, RowsMutated: run.RowsMutated,
+		RowsTotal: run.RowsTotal, Entities: entities, RowsMutated: run.RowsMutated,
 		DefectsRequested: requested, DefectsApplied: applied,
 	}
+}
+
+// entitiesFrom turns the list on disk back into the model, nil when the
+// document carries none.
+func entitiesFrom(documents []entityDocument) []manifest.Entity {
+	if len(documents) == 0 {
+		return nil
+	}
+	entities := make([]manifest.Entity, 0, len(documents))
+	for _, document := range documents {
+		entities = append(entities, manifest.Entity{Name: document.Entity, Rows: document.RowsTotal})
+	}
+	return entities
 }
 
 // inferenceOf carries the evidence for a guessed schema into the document, or

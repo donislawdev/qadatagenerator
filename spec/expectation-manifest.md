@@ -1,6 +1,6 @@
 # Expectation Manifest Specification
 
-**Version 0.1, draft.**
+**Version 0.2, draft.**
 
 An expectation manifest accompanies a deliberately corrupted dataset. For every defect it records where it is, what produced it, and **what the application under test is expected to do about it**.
 
@@ -44,9 +44,14 @@ A manifest has three top level members: `spec_version`, an **envelope** under `r
 | `source` | no | the file this run read and damaged, absent when the data was produced rather than read |
 | `schema_inference` | no | what the run worked out about a dataset nobody described, and what it worked it out from |
 | `rows_total` | yes | rows in the dataset |
+| `entities` | yes, from 0.2 | every entity of the dataset with the rows it had, in the order the run made them |
+| `entities[].entity` | yes | the entity, named the way every `location.entity` names it |
+| `entities[].rows_total` | yes | rows of that entity |
 | `rows_mutated` | yes | rows carrying at least one defect |
 | `defects_requested` | yes | how many defects the policy asked for |
 | `defects_applied` | yes | how many were actually applied |
+
+**`entities` lists every table, including the ones no defect reached, and its rows add up to `rows_total`.** A dataset of two tables has a row 1 in each, and a response record about what an application did is held to each table on its own. `rows_total` alone is the sum, so a reader holding a record to it would count rows of one table against the other. A name appears once, every `location.entity` of every defect is on the list, and a dataset of several entities has no defect standing in a row without naming its entity.
 
 **`defects_requested` and `defects_applied` are always both present.** A dataset where twenty seven of forty requested defects were applied looks exactly like a complete one, and it will be trusted as a complete one.
 
@@ -217,7 +222,7 @@ way the entry says it does.
 
 ```json
 {
-  "spec_version": "0.1",
+  "spec_version": "0.2",
   "run": {
     "generated_at": "2026-08-01T10:14:22Z",
     "seed": 20260801,
@@ -226,6 +231,10 @@ way the entry says it does.
     "recipe": "shop-basic@1",
     "tag": "run-1042",
     "rows_total": 13,
+    "entities": [
+      { "entity": "customer", "rows_total": 5 },
+      { "entity": "order", "rows_total": 8 }
+    ],
     "rows_mutated": 5,
     "defects_requested": 6,
     "defects_applied": 5
@@ -284,6 +293,8 @@ way the entry says it does.
 ```
 
 Entry `d6` is the whole point of the previous section. It did not happen, and the manifest says so instead of leaving a hole.
+
+The `order` entity carries no defect at all and is still listed under `entities`. Without the list a reader would know only the entities some defect stands in, and a response record about those orders would name a table the manifest seemed never to have heard of.
 
 ---
 
@@ -357,7 +368,7 @@ A tool reading a manifest compares each entry against what the application actua
 - **Accepted although it should have been rejected.** A hole in validation.
 - **Rejected although it should have been accepted.** Overzealous validation blocking legitimate users. This is what the `REV` module exists to find, and almost nobody tests for it.
 - **Expected a mark, got silence.** The application took the value and said nothing where the entry expected it to complain. This is what an expectation of `warning` fails as.
-- **The dataset arrived incomplete.** The number of rows the application took does not match `rows_total`. The row was neither accepted nor rejected, it disappeared on the way.
+- **The dataset arrived incomplete.** The rows of an entity the application answered for fall short of that entity's `rows_total` under `entities`. The row was neither accepted nor rejected, it disappeared on the way.
 
 The first three assume the application reacted to the row somehow. The fourth is the case where it did not react at all, because it never saw the row. A receiver with a hard row limit that silently drops everything past it produces exactly this, and no per-row check finds it.
 
@@ -377,5 +388,6 @@ A question the response record does not carry the evidence to answer is neither 
 - **Consumers must ignore unknown fields** rather than failing on them, so that a manifest from a newer producer stays readable.
 - A consumer that meets an unknown mutator identifier reports it as unknown instead of guessing.
 - A tool must be able to read an older manifest and say what is missing from it.
+- **Version 0.2 added `entities`.** A manifest written to 0.1 does not carry it, so a reader knows its entities only from the locations of its defects and the rows of each only when there is one. A comparison against such a manifest says that it held the rows to the dataset as a whole.
 - **An unknown MINOR version is read, and the reader says it did.** The rule above is about growth by adding, and a minor version is what adding produces. What the newer version added is invisible to an older reader by definition, so reading such a manifest in silence would report on evidence only partly understood.
 - 🔴 **An unknown MAJOR version is refused.** A major version is the one where the meaning of an existing field changes, so a reader meeting one cannot know what it is holding. This matters most where a manifest is read to judge an application: a verdict drawn from a document the reader cannot claim to understand is worse than no verdict, because it will be believed.

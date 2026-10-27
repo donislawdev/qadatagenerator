@@ -107,6 +107,17 @@ func closeManifest(run *damage.Run, rec recipe.Recipe, plan generate.Plan,
 		Tag:            rec.Tag,
 		RowsTotal:      plan.TotalRows(),
 		RowsMutated:    run.RowsMutated(),
+		Entities:       entitiesOf(plan),
 	}
 	return run.Finish(envelope)
+}
+
+// entitiesOf lists the tables of a plan for the manifest, in the order the run
+// made them, which is parents before children and the same for one recipe.
+func entitiesOf(plan generate.Plan) []manifest.Entity {
+	entities := make([]manifest.Entity, 0, len(plan.Entities))
+	for _, planned := range plan.Entities {
+		entities = append(entities, manifest.Entity{Name: planned.Entity, Rows: planned.Rows})
+	}
+	return entities
 }

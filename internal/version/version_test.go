@@ -40,14 +40,32 @@ func TestCatalogVersionMatchesTheCatalog(t *testing.T) {
 }
 
 func TestManifestVersionMatchesTheManifestSpecification(t *testing.T) {
-	matcher := regexp.MustCompile(`"spec_version"\s*:\s*"([^"]+)"`)
-	found := matcher.FindAllStringSubmatch(read(t, "spec/expectation-manifest.md"), -1)
+	holdsTo(t, "spec/expectation-manifest.md", "manifest", version.Manifest)
+}
+
+// The response format is read rather than written, and its constant is still a
+// copy of a number a specification states. It had no test until it moved to 0.2
+// on 2026-10-27, which is the day a copy drifts if it ever does.
+func TestResponseVersionMatchesTheResponseSpecification(t *testing.T) {
+	holdsTo(t, "spec/application-response.md", "response", version.Response)
+}
+
+// holdsTo checks every version a specification states, in its heading and in
+// every example, against the constant this build carries.
+func holdsTo(t *testing.T, relative, format, constant string) {
+	t.Helper()
+	content := read(t, relative)
+	found := regexp.MustCompile(`"spec_version"\s*:\s*"([^"]+)"`).FindAllStringSubmatch(content, -1)
 	if len(found) == 0 {
-		t.Fatal("spec/expectation-manifest.md shows no spec_version, so this build cannot state one")
+		t.Fatalf("%s shows no spec_version, so this build cannot state one", relative)
 	}
-	for _, occurrence := range found {
-		if occurrence[1] != version.Manifest {
-			t.Fatalf("manifest version is %q in the specification and %q in the code", occurrence[1], version.Manifest)
+	heading := regexp.MustCompile(`(?m)^\**Version ([0-9.]+),`).FindAllStringSubmatch(content, -1)
+	if len(heading) != 1 {
+		t.Fatalf("%s states its version in %d headings, and one is what a reader looks for", relative, len(heading))
+	}
+	for _, occurrence := range append(found, heading...) {
+		if occurrence[1] != constant {
+			t.Fatalf("%s version is %q in the specification and %q in the code", format, occurrence[1], constant)
 		}
 	}
 }

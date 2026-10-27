@@ -29,9 +29,56 @@ func TestASoundRecordIsRead(t *testing.T) {
 	if len(record.Rows) != 2 || !record.HasRowsTotal || record.RowsTotal != 2 {
 		t.Fatalf("the record came back as %+v", record)
 	}
-	row, answered := record.ByRow(1)
-	if !answered || row.Code != "E1" {
+	if row := record.Rows[0]; row.Number != 1 || row.Code != "E1" || row.Entity != "" {
 		t.Errorf("row one came back as %+v", row)
+	}
+}
+
+// A row of version 0.2 says which entity it belongs to, and the same number
+// under two entities is two rows of a dataset of two tables rather than one
+// row answered twice.
+func TestAnEntityIsReadWithItsRow(t *testing.T) {
+	record, err := responsejson.Load(written(t, `{"spec_version":"0.2","rows":[
+	  {"entity":"customer","row":1,"verdict":"accepted"},
+	  {"entity":"order","row":1,"verdict":"rejected"}]}`))
+	if err != nil {
+		t.Fatalf("two tables with a row 1 each were refused: %v", err)
+	}
+	if record.Rows[0].Entity != "customer" || record.Rows[1].Entity != "order" {
+		t.Errorf("the entities came back as %q and %q", record.Rows[0].Entity, record.Rows[1].Entity)
+	}
+}
+
+// 🔴 A member this build does not know is a typo in a version it knows and a
+// later addition in a version it does not (DEC-266). Refusing both made every
+// newer record unreadable before its version was looked at, and skipping both
+// would compare against evidence somebody believes they supplied.
+func TestAnUnknownMemberIsRefusedOrSkippedByTheVersion(t *testing.T) {
+	for _, given := range []struct {
+		what    string
+		version string
+		read    bool
+		says    string
+	}{
+		{"the version this build speaks", "0.2", false, "member names"},
+		{"an earlier version", "0.1", false, "member names"},
+		{"a later minor version", "0.3", true, ""},
+		{"a later major version", "1.0", false, "this build speaks"},
+	} {
+		t.Run(given.what, func(t *testing.T) {
+			record, err := responsejson.Load(written(t, `{"spec_version":"`+given.version+
+				`","rows":[{"row":1,"verdict":"accepted","confidence":"high"}],"producer":"x"}`))
+			switch {
+			case given.read && err != nil:
+				t.Fatalf("a record of %s was refused for members it may add: %v", given.version, err)
+			case given.read && (len(record.Rows) != 1 || record.Rows[0].Verdict != "accepted"):
+				t.Errorf("a record of %s came back as %+v", given.version, record)
+			case !given.read && err == nil:
+				t.Fatalf("a record of %s with a member nobody knows was accepted", given.version)
+			case !given.read && !strings.Contains(err.Error(), given.says):
+				t.Errorf("the refusal of %s says %q and should mention %q", given.version, err, given.says)
+			}
+		})
 	}
 }
 
@@ -50,7 +97,7 @@ func TestLookingAndFindingNothingIsNotTheSameAsNotLooking(t *testing.T) {
 		t.Fatalf("a sound record was refused: %v", err)
 	}
 
-	looked, _ := record.ByRow(1)
+	looked := record.Rows[0]
 	if !looked.HasStored || !looked.HasWarnings {
 		t.Error("a producer that answered with an empty list was taken for one that said nothing")
 	}
@@ -58,7 +105,7 @@ func TestLookingAndFindingNothingIsNotTheSameAsNotLooking(t *testing.T) {
 		t.Errorf("an empty warning list came back as marked=%t known=%t", marked, known)
 	}
 
-	silent, _ := record.ByRow(2)
+	silent := record.Rows[1]
 	if silent.HasStored || silent.HasWarnings {
 		t.Error("a producer that said nothing was taken for one that answered")
 	}

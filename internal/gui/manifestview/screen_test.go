@@ -100,11 +100,52 @@ func everyKindOfScreen(t *testing.T) []Screen {
 			{Number: 3, Verdict: response.Accepted},
 		},
 	}
-	comparison := Comparison{Record: actual, Report: verify.Compare(promised, actual)}
+	comparison := compared(t, promised, actual)
 	return []Screen{
 		Build(i18n.English, promised, nil),
 		Build(i18n.English, promised, &comparison),
 	}
+}
+
+// 🔴 An entry of one table is not given the finding of another (DEC-266).
+//
+// Two tables both have a row 1, and here both carry the same damage in a column
+// of the same name. Matched without the entity, the order's finding attached to
+// the customer, so the window painted an entry the application handled rightly
+// as one it got wrong, and the card read out somebody else's verdict.
+func TestAnEntryOfOneTableIsNotGivenTheFindingOfAnother(t *testing.T) {
+	customer := applied("c1", 1, catalog.Rejection, catalog.Hard)
+	order := applied("o1", 1, catalog.Rejection, catalog.Hard)
+	order.Location.Entity = "order"
+	envelope := run()
+	envelope.RowsTotal, envelope.RowsMutated = 2, 2
+	envelope.Entities = []manifest.Entity{{Name: "customer", Rows: 1}, {Name: "order", Rows: 1}}
+	promised, problems := manifest.New("0.2", envelope, []manifest.Defect{customer, order})
+	if len(problems) > 0 {
+		t.Fatalf("the manifest this test is built on is not valid: %v", problems)
+	}
+	comparison := compared(t, promised, response.Record{SpecVersion: "0.2", Rows: []response.Row{
+		{Entity: "customer", Number: 1, Verdict: response.Rejected},
+		{Entity: "order", Number: 1, Verdict: response.Accepted},
+	}})
+	screen := Build(i18n.English, promised, &comparison)
+	if screen.Rows[0].Finding.Color == palette.StateDanger {
+		t.Errorf("the customer entry, rightly refused, reads %q", screen.Rows[0].Finding.Text)
+	}
+	if screen.Rows[1].Finding.Color != palette.StateDanger {
+		t.Errorf("the order entry, wrongly taken, reads %q", screen.Rows[1].Finding.Text)
+	}
+}
+
+// compared is a comparison the test expects to be made, the way the view makes
+// it.
+func compared(t *testing.T, promised manifest.Manifest, actual response.Record) Comparison {
+	t.Helper()
+	report, err := verify.Compare(promised, actual)
+	if err != nil {
+		t.Fatalf("the comparison was refused: %v", err)
+	}
+	return Comparison{Record: actual, Report: report}
 }
 
 // everything a person could read off the screen, so that a test asks about what
@@ -372,7 +413,7 @@ func TestTheSecondStateShowsWhatTheApplicationDidWithEveryJudgedRow(t *testing.T
 			{Number: 2, Verdict: response.Rejected},
 		},
 	}
-	comparison := Comparison{Record: actual, Report: verify.Compare(promised, actual)}
+	comparison := compared(t, promised, actual)
 	screen := Build(i18n.English, promised, &comparison)
 
 	for index, row := range screen.Rows {
@@ -415,7 +456,7 @@ func TestTheSecondStateShowsWhatTheApplicationDidWithEveryJudgedRow(t *testing.T
 func TestARowTheApplicationNeverAnsweredForSaysSo(t *testing.T) {
 	promised := built(t, applied("d1", 1, catalog.Rejection, catalog.Hard))
 	actual := response.Record{SpecVersion: "0.1", Rows: []response.Row{{Number: 2, Verdict: response.Rejected}}}
-	comparison := Comparison{Record: actual, Report: verify.Compare(promised, actual)}
+	comparison := compared(t, promised, actual)
 	screen := Build(i18n.English, promised, &comparison)
 
 	if screen.Rows[0].Answer.Text != i18n.English.T(i18n.ManifestAnswerNone) {
@@ -438,7 +479,7 @@ func TestTheSecondStateCarriesWhatItCouldNotSettleAndCouldNotSee(t *testing.T) {
 	// and a record that says nothing about what is held now cannot tell a value
 	// taken as sent from one quietly changed.
 	actual := response.Record{SpecVersion: "0.1", Rows: []response.Row{{Number: 1, Verdict: response.Accepted}}}
-	comparison := Comparison{Record: actual, Report: verify.Compare(promised, actual)}
+	comparison := compared(t, promised, actual)
 	screen := Build(i18n.English, promised, &comparison)
 
 	if len(screen.Unsettled) == 0 {
@@ -467,7 +508,7 @@ func TestAFindingAboutTheWholeDatasetIsNotHungOnOneRow(t *testing.T) {
 	// The manifest says three rows and the application answered for one, so two
 	// records never arrived at all.
 	actual := response.Record{SpecVersion: "0.1", Rows: []response.Row{{Number: 1, Verdict: response.Rejected}}}
-	comparison := Comparison{Record: actual, Report: verify.Compare(promised, actual)}
+	comparison := compared(t, promised, actual)
 	screen := Build(i18n.English, promised, &comparison)
 
 	var whole []string
@@ -511,7 +552,7 @@ func TestAFindingAboutTheWholeDatasetIsNotHungOnOneRow(t *testing.T) {
 func TestASentenceOfTheComparisonOnALineOfItsOwnReadsAsOne(t *testing.T) {
 	promised := built(t, applied("d1", 1, catalog.Rejection, catalog.Hard))
 	actual := response.Record{SpecVersion: "0.1", Rows: []response.Row{{Number: 1, Verdict: response.Rejected}}}
-	comparison := Comparison{Record: actual, Report: verify.Compare(promised, actual)}
+	comparison := compared(t, promised, actual)
 	screen := Build(i18n.English, promised, &comparison)
 
 	if len(screen.Limits) == 0 {

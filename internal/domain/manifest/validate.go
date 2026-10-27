@@ -43,7 +43,51 @@ func (r Run) Problems() []string {
 		problems = append(problems, fmt.Sprintf(
 			"the envelope says %d of %d rows were mutated", r.RowsMutated, r.RowsTotal))
 	}
+	problems = append(problems, r.entityProblems()...)
 	return append(problems, r.Inference.problems()...)
+}
+
+// entityProblems reports a list of entities that disagrees with itself or with
+// the count of rows beside it.
+//
+// An empty list is not one of them. A manifest written to 0.1 carries none, and
+// whether a list is required is a question about the version, which the reader
+// and the writer of the format ask, because this model does not hold one.
+//
+// The rows are taken off what is left of the count rather than added up, so a
+// hand edited file listing rows near the largest integer cannot wrap a sum
+// round to a number that happens to agree.
+func (r Run) entityProblems() []string {
+	if len(r.Entities) == 0 {
+		return nil
+	}
+	var problems []string
+	seen := make(map[string]bool, len(r.Entities))
+	left, over := r.RowsTotal, false
+	for _, entity := range r.Entities {
+		switch {
+		case strings.TrimSpace(entity.Name) == "":
+			problems = append(problems, "the envelope lists an entity with no name")
+		case seen[entity.Name]:
+			problems = append(problems, fmt.Sprintf("the envelope lists the entity %q twice", entity.Name))
+		}
+		seen[entity.Name] = true
+		switch {
+		case entity.Rows < 0:
+			problems = append(problems, fmt.Sprintf(
+				"the envelope counts a negative number of rows of %q", entity.Name))
+		case entity.Rows > left:
+			over = true
+		default:
+			left -= entity.Rows
+		}
+	}
+	if over || left != 0 {
+		problems = append(problems, fmt.Sprintf(
+			"the rows the envelope lists for its entities do not add up to the %d rows it counts "+
+				"in the dataset", r.RowsTotal))
+	}
+	return problems
 }
 
 // problems reports what would make an inference unreadable to whoever has to

@@ -27,7 +27,11 @@ const Catalog = "0.1"
 // Manifest is the version of the expectation manifest format this build
 // writes. It mirrors spec_version in spec/expectation-manifest.md, checked by
 // the same test.
-const Manifest = "0.1"
+//
+// 0.2 added the list of entities with the rows each one had, without which a
+// response record about two tables could not be held to either of them
+// (DEC-266). A manifest written to 0.1 is still read.
+const Manifest = "0.2"
 
 // Recipe is the version of the recipe schema this build reads.
 //
@@ -43,7 +47,10 @@ const Recipe = "0.1"
 // changes what every pipeline parses out of --version. The number is still
 // needed here, because a reader that refuses a version it does not know has to
 // know which one it does.
-const Response = "0.1"
+//
+// 0.2 added the entity a row belongs to (DEC-266), and a record written to 0.1
+// is read by the same rules, since leaving the entity out is allowed in both.
+const Response = "0.2"
 
 // Set is the whole answer to the question of what this binary speaks.
 //

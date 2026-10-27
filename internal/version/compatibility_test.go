@@ -20,9 +20,18 @@ func TestWhatThisBuildCanDoWithAVersion(t *testing.T) {
 		want    version.Reading
 	}{
 		{"the version this build writes", "0.1", "0.1", version.AsWritten},
-		{"a later minor version", "0.1", "0.9", version.WithinTheLine},
-		{"an earlier minor version", "0.9", "0.1", version.WithinTheLine},
-		{"a minor version with a patch part", "0.1", "0.1.4", version.WithinTheLine},
+		{"a later minor version", "0.1", "0.9", version.Later},
+		{"an earlier minor version", "0.9", "0.1", version.Earlier},
+		{"a minor version with a patch part", "0.1", "0.1.4", version.Later},
+		{"an earlier minor version beside a patch part", "0.2", "0.1.4", version.Earlier},
+		// Numbers, not text. As text 0.10 sorts before 0.9, and a build
+		// speaking 0.9 would have read a newer record as an older one and said
+		// nothing about what it left unread.
+		{"a minor version of two digits", "0.9", "0.10", version.Later},
+		{"an earlier minor version of one digit", "0.10", "0.9", version.Earlier},
+		{"a trailing nought", "0.1", "0.1.0", version.AsWritten},
+		{"a minor part that is a word", "0.2", "0.x", version.Later},
+		{"a minor part with a leading nought", "0.2", "0.01", version.Later},
 		{"a later major version", "0.1", "99.0", version.Unreadable},
 		{"an earlier major version", "2.0", "1.9", version.Unreadable},
 		{"a word", "0.1", "banana", version.Unreadable},

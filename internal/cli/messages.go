@@ -207,15 +207,6 @@ const (
 	noteVerifySoft     = " rest on rules belonging to your application rather than to the data, so they are reported and do not fail the run"
 	noteVerifyLimit    = "not settled here: "
 
-	// The two halves of one sentence about a document from the same major
-	// version line as this build, written to a minor version it has never seen.
-	// It is read, because the format grows by adding, and it is announced,
-	// because what was added is by definition invisible here.
-	noteVerifyManifestVersion = "the manifest is written to version "
-	noteVerifyResponseVersion = "the response record is written to version "
-	noteVerifyVersionTail     = " and this build speaks "
-	noteVerifyVersionEnd      = ". It is read as far as this build understands it, so anything the newer version added is not part of what follows"
-
 	problemCorruptArguments        = "corrupt takes one file"
 	problemCorruptArgumentsWhy     = "it reads a file of records and writes those records back with damage in them"
 	problemCorruptArgumentsAllowed = "one path to a comma separated file"

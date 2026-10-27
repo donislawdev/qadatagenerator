@@ -173,7 +173,7 @@ func asManifest(read manifestDocument) (manifest.Manifest, []string) {
 	// refused it at writing time. A comparison run against an entry the model
 	// would not have written is a comparison against something this tool never
 	// promised.
-	return manifest.New(read.SpecVersion, manifest.Run{
+	built, problems := manifest.New(read.SpecVersion, manifest.Run{
 		GeneratedAt:    read.Run.GeneratedAt,
 		Seed:           read.Run.Seed,
 		Locale:         read.Run.Locale,
@@ -184,7 +184,33 @@ func asManifest(read manifestDocument) (manifest.Manifest, []string) {
 		Source:         read.Run.Source,
 		RowsTotal:      read.Run.RowsTotal,
 		RowsMutated:    read.Run.RowsMutated,
+		Entities:       entitiesFrom(read.Run.Entities),
 	}, defects)
+	if len(read.Run.Entities) == 0 && listsEntities(read.SpecVersion) {
+		problems = append(problems, "the envelope lists no entity, and from version 0.2 a manifest "+
+			"lists every entity of its dataset with the rows each one had")
+	}
+	return built, problems
+}
+
+// entitiesSince is the version of the format that started listing entities.
+//
+// A number of its own rather than the version this build writes, because the
+// rule is about when the list appeared. Asked against the current version, a
+// build writing 0.3 would have read a 0.2 manifest without its list as an
+// older one that never had it.
+const entitiesSince = "0.2"
+
+// listsEntities reports whether a manifest written to this version has to
+// list its entities: 0.2 and every version after it in the same line. A
+// manifest written to 0.1 never did, and it is read without the list.
+func listsEntities(claimed string) bool {
+	switch version.Compatibility(entitiesSince, claimed) {
+	case version.AsWritten, version.Later:
+		return true
+	case version.Earlier, version.Unreadable:
+	}
+	return false
 }
 
 // locationFrom turns a place on disk back into a place in the model, whole.

@@ -54,6 +54,7 @@ type document struct {
 		RowsTotal *int `json:"rows_total"`
 	} `json:"dataset"`
 	Rows []struct {
+		Entity   string            `json:"entity"`
 		Row      *int              `json:"row"`
 		Verdict  string            `json:"verdict"`
 		Code     string            `json:"code"`
@@ -116,25 +117,39 @@ func bytesOf(from *os.File, path string) ([]byte, error) {
 }
 
 // decode turns the bytes into a record this build can compare, or refuses them.
+//
+// # Why an unknown member is refused in one version and skipped in another
+//
+// The file is written by hand or by somebody's script, so a misspelled member
+// is the likely mistake, and silently ignoring it would mean comparing against
+// evidence the producer believes they supplied. That holds for a record written
+// to a version this build knows, where every member has a name it knows too.
+// A record written to a newer minor version may carry members this build has
+// never heard of, and the format tells a reader to skip those so that the
+// record stays readable (DEC-266). Refusing them would make every newer record
+// unreadable before its version was even looked at.
+//
+// So the record is read strictly first, and only a strict reading that failed
+// is tried again without the rule. The two readings differ in that rule alone,
+// so the second one succeeding means the first failed on a member it did not
+// know, and whether that is allowed is the version's to decide.
 func decode(raw []byte, path string) (response.Record, error) {
-	var read document
-	// Read straight from the bytes. Turning them into a string and the string
-	// back into a reader copied the whole record twice, which at the size this
-	// build accepts is ninety six megabytes of work with no answer attached.
-	decoder := json.NewDecoder(bytes.NewReader(raw))
-	// An unknown member is refused rather than skipped. This file is written by
-	// hand or by somebody's script, so a misspelled member is the likely
-	// mistake, and silently ignoring it would mean comparing against evidence
-	// the producer believes they supplied.
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&read); err != nil {
-		return response.Record{}, fault.Wrap(fault.Config, err, path+
-			" is not a response record this build can read. See spec/application-response.md "+
-			"for the shape, and check the member names")
+	read, err := documentOf(raw, true)
+	if err != nil {
+		if lenient, again := documentOf(raw, false); again == nil {
+			switch version.Compatibility(version.Response, lenient.SpecVersion) {
+			case version.Unreadable:
+				return response.Record{}, unreadableVersion(path, lenient.SpecVersion)
+			case version.Later:
+				read, err = lenient, nil
+			case version.AsWritten, version.Earlier:
+				// The strict reading stands: a member this build does not
+				// know, in a version whose every member it knows, is a typo.
+			}
+		}
 	}
-	if err := trailing(decoder); err != nil {
-		return response.Record{}, fault.Wrap(fault.Config, err, path+
-			" carries more than one document, and a run is one record")
+	if err != nil {
+		return response.Record{}, err.within(path)
 	}
 
 	built := asRecord(read)
@@ -143,15 +158,55 @@ func decode(raw []byte, path string) (response.Record, error) {
 			strings.Join(problems, ". "))
 	}
 	if version.Compatibility(version.Response, built.SpecVersion) == version.Unreadable {
-		return response.Record{}, fault.New(fault.Config, path+" is written to version "+
-			fault.Shorten(built.SpecVersion)+" of the response format, and this build speaks "+
-			version.Response+". A different major version is one where what a field means has "+
-			"changed, so a comparison against it would be a verdict on your application drawn "+
-			"from a document this build cannot read").
-			DoInstead("write the record to a version this build speaks, or use a build that " +
-				"speaks the one it is written to")
+		return response.Record{}, unreadableVersion(path, built.SpecVersion)
 	}
 	return built, nil
+}
+
+// misread is a reading of the bytes that failed, kept apart from the path so
+// that only the reading whose failure is reported has to name the file.
+type misread struct {
+	err      error
+	trailing bool
+}
+
+func (m *misread) within(path string) error {
+	if m.trailing {
+		return fault.Wrap(fault.Config, m.err, path+
+			" carries more than one document, and a run is one record")
+	}
+	return fault.Wrap(fault.Config, m.err, path+
+		" is not a response record this build can read. See spec/application-response.md "+
+		"for the shape, and check the member names")
+}
+
+// documentOf reads the bytes once, strictly about member names or not.
+func documentOf(raw []byte, strict bool) (document, *misread) {
+	var read document
+	// Read straight from the bytes. Turning them into a string and the string
+	// back into a reader copied the whole record twice, which at the size this
+	// build accepts is ninety six megabytes of work with no answer attached.
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	if strict {
+		decoder.DisallowUnknownFields()
+	}
+	if err := decoder.Decode(&read); err != nil {
+		return document{}, &misread{err: err}
+	}
+	if err := trailing(decoder); err != nil {
+		return document{}, &misread{err: err, trailing: true}
+	}
+	return read, nil
+}
+
+func unreadableVersion(path, claimed string) error {
+	return fault.New(fault.Config, path+" is written to version "+
+		fault.Shorten(claimed)+" of the response format, and this build speaks "+
+		version.Response+". A different major version is one where what a field means has "+
+		"changed, so a comparison against it would be a verdict on your application drawn "+
+		"from a document this build cannot read").
+		DoInstead("write the record to a version this build speaks, or use a build that " +
+			"speaks the one it is written to")
 }
 
 // trailing reports anything after the document, because a file holding two
@@ -173,6 +228,9 @@ func asRecord(read document) response.Record {
 	}
 	for _, row := range read.Rows {
 		made := response.Row{
+			// An entity written as an empty string or as null is the same
+			// answer as one left out, because none of the three names a table.
+			Entity:  row.Entity,
 			Verdict: response.Verdict(row.Verdict),
 			Code:    row.Code,
 			Message: row.Message,

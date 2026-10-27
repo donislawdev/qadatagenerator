@@ -54,6 +54,63 @@ func refused() manifest.Defect {
 	}
 }
 
+// 🔴 A list of entities that disagrees with itself, with the count beside it or
+// with the entries under it is refused (DEC-266).
+//
+// verify holds every row of a response record to the size of its own table, so
+// a list that does not add up holds rows to tables of the wrong size, and an
+// entry in a table the list leaves out is one no answer can reach.
+func TestAListOfEntitiesThatDisagreesIsRefused(t *testing.T) {
+	two := []manifest.Entity{{Name: "customer", Rows: 5}, {Name: "order", Rows: 8}}
+	if _, problems := manifest.New("0.2", withEntities(two), []manifest.Defect{applied()}); len(problems) > 0 {
+		t.Fatalf("a list of two tables adding up to the dataset was refused: %v", problems)
+	}
+	nowhere := applied()
+	nowhere.Location.Entity = ""
+	nowhere.Location.Field, nowhere.Location.Path = "", "$.customer[0]"
+	for _, given := range []struct {
+		what     string
+		entities []manifest.Entity
+		entry    manifest.Defect
+		says     string
+	}{
+		{"rows that do not add up", []manifest.Entity{{Name: "customer", Rows: 12}}, applied(),
+			"do not add up to the 13 rows"},
+		{"rows past the count", []manifest.Entity{{Name: "customer", Rows: 9}, {Name: "order", Rows: 9}},
+			applied(), "do not add up"},
+		{"rows near the largest integer, wrapping a sum round", []manifest.Entity{
+			{Name: "customer", Rows: 1 << 62}, {Name: "order", Rows: 1 << 62},
+			{Name: "invoice", Rows: 1 << 62}, {Name: "line", Rows: 1<<62 + 13}}, applied(), "do not add up"},
+		{"a negative count", []manifest.Entity{{Name: "customer", Rows: 14}, {Name: "order", Rows: -1}},
+			applied(), "negative number of rows"},
+		{"a table named twice", []manifest.Entity{{Name: "customer", Rows: 5}, {Name: "customer", Rows: 8}},
+			applied(), `"customer" twice`},
+		{"a table with no name", []manifest.Entity{{Name: "customer", Rows: 5}, {Name: " ", Rows: 8}},
+			applied(), "no name"},
+		{"the table of an entry left out", []manifest.Entity{{Name: "order", Rows: 13}}, applied(),
+			`entity "customer", which the envelope does not list`},
+		{"a row of no table beside two", two, nowhere, "without naming its entity"},
+	} {
+		t.Run(given.what, func(t *testing.T) {
+			_, problems := manifest.New("0.2", withEntities(given.entities), []manifest.Defect{given.entry})
+			if !strings.Contains(strings.Join(problems, ". "), given.says) {
+				t.Errorf("the problems are %v and should mention %q", problems, given.says)
+			}
+		})
+	}
+	// A row of no table beside one table is in the only table there is.
+	if _, problems := manifest.New("0.2", withEntities([]manifest.Entity{{Name: "customer", Rows: 13}}),
+		[]manifest.Defect{nowhere}); len(problems) > 0 {
+		t.Errorf("a row of no table beside one table was refused: %v", problems)
+	}
+}
+
+func withEntities(entities []manifest.Entity) manifest.Run {
+	envelope := run()
+	envelope.Entities = entities
+	return envelope
+}
+
 func TestAWholeManifestIsAccepted(t *testing.T) {
 	built, problems := manifest.New("0.1", run(), []manifest.Defect{applied(), refused()})
 	if len(problems) > 0 {

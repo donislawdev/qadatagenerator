@@ -174,22 +174,38 @@ func TestSilenceAboutWarningsIsNotTheAbsenceOfWarnings(t *testing.T) {
 	}
 }
 
-// A row the application never answered is absent rather than accepted, which is
-// what a receiver silently dropping everything past a limit actually produces.
-func TestARowTheApplicationNeverAnsweredIsAbsentRatherThanAccepted(t *testing.T) {
-	record := response.Record{
-		SpecVersion: "1.0",
-		Rows:        []response.Row{{Number: 2, Verdict: response.Rejected}},
+// The same number under two entities is two rows of a dataset of two tables,
+// and only one place named twice is one row answered twice. Whether a row with
+// no entity and a row naming one are the same place is for the comparison to
+// say, because only the manifest knows how many tables there are.
+func TestTheSameNumberUnderTwoEntitiesIsTwoRows(t *testing.T) {
+	two := response.Record{SpecVersion: "0.2", Rows: []response.Row{
+		{Entity: "customer", Number: 1, Verdict: response.Accepted},
+		{Entity: "order", Number: 1, Verdict: response.Rejected},
+		{Number: 1, Verdict: response.Rejected},
+	}}
+	if problems := two.Problems(); len(problems) > 0 {
+		t.Errorf("row 1 of two tables and a row 1 of no table named came back as %v", problems)
 	}
 
-	if _, reacted := record.ByRow(1); reacted {
-		t.Error("a row the application never answered was found")
+	twice := response.Record{SpecVersion: "0.2", Rows: []response.Row{
+		{Entity: "order", Number: 1, Verdict: response.Accepted},
+		{Entity: "order", Number: 1, Verdict: response.Rejected},
+	}}
+	problems := twice.Problems()
+	if len(problems) != 1 || !strings.Contains(problems[0], "row 1 of order is answered twice") {
+		t.Errorf("one place named twice came back as %v", problems)
 	}
-	row, reacted := record.ByRow(2)
-	if !reacted {
-		t.Fatal("a row the application answered was not found")
-	}
-	if row.Verdict != response.Rejected {
-		t.Errorf("the verdict of row 2 came back as %q", row.Verdict)
+
+	// Numbered from one in each of two tables and named in neither, which is
+	// what a producer of two tables writes first, and the sentence says what
+	// is missing rather than only that row 1 repeats.
+	unnamed := response.Record{SpecVersion: "0.2", Rows: []response.Row{
+		{Number: 1, Verdict: response.Accepted},
+		{Number: 1, Verdict: response.Rejected},
+	}}
+	if said := strings.Join(unnamed.Problems(), ". "); !strings.Contains(said, "row 1 is answered twice") ||
+		strings.Count(said, "each name their entity") != 1 {
+		t.Errorf("row 1 twice without an entity came back as %q", said)
 	}
 }

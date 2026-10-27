@@ -32,13 +32,67 @@ func anEnvelope() manifest.Run {
 	return manifest.Run{
 		GeneratedAt: "2026-08-11T00:00:00Z", Seed: "s", Locale: "pl-PL",
 		CatalogVersion: "0.1", RowsTotal: 10, RowsMutated: 1,
+		Entities: []manifest.Entity{{Name: "customer", Rows: 10}},
+	}
+}
+
+// 🔴 The list of entities is written whole, and an envelope that has none or
+// leaves out a table an entry stands in is refused before the document closes.
+//
+// The list is what a response record about two tables is held to (DEC-266). A
+// manifest without it is one verify could only read as the sum of its tables,
+// and the entries are on a disk by the time the envelope arrives, so the close
+// is the last moment a refusal still means something.
+func TestTheEntitiesAreWrittenWholeOrNotAtAll(t *testing.T) {
+	var buffer bytes.Buffer
+	writer := manifestjson.New(&buffer, "0.2")
+	writer.Add(anEntry("one"))
+	envelope := anEnvelope()
+	envelope.Entities = []manifest.Entity{{Name: "customer", Rows: 4}, {Name: "order", Rows: 6}}
+	if err := writer.Finish(envelope, 1, 1); err != nil {
+		t.Fatal(err)
+	}
+	var document struct {
+		Run struct {
+			Entities []struct {
+				Entity    string `json:"entity"`
+				RowsTotal int    `json:"rows_total"`
+			} `json:"entities"`
+		} `json:"run"`
+	}
+	if err := json.Unmarshal(buffer.Bytes(), &document); err != nil {
+		t.Fatalf("the manifest does not parse: %v\n%s", err, buffer.String())
+	}
+	if got := document.Run.Entities; len(got) != 2 || got[0].Entity != "customer" ||
+		got[0].RowsTotal != 4 || got[1].Entity != "order" || got[1].RowsTotal != 6 {
+		t.Errorf("the entities reached the file as %+v", got)
+	}
+
+	for _, given := range []struct {
+		what   string
+		listed []manifest.Entity
+		says   string
+	}{
+		{"no entity at all", nil, "lists no entity"},
+		{"the table of an entry left out", []manifest.Entity{{Name: "order", Rows: 10}}, "does not list"},
+	} {
+		t.Run(given.what, func(t *testing.T) {
+			writer := manifestjson.New(&bytes.Buffer{}, "0.2")
+			writer.Add(anEntry("one"))
+			envelope := anEnvelope()
+			envelope.Entities = given.listed
+			err := writer.Finish(envelope, 1, 1)
+			if err == nil || !strings.Contains(err.Error(), given.says) {
+				t.Errorf("an envelope with %s closed with %v", given.what, err)
+			}
+		})
 	}
 }
 
 // The document parses, and it is the shape the specification describes.
 func TestTheDocumentIsReadableBySomebodyElsesParser(t *testing.T) {
 	var buffer bytes.Buffer
-	writer := manifestjson.New(&buffer, "0.1")
+	writer := manifestjson.New(&buffer, "0.2")
 	writer.Add(anEntry("one"))
 	writer.Add(anEntry("two"))
 	if err := writer.Finish(anEnvelope(), 2, 2); err != nil {
@@ -63,7 +117,7 @@ func TestTheDocumentIsReadableBySomebodyElsesParser(t *testing.T) {
 // no rows, has to produce a manifest somebody can open rather than an empty file.
 func TestARunWithNoEntriesIsStillADocument(t *testing.T) {
 	var buffer bytes.Buffer
-	writer := manifestjson.New(&buffer, "0.1")
+	writer := manifestjson.New(&buffer, "0.2")
 	if err := writer.Finish(anEnvelope(), 0, 0); err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +145,7 @@ func TestARunWithNoEntriesIsStillADocument(t *testing.T) {
 // refuses for a defect in a value.
 func TestAnEntryTheModelWouldRefuseNeverReachesTheFile(t *testing.T) {
 	var buffer bytes.Buffer
-	writer := manifestjson.New(&buffer, "0.1")
+	writer := manifestjson.New(&buffer, "0.2")
 
 	broken := anEntry("no-field")
 	broken.Location.Field = ""
@@ -111,7 +165,7 @@ func TestAnEntryTheModelWouldRefuseNeverReachesTheFile(t *testing.T) {
 // different answers.
 func TestAValueThatIsEmptyOnPurposeIsWrittenRatherThanDropped(t *testing.T) {
 	var buffer bytes.Buffer
-	writer := manifestjson.New(&buffer, "0.1")
+	writer := manifestjson.New(&buffer, "0.2")
 	emptied := anEntry("emptied")
 	emptied.ValueAfter = ""
 	writer.Add(emptied)
@@ -139,7 +193,7 @@ func TestAValueThatIsEmptyOnPurposeIsWrittenRatherThanDropped(t *testing.T) {
 // disagree with the list under it.
 func TestTheEnvelopeCarriesTheCountsItWasGiven(t *testing.T) {
 	var buffer bytes.Buffer
-	writer := manifestjson.New(&buffer, "0.1")
+	writer := manifestjson.New(&buffer, "0.2")
 	writer.Add(anEntry("one"))
 	if err := writer.Finish(anEnvelope(), 60, 1); err != nil {
 		t.Fatal(err)
@@ -171,7 +225,7 @@ func TestTheEnvelopeCarriesTheCountsItWasGiven(t *testing.T) {
 // a manifest missing it asks the reader to take that damage on trust.
 func TestAnInferredRelationReachesTheFileWithItsBasis(t *testing.T) {
 	var buffer bytes.Buffer
-	writer := manifestjson.New(&buffer, "0.1")
+	writer := manifestjson.New(&buffer, "0.2")
 	envelope := anEnvelope()
 	envelope.Inference = &manifest.Inference{
 		Method:  "values-validated",

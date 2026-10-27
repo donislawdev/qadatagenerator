@@ -1,7 +1,7 @@
 {
   "tool_version": "0.1.0",
   "catalog_version": "0.1",
-  "manifest_version": "0.1",
+  "manifest_version": "0.2",
   "recipe_schema_version": "0.1",
   "seed": "dataset-oracle-2026-08",
   "locale": "pl-PL",

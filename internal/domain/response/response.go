@@ -38,6 +38,11 @@ const (
 
 // Row is what happened to one record.
 type Row struct {
+	// Entity is the table the record belongs to, as the producer wrote it, and
+	// empty when they did not say. Empty means the only entity of the dataset,
+	// and whether the dataset has only one is a question for the manifest,
+	// which this model does not hold.
+	Entity string
 	// Row is the record, counting the first one after the header as one.
 	Number  int
 	Verdict Verdict
@@ -87,47 +92,73 @@ func (r Record) Problems() []string {
 			"reacted to nothing is a run where every row went missing, and saying that needs the "+
 			"rows it did react to")
 	}
-	seen := map[int]bool{}
+	seen := map[Place]bool{}
+	hinted := false
 	for _, row := range r.Rows {
-		problems = append(problems, row.problems(seen)...)
+		problems = append(problems, row.problems(seen, &hinted)...)
 	}
 	sort.Strings(problems)
 	return problems
 }
 
-func (row Row) problems(seen map[int]bool) []string {
+// Place is a record as the producer named it: an entity, or none, and a row.
+type Place struct {
+	Entity string
+	Number int
+}
+
+// Place is where the producer said this row is.
+func (row Row) Place() Place { return Place{Entity: row.Entity, Number: row.Number} }
+
+// Name is the row as a reader finds it in a sentence: its number, and the
+// entity when the producer named one.
+func (p Place) Name() string {
+	if p.Entity == "" {
+		return "row " + strconv.Itoa(p.Number)
+	}
+	return "row " + strconv.Itoa(p.Number) + " of " + p.Entity
+}
+
+// problems is everything wrong with one row. hinted carries across the rows
+// whether the sentence about naming entities was said already.
+func (row Row) problems(seen map[Place]bool, hinted *bool) []string {
 	var problems []string
 	switch {
 	case row.Number < 1:
 		problems = append(problems, "a row is numbered "+strconv.Itoa(row.Number)+
 			", and rows count from one because the header is not a record")
-	case seen[row.Number]:
+	case seen[row.Place()]:
 		// 🔴 Two verdicts about one row is the one fault a reader cannot work
 		// around by choosing, because choosing is what would make the answer
 		// depend on the order of somebody else's file.
-		problems = append(problems, fmt.Sprintf(
-			"row %d is answered twice, and the two answers cannot both be what happened",
-			row.Number))
+		//
+		// The same number under two entities is two rows, which is what a
+		// dataset of two tables has. A row named once with its entity and once
+		// without it is a question for the manifest, which knows whether the
+		// dataset has one entity or several, so it is asked where the two are
+		// put side by side.
+		said := fmt.Sprintf("%s is answered twice, and the two answers cannot both be what happened",
+			row.Place().Name())
+		// Once per record, beside the first such row. A number repeated without
+		// an entity is most likely a producer of two tables numbering each from
+		// one, which is right, and naming neither, which is not. Measured on
+		// 2026-10-27: that record met this sentence before anything could say
+		// the entity was missing, because the manifest that knows there are two
+		// tables is not read here.
+		if row.Entity == "" && !*hinted {
+			said += ". Rows of different entities each name their entity"
+			*hinted = true
+		}
+		problems = append(problems, said)
 	default:
-		seen[row.Number] = true
+		seen[row.Place()] = true
 	}
 	if row.Verdict != Accepted && row.Verdict != Rejected {
 		problems = append(problems, fmt.Sprintf(
-			"row %d has the verdict %q, and the two a row can have are %q and %q",
-			row.Number, row.Verdict, Accepted, Rejected))
+			"%s has the verdict %q, and the two a row can have are %q and %q",
+			row.Place().Name(), row.Verdict, Accepted, Rejected))
 	}
 	return problems
-}
-
-// ByRow is what the application said about one row, and whether it said
-// anything.
-func (r Record) ByRow(number int) (Row, bool) {
-	for _, row := range r.Rows {
-		if row.Number == number {
-			return row, true
-		}
-	}
-	return Row{}, false
 }
 
 // Marked reports whether the application said anything about a row without

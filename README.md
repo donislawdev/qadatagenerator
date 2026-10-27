@@ -61,7 +61,8 @@ The `spec/` directory holds public specifications meant to be implemented by oth
 |---|---|
 | [Corruption catalog](spec/corruption-catalog.md) | 0.1, draft |
 | [Catalog entries](spec/corruption-catalog.yaml) | 0.1, draft, canonical form |
-| [Expectation manifest](spec/expectation-manifest.md) | 0.1, draft |
+| [Expectation manifest](spec/expectation-manifest.md) | 0.2, draft |
+| [Application response record](spec/application-response.md) | 0.2, draft, read by `verify` and never written |
 
 The catalog is split on purpose. The Markdown describes the shape of an entry and the rules the catalog grows by. The YAML carries the entries themselves and is the form a tool reads.
 

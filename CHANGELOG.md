@@ -10,6 +10,41 @@ repository once they are released.
 
 ## [Unreleased]
 
+### BREAKING
+
+- **The manifest format is 0.2 and lists every entity of the dataset.** The
+  envelope carries `entities`, each table with its own `rows_total`, the ones
+  no damage reached included. A manifest of 0.2 without the list is refused,
+  and one written to 0.1 is still read. A manifest whose list does not add up
+  to `rows_total`, names a table twice or leaves out a table an entry stands
+  in is refused as well.
+- **The response format is 0.2, and a row may say which entity it belongs
+  to.** With one entity it may still be left out. With several, verify refuses
+  a row that names none, and it refuses an entity the manifest does not list.
+  A record written to 0.1 is read by the same rules.
+- **verify refuses a response record whose rows do not fit the dataset, with
+  exit code 3.** A row past the end of its table, which is usually every row
+  shifted by one because the header was counted, and two rows landing on one
+  place were compared until now. Every reason is named at once, a few rows at
+  a time.
+- **A member nobody knows is refused only in a version this build speaks or
+  an earlier one.** In a record written to a newer minor version it is skipped,
+  and the report says that version was read only as far as this build
+  understands it. Until now such a record was refused before its version was
+  looked at.
+
+### Fixed
+
+- **verify holds a record about several tables to each of them.** Row 1 of one
+  table and row 1 of another got the same verdict, so an application that did
+  everything right could be reported as taking a value it should have
+  refused. The records nobody reacted to are counted table by table, and the
+  finding names the table. A row past the end no longer makes up for a row
+  that never arrived.
+- **The note about a newer version is among the limits of the report.** The
+  window says it too now. It used to stand before the report in the command
+  line only.
+
 ### Changed
 
 - **The primary key of an entity is held whole.** Two rows no longer share a

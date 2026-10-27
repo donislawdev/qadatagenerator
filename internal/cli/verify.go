@@ -10,8 +10,6 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/responsejson"
 	"github.com/donislawdev/qadatagenerator/internal/app/verify"
-	"github.com/donislawdev/qadatagenerator/internal/fault"
-	"github.com/donislawdev/qadatagenerator/internal/version"
 )
 
 // runVerify compares a manifest against what an application did with the data.
@@ -63,30 +61,18 @@ func compareAt(out *streams, manifestPath, responsePath string) int {
 		return fail(out, err)
 	}
 
-	// The refusal for a version this build cannot read happened in the readers.
-	// What is left is the readable half: a document from the same major line
-	// written to a minor version this build has never seen. It is read, and the
-	// run says so, because a comparison that silently ignored the difference
-	// would be reporting on evidence it only partly understands.
-	noteVersion(out, noteVerifyManifestVersion, version.Manifest, promised.SpecVersion())
-	noteVersion(out, noteVerifyResponseVersion, version.Response, actual.SpecVersion)
-
-	report := verify.Compare(promised, actual)
+	// The refusal for a version this build cannot read happened in the
+	// readers. A document written to a newer minor version is read, and the
+	// comparison says so among its limits, where the window says it too.
+	report, err := verify.Compare(promised, actual)
+	if err != nil {
+		return fail(out, err)
+	}
 	say(out, report)
 	if report.Failed() {
 		return finish(out, codeExpectation)
 	}
 	return finish(out, codeOK)
-}
-
-// noteVersion says that a document was read to a version of its format that
-// this build does not write, and says nothing when it was not.
-func noteVersion(out *streams, what, speaks, claimed string) {
-	if version.Compatibility(speaks, claimed) != version.WithinTheLine {
-		return
-	}
-	out.warn(what + fault.Shorten(claimed) + noteVerifyVersionTail + speaks +
-		noteVerifyVersionEnd)
 }
 
 // say writes the report on the log channel.
@@ -105,11 +91,13 @@ func say(out *streams, report verify.Report) {
 		word = noteVerifyOneEntry
 	}
 	out.note(noteVerifyCompared + strconv.Itoa(report.Compared) + word)
+	several := len(report.Entities) > 1
 	for _, finding := range report.Findings {
-		out.warn(placeOf(finding) + followedBy(string(finding.Kind), finding.Detail))
+		out.warn(placeOf(several, finding.Entity, finding.Row, finding.Field) +
+			followedBy(string(finding.Kind), finding.Detail))
 	}
 	for _, open := range report.Unsettled {
-		out.warn("row " + strconv.Itoa(open.Row) + ", " + open.Field + ": " + open.Reason)
+		out.warn(placeOf(several, open.Entity, open.Row, open.Field) + open.Reason)
 	}
 	if len(report.Findings) == 0 {
 		out.note(noteVerifyAgreed)
@@ -141,11 +129,18 @@ func followedBy(kind, detail string) string {
 
 // placeOf names where a finding is, and says nothing when it is about the
 // dataset rather than about one row.
-func placeOf(finding verify.Finding) string {
-	if finding.Row == 0 {
+//
+// The entity is named only in a dataset of several, where row 3 alone could be
+// in any of them. A run over one table reads as it did before the dataset could
+// have more than one.
+func placeOf(several bool, entity string, row int, field string) string {
+	if row == 0 {
 		return ""
 	}
-	return "row " + strconv.Itoa(finding.Row) + ", " + finding.Field + ": "
+	if several {
+		return "row " + strconv.Itoa(row) + " of " + entity + ", " + field + ": "
+	}
+	return "row " + strconv.Itoa(row) + ", " + field + ": "
 }
 
 func softCount(report verify.Report) int {

@@ -18,10 +18,23 @@ type Reading int
 const (
 	// AsWritten means the document names the version this build speaks.
 	AsWritten Reading = iota
-	// WithinTheLine means the same major version and a different minor one.
-	// The format grows by adding, so such a document stays readable and the
-	// only honest thing to do is read it and say so.
-	WithinTheLine
+	// Earlier means the same major version and an earlier minor one. The
+	// format grows by adding, so everything such a document can say is
+	// something this build knows, and it is read by the rules of its own
+	// version without a word about it.
+	Earlier
+	// Later means the same major version and a minor one this build has never
+	// seen. The format grows by adding, so such a document stays readable and
+	// the only honest thing to do is read it and say so.
+	//
+	// # Why Earlier and Later are two answers and not one
+	//
+	// They were one until 2026-10-27, when the response format moved to 0.2
+	// and a record written to 0.1 would have been read with the note that
+	// anything the newer version added was left out. That sentence is false
+	// about an older document, and a reader who believed it would go looking
+	// for a part of their file that was never missing.
+	Later
 	// Unreadable means a different major version, or a string naming no
 	// version at all. A major version is what changes the meaning of what is
 	// already there, so a reader meeting one cannot know what it is holding.
@@ -56,7 +69,81 @@ func Compatibility(speaks, claimed string) Reading {
 	if !ok || given != spoken {
 		return Unreadable
 	}
-	return WithinTheLine
+	switch order(minors(speaks), minors(claimed)) {
+	case 0:
+		return AsWritten
+	case 1:
+		return Earlier
+	}
+	return Later
+}
+
+// minors is the part of a version after its major number, one number for each
+// part, and nil when any part is not a plain decimal number.
+//
+// A part that cannot be read as a number cannot be placed before or after the
+// version this build speaks. Such a document is read as Later, because that is
+// the answer that tells its reader something may have been left unread, and
+// the other one would tell them nothing was.
+func minors(version string) []int {
+	_, rest, found := strings.Cut(version, ".")
+	if !found {
+		return []int{}
+	}
+	parts := strings.Split(rest, ".")
+	numbers := make([]int, 0, len(parts))
+	for _, part := range parts {
+		number, ok := plain(part)
+		if !ok {
+			return nil
+		}
+		numbers = append(numbers, number)
+	}
+	return numbers
+}
+
+// plain reads a part of a version that is a plain decimal number, refusing a
+// leading nought for the reason major gives.
+func plain(part string) (int, bool) {
+	if part == "" || len(part) > 9 || (len(part) > 1 && part[0] == '0') {
+		return 0, false
+	}
+	number := 0
+	for _, digit := range part {
+		if digit < '0' || digit > '9' {
+			return 0, false
+		}
+		number = number*10 + int(digit-'0')
+	}
+	return number, true
+}
+
+// order compares the minor parts of two versions: 0 when they are the same, 1
+// when the claimed one comes first and -1 when it comes after. A missing part
+// counts as nought, so 0.1 and 0.1.0 are one version. A claimed version whose
+// parts could not be read comes after, and so does one the build speaking
+// could not read, which only a build with a broken constant would be.
+func order(speaks, claimed []int) int {
+	if speaks == nil || claimed == nil {
+		return -1
+	}
+	for at := 0; at < len(speaks) || at < len(claimed); at++ {
+		spoken, given := partAt(speaks, at), partAt(claimed, at)
+		switch {
+		case given < spoken:
+			return 1
+		case given > spoken:
+			return -1
+		}
+	}
+	return 0
+}
+
+func partAt(parts []int, at int) int {
+	if at < len(parts) {
+		return parts[at]
+	}
+	return 0
 }
 
 // major returns the part before the first point, and refuses anything that is

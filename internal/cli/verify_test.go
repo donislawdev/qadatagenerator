@@ -21,7 +21,7 @@ func manifestFor(t *testing.T, into string, expectation catalog.Expectation,
 	if err != nil {
 		t.Fatalf("cannot write the manifest this test reads: %v", err)
 	}
-	writer := manifestjson.New(file, "0.1")
+	writer := manifestjson.New(file, "0.2")
 	writer.Add(manifest.Defect{
 		ID:            "case",
 		Location:      manifest.Location{Entity: "customer", Row: 1, Field: "pesel"},
@@ -37,6 +37,7 @@ func manifestFor(t *testing.T, into string, expectation catalog.Expectation,
 	err = writer.Finish(manifest.Run{
 		GeneratedAt: "2026-08-12T00:00:00Z", Seed: "s", Locale: "pl-PL",
 		CatalogVersion: "0.1", RowsTotal: 1, RowsMutated: 1,
+		Entities: []manifest.Entity{{Name: "customer", Rows: 1}},
 	}, 1, 1)
 	if err != nil {
 		t.Fatalf("the manifest did not close: %v", err)
@@ -132,12 +133,68 @@ func manifestAtVersion(t *testing.T, into, spec string) string {
 	err = writer.Finish(manifest.Run{
 		GeneratedAt: "2026-08-17T00:00:00Z", Seed: "s", Locale: "pl-PL",
 		CatalogVersion: "0.1", RowsTotal: 1, RowsMutated: 1,
+		Entities: []manifest.Entity{{Name: "customer", Rows: 1}},
 	}, 1, 1)
 	if err != nil {
 		t.Fatalf("the manifest did not close: %v", err)
 	}
 	_ = file.Close()
 	return path
+}
+
+// manifestOfTwo writes a manifest of a customer table and an order table of two
+// rows each, with row 1 of the orders expected to be refused.
+func manifestOfTwo(t *testing.T, into string) string {
+	t.Helper()
+	path := filepath.Join(into, "two-tables.json")
+	file, err := os.Create(path)
+	if err != nil {
+		t.Fatalf("cannot write the manifest this test reads: %v", err)
+	}
+	writer := manifestjson.New(file, "0.2")
+	writer.Add(manifest.Defect{
+		ID:       "case",
+		Location: manifest.Location{Entity: "order", Row: 1, Field: "amount"},
+		Mutator:  "L3.checksum.off_by_one", Layer: catalog.Layer("L3"),
+		Applied: true, ValueAfter: "sent", HasValueAfter: true,
+		Expectation: catalog.Rejection, Confidence: catalog.Hard,
+		Rationale: "the check digit no longer agrees",
+	})
+	err = writer.Finish(manifest.Run{
+		GeneratedAt: "2026-10-27T00:00:00Z", Seed: "s", Locale: "pl-PL",
+		CatalogVersion: "0.1", RowsTotal: 4, RowsMutated: 1,
+		Entities: []manifest.Entity{{Name: "customer", Rows: 2}, {Name: "order", Rows: 2}},
+	}, 1, 1)
+	if err != nil {
+		t.Fatalf("the manifest did not close: %v", err)
+	}
+	_ = file.Close()
+	return path
+}
+
+// 🔴 A record about two tables is held to each of them, end to end (DEC-266,
+// B-192).
+//
+// The finding names the table it is in, since row 1 alone could be in either.
+// A record that leaves the entity out of a dataset of two is refused with the
+// code for an input that is not valid, because comparing it would be guessing
+// which table each row belongs to.
+func TestARecordAboutTwoTablesIsHeldToEachOfThem(t *testing.T) {
+	into := t.TempDir()
+	twoTables := manifestOfTwo(t, into)
+
+	got := run(commandVerify, twoTables, responseFor(t, into, `{"spec_version":"0.2","rows":[
+	  {"entity":"customer","row":1,"verdict":"rejected"},{"entity":"customer","row":2,"verdict":"accepted"},
+	  {"entity":"order","row":1,"verdict":"accepted"},{"entity":"order","row":2,"verdict":"accepted"}]}`))
+	if got.code != int(codeExpectation) || !strings.Contains(got.log, "row 1 of order, amount: accepted") {
+		t.Errorf("an order taken although it should have been refused ended with %d: %q", got.code, got.log)
+	}
+
+	got = run(commandVerify, twoTables, responseFor(t, into,
+		`{"spec_version":"0.2","rows":[{"row":1,"verdict":"rejected"}]}`))
+	if got.code != int(codeConfig) || !strings.Contains(got.log, "names no entity") {
+		t.Errorf("a row naming no entity in a dataset of two ended with %d: %q", got.code, got.log)
+	}
 }
 
 // A document from a version this build cannot read is refused rather than
@@ -204,8 +261,17 @@ func TestADocumentFromANewerMinorVersionIsReadAndSaidSo(t *testing.T) {
 	if !strings.Contains(got.log, "0.9") {
 		t.Errorf("the run does not say which version it read: %q", got.log)
 	}
-	if !strings.Contains(got.log, "not part of what follows") {
+	if !strings.Contains(got.log, "anything the newer version added is not part of this comparison") {
 		t.Errorf("the run does not say what reading it costs: %q", got.log)
+	}
+
+	// A response record of a newer minor version may carry members this build
+	// has never heard of, and they are skipped rather than refused (DEC-266).
+	got = run(commandVerify, manifestFor(t, into, catalog.Rejection, catalog.Hard),
+		responseFor(t, into, `{"spec_version":"0.3","producer":"ci",`+
+			`"rows":[{"row":1,"verdict":"rejected","code":"E1","latency_ms":12}]}`))
+	if got.code != 0 || !strings.Contains(got.log, "the response record is written to version 0.3") {
+		t.Errorf("a response record of a newer minor version ended with %d: %q", got.code, got.log)
 	}
 }
 

@@ -584,7 +584,7 @@ func quoted(value string) string { return "\"" + value + "\"" }
 // the first is a claim about the application and the second is a question
 // the response record did not carry the evidence to answer.
 func answerOf(text i18n.Catalogue, comparison Comparison, defect manifest.Defect) (short, long Line) {
-	answer, reacted := comparison.Record.ByRow(defect.Location.Row)
+	answer, reacted := comparison.Report.Answer(defect)
 	if !reacted {
 		return Line{Text: text.T(i18n.ManifestAnswerNone), Color: palette.StateDanger},
 			Line{Text: text.T(i18n.VerifyNoAnswer), Color: palette.StateDanger}
@@ -622,13 +622,15 @@ func kindOf(text i18n.Catalogue, kind verify.Kind) string {
 
 // findingFor is the disagreement about one entry, if the comparison found one.
 //
-// Matched on the row, the column and the mutator together. Any two of those can
-// repeat inside one manifest, since one row carries several damages and one
-// mutator is used in many rows, so a match on fewer would attach somebody
-// else's finding to an entry that agreed.
+// Matched on the entity, the row, the column and the mutator together. Any
+// three of those can repeat inside one manifest, since one row carries several
+// damages, one mutator is used in many rows and two tables both have a row 1,
+// so a match on fewer would attach somebody else's finding to an entry that
+// agreed.
 func findingFor(report verify.Report, defect manifest.Defect) (verify.Finding, bool) {
 	for _, finding := range report.Findings {
-		if finding.Row == defect.Location.Row &&
+		if finding.Entity == defect.Location.Entity &&
+			finding.Row == defect.Location.Row &&
 			finding.Field == defect.Location.Field &&
 			finding.Mutator == defect.Mutator {
 			return finding, true
@@ -642,7 +644,8 @@ func findingFor(report verify.Report, defect manifest.Defect) (verify.Finding, b
 // reason.
 func unsettledFor(report verify.Report, defect manifest.Defect) (verify.Unsettled, bool) {
 	for _, open := range report.Unsettled {
-		if open.Row == defect.Location.Row &&
+		if open.Entity == defect.Location.Entity &&
+			open.Row == defect.Location.Row &&
 			open.Field == defect.Location.Field &&
 			open.Mutator == defect.Mutator {
 			return open, true
@@ -665,21 +668,28 @@ func disagreedOf(report verify.Report) int {
 }
 
 func unsettledOf(report verify.Report) []Line {
+	several := len(report.Entities) > 1
 	lines := make([]Line, 0, len(report.Unsettled))
 	for _, open := range report.Unsettled {
 		lines = append(lines, Line{
-			Text:  placeOfUnsettled(open) + open.Reason,
+			Text:  placeOfUnsettled(several, open) + open.Reason,
 			Color: palette.StateWarning,
 		})
 	}
 	return lines
 }
 
-func placeOfUnsettled(open verify.Unsettled) string {
+// placeOfUnsettled names the entry a question is about. The entity leads only
+// in a dataset of several, the way the command line names it.
+func placeOfUnsettled(several bool, open verify.Unsettled) string {
 	if open.Row == 0 {
 		return ""
 	}
-	return strconv.Itoa(open.Row) + separator + open.Field + separator
+	place := strconv.Itoa(open.Row) + separator + open.Field + separator
+	if several {
+		return open.Entity + separator + place
+	}
+	return place
 }
 
 func limitLines(report verify.Report) []Line {
