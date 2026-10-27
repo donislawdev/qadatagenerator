@@ -196,7 +196,7 @@ func TestTheMarkerIsGoneOnceTheResultIsInPlace(t *testing.T) {
 	if _, err := os.Stat(marker); err != nil {
 		t.Fatalf("no marker was taken while the run was going: %v", err)
 	}
-	if _, err := file.WriteString("id\n1\n"); err != nil {
+	if _, err := file.Write([]byte("id\n1\n")); err != nil {
 		t.Fatal(err)
 	}
 	if err := set.Commit(); err != nil {
@@ -279,7 +279,7 @@ func TestARenameThatFailsTakesTheEarlierOnesBack(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := first.WriteString("first"); err != nil {
+	if _, err := first.Write([]byte("first")); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := set.Create("b.csv"); err != nil {
@@ -328,7 +328,7 @@ func TestAnUndoneReplacementGivesTheEarlierFileBack(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := first.WriteString("new"); err != nil {
+	if _, err := first.Write([]byte("new")); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := set.Create("b.csv"); err != nil {
@@ -371,7 +371,7 @@ func TestAReplacementThatSucceedsLeavesNoCopyBehind(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := file.WriteString("new"); err != nil {
+	if _, err := file.Write([]byte("new")); err != nil {
 		t.Fatal(err)
 	}
 	if err := set.Commit(); err != nil {

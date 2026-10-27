@@ -18,6 +18,7 @@
 package format
 
 import (
+	"bufio"
 	"strconv"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
@@ -39,34 +40,90 @@ type WriteCloser interface {
 	Close() error
 }
 
-// keys remembers what identifies each row of each table, so that a child can
-// name its parent.
+// finish empties the buffer of a file into it and closes it.
+//
+// # Why a table is closed when it ends rather than with the rest of the run
+//
+// 🔴 Every file used to stay open until the set of files was committed, so a
+// recipe of many small tables held a handle for each of them at once, and a
+// system that allows a process a few hundred open files would stop such a run
+// part way. Found by an outside review on 2026-10-22. Closing the file of a
+// table at its end holds one at a time. The store still closes whatever is left
+// open at the end and answers for a close that failed here, so a writer that
+// forgot this would hold handles again and lose nothing.
+func finish(buffered *bufio.Writer, file WriteCloser) error {
+	if err := buffered.Flush(); err != nil {
+		return fault.Wrap(fault.IO, err, "cannot write the dataset")
+	}
+	if err := file.Close(); err != nil {
+		return fault.Wrap(fault.IO, err, "cannot write the dataset")
+	}
+	return nil
+}
+
+// keys remembers what identifies the rows of the tables somebody belongs to,
+// so that a child can name its parent.
+//
+// # Why only those tables, and why only their declared keys
+//
+// 🔴 The identifier of every row of every table used to be kept until the end
+// of the run, a table nobody belongs to included, so the comma separated form,
+// which streams everything else, grew in memory with its rows: an outside
+// review measured the peak of the whole process on 2026-10-22 at 199 MiB for
+// two million rows of one table and 28 for fifty thousand. A hundred thousand
+// rows of one column left 3.5 MB of keys in use, measured beside the guard in
+// closing_test.go. A table without a primary key is named by its row
+// number, and a number can be worked out when it is asked for, so what is kept
+// now is the key of each row of a table that is somebody's parent and declares
+// one. The key is still taken from the record as it is written, after any
+// damage, which is what it always was.
 type keys struct {
-	byEntity map[string][]string
+	// parents are the tables somebody belongs to.
+	parents map[string]bool
+	// kept holds the key of each row of a parent table that declares one.
+	kept map[string][]string
+	// counted is how many rows each parent table has, so that a row outside
+	// one is named by nothing, as it was when every key was kept.
+	counted map[string]int
 }
 
-func newKeys() keys { return keys{byEntity: make(map[string][]string)} }
-
-// record stores the identifier of one row.
-func (k keys) record(entity, key string) {
-	k.byEntity[entity] = append(k.byEntity[entity], key)
+func newKeys(rec recipe.Recipe) keys {
+	parents := make(map[string]bool)
+	for _, entity := range rec.Entities {
+		if len(entity.Parents) > 0 {
+			parents[entity.Parents[0].Entity] = true
+		}
+	}
+	return keys{parents: parents, kept: make(map[string][]string), counted: make(map[string]int)}
 }
 
-// of returns the identifier of one row of a table.
+// record notes one row of a table, and keeps its key when a child will ask
+// for it.
+func (k keys) record(entity recipe.Entity, planned dataset.Table, values []string) {
+	if !k.parents[entity.Name] {
+		return
+	}
+	k.counted[entity.Name]++
+	if len(entity.PrimaryKey) > 0 {
+		k.kept[entity.Name] = append(k.kept[entity.Name], identify(entity, planned, values))
+	}
+}
+
+// of returns what names one row of a parent table: its primary key when the
+// table declares one, and its row number otherwise.
 func (k keys) of(entity string, row int) string {
-	rows := k.byEntity[entity]
-	if row < 0 || row >= len(rows) {
+	if row < 0 || row >= k.counted[entity] {
 		return ""
 	}
-	return rows[row]
+	if kept, declared := k.kept[entity]; declared {
+		return kept[row]
+	}
+	return strconv.Itoa(row)
 }
 
-// identify returns what names one row: the primary key of the entity when it
-// has one, and the row number otherwise.
-func identify(entity recipe.Entity, planned dataset.Table, values []string, row int) string {
-	if len(entity.PrimaryKey) == 0 {
-		return strconv.Itoa(row)
-	}
+// identify returns the primary key of one row, its parts joined in the order
+// the recipe lists them.
+func identify(entity recipe.Entity, planned dataset.Table, values []string) string {
 	identifier := ""
 	for _, part := range entity.PrimaryKey {
 		for column, name := range planned.Columns {

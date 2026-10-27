@@ -24,22 +24,24 @@ import (
 //
 // It is also not the same quantity. An entity with no parent is streamed, so a
 // count of a billion costs a run its time and nothing else. An entity that
-// belongs to another is planned first: the plan says which parent each child
-// row belongs to, one machine word per row, before a byte is written.
+// belongs to another is planned first: the plan says how many children each
+// parent gets, one machine word per parent row, before a byte is written.
 //
 // # Why four thousand million
 //
 // Measured on 2026-09-02, on a dry run of this build, which plans and writes
-// nothing: 8.4 bytes a row at a million rows and 7.8 at five million, which is
-// the one word this holds and nothing else. At this limit the index alone is
-// 32 GB before a single value is drawn, which is more memory than the machines
-// this is built for have. A run that reached it was never going to finish, so
-// what this changes is that it is told so with the arithmetic instead of being
-// stopped by the allocator, or by the operating system.
+// nothing: 8.4 bytes a row at a million rows and 7.8 at five million, which was
+// the one word per CHILD row the plan held then. At this limit that index alone
+// was 32 GB before a single value was drawn, more memory than the machines this
+// is built for have.
 //
-// The full run costs about seventy bytes a row on top, measured the same day
-// at five million rows, so the ceiling is generous by roughly a factor of ten
-// against what a machine could actually write.
+// 🔴 Since 2026-10-27 the plan holds a word per parent instead (DEC-266), so the
+// limit on children no longer stands on memory. It stays where it was because it
+// is also what keeps the arithmetic of the plan inside 64 bits: the span of a
+// draw, the sum of the shares, and the product the reach is compared with by
+// dividing. Raising it is a question of its own (B-343) rather than a side effect
+// of making the plan small. The limit on parents still stands on memory: a word
+// for each of them, and two more while a count is repaired.
 //
 // # What it prevents besides an unfinishable run
 //
@@ -120,7 +122,16 @@ const maxInt = int(^uint(0) >> 1)
 // It touches no disk and reads no clock. Everything it decides is a function of
 // the recipe and the seed, which is what makes a dry run the same answer as a
 // real one.
-func Prepare(rec recipe.Recipe, values Values) (Plan, error) {
+//
+// # Why it can be stopped
+//
+// Sharing children out draws once for every parent row, and repairing a count
+// walks the parents until the shares add up, so a relation with millions of
+// parents plans for seconds before the run begins. A window asked to close in
+// that time used to wait for the plan to finish. The halt is asked between
+// tables and inside those two loops, which are the only places in planning
+// whose length grows with the rows.
+func Prepare(rec recipe.Recipe, values Values, stop Halt) (Plan, error) {
 	ordered, err := inDependencyOrder(rec)
 	if err != nil {
 		return Plan{}, err
@@ -132,13 +143,16 @@ func Prepare(rec recipe.Recipe, values Values) (Plan, error) {
 
 	total := 0
 	for _, entity := range ordered {
+		if ended := stop.Stopped(); ended != nil {
+			return Plan{}, ended
+		}
 		if err := checkGenerators(entity, values, rec.Locale, &plan); err != nil {
 			return Plan{}, err
 		}
 		if err := refuseChains(entity, values); err != nil {
 			return Plan{}, err
 		}
-		planned, err := planEntity(entity, produced, source)
+		planned, err := planEntity(entity, produced, source, stop)
 		if err != nil {
 			return Plan{}, err
 		}
@@ -173,7 +187,8 @@ func tooManyRows(entity string) error {
 
 // planEntity works out the row count of one entity and, when it has a parent,
 // which parent each of its rows belongs to.
-func planEntity(entity recipe.Entity, done map[string]dataset.Table, source seed.Source) (dataset.Table, error) {
+func planEntity(entity recipe.Entity, done map[string]dataset.Table, source seed.Source,
+	stop Halt) (dataset.Table, error) {
 	planned := dataset.Table{
 		Entity:  entity.Name,
 		Columns: entity.FieldNames(),
@@ -201,13 +216,13 @@ func planEntity(entity recipe.Entity, done map[string]dataset.Table, source seed
 			", which this run does not produce")
 	}
 
-	shares, err := shareOut(entity, parent, owner.Rows, source)
+	shares, err := shareOut(entity, parent, owner.Rows, source, stop)
 	if err != nil {
 		return dataset.Table{}, err
 	}
 	planned.Parent = parent.Entity
-	planned.ParentOf = expand(shares)
-	planned.Rows = len(planned.ParentOf)
+	planned.Ownership = dataset.OwnershipOf(shares)
+	planned.Rows = planned.Ownership.Rows()
 	return planned, nil
 }
 
@@ -220,7 +235,8 @@ func planEntity(entity recipe.Entity, done map[string]dataset.Table, source seed
 // whatever the draws add up to. A count that cannot be reached inside the
 // bounds is refused with both bounds and the wanted number in the message,
 // rather than quietly trimmed.
-func shareOut(entity recipe.Entity, parent recipe.Parent, parents int, source seed.Source) ([]int, error) {
+func shareOut(entity recipe.Entity, parent recipe.Parent, parents int, source seed.Source,
+	stop Halt) ([]int, error) {
 	if parents == 0 {
 		return nil, nil
 	}
@@ -237,6 +253,9 @@ func shareOut(entity recipe.Entity, parent recipe.Parent, parents int, source se
 	// still true.
 	span := int64(parent.Max) - int64(parent.Min) + 1
 	for index := range shares {
+		if ended := stop.Stopped(); ended != nil {
+			return nil, ended
+		}
 		shares[index] = parent.Min + int(source.IntN(seed.Coordinate{
 			Entity: entity.Name, Row: int64(index), Purpose: ":children",
 		}, span))
@@ -247,7 +266,7 @@ func shareOut(entity recipe.Entity, parent recipe.Parent, parents int, source se
 	if err := reachable(entity, parent, parents); err != nil {
 		return nil, err
 	}
-	return repair(shares, entity, parent, source), nil
+	return repair(shares, entity, parent, source, stop)
 }
 
 // withinReach refuses a relation this build cannot hold a plan for, showing
@@ -271,9 +290,8 @@ func withinReach(entity recipe.Entity, parent recipe.Parent, parents int) error 
 	if most > 0 && int64(parents) > MaxChildRows/most {
 		return fault.New(fault.Data, fmt.Sprintf(
 			"%s belongs to %s at up to %d children each, and %s has %d rows, so this asks "+
-				"for more than the %d rows this build can plan for. It holds one machine "+
-				"word for every child row before it writes anything. Lower the range or "+
-				"the number of parents",
+				"for more than the %d rows this build plans for a table that belongs to "+
+				"another. Lower the range or the number of parents",
 			entity.Name, parent.Entity, parent.Max, parent.Entity, parents,
 			MaxChildRows))
 	}
@@ -299,13 +317,27 @@ func reachable(entity recipe.Entity, parent recipe.Parent, parents int) error {
 // The order it walks is drawn rather than the order of the rows, so that the
 // adjustment does not always land on the first parents. It is still a function
 // of the seed alone, which is what the whole tool rests on.
-func repair(shares []int, entity recipe.Entity, parent recipe.Parent, source seed.Source) []int {
-	order := drawnOrder(entity.Name, len(shares), source)
+//
+// The halt is asked once a round of the parents rather than at every step,
+// because a step is two comparisons and an addition while a question is a call
+// through an interface, and a count far from the drawn total takes as many
+// rounds as the range is wide.
+func repair(shares []int, entity recipe.Entity, parent recipe.Parent, source seed.Source,
+	stop Halt) ([]int, error) {
+	order, err := drawnOrder(entity.Name, len(shares), source, stop)
+	if err != nil {
+		return nil, err
+	}
 	total := 0
 	for _, share := range shares {
 		total += share
 	}
 	for step := 0; total != entity.Count; step++ {
+		if step%len(order) == 0 {
+			if ended := stop.Stopped(); ended != nil {
+				return nil, ended
+			}
+		}
 		index := order[step%len(order)]
 		switch {
 		case total < entity.Count && shares[index] < parent.Max:
@@ -316,14 +348,17 @@ func repair(shares []int, entity recipe.Entity, parent recipe.Parent, source see
 			total--
 		}
 	}
-	return shares
+	return shares, nil
 }
 
 // drawnOrder returns the parent indices in an order derived from the seed.
-func drawnOrder(entity string, parents int, source seed.Source) []int {
+func drawnOrder(entity string, parents int, source seed.Source, stop Halt) ([]int, error) {
 	keys := make([]int64, parents)
 	order := make([]int, parents)
 	for index := range order {
+		if ended := stop.Stopped(); ended != nil {
+			return nil, ended
+		}
 		order[index] = index
 		keys[index] = source.IntN(seed.Coordinate{
 			Entity: entity, Row: int64(index), Purpose: ":share-order",
@@ -335,22 +370,7 @@ func drawnOrder(entity string, parents int, source seed.Source) []int {
 		}
 		return order[left] < order[right]
 	})
-	return order
-}
-
-// expand turns a count per parent into a parent index per child row.
-func expand(shares []int) []int {
-	total := 0
-	for _, share := range shares {
-		total += share
-	}
-	parentOf := make([]int, 0, total)
-	for parent, share := range shares {
-		for taken := 0; taken < share; taken++ {
-			parentOf = append(parentOf, parent)
-		}
-	}
-	return parentOf
+	return order, nil
 }
 
 // checkGenerators refuses a field this build cannot fill, naming what it does

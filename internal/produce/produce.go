@@ -116,16 +116,20 @@ func Preview(rec recipe.Recipe, values generate.Values, rows int) (Sample, error
 	if rows < 1 {
 		rows = DefaultRows
 	}
-	plan, err := planOf(rec, values)
+	// 🔴 Nothing can ask this to stop, the plan included, and the plan is the
+	// part that is not short: it shares the children of every parent out before
+	// a row is cut. What stops a check that a newer key press has made stale is
+	// a question of the screen asking, and it is not answered yet (B-341).
+	plan, err := planOf(rec, values, generate.NeverStops{})
 	if err != nil {
 		return Sample{}, err
 	}
 
 	held := newHeld()
-	// Nothing can ask this to stop. A run of ten rows a table is over before
-	// anybody could, and a port that answers `carry on` says that plainly. The
-	// writer is told the same thing as the run, because the one that writes at
-	// the end asks the question itself.
+	// A run of ten rows a table is over before anybody could stop it, and a port
+	// that answers `carry on` says that plainly. The writer is told the same
+	// thing as the run, because the one that writes at the end asks the question
+	// itself.
 	writer, err := format.For(held, rec, generate.NeverStops{})
 	if err != nil {
 		return Sample{}, err
@@ -144,13 +148,12 @@ func Preview(rec recipe.Recipe, values generate.Values, rows int) (Sample, error
 
 // cut lowers every table of a plan to at most as many rows as were asked for.
 //
-// 🔴 ParentOf is cut to the same length as well, and the honest reason is
+// 🔴 The ownership is cut to the same count as well, and the honest reason is
 // smaller than it looks: the engine walks rows up to the count and never past
-// it, so a longer tail would be ignored rather than harmful. It is cut because
-// the planner builds these two together and sets the count FROM the length, so
-// a plan carrying a count of ten beside forty parents is a shape nothing else
-// in this build produces, and shapes nothing produces are where the next reader
-// loses an afternoon.
+// it, so a longer mapping would be ignored rather than harmful. It is cut because
+// the planner sets the count FROM the mapping, so a plan carrying a count of ten
+// beside a mapping of forty rows is a shape nothing else in this build produces,
+// and shapes nothing produces are where the next reader loses an afternoon.
 //
 // What matters for correctness is the other half: the parents were shared out
 // knowing how many children there are, and cutting a prefix keeps them. Row i
@@ -164,9 +167,7 @@ func cut(plan generate.Plan, rows int) generate.Plan {
 	for at, table := range plan.Entities {
 		if table.Rows > rows {
 			table.Rows = rows
-			if len(table.ParentOf) > rows {
-				table.ParentOf = table.ParentOf[:rows]
-			}
+			table.Ownership = table.Ownership.Cut(rows)
 		}
 		cut.Entities[at] = table
 	}

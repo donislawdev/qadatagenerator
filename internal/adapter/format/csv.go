@@ -35,9 +35,7 @@ var _ generate.Writer = (*CSV)(nil)
 type csvTable struct {
 	entity  recipe.Entity
 	planned dataset.Table
-	file    WriteCloser
 	lines   lines
-	rows    int
 	column  string
 }
 
@@ -55,7 +53,7 @@ func NewCSV(files Files, rec recipe.Recipe) (*CSV, error) {
 	if err := usableEncoding(rec.Output.Encoding); err != nil {
 		return nil, err
 	}
-	return &CSV{files: files, rec: rec, delimiter: delimiter, keys: newKeys()}, nil
+	return &CSV{files: files, rec: rec, delimiter: delimiter, keys: newKeys(rec)}, nil
 }
 
 // Begin opens the file of one table and writes its header.
@@ -73,7 +71,7 @@ func (w *CSV) Begin(planned dataset.Table) error {
 		return err
 	}
 
-	w.current = &csvTable{entity: entity, planned: planned, file: file,
+	w.current = &csvTable{entity: entity, planned: planned,
 		lines: newLines(file, w.delimiter), column: column}
 	header := planned.Columns
 	if column != "" {
@@ -89,15 +87,16 @@ func (w *CSV) Write(record dataset.Record) error {
 		line = append(append([]string{}, line...),
 			w.keys.of(w.current.planned.Parent, record.Parent))
 	}
-	w.keys.record(w.current.planned.Entity,
-		identify(w.current.entity, w.current.planned, record.Values, w.current.rows))
-	w.current.rows++
+	w.keys.record(w.current.entity, w.current.planned, record.Values)
 	return w.current.lines.write(line)
 }
 
-// End flushes and closes the file of one table.
+// End empties the buffer of one table into its file and closes the file.
+//
+// 🔴 Until 2026-10-27 this comment said the same and the code only emptied the
+// buffer, so the file stayed open until the end of the run. See finish.
 func (w *CSV) End(dataset.Table) error {
-	if err := w.current.lines.flush(); err != nil {
+	if err := w.current.lines.close(); err != nil {
 		return err
 	}
 	w.current = nil
@@ -120,11 +119,12 @@ func (w *CSV) Finish() error { return nil }
 // quoting rules is a second answer to a question the format has one answer to.
 type lines struct {
 	buffered  *bufio.Writer
+	file      WriteCloser
 	delimiter string
 }
 
 func newLines(to WriteCloser, delimiter string) lines {
-	return lines{buffered: bufio.NewWriter(to), delimiter: delimiter}
+	return lines{buffered: bufio.NewWriter(to), file: to, delimiter: delimiter}
 }
 
 // write puts one row down, quoting the fields that need it.
@@ -166,12 +166,7 @@ func (l lines) quote(field string) string {
 	return `"` + strings.ReplaceAll(field, `"`, `""`) + `"`
 }
 
-func (l lines) flush() error {
-	if err := l.buffered.Flush(); err != nil {
-		return fault.Wrap(fault.IO, err, "cannot write the dataset")
-	}
-	return nil
-}
+func (l lines) close() error { return finish(l.buffered, l.file) }
 
 // Delimiter is the character this build separates values with for a recipe.
 //

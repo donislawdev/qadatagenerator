@@ -32,7 +32,7 @@ func TestALimitTooShortForTheTypeIsRefusedBeforeTheRun(t *testing.T) {
 		{values.TypeDecimal, 3}, {values.TypeDecimal, 1}, {values.TypeInteger, 0},
 	} {
 		rec := numeric(given.kind, given.limit, 30)
-		_, err := generate.Prepare(rec, values.New(rec.Locale, rec.Seed))
+		_, err := generate.Prepare(rec, values.New(rec.Locale, rec.Seed), generate.NeverStops{})
 		if err == nil {
 			t.Errorf("a %s limited to %d was planned, and no value of it fits", given.kind, given.limit)
 			continue

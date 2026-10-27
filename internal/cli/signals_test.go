@@ -9,6 +9,7 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
+	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/produce"
@@ -38,7 +39,8 @@ func TestARunStoppedPartWayLeavesNothingBehind(t *testing.T) {
 	out := filepath.Join(dir, "data")
 	built := decodedRecipe(t, recipeIn(t, dir, smallRecipe(out)))
 
-	prepared, err := produce.Prepare(built, values.New(built.Locale, built.Seed))
+	prepared, err := produce.Prepare(built, values.New(built.Locale, built.Seed),
+		generate.NeverStops{})
 	if err != nil {
 		t.Fatalf("the plan was refused: %v", err)
 	}

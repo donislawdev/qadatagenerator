@@ -73,7 +73,7 @@ func sample(t *testing.T, perEntity bool, count int) recipe.Recipe {
 func run(t *testing.T, rec recipe.Recipe, make func(*held, recipe.Recipe) (generate.Writer, error)) *held {
 	t.Helper()
 	source := values.New(rec.Locale, rec.Seed)
-	plan, err := generate.Prepare(rec, source)
+	plan, err := generate.Prepare(rec, source, generate.NeverStops{})
 	if err != nil {
 		t.Fatalf("the plan was refused: %v", err)
 	}
@@ -188,7 +188,7 @@ func TestTheChildCountIsExactAndTheParentsShareIt(t *testing.T) {
 	for _, count := range []int{0, 1, 7, 20} {
 		rec := sample(t, true, count)
 		source := values.New(rec.Locale, rec.Seed)
-		plan, err := generate.Prepare(rec, source)
+		plan, err := generate.Prepare(rec, source, generate.NeverStops{})
 		if err != nil {
 			t.Fatalf("count %d was refused: %v", count, err)
 		}
@@ -197,8 +197,8 @@ func TestTheChildCountIsExactAndTheParentsShareIt(t *testing.T) {
 			t.Errorf("asked for %d children and the plan makes %d", count, child.Rows)
 		}
 		perParent := map[int]int{}
-		for _, parent := range child.ParentOf {
-			perParent[parent]++
+		for row := range child.Rows {
+			perParent[child.Ownership.ParentOf(row)]++
 		}
 		for parent, held := range perParent {
 			if held > 5 {
@@ -212,7 +212,7 @@ func TestTheChildCountIsExactAndTheParentsShareIt(t *testing.T) {
 // than trimmed to what fits.
 func TestACountTheBoundsCannotReachIsRefusedWithTheArithmetic(t *testing.T) {
 	rec := sample(t, true, 21)
-	_, err := generate.Prepare(rec, values.New(rec.Locale, rec.Seed))
+	_, err := generate.Prepare(rec, values.New(rec.Locale, rec.Seed), generate.NeverStops{})
 	if err == nil {
 		t.Fatal("twenty one children of four parents at five each was accepted")
 	}
@@ -549,7 +549,7 @@ func TestAUniqueFieldWithTooFewValuesIsRefusedWithTheArithmetic(t *testing.T) {
 	rec.Entities[0].Fields = append(rec.Entities[0].Fields,
 		recipe.Field{Name: "sex", Generator: "gender", Unique: true})
 
-	_, err := generate.Prepare(rec, values.New(rec.Locale, rec.Seed))
+	_, err := generate.Prepare(rec, values.New(rec.Locale, rec.Seed), generate.NeverStops{})
 	if err == nil {
 		t.Fatal("five hundred rows of a field with two possible values were planned")
 	}
@@ -653,7 +653,7 @@ func TestAWriterRefusesATableWhoseRelationWantsAColumnAFieldAlreadyHas(t *testin
 
 	table := dataset.Table{
 		Entity: "order", Columns: []string{"customer"}, Rows: 1,
-		Parent: "customer", ParentOf: []int{0},
+		Parent: "customer", Ownership: dataset.OwnershipOf([]int{1}),
 	}
 	if err := writer.Begin(table); err == nil {
 		t.Fatal("the writer began a table in which the relation and a field want one column")

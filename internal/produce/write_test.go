@@ -26,7 +26,7 @@ var ranAt = time.Date(2026, 9, 24, 12, 0, 0, 0, time.UTC)
 // writeInto is a whole run of a recipe into a directory, started the way both
 // surfaces start one.
 func writeInto(rec recipe.Recipe, settings Settings) (Written, error) {
-	prepared, err := Prepare(rec, values.New(rec.Locale, rec.Seed))
+	prepared, err := Prepare(rec, values.New(rec.Locale, rec.Seed), generate.NeverStops{})
 	if err != nil {
 		return Written{}, err
 	}
@@ -83,11 +83,18 @@ func TestWhatIsWrittenBeginsWithTheRowsThePreviewShowed(t *testing.T) {
 
 // A run that fails leaves nothing that looks like a dataset.
 //
-// The recipe asks for ten rows unique on a field with two possible values,
-// which is refused with the arithmetic after the engine has already written
-// part of the table. What matters here is what is on the disk afterwards, and
-// it is asked twice: without a policy, and with one, where the manifest and its
-// export have been opened beside the data before the failure.
+// The recipe asks for ten rows unique on a list of two values bound to the
+// gender of the row. The plan leaves a field a rule binds to the run, so the
+// run refuses it at the third row, after the engine has already written two.
+// What matters here is what is on the disk afterwards, and it is asked twice:
+// without a policy, and with one, where the manifest and its export have been
+// opened beside the data before the failure.
+//
+// 🔴 Until 2026-10-27 the field was a gender asked to be unique, and the plan
+// refuses that with the arithmetic since 2026-10-26, before a file is opened.
+// Nothing was written, so there was nothing to leave behind, and the mutation
+// that stops a failed run from throwing its files away survived on the commit
+// before as well as after.
 func TestARunThatFailsLeavesNothingBehind(t *testing.T) {
 	for _, policy := range []recipe.Policy{
 		{},
@@ -97,7 +104,9 @@ func TestARunThatFailsLeavesNothingBehind(t *testing.T) {
 			Version: "0.1", Seed: "sample", Locale: "pl-PL",
 			Entities: []recipe.Entity{{
 				Name: "customer", Count: 10, HasCount: true,
-				Fields: []recipe.Field{{Name: "gender", Generator: "gender", Unique: true}},
+				Fields: []recipe.Field{{Name: "sex", Generator: "gender"},
+					{Name: "code", Values: []string{"p", "q"}, Unique: true}},
+				Consistency: []recipe.Rule{{Field: "code", Kind: recipe.Matches, With: []string{"sex"}}},
 			}},
 			Policy: policy,
 		}
@@ -383,7 +392,7 @@ func TestASettingNobodyWroteIsNotReportedAsChangingNothing(t *testing.T) {
 	} {
 		rec := related(3)
 		rec.Output = given.output
-		prepared, err := Prepare(rec, values.New(rec.Locale, rec.Seed))
+		prepared, err := Prepare(rec, values.New(rec.Locale, rec.Seed), generate.NeverStops{})
 		if err != nil {
 			t.Fatalf("%s: the plan was refused: %v", given.what, err)
 		}

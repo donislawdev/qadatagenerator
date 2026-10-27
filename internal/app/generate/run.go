@@ -79,7 +79,7 @@ func writeTable(planned dataset.Table, entity recipe.Entity, values Values, writ
 		}
 		record := dataset.Record{Values: built, Parent: dataset.NoParent}
 		if planned.Parent != "" {
-			record.Parent = planned.ParentOf[row]
+			record.Parent = planned.Ownership.ParentOf(row)
 		}
 		if err := writer.Write(record); err != nil {
 			return err

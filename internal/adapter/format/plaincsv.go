@@ -83,8 +83,8 @@ func (w *PlainCSV) Write(record dataset.Record) error {
 	return w.lines.write(record.Values)
 }
 
-// End flushes the file.
-func (w *PlainCSV) End(dataset.Table) error { return w.lines.flush() }
+// End empties the buffer into the file and closes it.
+func (w *PlainCSV) End(dataset.Table) error { return w.lines.close() }
 
 // Finish has nothing to do: this writer streams, so the table was already
 // complete when it ended.

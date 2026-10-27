@@ -176,7 +176,7 @@ func TestAColumnThatCannotBeCountedSaysWhatHappenedAndNoMore(t *testing.T) {
 // refuse, and returns what the run said.
 func runFailing(t *testing.T, rec recipe.Recipe, source generate.Values) error {
 	t.Helper()
-	plan, err := generate.Prepare(rec, source)
+	plan, err := generate.Prepare(rec, source, generate.NeverStops{})
 	if err != nil {
 		t.Fatalf("the plan was refused: %v", err)
 	}

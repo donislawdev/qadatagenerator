@@ -17,8 +17,8 @@ import (
 // preview on the recipe screen, the record left beside the data and the plan
 // printed by a dry run could each say something different about one recipe.
 // One place making the plan is what keeps the four of them one answer.
-func planOf(rec recipe.Recipe, values generate.Values) (generate.Plan, error) {
-	plan, err := generate.Prepare(rec, values)
+func planOf(rec recipe.Recipe, values generate.Values, stop generate.Halt) (generate.Plan, error) {
+	plan, err := generate.Prepare(rec, values, stop)
 	if err != nil {
 		return generate.Plan{}, err
 	}

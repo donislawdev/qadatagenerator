@@ -31,6 +31,8 @@
 // one, and having it here is what stops those two from depending on each other.
 package dataset
 
+import "sort"
+
 // Table is one table of a dataset.
 type Table struct {
 	// Entity is what the table is called. The file it goes to is derived from
@@ -43,10 +45,68 @@ type Table struct {
 	// Parent is the entity this one belongs to, empty when it belongs to
 	// nobody.
 	Parent string
-	// ParentOf maps each row of this table onto the row of its parent. It is
+	// Ownership maps each row of this table onto the row of its parent. It is
 	// empty when there is no parent, and it is what lets a nested writer put a
 	// record where it belongs without holding the whole dataset to work it out.
-	ParentOf []int
+	Ownership Ownership
+}
+
+// Ownership says which row of the parent each row of a table belongs to.
+//
+// # Why where the children of each parent end, rather than a parent for each child
+//
+// The children of one parent are planned one after another, so the whole
+// mapping is how many children each parent has, added up as it goes. A parent
+// for each child held one machine word for every row of the table before a byte
+// of it was written, and the preview on the recipe screen paid that at every key
+// press, for ten rows it then showed. Found by an outside review on 2026-10-22,
+// decided in DEC-266. What this holds is one word for every row of the parent.
+type Ownership struct {
+	// ends[p] is how many rows belong to parents 0 to p, so the rows of parent
+	// p are the ones from ends[p-1] up to but not including ends[p].
+	ends []int
+	// rows is how many of those rows the table holds. It is fewer than the last
+	// end when the table was cut to its first rows.
+	rows int
+}
+
+// OwnershipOf builds the mapping from how many children each parent has, in
+// the order of the parents.
+//
+// The counts are added up where they stand rather than copied, because a copy
+// is the second word per parent this type exists to avoid. Whoever passes them
+// hands them over and does not read them again.
+func OwnershipOf(shares []int) Ownership {
+	total := 0
+	for at, share := range shares {
+		total += share
+		shares[at] = total
+	}
+	return Ownership{ends: shares, rows: total}
+}
+
+// Rows is how many rows the mapping covers.
+func (o Ownership) Rows() int { return o.rows }
+
+// ParentOf returns the row of the parent that a row belongs to, and NoParent for
+// a row the table does not hold.
+func (o Ownership) ParentOf(row int) int {
+	if row < 0 || row >= o.rows {
+		return NoParent
+	}
+	return sort.SearchInts(o.ends, row+1)
+}
+
+// Cut keeps the first rows and gives each of them the parent it had.
+//
+// Only the count changes, so a preview of ten rows copies nothing of a mapping
+// planned for millions, and row i of the preview belongs where row i of the run
+// does because it is the same lookup.
+func (o Ownership) Cut(rows int) Ownership {
+	if rows < o.rows {
+		o.rows = max(rows, 0)
+	}
+	return o
 }
 
 // Record is one row.

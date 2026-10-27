@@ -98,8 +98,8 @@ func Writes(data []string, damaged bool, form string) []string {
 // The command line prints the plan before it runs and the run follows it, so
 // the plan has to be made once and kept. Taking it as a parameter beside the
 // recipe would let a caller hand in a plan made from a different recipe, and
-// making it again inside the run costs a second pass that allocates the parent
-// of every child row. Holding the two together makes the first impossible and
+// making it again inside the run costs a second pass that draws the share of
+// every parent row. Holding the two together makes the first impossible and
 // the second unnecessary, which is what the take mode does with a file it has
 // opened.
 type Prepared struct {
@@ -109,8 +109,12 @@ type Prepared struct {
 }
 
 // Prepare plans a run of the recipe and writes nothing.
-func Prepare(rec recipe.Recipe, source values.Source) (Prepared, error) {
-	plan, err := planOf(rec, source)
+//
+// The halt is the one the run will be given, because a relation with millions
+// of parents plans for seconds, and a window asked to close in that time has to
+// be able to say so before the first row rather than after the plan.
+func Prepare(rec recipe.Recipe, source values.Source, stop generate.Halt) (Prepared, error) {
+	plan, err := planOf(rec, source, stop)
 	if err != nil {
 		return Prepared{}, err
 	}

@@ -51,7 +51,7 @@ func related(children int) recipe.Recipe {
 func wholeRun(t *testing.T, rec recipe.Recipe) map[string][][]string {
 	t.Helper()
 	source := values.New(rec.Locale, rec.Seed)
-	plan, err := generate.Prepare(rec, source)
+	plan, err := generate.Prepare(rec, source, generate.NeverStops{})
 	if err != nil {
 		t.Fatalf("the whole run could not be planned: %v", err)
 	}

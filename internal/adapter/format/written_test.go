@@ -57,7 +57,7 @@ func (o oneFile) Create(string) (format.WriteCloser, error) { return o.file, nil
 func writeObjects(t *testing.T, rec recipe.Recipe, files format.Files, stop generate.Halt) error {
 	t.Helper()
 	source := values.New(rec.Locale, rec.Seed)
-	plan, err := generate.Prepare(rec, source)
+	plan, err := generate.Prepare(rec, source, generate.NeverStops{})
 	if err != nil {
 		t.Fatalf("the plan was refused: %v", err)
 	}
@@ -135,31 +135,33 @@ func (s *stopsAfter) Stopped() error {
 }
 
 // 🔴 The run itself is given a halt that never stops, so what is under test is
-// the writing and not the producing. This is the only writer where those two
+// the writing and not the producing. The tree is the only shape where those two
 // are different moments: every record has already been made and the file is
-// still being put together.
+// still being put together. Until 2026-10-27 the file per entity was one as
+// well, because it held its records until the table ended. It writes each one
+// as it arrives now, so the question the run asks before every record is the
+// one that stops it, and asking the writer's own here would be asking a
+// question that shape no longer has.
 //
 // The document that was left half written is not checked for its shape, and
 // that is deliberate. Nothing keeps it: the bytes are under a temporary name
 // and the caller throws them away, which is the arrangement the store holds and
 // its own tests state.
 func TestAStopWhileTheObjectsAreWrittenEndsTheRunRatherThanTheFile(t *testing.T) {
-	for _, perEntity := range []bool{true, false} {
-		rec := sample(t, perEntity, 40)
-		rec.Entities[0].Count = 40
-		rec.Output.Format = "json"
-		asked := errors.New("the window asked this run to stop")
-		files := newHeld()
+	rec := sample(t, false, 40)
+	rec.Entities[0].Count = 40
+	rec.Output.Format = "json"
+	asked := errors.New("the window asked this run to stop")
+	files := newHeld()
 
-		err := writeObjects(t, rec, files, &stopsAfter{left: 3, why: asked})
+	err := writeObjects(t, rec, files, &stopsAfter{left: 3, why: asked})
 
-		if !errors.Is(err, asked) {
-			t.Fatalf("a file per table %v: the run was stopped and answered %v", perEntity, err)
-		}
-		for name, built := range files.written {
-			if strings.HasSuffix(built.String(), "]\n") || strings.HasSuffix(built.String(), "}\n") {
-				t.Errorf("%s was finished off although the run was stopped part way", name)
-			}
+	if !errors.Is(err, asked) {
+		t.Fatalf("the tree was stopped and the run answered %v", err)
+	}
+	for name, built := range files.written {
+		if strings.HasSuffix(built.String(), "]\n") || strings.HasSuffix(built.String(), "}\n") {
+			t.Errorf("%s was finished off although the run was stopped part way", name)
 		}
 	}
 }

@@ -11,12 +11,13 @@ import (
 // # Why these are inside the package while the rest of the plan is tested from
 // outside it
 //
-// Everything this guard refuses is something that costs tens of gigabytes if
-// it is not refused. A test driving it through Prepare would therefore be a
-// test that allocates all of it the moment somebody breaks the guard, and the
-// tool that breaks guards on purpose runs here every time anybody changes this
-// package. A mutation is meant to turn a test red, not to ask the machine for
-// 32 GB.
+// Everything this guard refuses is something that costs tens of gigabytes, or
+// since the plan holds a word per parent (2026-10-27) ends in a panic of the
+// arithmetic, if it is not refused. A test driving it through Prepare would
+// therefore be a test that allocates all of it the moment somebody breaks the
+// guard, and the tool that breaks guards on purpose runs here every time
+// anybody changes this package. A mutation is meant to turn a test red, not to
+// ask the machine for 32 GB.
 //
 // withinReach is arithmetic and nothing else, so asked directly it answers the
 // same question for nothing. The way through Prepare is covered next door with
@@ -49,9 +50,14 @@ func TestARangeWiderThanThisBuildCanPlanForIsRefused(t *testing.T) {
 			"correctly and cannot be carried out, and the two leave by different exit codes",
 			fault.KindOf(err))
 	}
-	if !strings.Contains(err.Error(), "one machine word") {
-		t.Errorf("the refusal does not say what the cost actually is, so it reads as a "+
-			"rule somebody chose: %v", err)
+	// 🔴 Until 2026-10-27 this asked for the cost in memory, one machine word
+	// for every child row, because that was what the ceiling stood on. The plan
+	// holds a word per parent now and the ceiling stands on its arithmetic, so
+	// what the reader is owed is which tables it applies to: a person who reads
+	// only a number thinks every count in the recipe is capped, and none is.
+	if !strings.Contains(err.Error(), "plans for a table that belongs to another") {
+		t.Errorf("the refusal does not say which tables the ceiling applies to, so it reads "+
+			"as a cap on every count: %v", err)
 	}
 }
 

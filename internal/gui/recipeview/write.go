@@ -42,7 +42,7 @@ func Writer() Write {
 		if settings.Into != "" {
 			settings.Overrides = append(settings.Overrides, produce.MoveDir(&built, settings.Into))
 		}
-		prepared, err := produce.Prepare(built, values.New(built.Locale, built.Seed))
+		prepared, err := produce.Prepare(built, values.New(built.Locale, built.Seed), stop)
 		if err != nil {
 			return produce.Written{}, err
 		}

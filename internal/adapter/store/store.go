@@ -44,8 +44,41 @@ type Set struct {
 	pending   map[string]string
 	destined  map[string]bool
 	reserved  map[string]bool
-	open      []*os.File
+	open      []*File
 }
+
+// File is one file of a set, under its temporary name until the set commits.
+//
+// # Why closing it is allowed before the set commits, and why twice is fine
+//
+// A writer closes the file of a table when the table ends, so that a recipe of
+// many tables holds one handle at a time rather than one per table until the
+// end of the run (found by an outside review on 2026-10-22). The set closes
+// every file again when it commits or throws them away, because a writer that
+// forgot would otherwise leave a handle behind. So a close happens once and is
+// remembered, and every later one answers with what the first one said: a file
+// that failed to close is a file that may not hold what was written, and the
+// commit must still refuse it even when the writer that closed it said nothing.
+type File struct {
+	held   *os.File
+	closed bool
+	failed error
+}
+
+// Write puts bytes in the file.
+func (f *File) Write(p []byte) (int, error) { return f.held.Write(p) }
+
+// Close closes the file the first time and repeats that answer afterwards.
+func (f *File) Close() error {
+	if !f.closed {
+		f.closed = true
+		f.failed = f.held.Close()
+	}
+	return f.failed
+}
+
+// Name is the temporary name the file is written under.
+func (f *File) Name() string { return f.held.Name() }
 
 // New returns a set of files to be written into a directory.
 func New(dir string, overwrite bool) *Set {
@@ -63,7 +96,7 @@ func New(dir string, overwrite bool) *Set {
 // The name is checked before anything is opened, so a name the file system
 // would refuse is reported as a configuration failure rather than as a write
 // error somebody has to interpret.
-func (s *Set) Create(name string) (*os.File, error) {
+func (s *Set) Create(name string) (*File, error) {
 	if err := usableName(name); err != nil {
 		return nil, err
 	}
@@ -87,8 +120,9 @@ func (s *Set) Create(name string) (*os.File, error) {
 	}
 	s.destined[final] = true
 	s.pending[temporary.Name()] = final
-	s.open = append(s.open, temporary)
-	return temporary, nil
+	file := &File{held: temporary}
+	s.open = append(s.open, file)
+	return file, nil
 }
 
 // ownName refuses a destination this run has already taken for something else.
@@ -232,6 +266,9 @@ func (s *Set) release(marker string) {
 }
 
 // Commit closes every file and gives each its real name.
+//
+// A file its writer closed already answers with what that close said, so a
+// failure there stops the commit as a failure here would.
 //
 // It renames in a sorted order so that a run interrupted between two renames
 // leaves the same partial state every time rather than one that depends on how

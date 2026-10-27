@@ -35,6 +35,25 @@ repository once they are released.
 
 ### Fixed
 
+- **A relation is planned in a number for every parent rather than for every
+  child.** validate, a dry run and the preview on the recipe screen no longer
+  hold the parent of every child row before anything is written. Validating a
+  thousand parents of five thousand children each took 59 MiB and takes 21.
+  The stop button and the close button now also work while such a plan is
+  worked out on the recipe screen.
+- **A JSON file per entity and every CSV file are written as the records
+  arrive, and memory no longer grows with the dataset.** Two million records of
+  six fields took 802 MiB at the peak as JSON and 197 MiB as CSV, and both now
+  take about 25 MiB at every size measured, from fifty thousand records up. The
+  bytes written are the same. The single JSON file still holds its records,
+  because it cannot be written before the last child has arrived.
+- **The single JSON file writes a relation in a time that grows with its rows
+  rather than with their square.** Fifty thousand parents of one child each
+  took about four seconds and take under half a second.
+- **The file of each table is closed as soon as the table is written.** A
+  recipe of a thousand tables held a thousand files open until the end of the
+  run, which a system allowing a few hundred would stop part way. A file the
+  system fails to close stops the run rather than being reported as written.
 - **Closing the window while datasets are being written on two screens stops
   both runs, and the window goes once both have stopped.** Until now the run
   that ended first gave the close button back, and closing the window then cut

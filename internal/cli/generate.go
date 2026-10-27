@@ -125,7 +125,11 @@ func generateFrom(out *streams, path string, own *generateFlags, flags crossCutt
 		return fail(out, err)
 	}
 
-	prepared, err := produce.Prepare(built, values.New(built.Locale, built.Seed))
+	// The plan is given nothing that stops it, because nothing is watching the
+	// signals yet: an interrupt here ends the process the way the system ends
+	// any other, and nothing has been written to take back.
+	prepared, err := produce.Prepare(built, values.New(built.Locale, built.Seed),
+		generate.NeverStops{})
 	if err != nil {
 		return fail(out, err)
 	}

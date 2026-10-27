@@ -50,7 +50,7 @@ func field(name, generator string) recipe.Field {
 func produced(t *testing.T, rec recipe.Recipe) (generate.Plan, []map[string]string) {
 	t.Helper()
 	source := values.New(rec.Locale, rec.Seed)
-	plan, err := generate.Prepare(rec, source)
+	plan, err := generate.Prepare(rec, source, generate.NeverStops{})
 	if err != nil {
 		t.Fatalf("the plan was refused: %v", err)
 	}
@@ -221,7 +221,7 @@ func TestAChainOfRulesIsRefusedBeforeAnyRow(t *testing.T) {
 		recipe.Rule{Field: "gender", Kind: recipe.Matches, With: []string{"first_name"}},
 		recipe.Rule{Field: "pesel", Kind: recipe.Matches, With: []string{"gender"}},
 	)
-	_, err := generate.Prepare(rec, values.New(rec.Locale, rec.Seed))
+	_, err := generate.Prepare(rec, values.New(rec.Locale, rec.Seed), generate.NeverStops{})
 	if err == nil || !strings.Contains(err.Error(), "resolves one level") {
 		t.Errorf("the plan accepted a rule resting on a bound column, answering %v", err)
 	}

@@ -132,7 +132,7 @@ func TestRowsThatDoNotAddUpToACountableTotalAreRefused(t *testing.T) {
 		}
 	}
 
-	if _, err := generate.Prepare(twice(most), values); err == nil {
+	if _, err := generate.Prepare(twice(most), values, generate.NeverStops{}); err == nil {
 		t.Error("two tables of the largest countable size were accepted together")
 	} else if !strings.Contains(err.Error(), "add up to more than") {
 		t.Errorf("the refusal does not say the total is what went wrong: %v", err)
@@ -141,13 +141,13 @@ func TestRowsThatDoNotAddUpToACountableTotalAreRefused(t *testing.T) {
 	// Half of the range each is the case that wrapped all the way round to the
 	// most negative number rather than to a small one, so it is the case where
 	// a check on the sign alone would have looked right.
-	if _, err := generate.Prepare(twice(most/2+1), values); err == nil {
+	if _, err := generate.Prepare(twice(most/2+1), values, generate.NeverStops{}); err == nil {
 		t.Error("two tables of half the countable range each were accepted together")
 	}
 
 	// The refusal is about the total and must not start refusing ordinary
 	// recipes, which is the failure mode of a ceiling put in the wrong place.
-	plan, err := generate.Prepare(twice(3), values)
+	plan, err := generate.Prepare(twice(3), values, generate.NeverStops{})
 	if err != nil {
 		t.Fatalf("an ordinary recipe was refused: %v", err)
 	}
@@ -176,7 +176,7 @@ func TestAGeneratorTheLocaleCannotFillIsRefusedByThePlan(t *testing.T) {
 			Fields: []recipe.Field{{Name: "town", Generator: "city"}}}},
 	}
 
-	_, err := generate.Prepare(rec, values)
+	_, err := generate.Prepare(rec, values, generate.NeverStops{})
 	if err == nil {
 		t.Fatal("the plan accepted a generator this build cannot fill in that locale")
 	}
@@ -194,7 +194,7 @@ func TestAGeneratorTheLocaleCannotFillIsRefusedByThePlan(t *testing.T) {
 	// The same recipe in a locale this stub can fill has to go through, or the
 	// refusal above would be about the generator rather than about the pair.
 	rec.Locale = "pl-PL"
-	if _, err := generate.Prepare(rec, values); err != nil {
+	if _, err := generate.Prepare(rec, values, generate.NeverStops{}); err != nil {
 		t.Errorf("the same generator was refused in a locale that carries it: %v", err)
 	}
 }
@@ -211,7 +211,7 @@ func TestAColumnThisBuildWillLeaveEmptyIsNamed(t *testing.T) {
 	values := knownValues{produces: []string{"integer"}}
 	plan, err := generate.Prepare(oneEntity(
 		recipe.Field{Name: "price", Type: "money"},
-	), values)
+	), values, generate.NeverStops{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -233,7 +233,7 @@ func TestATypeThisBuildFillsIsNotReportedAsAGap(t *testing.T) {
 	values := knownValues{produces: []string{"integer", "decimal"}}
 	plan, err := generate.Prepare(oneEntity(
 		recipe.Field{Name: "quantity", Type: "integer"},
-	), values)
+	), values, generate.NeverStops{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -248,7 +248,7 @@ func TestAnExpressionIsStillReported(t *testing.T) {
 	values := knownValues{produces: []string{"integer"}}
 	plan, err := generate.Prepare(oneEntity(
 		recipe.Field{Name: "label", Expression: "${a} ${b}"},
-	), values)
+	), values, generate.NeverStops{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -265,7 +265,7 @@ func TestAGeneratorThisBuildLacksStopsTheRun(t *testing.T) {
 	values := knownValues{generators: []string{"city"}, produces: []string{"integer"}}
 	_, err := generate.Prepare(oneEntity(
 		recipe.Field{Name: "name", Generator: "no_such_generator"},
-	), values)
+	), values, generate.NeverStops{})
 	if err == nil {
 		t.Fatal("a recipe naming an unknown generator was planned rather than refused")
 	}
@@ -294,7 +294,7 @@ func TestARelationTooWideToPlanForIsRefusedWithTheArithmetic(t *testing.T) {
 	values := knownValues{generators: []string{"first_name"}}
 
 	for _, width := range []int{most, 4_000_000_000_000_000_000, 2_000_000_000} {
-		_, err := generate.Prepare(related(3, 0, width), values)
+		_, err := generate.Prepare(related(3, 0, width), values, generate.NeverStops{})
 		if err == nil {
 			t.Fatalf("a range of nought to %d children each was accepted, so this build "+
 				"was about to plan for more rows than it can hold", width)
@@ -326,7 +326,7 @@ func TestARelationTooWideToPlanForIsRefusedWithTheArithmetic(t *testing.T) {
 func TestAParentTableTooLargeToShareOutBetweenIsRefused(t *testing.T) {
 	values := knownValues{generators: []string{"first_name"}}
 
-	_, err := generate.Prepare(related(generate.MaxChildRows+1, 0, 0), values)
+	_, err := generate.Prepare(related(generate.MaxChildRows+1, 0, 0), values, generate.NeverStops{})
 
 	if err == nil {
 		t.Fatal("a parent table larger than this build can share children out between " +
@@ -347,13 +347,15 @@ func TestAParentTableTooLargeToShareOutBetweenIsRefused(t *testing.T) {
 // place.
 //
 // 🔴 The boundary is pinned from above only, and that is deliberate rather
-// than lazy. A recipe just under it plans for four thousand million rows and
-// takes 32 GB to do it, so a test standing on the other side of the line would
-// be a test that has to be able to allocate it.
+// than lazy. A recipe just under it plans for four thousand million rows, which
+// since 2026-10-27 takes a word per parent, and a test standing there would ask
+// the machine for 32 GB the day the plan went back to a word per child. That
+// is exactly the mutation the guard of the size of a plan is there to turn red,
+// and it must turn a test red rather than take the machine down.
 func TestARelationThisBuildCanPlanForIsNotRefused(t *testing.T) {
 	values := knownValues{generators: []string{"first_name"}}
 
-	plan, err := generate.Prepare(related(3, 0, 4), values)
+	plan, err := generate.Prepare(related(3, 0, 4), values, generate.NeverStops{})
 
 	if err != nil {
 		t.Fatalf("an ordinary relation was refused: %v", err)
@@ -370,7 +372,7 @@ func TestAListEntryTheFieldCannotHoldIsRefusedByItsPlace(t *testing.T) {
 	values := knownValues{refused: map[string]string{"x7": `"x7" is not a whole number`}}
 	rec := oneEntity(recipe.Field{Name: "tier", Type: "integer", Values: []string{"1", "x7"}})
 
-	_, err := generate.Prepare(rec, values)
+	_, err := generate.Prepare(rec, values, generate.NeverStops{})
 
 	if fault.KindOf(err) != fault.Config || !strings.Contains(err.Error(), "fields.tier.values[1]") ||
 		!strings.Contains(err.Error(), "is not a whole number") {
@@ -389,7 +391,7 @@ func TestAUniqueFieldWithTooFewKnownValuesIsRefusedBeforeTheRun(t *testing.T) {
 		rec := oneEntity(recipe.Field{Name: "tier", Generator: "tier", Unique: true})
 		rec.Entities[0].Count = test.rows
 
-		_, err := generate.Prepare(rec, values)
+		_, err := generate.Prepare(rec, values, generate.NeverStops{})
 
 		if refused := err != nil; refused != test.refused {
 			t.Fatalf("%d rows of three values: refused %v (%v)", test.rows, refused, err)
@@ -413,7 +415,7 @@ func TestAKeyIsRefusedWhenItsFieldsCannotMakeEnoughKeys(t *testing.T) {
 		rec.Entities[0].Count = test.rows
 		rec.Entities[0].PrimaryKey = []string{"a", "b"}
 
-		_, err := generate.Prepare(rec, values)
+		_, err := generate.Prepare(rec, values, generate.NeverStops{})
 
 		if refused := err != nil; refused != test.refused {
 			t.Fatalf("%d rows of a key of two by three: refused %v (%v)", test.rows, refused, err)
@@ -432,7 +434,7 @@ func TestAFieldARuleBindsIsLeftToTheRun(t *testing.T) {
 		recipe.Field{Name: "sex", Generator: "sex"})
 	rec.Entities[0].Consistency = []recipe.Rule{{Field: "tier", Kind: recipe.Matches, With: []string{"sex"}}}
 
-	if _, err := generate.Prepare(rec, values); err != nil {
+	if _, err := generate.Prepare(rec, values, generate.NeverStops{}); err != nil {
 		t.Fatalf("a bound field was refused on a domain it may not have: %v", err)
 	}
 }

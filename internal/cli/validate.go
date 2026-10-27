@@ -203,8 +203,12 @@ type whatARunWouldDo struct {
 // generate given a different seed writes a different number of rows and both
 // numbers are right. The three flags that override a recipe belong to the verb
 // that runs it, which is where somebody who overrode one will be reading.
+//
+// Nothing here can stop the plan, and nothing has to: this verb watches no
+// signal, so an interrupt ends the process the way the system ends any other,
+// and there is nothing on the disk to take back.
 func askThePlan(rec recipe.Recipe) whatARunWouldDo {
-	plan, err := generate.Prepare(rec, values.New(rec.Locale, rec.Seed))
+	plan, err := generate.Prepare(rec, values.New(rec.Locale, rec.Seed), generate.NeverStops{})
 	// The writer of the tree refuses a parent field named after a child, and
 	// validate asks it the same question so that the two verbs agree.
 	if err == nil {

@@ -31,11 +31,16 @@ import (
 // open question of whether the encoder is stable between releases of Go, since
 // the bytes now depend on this file and a golden test stands in front of it.
 type JSON struct {
-	files  Files
-	rec    recipe.Recipe
-	keys   keys
+	files Files
+	rec   recipe.Recipe
+	keys  keys
+	// tables are the tables held for the tree, which cannot be written before
+	// the last child has arrived. A file per entity holds none of them.
 	tables []*jsonTable
-	// stop is what this writer asks whether the run may carry on.
+	// current is the table Begin last announced.
+	current *jsonTable
+	// stop is what this writer asks whether the run may carry on while it
+	// writes the tree.
 	//
 	// 🔴 It is held here rather than passed to Finish, which would read better,
 	// because the two pillars declare the same writer port under two names and
@@ -51,12 +56,23 @@ type JSON struct {
 // Contract check.
 var _ generate.Writer = (*JSON)(nil)
 
-// jsonTable is one table held until the shape is known.
+// jsonTable is one table, either held for the tree or being written to its own
+// file.
 type jsonTable struct {
 	entity  recipe.Entity
 	planned dataset.Table
 	column  string
-	rows    []dataset.Record
+	// rows are the records of a table held for the tree.
+	rows []dataset.Record
+	// children are the tables that belong to this one, and family says which
+	// of this table's rows belong to which row of its parent. Both are worked
+	// out once, when the tree is written.
+	children []*jsonTable
+	family   family
+	// into is the file of a table written on its own, and written is how many
+	// records it holds so far.
+	into    document
+	written int
 }
 
 // NewJSON returns a writer for the object form.
@@ -67,7 +83,7 @@ func NewJSON(files Files, rec recipe.Recipe, stop generate.Halt) (*JSON, error) 
 	if err := NestingCollision(rec); err != nil {
 		return nil, err
 	}
-	return &JSON{files: files, rec: rec, keys: newKeys(), stop: stop}, nil
+	return &JSON{files: files, rec: rec, keys: newKeys(rec), stop: stop}, nil
 }
 
 // NestingCollision refuses a recipe whose tree would give one object two
@@ -110,7 +126,7 @@ func NestingCollision(rec recipe.Recipe) error {
 	return nil
 }
 
-// Begin starts a table.
+// Begin starts a table, and opens its file when each table goes to its own.
 func (w *JSON) Begin(planned dataset.Table) error {
 	entity, known := w.rec.Entity(planned.Entity)
 	if !known {
@@ -120,38 +136,63 @@ func (w *JSON) Begin(planned dataset.Table) error {
 	if err != nil {
 		return err
 	}
-	w.tables = append(w.tables, &jsonTable{entity: entity, planned: planned, column: column})
-	return nil
-}
-
-// Write keeps a record.
-//
-// Everything is held rather than streamed, and that is a real cost stated
-// rather than hidden: the nested shape cannot be written before the last child
-// has arrived, so this writer is the one place in the first pillar that does
-// not stream. The flat shape could, and does not, because two code paths for
-// one format is how the two drift apart.
-func (w *JSON) Write(record dataset.Record) error {
-	table := w.tables[len(w.tables)-1]
-	w.keys.record(table.planned.Entity,
-		identify(table.entity, table.planned, record.Values, len(table.rows)))
-	table.rows = append(table.rows, record)
-	return nil
-}
-
-// End finishes a table and writes it when each one goes to its own file.
-func (w *JSON) End(planned dataset.Table) error {
+	table := &jsonTable{entity: entity, planned: planned, column: column}
+	w.current = table
 	if !w.rec.Output.FilePerEntity {
+		w.tables = append(w.tables, table)
 		return nil
 	}
-	table := w.tables[len(w.tables)-1]
 	file, err := w.files.Create(planned.Entity + ".json")
 	if err != nil {
 		return err
 	}
-	into := newDocument(file)
-	w.writeTable(into, table, "")
-	return w.endOf(into)
+	table.into = newDocument(file)
+	table.into.write("[\n")
+	return nil
+}
+
+// Write puts a record in its file, or keeps it for the tree.
+//
+// # Why one shape streams and the other holds
+//
+// 🔴 Until 2026-10-27 every record was held here whatever the shape, on the
+// grounds that two code paths for one format is how the two drift apart, and a
+// file per entity of two million rows took 797 MiB where the comma separated
+// form took 199 (outside review, 2026-10-22, DEC-266). The argument did not
+// hold: what the two shapes share is the writing of one record, and that is one
+// function either way, so they differ in when it is called and not in what it
+// writes. The tree still holds its records, because it cannot be written before
+// the last child has arrived.
+func (w *JSON) Write(record dataset.Record) error {
+	table := w.current
+	w.keys.record(table.entity, table.planned, record.Values)
+	if !w.rec.Output.FilePerEntity {
+		table.rows = append(table.rows, record)
+		return nil
+	}
+	if table.written > 0 {
+		table.into.write(",\n")
+	}
+	table.into.write("  ")
+	w.writeRecord(table.into, table, record, "  ", nil)
+	table.written++
+	return nil
+}
+
+// End finishes the file of a table written on its own and closes it.
+//
+// The halt is not asked here, because in this shape the record is written at
+// the moment it is produced, and the run asks before every one of them.
+func (w *JSON) End(dataset.Table) error {
+	if !w.rec.Output.FilePerEntity {
+		return nil
+	}
+	table := w.current
+	if table.written > 0 {
+		table.into.write("\n")
+	}
+	table.into.write("]\n")
+	return table.into.close()
 }
 
 // Finish writes the tree when the whole dataset goes to one file.
@@ -163,6 +204,7 @@ func (w *JSON) Finish() error {
 	if err != nil {
 		return err
 	}
+	w.relate()
 	into := newDocument(file)
 	into.write("{\n")
 	roots := 0
@@ -181,7 +223,75 @@ func (w *JSON) Finish() error {
 		roots++
 	}
 	into.write("\n}\n")
-	return w.endOf(into)
+	// The stop that interrupted the walk comes first, and the bytes are only
+	// asked for when nothing interrupted it.
+	if w.ended != nil {
+		return w.ended
+	}
+	return into.close()
+}
+
+// relate works out, once for the whole tree, which tables belong to which and
+// which rows of each belong to which row of its parent.
+//
+// # Why once
+//
+// 🔴 Both used to be worked out again for every record the tree held: the
+// tables by walking all of them, and the children of a row by walking every row
+// of every child table, so a relation of one child to each of P parents cost P
+// times P comparisons to write 2P records. Found by an outside review on
+// 2026-10-22.
+func (w *JSON) relate() {
+	byName := make(map[string]*jsonTable, len(w.tables))
+	for _, table := range w.tables {
+		byName[table.planned.Entity] = table
+	}
+	for _, table := range w.tables {
+		parent, held := byName[table.planned.Parent]
+		if table.planned.Parent == "" || !held {
+			continue
+		}
+		parent.children = append(parent.children, table)
+		table.family = familyOf(table.rows, len(parent.rows))
+	}
+}
+
+// family says which rows of a table belong to which row of its parent.
+type family struct {
+	// The rows of parent p are at[starts[p]:starts[p+1]], as positions in the
+	// table.
+	starts []int
+	at     []int
+}
+
+// familyOf sorts the rows of a table by the parent they belong to, keeping the
+// order of the table among the rows of one parent, which is the order the tree
+// has always written them in.
+//
+// It counts rather than assuming that the children of one parent stand
+// together, although a plan always puts them so, because what a writer is
+// handed is records and not a promise about them. A row naming no parent the
+// table above holds is left out, as it always was: the tree is walked from its
+// roots, and such a row hangs under none of them.
+func familyOf(rows []dataset.Record, parents int) family {
+	starts := make([]int, parents+1)
+	for _, record := range rows {
+		if record.Parent >= 0 && record.Parent < parents {
+			starts[record.Parent+1]++
+		}
+	}
+	for parent := range parents {
+		starts[parent+1] += starts[parent]
+	}
+	at := make([]int, starts[parents])
+	next := append([]int(nil), starts[:parents]...)
+	for position, record := range rows {
+		if record.Parent >= 0 && record.Parent < parents {
+			at[next[record.Parent]] = position
+			next[record.Parent]++
+		}
+	}
+	return family{starts: starts, at: at}
 }
 
 // halted asks whether something outside the run wants it to stop, and remembers
@@ -189,12 +299,12 @@ func (w *JSON) Finish() error {
 //
 // # Why once per record rather than once per table
 //
-// Once per table is what the run above asks between tables, and it would be
-// enough here for a recipe with several of them. For a recipe with one entity
-// it would be one question asked before a single byte is written, which is a
-// writer that cannot be stopped at all while looking like one that can. The
-// question costs a call through an interface, which is what the run pays per
-// row already.
+// The tree is written after every record has been produced, so the questions
+// the run asked on the way are all behind it. Once per table would be one
+// question for a recipe with one entity, asked before a single byte is written,
+// which is a writer that cannot be stopped at all while looking like one that
+// can. The question costs a call through an interface, which is what the run
+// pays per row already.
 //
 // A walk that stops leaves the document unfinished, and that is the arrangement
 // working rather than failing: the bytes are still under a temporary name and
@@ -205,37 +315,6 @@ func (w *JSON) halted() bool {
 	}
 	w.ended = w.stop.Stopped()
 	return w.ended != nil
-}
-
-// endOf finishes one file: the stop that interrupted the walk comes first, and
-// the bytes are only asked for when nothing interrupted it.
-func (w *JSON) endOf(into document) error {
-	if w.ended != nil {
-		return w.ended
-	}
-	return into.flush()
-}
-
-// writeTable writes one table as a flat array of objects.
-func (w *JSON) writeTable(into document, table *jsonTable, indent string) {
-	into.write("[\n")
-	for index, record := range table.rows {
-		if w.halted() {
-			return
-		}
-		if index > 0 {
-			into.write(",\n")
-		}
-		into.write(indent + "  ")
-		w.writeRecord(into, table, record, indent+"  ", nil)
-	}
-	if len(table.rows) > 0 {
-		into.write("\n")
-	}
-	into.write(indent + "]")
-	if indent == "" {
-		into.write("\n")
-	}
 }
 
 // placed is a record together with the position it holds in its own table.
@@ -267,7 +346,6 @@ func wholeOf(table *jsonTable) []placed {
 // appears once as a whole and once per parent as a subset of itself, and the
 // writer has no business changing what the table holds in order to say which.
 func (w *JSON) writeNested(into document, table *jsonTable, rows []placed, indent string) {
-	children := w.childrenOf(table.planned.Entity)
 	into.write("[\n")
 	for index, row := range rows {
 		if w.halted() {
@@ -277,7 +355,7 @@ func (w *JSON) writeNested(into document, table *jsonTable, rows []placed, inden
 			into.write(",\n")
 		}
 		into.write(indent + "  ")
-		w.writeRecord(into, table, row.record, indent+"  ", w.gather(children, row.at))
+		w.writeRecord(into, table, row.record, indent+"  ", gather(table.children, row.at))
 	}
 	if len(rows) > 0 {
 		into.write("\n")
@@ -294,29 +372,17 @@ type nested struct {
 
 // gather collects the children of one parent row, keeping the position each of
 // them holds in its own table so that its own children can be found.
-func (w *JSON) gather(children []*jsonTable, parent int) []nested {
+func gather(children []*jsonTable, parent int) []nested {
 	gathered := make([]nested, 0, len(children))
 	for _, child := range children {
-		rows := make([]placed, 0)
-		for at, record := range child.rows {
-			if record.Parent == parent {
-				rows = append(rows, placed{record: record, at: at})
-			}
+		positions := child.family.at[child.family.starts[parent]:child.family.starts[parent+1]]
+		rows := make([]placed, 0, len(positions))
+		for _, at := range positions {
+			rows = append(rows, placed{record: child.rows[at], at: at})
 		}
 		gathered = append(gathered, nested{entity: child.planned.Entity, table: child, rows: rows})
 	}
 	return gathered
-}
-
-// childrenOf returns the tables that belong to an entity, in plan order.
-func (w *JSON) childrenOf(entity string) []*jsonTable {
-	var children []*jsonTable
-	for _, table := range w.tables {
-		if table.planned.Parent == entity {
-			children = append(children, table)
-		}
-	}
-	return children
 }
 
 // writeRecord writes one object.
@@ -365,9 +431,9 @@ func valueAt(record dataset.Record, index int) string {
 // which the golden tests say rather than this paragraph. The comma separated
 // form, which streams, takes 34 MB for the same rows.
 //
-// What is left in memory is the records, and that one is not an oversight: the
-// nested shape cannot be written before the last child has arrived, which is
-// said at Write above.
+// What is left in memory for the tree is the records, and that one is not an
+// oversight: the nested shape cannot be written before the last child has
+// arrived, which is said at Write above. A file per entity holds none.
 //
 // # Why the failure of a write is not checked at each write
 //
@@ -376,21 +442,21 @@ func valueAt(record dataset.Record, index int) string {
 // times. What matters is that it is asked at all: a file that could not be
 // written must never be reported as written, and the guard beside this holds
 // that rather than the reading of this paragraph.
-type document struct{ to *bufio.Writer }
+type document struct {
+	to   *bufio.Writer
+	file WriteCloser
+}
 
 // newDocument wraps a file in the same buffer the other writer of this package
 // uses, of the same size, because two buffer sizes would be two answers to a
 // question neither form is asking.
-func newDocument(file WriteCloser) document { return document{to: bufio.NewWriter(file)} }
+func newDocument(file WriteCloser) document {
+	return document{to: bufio.NewWriter(file), file: file}
+}
 
 func (d document) write(text string) { _, _ = d.to.WriteString(text) }
 
-func (d document) flush() error {
-	if err := d.to.Flush(); err != nil {
-		return fault.Wrap(fault.IO, err, "cannot write the dataset")
-	}
-	return nil
-}
+func (d document) close() error { return finish(d.to, d.file) }
 
 // quoteJSON writes a string the way this project writes strings.
 //
