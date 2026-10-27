@@ -35,6 +35,23 @@ repository once they are released.
 
 ### Fixed
 
+- **Closing the window while datasets are being written on two screens stops
+  both runs, and the window goes once both have stopped.** Until now the run
+  that ended first gave the close button back, and closing the window then cut
+  the other run off in the middle of a write, leaving its temporary files and
+  its marker in the output directory.
+- **The recipe screen answers the system asking the program to stop** (a
+  container stopped, a desktop logging out) the way the take and corrupt
+  screen always has: the run stops first and the window closes after it.
+  Until now that ended the program in the middle of writing the dataset.
+- **Typing into the recipe or the separator field no longer starts one check
+  or one read of the whole file per keystroke at the same time.** One runs at
+  a time, and the newest of the ones typed meanwhile follows it.
+- **The manifest browser compares a response record off the thread that
+  draws, and the cost no longer grows with the square of the manifest.** A
+  manifest of 50 000 entries that all disagreed kept the window frozen for
+  about six seconds while the comparison was built, and now takes under a
+  tenth of a second, none of it on the window.
 - **verify holds a record about several tables to each of them.** Row 1 of one
   table and row 1 of another got the same verdict, so an application that did
   everything right could be reported as taking a value it should have

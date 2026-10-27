@@ -186,42 +186,66 @@ const (
 
 func (v *View) chooseManifest() {
 	dialog.ShowFileOpen(func(chosen fyne.URIReadCloser, err error) {
-		path, ok := v.pathOf(chosen, err)
-		if !ok {
-			return
+		if path, ok := v.pathOf(chosen, err); ok {
+			v.readManifest(path)
 		}
-		v.startReading(path, theManifest, func() func() {
-			promised, readErr := v.read.Manifest(path)
-			return func() {
-				if readErr != nil {
-					v.hasPromise = false
-					v.respond.Disable()
-					v.unreadable(readErr)
-					return
-				}
-				v.Open(promised, path)
-			}
-		})
 	}, v.window)
 }
 
 func (v *View) chooseResponse() {
 	dialog.ShowFileOpen(func(chosen fyne.URIReadCloser, err error) {
-		path, ok := v.pathOf(chosen, err)
-		if !ok || !v.hasPromise {
-			return
+		if path, ok := v.pathOf(chosen, err); ok && v.hasPromise {
+			v.readResponse(path)
 		}
-		v.startReading(path, theResponse, func() func() {
-			actual, readErr := v.read.Response(path)
-			return func() {
-				if readErr != nil {
-					v.unreadable(readErr)
-					return
-				}
-				v.Compare(actual, path)
-			}
-		})
 	}, v.window)
+}
+
+// readManifest reads a manifest and builds its screen off the thread that
+// draws, and opens it there.
+//
+// Apart from the chooser so that a test can ask for it with no dialog, which
+// cannot be answered without a person.
+func (v *View) readManifest(path string) {
+	text := v.text
+	v.startReading(path, theManifest, func() func() {
+		promised, readErr := v.read.Manifest(path)
+		if readErr != nil {
+			return func() {
+				v.hasPromise = false
+				v.respond.Disable()
+				v.unreadable(readErr)
+			}
+		}
+		// Built here, where the file was read, for the reason comparedWith
+		// gives: on the thread that draws this is a window standing still for
+		// as long as a large manifest takes to put into sentences.
+		screen := Build(text, promised, nil)
+		return func() { v.showManifest(promised, screen, path) }
+	})
+}
+
+// readResponse reads a response record and compares it with the manifest open,
+// both off the thread that draws, and puts the comparison on the screen there.
+func (v *View) readResponse(path string) {
+	// Taken here, on the thread that draws, and handed to the read by value,
+	// so that the comparison never reads the screen while it is worked out
+	// somewhere else.
+	text, promised, opened := v.text, v.promised, v.opened
+	v.startReading(path, theResponse, func() func() {
+		actual, readErr := v.read.Response(path)
+		if readErr != nil {
+			return func() { v.unreadable(readErr) }
+		}
+		screen, err := comparedWith(text, promised, actual)
+		return func() {
+			if opened != v.opened {
+				// Another manifest was opened while this one was being
+				// compared with the manifest before it.
+				return
+			}
+			v.showCompared(actual, screen, err, path)
+		}
+	})
 }
 
 // startReading hands a read to the place of work, says on screen that it is

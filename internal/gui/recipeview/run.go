@@ -84,8 +84,7 @@ func (v *View) Start() {
 	// work that answers straight away carries the run out inside this call and
 	// the end of the run has a keyboard of its own to place.
 	v.keys.Begin(v.stop, v.generate)
-	v.interceptClose()
-	v.watchForClosing()
+	v.letGo = v.hold()
 	v.work.Produce(func() (produce.Written, error) {
 		return v.write(recipe, settings, halt)
 	}, v.finished)
@@ -122,17 +121,11 @@ func (v *View) finished(written produce.Written, err error) {
 		v.stage = stageFailed
 	}
 	v.thaw()
-	v.releaseClose()
-	v.releaseWatchForClosing()
-	if v.closing {
-		// Somebody asked to leave while this was writing, and the run has now
-		// ended, so there is nothing half written left to keep them here.
-		v.closing = false
-		v.leave()
-		return
-	}
 	v.draw()
 	v.keys.End(v.generate, v.stop)
+	// Last, because letting go may give the window up when somebody asked for
+	// it during the run, and nothing is drawn on a window that has gone.
+	v.release()
 }
 
 // busy reports whether a run is going on.

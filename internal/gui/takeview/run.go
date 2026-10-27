@@ -97,8 +97,7 @@ func (v *View) Start() {
 	// work that answers straight away carries the run out inside this call and
 	// the end of the run has a keyboard of its own to place.
 	v.keys.Begin(v.stop, v.damage)
-	v.interceptClose()
-	v.watchForClosing()
+	v.letGo = v.hold()
 	v.work.Run(func() (take.Result, error) {
 		return opened.Corrupt(settings, described, halt, time.Now())
 	}, v.finished)
@@ -141,107 +140,40 @@ func (v *View) finished(result take.Result, err error) {
 		v.stage = stageFailed
 	}
 	v.thaw()
-	v.releaseClose()
-	v.releaseWatchForClosing()
-	if v.closing {
-		// Somebody asked for the window while the run was going on, and the run
-		// was stopped rather than the window taken away from underneath it.
-		v.closing = false
-		v.leave()
-		return
-	}
 	v.drawRun()
 	v.keys.End(v.damage, v.stop)
+	// Last, because letting go may give the window up when somebody asked for
+	// it during the run, and nothing is drawn on a window that has gone.
+	v.release()
 }
 
-// interceptClose makes the closing of the window stop the run first.
-//
-// # Why the window is taken over for the length of a run and not for longer
+// hold keeps the window from ending this run where it stands.
 //
 // Closing a window ends the process, and a process ending in the middle of a
 // run leaves the temporary files of that run and the marker holding its name in
 // somebody's output directory, where the next run finds the marker and refuses.
-// That is what a killed run costs, and a person pressing the close button is not
-// killing anything: they are asking to leave.
+// A person pressing the cross, or a system stopping this program, is asking to
+// leave rather than for that. So for as long as the run goes on the ask stops
+// it, and the window goes once it has stopped. The whole of that belongs to the
+// window rather than to this screen, because the recipe screen writes too and
+// both run on one window: the reasons stand on background.Closing.
 //
-// So for as long as a run is going on, that ask stops the run and the window
-// closes once it has stopped. Outside a run the window closes the way every
-// other window does, which is why this is given back rather than left in place.
-func (v *View) interceptClose() {
-	if v.window == nil {
-		return
+// A caller assembling this screen with nobody looking at it is handed no hold,
+// which is said here rather than left to a nil call, because the states of
+// this screen are built exactly that way.
+func (v *View) hold() func() {
+	if v.work.Hold == nil {
+		return nil
 	}
-	v.window.SetCloseIntercept(func() {
-		v.closing = true
-		v.Stop()
-	})
+	return v.work.Hold(v.Stop)
 }
 
-func (v *View) releaseClose() {
-	if v.window != nil {
-		v.window.SetCloseIntercept(nil)
-	}
-}
-
-// watchForClosing makes the system asking this program to stop mean what the
-// close button means.
-//
-// # Why a signal is answered the same way as the close button
-//
-// They are the same ask from different people. A person clicking the cross and
-// a container being stopped both want this program to end, and both cost the
-// same thing if it ends where it stands: the temporary files of the run and the
-// marker holding its name are left in somebody's output directory, and the next
-// run finds the marker and refuses for a reason that stopped being true. The
-// window already knew how to answer one of them, so the other is routed into
-// the same answer rather than given a second one that could drift from it.
-//
-// # Why the watch lives no longer than the run
-//
-// Outside a run nothing is half written, so a person killing this window gets
-// the instant end their desktop would have given them anyway. That is the same
-// boundary the command line draws, and drawing it differently here would be the
-// parity rule broken in the other direction.
-func (v *View) watchForClosing() {
-	if v.work.Watch == nil {
-		// A caller assembling this screen with nobody looking at it has no
-		// process to be asked about. Said out loud rather than left to a nil
-		// call, because the states of this screen are built exactly that way.
-		return
-	}
-	v.releaseWatch = v.work.Watch(v.stoppedFromOutside)
-}
-
-func (v *View) releaseWatchForClosing() {
-	if v.releaseWatch == nil {
-		return
-	}
-	v.releaseWatch()
-	v.releaseWatch = nil
-}
-
-// stoppedFromOutside is what a signal means once it reaches the thread that
-// draws.
-//
-// 🔴 The run may already have ended by the time this arrives, and that is
-// ordinary rather than exotic: the signal is noticed on a goroutine and acted
-// on here, and a run that stops in between is a run with nothing left to take
-// back. Setting the flag anyway would arm the NEXT run to close the window
-// behind whoever started it.
-func (v *View) stoppedFromOutside() {
-	if !v.busy() {
-		v.leave()
-		return
-	}
-	v.closing = true
-	v.Stop()
-}
-
-// leave gives up the window, which is the answer to being asked to stop once
-// there is nothing left to clean up.
-func (v *View) leave() {
-	if v.window != nil {
-		v.window.Close()
+// release lets go of the window held for the run that has just ended.
+func (v *View) release() {
+	letGo := v.letGo
+	v.letGo = nil
+	if letGo != nil {
+		letGo()
 	}
 }
 

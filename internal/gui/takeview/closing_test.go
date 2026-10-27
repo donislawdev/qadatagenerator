@@ -50,7 +50,8 @@ func screenThatCanBeAskedToStop(t *testing.T, window fyne.Window) (*View, *held,
 	}
 	runs, watch := &held{}, &heldWatch{}
 	view := New(i18n.English, window, described, take.Open, background.Work{
-		Run: runs.background, Read: background.ReadHere, Watch: watch.watch,
+		Run: runs.background, Read: background.ReadHere,
+		Hold: background.NewClosing(window, watch.watch).Hold,
 	}, nil)
 	view.Content()
 	return view, runs, watch
@@ -169,8 +170,12 @@ func TestASignalThatArrivesAfterTheRunGivesTheWindowUpAtOnce(t *testing.T) {
 		t.Errorf("a signal arriving after the run had ended gave the window up %d times "+
 			"rather than once", window.closed)
 	}
-	if view.closing {
-		t.Error("the screen is still holding the ask to close, so the next run somebody " +
-			"starts would end by taking the window away from them")
+	// A directory of its own, because the first run's files would otherwise
+	// refuse the second run for a reason this guard is not about.
+	view.out.SetText(t.TempDir())
+	view.Start()
+	if view.stage != stageRunning {
+		t.Errorf("the next run is in stage %d rather than going on, so the late signal was "+
+			"kept and ended a run somebody started afterwards", view.stage)
 	}
 }

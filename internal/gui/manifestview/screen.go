@@ -342,15 +342,76 @@ func Waiting(text i18n.Catalogue) Screen {
 }
 
 func rowsOf(text i18n.Catalogue, promised manifest.Manifest, comparison *Comparison) []Row {
+	var judged *judgment
+	if comparison != nil {
+		judged = judgmentOf(comparison.Report)
+	}
 	defects := promised.Defects()
 	rows := make([]Row, 0, len(defects))
 	for _, defect := range defects {
-		rows = append(rows, rowOf(text, defect, comparison))
+		rows = append(rows, rowOf(text, defect, judged))
 	}
 	return rows
 }
 
-func rowOf(text i18n.Catalogue, defect manifest.Defect, comparison *Comparison) Row {
+// judgment is a comparison made ready to be asked about one entry at a time.
+//
+// # Why the findings are looked up rather than searched for
+//
+// Until 2026-10-27 every entry walked every finding to find its own, so a
+// comparison in which every entry disagreed cost the square of its size.
+// Measured that day on a manifest of one table and one damage per row, every
+// one of them answered wrongly: building the screen took 1.01 s for twenty
+// thousand entries and 6.28 s for fifty thousand, the median of three runs
+// after a first one thrown away. The key is the one the walk matched on, and
+// of two findings with one key the first is kept, which is the one the walk
+// would have found.
+type judgment struct {
+	report    verify.Report
+	findings  map[entryKey]verify.Finding
+	unsettled map[entryKey]verify.Unsettled
+}
+
+// entryKey is what tells one entry's finding from another's: the table, the
+// row, the column and the damage together. Any three of those can repeat inside
+// one manifest, since one row carries several damages, one damage is used in
+// many rows and two tables both have a row 1, so a key of fewer would attach
+// somebody else's finding to an entry that agreed.
+type entryKey struct {
+	entity  string
+	row     int
+	field   string
+	mutator catalog.ID
+}
+
+func keyOf(defect manifest.Defect) entryKey {
+	return entryKey{entity: defect.Location.Entity, row: defect.Location.Row,
+		field: defect.Location.Field, mutator: defect.Mutator}
+}
+
+func judgmentOf(report verify.Report) *judgment {
+	judged := &judgment{
+		report:    report,
+		findings:  make(map[entryKey]verify.Finding, len(report.Findings)),
+		unsettled: make(map[entryKey]verify.Unsettled, len(report.Unsettled)),
+	}
+	for _, finding := range report.Findings {
+		key := entryKey{entity: finding.Entity, row: finding.Row, field: finding.Field,
+			mutator: finding.Mutator}
+		if _, taken := judged.findings[key]; !taken {
+			judged.findings[key] = finding
+		}
+	}
+	for _, open := range report.Unsettled {
+		key := entryKey{entity: open.Entity, row: open.Row, field: open.Field, mutator: open.Mutator}
+		if _, taken := judged.unsettled[key]; !taken {
+			judged.unsettled[key] = open
+		}
+	}
+	return judged
+}
+
+func rowOf(text i18n.Catalogue, defect manifest.Defect, judged *judgment) Row {
 	// The layer is not written beside the identifier, because the identifier
 	// begins with it: every one is LAYER.area.variant, so a row saying
 	// "L0.bom.unexpected L0" is repeating itself in the one place a person
@@ -367,8 +428,8 @@ func rowOf(text i18n.Catalogue, defect manifest.Defect, comparison *Comparison) 
 	if !defect.Applied {
 		row.Reason = failureOf(text, defect)
 	}
-	if comparison != nil && defect.Applied {
-		row.Answer, row.Finding = answerOf(text, *comparison, defect)
+	if judged != nil && defect.Applied {
+		row.Answer, row.Finding = answerOf(text, judged, defect)
 	}
 	return row
 }
@@ -583,19 +644,19 @@ func quoted(value string) string { return "\"" + value + "\"" }
 // and an entry the comparison could not settle in the warning one, because
 // the first is a claim about the application and the second is a question
 // the response record did not carry the evidence to answer.
-func answerOf(text i18n.Catalogue, comparison Comparison, defect manifest.Defect) (short, long Line) {
-	answer, reacted := comparison.Report.Answer(defect)
+func answerOf(text i18n.Catalogue, judged *judgment, defect manifest.Defect) (short, long Line) {
+	answer, reacted := judged.report.Answer(defect)
 	if !reacted {
 		return Line{Text: text.T(i18n.ManifestAnswerNone), Color: palette.StateDanger},
 			Line{Text: text.T(i18n.VerifyNoAnswer), Color: palette.StateDanger}
 	}
 	verdict, word := verdictOf(text, answer.Verdict)
-	if finding, found := findingFor(comparison.Report, defect); found {
+	if finding, found := judged.findings[keyOf(defect)]; found {
 		return Line{Text: word, Color: palette.StateDanger},
 			Line{Text: verdict + separator + kindOf(text, finding.Kind) + separator + finding.Detail,
 				Color: palette.StateDanger}
 	}
-	if open, found := unsettledFor(comparison.Report, defect); found {
+	if open, found := judged.unsettled[keyOf(defect)]; found {
 		return Line{Text: text.T(i18n.ManifestAnswerNotSettled), Color: palette.StateWarning},
 			Line{Text: verdict + separator + open.Reason, Color: palette.StateWarning}
 	}
@@ -618,40 +679,6 @@ func kindOf(text i18n.Catalogue, kind verify.Kind) string {
 		return text.T(key)
 	}
 	return string(kind)
-}
-
-// findingFor is the disagreement about one entry, if the comparison found one.
-//
-// Matched on the entity, the row, the column and the mutator together. Any
-// three of those can repeat inside one manifest, since one row carries several
-// damages, one mutator is used in many rows and two tables both have a row 1,
-// so a match on fewer would attach somebody else's finding to an entry that
-// agreed.
-func findingFor(report verify.Report, defect manifest.Defect) (verify.Finding, bool) {
-	for _, finding := range report.Findings {
-		if finding.Entity == defect.Location.Entity &&
-			finding.Row == defect.Location.Row &&
-			finding.Field == defect.Location.Field &&
-			finding.Mutator == defect.Mutator {
-			return finding, true
-		}
-	}
-	return verify.Finding{}, false
-}
-
-// unsettledFor is the question about one entry the comparison could not
-// answer, if there is one, matched the way a finding is and for the same
-// reason.
-func unsettledFor(report verify.Report, defect manifest.Defect) (verify.Unsettled, bool) {
-	for _, open := range report.Unsettled {
-		if open.Entity == defect.Location.Entity &&
-			open.Row == defect.Location.Row &&
-			open.Field == defect.Location.Field &&
-			open.Mutator == defect.Mutator {
-			return open, true
-		}
-	}
-	return verify.Unsettled{}, false
 }
 
 // disagreedOf counts the findings that belong to one entry each, which is what

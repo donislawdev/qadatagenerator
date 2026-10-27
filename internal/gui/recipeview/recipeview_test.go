@@ -147,19 +147,57 @@ func TestAnAnswerAboutARecipeNobodyIsWaitingForIsNotDrawn(t *testing.T) {
 
 	view.SetRecipe("first")
 	view.SetRecipe("second")
-	if len(answer) != 2 {
-		t.Fatalf("expected two checks in flight and there are %d", len(answer))
+	if len(answer) != 1 {
+		t.Fatalf("expected one check in flight and there are %d", len(answer))
 	}
 
-	// The stale one lands last, which is the order that breaks a screen with no
-	// counter in it.
-	answer[1]()
+	// The check in flight answers about a recipe that is no longer in the
+	// field, which is the answer a screen with no counter in it draws.
 	answer[0]()
-
-	report, _ := view.Report()
-	if report.Name != "second" {
+	if report, checked := view.Report(); checked && report.Name == "first" {
 		t.Errorf("the screen is showing the answer about %q while %q is in the field",
 			report.Name, "second")
+	}
+	if len(answer) != 2 {
+		t.Fatalf("the check of the recipe in the field was never asked for: %d checks", len(answer))
+	}
+	answer[1]()
+	if report, _ := view.Report(); report.Name != "second" {
+		t.Errorf("the screen is showing the answer about %q while %q is in the field",
+			report.Name, "second")
+	}
+}
+
+// Letters typed during a check wait for it, and only the last of them is
+// checked.
+//
+// 🔴 A recipe is allowed to be 256 KB, and the note on its reader says one
+// inside that limit can cost hundreds of megabytes to parse. Until 2026-10-27
+// every letter started a parse of its own at once, side by side, and all their
+// answers but the last were thrown away.
+func TestLettersTypedDuringACheckWaitForIt(t *testing.T) {
+	var answer []func()
+	later := background.Work{Read: func(read func() func(), _ func(error) func()) {
+		answer = append(answer, read())
+	}}
+	var asked []string
+	view := recipeview.New(i18n.English, func(_ string, data []byte) recipeview.Answer {
+		asked = append(asked, string(data))
+		return recipeview.Answer{Report: validate.Report{Name: string(data)}}
+	}, nil, later, nil)
+	view.Content()
+
+	for _, typed := range []string{"v", "ve", "ver", "vers"} {
+		view.SetRecipe(typed)
+	}
+	if len(asked) != 1 {
+		t.Fatalf("four letters typed during one check started %d checks rather than one, so "+
+			"each of them parses the recipe beside the others", len(asked))
+	}
+	answer[0]()
+	if len(asked) != 2 || asked[1] != "vers" {
+		t.Fatalf("after the first check the screen asked about %q, and the one recipe worth "+
+			"asking about is the one in the field", asked[1:])
 	}
 }
 

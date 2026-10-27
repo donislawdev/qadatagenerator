@@ -141,6 +141,10 @@ type View struct {
 	// asked counts the reads, so that an answer which is no longer the latest
 	// question is dropped rather than drawn over a newer one.
 	asked int
+	// opened counts the manifests opened, so that a comparison worked out off
+	// the thread that draws against a manifest that has since been replaced is
+	// not drawn beside the one now open.
+	opened int
 
 	// Which entry the card reads out: the last one chosen, by a click or by the
 	// keyboard moving onto it, and never one the pointer merely passed over
@@ -253,9 +257,21 @@ func (v *View) lay() {
 // The path is where the manifest came from, for the band and the terminal
 // line, and may be empty for a document that arrived already parsed.
 func (v *View) Open(promised manifest.Manifest, path string) {
+	v.showManifest(promised, Build(v.text, promised, nil), path)
+}
+
+// showManifest puts a manifest on the screen, with the screen already built
+// from it.
+//
+// Apart from Open because the chooser builds the screen where it read the
+// file, off the thread that draws, and a manifest of a hundred thousand entries
+// is a hundred thousand rows of sentences to build. Open is the same state for
+// a caller that hands a manifest over already parsed.
+func (v *View) showManifest(promised manifest.Manifest, screen Screen, path string) {
+	v.opened++
 	v.promised, v.hasPromise, v.manifestPath = promised, true, path
 	v.hasResponse, v.responsePath, v.answered = false, "", 0
-	v.screen = Build(v.text, promised, nil)
+	v.screen = screen
 	// A new manifest has no comparison, so a card reading out the limits of
 	// the last one would be reading out a comparison that is no longer open.
 	if v.showing == cardLimits {
@@ -287,18 +303,44 @@ func (v *View) Compare(actual response.Record, path string) bool {
 	if !v.hasPromise {
 		return false
 	}
+	screen, err := comparedWith(v.text, v.promised, actual)
+	return v.showCompared(actual, screen, err, path)
+}
+
+// comparedWith is the comparison of a record with a manifest and the screen built
+// from it, which is all of the work a comparison costs.
+//
+// # Why it is a function of its arguments and nothing else
+//
+// The chooser calls it where the record was read, off the thread that draws.
+// Until 2026-10-27 it ran where the read answered, which is on that thread:
+// measured that day at 6.3 seconds for a manifest of fifty thousand entries
+// every one of which disagreed, with the window repainting nothing and
+// answering no key for all of it. So it reads only what it is handed, the
+// manifest is handed as a copy taken where it is open, and what comes back is
+// a value the screen takes over whole.
+func comparedWith(text i18n.Catalogue, promised manifest.Manifest,
+	actual response.Record) (Screen, error) {
+	report, err := verify.Compare(promised, actual)
+	if err != nil {
+		return Screen{}, err
+	}
+	comparison := Comparison{Record: actual, Report: report}
+	return Build(text, promised, &comparison), nil
+}
+
+// showCompared puts a comparison worked out beforehand on the screen.
+func (v *View) showCompared(actual response.Record, screen Screen, err error, path string) bool {
 	// A record whose rows do not fit the dataset is refused here as it is by
 	// verify, and said where a record that could not be read is said, with the
 	// file named in the band. The comparison already on screen stays, because
 	// nothing about it changed.
-	report, err := verify.Compare(v.promised, actual)
 	if err != nil {
 		v.tried, v.triedWhat = path, theResponse
 		v.unreadable(err)
 		return false
 	}
-	comparison := Comparison{Record: actual, Report: report}
-	v.screen = Build(v.text, v.promised, &comparison)
+	v.screen = screen
 	v.hasResponse, v.responsePath, v.answered = true, path, len(actual.Rows)
 	// A response that carries everything leaves nothing the comparison could
 	// not see, and the button that led to the limits is gone with them.

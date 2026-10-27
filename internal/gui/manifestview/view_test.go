@@ -305,6 +305,14 @@ func TestAResponseRecordWithNoManifestIsRefused(t *testing.T) {
 	if view.Compare(actual, "") {
 		t.Error("a record was compared against a manifest that is not there")
 	}
+	// 🔴 Asked as well since 2026-10-27, because the answer alone stopped
+	// proving anything at stage E: verify refuses on its own a record whose
+	// rows do not fit a dataset of no rows, so without the check above the
+	// screen still answered false, by the road of a refusal it then drew. A
+	// refusal about a manifest nobody opened is a sentence about nothing.
+	if err := view.Unread(); err != nil {
+		t.Errorf("a record with no manifest open was refused as one that does not fit it: %v", err)
+	}
 }
 
 // The terminal line names the two files once both are open, and until then it

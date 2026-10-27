@@ -71,7 +71,8 @@ func writing(t *testing.T, window fyne.Window) (*View, *heldRun, *heldWatch) {
 	}
 	runs, watch := &heldRun{}, &heldWatch{}
 	view := New(i18n.English, Checker(described), stillRun, background.Work{
-		Read: background.ReadHere, Produce: runs.produce, Watch: watch.watch,
+		Read: background.ReadHere, Produce: runs.produce,
+		Hold: background.NewClosing(window, watch.watch).Hold,
 	}, window)
 	view.Content()
 	view.SetRecipe(cleanEnough)

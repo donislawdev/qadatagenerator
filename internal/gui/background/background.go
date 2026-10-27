@@ -98,9 +98,10 @@ type Work struct {
 	Produce Produce
 	// Read is where somebody else's file is read.
 	Read Read
-	// Watch is how the system asking this program to stop reaches a screen, or
-	// nothing for a caller that has no process to be asked about.
-	Watch Watch
+	// Hold keeps the window, and this program, from ending where a run stands,
+	// or is nothing for a caller with no window behind the screen. It is the
+	// port of the one Closing of the window, and the reasons stand there.
+	Hold Hold
 }
 
 // Run is where the work of a run happens and how its answer comes back.
@@ -353,9 +354,10 @@ func (s *Stopper) Stopped() error {
 //
 // # What this asks for and what it does not
 //
-// It asks a screen to stop, and the screen decides what that means. It never
-// removes a file itself, for the reason the stopper above states: the run owns
-// what it is writing and ends it on the goroutine that made it.
+// It asks the Closing of the window to stop whatever is held, and each run
+// decides what that means. It never removes a file itself, for the reason the
+// stopper above states: the run owns what it is writing and ends it on the
+// goroutine that made it.
 func WatchForClosing(asked func()) (release func()) {
 	return watchForClosing(asked, fyne.Do)
 }

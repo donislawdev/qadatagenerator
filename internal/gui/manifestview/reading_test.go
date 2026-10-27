@@ -11,7 +11,9 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
+	"github.com/donislawdev/qadatagenerator/internal/domain/response"
 )
 
 // saying reports whether the words are anywhere on what is drawn.
@@ -152,5 +154,74 @@ func TestAnAnswerAboutADocumentNobodyIsWaitingForIsNotDrawn(t *testing.T) {
 	if drawn != 2 {
 		t.Errorf("the answer drawn last was the one from read %d, so an older answer was "+
 			"drawn over a newer one", drawn)
+	}
+}
+
+// answering is the screen with a response record that reads without a disk and
+// a place of work that keeps every read until the test carries it out.
+func answering(t *testing.T) (*View, *[]func() func()) {
+	t.Helper()
+	var waiting []func() func()
+	record := response.Record{SpecVersion: "0.1", Rows: []response.Row{
+		{Number: 1, Verdict: response.Accepted},
+	}}
+	view := New(i18n.English, nil, Readers{
+		Response: func(string) (response.Record, error) { return record, nil },
+	}, func(read func() func(), _ func(error) func()) {
+		waiting = append(waiting, read)
+	}, nil)
+	view.Content()
+	return view, &waiting
+}
+
+// 🔴 The comparison is worked out where the response record is read, on the
+// manifest as it stood when the read was asked for.
+//
+// Until 2026-10-27 the record was read off the thread that draws and compared
+// on it, measured that day at 6.3 seconds for a manifest of fifty thousand
+// entries every one of which disagreed, with the window repainting nothing for
+// all of it. The manifest is changed here behind the screen's back between the
+// ask and the read, which stands in for anything the screen holds changing
+// while a comparison is worked out elsewhere: only a comparison that took its
+// manifest at the ask and worked where the read happened is untouched by it.
+func TestTheComparisonIsWorkedOutWhereTheRecordIsRead(t *testing.T) {
+	view, waiting := answering(t)
+	one := built(t, applied("d1", 1, catalog.Rejection, catalog.Hard))
+	view.Open(one, "/runs/one.json")
+	view.readResponse("/runs/answer.json")
+
+	view.promised = built(t, applied("d1", 1, catalog.Rejection, catalog.Hard),
+		applied("d2", 2, catalog.Rejection, catalog.Hard))
+	(*waiting)[0]()()
+	if !view.hasResponse {
+		t.Fatal("the comparison was never put on the screen")
+	}
+	if rows := len(view.screen.Rows); rows != 1 {
+		t.Errorf("the comparison has %d rows, so it was worked out from what the screen held "+
+			"when the answer arrived rather than from the manifest the read was asked about", rows)
+	}
+}
+
+// A comparison worked out against a manifest that has since been replaced is
+// not drawn beside the one now open.
+//
+// The two buttons are out of reach during a read, so nobody clicking can open
+// a manifest in that moment today. This stands in front of the day something
+// else does, because the fault would be silent: the entries of one manifest
+// painted with the verdicts about another.
+func TestAComparisonWithAManifestNoLongerOpenIsNotDrawn(t *testing.T) {
+	view, waiting := answering(t)
+	view.Open(built(t, applied("d1", 1, catalog.Rejection, catalog.Hard)), "/runs/one.json")
+	view.readResponse("/runs/answer.json")
+	view.Open(built(t, applied("d1", 1, catalog.Rejection, catalog.Hard),
+		applied("d2", 2, catalog.Rejection, catalog.Hard)), "/runs/two.json")
+
+	(*waiting)[0]()()
+	if view.hasResponse {
+		t.Error("a comparison with the manifest that was open before was drawn beside the one " +
+			"open now")
+	}
+	if view.Reading() {
+		t.Error("the screen still says it is reading after the read answered")
 	}
 }

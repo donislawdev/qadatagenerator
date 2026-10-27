@@ -69,9 +69,14 @@ func screenOn(t *testing.T, window fyne.Window) (*View, *held) {
 	// The read happens where it is asked for, so a test reads a real file and
 	// finds the screen finished by the time the call returns. Where a read
 	// happens is its own port, and the tests for that one hold it up on purpose.
-	view := New(i18n.English, window, described, take.Open, background.Work{
-		Run: runs.background, Read: background.ReadHere,
-	}, nil)
+	work := background.Work{Run: runs.background, Read: background.ReadHere}
+	if window != nil {
+		// The closing of the window is the one the program runs, so that a
+		// test asking what the cross does during a run asks that code rather
+		// than a stand-in for it.
+		work.Hold = background.NewClosing(window, nil).Hold
+	}
+	view := New(i18n.English, window, described, take.Open, work, nil)
 	// The tree is built the way the shell builds it, so that everything a test
 	// reads is what a person would be looking at.
 	view.Content()

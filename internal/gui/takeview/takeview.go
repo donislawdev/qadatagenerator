@@ -103,6 +103,12 @@ type View struct {
 	// the file read under one separator while the field on screen showed
 	// another, which is the screen describing a file nobody has.
 	asked int
+	// reads is the queue every read of this screen goes through, so that a
+	// separator typed during a read waits for it rather than walking the file
+	// beside it. Each character reads the whole file, measured at 11.7 seconds
+	// for a hundred thousand rows on 2026-08-26, and before 2026-10-27 every
+	// one of them did so at once. The reasons stand on background.Latest.
+	reads *background.Latest
 	// unread is what the last attempt to read a file ended with, kept so that a
 	// caller assembling this screen without a person can say what went wrong
 	// rather than draw an empty screen and call it the state it asked for.
@@ -119,14 +125,11 @@ type View struct {
 	// halt is how the run in flight is asked to end, and nothing while there is
 	// none.
 	halt *background.Stopper
-	// releaseWatch stops noticing the system asking this program to end, and is
-	// nothing outside a run. The watch covers the same stretch as the halt
-	// above, because it is the same question asked by somebody other than the
-	// person at the keyboard.
-	releaseWatch func()
-	// closing records that somebody asked for the window while a run was going
-	// on, so that the window can be given to them once the run has stopped.
-	closing bool
+	// letGo gives back the window held for the run in flight, and is nothing
+	// outside a run. It covers the same stretch as the halt above, because the
+	// window and the system ask the same question as the person at the
+	// keyboard.
+	letGo func()
 	// keys moves the keyboard off the button a run takes away and back when
 	// the run ends. Shared with the recipe screen since 2026-09-15, and the
 	// reasons stand on the type.
@@ -198,6 +201,7 @@ func New(text i18n.Catalogue, window fyne.Window, described catalog.Catalog,
 		cardHeading: container.NewStack(),
 		planBox:     container.NewStack(), runBox: container.NewStack(),
 		fileBox: container.NewStack(), panel: container.NewStack(),
+		reads: background.NewLatest(work.Read),
 	}
 	view.buildControls()
 	view.lay()
@@ -384,10 +388,10 @@ func (v *View) Unread() error { return v.unread }
 // startReading hands a read to the place of work and shows that it is going on.
 //
 // 🔴 The answer is applied only if it is still the answer to the latest
-// question. Two reads in flight at once are ordinary here, because the
-// separator is typed one character at a time and every character reads the
-// file again, and the one that finishes second is not always the one that was
-// asked second.
+// question. The queue keeps one read in flight, and a separator typed while it
+// goes on makes that read an answer to a question nobody is asking any more:
+// the field already shows the next character, and the read about it is the one
+// waiting.
 func (v *View) startReading(path string, answer func(*take.Opened, error)) {
 	v.asked++
 	wanted := v.asked
@@ -395,7 +399,7 @@ func (v *View) startReading(path string, answer func(*take.Opened, error)) {
 	v.unread = nil
 	v.drawReading()
 	settings := v.chosen
-	v.work.Read(func() func() {
+	v.reads.Ask(func() func() {
 		opened, err := v.openFile(path, settings)
 		return func() {
 			if wanted != v.asked {

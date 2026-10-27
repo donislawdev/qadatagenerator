@@ -145,11 +145,10 @@ func TestNoRunBeginsWhileTheFileIsBeingReadAgain(t *testing.T) {
 // An answer about a file nobody is waiting for any more is not drawn.
 //
 // 🔴 Reads are superseded rather than refused, and this is the half that makes
-// that safe. A person typing a separator asks for a read per keystroke, and the
-// reads answer in whatever order the disk and the scheduler leave them in. An
-// older answer arriving last would put the file as it was read under the
-// previous separator on a screen showing the current one, which is the screen
-// describing a file nobody has.
+// that safe. A separator typed while the file is being read makes that read an
+// answer to a question nobody is asking any more, and drawing it would put the
+// file as it was read under the previous separator on a screen showing the
+// current one, which is the screen describing a file nobody has.
 func TestAnAnswerAboutAFileNobodyIsWaitingForIsNotDrawn(t *testing.T) {
 	window := test.NewWindow(nil)
 	defer window.Close()
@@ -160,26 +159,70 @@ func TestAnAnswerAboutAFileNobodyIsWaitingForIsNotDrawn(t *testing.T) {
 	view.Open(source)
 	reads.answer(t, 0)
 	view.delimiter.SetText(separator)
-	// The separator that reads the file as one column, then the one that reads
-	// it as three. Two reads asked for, and the older one answered last.
+	reads.answer(t, 1)
+	columns := len(view.opened.Table().Columns)
+	// The separator that reads the file as one column, and while that read
+	// goes on, the one that reads it as three again.
 	view.delimiter.SetText(",") // punctuation: test data
 	view.delimiter.SetText(separator)
-	if len(reads.waiting) != 4 {
-		t.Fatalf("the screen asked for %d reads rather than the four this guard walks",
+	if len(reads.waiting) != 3 {
+		t.Fatalf("the screen asked for %d reads rather than the three this guard walks",
 			len(reads.waiting))
 	}
 
-	reads.answer(t, 3)
-	columns := len(view.opened.Table().Columns)
 	reads.answer(t, 2)
 	if now := len(view.opened.Table().Columns); now != columns {
-		t.Errorf("an answer about the file as it was read two keystrokes ago was drawn over "+
-			"a newer one, leaving the screen describing %d columns where it had %d",
+		t.Errorf("an answer about the file as it was read a keystroke ago was drawn, "+
+			"leaving the screen describing %d columns under a separator that gives %d",
 			now, columns)
 	}
+	if !view.readingNow() {
+		t.Error("the screen stopped saying it is reading while the read about the separator " +
+			"on screen has not even begun")
+	}
+	if len(reads.waiting) != 4 {
+		t.Fatalf("the read about the separator on screen was never asked for, so the screen "+
+			"would wait for ever: %d reads asked", len(reads.waiting))
+	}
+	reads.answer(t, 3)
 	if view.readingNow() {
-		t.Error("the screen still says it is reading after the read it was waiting for " +
-			"answered, because an older answer put it back")
+		t.Error("the screen still says it is reading after the read it was waiting for answered")
+	}
+}
+
+// A separator typed while the file is being read waits for that read rather
+// than reading the file again beside it.
+//
+// 🔴 Every character of the separator reads the whole file, measured at 11.7
+// seconds for a hundred thousand rows, and until 2026-10-27 every one of them
+// started at once and ran to its end, side by side. Correcting one separator
+// to another by selecting it and typing three characters walked the file three
+// times at the same moment, and two of the answers were thrown away.
+func TestASeparatorTypedWhileTheFileIsReadWaitsForTheRead(t *testing.T) {
+	window := test.NewWindow(nil)
+	defer window.Close()
+	source := sourceFile(t, t.TempDir())
+
+	view, reads, _ := screenWaitingOnAFile(t, window)
+	view.Open(source)
+	reads.answer(t, 0)
+	for _, typed := range []string{"|", ",", ":", separator} { // punctuation: test data
+		view.delimiter.SetText(typed)
+	}
+	if len(reads.waiting) != 2 {
+		t.Fatalf("four separators typed during one read asked for %d reads at the place of "+
+			"work rather than the one in flight, so each of them walks the file beside it",
+			len(reads.waiting)-1)
+	}
+	reads.answer(t, 1)
+	if len(reads.waiting) != 3 {
+		t.Fatalf("the read that ended left %d more behind it rather than the one about the "+
+			"separator on screen", len(reads.waiting)-2)
+	}
+	reads.answer(t, 2)
+	if columns := len(view.opened.Table().Columns); columns != 3 {
+		t.Errorf("the screen describes %d columns, so the read it kept was not the one about "+
+			"the separator on screen", columns)
 	}
 }
 

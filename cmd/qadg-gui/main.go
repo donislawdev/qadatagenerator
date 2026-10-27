@@ -195,10 +195,18 @@ func saveReport(window fyne.Window) about.Saver {
 // reaching for them, which is what lets each of them be built in a test with no
 // disk and no goroutine.
 func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipboard) *shell.Shell {
+	// 🔴 One place of work for the whole window, handed to every screen as
+	// the same value. Until 2026-10-27 each screen was given a literal of its
+	// own, and the one for the recipe screen was written without the watch
+	// for a signal, so a container stopped while it wrote a dataset left the
+	// temporary files and the marker behind. A port one screen has and the
+	// other does not can no longer be written here.
+	//
+	work := placesOfWork(window)
 	browser := manifestview.New(text, window, manifestview.Readers{
 		Manifest: manifestjson.Load,
 		Response: responsejson.Load,
-	}, background.ReadInBackground, clipboard)
+	}, work.Read, clipboard)
 	// The catalog of damage is data compiled into this binary, so a failure to
 	// read it means the binary itself is not what it was built as. There is
 	// nothing a person could do about it from inside a window and nothing this
@@ -208,21 +216,14 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 		fmt.Fprintln(os.Stderr, "this build cannot read its own catalog of damage:", err)
 		os.Exit(1)
 	}
-	damage := takeview.New(text, window, described, take.Open, background.Work{
-		Run:   background.InBackground,
-		Read:  background.ReadInBackground,
-		Watch: background.WatchForClosing,
-	}, clipboard)
-	// Two places of work rather than one. A recipe is allowed to be 256 KB and
-	// parsing one inside that limit can cost hundreds of megabytes, so judging
-	// what is typed belongs anywhere except the thread that draws. Writing the
-	// dataset belongs there even less: it is the one thing on this screen that
-	// can take minutes.
+	damage := takeview.New(text, window, described, take.Open, work, clipboard)
+	// The recipe screen uses two of the places of work. A recipe is allowed to
+	// be 256 KB and parsing one inside that limit can cost hundreds of
+	// megabytes, so judging what is typed belongs anywhere except the thread
+	// that draws. Writing the dataset belongs there even less: it is the one
+	// thing on this screen that can take minutes.
 	editor := recipeview.New(text, recipeview.Checker(described), recipeview.Writer(),
-		background.Work{
-			Read:    background.ReadInBackground,
-			Produce: background.ProduceInBackground,
-		}, window)
+		work, window)
 
 	// The one screen that reaches outside this tool's own files and channels,
 	// and the way out is handed in rather than reached for, like every other
@@ -231,6 +232,23 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 	value := quickview.New(text, clipboard)
 
 	return shell.New(sidebar(text, window, value, damage, editor, browser), brand(text))
+}
+
+// placesOfWork is where every screen sends what must not happen on the thread
+// that draws, together with the one closing of the window.
+//
+// The closing is one for the window because both screens that write run on
+// this window, and a run on one ending must not give the close button back
+// while the other is still writing. It is apart from assemble so that a test
+// can ask whether every port is there without building a screen.
+func placesOfWork(window background.Window) background.Work {
+	closing := background.NewClosing(window, background.WatchForClosing)
+	return background.Work{
+		Run:     background.InBackground,
+		Produce: background.ProduceInBackground,
+		Read:    background.ReadInBackground,
+		Hold:    closing.Hold,
+	}
 }
 
 // sidebar is the column of screens the frame shows, each with its name, its

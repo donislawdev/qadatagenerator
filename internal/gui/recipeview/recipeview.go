@@ -147,6 +147,10 @@ type View struct {
 	// Read and written only on the thread that draws, which is what lets it be
 	// a plain number rather than anything with a lock around it.
 	asked int
+	// checks is the queue every check goes through, so that the letters typed
+	// during one check wait for it rather than each starting a parse of their
+	// own beside it. The reasons stand on background.Latest.
+	checks *background.Latest
 	// checking is true while a check is in flight, so the screen can say so.
 	checking bool
 
@@ -195,11 +199,9 @@ type View struct {
 	halt    *background.Stopper
 	written produce.Written
 	failed  error
-	// closing says somebody asked to leave while a run was going on, so that
-	// the window is given up once the run has ended rather than while it is
-	// still writing.
-	closing      bool
-	releaseWatch func()
+	// letGo gives back the window held for the run in flight, and is nothing
+	// outside a run.
+	letGo func()
 }
 
 // New builds the screen.
@@ -208,6 +210,7 @@ func New(text i18n.Catalogue, check Check, write Write, work background.Work,
 	view := &View{
 		text: text, check: check, write: write, work: work, window: window,
 		cardHeading: container.NewStack(), action: container.NewStack(),
+		checks: background.NewLatest(work.Read),
 	}
 	view.buildBand()
 	view.editor = parts.NewEditor(view.Recheck)
@@ -373,7 +376,7 @@ func (v *View) judge(recipe string, wanted int) {
 	name := v.text.T(i18n.RecipeName)
 	data := []byte(recipe)
 	check := v.check
-	v.work.Read(func() func() {
+	v.checks.Ask(func() func() {
 		report := check(name, data)
 		return func() {
 			if wanted != v.asked {
