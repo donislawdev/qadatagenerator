@@ -1,6 +1,8 @@
 package quick
 
 import (
+	"errors"
+	"math"
 	"slices"
 	"testing"
 
@@ -105,6 +107,58 @@ func everyCell(sample produce.Sample) []string {
 		}
 	}
 	return cells
+}
+
+// TestEachHandsOutAHugeCountOneValueAtATime holds R12: a count with no ceiling
+// is drawn one value at a time, and the first error take returns ends it.
+//
+// 🔴 The count is the largest an int holds, and that is what makes this a guard
+// rather than an example. Holding the values first fails at once on a count
+// like this one, and drawing on after take said stop asks for a fourth value,
+// which ends the test from inside take rather than leaving it running.
+func TestEachHandsOutAHugeCountOneValueAtATime(t *testing.T) {
+	gone := errors.New("the reader has gone")
+	asked := Request{Generator: "pesel", Locale: DefaultLocale, Seed: "for-the-test", Count: math.MaxInt}
+	var taken []string
+	err := Each(asked, func(value string) error {
+		if len(taken) == 3 {
+			t.Fatalf("a fourth value was drawn after the third was answered with an error")
+		}
+		taken = append(taken, value)
+		if len(taken) == 3 {
+			return gone
+		}
+		return nil
+	})
+	if !errors.Is(err, gone) {
+		t.Errorf("the error take returned came back as %v, so a caller whose output failed "+
+			"cannot tell that from anything else", err)
+	}
+	asked.Count = 3
+	bounded, runErr := Run(asked)
+	if runErr != nil {
+		t.Fatalf("three values could not be produced: %v", runErr)
+	}
+	if !slices.Equal(taken, bounded) {
+		t.Errorf("one value at a time gave %q and the same three held together gave %q", taken, bounded)
+	}
+}
+
+// An error of the engine ends the drawing before take hears of a value, and
+// comes back as the engine said it.
+func TestEachEndsWhereTheEngineRefuses(t *testing.T) {
+	asked := Request{Generator: "telephone", Locale: DefaultLocale, Seed: "for-the-test", Count: 5}
+	handed := 0
+	err := Each(asked, func(string) error {
+		handed++
+		return nil
+	})
+	if err == nil {
+		t.Fatal("a generator this build does not have was drawn from without an error")
+	}
+	if handed != 0 {
+		t.Errorf("take was handed %d values from a generator the engine refused", handed)
+	}
 }
 
 // TestQuickRefusesWhatItCannotProduce walks every refusal this mode has and

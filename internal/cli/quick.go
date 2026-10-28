@@ -236,11 +236,20 @@ func inLocale(locale string) string {
 	return problemQuickInLocale + locale
 }
 
-// writeOneValue draws the value and puts it on the data channel.
+// writeValues draws the values and puts them on the data channel as they come.
 //
 // Split from reading the command line above it for the reason every other verb
 // here is split the same way: what was asked for and what is done about it are
 // two things, and the second one is what a test wants to reach.
+//
+// 🔴 # Why a signal is not caught here, unlike in generate and corrupt
+//
+// The command line contract catches a signal only where a run has something to
+// take back (docs/09), and this verb writes no file. Catching it would also
+// change what a shell does: measured 2026-10-28 with bash 5.3.9, a loop whose
+// command catches the interrupt and exits with 130 runs on to its next round,
+// while a loop whose command dies of it ends. This is the verb people put in a
+// loop. A value is never cut in half by the kill either, see batchBytes.
 func writeValues(out *streams, locale, chosenSeed, generator string, count int, agrees map[string]string) int {
 	drawn := chosenSeed
 	if drawn == "" {
@@ -258,18 +267,18 @@ func writeValues(out *streams, locale, chosenSeed, generator string, count int, 
 		return usage(out, quickRefusalOf(refusal))
 	}
 
-	produced, err := quick.Run(asked)
-	if err != nil {
-		return fail(out, err)
-	}
-
 	// One value to a line, and nothing around them. A count, a heading or a
 	// blank line between them would each be something for a pipe to strip, and
-	// this is the one verb whose whole answer is meant to be piped.
-	for _, value := range produced {
-		out.emit(value)
-	}
-	if chosenSeed == "" {
+	// this is the one verb whose whole answer is meant to be piped. The first
+	// failed write ends the drawing, because nothing after it can arrive.
+	wrote := false
+	err := quick.Each(asked, func(value string) error {
+		wrote = true
+		out.emitBatched(value)
+		return out.dataErr
+	})
+	out.flushBatch()
+	if chosenSeed == "" && wrote {
 		// note rather than info, and the difference is the whole point: info is
 		// silent unless somebody asked for progress detail, and this is not
 		// progress. It is the one thing needed to ask for the same value
@@ -279,7 +288,14 @@ func writeValues(out *streams, locale, chosenSeed, generator string, count int, 
 		// Said after the value rather than before it, so that a person reading
 		// a terminal sees what they asked for first. The two channels are
 		// separate, so the order only matters to a pair of eyes.
+		//
+		// Said also when the output failed after the first value, because a
+		// reader that took the first values and left needs this line to get
+		// the same ones again. Not said when nothing was drawn at all.
 		out.note(quickSeedDrawn + drawn)
+	}
+	if err != nil {
+		return finishFailed(out, err)
 	}
 	return finish(out, codeOK)
 }

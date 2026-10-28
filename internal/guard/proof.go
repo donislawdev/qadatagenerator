@@ -664,4 +664,11 @@ var toolGuards = []Guard{
 	{"the real check of a recipe hands its stop to the preview", "TestTheRealCheckHandsItsStopToThePreview", "internal/gui/recipeview", ByMutation},
 	{"a forgotten question is told to stop, its answer is dropped and nothing waiting behind it is asked", "TestAForgottenQuestionIsStoppedAndNothingWaitingIsAsked", "internal/gui/background", ByMutation},
 	{"an answer that arrives after the recipe screen was emptied is not drawn over it", "TestAnAnswerArrivingAfterTheRecipeWasClearedIsNotDrawn", "internal/gui/recipeview", ByMutation},
+	{"the first error the receiver of quick values returns ends the drawing, so a count with no ceiling stops where its reader stops", "TestEachHandsOutAHugeCountOneValueAtATime", "internal/quick", ByMutation},
+	{"an error of the engine ends the drawing of quick values before the receiver is handed anything", "TestEachEndsWhereTheEngineRefuses", "internal/quick", ByMutation},
+	{"a batch of data lines is written only when the next line would not fit, so it fills the size a pipe takes whole exactly and never splits a line", "TestABatchIsWholeLinesAndAsLargeAsAPipeTakesWhole", "internal/cli", ByMutation},
+	{"every value quick draws reaches the data channel in order, the last batch that nothing later pushes out included", "TestQuickWritesEveryValueItDrewInOrder", "internal/cli", ByMutation},
+	{"quick stops drawing at the first failed write to standard output and writes nothing after it", "TestQuickStopsDrawingAtTheFirstWriteThatFails", "internal/cli", ByMutation},
+	{"a quick run that drew its own seed names it on the log, and that seed gives the same values again", "TestADrawnSeedIsSaidAndBringsTheSameValuesBack", "internal/cli", ByMutation},
+	{"a quick run whose engine refused the first value names no seed, because nothing was drawn for it to bring back", "TestNoSeedIsSaidWhenTheEngineRefusedTheFirstValue", "internal/cli", ByMutation},
 }

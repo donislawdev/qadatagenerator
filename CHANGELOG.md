@@ -35,6 +35,21 @@ repository once they are released.
 
 ### Fixed
 
+- **quick writes its values as it draws them, and stops at the first one that
+  cannot be written.** A large `--count` used to write nothing until the last
+  value was drawn, and a hundred million values ended in an out of memory
+  failure before the first one appeared. The first value now arrives in
+  milliseconds whatever the count, two million values take less than half the
+  time they did, and the memory no longer grows with the count. Values go out in
+  batches of whole lines of at most 512 bytes, the largest write every system
+  of the POSIX family promises to put into a pipe whole, so a run that is
+  killed never leaves half a value behind. A reader that leaves early ends the
+  run at once, where it used to keep writing into nothing for about a second
+  per million values.
+- **quick still does not catch Ctrl+C, and that is now written down.** It
+  leaves no file to take back, and a command that catches the interrupt keeps
+  a shell loop running into its next round, while one that dies of it ends
+  the loop.
 - **corrupt reads at most 1 MiB as one record and refuses a longer one,
   naming the line it starts on.** A quote left open near the top of a large
   file used to read the rest of the file into memory before anything was said

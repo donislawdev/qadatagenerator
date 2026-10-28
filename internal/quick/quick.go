@@ -180,13 +180,26 @@ func Reads(generator, role, locale string) bool {
 	return values.New(locale, "").ReadsRole(generator, role)
 }
 
-// Run produces the values the request asks for, in order.
+// Each produces the values the request asks for, in order, and hands each one
+// to take before the next is drawn.
 //
 // Check above has to have passed. A request that would be refused reaches the
 // engine here and is answered by whatever the engine says about it, which is a
 // worse message than the refusal beside it and, for an unknown generator, a
 // different exit code. The two surfaces both ask first, and the test beside
 // this package holds that they cannot stop.
+//
+// The first error ends it and comes back as it was, whether the engine said it
+// or take did. That is how a caller whose output has failed stops the drawing:
+// every value after a failed write would go nowhere too.
+//
+// 🔴 # Why one value at a time
+//
+// A count has no ceiling on the command line, on purpose, and until 2026-10-28
+// every value was held until the last one was drawn. A large count therefore
+// wrote nothing until the end, and a count of a hundred million asked the
+// runtime for 1.6 GB at once and ended in its out of memory failure, which no
+// recover can catch. Nothing is held here between two values.
 //
 // # Why the values are not promised to differ from each other
 //
@@ -195,9 +208,8 @@ func Reads(generator, role, locale string) bool {
 // the same seed. Uniqueness is a promise a recipe makes with a rule of its own,
 // and making it quietly here would be a second spelling of it that nobody
 // asked for. Both surfaces say so where it can be read.
-func Run(req Request) ([]string, error) {
+func Each(req Request, take func(value string) error) error {
 	source := values.New(req.Locale, req.Seed)
-	produced := make([]string, 0, req.Count)
 	for row := int64(FirstRow); row < int64(FirstRow)+int64(req.Count); row++ {
 		value, err := source.Produce(generate.Request{
 			Generator: req.Generator,
@@ -205,9 +217,31 @@ func Run(req Request) ([]string, error) {
 			Agrees:    provider.NewAgreement(req.Agrees),
 		})
 		if err != nil {
-			return nil, err
+			return err
 		}
+		if refused := take(value); refused != nil {
+			return refused
+		}
+	}
+	return nil
+}
+
+// Run produces the values the request asks for, in order, and holds all of
+// them.
+//
+// It is for a caller that bounds the count before asking, which is the window
+// and its MostShownAtOnce. A caller with no ceiling uses Each, for the reason
+// written there, and nothing is reserved here for the count up front, so that
+// a caller who takes this for the other one pays for the values it gets rather
+// than for the number it asked for.
+func Run(req Request) ([]string, error) {
+	var produced []string
+	err := Each(req, func(value string) error {
 		produced = append(produced, value)
+		return nil
+	})
+	if err != nil {
+		return nil, err
 	}
 	return produced, nil
 }
