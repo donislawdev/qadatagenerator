@@ -523,4 +523,13 @@ var damageGuards = []Guard{
 	{"an extra form of the manifest picked for a recipe without a policy is said on the card to have nothing to export, before the run and after it", "TestAnExtraFormOnARecipeWithoutAPolicySaysItHasNothingToExport", "internal/gui/recipeview", ByMutation},
 	{"the first entry on the list of extra forms of the manifest gives a run no form at all, rather than a form called by the word for none", "TestTheFirstFormOnTheListIsNoFormAtAll", "internal/gui/damageparts", ByMutation},
 	{"the plan of a take and corrupt run splits the damage ordered and carried out by layer, in the order the layers were named, and the rows sum to the totals", "TestThePlanSplitsWhatItWouldDoByLayerInTheOrderTheLayersWereNamed", "internal/take", ByMutation},
+	{"an entry no manifest document can record ends the damaging run before its record reaches the data", "TestAnEntryNoDocumentCanRecordEndsTheRunBeforeItsRecordGoesOn", "internal/adapter/corrupted", ByMutation},
+	{"the first manifest document to refuse an entry ends the handing out, and its refusal is what the run is told", "TestTheFirstSinkToRefuseAnEntryIsTheLastOneHandedIt", "internal/adapter/corrupted", ByMutation},
+	{"a damaging run whose manifest cannot be written stops within one buffer of entries rather than at its close", "TestARunStopsWithinABufferOfAManifestThatCannotBeWritten", "internal/adapter/corrupted", ByMutation},
+	{"the canonical manifest reaches its file in pieces of a few kilobytes rather than one write per entry", "TestTheManifestReachesItsFileInPiecesRatherThanAnEntryAtATime", "internal/adapter/manifestjson", ByMutation},
+	{"the canonical manifest sends what its buffer holds before it closes, and a failure to send it fails the close", "TestAManifestWhoseLastBytesCannotBeWrittenDoesNotClose", "internal/adapter/manifestjson", ByMutation},
+	{"the canonical manifest answers an entry with the failure to write the file while entries still arrive", "TestAManifestThatCannotBeWrittenSaysSoWithinOneBuffer", "internal/adapter/manifestjson", ByMutation},
+	{"every export of the manifest reaches its file in pieces of a few kilobytes rather than one write per entry", "TestEveryFormReachesItsFileInPiecesRatherThanAnEntryAtATime", "internal/adapter/manifestexport", ByMutation},
+	{"every export of the manifest answers an entry with the failure to write its file while entries still arrive", "TestEveryFormSaysItCannotBeWrittenWithinOneBuffer", "internal/adapter/manifestexport", ByMutation},
+	{"every export of the manifest sends what its buffer holds before it closes, and a failure to send it fails the close", "TestEveryFormSaysItsLastLinesCouldNotBeWritten", "internal/adapter/manifestexport", ByMutation},
 }

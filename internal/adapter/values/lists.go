@@ -90,7 +90,7 @@ func (s Source) entriesDerived(list string, build func(string) ([]string, bool))
 
 // pick chooses one entry, from those that fit when a limit is declared.
 func (s Source) pick(found listing, req generate.Request) (string, error) {
-	entries := fitting(found.entries, req)
+	entries := s.entriesWithin(found, req)
 	if len(entries) == 0 {
 		return "", fault.New(fault.Data, fmt.Sprintf(
 			"no entry of %s for %s is short enough for %s, which accepts %d %s",
@@ -101,6 +101,9 @@ func (s Source) pick(found listing, req generate.Request) (string, error) {
 
 // fitting returns the entries within the declared maximum length, all of them
 // when none is declared.
+//
+// The list itself comes back when every entry fits, so a limit wider than the
+// list costs no copy of it. Nothing that reads the answer changes it.
 func fitting(entries []string, req generate.Request) []string {
 	if !req.HasMaxLength {
 		return entries
@@ -110,6 +113,9 @@ func fitting(entries []string, req generate.Request) []string {
 		if measure(entry, req.Unit) <= req.MaxLength {
 			kept = append(kept, entry)
 		}
+	}
+	if len(kept) == len(entries) {
+		return entries
 	}
 	return kept
 }

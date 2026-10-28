@@ -1,6 +1,7 @@
 package corrupted_test
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 	"testing"
@@ -68,9 +69,10 @@ type recorder struct {
 	log     *[]string
 }
 
-func (r *recorder) Add(defect manifest.Defect) {
+func (r *recorder) Add(defect manifest.Defect) error {
 	r.entries = append(r.entries, defect)
 	*r.log = append(*r.log, r.name)
+	return nil
 }
 
 // silent is the writer the records reach once the damage is done to them.
@@ -107,6 +109,25 @@ func entry(id catalog.ID, summary string) catalog.Entry {
 // not what the fields held part way through.
 func damaged(t *testing.T) (*corrupted.Writer, *recorder) {
 	t.Helper()
+	log := []string{}
+	written := &recorder{name: "first", log: &log}
+	writer, _, table := writerInto(t, corrupted.Tee{written}, 4)
+	for row := 0; row < table.Rows; row++ {
+		record := dataset.Record{Values: []string{"1250"}, Parent: dataset.NoParent}
+		if err := writer.Write(record); err != nil {
+			t.Fatalf("row %d was refused: %v", row, err)
+		}
+	}
+	if err := writer.End(table); err != nil {
+		t.Fatalf("the run refused to end: %v", err)
+	}
+	return writer, written
+}
+
+// writerInto builds the writer of the fixture over the given documents and
+// begins a table of so many rows, every one of them ordered damage.
+func writerInto(t *testing.T, sinks corrupted.Entries, rows int) (*corrupted.Writer, *silent, dataset.Table) {
+	t.Helper()
 	described, problems := catalog.New("0.1", "draft", []catalog.Entry{
 		entry(damageApplied, "Puts text where the schema declares a number."),
 		entry(damageDeclined, "Empties a field the schema requires."),
@@ -130,24 +151,66 @@ func damaged(t *testing.T) (*corrupted.Writer, *recorder) {
 	engine := corrupt.New(described, implementations, noSchemes{},
 		capability.NewSet(capability.SchemaFieldType), seed.New("corrupt test"))
 
-	log := []string{}
-	written := &recorder{name: "first", log: &log}
-	writer := corrupted.New(&silent{}, engine, &selector, corrupted.Tee{written}, schema{})
-
-	table := dataset.Table{Entity: "invoice", Columns: []string{"amount"}, Rows: 4}
+	next := &silent{}
+	writer := corrupted.New(next, engine, &selector, sinks, schema{})
+	table := dataset.Table{Entity: "invoice", Columns: []string{"amount"}, Rows: rows}
 	if err := writer.Begin(table); err != nil {
 		t.Fatalf("the run refused to begin: %v", err)
 	}
-	for row := 0; row < table.Rows; row++ {
-		record := dataset.Record{Values: []string{"1250"}, Parent: dataset.NoParent}
-		if err := writer.Write(record); err != nil {
-			t.Fatalf("row %d was refused: %v", row, err)
-		}
+	return writer, next, table
+}
+
+// refusing is a document that cannot take any entry.
+type refusing struct{ handed int }
+
+var errNoRoom = errors.New("the document has no room for the entry")
+
+func (r *refusing) Add(manifest.Defect) error {
+	r.handed++
+	return errNoRoom
+}
+
+// 🔴 An entry no document can record ends the run before its record goes on.
+//
+// Until 2026-10-28 the refusal was held by the document and said only when it
+// closed, so a run went on to produce every remaining record of a dataset that
+// the failure at its close then threw away (found by an outside review on
+// 2026-10-22). A record passed on after its entry was refused is a record whose
+// damage nothing describes.
+func TestAnEntryNoDocumentCanRecordEndsTheRunBeforeItsRecordGoesOn(t *testing.T) {
+	refused := &refusing{}
+	writer, next, _ := writerInto(t, corrupted.Tee{refused}, 4)
+	err := writer.Write(dataset.Record{Values: []string{"1250"}, Parent: dataset.NoParent})
+	if !errors.Is(err, errNoRoom) {
+		t.Fatalf("the first record was written with %v although its entry was refused", err)
 	}
-	if err := writer.End(table); err != nil {
-		t.Fatalf("the run refused to end: %v", err)
+	if refused.handed != 1 {
+		t.Errorf("the document was handed %d entries, want the one it refused", refused.handed)
 	}
-	return writer, written
+	if next.rows != 0 {
+		t.Errorf("%d records reached the data after their entry was refused", next.rows)
+	}
+}
+
+// The documents after the one that refused an entry are not handed it, because
+// the run ends there and none of them will be kept.
+func TestTheFirstSinkToRefuseAnEntryIsTheLastOneHandedIt(t *testing.T) {
+	log := []string{}
+	first := &recorder{name: "first", log: &log}
+	refused := &refusing{}
+	third := &recorder{name: "third", log: &log}
+
+	err := corrupted.Tee{first, refused, third}.Add(manifest.Defect{ID: "d1"})
+	if !errors.Is(err, errNoRoom) {
+		t.Fatalf("three documents, one refusing, took the entry with %v", err)
+	}
+	if len(first.entries) != 1 || refused.handed != 1 {
+		t.Errorf("the documents before the refusal were handed %d and %d entries, want 1 and 1",
+			len(first.entries), refused.handed)
+	}
+	if len(third.entries) != 0 {
+		t.Error("a document after the one that refused was still handed the entry")
+	}
 }
 
 // The counts are kept here rather than gathered from the manifest afterwards,

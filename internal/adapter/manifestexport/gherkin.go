@@ -24,6 +24,7 @@
 package manifestexport
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"strconv"
@@ -39,7 +40,7 @@ var gherkinColumns = [4]string{"row", "field", "mutator", "expectation"}
 
 // Gherkin writes the entries of a run as an Examples table.
 type Gherkin struct {
-	to      io.Writer
+	to      *bufio.Writer
 	err     error
 	written int
 	skipped int
@@ -58,7 +59,7 @@ type Gherkin struct {
 // build can ever write is in the catalog, and the widest row number is the
 // count of rows the run was given.
 func NewGherkin(to io.Writer, described catalog.Catalog, rows int) *Gherkin {
-	g := &Gherkin{to: to}
+	g := &Gherkin{to: bufio.NewWriter(to)}
 	g.widths[0] = widthOf(len(strconv.Itoa(max(rows, 1))), gherkinColumns[0])
 	g.widths[1] = len(gherkinColumns[1])
 	g.widths[2] = widthOf(widestIdentifier(described), gherkinColumns[2])
@@ -85,13 +86,13 @@ func NewGherkin(to io.Writer, described catalog.Catalog, rows int) *Gherkin {
 }
 
 // Add takes one entry and writes it when it is one a test can use.
-func (g *Gherkin) Add(defect manifest.Defect) {
+func (g *Gherkin) Add(defect manifest.Defect) error {
 	if g.err != nil {
-		return
+		return g.err
 	}
 	if !defect.Applied {
 		g.skipped++
-		return
+		return nil
 	}
 	// 🔴 An entry expecting the application to take the value and complain has
 	// nothing a scenario can assert. What counts as a complaint is knowledge
@@ -101,7 +102,7 @@ func (g *Gherkin) Add(defect manifest.Defect) {
 	// failure this form already refuses for damage that never happened.
 	if defect.Expectation == catalog.Warning {
 		g.unassertable++
-		return
+		return nil
 	}
 	g.written++
 	g.writeRow([4]string{
@@ -110,6 +111,7 @@ func (g *Gherkin) Add(defect manifest.Defect) {
 		escapeCell(string(defect.Mutator)),
 		escapeCell(string(defect.Expectation)),
 	})
+	return g.err
 }
 
 // Finish closes the table with what it left out.
@@ -130,7 +132,7 @@ func (g *Gherkin) Finish() error {
 			"one application rather than about the data. The canonical manifest carries them.\n",
 			g.unassertable))
 	}
-	return g.err
+	return flushed(g.to, &g.err, GherkinName)
 }
 
 // Written is how many rows the table carries.
@@ -159,9 +161,25 @@ func (g *Gherkin) write(text string) {
 	if g.err != nil {
 		return
 	}
-	if _, err := io.WriteString(g.to, text); err != nil {
+	if _, err := g.to.WriteString(text); err != nil {
 		g.err = fault.Wrap(fault.IO, err, "cannot write "+GherkinName)
 	}
+}
+
+// flushed sends what a form still buffers to its file and answers with the
+// first failure the form met, which is the one Finish reports.
+//
+// It is shared because the two forms that write lines of their own close the
+// same way, and a third form copying one of them would copy the place where a
+// failure to send the last lines could be forgotten.
+func flushed(to *bufio.Writer, held *error, name string) error {
+	if *held != nil {
+		return *held
+	}
+	if err := to.Flush(); err != nil {
+		*held = fault.Wrap(fault.IO, err, "cannot write "+name)
+	}
+	return *held
 }
 
 // escapeCell makes a value safe inside a table cell.

@@ -3,12 +3,15 @@ package manifestjson_test
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
 func anEntry(id string) manifest.Defect {
@@ -149,7 +152,11 @@ func TestAnEntryTheModelWouldRefuseNeverReachesTheFile(t *testing.T) {
 
 	broken := anEntry("no-field")
 	broken.Location.Field = ""
-	writer.Add(broken)
+	// The refusal is answered at once rather than held for the close, so that
+	// the run ends at this entry instead of producing the rest of its dataset.
+	if err := writer.Add(broken); err == nil {
+		t.Error("an entry the manifest model refuses was taken without a word")
+	}
 
 	err := writer.Finish(anEnvelope(), 1, 1)
 	if err == nil {
@@ -158,6 +165,125 @@ func TestAnEntryTheModelWouldRefuseNeverReachesTheFile(t *testing.T) {
 	if strings.Contains(buffer.String(), "no-field") {
 		t.Error("the refused entry reached the document anyway")
 	}
+}
+
+// counted is a file that counts the writes it is handed.
+//
+// Write is all it has, like the file of a run. A fake that also took a string
+// would be handed large pieces past the buffer and past this count.
+type counted struct {
+	kept   bytes.Buffer
+	writes int
+}
+
+func (c *counted) Write(p []byte) (int, error) {
+	c.writes++
+	return c.kept.Write(p)
+}
+
+// takesUpTo is a file with room for so many bytes and no more.
+type takesUpTo struct {
+	room  int
+	tried int
+	kept  bytes.Buffer
+}
+
+var errNoRoom = errors.New("there is no room left on the disk")
+
+func (f *takesUpTo) Write(p []byte) (int, error) {
+	f.tried++
+	if len(p) > f.room {
+		taken := f.room
+		f.kept.Write(p[:taken])
+		f.room = 0
+		return taken, errNoRoom
+	}
+	f.room -= len(p)
+	f.kept.Write(p)
+	return len(p), nil
+}
+
+// The document reaches its file in pieces of a few kilobytes rather than one
+// write per entry. Until 2026-10-28 every entry was a call to the system of its
+// own (found by an outside review on 2026-10-22), so a run of a hundred
+// thousand defects made a hundred thousand of them.
+func TestTheManifestReachesItsFileInPiecesRatherThanAnEntryAtATime(t *testing.T) {
+	file := &counted{}
+	writer := manifestjson.New(file, "0.2")
+	const entries = 500
+	for at := 0; at < entries; at++ {
+		if err := writer.Add(anEntry(fmt.Sprintf("entry-%d", at))); err != nil {
+			t.Fatalf("entry %d was refused: %v", at, err)
+		}
+	}
+	if err := writer.Finish(anEnvelope(), entries, entries); err != nil {
+		t.Fatal(err)
+	}
+	if most := file.kept.Len()/4096 + 1; file.writes > most {
+		t.Errorf("%d entries, %d bytes, reached the file in %d writes, want at most %d",
+			entries, file.kept.Len(), file.writes, most)
+	}
+	var document struct {
+		Defects []json.RawMessage `json:"defects"`
+	}
+	if err := json.Unmarshal(file.kept.Bytes(), &document); err != nil {
+		t.Fatalf("the buffered document does not parse: %v", err)
+	}
+	if len(document.Defects) != entries {
+		t.Errorf("the buffered document carries %d of the %d entries", len(document.Defects), entries)
+	}
+}
+
+// 🔴 A document whose last bytes cannot be written does not close.
+//
+// The buffer holds them until the close, and the set of files gives every file
+// its real name right after it. A failure to send them that went unsaid would
+// give a short document the name of a whole one.
+func TestAManifestWhoseLastBytesCannotBeWrittenDoesNotClose(t *testing.T) {
+	file := &takesUpTo{room: 64}
+	writer := manifestjson.New(file, "0.2")
+	if err := writer.Add(anEntry("one")); err != nil {
+		t.Fatalf("an entry was refused before anything reached the file: %v", err)
+	}
+	err := writer.Finish(anEnvelope(), 1, 1)
+	if err == nil {
+		t.Fatalf("the manifest closed although %d bytes of it reached the file", file.kept.Len())
+	}
+	if kind := fault.KindOf(err); kind != fault.IO {
+		t.Errorf("a file out of room was reported as %v rather than as a failure to write", kind)
+	}
+}
+
+// 🔴 A document that cannot be written says so while entries still arrive,
+// within one buffer of them, rather than when it closes, and it says so at the
+// entry during which the disk refused rather than at the one after.
+//
+// It is the half of ending a run early that this package owns: the writer of
+// records stops at the first entry that is refused, and an entry is refused
+// only if the document says it was.
+func TestAManifestThatCannotBeWrittenSaysSoWithinOneBuffer(t *testing.T) {
+	file := &takesUpTo{}
+	writer := manifestjson.New(file, "0.2")
+	for at := 1; at <= 100; at++ {
+		err := writer.Add(anEntry(fmt.Sprintf("entry-%d", at)))
+		if file.tried == 0 {
+			if err != nil {
+				t.Fatalf("entry %d was refused before the disk was tried: %v", at, err)
+			}
+			continue
+		}
+		if err == nil {
+			t.Fatalf("the disk refused during entry %d and the entry was taken", at)
+		}
+		if !errors.Is(err, errNoRoom) || fault.KindOf(err) != fault.IO {
+			t.Errorf("a full disk was reported as %v", err)
+		}
+		if again := writer.Add(anEntry("after")); !errors.Is(again, errNoRoom) {
+			t.Errorf("the entry after the failure was answered with %v", again)
+		}
+		return
+	}
+	t.Fatal("a hundred entries were taken by a document whose file takes nothing")
 }
 
 // A value the mutator produced on purpose survives, including an empty one. One

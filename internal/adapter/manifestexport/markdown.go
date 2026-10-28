@@ -1,6 +1,7 @@
 package manifestexport
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"strconv"
@@ -23,7 +24,7 @@ import (
 // carries the rest, which is the shape the Gherkin form already proved: the
 // count of what is missing is stated rather than left as a gap.
 type Markdown struct {
-	to      io.Writer
+	to      *bufio.Writer
 	err     error
 	written int
 	skipped int
@@ -33,7 +34,7 @@ type Markdown struct {
 // NewMarkdown starts the document and writes what is known before the first
 // entry.
 func NewMarkdown(to io.Writer, described catalog.Catalog, rows int) *Markdown {
-	m := &Markdown{to: to}
+	m := &Markdown{to: bufio.NewWriter(to)}
 	m.widths[0] = widthOf(len(strconv.Itoa(max(rows, 1))), gherkinColumns[0])
 	m.widths[1] = len(gherkinColumns[1])
 	m.widths[2] = widthOf(widestIdentifier(described), gherkinColumns[2])
@@ -54,13 +55,13 @@ func NewMarkdown(to io.Writer, described catalog.Catalog, rows int) *Markdown {
 }
 
 // Add takes one entry and writes it when it is one the report is about.
-func (m *Markdown) Add(defect manifest.Defect) {
+func (m *Markdown) Add(defect manifest.Defect) error {
 	if m.err != nil {
-		return
+		return m.err
 	}
 	if !defect.Applied {
 		m.skipped++
-		return
+		return nil
 	}
 	m.written++
 	m.writeRow([4]string{
@@ -69,6 +70,7 @@ func (m *Markdown) Add(defect manifest.Defect) {
 		escapeCell(string(defect.Mutator)),
 		escapeCell(string(defect.Expectation)),
 	})
+	return m.err
 }
 
 // Finish closes the document with what the table left out.
@@ -80,12 +82,12 @@ func (m *Markdown) Finish() error {
 		m.write("\nNo damage was applied in this run, so this table has no rows.\n")
 		m.write(fmt.Sprintf("%d were ordered and none of them happened. "+
 			"The canonical manifest beside this file carries the reason for each.\n", m.skipped))
-		return m.err
+		return flushed(m.to, &m.err, FileFor(FormMarkdown))
 	}
 	m.write(fmt.Sprintf("\n%d applied, %d ordered and not applied. "+
 		"The canonical manifest beside this file carries the reason for each.\n",
 		m.written, m.skipped))
-	return m.err
+	return flushed(m.to, &m.err, FileFor(FormMarkdown))
 }
 
 // Written is how many rows the table carries.
@@ -111,7 +113,7 @@ func (m *Markdown) write(text string) {
 	if m.err != nil {
 		return
 	}
-	if _, err := io.WriteString(m.to, text); err != nil {
+	if _, err := m.to.WriteString(text); err != nil {
 		m.err = fault.Wrap(fault.IO, err, "cannot write "+FileFor(FormMarkdown))
 	}
 }

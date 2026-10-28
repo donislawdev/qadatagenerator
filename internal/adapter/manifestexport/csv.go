@@ -51,7 +51,7 @@ func NewCSV(to io.Writer) *CSV {
 }
 
 // Add takes one entry, applied or not.
-func (c *CSV) Add(defect manifest.Defect) {
+func (c *CSV) Add(defect manifest.Defect) error {
 	applied := "no"
 	if defect.Applied {
 		applied = "yes"
@@ -68,6 +68,7 @@ func (c *CSV) Add(defect manifest.Defect) {
 		string(defect.FailureKind),
 		defect.FailureReason,
 	})
+	return c.err
 }
 
 // Finish empties what the writer is holding.

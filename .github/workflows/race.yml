@@ -3,7 +3,7 @@
 # It ran on every push until then and answered the same question every time.
 # Almost nothing in this repository can carry a data race, because a guard in
 # internal/guard refuses a goroutine, a channel or a synchronisation import in
-# any file other than the three named below. A push that renames a message or
+# any file other than the ones named below. A push that renames a message or
 # adds a table column cannot introduce one, and paying for the detector to say
 # so is how a check becomes noise.
 #
@@ -11,14 +11,14 @@
 #
 # On a push, only when a file that can carry a race changed. That list is the
 # register in internal/guard/concurrency.go plus the register itself, because
-# adding a fourth entry there is how new concurrency legally arrives. The list
+# adding an entry there is how new concurrency legally arrives. The list
 # is not left to memory: tools/audyt.py compares it against the register in
 # both directions, so a file that moves makes the audit red rather than making
 # this workflow quietly narrower.
 #
 # On a schedule, once a week, because the push filter has a hole that cannot be
 # closed by widening it. A race needs a test to exercise it, those tests live
-# in the packages that use the three files rather than beside them, and a
+# in the packages that use those files rather than beside them, and a
 # change to shared code called from a goroutine carries no concurrency of its
 # own. Listing every file that could be reached from a goroutine would be the
 # whole repository, which is where this started.
@@ -38,6 +38,7 @@ on:
       - internal/cli/signals.go
       - internal/gui/background/background.go
       - internal/adapter/provider/corpus/corpus.go
+      - internal/adapter/values/fitted.go
       - internal/guard/concurrency.go
       - go.mod
       - go.sum

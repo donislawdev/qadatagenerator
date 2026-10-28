@@ -120,6 +120,10 @@ var types = map[string]string{
 type Source struct {
 	locale string
 	seed   seed.Source
+	// fitted holds the entries of a word list that fit a limit on length, so
+	// that the list is measured once a run rather than once a value. It is
+	// shared by every copy of this source and empty in a zero one.
+	fitted *fittedLists
 }
 
 // Contract check, so that a mismatch fails to compile rather than at run time.
@@ -134,7 +138,7 @@ func New(locale, from string) Source {
 	if locale == "" {
 		locale = defaultLocale
 	}
-	return Source{locale: locale, seed: seed.New(from)}
+	return Source{locale: locale, seed: seed.New(from), fitted: &fittedLists{}}
 }
 
 // everywhere is a generator that reads the same roles in every locale.

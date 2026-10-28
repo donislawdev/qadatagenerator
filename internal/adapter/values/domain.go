@@ -50,7 +50,7 @@ func (s Source) DomainOf(req generate.Request) (generate.Domain, bool) {
 			// own sentence before anything asks for a domain.
 			return generate.Domain{}, false
 		}
-		return listDomain(found.key, fitting(found.entries, req)), true
+		return listDomain(found.key, s.entriesWithin(found, req)), true
 	case req.Generator == Gender:
 		return listDomain(Gender, fitting([]string{string(provider.Female), string(provider.Male)}, req)), true
 	case req.Generator == BirthDate:

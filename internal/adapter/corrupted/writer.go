@@ -45,8 +45,17 @@ import (
 // Only Add is here. Closing a document belongs to whoever opened it, which is
 // the surface that created the files, and a port that could also finish would
 // invite this writer to finish something it did not begin.
+//
+// # Why Add answers with a failure
+//
+// A manifest that cannot be written makes the whole run worthless, because the
+// run fails at the end and leaves nothing behind. Until 2026-10-28 the failure
+// was held by the document and said only when it closed, so a run went on to
+// produce every remaining record of a dataset nobody would get (found by an
+// outside review on 2026-10-22). Answering here ends the run at the first entry
+// that could not be recorded.
 type Entries interface {
-	Add(defect manifest.Defect)
+	Add(defect manifest.Defect) error
 }
 
 // Tee sends every entry to each sink in turn, in the order given.
@@ -56,11 +65,17 @@ type Entries interface {
 // rest of this project follows about iteration order.
 type Tee []Entries
 
-// Add hands the entry to every sink.
-func (t Tee) Add(defect manifest.Defect) {
+// Add hands the entry to every sink and stops at the first one that refuses it.
+//
+// The sinks after it are not handed the entry, because the run ends here and
+// none of the documents it was writing will be kept.
+func (t Tee) Add(defect manifest.Defect) error {
 	for _, sink := range t {
-		sink.Add(defect)
+		if failed := sink.Add(defect); failed != nil {
+			return failed
+		}
 	}
+	return nil
 }
 
 // Writer damages records on their way to the real writer and records every
@@ -112,13 +127,18 @@ func (w *Writer) Begin(table dataset.Table) error {
 }
 
 // Write damages the record if this row was chosen, then passes it on.
+//
+// An entry that cannot be recorded ends the run before the record goes on, so
+// that no record reaches the data without the entry saying what was done to it.
 func (w *Writer) Write(record dataset.Record) error {
 	row := w.row
 	w.row++
 	damaged := false
 	for _, order := range w.selector.Orders(w.table.Entity, row, w.table.Rows) {
 		entry := w.apply(order, record, row)
-		w.entries.Add(entry)
+		if refused := w.entries.Add(entry); refused != nil {
+			return refused
+		}
 		w.requested++
 		if entry.Applied {
 			w.applied++

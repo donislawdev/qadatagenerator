@@ -15,12 +15,20 @@ import (
 // input and they cannot drift. What separates them is not the information,
 // which is the same, but who opens the file and what that costs.
 type Export interface {
-	// Add takes one entry, at the moment it happens.
-	Add(defect manifest.Defect)
-	// Finish writes whatever closes the file. A form left unfinished is a file
-	// that stops mid table without saying so.
+	// Add takes one entry, at the moment it happens, and answers with the first
+	// failure to write the file, so that the run ends there rather than at its
+	// close.
+	Add(defect manifest.Defect) error
+	// Finish writes whatever closes the file and sends what is still buffered
+	// to it. A form left unfinished is a file that stops mid table without
+	// saying so.
 	Finish() error
 }
+
+// Every form writes through a buffer of a few kilobytes rather than a call to
+// the system per entry (found by an outside review on 2026-10-22). The CSV form
+// had one from the start, inside the writer of the standard library. A failure
+// of the disk is noticed up to one buffer later, and Finish sends the rest.
 
 // The forms this build writes, and the file each is written to.
 //

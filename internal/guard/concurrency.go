@@ -89,6 +89,23 @@ import (
 // test stands in front of that, because the change that would break it is one
 // character long and nothing else would notice.
 //
+// # Why the fourth entry is here, and why it is not in the third file
+//
+// It starts no work either. It remembers which entries of a word list fit a
+// limit on length, because a field with a limit used to measure the whole list
+// once per value (found by an outside review on 2026-10-22). The limit comes
+// from whoever wrote the recipe or typed it into a window, so a memory kept for
+// the whole process beside the lists in the third file would be keyed by input
+// and would grow with every limit somebody tried. It is kept by one source of
+// values instead, which lives for one run, and it is gone with it.
+//
+// The lock is there because a source is a value. Its copies share the memory,
+// and nothing in the type stops a copy from reaching another goroutine. On
+// 2026-10-28 no source was used by two goroutines, read at every place one is
+// made, and a rule saying it never will be has nothing enforcing it. The answer
+// for a key is a pure function of the list and the limit, so no output can
+// depend on which goroutine asked first.
+//
 // # Why a guard rather than a rule in a document
 //
 // The architecture already says the result is assembled by row number and
@@ -109,6 +126,7 @@ var ConcurrencyAllowed = map[string]bool{
 	"internal/cli/signals.go":                    true,
 	"internal/gui/background/background.go":      true,
 	"internal/adapter/provider/corpus/corpus.go": true,
+	"internal/adapter/values/fitted.go":          true,
 }
 
 // concurrencyPackages are imports whose whole purpose is coordinating work

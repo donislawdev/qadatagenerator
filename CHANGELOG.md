@@ -35,6 +35,20 @@ repository once they are released.
 
 ### Fixed
 
+- **A run whose manifest cannot be written stops at that point.** generate
+  with a policy and corrupt used to go on producing the whole dataset and
+  fail only at the end, then leave nothing behind. They now stop within a few
+  entries of the failure, with the same exit code and the same nothing left
+  behind.
+- **The manifest and its exports are written in pieces rather than one entry
+  at a time.** A run of 100,000 damaged rows with a Gherkin export makes about
+  a tenth of the writes to the disk it made before and finishes about a third
+  sooner. The files are the same bytes.
+- **A field drawn from a word list with max_length no longer slows a run
+  down.** Every
+  value used to check the length of every entry in the list. 200,000 Polish
+  rows with three such fields took 20 seconds and now take under half a
+  second, with the same values.
 - **quick writes its values as it draws them, and stops at the first one that
   cannot be written.** A large `--count` used to write nothing until the last
   value was drawn, and a hundred million values ended in an out of memory

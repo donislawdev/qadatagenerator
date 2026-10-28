@@ -9,6 +9,15 @@
 // says what a manifest is. This says how it is written down, and it writes an
 // entry as soon as there is one.
 //
+// # Why through a buffer, and what that costs
+//
+// As soon as there is one means into a buffer of a few kilobytes, which goes to
+// the file when it fills and when the document closes. Until 2026-10-28 every
+// entry was a write of its own, one call to the system per defect (found by an
+// outside review on 2026-10-22). What the buffer costs is when a failing disk
+// is noticed: up to one buffer of entries later, and the run still ends there
+// rather than at its close.
+//
 // # Why the envelope comes last in the file
 //
 // The envelope carries how many rows were mutated and how much of the ordered
@@ -20,6 +29,7 @@
 package manifestjson
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -37,7 +47,7 @@ const Name = "expectation-manifest.json"
 
 // Writer turns entries into the document, one at a time.
 type Writer struct {
-	to      io.Writer
+	to      *bufio.Writer
 	written int
 	err     error
 	// named is every entity the entries stand in, held to the list in the
@@ -48,7 +58,7 @@ type Writer struct {
 // New starts a manifest document and writes everything that is known before the
 // first entry.
 func New(to io.Writer, specVersion string) *Writer {
-	w := &Writer{to: to, named: map[string]bool{}}
+	w := &Writer{to: bufio.NewWriter(to), named: map[string]bool{}}
 	w.write("{\n")
 	w.write(fmt.Sprintf("  %s: %s,\n", quoted("spec_version"), mustEncode(specVersion)))
 	w.write(fmt.Sprintf("  %s: [", quoted("defects")))
@@ -64,14 +74,17 @@ func New(to io.Writer, specVersion string) *Writer {
 // moment where refusing still means something: before the bytes are written. An
 // entry the model would refuse is a promise nobody can keep, and it must not
 // reach whoever reads the file as one.
-func (w *Writer) Add(defect manifest.Defect) {
+//
+// The answer is the first failure this document met, and every later call
+// repeats it, so a caller that went on would still be told.
+func (w *Writer) Add(defect manifest.Defect) error {
 	if w.err != nil {
-		return
+		return w.err
 	}
 	if problems := defect.Problems(); len(problems) > 0 {
 		w.err = fault.New(fault.Runtime,
 			"this run built a manifest entry that cannot be recorded: "+problems[0])
-		return
+		return w.err
 	}
 	separator := "\n    "
 	if w.written > 0 {
@@ -80,11 +93,12 @@ func (w *Writer) Add(defect manifest.Defect) {
 	encoded, err := json.Marshal(defectOf(defect))
 	if err != nil {
 		w.err = fault.Wrap(fault.Runtime, err, "cannot write a manifest entry")
-		return
+		return w.err
 	}
 	w.write(separator + string(encoded))
 	w.written++
 	defect.NameEntities(w.named)
+	return w.err
 }
 
 // Finish closes the document with the envelope.
@@ -117,6 +131,7 @@ func (w *Writer) Finish(run manifest.Run, requested, applied int) error {
 		return fault.Wrap(fault.Runtime, err, "cannot write the manifest envelope")
 	}
 	w.write(fmt.Sprintf("  %s: %s\n}\n", quoted("run"), string(envelope)))
+	w.flush()
 	return w.err
 }
 
@@ -127,7 +142,19 @@ func (w *Writer) write(text string) {
 	if w.err != nil {
 		return
 	}
-	if _, err := io.WriteString(w.to, text); err != nil {
+	if _, err := w.to.WriteString(text); err != nil {
+		w.err = fault.Wrap(fault.IO, err, "cannot write the manifest")
+	}
+}
+
+// flush sends what the buffer holds to the file. The set of files commits
+// after this, so a failure here is the last one that still keeps a short
+// document from being given its real name.
+func (w *Writer) flush() {
+	if w.err != nil {
+		return
+	}
+	if err := w.to.Flush(); err != nil {
 		w.err = fault.Wrap(fault.IO, err, "cannot write the manifest")
 	}
 }
