@@ -369,6 +369,17 @@ repository once they are released.
 
 ### Added
 
+- **Test payment card numbers: `card`.** A value is one of eight numbers that
+  at least two of four payment providers publish for testing (Stripe,
+  Braintree, Adyen and Checkout.com), never a number made up to pass the check
+  digit, because such a number can be somebody's card. They are Visa,
+  Mastercard, American Express, Discover, JCB and UnionPay, so a column holds
+  sixteen digit numbers and fifteen digit American Express ones. A unique card
+  column of more than eight rows is refused before anything is written, and a
+  field limited to fifteen characters draws the American Express numbers
+  alone. In a file you damage with corrupt, a card number of sixteen digits,
+  or of fifteen beginning 34 or 37, is checked and can be damaged, and one of
+  another length is left alone rather than called wrong.
 - **A field can draw from a list written in the recipe.** Write the values
   under values, on their own or with a type, such as
   `status: { values: ["active", "closed"] }`. With a type of integer, decimal

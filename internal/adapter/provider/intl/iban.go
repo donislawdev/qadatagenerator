@@ -178,7 +178,7 @@ func (IBAN) ID() string { return "iban" }
 // carrying these has to be marked synthetic. There is no unassigned target
 // either, which is the stronger absence: the routing number could at least offer
 // a block that is spare today, and this scheme cannot even do that.
-// Mask is the Polish form, which is the only one this build generates.
+// Masks are the Polish form, which is the only one this build generates.
 //
 // 🔴 The country code is a LITERAL here and that is the honest thing rather
 // than a gap. An IBAN is between fifteen and thirty four characters depending
@@ -186,9 +186,9 @@ func (IBAN) ID() string { return "iban" }
 // is about to receive. Whoever teaches this provider a second country has to
 // come back here, and the guard beside the contract will say so on the day
 // they forget: it generates values and refuses a mask that does not fit them.
-func (IBAN) Mask() string {
+func (IBAN) Masks() []string {
 	national := polishSettlementLength + polishAccountLength
-	return polishCountry + strings.Repeat(string(provider.MaskDigit), ibanCheckLength+national)
+	return []string{polishCountry + strings.Repeat(string(provider.MaskDigit), ibanCheckLength+national)}
 }
 
 func (IBAN) Capabilities() []capability.Name {

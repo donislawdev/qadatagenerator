@@ -51,6 +51,7 @@ const (
 	EAN        = "ean"
 	IMEI       = "imei"
 	ISBN       = "isbn"
+	Card       = "card"
 )
 
 // roles maps a generator onto the role it plays in a consistency rule.
@@ -114,6 +115,7 @@ var types = map[string]string{
 	EAN:        TypeIdentifier,
 	IMEI:       TypeIdentifier,
 	ISBN:       TypeIdentifier,
+	Card:       TypeIdentifier,
 }
 
 // Source produces values for one locale.
@@ -572,6 +574,9 @@ var producers = map[string]generator{
 	EAN:   {produce: fromProvider(intl.EAN{}), behind: intl.EAN{}},
 	IMEI:  {produce: fromProvider(intl.IMEI{}), behind: intl.IMEI{}},
 	ISBN:  {produce: fromProvider(intl.ISBN{}), behind: intl.ISBN{}},
+	// The one scheme drawn from a list rather than computed, so it names its
+	// entries as a word list does and a unique column can count them.
+	Card: {entries: cardNumbers, behind: intl.Card{}},
 }
 
 // fromProvider adapts an identifier provider to this registry.

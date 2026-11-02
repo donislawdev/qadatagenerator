@@ -1,0 +1,92 @@
+[
+  {
+    "seed": "release-2026-11",
+    "entity": "payment",
+    "row": 0,
+    "field": "card",
+    "purpose": "value",
+    "value": "6243030000000001",
+    "broken": "6243030000000002"
+  },
+  {
+    "seed": "release-2026-11",
+    "entity": "payment",
+    "row": 1,
+    "field": "card",
+    "purpose": "value",
+    "value": "5555555555554444",
+    "broken": "5555555555554445"
+  },
+  {
+    "seed": "release-2026-11",
+    "entity": "payment",
+    "row": 2,
+    "field": "card",
+    "purpose": "value",
+    "value": "5555555555554444",
+    "broken": "5555555555554445"
+  },
+  {
+    "seed": "release-2026-11",
+    "entity": "payment",
+    "row": 7,
+    "field": "card",
+    "purpose": "value",
+    "value": "6011111111111117",
+    "broken": "6011111111111118"
+  },
+  {
+    "seed": "release-2026-11",
+    "entity": "payment",
+    "row": 42,
+    "field": "card",
+    "purpose": "value",
+    "value": "5555555555554444",
+    "broken": "5555555555554445"
+  },
+  {
+    "seed": "release-2026-11",
+    "entity": "payment",
+    "row": 999,
+    "field": "card",
+    "purpose": "value",
+    "value": "6243030000000001",
+    "broken": "6243030000000002"
+  },
+  {
+    "seed": "release-2026-11",
+    "entity": "payment",
+    "row": 1000000,
+    "field": "card",
+    "purpose": "value",
+    "value": "371449635398431",
+    "broken": "371449635398432"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "payment",
+    "row": 0,
+    "field": "card",
+    "purpose": "value",
+    "value": "4242424242424242",
+    "broken": "4242424242424243"
+  },
+  {
+    "seed": "another-seed",
+    "entity": "payment",
+    "row": 1,
+    "field": "card",
+    "purpose": "value",
+    "value": "4111111111111111",
+    "broken": "4111111111111112"
+  },
+  {
+    "seed": "release-2026-11",
+    "entity": "payment",
+    "row": 5,
+    "field": "card",
+    "purpose": "value",
+    "value": "378282246310005",
+    "broken": "378282246310006"
+  }
+]

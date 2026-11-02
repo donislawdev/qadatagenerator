@@ -108,10 +108,12 @@ func (REGON) ID() string { return "PL.regon" }
 // Capabilities are what this provider brings.
 //
 // One, and every absence is quoted rather than assumed. See the type comment.
-// Mask is nine digits, the shorter of the two forms and the one this build
+// Masks are nine digits, the shorter of the two forms and the one this build
 // produces. The fourteen digit form of a local unit is recognised by Validate
 // and never generated, so it is not what a person is looking at beside this.
-func (REGON) Mask() string { return strings.Repeat(string(provider.MaskDigit), regonLength) }
+func (REGON) Masks() []string {
+	return []string{strings.Repeat(string(provider.MaskDigit), regonLength)}
+}
 
 func (REGON) Capabilities() []capability.Name {
 	return []capability.Name{capability.IdentifierCheckDigit}

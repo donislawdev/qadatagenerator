@@ -441,6 +441,10 @@ const (
 	QuickAboutFormat          Key = "quick.about.format"
 	QuickAboutDigits          Key = "quick.about.digits"
 	QuickAboutLettersOrDigits Key = "quick.about.letters-or-digits"
+	// QuickAboutOr joins the counts of a scheme with more than one form, as
+	// in "15 or 16 digits". A word rather than a sentence, for the reason
+	// the two above give.
+	QuickAboutOr Key = "quick.about.or"
 	// 🔴 The four sentences below are the only place this window tells
 	// somebody whether a value it just produced could belong to a real
 	// person, and both halves of that are said out loud.
@@ -550,6 +554,7 @@ const (
 	// walks every generator and holds that each has its name here.
 	KindAba        Key = "kind.aba"
 	KindBirthDate  Key = "kind.birth_date"
+	KindCard       Key = "kind.card"
 	KindCity       Key = "kind.city"
 	KindEan        Key = "kind.ean"
 	KindFirstName  Key = "kind.first_name"
@@ -601,7 +606,7 @@ var windowKeys = []Key{
 
 	QuickNothingWritten, QuickLabelValue, QuickValueHeading, QuickValuesCounted,
 	QuickAboutProduces, QuickAboutCheckDigit, QuickAboutRange,
-	QuickAboutFormat, QuickAboutDigits, QuickAboutLettersOrDigits,
+	QuickAboutFormat, QuickAboutDigits, QuickAboutLettersOrDigits, QuickAboutOr,
 	QuickAboutCheckDigitCarried, QuickAboutCheckDigitNone,
 	QuickAboutRangeReserved, QuickAboutRangeNone,
 	QuickAboutHarbour, QuickAboutUnavailable,
@@ -613,7 +618,7 @@ var windowKeys = []Key{
 	QuickRefusedCount, QuickRefusedCountShape, QuickRefusedCountMany,
 	QuickGroupInternational, QuickGroupPeople, QuickGroupPlaces, CountryPL, CountryUS,
 	QuickPickPrompt, QuickPickKinds, QuickPickMatches, QuickPickEnter, QuickPickNothing,
-	KindAba, KindBirthDate, KindCity, KindEan, KindFirstName, KindGender, KindIban, KindImei,
+	KindAba, KindBirthDate, KindCard, KindCity, KindEan, KindFirstName, KindGender, KindIban, KindImei,
 	KindIsbn, KindLastName, KindNip, KindPesel, KindPostalCode, KindRegion, KindRegon, KindSsn, KindVin,
 	CommandHeading, CommandCopy, CommandCopied,
 	PurposeTake, PurposeRecipe, PurposeManifest, PurposeAbout, AboutSaveJSON,

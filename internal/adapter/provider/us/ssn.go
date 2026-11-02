@@ -139,15 +139,15 @@ func (SSN) ID() string { return "US.ssn" }
 // scheme has a harbour and pillar one generates inside it. It also knows the
 // blocks a corruption can move a value into. A scheme with no harbour would
 // declare only the second.
-// Mask is nine digits in three groups, punctuated, which is how the
+// Masks are nine digits in three groups, punctuated, which is how the
 // administration writes it and how this provider generates it.
 //
 // The hyphens are in the mask because they are in every value: Generate sets
 // hyphenated, so a mask without them would be describing the bare form, which
 // Validate accepts and nothing here produces.
-func (SSN) Mask() string {
+func (SSN) Masks() []string {
 	group := func(n int) string { return strings.Repeat(string(provider.MaskDigit), n) }
-	return group(areaDigits) + "-" + group(groupDigits) + "-" + group(serialDigits)
+	return []string{group(areaDigits) + "-" + group(groupDigits) + "-" + group(serialDigits)}
 }
 
 func (SSN) Capabilities() []capability.Name {

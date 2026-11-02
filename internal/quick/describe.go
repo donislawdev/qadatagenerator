@@ -37,8 +37,9 @@ type Description struct {
 	// Scheme is the numbering scheme behind it, empty where there is none.
 	// A first name has no scheme. A PESEL is PL.pesel.
 	Scheme string
-	// Mask is the written form of one value of this scheme, empty for a kind
-	// that has no scheme behind it.
+	// Masks are the written forms of a value of this scheme, shortest first,
+	// none for a kind that has no scheme behind it. Almost every scheme has
+	// one. The payment card has two, sixteen digits and fifteen.
 	//
 	// # Why a surface is given the mask rather than a sentence about it
 	//
@@ -47,7 +48,7 @@ type Description struct {
 	// beside it learns the shape faster than from any wording - and works out
 	// what to say about it with Places below. The wording is then a matter for
 	// the language of the interface, which is where wording belongs.
-	Mask string
+	Masks []string
 	// CheckDigit says the value carries a digit computed from the rest of it,
 	// so that one wrong character can be caught by the number alone.
 	CheckDigit bool
@@ -160,7 +161,7 @@ func Describe(generator, locale string) Description {
 		return about
 	}
 	if shaped, saysSo := numbering.(provider.Shaped); saysSo {
-		about.Mask = shaped.Mask()
+		about.Masks = shaped.Masks()
 	}
 	for _, declared := range numbering.Capabilities() {
 		switch declared {

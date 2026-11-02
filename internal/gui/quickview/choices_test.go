@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 	"github.com/donislawdev/qadatagenerator/internal/quick"
 )
 
@@ -96,11 +97,39 @@ func TestAKindWithAMaskSaysHowLongItIs(t *testing.T) {
 	view := New(i18n.English, &heldClipboard{})
 	for _, choice := range view.choices() {
 		about := quick.Describe(choice.Value, view.locale)
-		if want := view.length(about.Mask); choice.Note != want {
-			t.Errorf("%s says %q at its end, where its mask %q is %q", choice.Value, choice.Note, about.Mask, want)
+		if want := view.length(about.Masks); choice.Note != want {
+			t.Errorf("%s says %q at its end, where its masks %q are %q", choice.Value, choice.Note, about.Masks, want)
 		}
-		if about.Mask != "" && choice.Note == "" {
-			t.Errorf("%s has the mask %q and says nothing about its length", choice.Value, about.Mask)
+		if len(about.Masks) > 0 && choice.Note == "" {
+			t.Errorf("%s has the masks %q and says nothing about its length", choice.Value, about.Masks)
+		}
+	}
+}
+
+// A scheme with more than one form says every length once and the noun once,
+// and forms holding different things say each with its own noun.
+//
+// The masks are built from the constants rather than typed, for the reason the
+// guard over the mask reader gives: a case written in an old mask character and
+// still passing would be a guard over a language nothing else speaks.
+func TestAKindWithSeveralFormsSaysEachLengthOnce(t *testing.T) {
+	view := New(i18n.English, &heldClipboard{})
+	digits := func(n int) string { return strings.Repeat(string(provider.MaskDigit), n) }
+	either := func(n int) string { return strings.Repeat(string(provider.MaskAlnum), n) }
+	for _, each := range []struct {
+		why   string
+		masks []string
+		said  string
+	}{
+		{"one form", []string{digits(11)}, "11 digits"},
+		{"two lengths of digits", []string{digits(15), digits(16)}, "15 or 16 digits"},
+		{"one length written two ways", []string{digits(4) + "-" + digits(4), digits(8)}, "8 digits"},
+		{"forms holding different things", []string{digits(9), either(17)},
+			"9 digits or 17 letters or digits"},
+		{"no form at all", nil, ""},
+	} {
+		if got := view.length(each.masks); got != each.said {
+			t.Errorf("%s: %q reads %q, where it has to read %q", each.why, each.masks, got, each.said)
 		}
 	}
 }

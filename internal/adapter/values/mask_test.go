@@ -43,9 +43,20 @@ func TestEverySchemeSaysWhatItsValuesLookLike(t *testing.T) {
 				"one has nothing to describe it with", scheme.ID())
 			continue
 		}
-		if shaped.Mask() == "" {
-			t.Errorf("%s answers with an empty mask, which is worse than not "+
-				"implementing the interface: it reads as a scheme with no shape", scheme.ID())
+		masks := shaped.Masks()
+		if len(masks) == 0 {
+			t.Errorf("%s answers with no mask, which is worse than not implementing "+
+				"the interface: it reads as a scheme with no shape", scheme.ID())
+		}
+		for at, mask := range masks {
+			if mask == "" {
+				t.Errorf("%s answers with an empty mask among its forms, which reads as "+
+					"a form with no shape", scheme.ID())
+			}
+			if at > 0 && len(mask) < len(masks[at-1]) {
+				t.Errorf("%s gives its forms out of order, %q after %q, where the "+
+					"contract says shortest first", scheme.ID(), mask, masks[at-1])
+			}
 		}
 	}
 }
@@ -86,25 +97,52 @@ func TestEveryValueIsWrittenTheWayItsSchemeSays(t *testing.T) {
 				// Reported by the test above, once, rather than twice a locale.
 				continue
 			}
-			checkOneSchemeIsWrittenAsItSays(t, source, locale, generator, scheme, shaped.Mask())
+			checkOneSchemeIsWrittenAsItSays(t, source, locale, generator, scheme, shaped.Masks())
 		}
 	}
 }
 
-func checkOneSchemeIsWrittenAsItSays(t *testing.T, source Source, locale, generator, scheme, mask string) {
+// rowsAMaskIsCheckedOn is how many values each scheme is asked for.
+//
+// Forty eight rather than the twenty four this stood at while every scheme had
+// one form, because a form has to be MET as well as fitted now. The payment
+// card writes fifteen digits for two of its eight numbers, so twenty four draws
+// miss that form about one time in a thousand, and forty eight about one in a
+// million. The draws are seeded, so this is a margin against a change of seed
+// rather than against chance.
+const rowsAMaskIsCheckedOn = 48
+
+func checkOneSchemeIsWrittenAsItSays(t *testing.T, source Source, locale, generator, scheme string, masks []string) {
 	t.Helper()
 	produced := 0
-	for row := int64(0); row < 24; row++ {
+	met := make([]bool, len(masks))
+	for row := int64(0); row < rowsAMaskIsCheckedOn; row++ {
 		at := seed.Coordinate{Entity: "quick", Row: row, Field: generator, Purpose: "value"}
 		value, err := source.Produce(generate.Request{Generator: generator, At: at})
 		if err != nil {
 			continue
 		}
 		produced++
-		if !provider.FitsMask(mask, value) {
+		fitted := false
+		for which, mask := range masks {
+			if provider.FitsMask(mask, value) {
+				met[which], fitted = true, true
+			}
+		}
+		if !fitted {
 			t.Errorf("%s in %s produced %q, which is not written the way %s says its "+
-				"values are: mask %q", generator, locale, value, scheme, mask)
+				"values are: masks %q", generator, locale, value, scheme, masks)
 			return
+		}
+	}
+	// 🔴 A form no value takes is a claim about the values that nothing
+	// produced, and the panel would show it beside ten values none of which
+	// look like it. Asked only where something was produced, for the reason
+	// the note below gives.
+	for which, mask := range masks {
+		if produced > 0 && !met[which] {
+			t.Errorf("%s in %s says its values may be written as %q, and none of %d were",
+				generator, locale, mask, produced)
 		}
 	}
 	if produced == 0 {

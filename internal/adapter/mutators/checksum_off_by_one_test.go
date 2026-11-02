@@ -40,6 +40,7 @@ var schemesThisBuildHas = map[string]provider.Provider{
 	"ean":       intl.EAN{},
 	"imei":      intl.IMEI{},
 	"isbn":      intl.ISBN{},
+	"card":      intl.Card{},
 }
 
 func TestTheSchemesCheckedHereAreTheSchemesThisBuildCarries(t *testing.T) {

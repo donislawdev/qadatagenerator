@@ -92,6 +92,54 @@ func TestAColumnOfNationalIdentifiersIsRecognisedFromItsValues(t *testing.T) {
 	}
 }
 
+// 🔴 Every scheme with a check digit is recognised in a column of its own
+// values and in no other way, and it is asked of every one of them rather than
+// of the newest. The payment card is why: an equipment identity is fifteen
+// digits under the same formula as a card number, so a card validator that
+// approved it would leave a column of IMEI values accepted by two schemes and
+// recognised as neither. Walking every scheme catches the next pair like that
+// on the day it arrives.
+//
+// One pair is left unrecognised by the standard rather than by a validator. An
+// ISBN-13 is a GTIN-13 carrying the prefix 978 or 979, so a column of book
+// numbers is a column of article numbers too, and the rule refuses to choose
+// between them as it is written to. What that costs is B-354. The pair is named
+// here, and the refusal is held to naming both of them, so that nothing else
+// can hide behind it.
+func TestEverySchemeIsRecognisedInAColumnOfItsOwnValues(t *testing.T) {
+	inside := map[string]string{"isbn": "ean"}
+	source := values.New("pl-PL", "infer")
+	for _, generator := range source.Names() {
+		scheme, behind := source.ProviderOf(generator)
+		if !behind {
+			continue
+		}
+		numbering, _ := source.ProviderNamed(scheme)
+		checked := false
+		for _, brought := range numbering.Capabilities() {
+			checked = checked || brought == capability.IdentifierCheckDigit
+		}
+		if !checked {
+			continue
+		}
+		finding := findingFor(t, infer.From(
+			tableOf(generator),
+			[]dataset.Sample{sampleOf(generator, produced(t, generator, 40))},
+			schemes(),
+		), generator)
+		if wider, known := inside[scheme]; known {
+			if finding.Scheme != "" || !strings.Contains(finding.Basis, wider+" and by "+scheme) {
+				t.Errorf("a column of %s values, which the standard puts inside %s, was answered %q: %s",
+					scheme, wider, finding.Scheme, finding.Basis)
+			}
+			continue
+		}
+		if finding.Scheme != scheme {
+			t.Errorf("a column of %s values was taken for %q: %s", scheme, finding.Scheme, finding.Basis)
+		}
+	}
+}
+
 // 🔴 The decision this defends is DEC-156, and it is the expensive half of it.
 //
 // A social security number validator answers about shape, because it has to

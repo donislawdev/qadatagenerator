@@ -52,7 +52,7 @@ func (v *View) aside(generator string) fyne.CanvasObject {
 	// answer a question nobody asked and would make the same word mean two
 	// different things on one screen.
 	if about.Scheme != "" {
-		if about.Mask != "" {
+		if len(about.Masks) > 0 {
 			blocks = append(blocks, v.format(about))
 		}
 		blocks = append(blocks, v.checkDigit(about))
@@ -112,11 +112,16 @@ func produces(about quick.Description) string {
 // only chooses words for what it read. A sentence written per scheme would be
 // eleven claims in a translation file, where nothing could check any of them
 // against the values they describe.
+//
+// A scheme with two forms gets two lines of mask, one under the other and
+// shortest first, so that the shapes can be compared as easily as the values.
 func (v *View) format(about quick.Description) fyne.CanvasObject {
-	return paint.Column(palette.NameStepHairline,
-		paint.Caption(v.text.T(i18n.QuickAboutFormat)),
-		paint.Mono(about.Mask, palette.TypeValue, palette.TextPrimary),
-		v.paragraph(v.length(about.Mask)))
+	lines := []fyne.CanvasObject{paint.Caption(v.text.T(i18n.QuickAboutFormat))}
+	for _, mask := range about.Masks {
+		lines = append(lines, paint.Mono(mask, palette.TypeValue, palette.TextPrimary))
+	}
+	lines = append(lines, v.paragraph(v.length(about.Masks)))
+	return paint.Column(palette.NameStepHairline, lines...)
 }
 
 // checkDigit says whether the number can catch a wrong character on its own.

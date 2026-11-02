@@ -44,13 +44,16 @@ func TestEveryMaskFitsThePanelItIsDrawnIn(t *testing.T) {
 		if !saysSo {
 			continue
 		}
-		mask := shaped.Mask()
-		drawn := fyne.MeasureText(mask, palette.TypeSize(palette.TypeValue),
-			fyne.TextStyle{Monospace: true}).Width
-		if drawn > room {
-			t.Errorf("the mask of %s is %.1f wide where the panel leaves %.1f, so drawing it "+
-				"widens the whole panel and narrows the values beside it: %q",
-				scheme.ID(), drawn, room, mask)
+		// Every form, because each is drawn on its own line and the widest of
+		// them is the one that decides the width of the panel.
+		for _, mask := range shaped.Masks() {
+			drawn := fyne.MeasureText(mask, palette.TypeSize(palette.TypeValue),
+				fyne.TextStyle{Monospace: true}).Width
+			if drawn > room {
+				t.Errorf("the mask of %s is %.1f wide where the panel leaves %.1f, so drawing it "+
+					"widens the whole panel and narrows the values beside it: %q",
+					scheme.ID(), drawn, room, mask)
+			}
 		}
 	}
 }

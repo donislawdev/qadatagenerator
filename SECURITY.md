@@ -48,10 +48,16 @@ can say its own output could not belong to anybody.
 |---|---|---|
 | `US.ssn` | yes, the area the administration never assigns | a value outside it would be a defect worth reporting |
 | `ean` | yes, the prefix 952, which GS1 sets aside for demonstrations and examples of its own system | a value outside it would be a defect worth reporting. What has not been established is whether a company prefix was issued there before GS1 carved it out, so a resemblance to a real article number is possible and is worth telling us about |
-| `PL.pesel`, `PL.nip`, `PL.regon`, `US.aba`, `iban`, `vin`, `imei`, `isbn` | **none** | the registrar issues, or reserves the right to issue, across the whole space |
+| `PL.pesel`, `PL.nip`, `PL.regon`, `US.aba`, `iban`, `vin`, `imei`, `isbn`, `card` | **none** | the registrar issues, or reserves the right to issue, across the whole space |
 
-`imei` and `isbn` are the two worth a sentence of their own, because both
-narrow what they write without claiming anything about it.
+`imei`, `isbn` and `card` are the three worth a sentence of their own, because
+each narrows what it writes without claiming anything about it.
+
+Every `card` is one of eight numbers that at least two of four payment
+providers publish for testing, so this tool never makes up a number that
+merely passes the check digit. That is not a safe block, because a test number
+works in its provider's test system and none of the four says that no issuer
+has given the same number to a real card.
 
 Every `imei` is generated inside the block the GSM Association gives to test
 equipment, which cannot be supplied to the market, so nothing this tool writes

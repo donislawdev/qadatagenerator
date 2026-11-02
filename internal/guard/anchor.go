@@ -394,6 +394,43 @@ var Anchors = []Anchor{
 		Detail:   "the music agency's sentence is held in internal/oracle/isbn.go and the prefix is read out of it, so the refusal is compared against the other agency's words rather than against a constant typed beside it",
 	},
 
+	// --- card ---------------------------------------------------------------
+	//
+	// No first party source states the check digit for every card. The standard
+	// that numbers cards is sold rather than published, and the industry body
+	// that does publish calls the formula the one most often used. So the
+	// arithmetic is anchored on published values. Here they CAN be stored,
+	// unlike every other measurement in this register, because they are test
+	// numbers and are the very list this build writes.
+	{
+		Rule:     "the check digit by the formula of Luhn over a number of fifteen or sixteen digits",
+		Provider: "card",
+		Source:   "the test documentation of Stripe, Braintree, Adyen and Checkout.com, read on 2026-11-02, with PCI Security Standards Council FAQ 1137 of July 2012 naming the formula as the one most often used to validate a primary account number. The FAQ words its first step so that a doubled five stays ten, and the Mastercard number three of the four providers publish refutes that reading",
+		State:    ByMeasurement,
+		Detail:   "8 numbers published as test numbers by at least two of the four providers, read on 2026-11-02, all satisfy the formula, which a value of the same length does one time in 10, and TestEveryPublishedTestNumberSatisfiesTheCheckDigit repeats it on every build",
+	},
+	{
+		Rule:     "an American Express number is fifteen digits beginning 34 or 37",
+		Provider: "card",
+		Source:   "American Express Global Merchant Services, Getting Started (United Kingdom), the page on preventing fraud, read from the page itself on 2026-11-02",
+		State:    ByQuotedSentence,
+		Detail:   "the sentence is held in internal/oracle/card.go and the two prefixes and the length are read out of it rather than typed a second time",
+	},
+	{
+		Rule:     "the numbers this build writes are published as test numbers by at least two of four payment providers",
+		Provider: "card",
+		Source:   "the test documentation of Stripe, Braintree, Adyen and Checkout.com, read on 2026-11-02, under DEC-268",
+		State:    ByMeasurement,
+		Detail:   "8 numbers met the rule out of the four documents read on 2026-11-02, the providers behind each are held beside it in internal/adapter/provider/intl/card.go, and TestEveryPublishedNumberHasTwoProvidersBehindIt holds every one to two",
+	},
+	{
+		Rule:     "a card number of another length up to nineteen digits is passed over rather than judged, and a longer one is refused",
+		Provider: "card",
+		Source:   "the four providers publish fourteen and nineteen digit test numbers and none longer, read on 2026-11-02. ISO/IEC 7812, which numbers cards, does not settle it here because it was not read, being sold rather than published",
+		State:    ByMeasurement,
+		Detail:   "4 documents read on 2026-11-02, three of them carrying a nineteen digit number and none a longer one, and TestOtherFormsArePassedOverRatherThanCalledWrong holds the lengths",
+	},
+
 	// --- PL.regon ----------------------------------------------------------
 	{
 		Rule:     "the nine digit shape and the ban on any digit carrying meaning",

@@ -41,7 +41,7 @@ func (v *View) choices() []parts.Choice {
 		choices = append(choices, parts.Choice{
 			Value:  about.Generator,
 			Detail: v.text.T(kindKey(about.Generator)),
-			Note:   v.length(about.Mask),
+			Note:   v.length(about.Masks),
 			Group:  v.groupName(about.Group),
 		})
 	}
@@ -123,23 +123,51 @@ func kindKey(generator string) i18n.Key {
 	return i18n.Key("kind." + generator)
 }
 
-// length is how long a value written in this mask is, in words: eleven digits,
-// or twenty eight letters or digits. Nothing for a kind with no mask, such as
-// a name, whose length is not a fact about the kind.
+// length is how long a value written in these masks is, in words: eleven
+// digits, twenty eight letters or digits, or 15 or 16 digits. Nothing for a
+// kind with no mask, such as a name, whose length is not a fact about the kind.
 //
 // The count comes from quick.Places, so the mode reads the mask and this file
 // only chooses words for what it read. The panel and the card beside the
 // values say it with this one function, so the two cannot disagree.
-func (v *View) length(mask string) string {
-	if mask == "" {
+//
+// # Why forms of one kind share one noun
+//
+// Because "15 digits or 16 digits" says digits twice for no reason, and the
+// payment card is the scheme that has two forms. Forms that differ in what
+// their places hold are said one after another instead. No scheme here needs
+// that, and it is written so that the first one to need it is not said wrong.
+func (v *View) length(masks []string) string {
+	if len(masks) == 0 {
 		return ""
 	}
-	places, letters := quick.Places(mask)
-	said := i18n.QuickAboutDigits
-	if letters {
-		said = i18n.QuickAboutLettersOrDigits
+	or := " " + v.text.T(i18n.QuickAboutOr) + " "
+	var counts, phrases []string
+	shared := true
+	_, firstLetters := quick.Places(masks[0])
+	for _, mask := range masks {
+		places, letters := quick.Places(mask)
+		shared = shared && letters == firstLetters
+		count := strconv.Itoa(places)
+		phrases = append(phrases, count+" "+v.text.T(heldIn(letters)))
+		// Two forms of one length, such as one with separators and one
+		// without, are one count rather than "11 or 11".
+		if len(counts) == 0 || counts[len(counts)-1] != count {
+			counts = append(counts, count)
+		}
 	}
-	return strconv.Itoa(places) + " " + v.text.T(said)
+	if shared {
+		return strings.Join(counts, or) + " " + v.text.T(heldIn(firstLetters))
+	}
+	return strings.Join(phrases, or)
+}
+
+// heldIn is the noun for what the places of a mask may hold.
+func heldIn(letters bool) i18n.Key {
+	if letters {
+		return i18n.QuickAboutLettersOrDigits
+	}
+	return i18n.QuickAboutDigits
 }
 
 // panelWords are what the panel says, in the language of this screen.

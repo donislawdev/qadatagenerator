@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/provider/corpus"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/provider/intl"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
@@ -45,6 +46,21 @@ func fromEntries(entries listed) producer {
 		}
 		return s.pick(found, req)
 	}
+}
+
+// cardEntries are the published test card numbers, read once from the provider
+// that owns them, so that a draw does not copy the list every row.
+var cardEntries = intl.Card{}.Published()
+
+// cardNumbers names the numbers the payment card draws from.
+//
+// The same in every locale, because a test number belongs to a payment
+// provider rather than to a country. Drawing them as a word list is drawn is
+// what lets a unique column count them and a limit on length choose the
+// fifteen digit numbers alone, and the provider's own Generate makes the same
+// draw at the same address.
+func cardNumbers(Source, generate.Request) (listing, error) {
+	return listing{entries: cardEntries, list: "the published test card numbers", key: Card}, nil
 }
 
 // entriesOf names the entries of one list.

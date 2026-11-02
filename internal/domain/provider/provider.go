@@ -322,9 +322,20 @@ type Provider interface {
 // ten values a person is looking at. Where a scheme has forms this build does
 // not generate, the mask says nothing about them, and the provider's own
 // comment is where that is written down.
+//
+// # Why a list, when almost every scheme has one form
+//
+// Because the payment card does not, and a single mask would have had to lie
+// about one of its two. A card number is sixteen digits, or fifteen for
+// American Express, and the test numbers this build writes are both (DEC-268).
+// A mask that fits the value one character at a time cannot describe two
+// lengths, and the guard beside the registry would refuse a mask that fits only
+// some of the values a scheme produces. So the contract carries every form
+// rather than a widest one, and a scheme with one form returns a list of one.
 type Shaped interface {
-	// Mask is the written form of one value this provider produces.
-	Mask() string
+	// Masks are the written forms of the values this provider produces, one
+	// per form, shortest first, never empty.
+	Masks() []string
 }
 
 // The two characters a mask uses for a place that varies. Everything else in a

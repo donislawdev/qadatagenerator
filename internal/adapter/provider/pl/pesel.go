@@ -125,11 +125,11 @@ func (PESEL) ID() string { return "PL.pesel" }
 //
 // identifier.reserved-range is deliberately absent. PESEL has no reserved
 // block, and claiming one would be a promise this scheme cannot keep.
-// Mask is eleven digits, which is the form the regulation prints as
+// Masks are eleven digits, which is the form the regulation prints as
 // RRMMDDPPPPK. The letters of that form are not carried here: a mask says where
 // a character varies, and what the varying characters MEAN is the business of
 // the date and gender readers below, which can be asked.
-func (PESEL) Mask() string { return strings.Repeat(string(provider.MaskDigit), length) }
+func (PESEL) Masks() []string { return []string{strings.Repeat(string(provider.MaskDigit), length)} }
 
 func (PESEL) Capabilities() []capability.Name {
 	return []capability.Name{

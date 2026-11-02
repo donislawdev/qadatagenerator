@@ -153,9 +153,9 @@ func (IMEI) ID() string { return "imei" }
 // reserved range for the reason set out on the type, and no claim about dates
 // or gender, because an equipment identity encodes a model and a serial number
 // and neither is a value a recipe holds in another column.
-// Mask is fifteen digits. The sixteen digit form carrying a software version
+// Masks are fifteen digits. The sixteen digit form carrying a software version
 // is recognised and never generated, so it is not what this describes.
-func (IMEI) Mask() string { return strings.Repeat(string(provider.MaskDigit), imeiLength) }
+func (IMEI) Masks() []string { return []string{strings.Repeat(string(provider.MaskDigit), imeiLength)} }
 
 func (IMEI) Capabilities() []capability.Name {
 	return []capability.Name{capability.IdentifierCheckDigit}
