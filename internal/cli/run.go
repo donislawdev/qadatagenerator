@@ -46,6 +46,10 @@ type Environment struct {
 	// because a variable is invisible in a CI log and would let the same
 	// commit produce different results for two people.
 	NoColorRequested bool
+	// InterruptIgnored reports whether the process started with the interrupt
+	// ignored, which is how a shell starts a command in the background. Exit
+	// reads it and Run does not, because it decides only how the process ends.
+	InterruptIgnored bool
 }
 
 // Run executes one invocation and returns the exit code.

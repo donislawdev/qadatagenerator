@@ -3,7 +3,9 @@ package cli
 import (
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
+	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
@@ -44,6 +46,21 @@ import (
 // This matters for runs nobody is watching. A container stopped with docker
 // stop and a cancelled CI job both send the termination signal, and those are
 // exactly the runs where a leftover temporary file goes unnoticed.
+//
+// # Why a stopped run ends by the signal that stopped it
+//
+// 🔴 A shell tells a program that died of the interrupt apart from one that
+// exited with 130, and bash acts on the difference. A loop around a program
+// that died of it stops. A loop around one that exited with 130 goes on to the
+// next round, on the reading that the program dealt with the key itself and
+// wants to carry on. Measured with the binary on bash 5.3.9 and 3.2.57: the
+// rounds after an interrupted generate ran to the end, while the same loop
+// around quick, which catches nothing, stopped at once (B-346).
+//
+// So once a run has cleaned up, the signal is sent again and the process ends
+// the way it would have if nothing had caught it. A shell still reports 130
+// and 143, and a program that started this one sees the signal, as it already
+// does for quick and for a run stopped before its first write.
 
 // halt watches for the signal that ends a run from outside it.
 //
@@ -125,4 +142,74 @@ func (h *halt) Stopped() error {
 func (h *halt) release() {
 	signal.Stop(h.signals)
 	close(h.signals)
+}
+
+// resendGrace is how long Exit waits for the signal it sent to end the process.
+//
+// A signal this process may receive reaches a thread in far less, so the wait
+// is not spent on any run that ends normally. It is a backstop: if the signal
+// does not arrive, the run still ends, with the code a shell would have shown.
+const resendGrace = 2 * time.Second
+
+// Exit ends the process with the code Run returned.
+//
+// A run stopped by a signal ends by that signal on Linux and macOS, as the
+// section above explains. Every other code ends the process as it is, and so
+// does every code on Windows, where there is no signal to send again.
+func (env Environment) Exit(code int) {
+	if sent, ok := signalBehind(runtime.GOOS, exitCode(code), env.InterruptIgnored); ok {
+		resend(sent)
+	}
+	os.Exit(code)
+}
+
+// signalBehind names the signal behind a code, when sending it again would end
+// the process. It takes the system by name, so that the answer for each system
+// is checked on whichever one the tests run on.
+func signalBehind(system string, code exitCode, interruptIgnored bool) (os.Signal, bool) {
+	if system == "windows" {
+		return nil, false
+	}
+	switch code {
+	case codeInterrupted:
+		// A shell starts a command in the background with the interrupt
+		// ignored. The watch took that away while the run wrote, and since it
+		// stopped the system ignores the interrupt again, so sending it would
+		// only wait out the grace.
+		if interruptIgnored {
+			return nil, false
+		}
+		return os.Interrupt, true
+	case codeTerminated:
+		return syscall.SIGTERM, true
+	}
+	return nil, false
+}
+
+// resend sends the signal to this process and waits for it to arrive.
+//
+// The watch has handed the signal back to the runtime by now, so the runtime
+// treats it as a signal nobody asked for. It ends the process by that signal,
+// or with 128 plus its number when this is the first process of a container,
+// which a signal cannot end that way. resend returns only if neither happened.
+func resend(sent os.Signal) {
+	self, err := os.FindProcess(os.Getpid())
+	if err != nil {
+		return
+	}
+	if self.Signal(sent) != nil {
+		return
+	}
+	time.Sleep(resendGrace)
+}
+
+// interruptIgnored reports whether this process was started with the
+// interrupt ignored.
+//
+// 🔴 It is right only until the first watch. signal.Notify takes the ignoring
+// away, and once the watch stops the system ignores the interrupt again while
+// signal.Ignored keeps saying it does not. That is why FromProcess asks, before
+// any run has started.
+func interruptIgnored() bool {
+	return signal.Ignored(os.Interrupt)
 }

@@ -374,16 +374,23 @@ var toolGuards = []Guard{
 
 	// --- being stopped from outside -----------------------------------------
 	//
-	// There is a fourth test beside these three, TestARealSignalReachesTheWatch,
-	// and it is deliberately absent. It is the only one that proves the runtime
-	// delivers the signal we ask for, and it cannot run on Windows, where the
-	// mutation runner runs. An entry claiming it was proven by mutation would be
-	// a sentence nobody has checked, which is the one thing this register exists
+	// There is a test beside these, TestARealSignalReachesTheWatch, and it is
+	// deliberately absent. It is the only one that proves the runtime delivers
+	// the signal we ask for, and it cannot run on Windows, where the mutation
+	// runner runs. An entry claiming it was proven by mutation would be a
+	// sentence nobody has checked, which is the one thing this register exists
 	// to prevent.
+	//
+	// The tests that a stopped run ends by its signal once it has cleaned up
+	// (signals_unix_test.go, B-346) are absent for the same reason. What can be
+	// checked on any system is which code is sent again with which signal, and
+	// that is the last entry here. The sending itself was mutated by hand on
+	// Linux on 2026-11-02, and the record of it is in docs/13 under B-346.
 	{"a run stopped part way leaves neither an output file nor a temporary one", "TestARunStoppedPartWayLeavesNothingBehind", "internal/cli", ByMutation},
 	{"an interrupted run ends with the code a shell would have reported", "TestTheWatchEndsTheRunAsAnInterruptedOne", "internal/cli", ByMutation},
 	{"a run told to stop stays told, however many times it asks", "TestTheWatchGivesTheSameAnswerEveryTimeItIsAsked", "internal/cli", ByMutation},
 	{"a run nobody interrupted is never reported as interrupted", "TestAWatchReleasedBeforeAnySignalStopsNothing", "internal/cli", ByMutation},
+	{"a run started in the background with the interrupt ignored ends with its code at once rather than waiting for a signal the system ignores", "TestEachCodeNamesTheSignalItIsSentAgainWith", "internal/cli", ByMutation},
 
 	// --- what the tool says its own output is -------------------------------
 	//

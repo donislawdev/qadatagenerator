@@ -6,9 +6,13 @@ import (
 
 // FromProcess builds the environment of a real invocation.
 //
-// It is the only place in the package that touches the process it runs in.
-// Everything below Run receives what it needs, which is what lets the command
-// line be tested without a terminal and without a subprocess.
+// It is the only place in the package that reads the process it runs in, and
+// Environment.Exit the only one that ends it. Everything below Run receives
+// what it needs, which is what lets the command line be tested without a
+// terminal and without a subprocess.
+//
+// It has to run before Run. Whether the interrupt was ignored can be asked only
+// until the first watch starts, as interruptIgnored says.
 func FromProcess(args []string, stdout, stderr *os.File) Environment {
 	return Environment{
 		Args:             args,
@@ -16,6 +20,7 @@ func FromProcess(args []string, stdout, stderr *os.File) Environment {
 		Stderr:           stderr,
 		StderrIsTerminal: isTerminal(stderr),
 		NoColorRequested: os.Getenv("NO_COLOR") != "",
+		InterruptIgnored: interruptIgnored(),
 	}
 }
 

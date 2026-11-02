@@ -15,8 +15,9 @@ import (
 // The signal handler is not here either, and that is the same decision as the
 // rest of this file. A run that is stopped ends through the ordinary path with
 // the kind of failure it had, so the codes 130 and 143 come out of the same
-// table as every other one and nothing about ending a run early is unreachable
-// from a test.
+// table as every other one. How the process then ends, including sending the
+// signal again on Linux and macOS, is Environment.Exit, where a test reaches it.
 func main() {
-	os.Exit(cli.Run(cli.FromProcess(os.Args[1:], os.Stdout, os.Stderr)))
+	env := cli.FromProcess(os.Args[1:], os.Stdout, os.Stderr)
+	env.Exit(cli.Run(env))
 }

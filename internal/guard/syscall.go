@@ -53,7 +53,8 @@ import (
 // one name is a smaller opening than one file allowed a package.
 var SyscallAllowed = map[string][]string{
 	// The termination signal, so that a run stopped by a system rather than by
-	// a person still removes what it was in the middle of writing.
+	// a person still removes what it was in the middle of writing, and then
+	// ends by that signal.
 	"internal/cli/signals.go": {"SIGTERM"},
 	// The same, for a run started from the window.
 	"internal/gui/background/background.go": {"SIGTERM"},

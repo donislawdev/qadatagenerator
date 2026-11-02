@@ -12,6 +12,14 @@ repository once they are released.
 
 ### BREAKING
 
+- **On Linux and macOS a run of generate or corrupt that was interrupted or
+  stopped ends by that signal once it has cleaned up.** A shell still reports
+  130 and 143, and a loop in bash around the command now stops on Ctrl+C
+  rather than going on to its next round. A program that reads the exit status
+  itself now sees the signal, as it already did for quick, so Python reports
+  -2 or -15. As the first process of a container the run still ends with 130
+  or 143, and so does a run started in the background with the interrupt
+  ignored. Nothing changes on Windows.
 - **The manifest format is 0.2 and lists every entity of the dataset.** The
   envelope carries `entities`, each table with its own `rows_total`, the ones
   no damage reached included. A manifest of 0.2 without the list is refused,

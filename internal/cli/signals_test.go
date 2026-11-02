@@ -4,6 +4,7 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
+	"syscall"
 	"testing"
 	"time"
 
@@ -120,6 +121,38 @@ func TestAWatchReleasedBeforeAnySignalStopsNothing(t *testing.T) {
 	}
 	if stopped := watcher.Stopped(); stopped != nil {
 		t.Errorf("a run nobody interrupted was stopped anyway: %v", stopped)
+	}
+}
+
+// 🔴 Which code is ended by sending its signal again, on each system. Only the
+// two signal codes are, only where there is a signal to send, and the
+// interrupt not when the process started with it ignored, since the system
+// ignores it again once the watch stops. Sending the signal and the process
+// ending by it can be seen only on Linux and macOS, in signals_unix_test.go.
+func TestEachCodeNamesTheSignalItIsSentAgainWith(t *testing.T) {
+	for _, sample := range []struct {
+		name             string
+		system           string
+		code             exitCode
+		interruptIgnored bool
+		sent             os.Signal
+	}{
+		{"a run a person stopped on Linux", "linux", codeInterrupted, false, os.Interrupt},
+		{"a run the system stopped on macOS", "darwin", codeTerminated, false, syscall.SIGTERM},
+		{"a run a person stopped, started in the background", "linux", codeInterrupted, true, nil},
+		{"a run the system stopped, started in the background", "linux", codeTerminated, true, syscall.SIGTERM},
+		{"a run a person stopped on Windows", "windows", codeInterrupted, false, nil},
+		{"a run the system stopped on Windows", "windows", codeTerminated, false, nil},
+		{"a run that failed on its own", "linux", codeExpectation, false, nil},
+		{"a run that succeeded", "darwin", codeOK, false, nil},
+	} {
+		t.Run(sample.name, func(t *testing.T) {
+			sent, ok := signalBehind(sample.system, sample.code, sample.interruptIgnored)
+			if ok != (sample.sent != nil) || sent != sample.sent {
+				t.Errorf("code %d is sent again with %v (%v), rather than with %v",
+					sample.code, sent, ok, sample.sent)
+			}
+		})
 	}
 }
 
