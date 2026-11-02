@@ -163,6 +163,26 @@ func TestADrawnSeedIsSaidAndBringsTheSameValuesBack(t *testing.T) {
 	}
 }
 
+// 🔴 A date of birth a PESEL cannot carry is a request that cannot be met, and
+// the refusal says so with the date and the years it could have been. Until
+// 2026-11-02 it reached the surface without a kind, so the reader was told this
+// tool had a defect and should be reported, with the code of one.
+func TestADateOfBirthThePeselCannotCarryIsARequestThatCannotBeMet(t *testing.T) {
+	got := run("quick", "pesel", "--birth-date", "1700-01-01")
+
+	if got.code != int(codeData) {
+		t.Fatalf("the run ended with %d rather than %d: %s", got.code, codeData, got.log)
+	}
+	if strings.Contains(got.log, problemMissingKind) {
+		t.Errorf("a date the scheme cannot carry is reported as a defect of the tool: %q", got.log)
+	}
+	for _, said := range []string{"1700-01-01", "1800 to 2299", "give a date of birth"} {
+		if !strings.Contains(got.log, said) {
+			t.Errorf("the refusal does not say %q: %q", said, got.log)
+		}
+	}
+}
+
 // 🔴 A run whose engine refused the very first value drew nothing, so there is
 // no value for a seed to bring back and the line is not said.
 //

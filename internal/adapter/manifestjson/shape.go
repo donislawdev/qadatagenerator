@@ -217,3 +217,34 @@ func inferenceOf(inferred *manifest.Inference) *inferenceDocument {
 	}
 	return document
 }
+
+// inferenceFrom turns the evidence on disk back into the model, nil when the
+// document carries none.
+//
+// 🔴 Until 2026-11-02 the reader parsed this member and dropped it, so a
+// manifest read back had no inference and the rules the model holds an
+// inference to never ran on one somebody edited by hand. Nothing showed it,
+// because no surface reading a manifest shows the inference yet.
+func inferenceFrom(document *inferenceDocument) *manifest.Inference {
+	if document == nil {
+		return nil
+	}
+	inferred := &manifest.Inference{
+		Method:       document.Method,
+		NotInferred:  append([]string(nil), document.NotInferred...),
+		ColumnsTotal: document.ColumnsTotal,
+	}
+	for _, column := range document.Columns {
+		inferred.Columns = append(inferred.Columns, manifest.InferredColumn{
+			Field: column.Field, Type: column.Type,
+			Scheme: column.Scheme, Basis: column.Basis,
+		})
+	}
+	for _, relation := range document.Relations {
+		inferred.Relations = append(inferred.Relations, manifest.InferredRelation{
+			Field: relation.Field, With: relation.With,
+			Kind: relation.Kind, Basis: relation.Basis,
+		})
+	}
+	return inferred
+}

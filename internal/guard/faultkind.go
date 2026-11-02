@@ -78,6 +78,7 @@ var RefusalKinds = map[string]string{
 
 	// --- Data: a valid document asks for something that cannot be done --------
 	"internal/adapter/manifestjson.bytesOf Data":             "the manifest is larger than this build reads back at once. The document is valid and this build cannot hold it, which is the other side of the boundary",
+	"internal/adapter/provider/pl.outOfRange Data":           "a date of birth the request bound is a real day the PESEL scheme has no century for, so the request was read without trouble and cannot be met. Reached by quick with a date of birth typed by hand, which is checked for its shape and not against the scheme. Given its kind on 2026-11-02, when it reached the surface as a defect of the tool (B-345)",
 	"internal/adapter/responsejson.bytesOf Data":             "the response record is larger than this build reads at once, or grew past that while being read, for the same reason as the manifest above",
 	"internal/adapter/sourcecsv.File.changedUnderneath Data": "the source file changed while it was being read. 🔴 The file is the DATA being worked on rather than a document telling this tool what to do, which is where DEC-172 draws the line",
 	"internal/adapter/sourcecsv.File.openAndReadHeader Data": "the source file is empty, and an empty file is data this mode cannot work with rather than an invalid instruction",

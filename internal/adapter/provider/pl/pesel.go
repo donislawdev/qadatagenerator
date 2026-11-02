@@ -14,6 +14,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
 	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
 // PESEL is the Polish national identification number.
@@ -95,8 +96,26 @@ var centuries = []struct {
 	{2200, 60},
 }
 
-// ErrOutOfRange is returned for a date the numbering scheme cannot express.
-var ErrOutOfRange = errors.New("pesel: the scheme covers 1800 to 2299 only")
+// ErrOutOfRange is the cause of every refusal of a date the numbering scheme
+// cannot express, reachable through errors.Is.
+var ErrOutOfRange = errors.New("the scheme covers the years 1800 to 2299 only")
+
+// outOfRange refuses a real day the scheme has no century for, naming it.
+//
+// # Why it carries a kind when the other refusals of this file do not
+//
+// It is the one a person reaches: a date of birth asked for by hand is checked
+// for its shape and not against this scheme, so a well formed date from 1700
+// arrives here. Until 2026-11-02 it arrived at the surface as a bare error,
+// which every surface reports as a defect of this tool with the advice to
+// report it, for a request that was simply one the scheme cannot meet. The
+// refusals of a date or a gender that cannot be read are stopped before they
+// get this far, so nothing reaches them with a value a person typed.
+func outOfRange(date provider.Date) error {
+	return fault.Wrap(fault.Data, ErrOutOfRange,
+		fmt.Sprintf("pesel: %04d-%02d-%02d cannot be written", date.Year, date.Month, date.Day)).
+		DoInstead("give a date of birth in those years")
+}
 
 // ID names this provider. The country prefix is ISO 3166-1 alpha-2, because a
 // provider belongs to a country rather than to a language.
@@ -316,7 +335,7 @@ func encodeMonth(date provider.Date) (int, error) {
 			return date.Month + century.offset, nil
 		}
 	}
-	return 0, ErrOutOfRange
+	return 0, outOfRange(date)
 }
 
 // decodeDate turns the first six digits back into a date, or reports that the

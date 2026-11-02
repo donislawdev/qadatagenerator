@@ -572,4 +572,7 @@ var toolGuards = []Guard{
 	{"a quick run whose engine refused the first value names no seed, because nothing was drawn for it to bring back", "TestNoSeedIsSaidWhenTheEngineRefusedTheFirstValue", "internal/cli", ByMutation},
 	{"the entries of a word list remembered under a limit on length are keyed by the list, the limit and the unit", "TestAListUnderALimitIsTheSameWhicheverLimitWasAskedFirst", "internal/adapter/values", ByMutation},
 	{"a value of a word list under a limit on length is drawn from the remembered entries rather than measuring the list again", "TestAValueUnderALimitIsDrawnWithoutMeasuringTheListAgain", "internal/adapter/values", ByMutation},
+	{"a failed write to standard output does not send the reader to check a path that does not exist", "TestAFailedWriteToTheOutputDoesNotSendTheReaderToAPath", "internal/cli", ByMutation},
+	{"a date of birth a PESEL cannot carry is refused as a request that cannot be met, naming the date and the years it could have been", "TestADateOfBirthThePeselCannotCarryIsARequestThatCannotBeMet", "internal/cli", ByMutation},
+	{"a date the PESEL scheme cannot express is refused with the date named and a kind saying the request cannot be met", "TestADateOutsideTheSchemeIsRefused", "internal/adapter/provider/pl", ByMutation},
 }

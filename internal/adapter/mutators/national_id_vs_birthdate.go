@@ -2,6 +2,7 @@ package mutators
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/mutator"
@@ -68,8 +69,17 @@ func (nationalIDVsBirthdate) Damage(target mutator.Target) mutator.Outcome {
 		// here is the honest answer: choosing a different drift instead would do
 		// something the policy did not ask for, and choosing the nearest real
 		// day would quietly change what the manifest promises.
+		if !isDay(moved) {
+			return mutator.Skipped(fmt.Sprintf(
+				"moving the birth date by %d years lands on %04d-%02d-%02d, which is not a day",
+				years, moved.Year, moved.Month, moved.Day))
+		}
+		// A day the calendar has and the scheme refused is a day it has no way
+		// to write, such as one past the last century a PESEL covers. Until
+		// 2026-11-02 the reason above was given for those too, so the manifest
+		// said of a real day that it was not one.
 		return mutator.Skipped(fmt.Sprintf(
-			"moving the birth date by %d years lands on %04d-%02d-%02d, which is not a day",
+			"moving the birth date by %d years lands on %04d-%02d-%02d, which the numbering scheme cannot write",
 			years, moved.Year, moved.Month, moved.Day))
 	}
 	if rebuilt == target.Value {
@@ -77,4 +87,12 @@ func (nationalIDVsBirthdate) Damage(target mutator.Target) mutator.Outcome {
 			"moving the birth date by %d years left the value where it was", years))
 	}
 	return mutator.Done(rebuilt)
+}
+
+// isDay reports whether the calendar has that date. The standard library moves
+// a day it does not have into the next month, so a date that comes back changed
+// was not one.
+func isDay(date provider.Date) bool {
+	asked := time.Date(date.Year, time.Month(date.Month), date.Day, 0, 0, 0, 0, time.UTC)
+	return asked.Year() == date.Year && int(asked.Month()) == date.Month && asked.Day() == date.Day
 }

@@ -142,6 +142,38 @@ func TestABirthDateWithNowhereToLandIsRefusedWithTheDateNamed(t *testing.T) {
 	if !strings.Contains(outcome.Reason(), "2009-02-29") {
 		t.Errorf("the reason does not name the day that does not exist: %s", outcome.Reason())
 	}
+	if !strings.Contains(outcome.Reason(), "which is not a day") {
+		t.Errorf("the reason does not say the calendar lacks the day: %s", outcome.Reason())
+	}
+}
+
+// 🔴 A day the calendar has and the scheme cannot write is refused for that,
+// and not for being no day. A number of 2297 moved by five years lands on the
+// first of March 2302, a real day a PESEL has no century for. Until 2026-11-02
+// the manifest said of it that it was not a day, which sends a reader to the
+// calendar for a fault that is in the range of the scheme.
+func TestADayPastTheSchemeIsRefusedAsOneItCannotWrite(t *testing.T) {
+	late, err := (pl.PESEL{}).WithDate(produce(t, pl.PESEL{}, 0),
+		provider.Date{Year: 2297, Month: 3, Day: 1})
+	if err != nil {
+		t.Fatalf("the scheme refused to build a day of 2297: %v", err)
+	}
+
+	outcome := damage(t, nationalIDVsBirthdate, mutator.Target{
+		Value: late, Field: identifierField("PL.pesel"), Provider: pl.PESEL{},
+		Params: mutator.Parameters{driftYears: 5},
+	})
+	if outcome.Applied() {
+		t.Fatalf("a day past the scheme became %q", outcome.Value())
+	}
+	if strings.Contains(outcome.Reason(), "not a day") {
+		t.Errorf("the reason says a real day is not one: %s", outcome.Reason())
+	}
+	for _, said := range []string{"2302-03-01", "cannot write"} {
+		if !strings.Contains(outcome.Reason(), said) {
+			t.Errorf("the reason does not say %q: %s", said, outcome.Reason())
+		}
+	}
 }
 
 // The catalog owns the drift, and it arrives as a whole number rather than as

@@ -532,4 +532,7 @@ var damageGuards = []Guard{
 	{"every export of the manifest reaches its file in pieces of a few kilobytes rather than one write per entry", "TestEveryFormReachesItsFileInPiecesRatherThanAnEntryAtATime", "internal/adapter/manifestexport", ByMutation},
 	{"every export of the manifest answers an entry with the failure to write its file while entries still arrive", "TestEveryFormSaysItCannotBeWrittenWithinOneBuffer", "internal/adapter/manifestexport", ByMutation},
 	{"every export of the manifest sends what its buffer holds before it closes, and a failure to send it fails the close", "TestEveryFormSaysItsLastLinesCouldNotBeWritten", "internal/adapter/manifestexport", ByMutation},
+	{"a real day a numbering scheme cannot write is not reported in the manifest as a day the calendar lacks", "TestADayPastTheSchemeIsRefusedAsOneItCannotWrite", "internal/adapter/mutators", ByMutation},
+	{"the inference a run wrote into its manifest is the one read back, and is held to the rules it was written under", "TestAnInferenceSurvivesBeingWrittenAndRead", "internal/adapter/manifestjson", ByMutation},
+	{"an inference edited by hand to lose its basis is refused on reading by the rule that refused it at writing", "TestAnInferenceEditedToLoseItsBasisIsRefusedOnReading", "internal/adapter/manifestjson", ByMutation},
 }

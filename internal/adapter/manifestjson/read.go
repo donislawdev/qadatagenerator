@@ -182,6 +182,7 @@ func asManifest(read manifestDocument) (manifest.Manifest, []string) {
 		Policy:         read.Run.Policy,
 		Tag:            read.Run.Tag,
 		Source:         read.Run.Source,
+		Inference:      inferenceFrom(read.Run.Inference),
 		RowsTotal:      read.Run.RowsTotal,
 		RowsMutated:    read.Run.RowsMutated,
 		Entities:       entitiesFrom(read.Run.Entities),

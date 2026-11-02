@@ -344,7 +344,14 @@ const (
 	//
 	// One sentence per kind rather than per message. What went wrong is already
 	// in the message, and the kind is exactly what decides the next move.
-	doAboutIO     = "check the path exists and that this account may write there"
+	doAboutIO = "check the path exists and that this account may write there"
+	// The data channel has no path of its own to check. It goes wherever the
+	// command was sent, which is a program reading it or a file the shell
+	// opened, and the two ways it stops taking writes are the program leaving
+	// and the disk filling up. Until 2026-11-02 a reader that left early got
+	// the sentence above, about a path nobody had named.
+	doAboutOutput = "whatever the output was sent to stopped taking it, so what it received is cut short. " +
+		"Check the program reading it, or the room left on the disk it is written to"
 	doAboutConfig = "qadg validate <recipe> reports every problem the recipe has at once"
 	// The same answer for the verb that is already that command. Telling a
 	// reader who has just run validate to run validate is a fourth part that

@@ -530,7 +530,7 @@ func usage(out *streams, p problem) int {
 // itself failed. Output that went nowhere is not a successful run.
 func finish(out *streams, code exitCode) int {
 	if out.dataErr != nil {
-		return fail(out, fault.Wrap(fault.IO, out.dataErr, "cannot write to standard output"))
+		return fail(out, outputFailed(out.dataErr))
 	}
 	return int(code)
 }
@@ -543,9 +543,19 @@ func finish(out *streams, code exitCode) int {
 // alongside a bad exit code leaves them with everything.
 func finishFailed(out *streams, err error) int {
 	if out.dataErr != nil {
-		return fail(out, fault.Wrap(fault.IO, out.dataErr, "cannot write to standard output"))
+		return fail(out, outputFailed(out.dataErr))
 	}
 	return fail(out, err)
+}
+
+// outputFailed is a failed write of the data channel, said the same way on
+// both of the paths a run ends on.
+//
+// It carries its own next move because the one for its kind names a path, and
+// standard output has none: the reader was sent to check a file that does not
+// exist while the program reading the output had simply left.
+func outputFailed(err error) error {
+	return fault.Wrap(fault.IO, err, "cannot write to standard output").DoInstead(doAboutOutput)
 }
 
 // fail reports a failure on the log channel and returns the exit code that

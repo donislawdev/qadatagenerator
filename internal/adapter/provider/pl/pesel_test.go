@@ -1,12 +1,14 @@
 package pl_test
 
 import (
+	"errors"
 	"strings"
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/provider/pl"
 	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 	"github.com/donislawdev/qadatagenerator/internal/domain/seed"
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/oracle"
 )
 
@@ -184,11 +186,25 @@ func iso(date provider.Date) string {
 
 // A date the scheme cannot express is refused rather than folded into some
 // other century, which is what makes the boundary a boundary.
+//
+// 🔴 The refusal names the date and carries a kind, because a person reaches it
+// with a date they typed. Until 2026-11-02 it carried none, and every surface
+// reported a request the scheme cannot meet as a defect of this tool.
 func TestADateOutsideTheSchemeIsRefused(t *testing.T) {
 	for _, date := range []string{"1799-12-31", "2300-01-01"} {
 		_, err := pl.PESEL{}.Generate(request(1, map[string]string{provider.RoleBirthDate: date}))
 		if err == nil {
 			t.Errorf("%s was accepted, and the scheme covers 1800 to 2299", date)
+			continue
+		}
+		if !errors.Is(err, pl.ErrOutOfRange) {
+			t.Errorf("%s was refused for another reason: %v", date, err)
+		}
+		if kind := fault.KindOf(err); kind != fault.Data {
+			t.Errorf("%s was refused as %v rather than as a request that cannot be met: %v", date, kind, err)
+		}
+		if !strings.Contains(err.Error(), date) {
+			t.Errorf("the refusal of %s does not name it: %v", date, err)
 		}
 	}
 }

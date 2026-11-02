@@ -35,6 +35,21 @@ repository once they are released.
 
 ### Fixed
 
+- **quick pesel with a date of birth outside 1800 to 2299 says the scheme
+  cannot write that date.** It used to report an internal defect of the tool
+  and ask for a bug report, with exit code 1. It now names the date and the
+  years a PESEL covers and ends with exit code 5.
+- **When the program reading a command's output stops early, the error no
+  longer tells you to check that a path exists.** Standard output has no path.
+  The message now says the output was cut short and points at the program
+  reading it or at the room left on the disk.
+- **verify refuses a manifest from corrupt whose inferred schema was edited to
+  lose its evidence.** The run that wrote it refuses the same thing. The
+  inferred schema used to be dropped when a manifest was read back.
+- **Damaging a file with a PESEL from the 2290s no longer records that a real
+  date is not a day.** Moving such a date by five years lands past the years
+  the scheme covers, and the manifest now gives that as the reason the damage
+  was not applied.
 - **A run whose manifest cannot be written stops at that point.** generate
   with a policy and corrupt used to go on producing the whole dataset and
   fail only at the end, then leave nothing behind. They now stop within a few
@@ -45,10 +60,9 @@ repository once they are released.
   a tenth of the writes to the disk it made before and finishes about a third
   sooner. The files are the same bytes.
 - **A field drawn from a word list with max_length no longer slows a run
-  down.** Every
-  value used to check the length of every entry in the list. 200,000 Polish
-  rows with three such fields took 20 seconds and now take under half a
-  second, with the same values.
+  down.** Every value used to check the length of every entry in the list.
+  200,000 Polish rows with three such fields took 20 seconds and now take
+  under half a second, with the same values.
 - **quick writes its values as it draws them, and stops at the first one that
   cannot be written.** A large `--count` used to write nothing until the last
   value was drawn, and a hundred million values ended in an out of memory

@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
@@ -37,6 +38,37 @@ func TestARefusalThatKnowsTheNextMoveDoesNotGetTheOneForItsKind(t *testing.T) {
 	}
 	if !strings.Contains(second.log, "allow replacing") {
 		t.Errorf("the refusal carries no next move of its own: %q", second.log)
+	}
+}
+
+// 🔴 Standard output has no path. Until 2026-11-02 a write to it that failed,
+// because the program reading it had left, ended with the sentence for every
+// write failure, asking the reader to check that a path exists. Both ways a run
+// ends are asked, because each wrapped the failure on its own: the version ends
+// through finish, and quick, whose drawing stops at the failed write, through
+// finishFailed.
+//
+// 🔴 The count is past one batch of the data channel on purpose. Three values
+// fit in one batch, which is written only after the drawing is done, so the
+// drawing itself never fails and the run ends through finish like the version
+// does. A mutation of finishFailed survived exactly that on 2026-11-02.
+func TestAFailedWriteToTheOutputDoesNotSendTheReaderToAPath(t *testing.T) {
+	for _, args := range [][]string{
+		{"--version"},
+		{"quick", "pesel", "--count", "100", "--seed", "the-reader-left"},
+	} {
+		var log bytes.Buffer
+		code := Run(Environment{Args: args, Stdout: refusingWriter{}, Stderr: &log})
+
+		if code != int(codeIO) {
+			t.Errorf("%v ended with %d rather than %d: %s", args, code, codeIO, log.String())
+		}
+		if strings.Contains(log.String(), doAboutIO) {
+			t.Errorf("%v sends the reader to check a path: %q", args, log.String())
+		}
+		if !strings.Contains(log.String(), doAboutOutput) {
+			t.Errorf("%v does not say what to do about output nobody took: %q", args, log.String())
+		}
 	}
 }
 
