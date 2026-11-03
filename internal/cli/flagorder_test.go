@@ -5,6 +5,7 @@ import (
 	"io"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -78,19 +79,85 @@ func splitSet() (*flag.FlagSet, *string, *bool) {
 	return set, set.String("out", "", ""), set.Bool("dry-run", false, "")
 }
 
-// --help after a path is answered by every verb that reads flags, which is a
-// question about every verb at once: one parsing its flags the old way prints
-// no help here. help itself is left out because it reads no flags at all.
+// --help after a path is answered by every verb, which is a question about
+// every verb at once: one parsing its flags the old way prints no help here.
+// help is asked too, and what stands after it is the name of a command.
 func TestEveryVerbAnswersHelpAskedForAfterItsPath(t *testing.T) {
 	for _, doc := range commandDocs {
-		if doc.name == commandHelp {
-			continue
-		}
 		before := run(doc.name, "--help")
 		after := run(doc.name, "anything", "--help")
 		if after.code != int(codeOK) || after.data != before.data || after.data == "" {
 			t.Errorf("qadg %s anything --help ended with %d and printed %q, want the help it prints for "+
 				"qadg %s --help. Log %q", doc.name, after.code, after.data, doc.name, after.log)
+		}
+	}
+}
+
+// 🔴 help reads the flags of the tool after itself, as its own help says.
+//
+// That help lists them under a heading saying they are accepted before or
+// after the command, and until 2026-11-03 each one written after help was taken
+// for the name of a command and refused with "no help for", --help included.
+// The guards of the help of every verb left help out as a verb that reads no
+// flags, which is what kept the sentence and the parser apart.
+func TestTheFlagsOfTheToolMeanTheSameAfterHelpAsBeforeIt(t *testing.T) {
+	var helpSpellings []string
+	for _, shared := range crossCuttingFlagDocs {
+		if slices.Contains(shared.names, "--help") {
+			helpSpellings = shared.names
+			continue
+		}
+		for _, spelling := range shared.names {
+			for _, subject := range [][]string{nil, {commandGenerate}, {subjectGenerators}} {
+				after := run(append(append([]string{commandHelp}, subject...), spelling)...)
+				before := run(append([]string{spelling, commandHelp}, subject...)...)
+				if after.code != int(codeOK) || after != before {
+					t.Errorf("qadg help %v %s ended with %d and logged %q, and qadg %s help %v with %d",
+						subject, spelling, after.code, after.log, spelling, subject, before.code)
+				}
+			}
+		}
+	}
+
+	// Before the verb a help flag asks for the help of the tool and is refused
+	// beside a command, so after it the comparison is with the help of help.
+	if len(helpSpellings) == 0 {
+		t.Fatal("no flag the tool shares is --help, so nothing below would be asked")
+	}
+	own := run(commandHelp, commandHelp)
+	for _, spelling := range helpSpellings {
+		for _, arguments := range [][]string{{commandHelp, spelling}, {commandHelp, commandGenerate, spelling}} {
+			if got := run(arguments...); got.code != int(codeOK) || got != own {
+				t.Errorf("qadg %v ended with %d and logged %q, want what qadg help help prints",
+					arguments, got.code, got.log)
+			}
+		}
+	}
+
+	both := run(commandHelp, "--quiet", "--verbose")
+	if both.code != int(codeUsage) || !strings.Contains(both.log, problemQuietAndVerbose) {
+		t.Errorf("qadg help --quiet --verbose ended with %d and logged %q, want the refusal of the pair",
+			both.code, both.log)
+	}
+}
+
+// A command written as a flag after help is refused as a flag, and the refusal
+// still names the command, as it did while help took every argument for one.
+func TestACommandWrittenAsAFlagAfterHelpIsStillSuggested(t *testing.T) {
+	for _, given := range []struct {
+		arguments []string
+		suggested string
+	}{
+		{[]string{commandHelp, "--generate"}, commandGenerate},
+		{[]string{commandHelp, "--quiet", "-generators"}, subjectGenerators},
+		{[]string{commandHelp, "--validat=yes"}, commandValidate},
+		{[]string{commandHelp, "--bogus", "--generate"}, commandHelp},
+	} {
+		got := run(given.arguments...)
+		want := labelTry + problemHelpSubjectDo + " " + given.suggested + "\n"
+		if got.code != int(codeUsage) || !strings.Contains(got.log, want) {
+			t.Errorf("qadg %v ended with %d and logged %q, want it to end with %q",
+				given.arguments, got.code, got.log, want)
 		}
 	}
 }

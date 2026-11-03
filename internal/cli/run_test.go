@@ -618,11 +618,6 @@ func TestEverySurfaceListingCommandsNamesAllOfThem(t *testing.T) {
 // where they were standing.
 func TestEveryFlagAVerbDocumentsIsOneItAccepts(t *testing.T) {
 	for _, doc := range commandDocs {
-		if doc.name == commandHelp {
-			// The help verb takes a command name rather than flags, and the
-			// dispatcher answers it before any flag set exists.
-			continue
-		}
 		help := run(doc.name, "--help").data
 		for _, flag := range append(append([]flagDoc{}, doc.flags...), crossCuttingFlagDocs...) {
 			// Listed rather than merely mentioned. The description of one flag

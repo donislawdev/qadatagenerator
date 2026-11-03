@@ -567,9 +567,9 @@ var commandDocs = []commandDoc{
 		name:      commandHelp,
 		summary:   "Print this text, the help of one command, or what this build can generate.",
 		arguments: "[command|generators]",
-		what: "Answers the same as --help. A command named after it is described on its own, with the\n" +
-			"flags it takes. The word generators lists every value this build can fill a field with\n" +
-			"and says where each one can be produced.",
+		what: "With nothing after it, it prints what qadg --help prints. A command named after it is\n" +
+			"described on its own, with the flags it takes. The word generators lists every value\n" +
+			"this build can fill a field with and says where each one can be produced.",
 		example: "qadg help generators",
 	},
 }

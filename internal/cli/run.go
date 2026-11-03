@@ -227,7 +227,7 @@ func runCommand(out *streams, command []string, asked invocation) int {
 	case commandQuick:
 		return runQuick(out, command[1:], asked.global)
 	case commandHelp:
-		return runHelp(out, command[1:])
+		return runHelp(out, command[1:], asked.global)
 	default:
 		return usage(out, unknownCommand(command[0]))
 	}

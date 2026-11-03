@@ -66,6 +66,11 @@ repository once they are released.
 - **A flag missing its value is told it takes one.** `qadg generate
   recipe.yaml --out` used to say the flag is not defined, beside a list of
   accepted flags that named it.
+- **Flags may follow help.** `qadg help --quiet` and `qadg help generate
+  --no-color` used to end with exit code 2 and the message "no help for
+  --quiet", although the help of help lists these flags as accepted after the
+  command. They are now read wherever they stand, as after every other
+  command, and `qadg help --help` prints the help of help.
 - **The Take and corrupt screen lets go of a file it is still reading as soon
   as another file or separator is chosen.** It used to stop the old read only
   between records, and then compare every column of a file with every other

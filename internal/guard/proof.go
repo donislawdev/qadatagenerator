@@ -568,9 +568,14 @@ var toolGuards = []Guard{
 	// Four verbs of five stopped at the first path until 2026-11-03 and
 	// refused a flag after it as a path too many.
 	{"the flags of a verb are read wherever they stand, a flag taking a value takes the next argument, a switch takes none, and a double dash ends the flags", "TestTheFlagsOfAVerbAreReadWhereverTheyStand", "internal/cli", ByMutation},
-	{"every verb that reads flags answers --help written after its path", "TestEveryVerbAnswersHelpAskedForAfterItsPath", "internal/cli", ByMutation},
+	{"every verb answers --help written after its path, help included", "TestEveryVerbAnswersHelpAskedForAfterItsPath", "internal/cli", ByMutation},
 	{"the same flags on the other side of the path give the same run on both channels, for every verb", "TestAFlagAfterThePathMeansWhatItMeansBeforeIt", "internal/cli", ByMutation},
 	{"a flag written last without its value is told it takes one rather than that it does not exist", "TestAFlagWrittenLastWithoutItsValueIsToldItTakesOne", "internal/cli", ByMutation},
+	// 🔴 B-359: help read every argument after it as the name of a command,
+	// so each flag its own help lists as accepted after the command was
+	// refused there, --help included, until 2026-11-03.
+	{"every flag of the tool written after help gives the run it gives before help, and --help after help prints the help of help", "TestTheFlagsOfTheToolMeanTheSameAfterHelpAsBeforeIt", "internal/cli", ByMutation},
+	{"a command written as a flag after help is refused as a flag and the refusal still names the command", "TestACommandWrittenAsAFlagAfterHelpIsStillSuggested", "internal/cli", ByMutation},
 	// 🔴 B-336: an identifier refuses a bound value it cannot read without a
 	// kind, which is right only while no value a person writes reaches it.
 	{"every value a generator playing a role draws is taken by every generator reading that role, in every locale", "TestEveryValueABoundGeneratorDrawsIsOneItsReadersTake", "internal/adapter/values", ByMutation},

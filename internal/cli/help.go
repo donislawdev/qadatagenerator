@@ -3,6 +3,7 @@ package cli
 import (
 	"flag"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
@@ -18,21 +19,77 @@ import (
 
 // runHelp answers the most common thing somebody types.
 //
-// With nothing after it, it is --help. With a command after it, it is the help
-// of that command, which is the same text that command prints for --help. One
+// # Why help reads flags although it takes none of its own
+//
+// Its help lists the flags of the tool as accepted before or after the command,
+// as the help of every verb does, and --help is a flag of every verb. Until
+// 2026-11-03 this verb read every argument after it as the name of a command,
+// so qadg help --quiet was refused with "no help for --quiet", and qadg help
+// --help the same way. --help written after help asks about help itself, as it
+// asks about the verb it follows everywhere else, whatever command is named.
+func runHelp(out *streams, arguments []string, global crossCutting) int {
+	set := flag.NewFlagSet(commandHelp, flag.ContinueOnError)
+	set.SetOutput(io.Discard)
+	local := declareCrossCutting(set)
+	askedForHelp := declareVerbHelp(set)
+	subjects, err := parseAnywhere(set, arguments)
+	if err != nil {
+		return usage(out, flagFailure(err, acceptedFlagsOf(commandHelp), helpInsteadOf(set, arguments)))
+	}
+	if askedForHelp() {
+		return printCommandHelp(out, commandHelp)
+	}
+	if code, ok := applyVerbosity(out, global.merge(local)); !ok {
+		return code
+	}
+	return answerHelp(out, subjects)
+}
+
+// helpInsteadOf says what to type after a flag help does not define.
+//
+// A command written with dashes in front of it, qadg help --generate, is such a
+// flag. While help read no flags the same slip was refused as a subject, beside
+// the command it was close to, and reading flags must not lose that. The flag
+// refused is the first one the set does not define, because the parse refuses
+// them in the order typed, and none of the flags of help takes a value, so an
+// argument that looks like a flag is one.
+func helpInsteadOf(set *flag.FlagSet, arguments []string) string {
+	for _, argument := range arguments {
+		if argument == "--" {
+			break
+		}
+		if !looksLikeFlag(argument) {
+			continue
+		}
+		name, _, _ := strings.Cut(strings.TrimPrefix(argument[1:], "-"), "=")
+		if set.Lookup(name) != nil {
+			continue
+		}
+		if near, close := nearestOf(name, helpSubjects()); close {
+			return problemHelpSubjectDo + " " + near
+		}
+		break
+	}
+	return problemHelpSubjectDo + " " + commandHelp
+}
+
+// answerHelp prints what was asked about.
+//
+// With nothing named, it is --help. With a command named, it is the help of
+// that command, which is the same text that command prints for --help. One
 // renderer rather than two, because two would answer the same question
 // differently the first time somebody edited one of them.
-func runHelp(out *streams, arguments []string) int {
+func answerHelp(out *streams, subjects []string) int {
 	switch {
-	case len(arguments) == 0:
+	case len(subjects) == 0:
 		printHelp(out)
 		return finish(out, codeOK)
-	case len(arguments) > 1:
+	case len(subjects) > 1:
 		return usage(out, problem{
 			what:    problemHelpArguments,
 			why:     problemHelpArgumentsWhy,
 			allowed: problemHelpArgumentsAllow,
-			instead: problemHelpSubjectDo + " " + arguments[0],
+			instead: problemHelpSubjectDo + " " + subjects[0],
 		})
 	}
 
@@ -41,19 +98,19 @@ func runHelp(out *streams, arguments []string) int {
 	// was to name one it does not have and read the refusal, on both surfaces.
 	// A vocabulary somebody can only reach by making a mistake is a vocabulary
 	// this tool keeps to itself.
-	if arguments[0] == subjectGenerators {
+	if subjects[0] == subjectGenerators {
 		out.emit(renderGenerators())
 		return finish(out, codeOK)
 	}
 
-	doc, found := commandDocFor(arguments[0])
+	doc, found := commandDocFor(subjects[0])
 	if !found {
-		refusal := unknownCommand(arguments[0])
-		refusal.what = problemHelpSubject + arguments[0]
+		refusal := unknownCommand(subjects[0])
+		refusal.what = problemHelpSubject + subjects[0]
 		refusal.why = problemHelpSubjectWhy
 		refusal.allowed = strings.Join(helpSubjects(), ", ")
 		refusal.instead = problemHelpSubjectDo
-		if near, close := nearestOf(arguments[0], helpSubjects()); close {
+		if near, close := nearestOf(subjects[0], helpSubjects()); close {
 			refusal.instead = problemHelpSubjectDo + " " + near
 		}
 		return usage(out, refusal)
