@@ -172,6 +172,61 @@ func TestAnAgreementWorthNothingIsRefused(t *testing.T) {
 	}
 }
 
+// 🔴 An agreement is a relation only when it could have come out a hundred
+// million other ways, and the split of the records decides that, however many
+// of them agree.
+//
+// The count used to stop as soon as a partial product passed the bar, and the
+// partial products of the last group rise past the final answer before they
+// come back down to it. Twenty nine records split ten to nineteen can be dealt
+// out about twenty million ways, thirty records of one gender in exactly one,
+// and both were announced (B-355). Fifteen to fifteen can be dealt out about a
+// hundred and fifty five million ways, and it is the control: the two refusals
+// have to come from the count and not from thirty records being too few.
+func TestASplitUnderTheBarIsRefusedHoweverManyRecordsAgree(t *testing.T) {
+	reads, ok := peselScheme(t).(provider.GenderEncoder)
+	if !ok {
+		t.Fatal("PL.pesel no longer reads a gender, so this relation cannot be proved")
+	}
+	var women, men []string
+	for _, value := range produced(t, "pesel", 400) {
+		if gender, _ := reads.EncodedGender(value); gender == provider.Female {
+			women = append(women, value)
+		} else {
+			men = append(men, value)
+		}
+	}
+	for _, given := range []struct {
+		what       string
+		women, men int
+		related    bool
+	}{
+		{"ten women and nineteen men", 10, 19, false},
+		{"thirty women and no men", 30, 0, false},
+		{"fifteen women and fifteen men", 15, 15, true},
+	} {
+		t.Run(given.what, func(t *testing.T) {
+			if len(women) < given.women || len(men) < given.men {
+				t.Fatalf("400 numbers gave %d women and %d men, too few for this split",
+					len(women), len(men))
+			}
+			identifiers := append(append([]string{}, women[:given.women]...), men[:given.men]...)
+			genders, _ := neighbours(t, identifiers)
+			shape := infer.From(tableOf("pesel", "sex"), []dataset.Sample{
+				sampleOf("pesel", identifiers), sampleOf("sex", genders),
+			}, schemes())
+			found, has := relationBetween(shape, "pesel", "sex")
+			switch {
+			case has && !given.related:
+				t.Errorf("%s were tied to the identifier: %s", given.what, found.Basis)
+			case !has && given.related:
+				t.Errorf("%s were not tied to the identifier. Relations: %v", given.what,
+					shape.Relations())
+			}
+		})
+	}
+}
+
 // 🔴 Two columns are compared record by record, not by position.
 //
 // Empty cells are dropped when a column is sampled, so the third value of one

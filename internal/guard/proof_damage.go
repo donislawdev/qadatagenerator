@@ -278,6 +278,12 @@ var damageGuards = []Guard{
 	// by accident one time in four.
 	{"a column standing for the encoded gender is tied to it", "TestAColumnStandingForTheEncodedGenderIsTiedToIt", "internal/adapter/infer", ByMutation},
 	{"an agreement worth nothing is refused", "TestAnAgreementWorthNothingIsRefused", "internal/adapter/infer", ByMutation},
+	// 🔴 The count stops early, and stopping early is honest only while no
+	// partial product passes the final one. Counted a record at a time the last
+	// group rises past it and comes back down, so splits that can be dealt out
+	// twenty million ways, or one, were announced as relations (B-355).
+	{"the count of ways meets the bar exactly when the multinomial does, for every split up to twenty five records and every split of seventy into two", "TestArrangementsMeetTheBarExactlyWhenTheMultinomialDoes", "internal/adapter/infer", ByMutation},
+	{"a split under the bar is refused however many records agree, and fifteen to fifteen still is a relation", "TestASplitUnderTheBarIsRefusedHoweverManyRecordsAgree", "internal/adapter/infer", ByMutation},
 	// 🔴 Empty cells are dropped when a column is sampled, so two columns line
 	// up by position only when neither has a gap. Reading them by position
 	// compares one person's identifier against another person's gender and

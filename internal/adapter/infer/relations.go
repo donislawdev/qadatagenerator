@@ -170,8 +170,10 @@ func genderAgreement(field, other string, reads provider.GenderEncoder,
 	// removing it changed nothing: a sample carrying one gender is one group,
 	// one group can be dealt out exactly one way, and one way is far under the
 	// bar. The degenerate case where every column of a single repeated value
-	// agrees perfectly is therefore refused by the count itself. A condition
-	// nobody can break is a condition nobody can be sure still works.
+	// agrees perfectly is therefore refused by the count itself, and
+	// TestASplitUnderTheBarIsRefusedHoweverManyRecordsAgree holds the count to
+	// that. A condition nobody can break is a condition nobody can be sure
+	// still works.
 	ways := arrangements(sizesOf(counts))
 	if ways < Coincidences {
 		return Relation{}, false
@@ -270,21 +272,29 @@ func sizesOf[K comparable](counts map[K]int) []int {
 // It stops counting once the answer is past the bar, because the numbers grow
 // beyond what a float can hold and the only question asked of them is whether
 // they are large enough.
+//
+// 🔴 Stopping early is honest only while no partial product is larger than the
+// final one, and counting a group up to its own size breaks that. The last
+// group of n records can be chosen one way, but counted a record at a time it
+// passes n choose n/2 on the way there, so thirty records of one gender reached
+// the bar halfway and were announced as a relation that can be dealt out in a
+// single way (B-355). Each group is counted up to the smaller of its size and
+// what is left beside it instead. That is the same binomial, and it climbs the
+// whole way.
 func arrangements(sizes []int) float64 {
-	total := 0
+	left := 0
 	for _, size := range sizes {
-		total += size
+		left += size
 	}
 	ways := 1.0
-	placed := 0
 	for _, size := range sizes {
-		for taken := 1; taken <= size; taken++ {
-			placed++
-			ways = ways * float64(total-placed+1) / float64(taken)
+		for taken := 1; taken <= min(size, left-size); taken++ {
+			ways = ways * float64(left-taken+1) / float64(taken)
 			if ways >= Coincidences {
 				return Coincidences
 			}
 		}
+		left -= size
 	}
 	return ways
 }

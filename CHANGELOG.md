@@ -43,6 +43,14 @@ repository once they are released.
 
 ### Fixed
 
+- **corrupt no longer ties a column to a national identifier on too little
+  evidence.** The gender or the date an identifier encodes has to agree with a
+  column in a way that could have come out a hundred million other ways, and
+  the count stopped early and said so for splits far short of it. A file of
+  forty women beside a column holding PL on every row was reported as two
+  columns agreeing on gender, both genders appearing, and damage was aimed at a
+  date column the file does not have. Such a file now has no relation, and the
+  damage that needs one is recorded as not applied with the reason.
 - **verify says once what is wrong with many rows of a response record.** A
   record answering every row twice, or giving many rows a verdict nobody
   knows, was refused with one sentence for each row, so 4000 repeated rows
