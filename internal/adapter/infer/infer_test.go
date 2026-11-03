@@ -100,14 +100,12 @@ func TestAColumnOfNationalIdentifiersIsRecognisedFromItsValues(t *testing.T) {
 // recognised as neither. Walking every scheme catches the next pair like that
 // on the day it arrives.
 //
-// One pair is left unrecognised by the standard rather than by a validator. An
-// ISBN-13 is a GTIN-13 carrying the prefix 978 or 979, so a column of book
-// numbers is a column of article numbers too, and the rule refuses to choose
-// between them as it is written to. What that costs is B-354. The pair is named
-// here, and the refusal is held to naming both of them, so that nothing else
-// can hide behind it.
+// The book number is accepted by the article number validator as well, because
+// an ISBN-13 is a GTIN-13 carrying the prefix 978 or 979. It is recognised as
+// itself all the same, because the book number declares the nesting and the
+// narrower scheme of a declared pair is chosen (DEC-269). Until then this test
+// held it as a named exception, which is what B-354 recorded.
 func TestEverySchemeIsRecognisedInAColumnOfItsOwnValues(t *testing.T) {
-	inside := map[string]string{"isbn": "ean"}
 	source := values.New("pl-PL", "infer")
 	for _, generator := range source.Names() {
 		scheme, behind := source.ProviderOf(generator)
@@ -127,15 +125,85 @@ func TestEverySchemeIsRecognisedInAColumnOfItsOwnValues(t *testing.T) {
 			[]dataset.Sample{sampleOf(generator, produced(t, generator, 40))},
 			schemes(),
 		), generator)
-		if wider, known := inside[scheme]; known {
-			if finding.Scheme != "" || !strings.Contains(finding.Basis, wider+" and by "+scheme) {
-				t.Errorf("a column of %s values, which the standard puts inside %s, was answered %q: %s",
-					scheme, wider, finding.Scheme, finding.Basis)
-			}
-			continue
-		}
 		if finding.Scheme != scheme {
 			t.Errorf("a column of %s values was taken for %q: %s", scheme, finding.Scheme, finding.Basis)
+		}
+	}
+}
+
+// A column of book numbers is accepted by two validators and recognised as the
+// narrower, and the basis says both halves: what else accepted it, and that
+// the definition of the scheme is what settled the choice. A reader handed
+// only "isbn" would not know that an article number reading was open to them.
+func TestABookNumberColumnIsRecognisedAsTheNarrowerOfTwoSchemes(t *testing.T) {
+	finding := findingFor(t, infer.From(
+		tableOf("book"),
+		[]dataset.Sample{sampleOf("book", produced(t, "isbn", 40))},
+		schemes(),
+	), "book")
+	if finding.Scheme != "isbn" {
+		t.Fatalf("a column of book numbers was taken for %q: %s", finding.Scheme, finding.Basis)
+	}
+	for _, said := range []string{"by ean", "narrower isbn", "definition"} {
+		if !strings.Contains(finding.Basis, said) {
+			t.Errorf("the basis has to say %q, and it says %q", said, finding.Basis)
+		}
+	}
+}
+
+// 🔴 The pair DEC-269 does NOT cover. A column of American Express test numbers
+// is accepted by the payment card and by the equipment identity, because both
+// are fifteen digits under the same formula, and neither definition puts one
+// inside the other. So nobody declares a nesting, and the column stays the
+// refusal it was. A rule reading containment off the column would have chosen
+// one of them here.
+func TestAColumnTwoUnrelatedSchemesAcceptIsStillARefusal(t *testing.T) {
+	amex := []string{
+		"378282246310005", "371449635398431", "378282246310005", "371449635398431",
+		"378282246310005", "371449635398431", "378282246310005", "371449635398431",
+	}
+	finding := findingFor(t, infer.From(
+		tableOf("paid with"),
+		[]dataset.Sample{sampleOf("paid with", amex)},
+		schemes(),
+	), "paid with")
+	if finding.Scheme != "" {
+		t.Fatalf("a column two unrelated schemes accept was given %q: %s", finding.Scheme, finding.Basis)
+	}
+	for _, named := range []string{"card", "imei", "alike"} {
+		if !strings.Contains(finding.Basis, named) {
+			t.Errorf("the refusal has to name %q, and it says %q", named, finding.Basis)
+		}
+	}
+}
+
+// The rule on its own, away from any real scheme. A narrower scheme naming the
+// one beside it is chosen, a third scheme accepting the column and named by
+// nobody keeps the refusal, and two schemes naming each other are no choice
+// at all, because neither is the narrower.
+func TestTheNarrowerSchemeIsChosenOnlyWhenItNamesEveryOther(t *testing.T) {
+	wide := &acceptsAnything{id: "BB.wide"}
+	narrow := &nestedInside{acceptsAnything: acceptsAnything{id: "AA.narrow"}, within: []provider.Provider{wide}}
+	beside := &acceptsAnything{id: "CC.beside"}
+	looped := &nestedInside{acceptsAnything: acceptsAnything{id: "DD.looped"}}
+	loopedBack := &nestedInside{acceptsAnything: acceptsAnything{id: "EE.looped"}, within: []provider.Provider{looped}}
+	looped.within = []provider.Provider{loopedBack}
+	codes := []string{"1", "2", "3", "4", "5", "6", "7", "8"}
+	for _, one := range []struct {
+		name    string
+		schemes []provider.Provider
+		want    string
+	}{
+		{"a narrower scheme naming the wider one", []provider.Provider{wide, narrow}, "AA.narrow"},
+		{"a third scheme nobody named", []provider.Provider{wide, narrow, beside}, ""},
+		{"two schemes naming each other", []provider.Provider{looped, loopedBack}, ""},
+	} {
+		finding := findingFor(t, infer.From(
+			tableOf("code"), []dataset.Sample{sampleOf("code", codes)}, one.schemes,
+		), "code")
+		if finding.Scheme != one.want {
+			t.Errorf("%s: the column was given %q where %q was wanted: %s",
+				one.name, finding.Scheme, one.want, finding.Basis)
 		}
 	}
 }
@@ -363,8 +431,10 @@ func TestTheViewAnswersAboutTheOneTableItRead(t *testing.T) {
 }
 
 // acceptsAnything is a scheme that carries a check digit and takes every value,
-// used to build the case where two schemes fit equally well. It is the only way
-// to reach that path, because no two real schemes accept the same forty values.
+// used to build the case where two schemes fit equally well. Real schemes reach
+// that path too, the book number inside the article number and an American
+// Express column under the card and the equipment identity, and each has its
+// own test above. This one isolates the rule from any of them.
 type acceptsAnything struct{ id string }
 
 func (a *acceptsAnything) ID() string { return a.id }
@@ -375,3 +445,12 @@ func (a *acceptsAnything) Validate(string) provider.Verdict { return provider.Va
 func (a *acceptsAnything) Generate(provider.Request) (string, error) {
 	return "", nil
 }
+
+// nestedInside takes every value and declares that it lies inside the schemes
+// given, which is how the narrower half of a pair is built without a real one.
+type nestedInside struct {
+	acceptsAnything
+	within []provider.Provider
+}
+
+func (n *nestedInside) Within() []provider.Provider { return n.within }

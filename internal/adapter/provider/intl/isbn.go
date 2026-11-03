@@ -136,6 +136,7 @@ type ISBN struct{}
 var (
 	_ provider.Provider     = ISBN{}
 	_ provider.CheckDigited = ISBN{}
+	_ provider.Narrower     = ISBN{}
 )
 
 const (
@@ -197,20 +198,27 @@ const (
 // entries, so it is read from there rather than chosen here.
 func (ISBN) ID() string { return "isbn" }
 
+// Masks are thirteen digits, unpunctuated. The hyphenated form a book prints
+// splits the number in places that depend on the registration group, so there
+// is no single punctuated mask and this build produces none.
+func (ISBN) Masks() []string { return []string{strings.Repeat(string(provider.MaskDigit), isbnLength)} }
+
 // Capabilities are what this provider brings.
 //
 // One only. The check digit is what the catalog asks of this scheme. There is
 // no reserved range to declare, for the reason written on the type, and a
 // declaration made anyway would be a promise to a manifest that nothing here
 // could keep.
-// Masks are thirteen digits, unpunctuated. The hyphenated form a book prints
-// splits the number in places that depend on the registration group, so there
-// is no single punctuated mask and this build produces none.
-func (ISBN) Masks() []string { return []string{strings.Repeat(string(provider.MaskDigit), isbnLength)} }
-
 func (ISBN) Capabilities() []capability.Name {
 	return []capability.Name{capability.IdentifierCheckDigit}
 }
+
+// Within is the article number, because an ISBN-13 is a GTIN-13 carrying the
+// prefix 978 or 979 and the arithmetic of the two is one rule. The validator
+// here refuses everything the article number refuses and some things it
+// accepts, a wrong prefix above all, so the set of book numbers lies strictly
+// inside the set of article numbers and not beside it.
+func (ISBN) Within() []provider.Provider { return []provider.Provider{EAN{}} }
 
 // Generate produces one book number.
 //

@@ -142,7 +142,18 @@ func nothingHereToTranspose(identical int) mutator.Outcome {
 			"to transpose")
 }
 
-// verdictOnTheSwap keeps the damage only where the scheme rejects the result.
+// verdictOnTheSwap keeps the damage only where the scheme rejects the result,
+// and every scheme it lies inside rejects it too.
+//
+// # Why the wider schemes are asked as well
+//
+// A book number is an article number with a fixed prefix, and the swap of an
+// eight and a three right after the 978 of a German book number moves the
+// prefix and leaves the arithmetic whole. The book number validator refuses
+// that value for its prefix, the article number validator accepts it, and an
+// application reading the column as article numbers takes it without a word.
+// The inference in corrupt chooses the narrower scheme of such a pair
+// (DEC-269), so the reader it did not choose is exactly the one this asks.
 func verdictOnTheSwap(scheme provider.Provider, damaged string, at int) mutator.Outcome {
 	after := scheme.Validate(damaged)
 	switch {
@@ -154,6 +165,17 @@ func verdictOnTheSwap(scheme provider.Provider, damaged string, at int) mutator.
 		return mutator.Skipped(fmt.Sprintf(
 			"swapping the digits at positions %d and %d produced a form %s does not check, so "+
 				"nothing here was verified as rejected", at+1, at+2, scheme.ID()))
+	}
+	if narrower, ok := scheme.(provider.Narrower); ok {
+		for _, wider := range narrower.Within() {
+			if verdict := wider.Validate(damaged); verdict.Valid || verdict.Unsupported {
+				return mutator.Skipped(fmt.Sprintf(
+					"swapping the digits at positions %d and %d breaks %s but not %s, and every %s "+
+						"is valid as %s too, so an application reading this column as %s would find "+
+						"nothing to reject", at+1, at+2, scheme.ID(), wider.ID(), scheme.ID(),
+					wider.ID(), wider.ID()))
+			}
+		}
 	}
 	return mutator.Done(damaged)
 }

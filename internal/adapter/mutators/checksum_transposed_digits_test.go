@@ -72,6 +72,15 @@ func TestNoSchemeIsEverToldToRejectAValueItStillAccepts(t *testing.T) {
 					t.Errorf("%s passed %s over rather than rejecting it, and it was reported "+
 						"as damaged: %s", id, outcome.Value(), verdict.Reason)
 				}
+				if narrower, ok := scheme.(provider.Narrower); ok {
+					for _, wider := range narrower.Within() {
+						if !wider.Validate(outcome.Value()).Valid {
+							continue
+						}
+						t.Errorf("%s was reported as damage to %s, and %s, which every %s lies "+
+							"inside, still accepts it", outcome.Value(), id, wider.ID(), id)
+					}
+				}
 			}
 		})
 	}
@@ -123,6 +132,67 @@ func TestATranspositionTheSchemeCannotSeeIsDeclinedRatherThanPromisedAsARejectio
 	}
 	if !strings.Contains(outcome.Reason(), "still accepts") {
 		t.Errorf("the reason does not say the scheme still accepts the value: %s", outcome.Reason())
+	}
+}
+
+// 🔴 The case DEC-269 opened, and the reason a wider scheme is asked as well.
+//
+// A German book number begins 9783, and an eight and a three differ by five,
+// so swapping them moves the prefix to 973 and leaves the arithmetic whole. The
+// book number validator refuses that value for its prefix, and the article
+// number validator accepts it. The inference chooses the book number for a
+// column both accept, so without the second question this would be promised as
+// a rejection that an article number system never makes.
+//
+// The rest of the value is threes, so the draw has four pairs to land on
+// rather than twelve. The rows below are walked until it lands on the one that
+// moves the prefix, and every swap that was kept is held to the wider reading.
+// The values this build generates never reach the case, because their fourth
+// digit is always a six.
+func TestASwapAWiderSchemeStillAcceptsIsNotKept(t *testing.T) {
+	const germanBookNumber = "9783333333335"
+	const prefixMoved = "9738333333335"
+
+	book, article := intl.ISBN{}, intl.EAN{}
+	if verdict := book.Validate(germanBookNumber); !verdict.Valid {
+		t.Fatalf("the fixture is not a correct book number to begin with: %s", verdict.Reason)
+	}
+	if book.Validate(prefixMoved).Valid {
+		t.Fatal("the book number validator accepts the moved prefix, so this case is not the one it claims to be")
+	}
+	if verdict := article.Validate(prefixMoved); !verdict.Valid {
+		t.Fatalf("the article number validator refuses the moved prefix, so this case is not the one "+
+			"it claims to be: %s", verdict.Reason)
+	}
+
+	entry := entryOf(t, checksumTransposedDigits)
+	landed := 0
+	for row := int64(0); row < 64; row++ {
+		outcome := damage(t, checksumTransposedDigits, mutator.Target{
+			Value:    germanBookNumber,
+			Field:    identifierField("isbn"),
+			Provider: book,
+			At:       seed.Coordinate{Entity: "corrupt", Row: row, Field: "identifier"},
+			Source:   seed.New("prefix moved"),
+			Params:   defaultsOf(entry),
+		})
+		if outcome.Applied() {
+			if article.Validate(outcome.Value()).Valid {
+				t.Errorf("%s was kept as damage to a book number, and an article number system accepts it",
+					outcome.Value())
+			}
+			continue
+		}
+		if strings.Contains(outcome.Reason(), "positions 3 and 4") {
+			landed++
+			if !strings.Contains(outcome.Reason(), "but not ean") {
+				t.Errorf("the reason does not name the reading that still accepts the value: %s",
+					outcome.Reason())
+			}
+		}
+	}
+	if landed == 0 {
+		t.Fatal("no draw landed on the pair that moves the prefix, so the branch that matters never ran")
 	}
 }
 
@@ -319,5 +389,41 @@ func TestASwapLandingInAFormTheSchemeDoesNotCheckIsNotCalledARejection(t *testin
 	}
 	if !strings.Contains(outcome.Reason(), "produced a form test.scheme does not check") {
 		t.Errorf("the reason does not say the swap landed in a form nobody checks: %s", outcome.Reason())
+	}
+}
+
+// statedInside is a scheme that lies inside the one given and answers whatever
+// a case needs it to, which is how a wider scheme is reached with an answer no
+// real one gives today.
+type statedInside struct {
+	stated
+	within provider.Provider
+}
+
+func (s *statedInside) Within() []provider.Provider { return []provider.Provider{s.within} }
+
+// The second half of the question a wider scheme is asked. A wider scheme that
+// does not check the form the swap produced has not rejected it, so the
+// application reading the column that way has nothing to reject either, and the
+// damage is put back exactly as when the wider scheme accepts. The article
+// number answers nothing but yes and no, so this is reached through doubles.
+func TestASwapAWiderSchemeDoesNotCheckIsNotKeptEither(t *testing.T) {
+	refused := provider.Invalid("the swap broke it")
+	narrower := &statedInside{
+		stated: stated{before: provider.Valid(), after: refused},
+		within: &stated{before: provider.Unsupported("a form the wider scheme does not check")},
+	}
+	outcome := damage(t, checksumTransposedDigits, mutator.Target{
+		Value:    "0000000000055",
+		Provider: narrower,
+		Source:   seed.New("unsupported wider"),
+		Params:   mutator.Parameters{"position": "random"},
+	})
+	if outcome.Applied() {
+		t.Fatalf("a swap the wider scheme does not check was kept as damage, and the value became %q",
+			outcome.Value())
+	}
+	if !strings.Contains(outcome.Reason(), "breaks test.scheme but not test.scheme") {
+		t.Errorf("the reason does not say which reading took the value: %s", outcome.Reason())
 	}
 }

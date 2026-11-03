@@ -150,13 +150,89 @@ func look(sample dataset.Sample, schemes []provider.Provider) Finding {
 			howMany(sample) + " of this column was accepted by the " + accepted[0] +
 			" validator, and by no other scheme carrying a check digit"}
 	default:
-		// 🔴 Two schemes accepting the whole sample is a refusal rather than a
-		// choice. Picking the first would make the answer depend on the order of
-		// a registry, and the manifest would then carry a scheme name with no
-		// evidence behind it that the other was not equally good.
+		// One scheme lying inside every other that accepted is a choice the
+		// definitions make, rather than this code, and it is the only one.
+		if narrowest, ok := narrowestOf(accepted, schemes); ok {
+			wider := others(accepted, narrowest)
+			return Finding{Type: typeIdentifier, Scheme: narrowest, Basis: "every one of " +
+				howMany(sample) + " of this column was accepted by the " + narrowest +
+				" validator and by " + strings.Join(wider, " and by ") + ", and the definition of " +
+				narrowest + " puts every one of its values inside " + strings.Join(wider, " and ") +
+				" as well, so the narrower " + narrowest + " was chosen"}
+		}
+		// 🔴 Two schemes accepting the whole sample are otherwise a refusal
+		// rather than a choice. Picking the first would make the answer depend
+		// on the order of a registry, and the manifest would then carry a scheme
+		// name with no evidence behind it that the other was not equally good.
 		return Finding{Type: typeString, Basis: howMany(sample) + " of this column were accepted " +
 			"by " + strings.Join(accepted, " and by ") + " alike, so no scheme was chosen"}
 	}
+}
+
+// narrowestOf returns the one accepted scheme that declares itself inside every
+// other accepted scheme, if exactly one does.
+//
+// # Why a declaration and never a comparison of the validators
+//
+// Both validators accepting the sample is the reason this is asked at all, so
+// it cannot also be the evidence that one set holds the other. A column of
+// American Express test numbers is accepted by the payment card and by the
+// equipment identity, and neither is inside the other, so a rule reading
+// containment off the column would have chosen one of them for no reason. The
+// scheme says what its definition puts it inside (provider.Narrower), and only
+// that is read (DEC-269).
+//
+// Every other accepted scheme has to be named, not just one of them. A third
+// scheme accepting the column and named by nobody is a disagreement this
+// cannot settle, so it stays a refusal. A chain of three would need the
+// narrowest to name both of the others, and the failure of forgetting one is
+// the refusal this replaced, never a wrong scheme.
+func narrowestOf(accepted []string, schemes []provider.Provider) (string, bool) {
+	var found []string
+	for _, candidate := range accepted {
+		if insideAllOthers(candidate, accepted, schemes) {
+			found = append(found, candidate)
+		}
+	}
+	if len(found) != 1 {
+		return "", false
+	}
+	return found[0], true
+}
+
+// insideAllOthers reports whether the named scheme declares every other
+// accepted scheme as one it lies inside.
+func insideAllOthers(candidate string, accepted []string, schemes []provider.Provider) bool {
+	declared := map[string]bool{}
+	for _, scheme := range schemes {
+		if scheme.ID() != candidate {
+			continue
+		}
+		narrower, ok := scheme.(provider.Narrower)
+		if !ok {
+			return false
+		}
+		for _, wider := range narrower.Within() {
+			declared[wider.ID()] = true
+		}
+	}
+	for _, other := range others(accepted, candidate) {
+		if !declared[other] {
+			return false
+		}
+	}
+	return true
+}
+
+// others returns the accepted schemes apart from the one named, in order.
+func others(accepted []string, apart string) []string {
+	var rest []string
+	for _, id := range accepted {
+		if id != apart {
+			rest = append(rest, id)
+		}
+	}
+	return rest
 }
 
 // acceptedBy returns the schemes that accept every value given, sorted.

@@ -151,6 +151,18 @@ repository once they are released.
 
 ### Changed
 
+- **corrupt recognises a column of book numbers as isbn.** Every ISBN-13 is
+  also a valid EAN-13, so such a column was accepted by both schemes and given
+  neither, and no check digit damage was aimed at it. The book number is
+  inside the article number by its definition, so the narrower isbn is now
+  chosen, and the reason in the manifest names ean as well. Two schemes that
+  merely accept the same values are still refused, such as a column of
+  American Express numbers, which a card and an IMEI both accept.
+- **A swap of two digits in a book number is kept only when an EAN reader
+  refuses it as well.** Swapping the 8 and the 3 of a German book number,
+  9783 to 9738, breaks its prefix and leaves its check digit correct. Such a
+  swap is now recorded as not applied with that reason, rather than as a
+  rejection an article number system would not make.
 - **The primary key of an entity is held whole.** Two rows no longer share a
   key, while its fields may still repeat on their own. A row whose key repeats
   is built again with new values for the fields of the key, and every other

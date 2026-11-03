@@ -419,6 +419,34 @@ type CheckDigited interface {
 	WithCheckDigits(value string) (string, error)
 }
 
+// Narrower is a scheme whose every valid value is, by the definition of the
+// scheme, a valid value of another one as well. An ISBN-13 is a GTIN-13
+// carrying the prefix 978 or 979, so every book number is an article number.
+//
+// # Why this is declared rather than worked out
+//
+// Two validators accepting the same column prove something about the column
+// and nothing about the two sets. A column of American Express test numbers is
+// accepted by the payment card and by the equipment identity alike, because
+// both are fifteen digits under the same formula, and neither scheme lies
+// inside the other. Only the definition of a scheme says that one does, so the
+// scheme that knows its definition says it here.
+//
+// # Who reads it, and the two answers have to agree
+//
+// The inference in corrupt chooses the narrower of two schemes accepting a
+// whole column instead of refusing to choose (DEC-269). The damage that swaps
+// two digits then keeps a value only when every scheme named here refuses it
+// as well, because an application reading the column as the wider scheme is
+// the reader that choice did not ask. Without the second half, a swap that
+// broke a book number's prefix and left its arithmetic intact would be
+// promised as a rejection that an article number system never makes.
+type Narrower interface {
+	// Within are the schemes every valid value of this one also satisfies,
+	// never this scheme itself and never empty.
+	Within() []Provider
+}
+
 // DateEncoder is required of a provider declaring identifier.encodes-date.
 type DateEncoder interface {
 	// EncodedDate reads the date out of the value.
