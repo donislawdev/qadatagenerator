@@ -30,14 +30,7 @@ func runQuick(out *streams, arguments []string, global crossCutting) int {
 	set.SetOutput(io.Discard)
 	local := declareCrossCutting(set)
 	askedForHelp := declareVerbHelp(set)
-	locale := set.String("locale", "", "")
-	seed := set.String("seed", "", "")
-	gender := set.String("gender", "", "")
-	birthDate := set.String("birth-date", "", "")
-	// A string rather than set.Int, as every other flag of this tool is, so
-	// that a number nobody could read is refused in the four parts this
-	// project writes rather than in the flag package's own one line.
-	count := set.String("count", "1", "")
+	own := declareQuick(set)
 
 	// Both documents describing this verb write the name first and the flags
 	// after it, and so does anybody typing it, which is why this verb was the
@@ -60,16 +53,43 @@ func runQuick(out *streams, arguments []string, global crossCutting) int {
 		return usage(out, arity)
 	}
 
-	if refusal, tooLong := seedRefused(*seed); tooLong {
+	if refusal, tooLong := seedRefused(*own.seed); tooLong {
 		return usage(out, refusal)
 	}
 
-	wanted, shape := wholeCount(*count)
+	wanted, shape := wholeCount(*own.count)
 	if shape.what != "" {
 		return usage(out, shape)
 	}
 
-	return writeValues(out, *locale, *seed, named, wanted, boundBy(set, *gender, *birthDate))
+	return writeValues(out, *own.locale, *own.seed, named, wanted, boundBy(set, *own.gender, *own.birthDate))
+}
+
+// quickFlags are the flags quick takes beside the flags of the tool.
+//
+// Declared in a function of their own, as generate and corrupt declare theirs,
+// so that the guard over flags nobody documented can build the same set the
+// command parses. Until 2026-11-03 they were declared inside runQuick, and that
+// guard went past quick as a verb it could not build.
+type quickFlags struct {
+	locale    *string
+	seed      *string
+	gender    *string
+	birthDate *string
+	count     *string
+}
+
+func declareQuick(set *flag.FlagSet) *quickFlags {
+	return &quickFlags{
+		locale:    set.String("locale", "", ""),
+		seed:      set.String("seed", "", ""),
+		gender:    set.String("gender", "", ""),
+		birthDate: set.String("birth-date", "", ""),
+		// A string rather than set.Int, as every other flag of this tool is,
+		// so that a number nobody could read is refused in the four parts this
+		// project writes rather than in the flag package's own one line.
+		count: set.String("count", "1", ""),
+	}
 }
 
 // oneGenerator is the one generator the command line named, wherever it stood

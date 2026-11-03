@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"maps"
+	"slices"
 	"strings"
 	"testing"
 
@@ -651,16 +653,38 @@ func TestEveryFlagAVerbDocumentsIsOneItAccepts(t *testing.T) {
 // neither. A register closed one way is a register that answers half the
 // question, and this project has paid for that shape more than once.
 func TestEveryFlagAVerbAcceptsIsOneItDocuments(t *testing.T) {
-	// The verbs that declare flags of their own. validate has none and takes
-	// only the cross cutting ones, which are documented in one place for every
-	// command and are covered by the test above.
+	// The verbs that declare flags of their own, each through the function the
+	// command itself calls. The others take only the flags of the tool, which
+	// are documented in one place for every command and covered above.
 	declared := map[string]func(*flag.FlagSet){
 		commandGenerate: func(set *flag.FlagSet) { declareGenerate(set) },
 		commandCorrupt:  func(set *flag.FlagSet) { declareCorrupt(set) },
+		commandQuick:    func(set *flag.FlagSet) { declareQuick(set) },
+	}
+	// 🔴 That list is written by hand, and until 2026-11-03 it left out quick,
+	// which declared five flags inside runQuick. A flag added there without a
+	// word in the help passed every test of the package. A verb whose help
+	// names flags of its own now has to be on the list, and a verb off it has
+	// to refuse every flag the verbs on it take, so a flag copied from a
+	// neighbour fails here as well. A flag of a new name given to a verb off
+	// the list is what this still cannot see.
+	ofListed := map[string]bool{}
+	for name, declare := range declared {
+		if _, known := commandDocFor(name); !known {
+			t.Errorf("this guard builds the flags of %s, which is not a command", name)
+		}
+		set := flag.NewFlagSet(name, flag.ContinueOnError)
+		declare(set)
+		set.VisitAll(func(accepted *flag.Flag) { ofListed[accepted.Name] = true })
 	}
 	for _, doc := range commandDocs {
 		declare, has := declared[doc.name]
 		if !has {
+			if len(doc.flags) > 0 {
+				t.Errorf("the help of %s names flags of its own, and this guard cannot build "+
+					"the set they come from", doc.name)
+			}
+			refusesEveryOne(t, doc.name, ofListed)
 			continue
 		}
 		documented := map[string]bool{}
@@ -677,5 +701,17 @@ func TestEveryFlagAVerbAcceptsIsOneItDocuments(t *testing.T) {
 					"to find the flag is to already know it", doc.name, accepted.Name)
 			}
 		})
+	}
+}
+
+// refusesEveryOne asks a verb that declares no flags of its own about each
+// flag another verb takes, and wants every one refused as not defined.
+func refusesEveryOne(t *testing.T, verb string, names map[string]bool) {
+	t.Helper()
+	for _, name := range slices.Sorted(maps.Keys(names)) {
+		if got := run(verb, "--"+name); !strings.Contains(got.log, "not defined: -"+name) {
+			t.Errorf("%s takes --%s, which its help never mentions: it ended with %d and logged %q",
+				verb, name, got.code, got.log)
+		}
 	}
 }

@@ -267,7 +267,7 @@ var damageGuards = []Guard{
 	// documentation to the parser, and a flag in the parser and absent from the
 	// documentation satisfied both. That is how --manifest came to be accepted
 	// by two verbs while appearing in the help of neither.
-	{"every flag a verb accepts is one it documents", "TestEveryFlagAVerbAcceptsIsOneItDocuments", "internal/cli", ByMutation},
+	{"every flag a verb accepts is one it documents, a verb whose help names flags of its own is one the guard builds, and a verb declaring none refuses every flag the others take", "TestEveryFlagAVerbAcceptsIsOneItDocuments", "internal/cli", ByMutation},
 
 	// 🔴 The one property that came off the list of what a file cannot say,
 	// and it came off because it is the one that can be measured. What a
