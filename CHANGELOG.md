@@ -12,6 +12,11 @@ repository once they are released.
 
 ### BREAKING
 
+- **A word beginning with a dash among the paths of verify is read as a
+  flag.** `qadg verify manifest.json -x` used to look for a response record
+  named `-x` and end with exit code 6. It is now refused as an unknown flag
+  with exit code 2. A file whose name begins with a dash is given after `--`,
+  or as `./-name`.
 - **verify reads a response record whose list of rows is empty.** A dataset of
   no rows, which a recipe with `count: 0` makes, can now be verified, and an
   empty list agrees with it. Until now no record could be compared with such a
@@ -50,6 +55,17 @@ repository once they are released.
 
 ### Fixed
 
+- **Flags may follow the path.** `qadg generate recipe.yaml --out ./data`,
+  `qadg corrupt records.csv --layers L3` and `qadg verify manifest.json --json
+  response.json` used to end with exit code 2 and a message saying the command
+  takes one recipe or one file, which suggested the command that had just been
+  typed. Every command now reads its flags before, between and after its
+  paths, so a misspelt flag or `--help` written after a path is answered too.
+  quick already took the name of a generator first, and now also takes flags
+  on both sides of it.
+- **A flag missing its value is told it takes one.** `qadg generate
+  recipe.yaml --out` used to say the flag is not defined, beside a list of
+  accepted flags that named it.
 - **The Take and corrupt screen lets go of a file it is still reading as soon
   as another file or separator is chosen.** It used to stop the old read only
   between records, and then compare every column of a file with every other

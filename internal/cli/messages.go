@@ -744,6 +744,12 @@ const (
 	problemFlagTakesNoValueAllowed = "the flag on its own, such as --json"
 	problemFlagTakesNoValueDo      = "remove the equals sign and whatever follows it"
 
+	// The flag exists, takes a value, and was the last thing on the line. It
+	// was given the reason for a flag nobody defines until 2026-11-03, beside a
+	// list of accepted flags naming the same one.
+	problemFlagNeedsValueWhy     = "that flag takes a value, and nothing came after it to be one"
+	problemFlagNeedsValueAllowed = "the flag with its value after it, or written as --flag=value"
+
 	problemUnknownCommandWhy = "this build does not define that command"
 	problemUnknownCommandDo  = "qadg --help"
 

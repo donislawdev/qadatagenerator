@@ -92,7 +92,8 @@ func runCorrupt(out *streams, arguments []string, global crossCutting) int {
 	local := declareCrossCutting(set)
 	own := declareCorrupt(set)
 	askedForHelp := declareVerbHelp(set)
-	if err := set.Parse(arguments); err != nil {
+	rest, err := parseAnywhere(set, arguments)
+	if err != nil {
 		return usage(out, flagFailure(err, acceptedFlagsOf(commandCorrupt),
 			problemHelpSubjectDo+" "+commandCorrupt))
 	}
@@ -105,7 +106,6 @@ func runCorrupt(out *streams, arguments []string, global crossCutting) int {
 		return code
 	}
 
-	rest := set.Args()
 	if len(rest) != 1 {
 		return usage(out, problem{
 			what:    problemCorruptArguments,

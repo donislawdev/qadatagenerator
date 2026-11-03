@@ -71,7 +71,8 @@ func runGenerate(out *streams, arguments []string, global crossCutting) int {
 	local := declareCrossCutting(set)
 	own := declareGenerate(set)
 	askedForHelp := declareVerbHelp(set)
-	if err := set.Parse(arguments); err != nil {
+	rest, err := parseAnywhere(set, arguments)
+	if err != nil {
 		return usage(out, flagFailure(err, acceptedFlagsOf(commandGenerate), problemHelpSubjectDo+" "+commandGenerate))
 	}
 	if askedForHelp() {
@@ -83,7 +84,6 @@ func runGenerate(out *streams, arguments []string, global crossCutting) int {
 		return code
 	}
 
-	rest := set.Args()
 	if len(rest) != 1 {
 		return usage(out, problem{
 			what:    problemGenerateArguments,

@@ -39,24 +39,11 @@ func runQuick(out *streams, arguments []string, global crossCutting) int {
 	// project writes rather than in the flag package's own one line.
 	count := set.String("count", "1", "")
 
-	// 🔴 The name is taken off the front before the flags are read, and this
-	// is not a stylistic choice. The flag package stops at the first argument
-	// that is not a flag, so qadg quick pesel --gender female would leave the
-	// two flags unparsed and the verb would refuse a command that looks right
-	// to everybody. Both documents describing this verb write the name first,
-	// and so does anybody typing it.
-	//
-	// Taking it only when it is genuinely first keeps the other order working
-	// too: with a flag in front, the flag package reads the flags and leaves
-	// the name behind as the one argument, which is where the code below looks
-	// for it. Scanning for the first argument that is not a flag would have
-	// been wrong, because the VALUE of a flag is not a flag either.
-	named := ""
-	if len(arguments) > 0 && !strings.HasPrefix(arguments[0], "-") {
-		named, arguments = arguments[0], arguments[1:]
-	}
-
-	if err := set.Parse(arguments); err != nil {
+	// Both documents describing this verb write the name first and the flags
+	// after it, and so does anybody typing it, which is why this verb was the
+	// first to read its flags on either side of what they apply to.
+	left, err := parseAnywhere(set, arguments)
+	if err != nil {
 		return usage(out, flagFailure(err, acceptedFlagsOf(commandQuick),
 			problemHelpSubjectDo+" "+commandQuick))
 	}
@@ -68,7 +55,7 @@ func runQuick(out *streams, arguments []string, global crossCutting) int {
 		return code
 	}
 
-	named, arity := oneGenerator(named, set.Args())
+	named, arity := oneGenerator(left)
 	if arity.what != "" {
 		return usage(out, arity)
 	}
@@ -85,17 +72,14 @@ func runQuick(out *streams, arguments []string, global crossCutting) int {
 	return writeValues(out, *locale, *seed, named, wanted, boundBy(set, *gender, *birthDate))
 }
 
-// oneGenerator is the one generator the command line named, whether it stood
-// before the flags or after them, or the refusal when there was not exactly one.
+// oneGenerator is the one generator the command line named, wherever it stood
+// among the flags, or the refusal when there was not exactly one.
 //
 // Apart from runQuick because that function passed the limit on the length of
 // a function. The seam is the one wholeCount below already uses: the flags are
 // read there, and what the arguments left over mean is answered here.
-func oneGenerator(named string, left []string) (string, problem) {
-	if named == "" && len(left) == 1 {
-		named, left = left[0], nil
-	}
-	if named == "" || len(left) > 0 {
+func oneGenerator(left []string) (string, problem) {
+	if len(left) != 1 {
 		return "", problem{
 			what:    problemQuickArguments,
 			why:     problemQuickArgumentsWhy,
@@ -103,7 +87,7 @@ func oneGenerator(named string, left []string) (string, problem) {
 			instead: problemQuickArgumentsDo,
 		}
 	}
-	return named, problem{}
+	return left[0], problem{}
 }
 
 // wholeCount reads how many values were asked for, and says which way the text

@@ -129,6 +129,9 @@ func dispatch(env Environment) int {
 
 	// The flag package stops at the first argument that is not a flag, so
 	// anything after a command belongs to that command and never to this set.
+	// That stop is wanted here and only here: a verb reads its own flags
+	// wherever they stand after it (parseAnywhere), and this set reading past
+	// the verb would refuse every flag of that verb as one it does not define.
 	if command := set.Args(); len(command) > 0 {
 		return runCommand(out, command, asked)
 	}
@@ -156,7 +159,11 @@ func reportParseFailure(out *streams, parseErr error) int {
 // listed the flag two rows further down, so the message contradicted itself and
 // sent the reader looking for a typo in a name that was spelled correctly.
 //
-// The two classes are told apart by the wording the flag package uses, which is
+// The same was true of a flag that takes a value and was written last with
+// nothing after it, which a verb reading its flags after its paths makes easy
+// to do: qadg generate recipe.yaml --out was told --out is not defined.
+//
+// The classes are told apart by the wording the flag package uses, which is
 // the only signal it offers. An unrecognised wording falls through to the
 // original reason, which is the right answer for a flag nobody knows.
 func flagFailure(err error, allowed, instead string) problem {
@@ -166,6 +173,14 @@ func flagFailure(err error, allowed, instead string) problem {
 			why:     problemFlagTakesNoValueWhy,
 			allowed: problemFlagTakesNoValueAllowed,
 			instead: problemFlagTakesNoValueDo,
+		}
+	}
+	if strings.Contains(err.Error(), "flag needs an argument") {
+		return problem{
+			what:    firstLine(err.Error()),
+			why:     problemFlagNeedsValueWhy,
+			allowed: problemFlagNeedsValueAllowed,
+			instead: instead,
 		}
 	}
 	return problem{

@@ -563,6 +563,14 @@ var toolGuards = []Guard{
 	{"a response record listing no row is a record, and one leaving the list out is refused", "TestAnEmptyListOfRowsIsAnAnswerAndNoListIsNot", "internal/domain/response", ByMutation},
 	{"the reader tells an empty list of rows from a list left out or written as null", "TestAnEmptyListOfRowsIsReadAndNoListIsRefused", "internal/adapter/responsejson", ByMutation},
 	{"a record listing no row is compared like any other, agreeing with a dataset of no rows without limits about rows it does not have", "TestARecordListingNoRowIsComparedLikeAnyOther", "internal/app/verify", ByMutation},
+	{"verify on the command line ends an empty list of rows with 0 for a dataset of no rows and with 4 for one with rows, and refuses a list left out with 3", "TestAnEmptyListOfRowsEndsAsWhatItSays", "internal/cli", ByMutation},
+	// 🔴 B-97, DEC-272: a verb reads its flags wherever they stand after it.
+	// Four verbs of five stopped at the first path until 2026-11-03 and
+	// refused a flag after it as a path too many.
+	{"the flags of a verb are read wherever they stand, a flag taking a value takes the next argument, a switch takes none, and a double dash ends the flags", "TestTheFlagsOfAVerbAreReadWhereverTheyStand", "internal/cli", ByMutation},
+	{"every verb that reads flags answers --help written after its path", "TestEveryVerbAnswersHelpAskedForAfterItsPath", "internal/cli", ByMutation},
+	{"the same flags on the other side of the path give the same run on both channels, for every verb", "TestAFlagAfterThePathMeansWhatItMeansBeforeIt", "internal/cli", ByMutation},
+	{"a flag written last without its value is told it takes one rather than that it does not exist", "TestAFlagWrittenLastWithoutItsValueIsToldItTakesOne", "internal/cli", ByMutation},
 	{"the window attaches a finding to the entry of its own table, matched on the entity as well as the row, the column and the mutator", "TestAnEntryOfOneTableIsNotGivenTheFindingOfAnother", "internal/gui/manifestview", ByMutation},
 	{"a run on one screen ending does not give the window back while a run on another is still writing", "TestTheWindowIsHeldUntilTheLastRunLetsGo", "internal/gui/background", ByMutation},
 	{"asking for the window stops every run going on and the window goes once the last of them has stopped", "TestAskingForTheWindowStopsEveryRunAndGoesAfterTheLast", "internal/gui/background", ByMutation},

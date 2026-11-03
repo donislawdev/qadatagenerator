@@ -26,7 +26,8 @@ func runVerify(out *streams, arguments []string, global crossCutting) int {
 	set.SetOutput(io.Discard)
 	local := declareCrossCutting(set)
 	askedForHelp := declareVerbHelp(set)
-	if err := set.Parse(arguments); err != nil {
+	paths, err := parseAnywhere(set, arguments)
+	if err != nil {
 		return usage(out, flagFailure(err, acceptedFlagsOf(commandVerify),
 			problemHelpSubjectDo+" "+commandVerify))
 	}
@@ -38,8 +39,7 @@ func runVerify(out *streams, arguments []string, global crossCutting) int {
 		return code
 	}
 
-	arguments = set.Args()
-	if len(arguments) != 2 {
+	if len(paths) != 2 {
 		return usage(out, problem{
 			what:    problemVerifyArguments,
 			why:     problemVerifyArgumentsWhy,
@@ -47,7 +47,7 @@ func runVerify(out *streams, arguments []string, global crossCutting) int {
 			instead: problemVerifyArgumentsDo,
 		})
 	}
-	return compareAt(out, arguments[0], arguments[1])
+	return compareAt(out, paths[0], paths[1])
 }
 
 // compareAt reads both files and reports where they disagree.

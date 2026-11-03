@@ -32,7 +32,8 @@ func runValidate(out *streams, arguments []string, global crossCutting) int {
 	set.SetOutput(io.Discard)
 	local := declareCrossCutting(set)
 	askedForHelp := declareVerbHelp(set)
-	if err := set.Parse(arguments); err != nil {
+	paths, err := parseAnywhere(set, arguments)
+	if err != nil {
 		return usage(out, flagFailure(err, acceptedFlagsOf(commandValidate), problemHelpSubjectDo+" "+commandValidate))
 	}
 	if askedForHelp() {
@@ -43,8 +44,7 @@ func runValidate(out *streams, arguments []string, global crossCutting) int {
 		return code
 	}
 
-	arguments = set.Args()
-	if len(arguments) != 1 {
+	if len(paths) != 1 {
 		return usage(out, problem{
 			what:    problemValidateArguments,
 			why:     problemValidateArgumentsWhy,
@@ -52,7 +52,7 @@ func runValidate(out *streams, arguments []string, global crossCutting) int {
 			instead: problemValidateArgumentsDo,
 		})
 	}
-	return validateRecipeAt(out, arguments[0], flags)
+	return validateRecipeAt(out, paths[0], flags)
 }
 
 // validateRecipeAt reads one recipe and reports what is wrong with it.
