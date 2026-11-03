@@ -9,6 +9,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
+	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
@@ -42,10 +43,7 @@ func rowsOf(t *testing.T, rec recipe.Recipe) ([][]string, string) {
 // one entry left of fifty, twenty draws miss it two times in three, and a list
 // of five is used up by drawing alone in about ninety nine runs of a hundred.
 func TestAUniqueListIsUsedUpWholeAndTheSameEveryTime(t *testing.T) {
-	entries := make([]string, 50)
-	for index := range entries {
-		entries[index] = "s" + strconv.Itoa(index)
-	}
+	entries := listOf("s", 50)
 	rec := oneTable(len(entries), recipe.Field{Name: "status", Values: entries, Unique: true})
 
 	records, first := rowsOf(t, rec)
@@ -135,6 +133,148 @@ func TestAUniqueFieldBoundToARuleSaysWhenEveryValueIsUsed(t *testing.T) {
 	for _, part := range []string{"fields.code is unique", "every one of the 2 values", "row 3 of 3"} {
 		if !strings.Contains(err.Error(), part) {
 			t.Errorf("the refusal does not carry %q: %v", part, err)
+		}
+	}
+}
+
+// askedFor is the real source counting, field by field, how often it is asked
+// for a domain.
+type askedFor struct {
+	values.Source
+	asked map[string]int
+}
+
+func (a askedFor) DomainOf(req generate.Request) (generate.Domain, bool) {
+	a.asked[req.At.Field]++
+	return a.Source.DomainOf(req)
+}
+
+// inBlocks is the real source with the gender column drawn as a woman in the
+// first rows and as a man in the rest.
+type inBlocks struct {
+	values.Source
+	women int64
+}
+
+func (b inBlocks) Produce(req generate.Request) (string, error) {
+	switch {
+	case req.At.Field != "sex":
+		return b.Source.Produce(req)
+	case req.At.Row < b.women:
+		return "female", nil
+	}
+	return "male", nil
+}
+
+// rowsFrom plans and runs a recipe of one table on the source handed in, calls
+// between before the run starts, and returns the records without the header.
+func rowsFrom(t *testing.T, rec recipe.Recipe, source generate.Values, between func()) [][]string {
+	t.Helper()
+	plan, err := generate.Prepare(rec, source, generate.NeverStops{})
+	if err != nil {
+		t.Fatalf("the plan was refused: %v", err)
+	}
+	between()
+	files := newHeld()
+	writer, err := format.NewCSV(files, rec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := generate.Run(plan, rec, source, writer, generate.NeverStops{}); err != nil {
+		t.Fatalf("the run failed: %v", err)
+	}
+	records, err := csv.NewReader(strings.NewReader(files.written["account.csv"].String())).ReadAll()
+	if err != nil {
+		t.Fatalf("the table does not read back: %v", err)
+	}
+	return records[1:]
+}
+
+// listOf is a list of entries that all begin with the same prefix.
+func listOf(prefix string, size int) []string {
+	entries := make([]string, size)
+	for index := range entries {
+		entries[index] = prefix + strconv.Itoa(index)
+	}
+	return entries
+}
+
+// The domain of a unique field that is the same in every row is asked for once
+// by the run, however many rows walk it: a field no rule binds, and a field a
+// rule binds that draws from a list under values all the same.
+//
+// 🔴 Until 2026-11-03 every row that walked asked again, and the source counts
+// a list anew each time, so a list of 28000 entries took 2.8 s where the same
+// table without unique took 0.077 s (B-348). Five hundred entries make 21 or
+// 22 rows of each field walk, which is how often the run asked before, and
+// fields with lists of their own check that each keeps its own answer.
+func TestADomainTheSameInEveryRowIsAskedForOnce(t *testing.T) {
+	lists := map[string][]string{"code": listOf("c", 500), "tag": listOf("t", 500), "mark": listOf("m", 500)}
+	rec := oneTable(500, recipe.Field{Name: "sex", Generator: "gender"},
+		recipe.Field{Name: "code", Values: lists["code"], Unique: true},
+		recipe.Field{Name: "tag", Values: lists["tag"], Unique: true},
+		recipe.Field{Name: "mark", Values: lists["mark"], Unique: true})
+	rec.Entities[0].Consistency = []recipe.Rule{{Field: "mark", Kind: recipe.Matches, With: []string{"sex"}}}
+	source := askedFor{values.New(rec.Locale, rec.Seed), map[string]int{}}
+
+	records := rowsFrom(t, rec, source, func() { clear(source.asked) })
+
+	for at, name := range []string{"code", "tag", "mark"} {
+		column := at + 1
+		listed, seen := map[string]bool{}, map[string]bool{}
+		for _, entry := range lists[name] {
+			listed[entry] = true
+		}
+		for _, record := range records {
+			if !listed[record[column]] {
+				t.Fatalf("%s holds %q, which its list does not", name, record[column])
+			}
+			seen[record[column]] = true
+		}
+		if len(seen) != len(lists[name]) {
+			t.Errorf("%s holds %d different values of %d", name, len(seen), len(lists[name]))
+		}
+		if source.asked[name] != 1 {
+			t.Errorf("the run asked for the domain of %s %d times", name, source.asked[name])
+		}
+	}
+}
+
+// A unique field a rule binds to the gender walks the domain of the gender of
+// its row, so a table that uses up the first names of women and then those of
+// men gives every row a name of its own gender.
+//
+// One answer kept for the whole column would hand the men the names of women,
+// which are all taken by then, and the run would say every value is used.
+func TestAUniqueFieldBoundToTheGenderWalksTheDomainOfItsRow(t *testing.T) {
+	plain := values.New("pl-PL", "domain")
+	of := func(gender string) map[string]bool {
+		req := generate.Request{Generator: values.FirstName,
+			Agrees: provider.NewAgreement(map[string]string{provider.RoleGender: gender})}
+		domain, _ := plain.DomainOf(req)
+		names := map[string]bool{}
+		for place := int64(0); place < domain.Size; place++ {
+			names[domain.At(place)] = true
+		}
+		return names
+	}
+	women, men := of("female"), of("male")
+	shared := 0
+	for name := range women {
+		if men[name] {
+			shared++
+		}
+	}
+	rec := oneTable(len(women)+len(men)-shared, recipe.Field{Name: "sex", Generator: "gender"},
+		recipe.Field{Name: "name", Generator: "first_name", Unique: true})
+	rec.Entities[0].Consistency = []recipe.Rule{{Field: "name", Kind: recipe.Matches, With: []string{"sex"}}}
+
+	records := rowsFrom(t, rec, inBlocks{values.New(rec.Locale, rec.Seed), int64(len(women))}, func() {})
+
+	own := map[string]map[string]bool{"female": women, "male": men}
+	for row, record := range records {
+		if !own[record[0]][record[1]] {
+			t.Fatalf("row %d is %s and holds the name %q", row+1, record[0], record[1])
 		}
 	}
 }

@@ -78,6 +78,41 @@ func (s *uniqueSet) walkerFor(field string, domain Domain) *walker {
 	return made
 }
 
+// askedDomain is one answer of the source about a domain, kept with whether
+// the source knew it.
+type askedDomain struct {
+	domain Domain
+	known  bool
+}
+
+// domainOf returns the domain a unique field walks in a row, asking the source
+// once for a field whose domain is the same in every row.
+//
+// # Why once, and for which fields
+//
+// 🔴 Until 2026-11-03 every row that walked asked again, and the source counts
+// the entries of a list each time it is asked, so a unique list of 28000
+// entries under values took 2.8 s where the same table without unique took
+// 0.077 s (B-348). A request differs from row to row only in its address and in
+// what the row agrees with, and a domain does not depend on the address, which
+// the plan and the walk of a key rely on as well. So the answer is kept for a
+// field no rule binds, and for a field drawing from a list under values, which
+// draws from the list alone whatever it agrees with. Any other field a rule
+// binds asks in every row, because a first name of a woman and one of a man
+// are two domains, and keeping an answer for each agreement would hold a list
+// for every value a row can agree with.
+func (t *tableRun) domainOf(field recipe.Field, request Request) (Domain, bool) {
+	if t.bound[field.Name] && len(field.Values) == 0 {
+		return t.values.DomainOf(request)
+	}
+	if kept, found := t.domains[field.Name]; found {
+		return kept.domain, kept.known
+	}
+	domain, known := t.values.DomainOf(request)
+	t.domains[field.Name] = askedDomain{domain: domain, known: known}
+	return domain, known
+}
+
 // keyParts returns the parts of the primary key the run holds, and whether it
 // holds the key at all.
 //

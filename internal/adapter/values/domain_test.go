@@ -1,6 +1,7 @@
 package values_test
 
 import (
+	"strconv"
 	"strings"
 	"testing"
 
@@ -17,33 +18,7 @@ import (
 // through one function since 2026-10-26, and this holds the two together from
 // outside, under limits and agreements that change which entries are drawn.
 func TestEveryDrawnValueLiesInsideTheDomainItsRequestReports(t *testing.T) {
-	female := provider.NewAgreement(map[string]string{provider.RoleGender: "female"})
-	male := provider.NewAgreement(map[string]string{provider.RoleGender: "male"})
-	short := func(req generate.Request, length int) generate.Request {
-		req.MaxLength, req.HasMaxLength, req.Unit = length, true, "characters"
-		return req
-	}
-	cases := []struct {
-		name   string
-		locale string
-		req    generate.Request
-	}{
-		{"a city", "pl-PL", generate.Request{Generator: values.City}},
-		{"a city of six letters at most", "pl-PL", short(generate.Request{Generator: values.City}, 6)},
-		{"a region", "pl-PL", generate.Request{Generator: values.Region}},
-		{"a first name of anybody", "en-US", generate.Request{Generator: values.FirstName}},
-		{"a first name of a woman", "pl-PL", generate.Request{Generator: values.FirstName, Agrees: female}},
-		{"a surname of a man in Polish", "pl-PL", generate.Request{Generator: values.LastName, Agrees: male}},
-		{"a surname of a woman in Polish", "pl-PL", generate.Request{Generator: values.LastName, Agrees: female}},
-		{"a surname of anybody in Polish", "pl-PL", generate.Request{Generator: values.LastName}},
-		{"a surname in English", "en-US", short(generate.Request{Generator: values.LastName}, 5)},
-		{"a gender", "en-US", generate.Request{Generator: values.Gender}},
-		{"a date of birth", "en-US", generate.Request{Generator: values.BirthDate}},
-		{"a whole number of two digits", "en-US", short(generate.Request{Type: values.TypeInteger}, 2)},
-		{"a decimal of five characters", "en-US", short(generate.Request{Type: values.TypeDecimal}, 5)},
-		{"a list under values", "en-US", generate.Request{Values: []string{"p", "q", "r"}}},
-	}
-	for _, test := range cases {
+	for _, test := range knownDomains() {
 		t.Run(test.name, func(t *testing.T) {
 			source := values.New(test.locale, "domain")
 			domain, known := source.DomainOf(test.req)
@@ -69,6 +44,73 @@ func TestEveryDrawnValueLiesInsideTheDomainItsRequestReports(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+// A domain is the same at every address: the same name, the same size and the
+// same value at every place.
+//
+// 🔴 The plan, the walk of a key and, since 2026-11-03, the walk of a unique
+// field ask once for a field no rule binds and keep the answer for every row
+// (B-348). A domain that moved with the row would give the later rows values
+// their own request does not produce.
+func TestADomainIsTheSameAtEveryAddress(t *testing.T) {
+	for _, test := range knownDomains() {
+		t.Run(test.name, func(t *testing.T) {
+			source := values.New(test.locale, "domain")
+			first, _ := source.DomainOf(test.req)
+			for _, row := range []int64{1, 77, 4096} {
+				req := test.req
+				req.At = at("f", row)
+				req.At.Purpose = "value:unique#" + strconv.FormatInt(row, 10)
+				again, known := source.DomainOf(req)
+				if !known || again.Key != first.Key || again.Size != first.Size {
+					t.Fatalf("at row %d the domain is %q of %d (known %v), and at the first address %q of %d",
+						row, again.Key, again.Size, known, first.Key, first.Size)
+				}
+				for place := int64(0); place < first.Size; place += 1 + first.Size/500 {
+					if again.At(place) != first.At(place) {
+						t.Fatalf("at row %d place %d holds %q, and at the first address %q",
+							row, place, again.At(place), first.At(place))
+					}
+				}
+			}
+		})
+	}
+}
+
+// knownDomain is one request whose domain this build knows.
+type knownDomain struct {
+	name   string
+	locale string
+	req    generate.Request
+}
+
+// knownDomains are the requests the tests of domains walk, under limits and
+// agreements that change which entries are drawn.
+func knownDomains() []knownDomain {
+	female := provider.NewAgreement(map[string]string{provider.RoleGender: "female"})
+	male := provider.NewAgreement(map[string]string{provider.RoleGender: "male"})
+	short := func(req generate.Request, length int) generate.Request {
+		req.MaxLength, req.HasMaxLength, req.Unit = length, true, "characters"
+		return req
+	}
+	return []knownDomain{
+		{"a city", "pl-PL", generate.Request{Generator: values.City}},
+		{"a city of six letters at most", "pl-PL", short(generate.Request{Generator: values.City}, 6)},
+		{"a region", "pl-PL", generate.Request{Generator: values.Region}},
+		{"a first name of anybody", "en-US", generate.Request{Generator: values.FirstName}},
+		{"a first name of a woman", "pl-PL", generate.Request{Generator: values.FirstName, Agrees: female}},
+		{"a surname of a man in Polish", "pl-PL", generate.Request{Generator: values.LastName, Agrees: male}},
+		{"a surname of a woman in Polish", "pl-PL", generate.Request{Generator: values.LastName, Agrees: female}},
+		{"a surname of anybody in Polish", "pl-PL", generate.Request{Generator: values.LastName}},
+		{"a surname in English", "en-US", short(generate.Request{Generator: values.LastName}, 5)},
+		{"a gender", "en-US", generate.Request{Generator: values.Gender}},
+		{"a date of birth", "en-US", generate.Request{Generator: values.BirthDate}},
+		{"a whole number of two digits", "en-US", short(generate.Request{Type: values.TypeInteger}, 2)},
+		{"a decimal of five characters", "en-US", short(generate.Request{Type: values.TypeDecimal}, 5)},
+		{"a list under values", "en-US", generate.Request{Values: []string{"p", "q", "r"}}},
+		{"a test card number", "en-US", generate.Request{Generator: values.Card}},
 	}
 }
 

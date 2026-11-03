@@ -168,6 +168,15 @@ repository once they are released.
 
 ### Changed
 
+- **generate fills a unique column drawing from a long list in a fraction of
+  a second.** Each row that ran out of luck counted the whole list under
+  values again, so a list of 28000 entries took over two and a half seconds,
+  where the same table without unique takes less than a tenth. The list is now
+  counted once per table, and the same table takes about a tenth of a second.
+  A unique surname without a gender column gains the same way. A unique first
+  name or surname that follows the gender of its row still counts its list on
+  each such row, which costs hundredths of a second with the lists this build
+  carries. The data comes out the same as before, byte for byte.
 - **corrupt reads a wide file of national identifiers in a fraction of a
   second.** Working out which columns agree with a column of identifiers
   compared every pair of columns in full, so 1024 columns of PESEL numbers took

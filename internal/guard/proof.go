@@ -515,6 +515,13 @@ var toolGuards = []Guard{
 	{"the plan refuses a unique field whose known values are fewer than its rows, with the arithmetic", "TestAUniqueFieldWithTooFewKnownValuesIsRefusedBeforeTheRun", "internal/app/generate", ByMutation},
 	{"an entry under values that does not fit the type or the length beside it is refused by its place in the list", "TestAListEntryTheFieldCannotHoldIsRefusedByItsPlace", "internal/app/generate", ByMutation},
 	{"every value a request draws lies in the domain the same request reports, and the domain counts each value once", "TestEveryDrawnValueLiesInsideTheDomainItsRequestReports", "internal/adapter/values", ByMutation},
+	// 🔴 B-348, 2026-11-03: every row that walked asked for the domain again, so a
+	// unique list of 28000 entries took 2.8 s where the table without unique
+	// took 0.077 s. The three below hold the answer kept, kept per field, and
+	// never kept for a field whose domain moves with its row.
+	{"a domain is the same at every address, so a field no rule binds can be asked once and the answer kept for every row", "TestADomainIsTheSameAtEveryAddress", "internal/adapter/values", ByMutation},
+	{"the run asks once for the domain of a unique field that is the same in every row, however many rows walk it, and each field keeps its own answer", "TestADomainTheSameInEveryRowIsAskedForOnce", "internal/adapter/format", ByMutation},
+	{"a unique field bound to the gender walks the domain of the gender of its row, so a table that uses up the names of women and then of men gives every row a name of its own gender", "TestAUniqueFieldBoundToTheGenderWalksTheDomainOfItsRow", "internal/adapter/format", ByMutation},
 	{"a unique column whose values are not counted says what happened when drawing runs out and claims nothing about how many values there are", "TestAColumnThatCannotBeCountedSaysWhatHappenedAndNoMore", "internal/adapter/format", ByMutation},
 	{"a list under values beside a generator or an expression is refused, because the field would name two places its value comes from", "TestAListUnderValuesIsRefusedBesideAnotherSource", "internal/adapter/recipeyaml", ByMutation},
 	{"a part of the primary key asked to be empty in some rows is refused by the reader", "TestAPartOfTheKeyAskedToBeEmptyIsRefused", "internal/adapter/recipeyaml", ByMutation},

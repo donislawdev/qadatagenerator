@@ -102,12 +102,15 @@ type tableRun struct {
 	taken  *uniqueSet
 	// key is nil when the run does not hold the primary key, see keyParts.
 	key *keySet
+	// domains are those of the unique fields whose domain is the same in
+	// every row, asked the first time one of their rows walks, see domainOf.
+	domains map[string]askedDomain
 }
 
 func newTableRun(planned dataset.Table, entity recipe.Entity, values Values, source seed.Source) *tableRun {
 	rules := Rules(entity, values)
 	table := &tableRun{entity: entity, rows: planned.Rows, rules: rules, bound: boundFields(rules),
-		values: values, source: source, taken: newUniqueSet(entity)}
+		values: values, source: source, taken: newUniqueSet(entity), domains: make(map[string]askedDomain)}
 	if parts, held := keyParts(entity, values); held {
 		table.key = newKeySet(parts)
 	}
@@ -308,7 +311,7 @@ func (t *tableRun) uniqueValue(field recipe.Field, request Request) (string, err
 // seed draws, once drawing has run out of luck.
 func (t *tableRun) walkUnique(field recipe.Field, request Request) (string, error) {
 	where := "entities." + t.entity.Name + ".fields." + field.Name
-	domain, known := t.values.DomainOf(request)
+	domain, known := t.domainOf(field, request)
 	if !known {
 		return "", fault.New(fault.Data, fmt.Sprintf(
 			"%s is unique and %d draws in a row landed on a value already used, at row %d of %d. "+

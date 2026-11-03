@@ -146,6 +146,11 @@ type Values interface {
 	// known the plan refuses with the arithmetic before a row is written and the
 	// run walks to a free value instead of giving up. Only the source knows how
 	// many values a word list holds after the filter, so the question is here.
+	//
+	// The answer depends on everything in the request but its address. The
+	// plan, the walk of a key and the walk of a unique field each ask once for
+	// a field whose requests differ only there, and keep the answer for every
+	// row of the table.
 	DomainOf(req Request) (Domain, bool)
 	// Accepts reports whether a value written in the recipe under values can
 	// stand in the field the request describes, and says why not when it cannot.
