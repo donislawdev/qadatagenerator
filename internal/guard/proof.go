@@ -600,6 +600,11 @@ var toolGuards = []Guard{
 	{"the stop of a preview reaches the plan, which shares the children of every parent out", "TestTheStopOfAPreviewReachesThePlan", "internal/produce", ByMutation},
 	{"a separator typed while a newly chosen file is read goes to that file", "TestASeparatorTypedWhileAChosenFileIsReadGoesToThatFile", "internal/gui/takeview", ByMutation},
 	{"the stop handed to take.Open reaches the reading of the file", "TestAReadingToldToStopEndsBeforeTheWholeFileIsRead", "internal/take", ByMutation},
+	// 🔴 B-356: the working out that comes after the reading asks as well,
+	// once a column and once a column of identifiers, so a read nobody wants
+	// any more ends within one column of a wide file rather than after all.
+	{"working out a table asks whether to stop before every column and before every column of identifiers it pairs, and a stop at any of those ends it with no shape", "TestWorkingOutATableAsksToStopBeforeEveryColumnAndEveryPairing", "internal/adapter/infer", ByMutation},
+	{"the stop handed to take.Open reaches the working out of the columns, and a read stopped there lets the file go", "TestAReadStoppedWhileItsColumnsAreWorkedOutEndsAndLetsTheFileGo", "internal/take", ByMutation},
 	{"the real check of a recipe hands its stop to the preview", "TestTheRealCheckHandsItsStopToThePreview", "internal/gui/recipeview", ByMutation},
 	{"a forgotten question is told to stop, its answer is dropped and nothing waiting behind it is asked", "TestAForgottenQuestionIsStoppedAndNothingWaitingIsAsked", "internal/gui/background", ByMutation},
 	{"an answer that arrives after the recipe screen was emptied is not drawn over it", "TestAnAnswerArrivingAfterTheRecipeWasClearedIsNotDrawn", "internal/gui/recipeview", ByMutation},

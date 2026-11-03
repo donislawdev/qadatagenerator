@@ -32,6 +32,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
 	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
 	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
@@ -92,7 +93,19 @@ var _ recipe.SchemaView = Schema{}
 // off values is decided here rather than by the caller, because that is the
 // whole content of the rule and a caller filtering the list first would be a
 // second place for the rule to live.
-func From(table dataset.Table, samples []dataset.Sample, schemes []provider.Provider) Schema {
+//
+// # Where it can be stopped
+//
+// stop is asked before every column is looked at and before every column of
+// identifiers is paired, and a stopped look returns what stop answered and no
+// shape. 🔴 Until 2026-11-03 nothing here asked (B-356). The reading before it
+// asks between records, and its cost grows with the rows, while this grows with
+// the columns: 16383 columns with about one cell in seven blank kept a window
+// waiting 44 s for a read it no longer wanted, on a machine busy with other
+// work. One column of identifiers walked against every other is the most that
+// now lies between two asks.
+func From(table dataset.Table, samples []dataset.Sample, schemes []provider.Provider,
+	stop corrupt.Halt) (Schema, error) {
 	selfChecking := selfCheckingOnly(schemes)
 	built := Schema{entity: table.Entity}
 	byName := make(map[string]dataset.Sample, len(samples))
@@ -100,6 +113,9 @@ func From(table dataset.Table, samples []dataset.Sample, schemes []provider.Prov
 		byName[sample.Field] = sample
 	}
 	for _, column := range table.Columns {
+		if err := stop.Stopped(); err != nil {
+			return Schema{}, err
+		}
 		finding := look(byName[column], selfChecking)
 		finding.Field = column
 		built.findings = append(built.findings, finding)
@@ -121,11 +137,14 @@ func From(table dataset.Table, samples []dataset.Sample, schemes []provider.Prov
 		if finding.Scheme == "" {
 			continue
 		}
+		if err := stop.Stopped(); err != nil {
+			return Schema{}, err
+		}
 		built.relations = append(built.relations,
 			relationsOf(finding.Field, carriers[finding.Scheme], around, byName)...)
 	}
 	built.rules = rulesOf(built.relations)
-	return built
+	return built, nil
 }
 
 // look decides what one column holds.

@@ -252,9 +252,11 @@ type Opened struct {
 // settings, and a run that never starts must not have read a large file into
 // memory for nothing.
 //
-// stop is asked between the records of the reading, which walks the whole file.
-// Working out what the columns hold comes after it and is not asked, because
-// its cost grows with the columns rather than the rows (B-344).
+// stop is asked between the records of the reading, which walks the whole file,
+// and then before every column the working out looks at, whose cost grows with
+// the columns rather than the rows (B-344, B-356). A read stopped in either
+// leaves nothing open, because the reading closes what it opened and the file
+// is opened again only when its records are taken.
 func Open(path string, settings Settings, stop corrupt.Halt) (*Opened, error) {
 	// 🔴 The separator is held against the same rule Check holds it against,
 	// and this is the second place rather than the first. Every caller is meant
@@ -277,10 +279,11 @@ func Open(path string, settings Settings, stop corrupt.Halt) (*Opened, error) {
 		return nil, err
 	}
 	from := values.New(settings.Locale, settings.Seed)
-	return &Opened{
-		file: file, shape: infer.From(file.Table(), file.Samples(), from.Schemes()),
-		from: from, path: path,
-	}, nil
+	shape, err := infer.From(file.Table(), file.Samples(), from.Schemes(), stop)
+	if err != nil {
+		return nil, err
+	}
+	return &Opened{file: file, shape: shape, from: from, path: path}, nil
 }
 
 // Close releases the file.

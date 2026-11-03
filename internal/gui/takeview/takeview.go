@@ -63,7 +63,8 @@ import (
 // a file around for.
 //
 // stale says that the screen has asked a newer question, and the reading ends
-// at the next record once it does.
+// at the next record once it does, or at the next column once the records are
+// read and what the columns hold is being worked out.
 type Opener func(path string, settings take.Settings, stale corrupt.Halt) (*take.Opened, error)
 
 // View is the screen and what it is currently looking at.

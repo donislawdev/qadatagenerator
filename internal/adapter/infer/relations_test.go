@@ -90,7 +90,7 @@ func TestAColumnStandingForTheEncodedGenderIsTiedToIt(t *testing.T) {
 	identifiers := produced(t, "pesel", 60)
 	genders, dates := neighbours(t, identifiers)
 
-	shape := infer.From(tableOf("pesel", "sex", "born"), []dataset.Sample{
+	shape := shapeOf(t, tableOf("pesel", "sex", "born"), []dataset.Sample{
 		sampleOf("pesel", identifiers),
 		sampleOf("sex", genders),
 		sampleOf("born", dates),
@@ -150,7 +150,7 @@ func TestAnAgreementWorthNothingIsRefused(t *testing.T) {
 		{"a column agreeing over too few records", genders, 8},
 	} {
 		t.Run(given.what, func(t *testing.T) {
-			shape := infer.From(tableOf("pesel", "sex"), []dataset.Sample{
+			shape := shapeOf(t, tableOf("pesel", "sex"), []dataset.Sample{
 				sampleOf("pesel", identifiers[:given.records]),
 				sampleOf("sex", given.column[:given.records]),
 			}, schemes())
@@ -164,7 +164,7 @@ func TestAnAgreementWorthNothingIsRefused(t *testing.T) {
 	}
 	// The date column of the same file is untouched by all of that, so the
 	// refusals above are about the column they name and not about the file.
-	shape := infer.From(tableOf("pesel", "born"), []dataset.Sample{
+	shape := shapeOf(t, tableOf("pesel", "born"), []dataset.Sample{
 		sampleOf("pesel", identifiers), sampleOf("born", dates),
 	}, schemes())
 	if _, has := relationBetween(shape, "pesel", "born"); !has {
@@ -212,7 +212,7 @@ func TestASplitUnderTheBarIsRefusedHoweverManyRecordsAgree(t *testing.T) {
 			}
 			identifiers := append(append([]string{}, women[:given.women]...), men[:given.men]...)
 			genders, _ := neighbours(t, identifiers)
-			shape := infer.From(tableOf("pesel", "sex"), []dataset.Sample{
+			shape := shapeOf(t, tableOf("pesel", "sex"), []dataset.Sample{
 				sampleOf("pesel", identifiers), sampleOf("sex", genders),
 			}, schemes())
 			found, has := relationBetween(shape, "pesel", "sex")
@@ -245,7 +245,7 @@ func TestColumnsAreLinedUpByRecordAndNotByPosition(t *testing.T) {
 		rows = append(rows, at)
 	}
 
-	shape := infer.From(tableOf("pesel", "sex"), []dataset.Sample{
+	shape := shapeOf(t, tableOf("pesel", "sex"), []dataset.Sample{
 		sampleOf("pesel", identifiers),
 		sampleAtRows("sex", genders[1:], rows),
 	}, schemes())
@@ -264,7 +264,7 @@ func TestColumnsAreLinedUpByRecordAndNotByPosition(t *testing.T) {
 // A file nobody can read a scheme out of has no relations either, because a
 // relation here hangs off a scheme.
 func TestAFileWithNoSchemeInItHasNoRelations(t *testing.T) {
-	shape := infer.From(tableOf("left", "right"), []dataset.Sample{
+	shape := shapeOf(t, tableOf("left", "right"), []dataset.Sample{
 		sampleOf("left", []string{"1", "2", "3", "4", "5", "6", "7", "8"}),
 		sampleOf("right", []string{"a", "b", "a", "b", "a", "b", "a", "b"}),
 	}, schemes())

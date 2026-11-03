@@ -43,6 +43,12 @@ repository once they are released.
 
 ### Fixed
 
+- **The Take and corrupt screen lets go of a file it is still reading as soon
+  as another file or separator is chosen.** It used to stop the old read only
+  between records, and then compare every column of a file with every other
+  before the new read could begin. In a file of thousands of columns with
+  blanks in them that took seconds, and the screen could only wait. The old
+  read now ends at the next column it looks at.
 - **corrupt no longer ties a column to a national identifier on too little
   evidence.** The gender or the date an identifier encodes has to agree with a
   column in a way that could have come out a hundred million other ways, and

@@ -9,6 +9,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/provider/pl"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/provider/us"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
+	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
 	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
@@ -72,8 +73,20 @@ func findingFor(t *testing.T, shape infer.Schema, field string) infer.Finding {
 	return infer.Finding{}
 }
 
+// shapeOf works out a table with nothing that could stop it, which is what every
+// test here asks for apart from the ones about stopping.
+func shapeOf(t *testing.T, table dataset.Table, samples []dataset.Sample,
+	schemes []provider.Provider) infer.Schema {
+	t.Helper()
+	shape, err := infer.From(table, samples, schemes, corrupt.NeverStops{})
+	if err != nil {
+		t.Fatalf("working out a table nothing could stop ended with %v", err)
+	}
+	return shape
+}
+
 func TestAColumnOfNationalIdentifiersIsRecognisedFromItsValues(t *testing.T) {
-	shape := infer.From(
+	shape := shapeOf(t,
 		tableOf("pesel"),
 		[]dataset.Sample{sampleOf("pesel", produced(t, values.Pesel, 40))},
 		schemes(),
@@ -120,7 +133,7 @@ func TestEverySchemeIsRecognisedInAColumnOfItsOwnValues(t *testing.T) {
 		if !checked {
 			continue
 		}
-		finding := findingFor(t, infer.From(
+		finding := findingFor(t, shapeOf(t,
 			tableOf(generator),
 			[]dataset.Sample{sampleOf(generator, produced(t, generator, 40))},
 			schemes(),
@@ -136,7 +149,7 @@ func TestEverySchemeIsRecognisedInAColumnOfItsOwnValues(t *testing.T) {
 // the definition of the scheme is what settled the choice. A reader handed
 // only "isbn" would not know that an article number reading was open to them.
 func TestABookNumberColumnIsRecognisedAsTheNarrowerOfTwoSchemes(t *testing.T) {
-	finding := findingFor(t, infer.From(
+	finding := findingFor(t, shapeOf(t,
 		tableOf("book"),
 		[]dataset.Sample{sampleOf("book", produced(t, "isbn", 40))},
 		schemes(),
@@ -162,7 +175,7 @@ func TestAColumnTwoUnrelatedSchemesAcceptIsStillARefusal(t *testing.T) {
 		"378282246310005", "371449635398431", "378282246310005", "371449635398431",
 		"378282246310005", "371449635398431", "378282246310005", "371449635398431",
 	}
-	finding := findingFor(t, infer.From(
+	finding := findingFor(t, shapeOf(t,
 		tableOf("paid with"),
 		[]dataset.Sample{sampleOf("paid with", amex)},
 		schemes(),
@@ -198,7 +211,7 @@ func TestTheNarrowerSchemeIsChosenOnlyWhenItNamesEveryOther(t *testing.T) {
 		{"a third scheme nobody named", []provider.Provider{wide, narrow, beside}, ""},
 		{"two schemes naming each other", []provider.Provider{looped, loopedBack}, ""},
 	} {
-		finding := findingFor(t, infer.From(
+		finding := findingFor(t, shapeOf(t,
 			tableOf("code"), []dataset.Sample{sampleOf("code", codes)}, one.schemes,
 		), "code")
 		if finding.Scheme != one.want {
@@ -224,7 +237,7 @@ func TestAColumnOfRealSocialSecurityNumbersIsStillNotRecognised(t *testing.T) {
 		}
 	}
 	finding := findingFor(t,
-		infer.From(tableOf("ssn"), []dataset.Sample{sampleOf("ssn", real)}, schemes()), "ssn")
+		shapeOf(t, tableOf("ssn"), []dataset.Sample{sampleOf("ssn", real)}, schemes()), "ssn")
 	if finding.Scheme != "" {
 		t.Errorf("a scheme with no check digit was read off values: %q", finding.Scheme)
 	}
@@ -249,7 +262,7 @@ func TestUnrelatedDigitsAreNotAnnouncedAsANumberingScheme(t *testing.T) {
 			digits = append(digits, strconv.FormatInt(100000000+draws.IntN(at, 899999999), 10))
 		}
 		finding := findingFor(t,
-			infer.From(tableOf("code"), []dataset.Sample{sampleOf("code", digits)}, schemes()), "code")
+			shapeOf(t, tableOf("code"), []dataset.Sample{sampleOf("code", digits)}, schemes()), "code")
 		if finding.Scheme != "" {
 			recognised++
 			t.Logf("column %d of unrelated digits was taken for %s: %v", column, finding.Scheme, digits)
@@ -265,7 +278,7 @@ func TestUnrelatedDigitsAreNotAnnouncedAsANumberingScheme(t *testing.T) {
 func TestTooFewValuesLeaveAColumnUnrecognised(t *testing.T) {
 	short := produced(t, values.Pesel, infer.MinimumEvidence-1)
 	finding := findingFor(t,
-		infer.From(tableOf("pesel"), []dataset.Sample{sampleOf("pesel", short)}, schemes()), "pesel")
+		shapeOf(t, tableOf("pesel"), []dataset.Sample{sampleOf("pesel", short)}, schemes()), "pesel")
 	if finding.Scheme != "" {
 		t.Fatalf("%d values were enough to announce %s, and the threshold is %d",
 			len(short), finding.Scheme, infer.MinimumEvidence)
@@ -290,7 +303,7 @@ func TestOneValueThatDoesNotFitRefusesTheColumn(t *testing.T) {
 	}
 	withATypo[17] = broken
 	finding := findingFor(t,
-		infer.From(tableOf("pesel"), []dataset.Sample{sampleOf("pesel", withATypo)}, schemes()), "pesel")
+		shapeOf(t, tableOf("pesel"), []dataset.Sample{sampleOf("pesel", withATypo)}, schemes()), "pesel")
 	if finding.Scheme != "" {
 		t.Errorf("a column carrying a value the validator refuses was still announced as %s",
 			finding.Scheme)
@@ -309,7 +322,7 @@ func brokenLastDigit(value string) string {
 func TestTwoSchemesAcceptingEverythingLeaveTheColumnUnrecognised(t *testing.T) {
 	both := &acceptsAnything{id: "AA.first"}
 	other := &acceptsAnything{id: "BB.second"}
-	finding := findingFor(t, infer.From(
+	finding := findingFor(t, shapeOf(t,
 		tableOf("code"),
 		[]dataset.Sample{sampleOf("code", []string{"1", "2", "3", "4", "5", "6", "7", "8"})},
 		[]provider.Provider{both, other},
@@ -326,7 +339,7 @@ func TestTwoSchemesAcceptingEverythingLeaveTheColumnUnrecognised(t *testing.T) {
 
 // A column of blanks is an answer rather than a gap, and it says so.
 func TestAColumnWithNoValuesSaysThatIsWhyNothingWasDecided(t *testing.T) {
-	finding := findingFor(t, infer.From(
+	finding := findingFor(t, shapeOf(t,
 		tableOf("spare"),
 		[]dataset.Sample{{Field: "spare", Empty: 40}},
 		schemes(),
@@ -343,7 +356,7 @@ func TestAColumnWithNoValuesSaysThatIsWhyNothingWasDecided(t *testing.T) {
 // concluded about. A column with no entry at all would leave a reader unable to
 // tell one that was examined from one that was skipped.
 func TestEveryColumnGetsAFindingWithABasis(t *testing.T) {
-	shape := infer.From(
+	shape := shapeOf(t,
 		tableOf("id", "pesel", "note"),
 		[]dataset.Sample{
 			sampleOf("id", []string{"1", "2", "3"}),
@@ -366,7 +379,7 @@ func TestEveryColumnGetsAFindingWithABasis(t *testing.T) {
 // one of these would be a property of a contract rather than of the data, and
 // claiming one lets a mutator break a limit this tool invented.
 func TestNothingBeyondTypeAndSchemeIsClaimed(t *testing.T) {
-	shape := infer.From(
+	shape := shapeOf(t,
 		tableOf("pesel", "note"),
 		[]dataset.Sample{
 			sampleOf("pesel", produced(t, values.Pesel, 40)),
@@ -421,7 +434,7 @@ func TestTheLimitsOfThisWayOfLookingAreStated(t *testing.T) {
 
 // A view of one file answers about one entity and about nothing else.
 func TestTheViewAnswersAboutTheOneTableItRead(t *testing.T) {
-	shape := infer.From(tableOf("a"), []dataset.Sample{sampleOf("a", []string{"x"})}, schemes())
+	shape := shapeOf(t, tableOf("a"), []dataset.Sample{sampleOf("a", []string{"x"})}, schemes())
 	if names := shape.EntityNames(); len(names) != 1 || names[0] != "records" {
 		t.Fatalf("one file is one table and the view names %v", names)
 	}
