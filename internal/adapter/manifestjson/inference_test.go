@@ -96,3 +96,27 @@ func TestAnInferenceEditedToLoseItsBasisIsRefusedOnReading(t *testing.T) {
 		t.Errorf("the refusal does not say which conclusion lost its basis: %v", err)
 	}
 }
+
+// Two bases taken out are two sentences, and the second begins with a capital
+// (B-352). The refusal read "...nobody can argue with. the relation between
+// pesel and sex carries no basis" until 2026-11-03, measured on this edit.
+func TestTwoProblemsReadBackAreTwoSentences(t *testing.T) {
+	path := onDisk(t, inferred())
+	text, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	edited := bytes.Replace(text, []byte(`"two spellings of a gender"`), []byte(`""`), 1)
+	edited = bytes.Replace(edited, []byte(`"every record agrees"`), []byte(`""`), 1)
+	if err := os.WriteFile(path, edited, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = manifestjson.Load(path)
+	if err == nil {
+		t.Fatal("an inference with two bases taken out was read as a valid manifest")
+	}
+	if !strings.Contains(err.Error(), ". The ") || strings.Contains(err.Error(), ". the ") {
+		t.Errorf("the second problem does not begin a sentence of its own: %v", err)
+	}
+}

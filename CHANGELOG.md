@@ -43,6 +43,15 @@ repository once they are released.
 
 ### Fixed
 
+- **verify says once what is wrong with many rows of a response record.** A
+  record answering every row twice, or giving many rows a verdict nobody
+  knows, was refused with one sentence for each row, so 4000 repeated rows
+  made a message of 311 kB. Rows wrong the same way are now one sentence
+  naming three of them and counting the rest.
+- **A refusal naming several problems begins each of them with a capital.**
+  The second problem of a manifest or a response record read back from disk
+  followed a full stop in lower case. An identifier copied from the file, such
+  as the one an entry of a manifest carries, is still shown exactly as written.
 - **quick pesel with a date of birth outside 1800 to 2299 says the scheme
   cannot write that date.** It used to report an internal defect of the tool
   and ask for a bug report, with exit code 1. It now names the date and the

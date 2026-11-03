@@ -21,6 +21,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
 // Verdict is what the application did with one row.
@@ -92,13 +94,36 @@ func (r Record) Problems() []string {
 			"reacted to nothing is a run where every row went missing, and saying that needs the "+
 			"rows it did react to")
 	}
+	// Grouped by reason since 2026-11-03 (B-339), the way the rows the manifest
+	// cannot place already were. The likely mistake repeats on every row, and a
+	// record of four hundred thousand rows answering each one twice was four
+	// hundred thousand sentences in one message.
 	seen := map[Place]bool{}
-	hinted := false
+	grouped := fault.Grouped{}
+	unnumbered := map[int]int{}
 	for _, row := range r.Rows {
-		problems = append(problems, row.problems(seen, &hinted)...)
+		row.problems(seen, grouped, unnumbered)
 	}
+	problems = append(problems, grouped.Said()...)
+	problems = append(problems, belowOne(unnumbered)...)
 	sort.Strings(problems)
 	return problems
+}
+
+// belowOne says once for each number below one how many rows carried it.
+//
+// Apart from the grouped reasons because such a row has no number a reader
+// could look for, and a reason names rows by their numbers.
+func belowOne(unnumbered map[int]int) []string {
+	said := make([]string, 0, len(unnumbered))
+	for number, rows := range unnumbered {
+		lead := "a row is numbered " + strconv.Itoa(number)
+		if rows > 1 {
+			lead = strconv.Itoa(rows) + " rows are numbered " + strconv.Itoa(number)
+		}
+		said = append(said, lead+", and rows count from one because the header is not a record")
+	}
+	return said
 }
 
 // Place is a record as the producer named it: an entity, or none, and a row.
@@ -119,14 +144,16 @@ func (p Place) Name() string {
 	return "row " + strconv.Itoa(p.Number) + " of " + p.Entity
 }
 
-// problems is everything wrong with one row. hinted carries across the rows
-// whether the sentence about naming entities was said already.
-func (row Row) problems(seen map[Place]bool, hinted *bool) []string {
-	var problems []string
+// problems records everything wrong with one row, grouped with the rows that
+// are wrong the same way, and counts the rows numbered below one by number.
+func (row Row) problems(seen map[Place]bool, grouped fault.Grouped, unnumbered map[int]int) {
+	of := ""
+	if row.Entity != "" {
+		of = "of " + row.Entity + " "
+	}
 	switch {
 	case row.Number < 1:
-		problems = append(problems, "a row is numbered "+strconv.Itoa(row.Number)+
-			", and rows count from one because the header is not a record")
+		unnumbered[row.Number]++
 	case seen[row.Place()]:
 		// 🔴 Two verdicts about one row is the one fault a reader cannot work
 		// around by choosing, because choosing is what would make the answer
@@ -137,28 +164,39 @@ func (row Row) problems(seen map[Place]bool, hinted *bool) []string {
 		// without it is a question for the manifest, which knows whether the
 		// dataset has one entity or several, so it is asked where the two are
 		// put side by side.
-		said := fmt.Sprintf("%s is answered twice, and the two answers cannot both be what happened",
-			row.Place().Name())
-		// Once per record, beside the first such row. A number repeated without
-		// an entity is most likely a producer of two tables numbering each from
-		// one, which is right, and naming neither, which is not. Measured on
-		// 2026-10-27: that record met this sentence before anything could say
-		// the entity was missing, because the manifest that knows there are two
-		// tables is not read here.
-		if row.Entity == "" && !*hinted {
-			said += ". Rows of different entities each name their entity"
-			*hinted = true
+		twice := fault.Reason{
+			One:  of + "is answered twice, and the two answers cannot both be what happened",
+			Many: of + "are each answered twice, and two answers about one row cannot both be what happened",
 		}
-		problems = append(problems, said)
+		// Once per record, and grouping is what keeps it once. A number
+		// repeated without an entity is most likely a producer of two tables
+		// numbering each from one, which is right, and naming neither, which is
+		// not. Measured on 2026-10-27: that record met this sentence before
+		// anything could say the entity was missing, because the manifest that
+		// knows there are two tables is not read here.
+		if row.Entity == "" {
+			twice.One += ". Rows of different entities each name their entity"
+			twice.Many += ". Rows of different entities each name their entity"
+		}
+		grouped.Add(twice, row.Number)
 	default:
 		seen[row.Place()] = true
 	}
 	if row.Verdict != Accepted && row.Verdict != Rejected {
-		problems = append(problems, fmt.Sprintf(
-			"%s has the verdict %q, and the two a row can have are %q and %q",
-			row.Place().Name(), row.Verdict, Accepted, Rejected))
+		verdict := fault.Reason{
+			One: fmt.Sprintf("%shas the verdict %q, and the two a row can have are %q and %q",
+				of, row.Verdict, Accepted, Rejected),
+			Many: fmt.Sprintf("%shave the verdict %q, and the two a row can have are %q and %q",
+				of, row.Verdict, Accepted, Rejected),
+		}
+		// A row below one has no number for the group to lead with, so its
+		// sentence has to stand on its own words.
+		if row.Number < 1 {
+			alone := fmt.Sprintf("a row numbered %d %s", row.Number, verdict.One)
+			verdict = fault.Reason{One: alone, Many: alone}
+		}
+		grouped.Add(verdict, row.Number)
 	}
-	return problems
 }
 
 // Marked reports whether the application said anything about a row without

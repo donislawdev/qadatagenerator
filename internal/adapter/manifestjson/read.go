@@ -78,7 +78,7 @@ func Load(path string) (manifest.Manifest, error) {
 	built, problems := asManifest(read)
 	if len(problems) > 0 {
 		return manifest.Manifest{}, fault.New(fault.Config, path+
-			" is a manifest this build would not have written: "+strings.Join(problems, ". "))
+			" is a manifest this build would not have written: "+fault.Sentences(problems))
 	}
 	if version.Compatibility(version.Manifest, built.SpecVersion()) == version.Unreadable {
 		return manifest.Manifest{}, fault.New(fault.Config, path+" is written to version "+

@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
 // The fourth part of a refusal says what to do instead. These two hold the
@@ -94,5 +96,27 @@ func TestValidateDoesNotSendTheReaderToValidate(t *testing.T) {
 	}
 	if !strings.Contains(got.log, doAboutConfigValidate) {
 		t.Errorf("the refusal has no fourth part of its own: %q", got.log)
+	}
+}
+
+// A request that cannot be met sends each verb to what it was given (B-351).
+// Until 2026-11-03 every verb without a recipe was told to change "the file",
+// which is the corrupting verb's file, and the verb drawing values reads none.
+// No refusal of that verb reaches this today, because the one it can meet
+// carries its own move, so the rule is asked of the function that decides it,
+// the same way the recipe advice is.
+func TestADataFailureSendsEachVerbToWhatItWasGiven(t *testing.T) {
+	for _, one := range []struct {
+		verb string
+		want string
+	}{
+		{commandGenerate, doAboutData},
+		{commandCorrupt, doAboutDataCorrupt},
+		{commandVerify, doAboutConfigDocument},
+		{commandQuick, doAboutConfigFlags + commandQuick + doAboutConfigFlagsTail},
+	} {
+		if said := whatToDoAbout(fault.Data, one.verb); said != one.want {
+			t.Errorf("a request %s cannot meet is followed by %q, want %q", one.verb, said, one.want)
+		}
 	}
 }

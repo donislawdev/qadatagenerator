@@ -13,7 +13,6 @@ import (
 	"io"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/boundedfile"
 	"github.com/donislawdev/qadatagenerator/internal/domain/response"
@@ -155,7 +154,7 @@ func decode(raw []byte, path string) (response.Record, error) {
 	built := asRecord(read)
 	if problems := built.Problems(); len(problems) > 0 {
 		return response.Record{}, fault.New(fault.Config, path+" cannot be compared: "+
-			strings.Join(problems, ". "))
+			fault.Sentences(problems))
 	}
 	if version.Compatibility(version.Response, built.SpecVersion) == version.Unreadable {
 		return response.Record{}, unreadableVersion(path, built.SpecVersion)

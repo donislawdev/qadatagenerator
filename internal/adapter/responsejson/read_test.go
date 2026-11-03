@@ -131,6 +131,11 @@ func TestARecordThatCannotBeComparedIsRefusedWithAReason(t *testing.T) {
 			"answered twice"},
 		{"a verdict nobody knows",
 			`{"spec_version":"0.1","rows":[{"row":1,"verdict":"maybe"}]}`, "verdict"},
+		// Two problems are two sentences, and the second begins with a capital
+		// (B-352). It read ". row 1 has the verdict" until 2026-11-03.
+		{"two problems at once",
+			`{"spec_version":"0.1","rows":[{"row":0,"verdict":"accepted"},{"row":1,"verdict":"maybe"}]}`,
+			`because the header is not a record. Row 1 has the verdict "maybe"`},
 		// A misspelled member is the likely mistake in a file somebody writes
 		// by hand, and skipping it would mean comparing against evidence the
 		// producer believes they supplied.

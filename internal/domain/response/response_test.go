@@ -98,6 +98,9 @@ func TestARecordWithNothingWrongWithItNamesNoProblem(t *testing.T) {
 // A row that is not numbered has no number to have been answered twice about,
 // so two of them are two faults about numbering rather than one duplicate. The
 // order of the two checks is what decides this, which is why it is named.
+//
+// Since 2026-11-03 the two are said in one sentence that counts them (B-339),
+// where until then they were two sentences, one a row.
 func TestARowWithNoUsableNumberIsNotAlsoCountedAsAnsweredTwice(t *testing.T) {
 	record := response.Record{
 		SpecVersion: "1.0",
@@ -110,8 +113,41 @@ func TestARowWithNoUsableNumberIsNotAlsoCountedAsAnsweredTwice(t *testing.T) {
 	if contains(problems, "answered twice") {
 		t.Errorf("two unnumbered rows were reported as one row answered twice: %v", problems)
 	}
-	if len(problems) != 2 {
-		t.Errorf("two unnumbered rows produced %d problems: %v", len(problems), problems)
+	if len(problems) != 1 || !strings.HasPrefix(problems[0], "2 rows are numbered 0") {
+		t.Errorf("two unnumbered rows were not said as two rows numbered 0: %v", problems)
+	}
+}
+
+// 🔴 Four hundred thousand rows wrong the same way are one reason with a few of
+// their numbers, not four hundred thousand sentences (B-339). Measured on
+// 2026-10-27 before the change: four repeated numbers were four sentences.
+// Two ways a row can be wrong are held here, each repeated over the whole
+// record, and each has to come out once and say how many more rows it covers.
+func TestRowsWrongTheSameWayAreSaidOnce(t *testing.T) {
+	const repeated = 400_000
+	rows := make([]response.Row, 0, 3*repeated)
+	for number := 1; number <= repeated; number++ {
+		rows = append(rows,
+			response.Row{Number: number, Verdict: response.Accepted},
+			response.Row{Number: number, Verdict: response.Accepted})
+	}
+	for number := 1; number <= repeated; number++ {
+		rows = append(rows, response.Row{Entity: "order", Number: number, Verdict: "maybe"})
+	}
+	problems := response.Record{SpecVersion: "1.0", Rows: rows}.Problems()
+	said := strings.Join(problems, ". ")
+	if len(problems) != 2 || len(said) > 600 {
+		t.Fatalf("%d rows wrong two ways gave %d problems, %d bytes: %.300s",
+			3*repeated, len(problems), len(said), said)
+	}
+	for _, want := range []string{
+		"rows 1, 2, 3 and 399997 more are each answered twice",
+		`rows 1, 2, 3 and 399997 more of order have the verdict "maybe"`,
+		"Rows of different entities each name their entity",
+	} {
+		if !strings.Contains(said, want) {
+			t.Errorf("the problems do not say %q: %s", want, said)
+		}
 	}
 }
 

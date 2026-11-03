@@ -662,10 +662,21 @@ func whatToDoAbout(kind fault.Kind, verb string) string {
 			return doAboutConfigFlags + verb + doAboutConfigFlagsTail
 		}
 	case fault.Data:
-		if !hasRecipe {
+		// 🔴 The same question a third time, on 2026-11-03 (B-351). Every verb
+		// without a recipe got the sentence about the file it damages, and the
+		// verb drawing values reads no file at all. The verb that reads a file
+		// gets the file, the verb that reads documents gets the documents, and
+		// any other one the flags it was given.
+		switch {
+		case hasRecipe:
+			return doAboutData
+		case verb == commandCorrupt:
 			return doAboutDataCorrupt
+		case readsDocuments:
+			return doAboutConfigDocument
+		default:
+			return doAboutConfigFlags + verb + doAboutConfigFlagsTail
 		}
-		return doAboutData
 	case fault.Interrupted, fault.Terminated:
 		return doAboutStopped
 	default:
