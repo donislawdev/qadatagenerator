@@ -168,6 +168,15 @@ repository once they are released.
 
 ### Changed
 
+- **corrupt reads a wide file of national identifiers in a fraction of a
+  second.** Working out which columns agree with a column of identifiers
+  compared every pair of columns in full, so 1024 columns of PESEL numbers took
+  ten seconds and the widest file this reads would have taken over half an
+  hour. The same file now takes four hundredths of a second, and 16384 columns
+  a quarter of one. A file whose columns have blanks among their first eight
+  records still compares those columns pair by pair, and at the widest with
+  blanks everywhere that takes about eleven seconds. What is worked out is the
+  same as before, byte for byte.
 - **corrupt recognises a column of book numbers as isbn.** Every ISBN-13 is
   also a valid EAN-13, so such a column was accepted by both schemes and given
   neither, and no check digit damage was aimed at it. The book number is

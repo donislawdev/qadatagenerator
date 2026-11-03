@@ -48,8 +48,10 @@ const MaxRecordBytes = 1 << 20
 // spreadsheet holds, so a file exported from one always fits.
 //
 // It bounds what is kept for every column and the fields of every record. It
-// does not bound the time it takes to work out what the columns hold, which
-// grows with the square of the columns carrying an identifier (B-344).
+// does not bound the time it takes to work out what the columns hold. Pairing
+// a column of identifiers with the others still grows with the square of the
+// width for the columns with a blank among their first records, and only for
+// those (B-344).
 const MaxColumns = 16384
 
 // SampleBytes is how much of the file the first pass keeps for all the columns

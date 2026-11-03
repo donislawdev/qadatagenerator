@@ -1,6 +1,7 @@
 package infer
 
 import (
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -61,73 +62,298 @@ var dateLayouts = []string{
 	"2006-01-02", "2006/01/02", "02.01.2006", "02-01-2006", "02/01/2006", "20060102",
 }
 
-// aligned is the values of two columns for the records where both are present.
-type aligned struct {
-	rows  []int
-	left  []string
-	right []string
+// column is one column of the table and what was sampled of it, looked up once
+// for the file rather than once for every pair the column is part of.
+type column struct {
+	name    string
+	sample  dataset.Sample
+	sampled bool
 }
 
-// alignBy walks two samples in record order and keeps the records both hold.
+// columnsOf lines the samples up with the columns of the table.
+func columnsOf(names []string, byName map[string]dataset.Sample) []column {
+	columns := make([]column, len(names))
+	for at, name := range names {
+		sample, sampled := byName[name]
+		columns[at] = column{name: name, sample: sample, sampled: sampled}
+	}
+	return columns
+}
+
+// indexedRecords is how many records at the top of a file the index of
+// neighbours reads.
+//
+// # Why eight
+//
+// Two columns that both hold the first eight records share exactly those as
+// their first eight, so whatever ends a hypothesis there ends it for the pair
+// without a walk. Eight is enough for a column of two values to match the
+// genders of eight records by chance one time in 128, and few enough that a
+// blank near the top of a column is the exception rather than the rule.
+const indexedRecords = 8
+
+// neighbourhood is the columns of a table as the pairing reads them, with an
+// index of which of them can agree with a column of identifiers at all.
+//
+// 🔴 The index answers from the first records only, and it never leaves out a
+// neighbour the walk would keep. For two columns that both hold the first
+// indexedRecords records, the first steps of the walk are known in advance:
+// the gender lasts through them only if the values of the neighbour repeat
+// exactly where the genders repeat, and the date lasts through the first only
+// if the first value is that date in one of the layouts. A column with a blank
+// among its first records is outside the index and is walked by everybody, and
+// an identifier column with such a blank walks everybody. This is the sorting
+// of columns once that B-344 asked for, made exact. Sorting a column by what all
+// of its values look like would have dropped a gender column holding a third
+// value on the records that carry no identifier, and such a column agrees.
+type neighbourhood struct {
+	columns []column
+	// everyone is every column, for an identifier column the index cannot
+	// speak for, and ragged is every column the index holds nothing about.
+	everyone []int
+	ragged   []int
+	// byPattern holds the columns that hold the first records, by which of
+	// their first values repeat which, and byFirst by their first value.
+	byPattern map[string][]int
+	byFirst   map[string][]int
+}
+
+// neighbourhoodOf reads every column of the table once, for all the columns
+// of identifiers that will be paired with it.
+func neighbourhoodOf(names []string, byName map[string]dataset.Sample) neighbourhood {
+	around := neighbourhood{columns: columnsOf(names, byName),
+		byPattern: map[string][]int{}, byFirst: map[string][]int{}}
+	for at, other := range around.columns {
+		around.everyone = append(around.everyone, at)
+		switch {
+		case !other.sampled:
+		case !fromTheTop(other.sample.Rows):
+			around.ragged = append(around.ragged, at)
+		default:
+			pattern := patternOf(other.sample.Values[:indexedRecords])
+			around.byPattern[pattern] = append(around.byPattern[pattern], at)
+			first := other.sample.Values[0]
+			around.byFirst[first] = append(around.byFirst[first], at)
+		}
+	}
+	return around
+}
+
+// candidatesFor names, in the order of the table, the columns a column of
+// identifiers has to be walked against. Every other column is one the walk
+// would have ended on within the first records.
+func (n neighbourhood) candidatesFor(ids encoded, gendered, dated bool) []int {
+	if !fromTheTop(ids.rows) {
+		return n.everyone
+	}
+	lists := [][]int{n.ragged}
+	if gendered && !slices.Contains(ids.genders[:indexedRecords], provider.Unknown) {
+		lists = append(lists, n.byPattern[patternOf(ids.genders[:indexedRecords])])
+	}
+	if dated && ids.dated[0] {
+		for _, layout := range dateLayouts {
+			lists = append(lists, n.byFirst[asWritten(layout, ids.dates[0])])
+		}
+	}
+	total := 0
+	for _, list := range lists {
+		total += len(list)
+	}
+	candidates := make([]int, 0, total)
+	for _, list := range lists {
+		candidates = append(candidates, list...)
+	}
+	slices.Sort(candidates)
+	return slices.Compact(candidates)
+}
+
+// fromTheTop reports whether a column holds every one of the first
+// indexedRecords records. The records of a sample only go up, so the first
+// standing at one and the last of them at indexedRecords leave no room for a
+// gap between.
+func fromTheTop(rows []int) bool {
+	return len(rows) >= indexedRecords && rows[0] == 1 && rows[indexedRecords-1] == indexedRecords
+}
+
+// patternOf writes down which of the values repeat which: for every position,
+// the position where its value was first seen. Two columns of values, or a
+// column of genders and one of values, have the same pattern exactly when the
+// one stands for the other one for one.
+func patternOf[T comparable](values []T) string {
+	pattern := make([]byte, len(values))
+	for at := range values {
+		pattern[at] = byte(at)
+		for before := range at {
+			if values[before] == values[at] {
+				pattern[at] = pattern[before]
+				break
+			}
+		}
+	}
+	return string(pattern)
+}
+
+// encoded is what the identifiers of one column carry, read once for the
+// column.
+//
+// 🔴 Reading it once is most of B-344. It used to be read again for every other
+// column of the file, and every date written out again in six layouts, so one
+// pair cost as much as decoding the whole sample and the time grew with the
+// square of the width at that price. A value that carries no gender holds
+// Unknown here, and one whose date cannot be read is not dated, because either
+// ends the relation as soon as a record both columns hold lands on it.
+type encoded struct {
+	rows    []int
+	genders []provider.Gender
+	dates   []provider.Date
+	dated   []bool
+}
+
+// encodedIn reads every identifier of a column once. A scheme that encodes no
+// gender, or no date, is passed as nil for it.
+func encodedIn(carrier dataset.Sample, readsGender provider.GenderEncoder,
+	readsDate provider.DateEncoder) encoded {
+	ids := encoded{
+		rows:    carrier.Rows,
+		genders: make([]provider.Gender, len(carrier.Values)),
+		dates:   make([]provider.Date, len(carrier.Values)),
+		dated:   make([]bool, len(carrier.Values)),
+	}
+	for at, value := range carrier.Values {
+		ids.genders[at] = provider.Unknown
+		if readsGender != nil {
+			if gender, ok := readsGender.EncodedGender(value); ok {
+				ids.genders[at] = gender
+			}
+		}
+		if readsDate != nil {
+			ids.dates[at], ids.dated[at] = readsDate.EncodedDate(value)
+		}
+	}
+	return ids
+}
+
+// relationsOf works out which columns a column of identifiers agrees with.
+func relationsOf(field string, scheme provider.Provider, around neighbourhood,
+	byName map[string]dataset.Sample) []Relation {
+	carrier, has := byName[field]
+	if !has {
+		return nil
+	}
+	readsGender, gendered := scheme.(provider.GenderEncoder)
+	readsDate, dated := scheme.(provider.DateEncoder)
+	if !gendered && !dated {
+		return nil
+	}
+	ids := encodedIn(carrier, readsGender, readsDate)
+	var found []Relation
+	var walk pairing
+	for _, at := range around.candidatesFor(ids, gendered, dated) {
+		other := &around.columns[at]
+		if other.name == field || !other.sampled {
+			continue
+		}
+		shared := walk.over(ids, other.sample, gendered, dated)
+		if relation, ok := walk.genderAgreement(field, other.name, shared); ok {
+			found = append(found, relation)
+		}
+		if relation, ok := walk.dateAgreement(field, other.name, ids, other.sample, shared); ok {
+			found = append(found, relation)
+		}
+	}
+	return found
+}
+
+// pairing walks the records a column of identifiers shares with one neighbour
+// and keeps what they have not yet ruled out: that the neighbour stands for the
+// gender, and that it holds the date in each layout.
+//
+// One walk serves every neighbour of a column of identifiers and is emptied
+// before each, so a pair allocates nothing. It stops at the record that rules
+// out the last hypothesis, which for two columns with nothing to do with each
+// other is the first or the second record they share, instead of lining every
+// record up first and asking afterwards.
+type pairing struct {
+	gender bool
+	// layouts has bit i set while the neighbour can still be dateLayouts[i].
+	layouts uint
+	// genders, stands and counts say which value of the neighbour each gender
+	// stands for and on how many records, for as long as the gender holds.
+	genders []provider.Gender
+	stands  []string
+	counts  []int
+}
+
+// over walks the records both columns hold, in record order, and returns how
+// many there are. The count is whole only when a hypothesis lasted to the end,
+// which is the only time it is read.
 //
 // 🔴 This is the whole reason a sample carries its record numbers. Empty cells
 // are dropped when a column is sampled, so the third value of one column and
 // the third of another come from the same record only when neither has a gap
 // above it. Reading them by position would compare one person's identifier
 // against another person's gender and call the disagreement evidence.
-func alignBy(left, right dataset.Sample) aligned {
-	var both aligned
+func (p *pairing) over(ids encoded, neighbour dataset.Sample, gendered, dated bool) int {
+	p.gender, p.layouts = gendered, 0
+	if dated {
+		p.layouts = 1<<len(dateLayouts) - 1
+	}
+	p.genders, p.stands, p.counts = p.genders[:0], p.stands[:0], p.counts[:0]
+	shared := 0
 	at, to := 0, 0
-	for at < len(left.Rows) && to < len(right.Rows) {
+	for at < len(ids.rows) && to < len(neighbour.Rows) && (p.gender || p.layouts != 0) {
 		switch {
-		case left.Rows[at] < right.Rows[to]:
+		case ids.rows[at] < neighbour.Rows[to]:
 			at++
-		case left.Rows[at] > right.Rows[to]:
+		case ids.rows[at] > neighbour.Rows[to]:
 			to++
 		default:
-			both.rows = append(both.rows, left.Rows[at])
-			both.left = append(both.left, left.Values[at])
-			both.right = append(both.right, right.Values[to])
+			value := neighbour.Values[to]
+			if p.gender {
+				p.gender = p.standsFor(ids.genders[at], value)
+			}
+			if !ids.dated[at] {
+				p.layouts = 0
+			}
+			for layout := range dateLayouts {
+				if p.layouts&(1<<layout) != 0 && !writes(dateLayouts[layout], ids.dates[at], value) {
+					p.layouts &^= 1 << layout
+				}
+			}
+			shared++
 			at++
 			to++
 		}
 	}
-	return both
+	return shared
 }
 
-// relationsOf works out which columns a column of identifiers agrees with.
-func relationsOf(field string, scheme provider.Provider, columns []string,
-	byName map[string]dataset.Sample) []Relation {
-	var found []Relation
-	carrier, has := byName[field]
-	if !has {
-		return nil
+// standsFor keeps the gender through one more record. Every gender has to
+// stand for one value of the neighbour and every value for one gender, so a
+// gender met with a second value, or a value already standing for the other
+// gender, ends it.
+func (p *pairing) standsFor(gender provider.Gender, value string) bool {
+	if gender == provider.Unknown {
+		return false
 	}
-	for _, other := range columns {
-		if other == field {
-			continue
+	for at := range p.genders {
+		sameGender, sameValue := p.genders[at] == gender, p.stands[at] == value
+		if sameGender != sameValue {
+			return false
 		}
-		neighbour, has := byName[other]
-		if !has {
-			continue
-		}
-		both := alignBy(carrier, neighbour)
-		if reads, ok := scheme.(provider.GenderEncoder); ok {
-			if relation, ok := genderAgreement(field, other, reads, both); ok {
-				found = append(found, relation)
-			}
-		}
-		if reads, ok := scheme.(provider.DateEncoder); ok {
-			if relation, ok := dateAgreement(field, other, reads, both); ok {
-				found = append(found, relation)
-			}
+		if sameGender {
+			p.counts[at]++
+			return true
 		}
 	}
-	return found
+	p.genders = append(p.genders, gender)
+	p.stands = append(p.stands, value)
+	p.counts = append(p.counts, 1)
+	return true
 }
 
-// genderAgreement answers whether a column stands one for one against the
-// gender the identifiers encode.
+// genderAgreement answers, once the walk is over, whether a column stands one
+// for one against the gender the identifiers encode.
 //
 // # Why the vocabulary of the column never comes into it
 //
@@ -141,29 +367,9 @@ func relationsOf(field string, scheme provider.Provider, columns []string,
 // 🔴 Both genders have to appear, and that is not a formality. With one gender
 // in the sample every column holding a single repeated value agrees perfectly,
 // and the agreement says nothing at all.
-func genderAgreement(field, other string, reads provider.GenderEncoder,
-	both aligned) (Relation, bool) {
-	if len(both.rows) == 0 {
+func (p *pairing) genderAgreement(field, other string, shared int) (Relation, bool) {
+	if !p.gender || shared == 0 {
 		return Relation{}, false
-	}
-	means := map[provider.Gender]string{}
-	saidBy := map[string]provider.Gender{}
-	counts := map[provider.Gender]int{}
-	for at, value := range both.left {
-		encoded, ok := reads.EncodedGender(value)
-		if !ok || encoded == provider.Unknown {
-			return Relation{}, false
-		}
-		stands := both.right[at]
-		if seen, has := means[encoded]; has && seen != stands {
-			return Relation{}, false
-		}
-		if seen, has := saidBy[stands]; has && seen != encoded {
-			return Relation{}, false
-		}
-		means[encoded] = stands
-		saidBy[stands] = encoded
-		counts[encoded]++
 	}
 	// 🔴 There is no separate check that both genders appeared, and its absence
 	// is the finding rather than an oversight. One was written, and a mutation
@@ -174,58 +380,133 @@ func genderAgreement(field, other string, reads provider.GenderEncoder,
 	// TestASplitUnderTheBarIsRefusedHoweverManyRecordsAgree holds the count to
 	// that. A condition nobody can break is a condition nobody can be sure
 	// still works.
-	ways := arrangements(sizesOf(counts))
+	ways := arrangements(ascending(p.counts))
 	if ways < Coincidences {
 		return Relation{}, false
 	}
+	return genderRelation(field, other, shared, ways), true
+}
+
+// genderRelation is the relation a gender agreement proves, in the words the
+// manifest carries.
+func genderRelation(field, other string, shared int, ways float64) Relation {
 	return Relation{Field: field, With: other, Kind: GenderRelation,
-		Basis: "every one of " + counted(len(both.rows), "record") + " holding both columns has " +
+		Basis: "every one of " + counted(shared, "record") + " holding both columns has " +
 			"the gender encoded in " + field + " standing for the same value of " + other +
 			", both genders appear, and the values could have been dealt out " +
-			roughly(ways) + " ways"}, true
+			roughly(ways) + " ways"}
 }
 
-// dateAgreement answers whether a column holds the date the identifiers encode.
-func dateAgreement(field, other string, reads provider.DateEncoder,
-	both aligned) (Relation, bool) {
-	if len(both.rows) == 0 {
+// dateAgreement answers, once the walk is over, whether a column holds the date
+// the identifiers encode.
+//
+// Two layouts both lasting to the end are no conflict, because they agree on
+// every record and the answer is the same either way.
+func (p *pairing) dateAgreement(field, other string, ids encoded, neighbour dataset.Sample,
+	shared int) (Relation, bool) {
+	if p.layouts == 0 || shared == 0 {
 		return Relation{}, false
 	}
-	encoded := make([]provider.Date, len(both.left))
-	for at, value := range both.left {
-		read, ok := reads.EncodedDate(value)
-		if !ok {
-			return Relation{}, false
-		}
-		encoded[at] = read
-	}
-	agreeing := 0
-	for _, layout := range dateLayouts {
-		if writtenAs(layout, encoded, both.right) {
-			agreeing++
-		}
-	}
-	if agreeing == 0 {
-		return Relation{}, false
-	}
-	ways := arrangements(sizesOf(tally(encoded)))
+	ways := arrangements(sizesOf(tally(sharedDates(ids, neighbour))))
 	if ways < Coincidences {
 		return Relation{}, false
 	}
-	return Relation{Field: field, With: other, Kind: DateRelation,
-		Basis: "every one of " + counted(len(both.rows), "record") + " holding both columns has " +
-			"the date encoded in " + field + " written in " + other +
-			", and the dates could have been dealt out " + roughly(ways) + " ways"}, true
+	return dateRelation(field, other, shared, ways), true
 }
 
-// writtenAs reports whether every value is the date beside it in one layout.
-func writtenAs(layout string, encoded []provider.Date, written []string) bool {
-	for at, value := range written {
-		if asWritten(layout, encoded[at]) != value {
-			return false
+// dateRelation is the relation a date agreement proves, in the words the
+// manifest carries.
+func dateRelation(field, other string, shared int, ways float64) Relation {
+	return Relation{Field: field, With: other, Kind: DateRelation,
+		Basis: "every one of " + counted(shared, "record") + " holding both columns has " +
+			"the date encoded in " + field + " written in " + other +
+			", and the dates could have been dealt out " + roughly(ways) + " ways"}
+}
+
+// sharedDates are the dates encoded on the records both columns hold.
+//
+// It is a second walk over the same records, taken only by a neighbour that
+// held the date on every one of them, so it is paid for by relations rather
+// than by pairs.
+func sharedDates(ids encoded, neighbour dataset.Sample) []provider.Date {
+	var dates []provider.Date
+	at, to := 0, 0
+	for at < len(ids.rows) && to < len(neighbour.Rows) {
+		switch {
+		case ids.rows[at] < neighbour.Rows[to]:
+			at++
+		case ids.rows[at] > neighbour.Rows[to]:
+			to++
+		default:
+			dates = append(dates, ids.dates[at])
+			at++
+			to++
+		}
+	}
+	return dates
+}
+
+// writes reports whether value is the date written in the layout, which is
+// what asWritten(layout, date) == value answers, without writing the date out.
+//
+// It is asked for every layout still standing on every record two columns
+// share, so it is the innermost step of the pairing and allocates nothing. The
+// layout is read the way asWritten replaces it, a year, a month or a day where
+// one is named and the character itself everywhere else. A date with a part
+// wider than its place is written out in full, because only then can the
+// written date be longer than the layout.
+func writes(layout string, date provider.Date, value string) bool {
+	if !fits(date) {
+		return asWritten(layout, date) == value
+	}
+	if len(value) != len(layout) {
+		return false
+	}
+	for at := 0; at < len(layout); {
+		switch {
+		case strings.HasPrefix(layout[at:], "2006"):
+			if !digits(value[at:at+4], date.Year) {
+				return false
+			}
+			at += 4
+		case strings.HasPrefix(layout[at:], "01"):
+			if !digits(value[at:at+2], date.Month) {
+				return false
+			}
+			at += 2
+		case strings.HasPrefix(layout[at:], "02"):
+			if !digits(value[at:at+2], date.Day) {
+				return false
+			}
+			at += 2
+		default:
+			if value[at] != layout[at] {
+				return false
+			}
+			at++
 		}
 	}
 	return true
+}
+
+// fits reports whether every part of the date takes exactly the width its
+// place in a layout gives it, so that the written date is as long as the
+// layout.
+func fits(date provider.Date) bool {
+	return date.Year >= 0 && date.Year <= 9999 && date.Month >= 0 && date.Month <= 99 &&
+		date.Day >= 0 && date.Day <= 99
+}
+
+// digits reports whether written is the number in exactly that many decimal
+// digits, with zeros in front.
+func digits(written string, number int) bool {
+	for at := len(written) - 1; at >= 0; at-- {
+		if written[at] != byte('0'+number%10) {
+			return false
+		}
+		number /= 10
+	}
+	return number == 0
 }
 
 // asWritten renders a date in a layout, without a time package, because the
@@ -262,6 +543,14 @@ func sizesOf[K comparable](counts map[K]int) []int {
 	for _, count := range counts {
 		sizes = append(sizes, count)
 	}
+	sort.Ints(sizes)
+	return sizes
+}
+
+// ascending is a copy of the counts in order, from the smallest, the order
+// sizesOf gives.
+func ascending(counts []int) []int {
+	sizes := slices.Clone(counts)
 	sort.Ints(sizes)
 	return sizes
 }

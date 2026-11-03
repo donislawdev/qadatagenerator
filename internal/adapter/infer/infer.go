@@ -116,12 +116,13 @@ func From(table dataset.Table, samples []dataset.Sample, schemes []provider.Prov
 	for _, scheme := range selfChecking {
 		carriers[scheme.ID()] = scheme
 	}
+	around := neighbourhoodOf(table.Columns, byName)
 	for _, finding := range built.findings {
 		if finding.Scheme == "" {
 			continue
 		}
 		built.relations = append(built.relations,
-			relationsOf(finding.Field, carriers[finding.Scheme], table.Columns, byName)...)
+			relationsOf(finding.Field, carriers[finding.Scheme], around, byName)...)
 	}
 	built.rules = rulesOf(built.relations)
 	return built

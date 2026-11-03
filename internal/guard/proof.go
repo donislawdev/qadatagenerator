@@ -435,6 +435,14 @@ var toolGuards = []Guard{
 	{"a column of book numbers is recognised as isbn rather than refused, and the basis names the article number that accepted it too", "TestABookNumberColumnIsRecognisedAsTheNarrowerOfTwoSchemes", "internal/adapter/infer", ByMutation},
 	{"the narrower scheme is chosen only when it names every other scheme that accepted the column, and never out of two that name each other", "TestTheNarrowerSchemeIsChosenOnlyWhenItNamesEveryOther", "internal/adapter/infer", ByMutation},
 	{"a column of American Express numbers stays a refusal, because the card and the equipment identity accept it and neither lies inside the other", "TestAColumnTwoUnrelatedSchemesAcceptIsStillARefusal", "internal/adapter/infer", ByMutation},
+	// 🔴 B-344: the pairing reads every identifier once, walks two columns
+	// once and stops at the record that ends the last hypothesis. Each of
+	// those is a way to answer differently from the rule, so the rule written
+	// plainly is kept beside it and the two are put to the same tables.
+	{"the pairing of two columns answers what comparing every record the plain way answers, over three thousand tables with gaps, unreadable identifiers and near misses", "TestThePairingAnswersWhatComparingEveryRecordWouldAnswer", "internal/adapter/infer", ByMutation},
+	{"a date compared digit by digit answers what writing it out and comparing answers, for dates that fit a layout and dates that do not", "TestWritesAnswersWhatWritingTheDateOutWould", "internal/adapter/infer", ByMutation},
+	{"one column of identifiers allocates as much against four hundred neighbours as against ten, so a pair of columns costs no allocation", "TestAPairOfColumnsAllocatesNothing", "internal/adapter/infer", ByMutation},
+	{"the index of neighbours leaves out the columns the walk would end on within the first records, keeps every other, and speaks for no identifier column with a blank near its top", "TestOnlyColumnsThatCanAgreeAreWalked", "internal/adapter/infer", ByMutation},
 	{"a swap that breaks a book number and leaves an article number whole is put back, so no rejection is promised that an article number system never makes", "TestASwapAWiderSchemeStillAcceptsIsNotKept", "internal/adapter/mutators", ByMutation},
 	{"a swap into a form a wider scheme does not check is put back as well, because not checked is not rejected", "TestASwapAWiderSchemeDoesNotCheckIsNotKeptEither", "internal/adapter/mutators", ByMutation},
 	{"every control a pointer can touch draws each of its states differently, so a person can tell hovering from pressing", "TestEveryControlAPointerCanTouchDrawsEachOfItsStatesDifferently", "internal/gui/parts", ByMutation},
