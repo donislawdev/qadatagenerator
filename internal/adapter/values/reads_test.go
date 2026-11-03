@@ -108,3 +108,68 @@ func TestARoleTheRegisterNamesIsARoleThatExists(t *testing.T) {
 		}
 	}
 }
+
+// 🔴 TestEveryValueABoundGeneratorDrawsIsOneItsReadersTake holds the reason an
+// identifier may refuse a bound value without saying what kind of failure it is.
+//
+// The scheme behind a PESEL refuses a bound date or gender it cannot read with
+// a bare error, and a bare error reaches every surface as a defect of this tool.
+// That is true only while nothing a person writes gets there. A person typing a
+// value goes through the refusals of quick first, and a recipe binds only what
+// a generator playing the role drew, because a list under values plays no role.
+// Measured on 2026-11-03 on the binary (B-336): a gender of other and a date of
+// 2023-02-30 from such a list were generated beside the PESEL with a warning that
+// the two are independent, and neither reached it.
+//
+// So every value those generators draw is handed to every generator reading the
+// role. One that starts drawing a value a reader cannot take fails here, rather
+// than as a defect reported from somebody's run.
+func TestEveryValueABoundGeneratorDrawsIsOneItsReadersTake(t *testing.T) {
+	for _, locale := range Locales() {
+		source := New(locale, "bound-values")
+		for _, bound := range source.Names() {
+			role, plays := source.RoleOf(bound)
+			if !plays {
+				continue
+			}
+			for _, reader := range source.Names() {
+				if source.ReadsRole(reader, role) {
+					bindEveryDraw(t, source, locale, bound, role, reader)
+				}
+			}
+		}
+	}
+}
+
+// boundRows is how many values of a bound generator are handed on. Enough for
+// the dates to land in every year of their span many times over, which is where
+// a value a scheme cannot carry would show first.
+const boundRows = 2000
+
+func bindEveryDraw(t *testing.T, source Source, locale, bound, role, reader string) {
+	t.Helper()
+	at := func(field string, row int64) seed.Coordinate {
+		return seed.Coordinate{Entity: "bound", Row: row, Field: field, Purpose: "value"}
+	}
+	if _, err := source.Produce(generate.Request{Generator: reader, At: at(reader, 0)}); err != nil {
+		// A generator this locale cannot produce at all is reached by no
+		// binding here either, so there is nothing to hand it.
+		return
+	}
+	for row := int64(0); row < boundRows; row++ {
+		value, err := source.Produce(generate.Request{Generator: bound, At: at(bound, row)})
+		if err != nil {
+			t.Errorf("in %s, %s could not be drawn at row %d: %v", locale, bound, row, err)
+			return
+		}
+		_, err = source.Produce(generate.Request{
+			Generator: reader, At: at(reader, row),
+			Agrees: provider.NewAgreement(map[string]string{role: value}),
+		})
+		if err != nil {
+			t.Errorf("in %s, %s drew %q as the %s, and %s bound to it refused it: %v",
+				locale, bound, value, role, reader, err)
+			return
+		}
+	}
+}

@@ -110,7 +110,9 @@ var ErrOutOfRange = errors.New("the scheme covers the years 1800 to 2299 only")
 // which every surface reports as a defect of this tool with the advice to
 // report it, for a request that was simply one the scheme cannot meet. The
 // refusals of a date or a gender that cannot be read are stopped before they
-// get this far, so nothing reaches them with a value a person typed.
+// get this far, so nothing reaches them with a value a person typed. What a
+// recipe binds is drawn by a generator, and the test of the roles in the
+// package of values hands every value those draw to this scheme.
 func outOfRange(date provider.Date) error {
 	return fault.Wrap(fault.Data, ErrOutOfRange,
 		fmt.Sprintf("pesel: %04d-%02d-%02d cannot be written", date.Year, date.Month, date.Day)).

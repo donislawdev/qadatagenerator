@@ -571,6 +571,9 @@ var toolGuards = []Guard{
 	{"every verb that reads flags answers --help written after its path", "TestEveryVerbAnswersHelpAskedForAfterItsPath", "internal/cli", ByMutation},
 	{"the same flags on the other side of the path give the same run on both channels, for every verb", "TestAFlagAfterThePathMeansWhatItMeansBeforeIt", "internal/cli", ByMutation},
 	{"a flag written last without its value is told it takes one rather than that it does not exist", "TestAFlagWrittenLastWithoutItsValueIsToldItTakesOne", "internal/cli", ByMutation},
+	// 🔴 B-336: an identifier refuses a bound value it cannot read without a
+	// kind, which is right only while no value a person writes reaches it.
+	{"every value a generator playing a role draws is taken by every generator reading that role, in every locale", "TestEveryValueABoundGeneratorDrawsIsOneItsReadersTake", "internal/adapter/values", ByMutation},
 	{"the window attaches a finding to the entry of its own table, matched on the entity as well as the row, the column and the mutator", "TestAnEntryOfOneTableIsNotGivenTheFindingOfAnother", "internal/gui/manifestview", ByMutation},
 	{"a run on one screen ending does not give the window back while a run on another is still writing", "TestTheWindowIsHeldUntilTheLastRunLetsGo", "internal/gui/background", ByMutation},
 	{"asking for the window stops every run going on and the window goes once the last of them has stopped", "TestAskingForTheWindowStopsEveryRunAndGoesAfterTheLast", "internal/gui/background", ByMutation},
