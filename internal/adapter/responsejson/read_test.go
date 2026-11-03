@@ -34,6 +34,34 @@ func TestASoundRecordIsRead(t *testing.T) {
 	}
 }
 
+// 🔴 An empty list is read as an answer and a list left out or written as null
+// is refused (DEC-271). The two came out of the reader as one record of no rows
+// until 2026-11-03, so the refusal could not tell them apart and took both
+// (B-338).
+func TestAnEmptyListOfRowsIsReadAndNoListIsRefused(t *testing.T) {
+	record, err := responsejson.Load(written(t, `{"spec_version":"0.2","rows":[]}`))
+	if err != nil {
+		t.Fatalf("a record saying the application reacted to nothing was refused: %v", err)
+	}
+	if !record.HasRows || len(record.Rows) != 0 {
+		t.Errorf("an empty list came back as %+v", record)
+	}
+	for _, given := range []struct{ what, content string }{
+		{"left out", `{"spec_version":"0.2"}`},
+		{"written as null", `{"spec_version":"0.2","rows":null}`},
+	} {
+		t.Run(given.what, func(t *testing.T) {
+			_, err := responsejson.Load(written(t, given.content))
+			if err == nil {
+				t.Fatalf("a record whose list of rows is %s was read", given.what)
+			}
+			if !strings.Contains(err.Error(), "carries no list of rows") {
+				t.Errorf("the refusal of a list %s says %q", given.what, err)
+			}
+		})
+	}
+}
+
 // A row of version 0.2 says which entity it belongs to, and the same number
 // under two entities is two rows of a dataset of two tables rather than one
 // row answered twice.
@@ -123,7 +151,8 @@ func TestARecordThatCannotBeComparedIsRefusedWithAReason(t *testing.T) {
 		says    string
 	}{
 		{"no version", `{"rows":[{"row":1,"verdict":"accepted"}]}`, "which version"},
-		{"no rows at all", `{"spec_version":"0.1","rows":[]}`, "names no row"},
+		// An empty list is an answer since DEC-271, and a list left out is not.
+		{"no list of rows", `{"spec_version":"0.1"}`, "carries no list of rows"},
 		{"a row numbered zero", `{"spec_version":"0.1","rows":[{"row":0,"verdict":"accepted"}]}`,
 			"count from one"},
 		{"one row answered twice",

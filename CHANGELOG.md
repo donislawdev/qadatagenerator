@@ -12,6 +12,13 @@ repository once they are released.
 
 ### BREAKING
 
+- **verify reads a response record whose list of rows is empty.** A dataset of
+  no rows, which a recipe with `count: 0` makes, can now be verified, and an
+  empty list agrees with it. Until now no record could be compared with such a
+  dataset. For a dataset with rows an empty list means every row went missing,
+  so the run reports them and ends with exit code 4, where it used to be
+  refused with exit code 3. A record that leaves `rows` out, or writes it as
+  `null`, is still refused with exit code 3.
 - **On Linux and macOS a run of generate or corrupt that was interrupted or
   stopped ends by that signal once it has cleaned up.** A shell still reports
   130 and 143, and a loop in bash around the command now stops on Ctrl+C

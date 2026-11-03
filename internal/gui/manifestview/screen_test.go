@@ -137,6 +137,25 @@ func TestAnEntryOfOneTableIsNotGivenTheFindingOfAnother(t *testing.T) {
 	}
 }
 
+// A dataset of no rows answered by a record listing none agrees with it on the
+// screen as it does on the command line (DEC-271). Until 2026-11-03 the window
+// could not get this far, because the reader refused the record (B-338).
+func TestADatasetOfNoRowsAnsweredByNoneReadsAsAgreed(t *testing.T) {
+	envelope := run()
+	envelope.RowsTotal, envelope.RowsMutated = 0, 0
+	envelope.Entities = []manifest.Entity{{Name: "customer"}}
+	promised, problems := manifest.New("0.2", envelope, nil)
+	if len(problems) > 0 {
+		t.Fatalf("the manifest this test is built on is not valid: %v", problems)
+	}
+	comparison := compared(t, promised, response.Record{SpecVersion: "0.2", HasRows: true})
+	screen := Build(i18n.English, promised, &comparison)
+	if !screen.Agreed || screen.NeverAnswered != 0 || screen.Compared != 0 || len(screen.Rows) != 0 {
+		t.Errorf("nothing to answer for reads as agreed %v, %d never answered, %d compared, %d rows",
+			screen.Agreed, screen.NeverAnswered, screen.Compared, len(screen.Rows))
+	}
+}
+
 // compared is a comparison the test expects to be made, the way the view makes
 // it.
 func compared(t *testing.T, promised manifest.Manifest, actual response.Record) Comparison {

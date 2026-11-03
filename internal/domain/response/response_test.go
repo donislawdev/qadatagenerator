@@ -66,16 +66,25 @@ func TestTheProblemsComeBackInOneOrderRatherThanTheOrderTheyWereFound(t *testing
 	}
 }
 
-// A run where the application reacted to nothing is a run where every row went
-// missing, and saying that needs the rows it did react to.
-func TestARecordThatNamesNoRowIsRefused(t *testing.T) {
-	record := response.Record{SpecVersion: "1.0", Rows: nil}
-	problems := record.Problems()
-	if !contains(problems, "names no row at all") {
-		t.Fatalf("a record answering about nothing was not refused: %v", problems)
+// 🔴 An empty list and no list are two answers (DEC-271). The first says the
+// application reacted to nothing, which is every row going missing and, for a
+// dataset of no rows, the only true answer. The second says nothing, and reading
+// it as the first would blame the application for a producer that wrote no list.
+// Until 2026-11-03 both were refused, so a dataset of no rows could not be
+// compared at all (B-338).
+func TestAnEmptyListOfRowsIsAnAnswerAndNoListIsNot(t *testing.T) {
+	empty := response.Record{SpecVersion: "0.2", HasRows: true}
+	if problems := empty.Problems(); len(problems) != 0 {
+		t.Errorf("a record saying the application reacted to nothing was refused: %v", problems)
+	}
+
+	unlisted := response.Record{SpecVersion: "0.2"}
+	problems := unlisted.Problems()
+	if !contains(problems, "carries no list of rows") {
+		t.Fatalf("a record without a list of rows was not refused: %v", problems)
 	}
 	if len(problems) != 1 {
-		t.Errorf("a record whose only fault is having no rows named %d problems: %v",
+		t.Errorf("a record whose only fault is having no list named %d problems: %v",
 			len(problems), problems)
 	}
 }

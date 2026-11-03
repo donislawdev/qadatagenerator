@@ -354,9 +354,10 @@ func (r *Report) addShort(entity string, total, answered int) {
 		return
 	}
 	// The verb follows the count, which the real window showed reading "so 1
-	// were never reacted to" (B-289). So does the noun before it: with one
-	// table a record answering for no row is refused by the reader, but a
-	// table of one record nobody answered for is ordinary once there are two.
+	// were never reacted to" (B-289). So does the noun before it, since a table
+	// of one record nobody answered for is ordinary once there are two tables,
+	// and since 2026-11-03 with one as well, because a record listing no row is
+	// read as every row going missing rather than refused (DEC-271).
 	missing := total - answered
 	r.NeverReacted += missing
 	were := "were"
@@ -396,6 +397,13 @@ func limitsOf(promised manifest.Manifest, actual response.Record, tables dataset
 			"a manifest written to 0.1 never did, so a row past the end of its entity and the "+
 			"records that went missing are counted against the dataset as a whole")
 	}
+	// A record of no rows judges no entry against a verdict, so there is no
+	// value whose fate or mark went unsaid, and the two sentences about that
+	// would be about rows that are not there. Without this a dataset of no rows,
+	// comparable since B-338, would end a report of full agreement with both.
+	if len(actual.Rows) == 0 {
+		return withoutRows(limits, actual)
+	}
 	if !anyRow(actual, func(row response.Row) bool { return row.HasStored }) {
 		limits = append(limits, "no row says what the application holds now, so a value taken as "+
 			"sent and a value quietly changed on the way in look the same here")
@@ -404,6 +412,12 @@ func limitsOf(promised manifest.Manifest, actual response.Record, tables dataset
 		limits = append(limits, "no row says whether anything was marked, so an entry expecting a "+
 			"mark cannot be settled")
 	}
+	return withoutRows(limits, actual)
+}
+
+// withoutRows adds what a record can leave unsaid whether or not it lists any
+// row.
+func withoutRows(limits []string, actual response.Record) []string {
 	if !actual.HasRowsTotal {
 		limits = append(limits, "the response record does not say how many rows it was given, so "+
 			"the count of records that went missing rests on the manifest alone")

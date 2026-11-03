@@ -91,6 +91,58 @@ func TestOnlyAHardDisagreementReturnsTheExpectationCode(t *testing.T) {
 	}
 }
 
+// emptyManifest writes the manifest of a dataset of no rows with the real
+// writer, which is what a recipe asking for none produces.
+func emptyManifest(t *testing.T, into string) string {
+	t.Helper()
+	path := filepath.Join(into, "empty-manifest.json")
+	file, err := os.Create(path)
+	if err != nil {
+		t.Fatalf("cannot write the manifest this test reads: %v", err)
+	}
+	err = manifestjson.New(file, "0.2").Finish(manifest.Run{
+		GeneratedAt: "2026-11-03T00:00:00Z", Seed: "s", Locale: "pl-PL",
+		CatalogVersion: "0.1", Entities: []manifest.Entity{{Name: "customer"}},
+	}, 0, 0)
+	if err != nil {
+		t.Fatalf("the manifest did not close: %v", err)
+	}
+	_ = file.Close()
+	return path
+}
+
+// 🔴 What an empty list of rows ends with, read through both real readers
+// (DEC-271). A dataset of no rows agrees with it, a dataset with rows went
+// missing whole, and a record that leaves the list out is refused as it always
+// was. Until 2026-11-03 the first two ended with the code for a broken file as
+// well, so a dataset of no rows could not be verified at all (B-338).
+func TestAnEmptyListOfRowsEndsAsWhatItSays(t *testing.T) {
+	const none = `{"spec_version":"0.2","rows":[]}`
+	for _, given := range []struct {
+		what     string
+		manifest func(t *testing.T, into string) string
+		response string
+		want     int
+		says     string
+	}{
+		{"a dataset of no rows answered by an empty list", emptyManifest, none, 0, "compared 0 entries"},
+		{"a dataset of one row answered by an empty list", func(t *testing.T, into string) string {
+			return manifestFor(t, into, catalog.Rejection, catalog.Hard)
+		}, none, 4, "answers for 0, so 1 was never reacted to"},
+		{"a dataset of no rows answered without a list", emptyManifest, `{"spec_version":"0.2"}`, 3,
+			"carries no list of rows"},
+	} {
+		t.Run(given.what, func(t *testing.T) {
+			into := t.TempDir()
+			got := run(commandVerify, given.manifest(t, into), responseFor(t, into, given.response))
+			if got.code != given.want || !strings.Contains(got.log, given.says) {
+				t.Errorf("%s ended with %d, want %d, and should say %q. It said %q",
+					given.what, got.code, given.want, given.says, got.log)
+			}
+		})
+	}
+}
+
 // The detail of a finding is a sentence of its own, and a sentence begins with
 // a capital.
 //

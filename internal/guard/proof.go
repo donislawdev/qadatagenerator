@@ -557,6 +557,12 @@ var toolGuards = []Guard{
 	{"the writer of a manifest refuses an envelope that lists no entity or leaves out the table of an entry", "TestTheEntitiesAreWrittenWholeOrNotAtAll", "internal/adapter/manifestjson", ByMutation},
 	{"verify names the table of a finding when the dataset has several, and refuses a row naming none with the code for an invalid input", "TestARecordAboutTwoTablesIsHeldToEachOfThem", "internal/cli", ByMutation},
 	{"the version of the response format this build reads is the one its specification states", "TestResponseVersionMatchesTheResponseSpecification", "internal/version", ByMutation},
+	// 🔴 B-338, DEC-271: an empty list of rows is an answer, every row going
+	// missing or, for a dataset of no rows, full agreement. A list left out or
+	// written as null is not one, and was the same refusal until 2026-11-03.
+	{"a response record listing no row is a record, and one leaving the list out is refused", "TestAnEmptyListOfRowsIsAnAnswerAndNoListIsNot", "internal/domain/response", ByMutation},
+	{"the reader tells an empty list of rows from a list left out or written as null", "TestAnEmptyListOfRowsIsReadAndNoListIsRefused", "internal/adapter/responsejson", ByMutation},
+	{"a record listing no row is compared like any other, agreeing with a dataset of no rows without limits about rows it does not have", "TestARecordListingNoRowIsComparedLikeAnyOther", "internal/app/verify", ByMutation},
 	{"the window attaches a finding to the entry of its own table, matched on the entity as well as the row, the column and the mutator", "TestAnEntryOfOneTableIsNotGivenTheFindingOfAnother", "internal/gui/manifestview", ByMutation},
 	{"a run on one screen ending does not give the window back while a run on another is still writing", "TestTheWindowIsHeldUntilTheLastRunLetsGo", "internal/gui/background", ByMutation},
 	{"asking for the window stops every run going on and the window goes once the last of them has stopped", "TestAskingForTheWindowStopsEveryRunAndGoesAfterTheLast", "internal/gui/background", ByMutation},

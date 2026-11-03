@@ -95,6 +95,49 @@ func has(report verify.Report, kind verify.Kind) bool {
 	return false
 }
 
+// 🔴 A record listing no row says the application reacted to none, and that is
+// compared like any other answer (DEC-271). For a dataset of no rows it agrees
+// with the manifest, and until 2026-11-03 no record could, because the reader
+// refused every empty list (B-338). For a dataset with rows it is every row
+// going missing, said the way one row of sixty answered says the other
+// fifty nine, rather than refused as a broken file.
+func TestARecordListingNoRowIsComparedLikeAnyOther(t *testing.T) {
+	none := response.Record{SpecVersion: "0.2", HasRows: true}
+	for _, given := range []struct {
+		what     string
+		promised manifest.Manifest
+	}{
+		{"a dataset of no rows listing its table", listing(t, []manifest.Entity{{Name: "customer"}})},
+		{"a dataset of no rows written to 0.1", promised(t, 0)},
+	} {
+		t.Run(given.what, func(t *testing.T) {
+			report := compare(t, given.promised, none)
+			if len(report.Findings) != 0 || report.Failed() || report.Compared != 0 ||
+				report.NeverReacted != 0 {
+				t.Errorf("nothing to answer for and the report says %+v", report)
+			}
+			// No row was judged, so no value went unread and no mark unsaid.
+			for _, limit := range report.Limits {
+				if strings.Contains(limit, "holds now") || strings.Contains(limit, "marked") {
+					t.Errorf("a record of no rows is limited by what its rows do not say: %q", limit)
+				}
+			}
+		})
+	}
+
+	report := compare(t, promised(t, 3, damage(1, catalog.Rejection, catalog.Hard),
+		damage(2, catalog.Acceptance, catalog.Soft)), none)
+	if report.NeverReacted != 3 || !report.Failed() || report.Compared != 2 {
+		t.Errorf("three rows nobody answered for came back as %d never reacted to, failed %v, "+
+			"%d compared", report.NeverReacted, report.Failed(), report.Compared)
+	}
+	for _, finding := range report.Findings {
+		if finding.Kind != verify.Missing {
+			t.Errorf("a record answering for nothing found %q at row %d", finding.Kind, finding.Row)
+		}
+	}
+}
+
 // The four disagreements are told apart, because they mean different things to
 // whoever reads the report.
 func TestTheFourDisagreementsAreToldApart(t *testing.T) {

@@ -52,15 +52,20 @@ type document struct {
 	Dataset     *struct {
 		RowsTotal *int `json:"rows_total"`
 	} `json:"dataset"`
-	Rows []struct {
-		Entity   string            `json:"entity"`
-		Row      *int              `json:"row"`
-		Verdict  string            `json:"verdict"`
-		Code     string            `json:"code"`
-		Message  string            `json:"message"`
-		Stored   map[string]string `json:"stored"`
-		Warnings []string          `json:"warnings"`
-	} `json:"rows"`
+	// A pointer, because an empty list and no list are different answers: the
+	// first says the application reacted to nothing, the second says nothing.
+	// Written as null it is no list either.
+	Rows *[]rowDocument `json:"rows"`
+}
+
+type rowDocument struct {
+	Entity   string            `json:"entity"`
+	Row      *int              `json:"row"`
+	Verdict  string            `json:"verdict"`
+	Code     string            `json:"code"`
+	Message  string            `json:"message"`
+	Stored   map[string]string `json:"stored"`
+	Warnings []string          `json:"warnings"`
 }
 
 // Load reads a response record and refuses one that cannot be compared.
@@ -225,7 +230,11 @@ func asRecord(read document) response.Record {
 	if read.Dataset != nil && read.Dataset.RowsTotal != nil {
 		built.RowsTotal, built.HasRowsTotal = *read.Dataset.RowsTotal, true
 	}
-	for _, row := range read.Rows {
+	if read.Rows == nil {
+		return built
+	}
+	built.HasRows = true
+	for _, row := range *read.Rows {
 		made := response.Row{
 			// An entity written as an empty string or as null is the same
 			// answer as one left out, because none of the three names a table.

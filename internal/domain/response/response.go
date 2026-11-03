@@ -74,7 +74,18 @@ type Record struct {
 	// the manifest knows how many rows there were.
 	RowsTotal    int
 	HasRowsTotal bool
-	Rows         []Row
+	// Rows is every row the application reacted to, and HasRows says whether
+	// the producer wrote the list at all, which only matters when it holds
+	// nothing.
+	//
+	// 🔴 The pair for the reason Stored has one. An empty list says that the
+	// application reacted to none of the rows it was sent, which is every row
+	// going missing, and for a dataset of no rows it is the only true answer
+	// there is. A list left out says nothing, and until 2026-11-03 the two were
+	// one refusal, so a dataset of no rows could not be compared at all (B-338,
+	// DEC-271).
+	Rows    []Row
+	HasRows bool
 }
 
 // Problems is everything wrong with a record, all of it at once.
@@ -89,10 +100,10 @@ func (r Record) Problems() []string {
 		problems = append(problems, "the record does not say which version of the format it is "+
 			"written to, so nothing can tell it from a later one")
 	}
-	if len(r.Rows) == 0 {
-		problems = append(problems, "the record names no row at all. A run where the application "+
-			"reacted to nothing is a run where every row went missing, and saying that needs the "+
-			"rows it did react to")
+	if !r.HasRows && len(r.Rows) == 0 {
+		problems = append(problems, "the record carries no list of rows, and the format asks for "+
+			"one. A run where the application reacted to nothing is written as an empty list, so "+
+			"that leaving the list out is never read as every row going missing")
 	}
 	// Grouped by reason since 2026-11-03 (B-339), the way the rows the manifest
 	// cannot place already were. The likely mistake repeats on every row, and a

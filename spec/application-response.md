@@ -36,7 +36,7 @@ That has a consequence worth stating plainly: **something has to write this file
 | `spec_version` | yes | the version of this format the file is written to |
 | `dataset` | no | what the producer believes it sent, for a cross check |
 | `dataset.rows_total` | no | how many rows were sent |
-| `rows` | yes | one entry per row the application reacted to |
+| `rows` | yes | one entry per row the application reacted to, and an empty list when it reacted to none |
 | `rows[].entity` | no, from 0.2 | the entity the row belongs to, named as the manifest names it. May be left out when the dataset has one entity |
 | `rows[].row` | yes | the row number within its entity, counting the first record after the header as one |
 | `rows[].verdict` | yes | `accepted` or `rejected` |
@@ -76,6 +76,8 @@ A row of the manifest with no entry in `rows` is reported as **the dataset arriv
 What is missing is counted for each entity on its own, from the rows of that entity the record answers for. A row of one entity never makes up for a row of another.
 
 This is why omitting rows you did see is a misreport rather than a shortcut. If your application reacted to a row, say so.
+
+An empty `rows` says the application reacted to none of the rows it was sent, so every row of the dataset is reported as never reacted to. For a dataset of no rows it is the only true answer, and it agrees with the manifest. A record that leaves `rows` out, or writes it as `null`, is refused. It does not say what happened, and reading it as every row going missing would blame the application for a producer that wrote nothing.
 
 ## 🔴 `verdict: accepted` is not the same as the value surviving
 
