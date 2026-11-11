@@ -183,15 +183,13 @@ func texts() []control {
 		kind: "FieldEntry", name: i18n.CatalogueField, states: typeable,
 		variants: []variant{
 			{name: i18n.CatalogueEmpty, build: field(nothing)},
+			// Alone, because the field is as wide as its hint, and sharing a
+			// cell would widen every row of the field until the states no
+			// longer stood side by side and the page ran past the window.
+			{name: i18n.CatalogueHinted, alone: true, build: hinted},
 			{name: i18n.CatalogueShort, build: field(word)},
 			{name: i18n.CatalogueExtreme, build: field(extreme)},
 			{name: i18n.CatalogueLongValue, build: field(long)},
-		},
-	}, {
-		kind: "Editor", name: i18n.CatalogueEditor, states: typeable,
-		variants: []variant{
-			{name: i18n.CatalogueEmpty, build: editor(nothing)},
-			{name: i18n.CatalogueLines, build: editor(severalLines)},
 		},
 	}}
 }
@@ -212,6 +210,17 @@ func field(value func(Samples) string) builder {
 		made.SetText(value(samples))
 		return made, paint.AtLeast(paint.FieldWidth(samples.Word), 0, parts.Standing(parts.Field(made)))
 	}
+}
+
+// hinted is an empty field showing what leaving it empty means, which is how
+// the take, recipe and quick screens each show one of theirs. The hint is one
+// the window really shows, and the field is as wide as it, so the row is the
+// drawing a person meets rather than a hint cut to the width of one word.
+func hinted(text i18n.Catalogue, _ Samples) (any, fyne.CanvasObject) {
+	hint := text.T(i18n.TakeSettingOutHint)
+	made := parts.NewFieldEntry()
+	made.SetPlaceHolder(hint)
+	return made, paint.AtLeast(paint.FieldWidth(hint), 0, parts.Standing(parts.Field(made)))
 }
 
 // editor is the field of several lines, sized like the single line one so
@@ -238,6 +247,22 @@ func lists() []control {
 	}, {
 		kind: "KeyTable", name: i18n.CatalogueTable, states: focusable,
 		variants: []variant{{name: i18n.CatalogueRows, alone: true, build: table}},
+	}}
+}
+
+// editors is the page of the text of several lines.
+//
+// A page of its own since 2026-11-11, when the field of one line gained the
+// row of an empty field with a hint: the two together ran past the foot of the
+// window, and so did the editor on the page of areas. The numbers stand where
+// the pages are counted.
+func editors() []control {
+	return []control{{
+		kind: "Editor", name: i18n.CatalogueEditor, states: typeable,
+		variants: []variant{
+			{name: i18n.CatalogueEmpty, build: editor(nothing)},
+			{name: i18n.CatalogueLines, build: editor(severalLines)},
+		},
 	}}
 }
 

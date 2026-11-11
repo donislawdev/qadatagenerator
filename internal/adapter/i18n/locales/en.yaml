@@ -75,6 +75,7 @@ catalogue.page.buttons: Buttons
 catalogue.page.choosers: Choosers
 catalogue.page.checks: Check boxes
 catalogue.page.text: Text
+catalogue.page.lines: Several lines
 catalogue.page.lists: Lists
 catalogue.page.areas: Areas
 catalogue.control.button: Button
@@ -105,6 +106,7 @@ catalogue.variant.on: Ticked
 catalogue.variant.unbanded: Row without a band
 catalogue.variant.banded: Row with a band
 catalogue.variant.empty: Empty
+catalogue.variant.hinted: Empty, with a hint
 catalogue.variant.short: One word
 catalogue.variant.extreme: Wider than the field
 catalogue.variant.lines: Several lines, some too long

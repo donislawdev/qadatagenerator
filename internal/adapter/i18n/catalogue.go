@@ -27,6 +27,7 @@ const (
 	CataloguePageChoosers Key = "catalogue.page.choosers"
 	CataloguePageChecks   Key = "catalogue.page.checks"
 	CataloguePageText     Key = "catalogue.page.text"
+	CataloguePageLines    Key = "catalogue.page.lines"
 	CataloguePageLists    Key = "catalogue.page.lists"
 	CataloguePageAreas    Key = "catalogue.page.areas"
 
@@ -63,6 +64,7 @@ const (
 	CatalogueUnbanded   Key = "catalogue.variant.unbanded"
 	CatalogueBanded     Key = "catalogue.variant.banded"
 	CatalogueEmpty      Key = "catalogue.variant.empty"
+	CatalogueHinted     Key = "catalogue.variant.hinted"
 	CatalogueShort      Key = "catalogue.variant.short"
 	CatalogueExtreme    Key = "catalogue.variant.extreme"
 	CatalogueLines      Key = "catalogue.variant.lines"
@@ -76,14 +78,14 @@ const (
 var catalogueKeys = []Key{
 	CataloguePromise, CatalogueGroup,
 	CataloguePageButtons, CataloguePageChoosers, CataloguePageChecks, CataloguePageText,
-	CataloguePageLists, CataloguePageAreas,
+	CataloguePageLines, CataloguePageLists, CataloguePageAreas,
 	CatalogueButton, CatalogueSelect, CatalogueCheck, CatalogueTapRow, CatalogueField,
 	CatalogueEditor, CatalogueTable, CatalogueScroll, CatalogueDisclosure,
 	CatalogueStateRest, CatalogueStatePointer, CatalogueStatePressed, CatalogueStateFocus,
 	CatalogueStateDisabled,
 	CatalogueOutlined, CatalogueIcon, CatalogueFilled, CataloguePlace, CatalogueCurrent,
 	CatalogueLongLabel, CatalogueNothing, CatalogueChosen, CatalogueLongValue, CatalogueOff,
-	CatalogueOn, CatalogueUnbanded, CatalogueBanded, CatalogueEmpty, CatalogueShort,
+	CatalogueOn, CatalogueUnbanded, CatalogueBanded, CatalogueEmpty, CatalogueHinted, CatalogueShort,
 	CatalogueExtreme, CatalogueLines, CatalogueRows, CatalogueClosed, CatalogueOpened,
 	CatalogueOverflowed,
 }

@@ -68,20 +68,25 @@ type Samples struct {
 // under it. The constants in internal/gui/screens say why that is measured
 // rather than tidy.
 //
-// # Why six pages, and what would change the number
+// # Why seven pages, and what would change the number
 //
 // A page holds what fits the window at the size it opens in, StartWidth by
 // StartHeight, because a page that runs past the foot of the window is a page
 // whose foot no picture shows. Measured on the render of 2026-09-25: a chooser
 // and a check box with a very long label each take about 470 of the 710 units
-// a page has under its title, so they cannot share one. A page is a family of
-// controls a person would look for together. What would change the number: a
-// control added to a family, or a change to the size the window opens in.
+// a page has under its title, so they cannot share one. The seventh came on
+// 2026-11-11 with the row of an empty field with a hint: the text page holding
+// the editor as well asked for 855 units of height against the 780 the window
+// opens at, and the page of areas given the editor instead asked for 995. A
+// page is a family of controls a person would look for together. What would
+// change the number: a control added to a family, or a change to the size the
+// window opens in.
 const (
 	PageButtons = iota
 	PageChoosers
 	PageChecks
 	PageText
+	PageLines
 	PageLists
 	PageAreas
 	// PageCount is how many pages there are, so that a caller can ask for a
@@ -109,6 +114,8 @@ func Frame(text i18n.Catalogue, brand shell.Brand, samples Samples) *shell.Shell
 		Icon: paint.IconCheck, Content: page(text, samples, checks())}
 	pages[PageText] = shell.Screen{Name: text.T(i18n.CataloguePageText), Group: controls,
 		Icon: paint.IconDoc, Content: page(text, samples, texts())}
+	pages[PageLines] = shell.Screen{Name: text.T(i18n.CataloguePageLines), Group: controls,
+		Icon: paint.IconRecipe, Content: page(text, samples, editors())}
 	pages[PageLists] = shell.Screen{Name: text.T(i18n.CataloguePageLists), Group: controls,
 		Icon: paint.IconChecklist, Content: page(text, samples, lists())}
 	pages[PageAreas] = shell.Screen{Name: text.T(i18n.CataloguePageAreas), Group: controls,

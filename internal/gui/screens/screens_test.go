@@ -376,6 +376,7 @@ func TestEveryStateOpensTheScreenItsNameSays(t *testing.T) {
 		"catalogue-choosers": catalogue.PageChoosers,
 		"catalogue-checks":   catalogue.PageChecks,
 		"catalogue-text":     catalogue.PageText,
+		"catalogue-lines":    catalogue.PageLines,
 		"catalogue-lists":    catalogue.PageLists,
 		"catalogue-areas":    catalogue.PageAreas,
 	}

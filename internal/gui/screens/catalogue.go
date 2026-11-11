@@ -37,8 +37,14 @@ func catalogueStates() []State {
 		},
 		{
 			Name:      "catalogue-text",
-			Purpose:   "the text field and the text of several lines, empty, short, too long and too wide",
+			Purpose:   "the text field empty, empty with a hint, short, too long and too wide",
 			Screen:    catalogue.PageText,
+			Catalogue: true,
+		},
+		{
+			Name:      "catalogue-lines",
+			Purpose:   "the text of several lines, empty and with lines longer than it is wide",
+			Screen:    catalogue.PageLines,
 			Catalogue: true,
 		},
 		{
