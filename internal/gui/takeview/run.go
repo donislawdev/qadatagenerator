@@ -76,18 +76,17 @@ func (v *View) Start() {
 		// depend on a control staying disabled.
 		return
 	}
-	if take.Check(v.chosen, v.described).Refused() {
-		return
-	}
-	if take.CheckOutput(v.path, v.chosen).Refused() {
-		return
-	}
-
 	// Everything the run touches is taken now and by value, so that nothing it
 	// reads can be changed while it is going on. The controls are frozen for
 	// the same reason one level up, and this is the half that does not depend
 	// on a control staying disabled.
-	opened, settings, described := v.opened, v.chosen, v.described
+	opened, settings, described := v.opened, v.asked(), v.described
+	if take.Check(settings, described).Refused() {
+		return
+	}
+	if take.CheckOutput(v.path, settings).Refused() {
+		return
+	}
 	halt := background.NewStopper()
 	v.halt = halt
 	v.stage = stageRunning
@@ -283,8 +282,9 @@ func (v *View) refusedNow() bool {
 	if v.opened == nil {
 		return true
 	}
-	return take.Check(v.chosen, v.described).Refused() ||
-		take.CheckOutput(v.path, v.chosen).Refused()
+	asked := v.asked()
+	return take.Check(asked, v.described).Refused() ||
+		take.CheckOutput(v.path, asked).Refused()
 }
 
 // runningContent is what the card says while a run is going on.

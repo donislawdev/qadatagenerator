@@ -159,8 +159,9 @@ var WindowReach = map[string]Claim{
 		Test:   "TestEverySettingOnTheScreenReachesTheRun",
 	},
 	"corrupt --out": {
-		Screen: "the directory to write to, as a field, and the answer above the button names it",
-		Test:   "TestEverySettingOnTheScreenReachesTheRun",
+		Screen: "the directory to write to, as a field left empty for the folder of the chosen file, " +
+			"which the answer above the button and the command at the foot both name",
+		Test: "TestTheCopyIsWrittenBesideTheFileWhenNoDirectoryIsNamed",
 	},
 	"corrupt --manifest": {
 		Screen: "the extra form of the manifest, as a list whose first entry names the absence of " +

@@ -162,6 +162,41 @@ func Defaults() Settings {
 	}
 }
 
+// Beside is the settings with the directory to write to counted from the
+// folder of the source: that folder where no directory was named, and a
+// directory named without its root taken inside it.
+//
+// # Why the window asks this and the command line does not
+//
+// 🔴 A run counts a directory without a root from where the person typing
+// stands, and DefaultOut is that place itself. A window has no such place:
+// started from a file manager its directory is the one the program lives in,
+// and the damaged copy landed there while the window promised it beside the
+// file (B-302, B-207). The folder of the file is the one place a person at the
+// window knows, so the window counts from it, and the command line keeps what
+// "." has always meant in a terminal.
+//
+// A path rooted without being whole, which on Windows is one starting at a
+// separator or naming a drive and nothing after it, is left as it was typed.
+// Taken inside the folder it would become a path nobody wrote, and as typed it
+// still names the drive somebody meant.
+func (s Settings) Beside(source string) Settings {
+	folder := filepath.Dir(source)
+	switch {
+	case s.Out == "":
+		s.Out = folder
+	case !rooted(s.Out):
+		s.Out = filepath.Join(folder, s.Out)
+	}
+	return s
+}
+
+// rooted reports whether a path says where it starts, whole or not.
+func rooted(path string) bool {
+	return path != "" &&
+		(filepath.IsAbs(path) || filepath.VolumeName(path) != "" || os.IsPathSeparator(path[0]))
+}
+
 // Policy turns the settings into the policy the engine takes.
 //
 // It builds the same value a recipe would have produced, so that the engine

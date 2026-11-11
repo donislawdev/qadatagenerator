@@ -16,6 +16,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
+	"github.com/donislawdev/qadatagenerator/internal/commandline"
 	"github.com/donislawdev/qadatagenerator/internal/damage"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
@@ -104,8 +105,18 @@ func sourceFile(t *testing.T, dir string) string {
 	return path
 }
 
-// opened is a screen with that file on it, read with the separator it uses.
+// opened is a screen with that file on it, read with the separator it uses,
+// writing into the directory named.
 func opened(t *testing.T, window fyne.Window, source, out string) (*View, *held) {
+	t.Helper()
+	view, runs := ready(t, window, source)
+	view.out.SetText(out)
+	return view, runs
+}
+
+// ready is a screen with that file on it, read with the separator it uses and
+// with two kinds of damage ticked, and with nothing typed where the copy goes.
+func ready(t *testing.T, window fyne.Window, source string) (*View, *held) {
 	t.Helper()
 	view, runs := screenOn(t, window)
 	view.Open(source)
@@ -114,7 +125,6 @@ func opened(t *testing.T, window fyne.Window, source, out string) (*View, *held)
 	}
 	view.delimiter.SetText(separator)
 	view.ChooseLayers([]string{orderedLayers, otherLayer})
-	view.out.SetText(out)
 	return view, runs
 }
 
@@ -195,6 +205,89 @@ func TestTheScreenDamagesTheFileAndSaysWhatItWrote(t *testing.T) {
 			t.Errorf("the screen does not say %q about the run it just made. It said %q",
 				want, said)
 		}
+	}
+}
+
+// With nothing typed where the copy goes, it goes beside the file it was made
+// from, and the screen, the result and the command all name that directory
+// (B-302).
+//
+// 🔴 The test first moves into a directory of its own, because that is the
+// failure: until 2026-11-11 an empty choice meant the directory the program
+// was started from, which for a window is wherever it happened to be launched,
+// while the sentence at the top of the screen promised the copy beside the
+// file. The two directories are different here on purpose, and nothing may
+// land in the first.
+func TestTheCopyIsWrittenBesideTheFileWhenNoDirectoryIsNamed(t *testing.T) {
+	started := t.TempDir()
+	t.Chdir(started)
+	dir := t.TempDir()
+	source := sourceFile(t, dir)
+	view, runs := ready(t, nil, source)
+
+	if view.out.Text != "" {
+		t.Errorf("the field for the directory holds %q before anybody typed into it, "+
+			"so its hint about the folder of the file is never seen", view.out.Text)
+	}
+	if !saying(texts(view.planBox), dir) {
+		t.Errorf("the plan does not name %s, the folder of the file. It said %q", dir, texts(view.planBox))
+	}
+	// Named in the command although a terminal has a directory of its own: the
+	// line has to write where this screen does, from wherever it is pasted. The
+	// flag is asked about rather than the directory alone, because the file at
+	// the end of the line names that directory as well, and a check for the
+	// directory alone passed on the code it was written to catch.
+	line := view.commandLine()
+	if !strings.Contains(line, commandline.Out+" "+dir) && !strings.Contains(line, commandline.Out+" '"+dir) {
+		t.Errorf("the command does not write into %s, so pasted elsewhere it writes elsewhere: %s",
+			dir, line)
+	}
+
+	view.Start()
+	runs.carryOut(t)
+	if view.stage != stageWritten {
+		t.Fatalf("the run did not finish: %v", view.failed)
+	}
+	if _, err := os.Stat(filepath.Join(dir, take.OutputName(source))); err != nil {
+		t.Errorf("the damaged copy is not beside the file it was made from: %v", err)
+	}
+	left, err := os.ReadDir(started)
+	if err != nil {
+		t.Fatalf("cannot look at the directory the test started in: %v", err)
+	}
+	for _, entry := range left {
+		t.Errorf("the run wrote %s into the directory the program was started from", entry.Name())
+	}
+	if !saying(texts(view.runBox), dir) {
+		t.Errorf("the result does not name %s. It said %q", dir, texts(view.runBox))
+	}
+}
+
+// A directory typed without its root is a folder beside the file, and the
+// screen names where it is rather than repeating the word that was typed
+// (B-207). Until 2026-11-11 it counted from where the program was started, and
+// the plan said "in written" about a directory nobody could find.
+func TestADirectoryTypedWithoutItsRootIsBesideTheFile(t *testing.T) {
+	started := t.TempDir()
+	t.Chdir(started)
+	dir := t.TempDir()
+	source := sourceFile(t, dir)
+	view, runs := opened(t, nil, source, "written")
+	whole := filepath.Join(dir, "written")
+
+	if !saying(texts(view.planBox), whole) {
+		t.Errorf("the plan does not name %s. It said %q", whole, texts(view.planBox))
+	}
+	view.Start()
+	runs.carryOut(t)
+	if view.stage != stageWritten {
+		t.Fatalf("the run did not finish: %v", view.failed)
+	}
+	if _, err := os.Stat(filepath.Join(whole, take.OutputName(source))); err != nil {
+		t.Errorf("the damaged copy is not in the folder typed beside the file: %v", err)
+	}
+	if left, err := os.ReadDir(started); err != nil || len(left) > 0 {
+		t.Errorf("the run wrote %v into the directory the program was started from (%v)", left, err)
 	}
 }
 

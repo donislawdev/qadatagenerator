@@ -682,7 +682,7 @@ var windowKeys = []Key{
 
 	TakeSettingLayers, TakeSettingRows, TakeSettingPerRow, TakeSettingExclude,
 	TakeSettingDelimiter, TakeSettingLocale, TakeSettingSeed, TakeSettingOut,
-	TakeSettingManifest, TakeSettingOverwrite, TakeSettingNone,
+	TakeSettingOutHint, TakeSettingManifest, TakeSettingOverwrite, TakeSettingNone,
 	TakePlanCarried, TakePlanOf, TakePlanWrites, TakePlanWritesTo,
 	TakePlanEveryOrder,
 	TakeRun, TakeStop, TakeRunning, TakeRunStopping,

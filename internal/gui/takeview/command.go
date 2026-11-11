@@ -94,19 +94,25 @@ func (v *View) drawCommand() {
 // The seed is the exception worth naming. It is written whenever there is one,
 // because without it a run draws a fresh seed, and a line copied from here
 // would then damage different rows from the ones this screen said it would.
-// That is the one way this bridge could quietly lie.
+// That is one way this bridge could quietly lie.
+//
+// The folder is the other, and is written for the same reason. With the field
+// left empty this screen writes beside the file, while a terminal given no
+// folder writes where it stands, so the line always carries the folder the
+// screen would use (B-302).
 func (v *View) commandLine() string {
+	asked := v.asked()
 	line := commandline.New(commandline.Corrupt).
-		Flag(commandline.Layers, strings.Join(v.chosen.Layers, ",")).
-		Flag(commandline.Rows, v.chosen.Rows).
-		Flag(commandline.PerRow, v.chosen.PerRow).
-		Flag(commandline.ExcludeFields, strings.Join(v.chosen.ExcludeFields, ",")).
-		Flag(commandline.Delimiter, v.chosen.Delimiter).
-		Flag(commandline.Locale, v.chosen.Locale).
-		Flag(commandline.Seed, v.chosen.Seed).
-		Flag(commandline.Out, v.chosen.Out).
-		Flag(commandline.Manifest, v.chosen.Manifest).
-		Switch(commandline.Overwrite, v.chosen.Overwrite)
+		Flag(commandline.Layers, strings.Join(asked.Layers, ",")).
+		Flag(commandline.Rows, asked.Rows).
+		Flag(commandline.PerRow, asked.PerRow).
+		Flag(commandline.ExcludeFields, strings.Join(asked.ExcludeFields, ",")).
+		Flag(commandline.Delimiter, asked.Delimiter).
+		Flag(commandline.Locale, asked.Locale).
+		Flag(commandline.Seed, asked.Seed).
+		Flag(commandline.Out, asked.Out).
+		Flag(commandline.Manifest, asked.Manifest).
+		Switch(commandline.Overwrite, asked.Overwrite)
 	return line.Argument(v.path).String()
 }
 

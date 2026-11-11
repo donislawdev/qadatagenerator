@@ -356,6 +356,7 @@ take.setting.locale: Data locale
 take.setting.seed: Seed
 # tekst-ok: the same setting on the recipe screen in recipe.write-to, one wording
 take.setting.out: Write to
+take.setting.out-hint: Same folder as the file
 take.setting.manifest: Extra manifest form
 # tekst-ok: the same setting on the recipe screen in recipe.replace, one wording
 take.setting.overwrite: Replace files already there

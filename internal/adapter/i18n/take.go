@@ -80,6 +80,7 @@ const (
 	TakeSettingLocale    Key = "take.setting.locale"
 	TakeSettingSeed      Key = "take.setting.seed"
 	TakeSettingOut       Key = "take.setting.out"
+	TakeSettingOutHint   Key = "take.setting.out-hint"
 	TakeSettingManifest  Key = "take.setting.manifest"
 	TakeSettingOverwrite Key = "take.setting.overwrite"
 	TakeSettingNone      Key = "take.setting.none"

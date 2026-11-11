@@ -1,10 +1,41 @@
 package take
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
 )
+
+// A directory left unnamed becomes the folder of the source, one named without
+// its root is taken inside that folder, and one named from its root stays as
+// it was typed (B-302, B-207).
+func TestADirectoryIsCountedFromTheFolderOfTheSource(t *testing.T) {
+	folder := filepath.Join(t.TempDir(), "in")
+	source := filepath.Join(folder, "contacts.csv")
+	elsewhere := filepath.Join(t.TempDir(), "elsewhere")
+	// A separator and a name, which is rooted everywhere and whole only where
+	// paths have no drive, so on Windows it is the one rooted path that is not
+	// whole.
+	fromTheRoot := string(filepath.Separator) + "elsewhere"
+	for _, each := range []struct {
+		name, out, source, want string
+	}{
+		{"nothing named", "", source, folder},
+		{"a file named without a folder", "", "contacts.csv", "."},
+		{"a directory named without its root", "written", source, filepath.Join(folder, "written")},
+		{"the dot the command line defaults to", DefaultOut, source, folder},
+		{"a directory above the folder", "..", source, filepath.Dir(folder)},
+		{"a whole path", elsewhere, source, elsewhere},
+		{"a path from the root of the drive", fromTheRoot, source, fromTheRoot},
+	} {
+		settings := Defaults()
+		settings.Out = each.out
+		if got := settings.Beside(each.source).Out; got != each.want {
+			t.Errorf("%s: writes into %q, want %q", each.name, got, each.want)
+		}
+	}
+}
 
 // The plan of a run says, for each layer that was named, how much of it this
 // build carries out, and the two sums are the sums of those rows.

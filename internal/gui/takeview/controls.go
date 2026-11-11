@@ -48,7 +48,7 @@ func (v *View) buildControls() {
 	v.exclude = v.entry("", func(typed string) { v.chosen.ExcludeFields = take.NamesIn(typed) })
 	v.locale = v.entry(v.chosen.Locale, func(typed string) { v.chosen.Locale = typed })
 	v.seed = v.entry(v.chosen.Seed, func(typed string) { v.chosen.Seed = typed })
-	v.out = v.entry(v.chosen.Out, func(typed string) { v.chosen.Out = typed })
+	v.buildOut()
 
 	// The separator is the one setting that decides how the file is read, so
 	// changing it reads the file again. Everything else only changes what a run
@@ -93,6 +93,21 @@ func (v *View) buildControls() {
 	// which is what the keyboard needs to find the canvas through and to fall
 	// back onto.
 	v.keys = parts.Handover{Anchor: v.chooseFile}
+}
+
+// buildOut makes the field naming the folder the damaged copy goes to.
+//
+// 🔴 Empty rather than the "." of the command line, with a hint saying what
+// empty means (B-302). The dot is where the person typing stands, and a window
+// has no such place: started from a file manager it is the folder of the
+// program, and the copy landed there while the sentence at the top of this
+// screen promised it beside the file. Empty is the folder of the file, filled
+// in by asked at every question rather than typed into the field, so choosing
+// another file moves it and a folder somebody named stays named.
+func (v *View) buildOut() {
+	v.chosen.Out = ""
+	v.out = v.entry(v.chosen.Out, func(typed string) { v.chosen.Out = typed })
+	v.out.SetPlaceHolder(v.text.T(i18n.TakeSettingOutHint))
 }
 
 // buildKinds makes one check box per kind of damage this build describes, in
@@ -241,6 +256,15 @@ func (v *View) settingChanged() {
 	v.drawRun()
 }
 
+// asked is the settings as a run takes them: what the controls hold, with the
+// folder of the file that was read where nobody named a folder to write to.
+//
+// 🔴 The plan, the button, the run and the command all ask through this and
+// never through chosen. They answer one question between them, and a folder
+// filled in for three of them and left empty for the fourth would have the
+// screen promise one folder and write into another.
+func (v *View) asked() take.Settings { return v.chosen.Beside(v.path) }
+
 // reopen reads the file again, because the separator decides how it is read.
 //
 // # Why this is not simply Open on the same path
@@ -305,13 +329,14 @@ func (v *View) drawPlan() {
 }
 
 func (v *View) planContent() fyne.CanvasObject {
-	if refused := take.Check(v.chosen, v.described); refused.Refused() {
+	asked := v.asked()
+	if refused := take.Check(asked, v.described); refused.Refused() {
 		return v.refusal(refused)
 	}
-	if refused := take.CheckOutput(v.path, v.chosen); refused.Refused() {
+	if refused := take.CheckOutput(v.path, asked); refused.Refused() {
 		return v.refusal(refused)
 	}
-	planned := v.opened.Plan(v.chosen, v.described)
+	planned := v.opened.Plan(asked, v.described)
 	// The names stand in a column as wide as the longest kind this screen
 	// offers rather than the longest ticked, so that ticking one does not move
 	// the figures of the others.

@@ -55,6 +55,14 @@ repository once they are released.
 
 ### Fixed
 
+- **Damage a file writes the damaged copy beside the file you chose.** The
+  screen said so, and wrote it into the folder the program was started from
+  instead, which after starting it from a file manager is the folder of the
+  program itself. "Write to" now starts empty, and empty means the folder of
+  the file. A folder typed without its drive or root, such as `out`, is a
+  folder inside the folder of the file. The plan, the result and the command
+  at the foot of the screen name the whole path. The command line is
+  unchanged: without `--out` it still writes into the current directory.
 - **Flags may follow the path.** `qadg generate recipe.yaml --out ./data`,
   `qadg corrupt records.csv --layers L3` and `qadg verify manifest.json --json
   response.json` used to end with exit code 2 and a message saying the command
