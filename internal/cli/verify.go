@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"flag"
-	"io"
 	"strconv"
 	"unicode"
 	"unicode/utf8"
@@ -12,7 +10,8 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/app/verify"
 )
 
-// runVerify compares a manifest against what an application did with the data.
+// verifyWith compares a manifest against what an application did with the data,
+// once its arguments have been read.
 //
 // # The one verb that fails on somebody else's behaviour
 //
@@ -21,24 +20,8 @@ import (
 // that returns the expectation code. That code has been in the table since the
 // first day with nothing to return it, which is what made this verb a
 // requirement rather than an idea.
-func runVerify(out *streams, arguments []string, global crossCutting) int {
-	set := flag.NewFlagSet(commandVerify, flag.ContinueOnError)
-	set.SetOutput(io.Discard)
-	local := declareCrossCutting(set)
-	askedForHelp := declareVerbHelp(set)
-	paths, err := parseAnywhere(set, arguments)
-	if err != nil {
-		return usage(out, flagFailure(err, acceptedFlagsOf(commandVerify),
-			problemHelpSubjectDo+" "+commandVerify))
-	}
-	if askedForHelp() {
-		return printCommandHelp(out, commandVerify)
-	}
-	flags := global.merge(local)
-	if code, ok := applyVerbosity(out, flags); !ok {
-		return code
-	}
-
+func verifyWith(out *streams, given parsed[noFlags]) int {
+	paths := given.rest
 	if len(paths) != 2 {
 		return usage(out, problem{
 			what:    problemVerifyArguments,

@@ -215,22 +215,11 @@ func runCommand(out *streams, command []string, asked invocation) int {
 	// recorded before the verb can fail. Setting it inside each verb would
 	// leave the one that forgot answering with the sentence of another.
 	out.verb = command[0]
-	switch command[0] {
-	case commandValidate:
-		return runValidate(out, command[1:], asked.global)
-	case commandGenerate:
-		return runGenerate(out, command[1:], asked.global)
-	case commandCorrupt:
-		return runCorrupt(out, command[1:], asked.global)
-	case commandVerify:
-		return runVerify(out, command[1:], asked.global)
-	case commandQuick:
-		return runQuick(out, command[1:], asked.global)
-	case commandHelp:
-		return runHelp(out, command[1:], asked.global)
-	default:
+	chosen, known := verbs[command[0]]
+	if !known {
 		return usage(out, unknownCommand(command[0]))
 	}
+	return chosen.run(out, command[1:], asked.global)
 }
 
 // unknownCommand builds the refusal for a verb this build does not have, and

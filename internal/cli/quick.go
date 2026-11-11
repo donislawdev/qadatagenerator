@@ -3,7 +3,6 @@ package cli
 import (
 	"errors"
 	"flag"
-	"io"
 	"strconv"
 	"strings"
 
@@ -11,7 +10,8 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/quick"
 )
 
-// runQuick writes one value and nothing else.
+// quickWith writes one value and nothing else, once its arguments have been
+// read.
 //
 // # Why this verb has no output beyond the value
 //
@@ -25,30 +25,13 @@ import (
 // somebody needs in order to ask for the same value again is the one thing they
 // cannot get. The log channel rather than the data channel, so a pipe reading
 // the value never sees it.
-func runQuick(out *streams, arguments []string, global crossCutting) int {
-	set := flag.NewFlagSet(commandQuick, flag.ContinueOnError)
-	set.SetOutput(io.Discard)
-	local := declareCrossCutting(set)
-	askedForHelp := declareVerbHelp(set)
-	own := declareQuick(set)
-
-	// Both documents describing this verb write the name first and the flags
-	// after it, and so does anybody typing it, which is why this verb was the
-	// first to read its flags on either side of what they apply to.
-	left, err := parseAnywhere(set, arguments)
-	if err != nil {
-		return usage(out, flagFailure(err, acceptedFlagsOf(commandQuick),
-			problemHelpSubjectDo+" "+commandQuick))
-	}
-	if askedForHelp() {
-		return printCommandHelp(out, commandQuick)
-	}
-	flags := global.merge(local)
-	if code, ok := applyVerbosity(out, flags); !ok {
-		return code
-	}
-
-	named, arity := oneGenerator(left)
+//
+// Both documents describing this verb write the name first and the flags after
+// it, and so does anybody typing it, which is why this verb was the first to
+// read its flags on either side of what they apply to.
+func quickWith(out *streams, given parsed[*quickFlags]) int {
+	own := given.own
+	named, arity := oneGenerator(given.rest)
 	if arity.what != "" {
 		return usage(out, arity)
 	}
@@ -62,15 +45,15 @@ func runQuick(out *streams, arguments []string, global crossCutting) int {
 		return usage(out, shape)
 	}
 
-	return writeValues(out, *own.locale, *own.seed, named, wanted, boundBy(set, *own.gender, *own.birthDate))
+	return writeValues(out, *own.locale, *own.seed, named, wanted, boundBy(given.set, *own.gender, *own.birthDate))
 }
 
 // quickFlags are the flags quick takes beside the flags of the tool.
 //
 // Declared in a function of their own, as generate and corrupt declare theirs,
-// so that the guard over flags nobody documented can build the same set the
-// command parses. Until 2026-11-03 they were declared inside runQuick, and that
-// guard went past quick as a verb it could not build.
+// because that function is what the table of verbs builds the set from. Until
+// 2026-11-03 they were declared inside the body of the verb, and the guard over
+// flags nobody documented went past quick as a verb it could not build.
 type quickFlags struct {
 	locale    *string
 	seed      *string
@@ -95,7 +78,7 @@ func declareQuick(set *flag.FlagSet) *quickFlags {
 // oneGenerator is the one generator the command line named, wherever it stood
 // among the flags, or the refusal when there was not exactly one.
 //
-// Apart from runQuick because that function passed the limit on the length of
+// Apart from quickWith because that function passed the limit on the length of
 // a function. The seam is the one wholeCount below already uses: the flags are
 // read there, and what the arguments left over mean is answered here.
 func oneGenerator(left []string) (string, problem) {

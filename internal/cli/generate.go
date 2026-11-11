@@ -5,7 +5,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io"
 	"strconv"
 	"strings"
 	"time"
@@ -59,31 +58,15 @@ func (f *generateFlags) note(set *flag.FlagSet) {
 	set.Visit(func(seen *flag.Flag) { f.given[seen.Name] = true })
 }
 
-// runGenerate turns a recipe into files.
+// generateWith turns a recipe into files, once its arguments have been read.
 //
 // This is the only place the pieces are wired together. The use case is handed
 // a source of values and a writer as ports, the exit code comes from the kind
 // the failure carried rather than from a decision made here, and nothing is
 // visible under its real name until the whole run has succeeded.
-func runGenerate(out *streams, arguments []string, global crossCutting) int {
-	set := flag.NewFlagSet(commandGenerate, flag.ContinueOnError)
-	set.SetOutput(io.Discard)
-	local := declareCrossCutting(set)
-	own := declareGenerate(set)
-	askedForHelp := declareVerbHelp(set)
-	rest, err := parseAnywhere(set, arguments)
-	if err != nil {
-		return usage(out, flagFailure(err, acceptedFlagsOf(commandGenerate), problemHelpSubjectDo+" "+commandGenerate))
-	}
-	if askedForHelp() {
-		return printCommandHelp(out, commandGenerate)
-	}
-	own.note(set)
-	flags := global.merge(local)
-	if code, ok := applyVerbosity(out, flags); !ok {
-		return code
-	}
-
+func generateWith(out *streams, given parsed[*generateFlags]) int {
+	own, rest, flags := given.own, given.rest, given.flags
+	own.note(given.set)
 	if len(rest) != 1 {
 		return usage(out, problem{
 			what:    problemGenerateArguments,

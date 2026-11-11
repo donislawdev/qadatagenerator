@@ -3,7 +3,6 @@ package cli
 import (
 	"flag"
 	"fmt"
-	"io"
 	"strings"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
@@ -17,7 +16,8 @@ import (
 // rather than to raise it, and help is the part that divides cleanly: it prints
 // and decides nothing.
 
-// runHelp answers the most common thing somebody types.
+// helpWith answers the most common thing somebody types, once its arguments
+// have been read.
 //
 // # Why help reads flags although it takes none of its own
 //
@@ -27,22 +27,8 @@ import (
 // so qadg help --quiet was refused with "no help for --quiet", and qadg help
 // --help the same way. --help written after help asks about help itself, as it
 // asks about the verb it follows everywhere else, whatever command is named.
-func runHelp(out *streams, arguments []string, global crossCutting) int {
-	set := flag.NewFlagSet(commandHelp, flag.ContinueOnError)
-	set.SetOutput(io.Discard)
-	local := declareCrossCutting(set)
-	askedForHelp := declareVerbHelp(set)
-	subjects, err := parseAnywhere(set, arguments)
-	if err != nil {
-		return usage(out, flagFailure(err, acceptedFlagsOf(commandHelp), helpInsteadOf(set, arguments)))
-	}
-	if askedForHelp() {
-		return printCommandHelp(out, commandHelp)
-	}
-	if code, ok := applyVerbosity(out, global.merge(local)); !ok {
-		return code
-	}
-	return answerHelp(out, subjects)
+func helpWith(out *streams, given parsed[noFlags]) int {
+	return answerHelp(out, given.rest)
 }
 
 // helpInsteadOf says what to type after a flag help does not define.

@@ -3,7 +3,6 @@ package cli
 import (
 	"encoding/json"
 	"errors"
-	"flag"
 	"io"
 	"os"
 	"strconv"
@@ -19,32 +18,15 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
-// runValidate reads a recipe and says whether it can be used.
+// validateWith reads a recipe and says whether it can be used, once its
+// arguments have been read.
 //
 // This is the only place where the pieces are wired together: the file is read
 // here, the decoding is handed to the use case as a port, and the exit code
 // comes from the failure the use case returned rather than from a decision
 // made here.
-func runValidate(out *streams, arguments []string, global crossCutting) int {
-	// The command declares the cross cutting flags again, so that they mean
-	// the same thing after the verb as before it.
-	set := flag.NewFlagSet(commandValidate, flag.ContinueOnError)
-	set.SetOutput(io.Discard)
-	local := declareCrossCutting(set)
-	askedForHelp := declareVerbHelp(set)
-	paths, err := parseAnywhere(set, arguments)
-	if err != nil {
-		return usage(out, flagFailure(err, acceptedFlagsOf(commandValidate), problemHelpSubjectDo+" "+commandValidate))
-	}
-	if askedForHelp() {
-		return printCommandHelp(out, commandValidate)
-	}
-	flags := global.merge(local)
-	if code, ok := applyVerbosity(out, flags); !ok {
-		return code
-	}
-
-	if len(paths) != 1 {
+func validateWith(out *streams, given parsed[noFlags]) int {
+	if len(given.rest) != 1 {
 		return usage(out, problem{
 			what:    problemValidateArguments,
 			why:     problemValidateArgumentsWhy,
@@ -52,7 +34,7 @@ func runValidate(out *streams, arguments []string, global crossCutting) int {
 			instead: problemValidateArgumentsDo,
 		})
 	}
-	return validateRecipeAt(out, paths[0], flags)
+	return validateRecipeAt(out, given.rest[0], given.flags)
 }
 
 // validateRecipeAt reads one recipe and reports what is wrong with it.

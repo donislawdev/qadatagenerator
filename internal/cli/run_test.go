@@ -652,66 +652,42 @@ func TestEveryFlagAVerbDocumentsIsOneItAccepts(t *testing.T) {
 // their refusals and named in two examples, while appearing in the help of
 // neither. A register closed one way is a register that answers half the
 // question, and this project has paid for that shape more than once.
+//
+// 🔴 The sets come from the table the dispatcher runs, and that is the whole
+// point. Until 2026-11-03 this guard built them from a list written here by
+// hand, which left out quick, and after that day a flag of a new name given to
+// validate, verify or help still passed, because those three were off the list
+// (B-360). A flag declared anywhere but in the set a verb parses is never read,
+// so a flag that works at all is a flag this sees.
 func TestEveryFlagAVerbAcceptsIsOneItDocuments(t *testing.T) {
-	// The verbs that declare flags of their own, each through the function the
-	// command itself calls. The others take only the flags of the tool, which
-	// are documented in one place for every command and covered above.
-	declared := map[string]func(*flag.FlagSet){
-		commandGenerate: func(set *flag.FlagSet) { declareGenerate(set) },
-		commandCorrupt:  func(set *flag.FlagSet) { declareCorrupt(set) },
-		commandQuick:    func(set *flag.FlagSet) { declareQuick(set) },
-	}
-	// 🔴 That list is written by hand, and until 2026-11-03 it left out quick,
-	// which declared five flags inside runQuick. A flag added there without a
-	// word in the help passed every test of the package. A verb whose help
-	// names flags of its own now has to be on the list, and a verb off it has
-	// to refuse every flag the verbs on it take, so a flag copied from a
-	// neighbour fails here as well. A flag of a new name given to a verb off
-	// the list is what this still cannot see.
-	ofListed := map[string]bool{}
-	for name, declare := range declared {
-		if _, known := commandDocFor(name); !known {
-			t.Errorf("this guard builds the flags of %s, which is not a command", name)
-		}
-		set := flag.NewFlagSet(name, flag.ContinueOnError)
-		declare(set)
-		set.VisitAll(func(accepted *flag.Flag) { ofListed[accepted.Name] = true })
-	}
 	for _, doc := range commandDocs {
-		declare, has := declared[doc.name]
-		if !has {
-			if len(doc.flags) > 0 {
-				t.Errorf("the help of %s names flags of its own, and this guard cannot build "+
-					"the set they come from", doc.name)
-			}
-			refusesEveryOne(t, doc.name, ofListed)
+		if _, runs := verbs[doc.name]; !runs {
+			t.Errorf("the help describes %s and no verb of that name runs", doc.name)
+		}
+	}
+	for _, name := range slices.Sorted(maps.Keys(verbs)) {
+		doc, known := commandDocFor(name)
+		if !known {
+			t.Errorf("%s runs and no help describes it", name)
 			continue
 		}
+		set := verbs[name].flags()
+		if set.Name() != name {
+			t.Errorf("the verb run as %s builds the flags of %s", name, set.Name())
+		}
+		// Every dash comes off, one or two, because the set now holds the flags
+		// of the tool and --help as well, and -h is written with one.
 		documented := map[string]bool{}
 		for _, flag := range append(append([]flagDoc{}, doc.flags...), crossCuttingFlagDocs...) {
 			for _, spelling := range flag.names {
-				documented[strings.TrimPrefix(spelling, "--")] = true
+				documented[strings.TrimLeft(spelling, "-")] = true
 			}
 		}
-		set := flag.NewFlagSet(doc.name, flag.ContinueOnError)
-		declare(set)
 		set.VisitAll(func(accepted *flag.Flag) {
 			if !documented[accepted.Name] {
 				t.Errorf("%s accepts --%s and its help never mentions it, so the only way "+
-					"to find the flag is to already know it", doc.name, accepted.Name)
+					"to find the flag is to already know it", name, accepted.Name)
 			}
 		})
-	}
-}
-
-// refusesEveryOne asks a verb that declares no flags of its own about each
-// flag another verb takes, and wants every one refused as not defined.
-func refusesEveryOne(t *testing.T, verb string, names map[string]bool) {
-	t.Helper()
-	for _, name := range slices.Sorted(maps.Keys(names)) {
-		if got := run(verb, "--"+name); !strings.Contains(got.log, "not defined: -"+name) {
-			t.Errorf("%s takes --%s, which its help never mentions: it ended with %d and logged %q",
-				verb, name, got.code, got.log)
-		}
 	}
 }

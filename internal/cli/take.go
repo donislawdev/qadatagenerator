@@ -2,7 +2,6 @@ package cli
 
 import (
 	"flag"
-	"io"
 	"strconv"
 	"strings"
 	"time"
@@ -85,28 +84,11 @@ func (f *takeFlags) settings() take.Settings {
 	}
 }
 
-// runCorrupt damages a file somebody else made.
-func runCorrupt(out *streams, arguments []string, global crossCutting) int {
-	set := flag.NewFlagSet(commandCorrupt, flag.ContinueOnError)
-	set.SetOutput(io.Discard)
-	local := declareCrossCutting(set)
-	own := declareCorrupt(set)
-	askedForHelp := declareVerbHelp(set)
-	rest, err := parseAnywhere(set, arguments)
-	if err != nil {
-		return usage(out, flagFailure(err, acceptedFlagsOf(commandCorrupt),
-			problemHelpSubjectDo+" "+commandCorrupt))
-	}
-	if askedForHelp() {
-		return printCommandHelp(out, commandCorrupt)
-	}
-	own.note(set)
-	flags := global.merge(local)
-	if code, ok := applyVerbosity(out, flags); !ok {
-		return code
-	}
-
-	if len(rest) != 1 {
+// corruptWith damages a file somebody else made, once its arguments have been
+// read.
+func corruptWith(out *streams, given parsed[*takeFlags]) int {
+	given.own.note(given.set)
+	if len(given.rest) != 1 {
 		return usage(out, problem{
 			what:    problemCorruptArguments,
 			why:     problemCorruptArgumentsWhy,
@@ -114,7 +96,7 @@ func runCorrupt(out *streams, arguments []string, global crossCutting) int {
 			instead: problemCorruptArgumentsDo,
 		})
 	}
-	return corruptFile(out, rest[0], own)
+	return corruptFile(out, given.rest[0], given.own)
 }
 
 // corruptFile is the whole path, from a file on a disk to a damaged file and a
