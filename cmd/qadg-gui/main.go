@@ -104,7 +104,14 @@ func main() {
 	// green, because the tests read the content rather than how much of it a
 	// person can see.
 	window.Resize(fyne.NewSize(palette.StartWidth, palette.StartHeight))
+	// What the window no longer uses goes back once it is left alone, and
+	// internal/gui/background/tidy.go says when and why. Stopped as the window
+	// closes, while the toolkit still runs, and again once it has stopped, in
+	// case it stopped some other way.
+	stopTidying := background.TidyWhenLeftAlone(window.Canvas())
+	window.SetOnClosed(stopTidying)
 	window.ShowAndRun()
+	stopTidying()
 }
 
 // frameFor is the frame the command line asked for: the catalogue of controls

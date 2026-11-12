@@ -141,6 +141,15 @@ var ConcurrencyAllowed = map[string]bool{
 // its functions builds the whole arrangement without the caller writing go,
 // chan or select anywhere. Concurrency would then enter through a file that
 // looks entirely ordinary, which is the one thing this guard exists to stop.
+//
+// time is not here, because nearly every file may need a duration, and the one
+// function of it that starts work elsewhere is reported by name instead:
+// time.AfterFunc runs the function it is handed on a goroutine of its own, with
+// no go written anywhere. The same day, 2026-11-12, waiting on a channel and
+// sending on one became findings as well. A ticker or a timer hands out a
+// channel the file never declares, so until then a file could wait on one and
+// pass. Found while writing the first timer of the product, the way os/signal
+// was found while writing the first signal.
 var concurrencyPackages = map[string]bool{
 	"sync":        true,
 	"sync/atomic": true,
@@ -210,6 +219,7 @@ func concurrencyIn(path, name string) ([]string, error) {
 		findings = append(findings, fmt.Sprintf("%s:%d %s", name, fileSet.Position(node.Pos()).Line, what))
 	}
 
+	timeName := ""
 	for _, spec := range parsed.Imports {
 		unquoted, err := strconv.Unquote(spec.Path.Value)
 		if err != nil {
@@ -218,16 +228,37 @@ func concurrencyIn(path, name string) ([]string, error) {
 		if concurrencyPackages[unquoted] {
 			at(spec, "imports "+unquoted)
 		}
+		if unquoted == "time" {
+			timeName = "time"
+			if spec.Name != nil {
+				timeName = spec.Name.Name
+			}
+		}
 	}
 
 	ast.Inspect(parsed, func(node ast.Node) bool {
-		switch node.(type) {
+		switch n := node.(type) {
 		case *ast.GoStmt:
 			at(node, "starts a goroutine")
 		case *ast.ChanType:
 			at(node, "declares a channel")
 		case *ast.SelectStmt:
 			at(node, "waits on several channels")
+		case *ast.UnaryExpr:
+			if n.Op == token.ARROW {
+				at(node, "waits on a channel")
+			}
+		case *ast.SendStmt:
+			at(node, "sends on a channel")
+		case *ast.SelectorExpr:
+			if ident, ok := n.X.(*ast.Ident); ok && timeName != "" && ident.Name == timeName &&
+				n.Sel.Name == "AfterFunc" {
+				at(node, "runs a function on a goroutine of its own")
+			}
+		case *ast.Ident:
+			if timeName == "." && n.Name == "AfterFunc" {
+				at(node, "runs a function on a goroutine of its own")
+			}
 		}
 		return true
 	})

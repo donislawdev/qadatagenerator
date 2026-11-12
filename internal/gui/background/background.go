@@ -70,9 +70,13 @@ import (
 	"errors"
 	"os"
 	"os/signal"
+	"runtime/debug"
+	"runtime/metrics"
 	"syscall"
+	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/produce"
@@ -268,6 +272,88 @@ func ReadHere(read func() func(), _ func(error) func()) {
 	if act := read(); act != nil {
 		act()
 	}
+}
+
+// TidyWhenLeftAlone gives back what the window no longer uses once nobody has
+// used it for a while, and answers with the way to stop. When, and why there
+// is anything to give back, is in tidy.go.
+//
+// # Why it lives here
+//
+// The quiet has to be waited out somewhere, and the thread that draws does
+// nothing at all while nobody uses the window, which is the whole point. The
+// memory then goes back off that thread, for the reason tidy.go gives. The
+// frame is the one thing done on it, handed over through fyne.Do like every
+// answer in this file.
+//
+// # Why a panic here stops the tidying and nothing else
+//
+// Every other goroutine in this file turns a panic into a failure a screen
+// shows. This one has nobody to show it to, and the window ending over memory
+// it could not give back would be the worse trade. The one panic it can meet
+// is the toolkit's own, at the very end: fyne.Do sends on a queue the toolkit
+// closes as it shuts down (Fyne 2.8.2, internal/driver/glfw/loop.go), checking
+// a flag first, and a send between the flag and the close would land on a
+// closed channel. Stopping the tidying when the window closes makes that a
+// window of microseconds, and this makes it harmless.
+func TidyWhenLeftAlone(window fyne.Canvas) (stop func()) {
+	// Not in the window and never put there. Redrawing it is a frame that
+	// touches nothing, which is what tidy.go asks for.
+	nothing := canvas.NewRectangle(nil)
+	ticker := time.NewTicker(tidyLook)
+	return tidyWhenLeftAlone(allocatedSoFar, time.Now(), ticker.C, ticker.Stop,
+		func() { fyne.Do(func() { window.Refresh(nothing) }) }, debug.FreeOSMemory)
+}
+
+// tidyWhenLeftAlone is the whole of the tidying, with the clock, the counter
+// and what a frame and a release are handed in, for the reason
+// watchForClosing gives: fyne.Do needs a running toolkit, and the clock would
+// make a test wait out a real quiet.
+func tidyWhenLeftAlone(allocated func() uint64, began time.Time, looks <-chan time.Time,
+	stopLooking func(), frame, release func()) (stop func()) {
+	t := newTidy(allocated(), began)
+	done := make(chan struct{})
+	go func() {
+		defer func() { _ = recover() }()
+		for {
+			select {
+			case <-done:
+				return
+			case now := <-looks:
+				switch t.look(allocated(), now) {
+				case stepFrame:
+					frame()
+				case stepRelease:
+					release()
+				}
+			}
+		}
+	}()
+	// Read and written on the thread that stops, and only there: the window
+	// closing and the end of main are both on the thread that draws.
+	stopped := false
+	return func() {
+		if stopped {
+			return
+		}
+		stopped = true
+		stopLooking()
+		close(done)
+	}
+}
+
+// allocatedSoFar is every byte the heap has handed out since the process
+// began, read without stopping anything, unlike runtime.ReadMemStats. Zero if
+// a runtime ever stops counting it, and the tidy then sees a window that is
+// never used again after it opened: tidied once, then never, which is the
+// cheap way to be wrong.
+func allocatedSoFar() uint64 {
+	sample := []metrics.Sample{{Name: "/gc/heap/allocs:bytes"}}
+	metrics.Read(sample)
+	if sample[0].Value.Kind() != metrics.KindUint64 {
+		return 0
+	}
+	return sample[0].Value.Uint64()
 }
 
 // ErrStopped is what a run ends with when somebody stopped it from the window.

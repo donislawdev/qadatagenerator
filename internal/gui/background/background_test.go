@@ -180,3 +180,63 @@ func TestAPanicInAReadHereReachesTheCallerThatOwnsTheThread(t *testing.T) {
 
 	ReadHere(func() func() { panic("a probe wants to see this") }, nil)
 }
+
+// The tidy asks for its frame and then gives the memory back, both off the
+// goroutine that started it, at the looks tidy.go says. When each comes is
+// tidy_test.go's question. This one is whether the looks arriving on a clock
+// reach the window at all.
+func TestALeftAloneWindowIsAskedForAFrameAndThenGivesBack(t *testing.T) {
+	looks := make(chan time.Time)
+	framed, released := make(chan struct{}, 1), make(chan struct{}, 1)
+	began := time.Date(2026, 11, 12, 18, 0, 0, 0, time.UTC)
+	stop := tidyWhenLeftAlone(func() uint64 { return 0 }, began, looks, func() {},
+		func() { framed <- struct{}{} }, func() { released <- struct{}{} })
+	defer stop()
+
+	looks <- began.Add(tidyQuiet)
+	select {
+	case <-framed:
+	case <-released:
+		t.Fatal("the memory went back before any frame was asked for, so the renderers the frame " +
+			"lets go of would still be holding it")
+	case <-time.After(2 * time.Second):
+		t.Fatal("a window left alone for the whole quiet was never asked for a frame")
+	}
+	looks <- began.Add(tidyQuiet + tidySettle)
+	select {
+	case <-released:
+	case <-time.After(2 * time.Second):
+		t.Fatal("the frame came and the memory never went back")
+	}
+}
+
+// sink keeps an allocation alive past the compiler, so the test below
+// measures one that happened.
+var sink []byte
+
+// The counter the tidy reads exists on this system and counts. A runtime that
+// renamed it would answer zero for ever, and the window would be tidied once
+// after it opened and never again, with every test of the decision green.
+func TestTheCounterTheTidyReadsCounts(t *testing.T) {
+	before := allocatedSoFar()
+	sink = make([]byte, 4<<20)
+	after := allocatedSoFar()
+	if after-before < 4<<20 {
+		t.Fatalf("4 MB allocated moved the counter from %d to %d, so the tidy would never see the "+
+			"window used", before, after)
+	}
+}
+
+// Stopping the tidy twice is ordinary: the window closing stops it, and so
+// does the end of main after it. Closing a closed channel is a panic, and it
+// would come at the moment the program is leaving.
+func TestStoppingTheTidyTwiceIsSafe(t *testing.T) {
+	stoppedLooking := 0
+	stop := tidyWhenLeftAlone(func() uint64 { return 0 }, time.Now(), make(chan time.Time),
+		func() { stoppedLooking++ }, func() {}, func() {})
+	stop()
+	stop()
+	if stoppedLooking != 1 {
+		t.Errorf("the clock was stopped %d times, want once", stoppedLooking)
+	}
+}

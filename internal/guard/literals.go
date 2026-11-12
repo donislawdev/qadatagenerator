@@ -45,9 +45,26 @@ const ViewRoot = "internal/gui"
 // something. If it grows a call that lays a widget out, this exemption stops
 // describing it and the package has to take its values from the theme like every
 // other one.
+//
+// # The third entry, and why its numbers are not the theme's either
+//
+// internal/gui/background draws nothing either. It is where the window sends
+// what must not happen on the thread that draws, and since 2026-11-12 it also
+// gives memory back once the window is left alone. Its numbers are times of
+// that work: how often it looks, how long a quiet lasts, how long a frame
+// takes to be cleaned up after. Each follows from the toolkit's own caches and
+// from a measurement written beside it, and none of them reaches a layout. The
+// theme holds the look of the window, so putting them there would make the
+// visual system the home of a memory policy, and the next change to either
+// would have to read both.
+//
+// 🔴 What would make this entry wrong: the day that package sizes, positions
+// or paints something. The one canvas object it makes is an empty rectangle
+// that is never put in the window, redrawn to ask for a frame.
 var LiteralsAllowed = map[string]bool{
-	"internal/gui/theme":   true,
-	"internal/gui/screens": true,
+	"internal/gui/theme":      true,
+	"internal/gui/screens":    true,
+	"internal/gui/background": true,
 }
 
 // A colour written as text, in either case, in any string the window carries.

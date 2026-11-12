@@ -48,6 +48,37 @@ func TestConcurrencyNoticesEachWayOfStartingWork(t *testing.T) {
 			source: "package p\n\nimport \"sync/atomic\"\n\nvar n atomic.Int64\n",
 			expect: "imports sync/atomic",
 		},
+		{
+			name:   "the signal package",
+			source: "package p\n\nimport \"os/signal\"\n\nvar f = signal.Ignore\n",
+			expect: "imports os/signal",
+		},
+		{
+			name: "waiting on a channel the file never declares",
+			source: "package p\n\nimport \"time\"\n\nfunc f() {\n\tt := time.NewTicker(time.Second)\n" +
+				"\t<-t.C\n}\n",
+			expect: "waits on a channel",
+		},
+		{
+			name:   "sending on a channel",
+			source: "package p\n\nfunc f(c chan int) {\n\tc <- 1\n}\n",
+			expect: "sends on a channel",
+		},
+		{
+			name:   "a function run later on a goroutine of its own",
+			source: "package p\n\nimport \"time\"\n\nfunc f() {\n\ttime.AfterFunc(time.Second, g)\n}\n\nfunc g() {}\n",
+			expect: "runs a function on a goroutine of its own",
+		},
+		{
+			name:   "the same under another name for the package",
+			source: "package p\n\nimport clock \"time\"\n\nvar f = clock.AfterFunc\n",
+			expect: "runs a function on a goroutine of its own",
+		},
+		{
+			name:   "the same imported into the file's own names",
+			source: "package p\n\nimport . \"time\"\n\nfunc f() {\n\tAfterFunc(Second, f)\n}\n",
+			expect: "runs a function on a goroutine of its own",
+		},
 	}
 
 	for _, test := range cases {
@@ -76,6 +107,10 @@ func TestConcurrencyStaysQuietAboutProse(t *testing.T) {
 		{"the words in a raw string", "package p\n\nconst doc = `select and chan appear here`\n"},
 		{"a context, which starts nothing", "package p\n\nimport \"context\"\n\nfunc f(ctx context.Context) {}\n"},
 		{"an ordinary function called go something", "package p\n\nfunc gopher() {}\n"},
+		{"a duration, which starts nothing", "package p\n\nimport \"time\"\n\nvar d = 2 * time.Second\n"},
+		{"a method of our own called AfterFunc", "package p\n\ntype clock struct{}\n\nfunc (clock) AfterFunc() {}\n\n" +
+			"var time clock\n\nfunc f() {\n\ttime.AfterFunc()\n}\n"},
+		{"a comparison that looks like an arrow", "package p\n\nfunc f(a, b int) bool {\n\treturn a < -b\n}\n"},
 	}
 
 	for _, test := range quiet {
@@ -114,11 +149,11 @@ func TestConcurrencyRespectsTheAllowList(t *testing.T) {
 
 // The rule this guard exists for, applied to the repository as it stands.
 //
-// There is no concurrency in the product today, so the allow list is empty and
-// this passes trivially. That is the cheapest moment to install it: everything
-// it will ever report is somebody adding the first goroutine, and adding a
-// file to the list is then a deliberate act rather than a line that slipped
-// through.
+// It was installed while the product had no concurrency at all, the cheapest
+// moment, so that every file on the allow list arrived as a deliberate act
+// rather than a line that slipped through. The list says which files those
+// are, each with its reason, and this test is what keeps every other file off
+// it.
 func TestTheProductStartsNoConcurrentWorkWithoutSayingSo(t *testing.T) {
 	root, err := ModuleRoot()
 	if err != nil {

@@ -88,6 +88,14 @@ repository once they are released.
 
 ### Fixed
 
+- **The window gives memory back once it has been left alone.** After work
+  such as drawing a thousand values five times, the window used to hold about
+  200 MB for as long as nobody touched it. About a minute and a half after the
+  last thing done in it, it now returns to the system what it no longer uses,
+  which was about 37 MB on the machine it was measured on. Nothing on the
+  screen changes. A field holding the keyboard counts as the window being in
+  use until you switch to another program, and a minimised window returns
+  less.
 - **The window no longer keeps the processor busy after a list of choices is
   closed.** Closing a list that has a search field at its top, such as the
   list of kinds on Quick value, left the search field thinking it still had
