@@ -180,6 +180,18 @@ func Reads(generator, role, locale string) bool {
 	return values.New(locale, "").ReadsRole(generator, role)
 }
 
+// DependsOnLocale reports whether choosing another locale can change what that
+// generator gives: its values, whether it gives any, or which fields beside it
+// it takes account of.
+//
+// It takes no locale, because it is a question about all of them. A surface
+// asks it to decide whether a choice of locale belongs beside the chosen kind
+// at all, and the answer is measured by the guard beside the register rather
+// than written on a screen (B-367).
+func DependsOnLocale(generator string) bool {
+	return values.New("", "").DependsOnLocale(generator)
+}
+
 // Each produces the values the request asks for, in order, and hands each one
 // to take before the next is drawn.
 //

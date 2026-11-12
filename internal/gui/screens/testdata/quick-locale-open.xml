@@ -250,8 +250,8 @@
 								<text color="disabled" size="1058x16">Make test values to copy into a form or a test. Nothing on this screen is written to a file.</text>
 								<container pos="0,32" size="1058x52">
 									<container size="1058x52">
-										<container size="816x52">
-											<container size="712x52">
+										<container size="701x52">
+											<container size="597x52">
 												<container size="118x52">
 													<text color="disabled" size="118x14" textSize="11">Kind</text>
 													<widget pos="0,18" size="118x34" type="*parts.Select">
@@ -266,7 +266,7 @@
 																		<container pos="12,4" size="98x26">
 																			<container size="71x26">
 																				<spacer size="71x4"/>
-																				<text pos="0,4" size="71x16">pesel</text>
+																				<text pos="0,4" size="71x16">first_name</text>
 																				<spacer pos="0,21" size="71x4"/>
 																			</container>
 																			<container pos="71,0" size="27x26">
@@ -375,37 +375,7 @@
 														</container>
 													</widget>
 												</container>
-												<container pos="463,0" size="103x52">
-													<text color="disabled" size="103x14" textSize="11">Born</text>
-													<container pos="0,18" size="103x34">
-														<rectangle size="103x34"/>
-														<container size="103x34">
-															<container size="103x34">
-																<rectangle fillColor="button" pos="1,1" radius="6" size="101x32" strokeColor="inputBorder" strokeWidth="2"/>
-															</container>
-															<container size="103x34">
-																<widget pos="8,8" size="87x26" type="*container.ThemeOverride">
-																	<container size="87x26">
-																		<widget size="87x26" type="*parts.FieldEntry">
-																			<rectangle pos="2,2" radius="6" size="83x22"/>
-																			<widget pos="0,2" size="87x22" type="*widget.Scroll">
-																				<widget size="87x22" type="*widget.entryContent">
-																					<widget size="87x22" type="*widget.RichText">
-																						<text color="disabled" pos="4,2" size="79x16">YYYY-MM-DD</text>
-																					</widget>
-																					<widget size="87x22" type="*widget.RichText">
-																						<text pos="4,2" size="0x16"></text>
-																					</widget>
-																				</widget>
-																			</widget>
-																		</widget>
-																	</container>
-																</widget>
-															</container>
-														</container>
-													</container>
-												</container>
-												<container pos="578,0" size="134x52">
+												<container pos="463,0" size="134x52">
 													<text color="disabled" size="134x14" textSize="11">Seed</text>
 													<container pos="0,18" size="134x34">
 														<rectangle size="134x34"/>
@@ -436,7 +406,7 @@
 													</container>
 												</container>
 											</container>
-											<container pos="712,0" size="103x52">
+											<container pos="597,0" size="103x52">
 												<container pos="16,0" size="87x52">
 													<container size="87x14">
 														<rectangle size="87x14"/>
@@ -466,7 +436,7 @@
 												</container>
 											</container>
 										</container>
-										<spacer pos="816,0" size="241x52"/>
+										<spacer pos="701,0" size="356x52"/>
 									</container>
 								</container>
 							</container>
@@ -563,16 +533,16 @@
 																			<rectangle size="684x52"/>
 																			<container size="684x52">
 																				<container pos="16,4" size="652x44">
-																					<container size="134x44">
+																					<container size="96x44">
 																						<container size="13x44">
 																							<spacer size="13x14"/>
 																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 1</text>
 																							<spacer pos="0,29" size="13x14"/>
 																						</container>
-																						<container pos="29,0" size="105x44">
-																							<spacer size="105x11"/>
-																							<text monospace pos="0,11" size="105x20" textSize="16">63051025079</text>
-																							<spacer pos="0,32" size="105x11"/>
+																						<container pos="29,0" size="67x44">
+																							<spacer size="67x11"/>
+																							<text monospace pos="0,11" size="67x20" textSize="16">Jackson</text>
+																							<spacer pos="0,32" size="67x11"/>
 																						</container>
 																					</container>
 																					<rectangle pos="651,0" size="1x44"/>
@@ -587,16 +557,16 @@
 																			<rectangle fillColor="button" size="684x52"/>
 																			<container size="684x52">
 																				<container pos="16,4" size="652x44">
-																					<container size="134x44">
+																					<container size="77x44">
 																						<container size="13x44">
 																							<spacer size="13x14"/>
 																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 2</text>
 																							<spacer pos="0,29" size="13x14"/>
 																						</container>
-																						<container pos="29,0" size="105x44">
-																							<spacer size="105x11"/>
-																							<text monospace pos="0,11" size="105x20" textSize="16">59040488071</text>
-																							<spacer pos="0,32" size="105x11"/>
+																						<container pos="29,0" size="47x44">
+																							<spacer size="47x11"/>
+																							<text monospace pos="0,11" size="47x20" textSize="16">Bryce</text>
+																							<spacer pos="0,32" size="47x11"/>
 																						</container>
 																					</container>
 																					<rectangle pos="651,0" size="1x44"/>
@@ -611,16 +581,16 @@
 																			<rectangle size="684x52"/>
 																			<container size="684x52">
 																				<container pos="16,4" size="652x44">
-																					<container size="134x44">
+																					<container size="105x44">
 																						<container size="13x44">
 																							<spacer size="13x14"/>
 																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 3</text>
 																							<spacer pos="0,29" size="13x14"/>
 																						</container>
-																						<container pos="29,0" size="105x44">
-																							<spacer size="105x11"/>
-																							<text monospace pos="0,11" size="105x20" textSize="16">59080866648</text>
-																							<spacer pos="0,32" size="105x11"/>
+																						<container pos="29,0" size="76x44">
+																							<spacer size="76x11"/>
+																							<text monospace pos="0,11" size="76x20" textSize="16">Cristian</text>
+																							<spacer pos="0,32" size="76x11"/>
 																						</container>
 																					</container>
 																					<rectangle pos="651,0" size="1x44"/>
@@ -635,16 +605,16 @@
 																			<rectangle fillColor="button" size="684x52"/>
 																			<container size="684x52">
 																				<container pos="16,4" size="652x44">
-																					<container size="134x44">
+																					<container size="77x44">
 																						<container size="13x44">
 																							<spacer size="13x14"/>
 																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 4</text>
 																							<spacer pos="0,29" size="13x14"/>
 																						</container>
-																						<container pos="29,0" size="105x44">
-																							<spacer size="105x11"/>
-																							<text monospace pos="0,11" size="105x20" textSize="16">09282050932</text>
-																							<spacer pos="0,32" size="105x11"/>
+																						<container pos="29,0" size="47x44">
+																							<spacer size="47x11"/>
+																							<text monospace pos="0,11" size="47x20" textSize="16">Heidi</text>
+																							<spacer pos="0,32" size="47x11"/>
 																						</container>
 																					</container>
 																					<rectangle pos="651,0" size="1x44"/>
@@ -659,16 +629,16 @@
 																			<rectangle size="684x52"/>
 																			<container size="684x52">
 																				<container pos="16,4" size="652x44">
-																					<container size="134x44">
+																					<container size="86x44">
 																						<container size="13x44">
 																							<spacer size="13x14"/>
 																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 5</text>
 																							<spacer pos="0,29" size="13x14"/>
 																						</container>
-																						<container pos="29,0" size="105x44">
-																							<spacer size="105x11"/>
-																							<text monospace pos="0,11" size="105x20" textSize="16">04262750378</text>
-																							<spacer pos="0,32" size="105x11"/>
+																						<container pos="29,0" size="57x44">
+																							<spacer size="57x11"/>
+																							<text monospace pos="0,11" size="57x20" textSize="16">Dillon</text>
+																							<spacer pos="0,32" size="57x11"/>
 																						</container>
 																					</container>
 																					<rectangle pos="651,0" size="1x44"/>
@@ -683,16 +653,16 @@
 																			<rectangle fillColor="button" size="684x52"/>
 																			<container size="684x52">
 																				<container pos="16,4" size="652x44">
-																					<container size="134x44">
+																					<container size="96x44">
 																						<container size="13x44">
 																							<spacer size="13x14"/>
 																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 6</text>
 																							<spacer pos="0,29" size="13x14"/>
 																						</container>
-																						<container pos="29,0" size="105x44">
-																							<spacer size="105x11"/>
-																							<text monospace pos="0,11" size="105x20" textSize="16">66081862269</text>
-																							<spacer pos="0,32" size="105x11"/>
+																						<container pos="29,0" size="67x44">
+																							<spacer size="67x11"/>
+																							<text monospace pos="0,11" size="67x20" textSize="16">Gilbert</text>
+																							<spacer pos="0,32" size="67x11"/>
 																						</container>
 																					</container>
 																					<rectangle pos="651,0" size="1x44"/>
@@ -707,16 +677,16 @@
 																			<rectangle size="684x52"/>
 																			<container size="684x52">
 																				<container pos="16,4" size="652x44">
-																					<container size="134x44">
+																					<container size="77x44">
 																						<container size="13x44">
 																							<spacer size="13x14"/>
 																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 7</text>
 																							<spacer pos="0,29" size="13x14"/>
 																						</container>
-																						<container pos="29,0" size="105x44">
-																							<spacer size="105x11"/>
-																							<text monospace pos="0,11" size="105x20" textSize="16">45011356621</text>
-																							<spacer pos="0,32" size="105x11"/>
+																						<container pos="29,0" size="47x44">
+																							<spacer size="47x11"/>
+																							<text monospace pos="0,11" size="47x20" textSize="16">Allen</text>
+																							<spacer pos="0,32" size="47x11"/>
 																						</container>
 																					</container>
 																					<rectangle pos="651,0" size="1x44"/>
@@ -731,16 +701,16 @@
 																			<rectangle fillColor="button" size="684x52"/>
 																			<container size="684x52">
 																				<container pos="16,4" size="652x44">
-																					<container size="134x44">
+																					<container size="57x44">
 																						<container size="13x44">
 																							<spacer size="13x14"/>
 																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 8</text>
 																							<spacer pos="0,29" size="13x14"/>
 																						</container>
-																						<container pos="29,0" size="105x44">
-																							<spacer size="105x11"/>
-																							<text monospace pos="0,11" size="105x20" textSize="16">93032244881</text>
-																							<spacer pos="0,32" size="105x11"/>
+																						<container pos="29,0" size="28x44">
+																							<spacer size="28x11"/>
+																							<text monospace pos="0,11" size="28x20" textSize="16">Dan</text>
+																							<spacer pos="0,32" size="28x11"/>
 																						</container>
 																					</container>
 																					<rectangle pos="651,0" size="1x44"/>
@@ -755,16 +725,16 @@
 																			<rectangle size="684x52"/>
 																			<container size="684x52">
 																				<container pos="16,4" size="652x44">
-																					<container size="134x44">
+																					<container size="86x44">
 																						<container size="13x44">
 																							<spacer size="13x14"/>
 																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 9</text>
 																							<spacer pos="0,29" size="13x14"/>
 																						</container>
-																						<container pos="29,0" size="105x44">
-																							<spacer size="105x11"/>
-																							<text monospace pos="0,11" size="105x20" textSize="16">42102204924</text>
-																							<spacer pos="0,32" size="105x11"/>
+																						<container pos="29,0" size="57x44">
+																							<spacer size="57x11"/>
+																							<text monospace pos="0,11" size="57x20" textSize="16">Andrew</text>
+																							<spacer pos="0,32" size="57x11"/>
 																						</container>
 																					</container>
 																					<rectangle pos="651,0" size="1x44"/>
@@ -779,16 +749,16 @@
 																			<rectangle fillColor="button" size="684x52"/>
 																			<container size="684x52">
 																				<container pos="16,4" size="652x44">
-																					<container size="134x44">
+																					<container size="77x44">
 																						<container size="13x44">
 																							<spacer size="13x14"/>
 																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11">10</text>
 																							<spacer pos="0,29" size="13x14"/>
 																						</container>
-																						<container pos="29,0" size="105x44">
-																							<spacer size="105x11"/>
-																							<text monospace pos="0,11" size="105x20" textSize="16">64012248081</text>
-																							<spacer pos="0,32" size="105x11"/>
+																						<container pos="29,0" size="47x44">
+																							<spacer size="47x11"/>
+																							<text monospace pos="0,11" size="47x20" textSize="16">Heidi</text>
+																							<spacer pos="0,32" size="47x11"/>
 																						</container>
 																					</container>
 																					<rectangle pos="651,0" size="1x44"/>
@@ -807,73 +777,18 @@
 									</container>
 								</container>
 								<container pos="700,0" size="358x621">
-									<container size="358x405">
-										<container size="358x405">
-											<container pos="24,4" size="330x397">
-												<rectangle size="330x397"/>
-												<container size="330x397">
-													<rectangle fillColor="menuBackground" radius="10" size="330x397"/>
-													<container size="330x397">
-														<container pos="16,16" size="298x365">
-															<text bold size="298x18" textSize="14">pesel</text>
+									<container size="358x109">
+										<container size="358x109">
+											<container pos="24,4" size="330x101">
+												<rectangle size="330x101"/>
+												<container size="330x101">
+													<rectangle fillColor="menuBackground" radius="10" size="330x101"/>
+													<container size="330x101">
+														<container pos="16,16" size="298x69">
+															<text bold size="298x18" textSize="14">first_name</text>
 															<container pos="0,34" size="298x35">
 																<text bold color="focus" size="298x14" textSize="11">PRODUCES</text>
-																<text monospace pos="0,18" size="298x16">identifier (PL.pesel)</text>
-															</container>
-															<container pos="0,85" size="298x68">
-																<text bold color="focus" size="298x14" textSize="11">FORMAT</text>
-																<text monospace pos="0,18" size="298x20" textSize="16">00000000000</text>
-																<container pos="0,43" size="298x24">
-																	<widget size="298x24" type="*widget.Label">
-																		<widget size="298x24" type="*widget.RichText">
-																			<text color="disabled" pos="4,4" size="50x16">11 digits</text>
-																		</widget>
-																	</widget>
-																</container>
-															</container>
-															<container pos="0,169" size="298x77">
-																<text bold color="focus" size="298x14" textSize="11">CHECK DIGIT</text>
-																<container pos="0,18" size="298x58">
-																	<widget size="298x58" type="*widget.Label">
-																		<widget size="298x58" type="*widget.RichText">
-																			<text color="disabled" pos="4,4" size="272x16">Yes. One wrong character can be caught by the</text>
-																			<text color="disabled" pos="4,20" size="261x16">number itself, so an import that checks it can</text>
-																			<text color="disabled" pos="4,37" size="93x16">reject the value.</text>
-																		</widget>
-																	</widget>
-																</container>
-															</container>
-															<rectangle fillColor="separator" pos="0,262" size="298x1"/>
-															<container pos="0,279" size="298x85">
-																<container size="298x23">
-																	<container size="114x23">
-																		<rectangle fillColor="rgba(232,163,61,36)" radius="999" size="114x23"/>
-																		<container size="114x23">
-																			<container pos="8,4" size="98x15">
-																				<container size="15x15">
-																					<spacer size="15x0"/>
-																					<image fillMode="contain" rsc="triangle-alert-e8a33d-15.svg" size="15x15"/>
-																					<spacer pos="0,15" size="15x0"/>
-																				</container>
-																				<container pos="19,0" size="79x15">
-																					<spacer size="79x0"/>
-																					<text bold color="warning" size="79x14" textSize="11">Reserved range</text>
-																					<spacer pos="0,14" size="79x0"/>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																	<spacer pos="118,0" size="183x23"/>
-																</container>
-																<container pos="0,27" size="298x58">
-																	<widget size="298x58" type="*widget.Label">
-																		<widget size="298x58" type="*widget.RichText">
-																			<text color="disabled" pos="4,4" size="289x16">No block of this scheme is set aside for testing, so</text>
-																			<text color="disabled" pos="4,20" size="251x16">a value here may match one that was really</text>
-																			<text color="disabled" pos="4,37" size="222x16">issued. Treat it as you would real data.</text>
-																		</widget>
-																	</widget>
-																</container>
+																<text monospace pos="0,18" size="298x16">string</text>
 															</container>
 														</container>
 													</container>
@@ -892,7 +807,7 @@
 										<spacer size="904x4"/>
 										<widget pos="0,4" size="904x24" type="*widget.Label">
 											<widget size="904x24" type="*widget.RichText">
-												<text monospace pos="4,4" size="506x16">qadg quick --count 10 --locale en-US --seed for-the-picture pesel</text>
+												<text monospace pos="4,4" size="545x16">qadg quick --count 10 --locale en-US --seed for-the-picture first_name</text>
 											</widget>
 										</widget>
 										<spacer pos="0,29" size="904x4"/>

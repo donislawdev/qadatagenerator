@@ -218,6 +218,12 @@ repository once they are released.
 
 ### Changed
 
+- **Quick value shows the Locale list only beside a kind the locale changes.**
+  A first name, a surname, a city, a region and a postal code come out
+  differently in each locale, so the list stays beside them. Every other kind,
+  such as a PESEL, an SSN or a date of birth, is the same in every locale, so
+  the list is gone there and the command at the foot leaves out `--locale` too.
+  The locale chosen before is kept and comes back with the list.
 - **generate fills a unique column drawing from a long list in a fraction of
   a second.** Each row that ran out of luck counted the whole list under
   values again, so a list of 28000 entries took over two and a half seconds,

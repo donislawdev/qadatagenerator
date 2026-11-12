@@ -265,6 +265,44 @@ func TestAFieldTheChosenKindDoesNotReadIsNotSent(t *testing.T) {
 	}
 }
 
+// TestTheLocaleIsOfferedOnlyBesideAKindItChanges holds B-367: the choice of
+// locale stands beside a kind only where another locale gives something else,
+// which is asked of the mode rather than listed here.
+//
+// 🔴 The second half is the one a screen gets wrong while looking right. A
+// locale chosen beside a first name and then hidden beside a PESEL must leave
+// the request and the line at the foot, or it is a setting nobody can see,
+// which is the shape B-365 had. Coming back to a kind that reads it applies it
+// again, the way a hidden gender is applied again.
+func TestTheLocaleIsOfferedOnlyBesideAKindItChanges(t *testing.T) {
+	view := New(i18n.English, &heldClipboard{})
+	view.UseSeed("for-the-test")
+	for _, generator := range quick.Generators(quick.DefaultLocale) {
+		view.Choose(generator)
+		if shown, changes := view.Shows(settingLocale), quick.DependsOnLocale(generator); shown != changes {
+			t.Errorf("beside %s the choice of locale is shown %v where the mode says the locale "+
+				"changes the value %v", generator, shown, changes)
+		}
+	}
+
+	view.Choose("first_name")
+	view.UseLocale("pl-PL")
+	view.Choose("pesel")
+	if asked := view.request("pesel", 1).Locale; asked != "" {
+		t.Errorf("a PESEL is asked for in %q while the screen shows no locale", asked)
+	}
+	if strings.Contains(view.command.Text, commandline.Locale) {
+		t.Errorf("the command for a PESEL names a locale the screen does not show: %q",
+			view.command.Text)
+	}
+
+	view.Choose("first_name")
+	if !strings.Contains(view.command.Text, commandline.Locale+" pl-PL") {
+		t.Errorf("back on a first name the locale chosen before is no longer applied: %q",
+			view.command.Text)
+	}
+}
+
 // 🔴 The sample the count field is sized from has to be the shape of the
 // largest count the screen takes, or the field is measured against a number
 // nobody can type into it.

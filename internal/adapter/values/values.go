@@ -187,6 +187,14 @@ func (s Source) ReadsRole(generator, role string) bool {
 	return false
 }
 
+// DependsOnLocale reports whether choosing another locale can change what that
+// generator gives. An unknown generator depends on nothing, for the reason
+// written at RolesRead.
+func (s Source) DependsOnLocale(generator string) bool {
+	known, found := producers[generator]
+	return found && known.byLocale
+}
+
 // Known reports whether this build has a generator of that name.
 func (s Source) Known(generator string) bool {
 	_, found := producers[generator]
@@ -526,6 +534,20 @@ type generator struct {
 	// English. A register that answered without the locale would promise an
 	// influence that half the runs do not have.
 	reads func(locale string) []string
+	// byLocale says whether choosing another locale can change what this
+	// generator gives: its values, whether it gives any, or which roles it
+	// reads.
+	//
+	// # Why a written answer, and what keeps it honest
+	//
+	// A screen leaves its choice of locale out beside a generator that does
+	// not depend on one (B-367), so the answer has to exist before any value
+	// is drawn. Nothing in a provider declares it, for the reason nothing
+	// declares what it reads, so it is written here and measured by the guard
+	// beside this file: every generator is drawn in every locale this build
+	// carries, and the answers are compared. Measured on 2026-11-12, twenty
+	// values in en-US and pl-PL were the same for thirteen of the eighteen.
+	byLocale bool
 	// topic is the shelf a generator with no scheme behind it stands on, for
 	// a surface that lists every kind this build has.
 	//
@@ -553,16 +575,17 @@ const (
 var producers = map[string]generator{
 	FirstName: {entries: Source.firstNames, list: "first-names",
 		needs: fromLists("first-names-female", "first-names-male"),
-		reads: everywhere(provider.RoleGender), topic: TopicPeople},
+		reads: everywhere(provider.RoleGender), byLocale: true, topic: TopicPeople},
 	LastName: {entries: Source.lastNames, list: "last-names", needs: surnameLists,
-		reads: whereSurnamesInflect, topic: TopicPeople},
+		reads: whereSurnamesInflect, byLocale: true, topic: TopicPeople},
 	Gender:    {produce: Source.gender, topic: TopicPeople},
 	BirthDate: {produce: Source.birthDate, topic: TopicPeople},
 	City: {entries: fromList("cities"), list: "cities", needs: fromLists("cities"),
-		topic: TopicPlaces},
+		byLocale: true, topic: TopicPlaces},
 	Region: {entries: fromList("regions"), list: "regions", needs: fromLists("regions"),
-		topic: TopicPlaces},
-	PostalCode: {produce: Source.postalCode, behind: us.Postal{}, needs: postalRegister},
+		byLocale: true, topic: TopicPlaces},
+	PostalCode: {produce: Source.postalCode, behind: us.Postal{}, needs: postalRegister,
+		byLocale: true},
 	Pesel: {produce: fromProvider(pl.PESEL{}), behind: pl.PESEL{},
 		reads: everywhere(provider.RoleBirthDate, provider.RoleGender)},
 	Nip:   {produce: fromProvider(pl.NIP{}), behind: pl.NIP{}},

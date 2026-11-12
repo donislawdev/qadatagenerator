@@ -250,8 +250,8 @@
 								<text color="disabled" size="1058x16">Make test values to copy into a form or a test. Nothing on this screen is written to a file.</text>
 								<container pos="0,32" size="1058x52">
 									<container size="1058x52">
-										<container size="816x52">
-											<container size="712x52">
+										<container size="687x52">
+											<container size="583x52">
 												<container size="118x52">
 													<text color="disabled" size="118x14" textSize="11">Kind</text>
 													<widget pos="0,18" size="118x34" type="*parts.Select">
@@ -314,37 +314,6 @@
 													</container>
 												</container>
 												<container pos="205,0" size="117x52">
-													<text color="disabled" size="117x14" textSize="11">Locale</text>
-													<widget pos="0,18" size="117x34" type="*parts.Select">
-														<container size="117x34">
-															<container size="117x34">
-																<rectangle size="117x34"/>
-																<container size="117x34">
-																	<container size="117x34">
-																		<rectangle fillColor="button" pos="1,1" radius="6" size="115x32" strokeColor="inputBorder" strokeWidth="2"/>
-																	</container>
-																	<container size="117x34">
-																		<container pos="12,4" size="97x26">
-																			<container size="70x26">
-																				<spacer size="70x4"/>
-																				<text pos="0,4" size="70x16">en-US</text>
-																				<spacer pos="0,21" size="70x4"/>
-																			</container>
-																			<container pos="70,0" size="27x26">
-																				<container pos="8,4" size="15x18">
-																					<spacer size="15x1"/>
-																					<image fillMode="contain" pos="0,1" rsc="chevron-down-acb4bd-15.svg" size="15x15"/>
-																					<spacer pos="0,16" size="15x1"/>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-												</container>
-												<container pos="334,0" size="117x52">
 													<text color="disabled" size="117x14" textSize="11">Gender</text>
 													<widget pos="0,18" size="117x34" type="*parts.Select">
 														<container size="117x34">
@@ -375,7 +344,7 @@
 														</container>
 													</widget>
 												</container>
-												<container pos="463,0" size="103x52">
+												<container pos="334,0" size="103x52">
 													<text color="disabled" size="103x14" textSize="11">Born</text>
 													<container pos="0,18" size="103x34">
 														<rectangle size="103x34"/>
@@ -405,7 +374,7 @@
 														</container>
 													</container>
 												</container>
-												<container pos="578,0" size="134x52">
+												<container pos="449,0" size="134x52">
 													<text color="disabled" size="134x14" textSize="11">Seed</text>
 													<container pos="0,18" size="134x34">
 														<rectangle size="134x34"/>
@@ -436,7 +405,7 @@
 													</container>
 												</container>
 											</container>
-											<container pos="712,0" size="103x52">
+											<container pos="583,0" size="103x52">
 												<container pos="16,0" size="87x52">
 													<container size="87x14">
 														<rectangle size="87x14"/>
@@ -466,7 +435,7 @@
 												</container>
 											</container>
 										</container>
-										<spacer pos="816,0" size="241x52"/>
+										<spacer pos="687,0" size="370x52"/>
 									</container>
 								</container>
 							</container>
@@ -892,7 +861,7 @@
 										<spacer size="904x4"/>
 										<widget pos="0,4" size="904x24" type="*widget.Label">
 											<widget size="904x24" type="*widget.RichText">
-												<text monospace pos="4,4" size="506x16">qadg quick --count 10 --locale en-US --seed for-the-picture pesel</text>
+												<text monospace pos="4,4" size="389x16">qadg quick --count 10 --seed for-the-picture pesel</text>
 											</widget>
 										</widget>
 										<spacer pos="0,29" size="904x4"/>

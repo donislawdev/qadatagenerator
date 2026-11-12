@@ -185,7 +185,11 @@ func quickStatesOfTheKeyboard() []State {
 			// again rather than counted here, for the reason above: at twelve
 			// the keyboard now lands on Generate, and the pattern would have
 			// blessed a picture of the wrong button under this name.
-			Keyboard: Keyboard{Tabs: 13},
+			//
+			// 🔴 Twelve since B-367, because the choice of locale left the row
+			// beside a PESEL, which is the same in every locale. From
+			// tools/klawiatura again.
+			Keyboard: Keyboard{Tabs: 12},
 		},
 		{
 			Name: "quick-focus-generate",
@@ -196,7 +200,7 @@ func quickStatesOfTheKeyboard() []State {
 			Purpose:  "the keyboard on the button that produces, which is the one action this screen is for",
 			Screen:   screenQuick,
 			Quick:    Quick{Generator: "pesel", Seed: "for-the-picture"},
-			Keyboard: Keyboard{Tabs: 12},
+			Keyboard: Keyboard{Tabs: 11},
 		},
 	}
 }
@@ -249,10 +253,12 @@ func quickStatesOfThePanel() []State {
 			Keyboard: Keyboard{Tabs: 6, Keys: []fyne.KeyName{fyne.KeyReturn}, Typed: "zzz"},
 		},
 		{
-			Name:     "quick-locale-open",
-			Purpose:  "the flat panel a short list opens, with no field and no foot, so the two shapes can be compared",
-			Screen:   screenQuick,
-			Quick:    pesel,
+			Name:    "quick-locale-open",
+			Purpose: "the flat panel a short list opens, with no field and no foot, so the two shapes can be compared",
+			Screen:  screenQuick,
+			// A first name rather than the PESEL of the states above, because
+			// the choice of locale stands only beside a kind it changes (B-367).
+			Quick:    Quick{Generator: "first_name", Seed: "for-the-picture"},
 			Keyboard: Keyboard{Tabs: 8, Keys: []fyne.KeyName{fyne.KeyReturn}},
 		},
 	}
@@ -379,7 +385,7 @@ func quickStatesOfThePointerOnAControl() []State {
 				"moves rather than its ground",
 			Screen:  screenQuick,
 			Quick:   Quick{Seed: "for-the-picture"},
-			Pointer: Pointer{Tabs: 11, Pressed: true},
+			Pointer: Pointer{Tabs: 10, Pressed: true},
 		},
 		{
 			Name: "quick-pointer-primary",
@@ -387,7 +393,7 @@ func quickStatesOfThePointerOnAControl() []State {
 				"here whose label changes colour with its fill",
 			Screen:  screenQuick,
 			Quick:   Quick{Seed: "for-the-picture"},
-			Pointer: Pointer{Tabs: 10},
+			Pointer: Pointer{Tabs: 9},
 		},
 		{
 			Name: "quick-pointer-primary-pressed",
@@ -395,7 +401,7 @@ func quickStatesOfThePointerOnAControl() []State {
 				"offers a button that has to carry a label",
 			Screen:  screenQuick,
 			Quick:   Quick{Seed: "for-the-picture"},
-			Pointer: Pointer{Tabs: 10, Pressed: true},
+			Pointer: Pointer{Tabs: 9, Pressed: true},
 		},
 	}
 }

@@ -97,9 +97,10 @@ type View struct {
 	// right aligned words. The label now stands ABOVE its control, which is
 	// what the accepted drawing asks for and what paint.FieldLabel draws.
 	settings *fyne.Container
-	// showing is which roles have a field on screen, so that a test can ask
-	// the screen rather than count pixels. It replaces reading the items of a
-	// form, which no longer exists.
+	// showing is which optional settings have a field on screen: the roles the
+	// chosen kind reads, and the locale where it changes the kind (under
+	// settingLocale). A test asks the screen this rather than counting pixels,
+	// and the request and the line at the foot carry only what it holds.
 	showing map[string]bool
 
 	// values are what the mode produced, kept as a list rather than as one
@@ -594,9 +595,23 @@ func (v *View) ask(chosen string, wanted int) {
 // request is what the person on this screen asked for.
 func (v *View) request(generator string, count int) quick.Request {
 	return quick.Request{
-		Generator: generator, Locale: v.locale, Seed: v.seed, Agrees: v.bindings(),
+		Generator: generator, Locale: v.localeAsked(), Seed: v.seed, Agrees: v.bindings(),
 		Count: count,
 	}
+}
+
+// localeAsked is the locale the request carries, which is none where the screen
+// shows no choice of locale.
+//
+// For the reason bindings sends only what is on screen: a locale chosen beside
+// a first name and kept while a PESEL is chosen would be a setting nobody can
+// see. Leaving it out changes no value, which the guard beside the register
+// measures, and keeps the line at the foot free of a flag that does nothing.
+func (v *View) localeAsked() string {
+	if !v.showing[settingLocale] {
+		return ""
+	}
+	return v.locale
 }
 
 // countAsked is how many values were asked for, or the sentence saying why the
@@ -668,6 +683,13 @@ func (v *View) bindings() map[string]string {
 // what stops this row needing a width written into it.
 func (v *View) showRows(generator string) {
 	showing := map[string]bool{}
+	// 🔴 The locale only where another locale gives something else, asked of
+	// the mode for the reason the roles below are. Until 2026-11-12 it stood
+	// beside every kind, and for thirteen of eighteen it changed nothing a
+	// person could see (B-367).
+	if quick.DependsOnLocale(generator) {
+		showing[settingLocale] = true
+	}
 	if quick.Reads(generator, quick.RoleGender, v.locale) {
 		showing[quick.RoleGender] = true
 	}
@@ -724,7 +746,10 @@ func (v *View) settingsRow(showing map[string]bool) fyne.CanvasObject {
 		// belongs before the ones that do.
 		labelled(v.text.T(i18n.QuickLabelCount),
 			paint.AtLeast(paint.FieldWidth(countSample), 0, parts.Standing(parts.Field(v.howMany)))),
-		labelled(v.text.T(i18n.QuickLabelLocale), v.locales.OnScreen()),
+	}
+	// Before the gender, because the locale decides whether a surname reads one.
+	if showing[settingLocale] {
+		fixed = append(fixed, labelled(v.text.T(i18n.QuickLabelLocale), v.locales.OnScreen()))
 	}
 	if showing[quick.RoleGender] {
 		fixed = append(fixed, labelled(v.text.T(i18n.QuickLabelGender), v.gender.OnScreen()))
@@ -851,6 +876,11 @@ func sameFields(held, wanted map[string]bool) bool {
 	return true
 }
 
+// settingLocale is the key the choice of locale is held under in v.showing,
+// beside the roles. It cannot be mistaken for one, because a role is a name the
+// mode reads and the mode has no role of this name.
+const settingLocale = "locale"
+
 // Shows reports whether the field for that role is on screen, for a test that
 // asks the screen rather than counting pixels.
 func (v *View) Shows(role string) bool { return v.showing[role] }
@@ -884,7 +914,7 @@ func (v *View) commandFor(generator string) string {
 	}
 	return commandline.New(commandline.Quick).
 		Flag(commandline.Count, asked).
-		Flag(commandline.Locale, v.locale).
+		Flag(commandline.Locale, v.localeAsked()).
 		Flag(commandline.Gender, bound[quick.RoleGender]).
 		Flag(commandline.BirthDate, bound[quick.RoleBirthDate]).
 		Flag(commandline.Seed, v.seed).
@@ -991,9 +1021,11 @@ const (
 //
 // # Why this one
 //
-// It agrees with the locale this screen also opens on, which is en-US, so the
-// first thing on screen is not an identifier of a country the locale beside it
-// does not name. It has a reserved range, so the values shown before anybody
+// It belongs to the country of the locale this screen opens on, which is en-US
+// and puts the kinds of that country under the first heading of the list, so the
+// kind on screen stands where a person opening the list looks first. The choice
+// of locale itself is not beside it, because an SSN is the same in every
+// locale (B-367). It has a reserved range, so the values shown before anybody
 // has chosen anything cannot belong to a real person, which is rule nine and
 // matters most exactly here, where the values appear without being asked for.
 // And it is recognisable, which the first screen of a tool has to be.
