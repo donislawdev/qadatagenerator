@@ -130,6 +130,7 @@ about.version.catalog: Corruption catalog
 about.version.manifest: Manifest format
 about.version.recipe: Recipe schema
 
+about.license.author: Author
 about.license.code: Code
 about.license.spec: Specification
 

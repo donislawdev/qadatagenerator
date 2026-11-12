@@ -316,13 +316,13 @@
 						</container>
 						<container pos="0,106" size="1122x737">
 							<widget size="1122x737" type="*parts.KeyScroll">
-								<container size="1122x2019">
-									<container pos="32,24" size="1058x1971">
-										<container size="1058x153">
-											<rectangle fillColor="menuBackground" radius="10" size="1058x153"/>
-											<container size="1058x153">
-												<container pos="16,16" size="1026x121">
-													<container size="513x121">
+								<container size="1122x2027">
+									<container pos="32,24" size="1058x1979">
+										<container size="1058x161">
+											<rectangle fillColor="menuBackground" radius="10" size="1058x161"/>
+											<container size="1058x161">
+												<container pos="16,16" size="1026x129">
+													<container size="513x129">
 														<text bold color="focus" size="513x14" textSize="11">VERSIONS</text>
 														<container pos="0,22" size="513x99">
 															<container size="127x24">
@@ -359,27 +359,35 @@
 															</container>
 														</container>
 													</container>
-													<container pos="513,0" size="513x121">
+													<container pos="513,0" size="513x129">
 														<text bold color="focus" size="513x14" textSize="11">LICENSES</text>
-														<container pos="0,22" size="513x49">
+														<container pos="0,22" size="513x74">
 															<container size="95x24">
-																<text color="disabled" pos="4,4" size="75x16">Code</text>
+																<text color="disabled" pos="4,4" size="75x16">Author</text>
 															</container>
 															<container pos="95,0" size="417x24">
+																<spacer size="417x4"/>
+																<text bold pos="0,4" size="417x16">DonislawDev</text>
+																<spacer pos="0,20" size="417x4"/>
+															</container>
+															<container pos="0,24" size="95x24">
+																<text color="disabled" pos="4,4" size="75x16">Code</text>
+															</container>
+															<container pos="95,24" size="417x24">
 																<spacer size="417x4"/>
 																<text bold pos="0,4" size="417x16">GPL-3.0-only</text>
 																<spacer pos="0,20" size="417x4"/>
 															</container>
-															<container pos="0,24" size="95x24">
+															<container pos="0,49" size="95x24">
 																<text color="disabled" pos="4,4" size="75x16">Specification</text>
 															</container>
-															<container pos="95,24" size="417x24">
+															<container pos="95,49" size="417x24">
 																<spacer size="417x4"/>
 																<text bold pos="0,4" size="417x16">CC-BY-4.0</text>
 																<spacer pos="0,20" size="417x4"/>
 															</container>
 														</container>
-														<widget pos="0,80" size="513x24" type="*widget.Label">
+														<widget pos="0,105" size="513x24" type="*widget.Label">
 															<widget size="513x24" type="*widget.RichText">
 																<text color="disabled" pos="4,4" size="431x16">Applies to spec/ and to the corruption catalog entries built into this binary.</text>
 															</widget>
@@ -388,7 +396,7 @@
 												</container>
 											</container>
 										</container>
-										<container pos="0,177" size="1058x108">
+										<container pos="0,185" size="1058x108">
 											<container size="1058x18">
 												<spacer pos="194,0" size="863x18"/>
 												<container size="194x18">
@@ -426,7 +434,7 @@
 												</container>
 											</container>
 										</container>
-										<container pos="0,310" size="1058x236">
+										<container pos="0,318" size="1058x236">
 											<container size="1058x18">
 												<spacer pos="98,0" size="861x18"/>
 												<container size="98x18">
@@ -527,7 +535,7 @@
 												</container>
 											</container>
 										</container>
-										<container pos="0,571" size="1058x170">
+										<container pos="0,579" size="1058x170">
 											<container size="1058x18">
 												<spacer pos="101,0" size="915x18"/>
 												<container size="101x18">
@@ -617,7 +625,7 @@
 												</container>
 											</container>
 										</container>
-										<container pos="0,765" size="1058x1205">
+										<container pos="0,773" size="1058x1205">
 											<container size="1058x18">
 												<spacer pos="155,0" size="844x18"/>
 												<container size="155x18">
@@ -1407,8 +1415,8 @@
 									<linearGradient endColor="shadow" pos="0,-8" size="1122x8"/>
 								</widget>
 								<widget pos="1116,0" size="6x737" type="*widget.scrollBarArea">
-									<widget pos="3,0" size="3x269" type="*widget.scrollBar">
-										<rectangle fillColor="scrollbar" radius="3" size="3x269"/>
+									<widget pos="3,0" size="3x268" type="*widget.scrollBar">
+										<rectangle fillColor="scrollbar" radius="3" size="3x268"/>
 									</widget>
 								</widget>
 							</widget>

@@ -728,6 +728,7 @@ func printLicense(out *streams, machineReadable bool) {
 		return
 	}
 	out.emit(versionLabelTool + " " + version.Tool)
+	out.emit(licenseHeadingAuthor + " " + license.Author)
 	out.emit("")
 	out.emit(licenseHeadingCode + " " + license.Code)
 	out.emit(licenseHeadingSpec + " " + license.Spec)

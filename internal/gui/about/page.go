@@ -62,7 +62,7 @@ func section(heading, count string, body fyne.CanvasObject) fyne.CanvasObject {
 //
 // # Why this is the card
 //
-// A screen has one framed thing and it is what the screen is for. These six
+// A screen has one framed thing and it is what the screen is for. These seven
 // facts are what somebody puts in a bug report or a compliance answer, and all
 // the rest of the page is either a consequence of them or an inventory.
 //
@@ -80,6 +80,7 @@ func buildCard(text i18n.Catalogue, report license.Report, versions version.Set)
 	licenseHalf := []fyne.CanvasObject{
 		paint.Caption(text.T(i18n.AboutHeadingLicenses)),
 		form([]pair{
+			{text.T(i18n.AboutLicenseAuthor), report.Author},
 			{text.T(i18n.AboutLicenseCode), report.Code.License},
 			{text.T(i18n.AboutLicenseSpec), report.Spec.License},
 		}),

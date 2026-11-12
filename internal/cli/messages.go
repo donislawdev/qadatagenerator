@@ -412,10 +412,11 @@ const (
 
 	exitCodesHeading = "Exit codes:"
 
-	// licenseHeadingCode and the two below label the license report.
-	licenseHeadingCode  = "Code license:"
-	licenseHeadingSpec  = "Specification license:"
-	licenseHeadingParts = "Third party components:"
+	// licenseHeadingCode and the three below label the license report.
+	licenseHeadingAuthor = "Author:"
+	licenseHeadingCode   = "Code license:"
+	licenseHeadingSpec   = "Specification license:"
+	licenseHeadingParts  = "Third party components:"
 
 	// licenseNoComponents states the empty case as a fact. "None" alone
 	// reads like something is missing.

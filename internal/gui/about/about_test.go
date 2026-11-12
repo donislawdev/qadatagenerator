@@ -91,7 +91,7 @@ func TestTheScreenCarriesEveryFactTheLicenceFlagPrints(t *testing.T) {
 	all := screen(t)
 	report := license.Current()
 
-	for _, want := range []string{report.Code.License, report.Spec.License, report.Spec.Scope} {
+	for _, want := range []string{report.Author, report.Code.License, report.Spec.License, report.Spec.Scope} {
 		if !has(all, want) {
 			t.Errorf("the screen does not carry %q, which --license prints", want)
 		}

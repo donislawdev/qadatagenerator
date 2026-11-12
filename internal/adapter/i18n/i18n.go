@@ -101,8 +101,10 @@ const (
 	AboutVersionManifest Key = "about.version.manifest"
 	AboutVersionRecipe   Key = "about.version.recipe"
 
-	AboutLicenseCode Key = "about.license.code"
-	AboutLicenseSpec Key = "about.license.spec"
+	// The author stands first among the terms, because it is who grants them.
+	AboutLicenseAuthor Key = "about.license.author"
+	AboutLicenseCode   Key = "about.license.code"
+	AboutLicenseSpec   Key = "about.license.spec"
 
 	// The heads of the columns of the three lists on the screen: what it is,
 	// which version, under which license, and the day that license was read.
@@ -626,7 +628,7 @@ var windowKeys = []Key{
 	AboutHeadingVersions, AboutHeadingLicenses, AboutHeadingComponents,
 	AboutHeadingData, AboutHeadingNotices,
 	AboutVersionTool, AboutVersionCatalog, AboutVersionManifest, AboutVersionRecipe,
-	AboutLicenseCode, AboutLicenseSpec,
+	AboutLicenseAuthor, AboutLicenseCode, AboutLicenseSpec,
 	AboutColumnModule, AboutColumnSource, AboutColumnAsset,
 	AboutColumnVersion, AboutColumnLicense, AboutColumnChecked,
 	AboutCountModule, AboutCountModules, AboutCountList, AboutCountLists,

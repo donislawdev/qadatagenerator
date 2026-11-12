@@ -466,6 +466,9 @@ repository once they are released.
 
 ### Added
 
+- **The About screen and `qadg --license` name the author.** Both now show
+  "Author: DonislawDev" beside the licenses, and `qadg --license --json`
+  carries it as `author`.
 - **Test payment card numbers: `card`.** A value is one of eight numbers that
   at least two of four payment providers publish for testing (Stripe,
   Braintree, Adyen and Checkout.com), never a number made up to pass the check

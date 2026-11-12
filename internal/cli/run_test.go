@@ -85,7 +85,8 @@ func TestLicenseNamesBothLicensesAndFreesTheOutput(t *testing.T) {
 	if got.code != 0 {
 		t.Fatalf("ended with %d", got.code)
 	}
-	for _, wanted := range []string{"GPL-3.0-only", "CC-BY-4.0", "belongs to you", licenseHeadingParts} {
+	for _, wanted := range []string{"GPL-3.0-only", "CC-BY-4.0", "belongs to you", licenseHeadingParts,
+		licenseHeadingAuthor + " " + license.Author} {
 		if !strings.Contains(got.data, wanted) {
 			t.Errorf("the license report leaves out %q", wanted)
 		}
@@ -135,6 +136,9 @@ func TestTheMachineReadableLicenseCarriesWhatTheReadableOneDoes(t *testing.T) {
 	}
 	if report.Tool == "" {
 		t.Error("the report does not say which build it describes")
+	}
+	if report.Author != license.Author {
+		t.Errorf("the report names %q as the author, expected %q", report.Author, license.Author)
 	}
 	if report.Notices.SyntheticData != license.SyntheticDataNotice {
 		t.Error("the machine readable report drops the notice that every value is synthetic")

@@ -9,6 +9,14 @@ package license
 
 import "github.com/donislawdev/qadatagenerator/internal/version"
 
+// Author is who wrote this tool and holds the copyright of its code and of the
+// specification, the name the two licenses below are granted by.
+//
+// It is in the license report rather than beside the version numbers because a
+// compliance answer asks who grants the terms as well as which terms they are,
+// and both surfaces print this report: the --license flag and the About screen.
+const Author = "DonislawDev"
+
 // Code is the license of everything this project compiles.
 //
 // Only version 3, without the usual "or any later version" clause. The clause
@@ -571,7 +579,10 @@ var ThirdParty = []Component{
 // flag could not have been built before the registry settled, which is what let
 // it exist now rather than after the release.
 type Report struct {
-	Tool       string       `json:"tool_version"`
+	Tool string `json:"tool_version"`
+	// Author is added the way Embedded was, under the rule on this shape: a
+	// consumer that does not know the field ignores it.
+	Author     string       `json:"author"`
 	Code       Terms        `json:"code"`
 	Spec       Terms        `json:"spec"`
 	Components []Component  `json:"components"`
@@ -619,6 +630,7 @@ func Current() Report {
 		// version numbers: they are written to be read by every layer and know
 		// none of them.
 		Tool:       version.Tool,
+		Author:     Author,
 		Code:       Terms{License: Code},
 		Spec:       Terms{License: Spec, Scope: SpecScope},
 		Components: components,
