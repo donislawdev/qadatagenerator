@@ -428,6 +428,11 @@ func FieldFace(value, rung string, width float32) fyne.CanvasObject {
 // person who has to see it (B-363). Focus is shown by the colour of that same
 // edge, so on a refused field it is drawn as a second edge just inside the
 // first rather than being lost under the red.
+//
+// 🔴 That ring is the one exception to the rule that focus is never a ring
+// inside a control, and it is the owner's decision rather than an oversight
+// (DEC-280). Moving focus back to the edge would hide the red while somebody
+// types, which is the moment it exists for.
 func FieldGround(look FieldLook) fyne.CanvasObject {
 	if look.Disabled {
 		return disabledGround()
