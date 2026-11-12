@@ -341,6 +341,27 @@ type Shaped interface {
 	Masks() []string
 }
 
+// CountryScoped is a scheme that belongs to no one country and produces values
+// for some countries only, such as an account number this build writes for
+// Poland alone.
+//
+// # Why the scheme says it rather than a sentence beside it
+//
+// For the reason a mask exists: a sentence about which countries a scheme
+// covers would sit in a translation file and go stale the day a second country
+// was taught, while a list the provider returns is held against the values it
+// produces by the test beside the provider. The surfaces read the list to
+// shelve the kind and to say where its values come from (DEC-281).
+//
+// A scheme whose identifier carries a country (DEC-47) does not implement this,
+// because the identifier already says it. Neither does one produced the same
+// way for every country, since a list of all of them would say nothing.
+type CountryScoped interface {
+	// Countries are the ISO 3166-1 alpha-2 codes of the countries whose values
+	// this provider produces, sorted, never empty.
+	Countries() []string
+}
+
 // The two characters a mask uses for a place that varies. Everything else in a
 // mask stands for itself.
 //

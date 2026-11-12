@@ -1113,6 +1113,46 @@
 																					<rectangle size="71x32"/>
 																					<container size="71x32">
 																						<spacer size="71x7"/>
+																						<text pos="0,7" size="71x16">iban</text>
+																						<spacer pos="0,24" size="71x7"/>
+																					</container>
+																				</container>
+																				<container pos="83,0" size="127x32">
+																					<spacer size="127x7"/>
+																					<text color="disabled" pos="0,7" size="127x16">Bank account number</text>
+																					<spacer pos="0,24" size="127x7"/>
+																				</container>
+																			</container>
+																			<container pos="362,0" size="69x32">
+																				<container size="42x32">
+																					<spacer size="42x8"/>
+																					<text color="disabled" pos="0,8" size="42x14" textSize="11">26 digits</text>
+																					<spacer pos="0,23" size="42x8"/>
+																				</container>
+																				<container pos="54,0" size="15x32">
+																					<rectangle size="15x32"/>
+																					<rectangle size="15x32"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</widget>
+													<widget pos="0,252" size="456x40" type="*parts.TapRow">
+														<container size="456x40">
+															<container size="456x40">
+																<rectangle size="456x40"/>
+																<container size="456x40">
+																	<rectangle size="456x40"/>
+																	<container size="456x40">
+																		<container pos="12,4" size="432x32">
+																			<container size="362x32">
+																				<container size="71x32">
+																					<rectangle size="71x32"/>
+																					<container size="71x32">
+																						<spacer size="71x7"/>
 																						<text pos="0,7" size="71x16">nip</text>
 																						<spacer pos="0,24" size="71x7"/>
 																					</container>
@@ -1140,7 +1180,7 @@
 															</container>
 														</container>
 													</widget>
-													<widget pos="0,252" size="456x40" type="*parts.TapRow">
+													<widget pos="0,296" size="456x40" type="*parts.TapRow">
 														<container size="456x40">
 															<container size="456x40">
 																<rectangle size="456x40"/>
@@ -1181,7 +1221,7 @@
 															</container>
 														</container>
 													</widget>
-													<widget pos="0,296" size="456x40" type="*parts.TapRow">
+													<widget pos="0,340" size="456x40" type="*parts.TapRow">
 														<container size="456x40">
 															<container size="456x40">
 																<rectangle size="456x40"/>
@@ -1221,10 +1261,10 @@
 															</container>
 														</container>
 													</widget>
-													<container pos="0,340" size="456x34">
+													<container pos="0,384" size="456x34">
 														<text bold color="focus" pos="12,16" size="440x14" textSize="11">INTERNATIONAL</text>
 													</container>
-													<widget pos="0,378" size="456x40" type="*parts.TapRow">
+													<widget pos="0,422" size="456x40" type="*parts.TapRow">
 														<container size="456x40">
 															<container size="456x40">
 																<rectangle size="456x40"/>
@@ -1264,7 +1304,7 @@
 															</container>
 														</container>
 													</widget>
-													<widget pos="0,422" size="456x40" type="*parts.TapRow">
+													<widget pos="0,466" size="456x40" type="*parts.TapRow">
 														<container size="456x40">
 															<container size="456x40">
 																<rectangle size="456x40"/>
@@ -1291,46 +1331,6 @@
 																				<container size="42x32">
 																					<spacer size="42x8"/>
 																					<text color="disabled" pos="0,8" size="42x14" textSize="11">13 digits</text>
-																					<spacer pos="0,23" size="42x8"/>
-																				</container>
-																				<container pos="54,0" size="15x32">
-																					<rectangle size="15x32"/>
-																					<rectangle size="15x32"/>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<widget pos="0,466" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="362x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">iban</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="127x32">
-																					<spacer size="127x7"/>
-																					<text color="disabled" pos="0,7" size="127x16">Bank account number</text>
-																					<spacer pos="0,24" size="127x7"/>
-																				</container>
-																			</container>
-																			<container pos="362,0" size="69x32">
-																				<container size="42x32">
-																					<spacer size="42x8"/>
-																					<text color="disabled" pos="0,8" size="42x14" textSize="11">26 digits</text>
 																					<spacer pos="0,23" size="42x8"/>
 																				</container>
 																				<container pos="54,0" size="15x32">

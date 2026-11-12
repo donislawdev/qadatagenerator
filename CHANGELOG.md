@@ -238,6 +238,12 @@ repository once they are released.
 
 ### Changed
 
+- **The bank account number is listed under Poland and says its numbers are
+  Polish.** It is an international standard, and this build generates Polish
+  account numbers only, starting with `PL`. Quick value now lists it under
+  Poland rather than under International and adds Generated for: Poland
+  beside the values. `qadg help generators` describes it as
+  `identifier (iban, PL only)`. Nothing about the numbers themselves changed.
 - **The How many field of Quick value turns red as you type a number it would
   refuse.** Nought and anything over the limit of the screen get a red edge at
   once, before Generate is pressed, and the edge goes back to normal as soon as

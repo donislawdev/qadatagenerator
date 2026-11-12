@@ -67,6 +67,30 @@ func TestEveryGeneratedAccountNumberIsOneThisBuildChecksInFull(t *testing.T) {
 	}
 }
 
+// The countries the provider names are the countries of the values it produces,
+// both ways round: a country named and never produced would shelve the kind
+// under a promise, and one produced and not named would leave a surface saying
+// less than the values do (DEC-281).
+func TestTheCountriesTheAccountNumberNamesAreTheOnesItProduces(t *testing.T) {
+	named := intl.IBAN{}.Countries()
+	if len(named) == 0 {
+		t.Fatal("the provider names no country, which the contract forbids")
+	}
+	produced := map[string]bool{}
+	for row := int64(0); row < 500; row++ {
+		produced[generated(t, "iban countries", row)[:2]] = true
+	}
+	for _, country := range named {
+		if !produced[country] {
+			t.Errorf("the provider names %s and 500 values carried none from it", country)
+		}
+		delete(produced, country)
+	}
+	for country := range produced {
+		t.Errorf("a value from %s was produced and the provider does not name that country", country)
+	}
+}
+
 // The settlement number names a bank, and the act in force gives it a check
 // digit of its own. A generated value failing that rule would be one the central
 // bank could not have assigned, and this provider would then be refusing its own

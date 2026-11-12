@@ -432,6 +432,10 @@ const (
 	QuickAboutProduces   Key = "quick.about.produces"
 	QuickAboutCheckDigit Key = "quick.about.check-digit"
 	QuickAboutRange      Key = "quick.about.range"
+	// QuickAboutCountries heads the countries a scheme of no one country
+	// produces values for, where it covers some only (DEC-281). The names
+	// under it are the country.XX keys the headings of the list use.
+	QuickAboutCountries Key = "quick.about.countries"
 	// QuickAboutFormat heads the written form of one value, and the two
 	// after it are what the places in that form may hold.
 	//
@@ -610,7 +614,7 @@ var windowKeys = []Key{
 
 	QuickNothingWritten, QuickLabelValue, QuickValueHeading, QuickValuesCounted,
 	QuickAboutProduces, QuickAboutCheckDigit, QuickAboutRange,
-	QuickAboutFormat, QuickAboutDigits, QuickAboutLettersOrDigits, QuickAboutOr,
+	QuickAboutFormat, QuickAboutCountries, QuickAboutDigits, QuickAboutLettersOrDigits, QuickAboutOr,
 	QuickAboutCheckDigitCarried, QuickAboutCheckDigitNone,
 	QuickAboutRangeReserved, QuickAboutRangeNone,
 	QuickAboutHarbour, QuickAboutUnavailable,

@@ -75,8 +75,9 @@ type IBAN struct{}
 // Contract checks, so that a mismatch between what this provider claims and
 // what it implements fails to compile rather than at run time.
 var (
-	_ provider.Provider     = IBAN{}
-	_ provider.CheckDigited = IBAN{}
+	_ provider.Provider      = IBAN{}
+	_ provider.CheckDigited  = IBAN{}
+	_ provider.CountryScoped = IBAN{}
 )
 
 const (
@@ -194,6 +195,12 @@ func (IBAN) Masks() []string {
 func (IBAN) Capabilities() []capability.Name {
 	return []capability.Name{capability.IdentifierCheckDigit}
 }
+
+// Countries are the countries whose account numbers this build generates, which
+// is Poland alone for the reason Generate gives. A country taught here belongs
+// in this list as well as in Masks, and the test beside this provider holds the
+// list to the country codes of the values it produces.
+func (IBAN) Countries() []string { return []string{polishCountry} }
 
 // Generate produces one Polish account number for the place described by the
 // request.

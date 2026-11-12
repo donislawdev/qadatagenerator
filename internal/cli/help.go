@@ -176,12 +176,20 @@ func renderGenerators() string {
 
 // producedBy says what one generator makes, naming the numbering scheme behind
 // it when there is one.
+//
+// A scheme of no one country that covers some countries only names them too,
+// because the columns beside it answer a different question: an account number
+// is produced in every locale, and in each of them it is Polish (DEC-281).
 func producedBy(source values.Source, generator string) string {
 	kind, _ := source.TypeOf(generator)
-	if scheme, behind := source.ProviderOf(generator); behind {
-		return kind + " (" + scheme + ")"
+	scheme, behind := source.ProviderOf(generator)
+	if !behind {
+		return kind
 	}
-	return kind
+	if countries := source.CountriesOf(generator); len(countries) > 0 {
+		return kind + " (" + scheme + ", " + strings.Join(countries, ", ") + generatorsOnly + ")"
+	}
+	return kind + " (" + scheme + ")"
 }
 
 // declareVerbHelp gives a command the two spellings of the help flag and

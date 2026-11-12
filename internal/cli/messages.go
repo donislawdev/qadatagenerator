@@ -397,7 +397,10 @@ const (
 	generatorsColumnProduces = "produces"
 	generatorsYes            = "yes"
 	generatorsNo             = "no"
-	generatorsLocaleNote     = "The columns are the locales this build carries word lists for. A recipe may name\n" +
+	// generatorsOnly follows the countries a scheme of no one country covers,
+	// as in "identifier (iban, PL only)".
+	generatorsOnly       = " only"
+	generatorsLocaleNote = "The columns are the locales this build carries word lists for. A recipe may name\n" +
 		"another one, and then only the generators that need no list can be filled."
 	generatorsMissingIntro = "Where a column says no, this build has nothing to draw from:"
 

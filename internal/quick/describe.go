@@ -70,6 +70,11 @@ type Description struct {
 	// Unavailable is why this build cannot produce the kind in the locale
 	// asked about, and is empty when it can.
 	Unavailable string
+	// Countries are the ISO 3166-1 alpha-2 codes of the countries a scheme of
+	// no one country produces values for, where it covers some only. Empty
+	// for a scheme whose identifier carries its country and for a kind with
+	// no scheme.
+	Countries []string
 	// Group is the shelf a surface listing every kind puts this one on.
 	Group Group
 }
@@ -99,7 +104,9 @@ type Group struct {
 
 // The kinds of group.
 const (
-	// GroupCountry is a kind whose scheme belongs to one country.
+	// GroupCountry is a kind whose values belong to one country: its scheme
+	// carries the country, or a scheme of no one country produces values for
+	// that one alone (DEC-281).
 	GroupCountry = "country"
 	// GroupInternational is a kind whose scheme belongs to no country.
 	GroupInternational = "international"
@@ -111,10 +118,23 @@ const (
 
 // groupOf reads the shelf off a scheme, or off a declared topic where there is
 // no scheme.
-func groupOf(scheme string, topic string) Group {
+//
+// # Why a scheme of no country can stand under one
+//
+// Because a person choosing a kind is choosing values, and the heading is the
+// first thing that says where those come from. An account number is a standard
+// of no country, and the values this build writes are Polish. Under the
+// international heading it would promise accounts of every country, so a kind
+// whose values come from one country stands under that country (DEC-281). The
+// day a second country is taught, the list grows past one and the kind goes
+// back to the international heading without a word changed here.
+func groupOf(scheme, topic string, countries []string) Group {
 	if scheme != "" {
 		if dot := strings.Index(scheme, "."); dot > 0 {
 			return Group{Kind: GroupCountry, Country: scheme[:dot]}
+		}
+		if len(countries) == 1 {
+			return Group{Kind: GroupCountry, Country: countries[0]}
 		}
 		return Group{Kind: GroupInternational}
 	}
@@ -151,7 +171,8 @@ func Describe(generator, locale string) Description {
 
 	scheme, behind := source.ProviderOf(generator)
 	topic, _ := source.TopicOf(generator)
-	about.Group = groupOf(scheme, topic)
+	about.Countries = source.CountriesOf(generator)
+	about.Group = groupOf(scheme, topic, about.Countries)
 	if !behind {
 		return about
 	}

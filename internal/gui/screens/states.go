@@ -116,10 +116,15 @@ func quickStatesOfAValue() []State {
 			Purpose: "a value that takes account of neither field, where neither field " +
 				"is on screen rather than sitting there doing nothing",
 			Screen: screenQuick,
-			// An American identifier rather than a city, and the render is
-			// what settled it: this build carries no cities for en-US, so the
-			// state meant to show a plain value showed a refusal instead.
+			// An identifier that reads neither field in any locale.
 			Quick: Quick{Generator: "ssn", Seed: "for-the-picture"},
+		},
+		{
+			Name: "quick-country",
+			Purpose: "a scheme of no one country that produces values for one, which " +
+				"the panel beside them names under Generated for (DEC-281)",
+			Screen: screenQuick,
+			Quick:  Quick{Generator: "iban", Seed: "for-the-picture"},
 		},
 	}
 }

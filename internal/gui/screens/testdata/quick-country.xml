@@ -1,0 +1,863 @@
+<canvas padded size="1342x900">
+	<content>
+		<container size="1342x900">
+			<container size="220x900">
+				<rectangle fillColor="menuBackground" size="220x900"/>
+				<container size="220x900">
+					<container size="220x900">
+						<container size="220x62">
+							<container pos="8,4" size="208x34">
+								<rectangle size="208x34"/>
+								<container size="208x34">
+									<container size="3x34">
+										<rectangle size="3x34"/>
+										<rectangle size="3x34"/>
+									</container>
+									<container pos="3,0" size="205x34">
+										<container pos="12,0" size="193x34">
+											<spacer size="193x8"/>
+											<text bold pos="0,8" size="193x16">QA Data Generator</text>
+											<spacer pos="0,25" size="193x8"/>
+										</container>
+									</container>
+								</container>
+							</container>
+						</container>
+						<container pos="0,62" size="220x838">
+							<container size="220x30">
+								<container pos="8,12" size="208x14">
+									<container size="3x14">
+										<rectangle size="3x14"/>
+										<rectangle size="3x14"/>
+									</container>
+									<container pos="3,0" size="205x14">
+										<text bold color="focus" pos="12,0" size="193x14" textSize="11">MAKE DATA</text>
+									</container>
+								</container>
+							</container>
+							<container pos="0,30" size="220x42">
+								<container size="3x42">
+									<rectangle size="3x42"/>
+									<rectangle fillColor="focus" size="3x42"/>
+								</container>
+								<container pos="3,0" size="217x42">
+									<widget pos="8,4" size="201x34" type="*parts.Button">
+										<container size="201x34">
+											<container size="201x34">
+												<rectangle size="201x34"/>
+												<container size="201x34">
+													<rectangle fillColor="rgba(37,51,72,255)" radius="6" size="201x34"/>
+													<container size="201x34">
+														<container pos="12,4" size="177x26">
+															<container size="90x26">
+																<container size="15x26">
+																	<spacer size="15x5"/>
+																	<image fillMode="contain" pos="0,5" rsc="zap-72abff-15.svg" size="15x15"/>
+																	<spacer pos="0,20" size="15x5"/>
+																</container>
+																<container pos="23,0" size="67x26">
+																	<spacer size="67x4"/>
+																	<text pos="0,4" size="67x16">Quick value</text>
+																	<spacer pos="0,21" size="67x4"/>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</container>
+										</container>
+									</widget>
+								</container>
+							</container>
+							<container pos="0,72" size="220x42">
+								<container size="3x42">
+									<rectangle size="3x42"/>
+									<rectangle size="3x42"/>
+								</container>
+								<container pos="3,0" size="217x42">
+									<widget pos="8,4" size="201x34" type="*parts.Button">
+										<container size="201x34">
+											<container size="201x34">
+												<rectangle size="201x34"/>
+												<container size="201x34">
+													<rectangle size="201x34"/>
+													<container size="201x34">
+														<container pos="12,4" size="177x26">
+															<container size="101x26">
+																<container size="15x26">
+																	<spacer size="15x5"/>
+																	<image fillMode="contain" pos="0,5" rsc="file-x-72abff-15.svg" size="15x15"/>
+																	<spacer pos="0,20" size="15x5"/>
+																</container>
+																<container pos="23,0" size="78x26">
+																	<spacer size="78x4"/>
+																	<text pos="0,4" size="78x16">Damage a file</text>
+																	<spacer pos="0,21" size="78x4"/>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</container>
+										</container>
+									</widget>
+								</container>
+							</container>
+							<container pos="0,114" size="220x42">
+								<container size="3x42">
+									<rectangle size="3x42"/>
+									<rectangle size="3x42"/>
+								</container>
+								<container pos="3,0" size="217x42">
+									<widget pos="8,4" size="201x34" type="*parts.Button">
+										<container size="201x34">
+											<container size="201x34">
+												<rectangle size="201x34"/>
+												<container size="201x34">
+													<rectangle size="201x34"/>
+													<container size="201x34">
+														<container pos="12,4" size="177x26">
+															<container size="62x26">
+																<container size="15x26">
+																	<spacer size="15x5"/>
+																	<image fillMode="contain" pos="0,5" rsc="file-cog-72abff-15.svg" size="15x15"/>
+																	<spacer pos="0,20" size="15x5"/>
+																</container>
+																<container pos="23,0" size="39x26">
+																	<spacer size="39x4"/>
+																	<text pos="0,4" size="39x16">Recipe</text>
+																	<spacer pos="0,21" size="39x4"/>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</container>
+										</container>
+									</widget>
+								</container>
+							</container>
+							<container pos="0,156" size="220x30">
+								<container pos="8,12" size="208x14">
+									<container size="3x14">
+										<rectangle size="3x14"/>
+										<rectangle size="3x14"/>
+									</container>
+									<container pos="3,0" size="205x14">
+										<text bold color="focus" pos="12,0" size="193x14" textSize="11">VERIFY</text>
+									</container>
+								</container>
+							</container>
+							<container pos="0,186" size="220x42">
+								<container size="3x42">
+									<rectangle size="3x42"/>
+									<rectangle size="3x42"/>
+								</container>
+								<container pos="3,0" size="217x42">
+									<widget pos="8,4" size="201x34" type="*parts.Button">
+										<container size="201x34">
+											<container size="201x34">
+												<rectangle size="201x34"/>
+												<container size="201x34">
+													<rectangle size="201x34"/>
+													<container size="201x34">
+														<container pos="12,4" size="177x26">
+															<container size="101x26">
+																<container size="15x26">
+																	<spacer size="15x5"/>
+																	<image fillMode="contain" pos="0,5" rsc="clipboard-check-72abff-15.svg" size="15x15"/>
+																	<spacer pos="0,20" size="15x5"/>
+																</container>
+																<container pos="23,0" size="78x26">
+																	<spacer size="78x4"/>
+																	<text pos="0,4" size="78x16">Check results</text>
+																	<spacer pos="0,21" size="78x4"/>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</container>
+										</container>
+									</widget>
+								</container>
+							</container>
+							<spacer pos="0,228" size="220x536"/>
+							<widget pos="0,764" size="220x1" type="*widget.Separator">
+								<rectangle fillColor="separator" size="220x1"/>
+							</widget>
+							<container pos="0,765" size="220x42">
+								<container size="3x42">
+									<rectangle size="3x42"/>
+									<rectangle size="3x42"/>
+								</container>
+								<container pos="3,0" size="217x42">
+									<widget pos="8,4" size="201x34" type="*parts.Button">
+										<container size="201x34">
+											<container size="201x34">
+												<rectangle size="201x34"/>
+												<container size="201x34">
+													<rectangle size="201x34"/>
+													<container size="201x34">
+														<container pos="12,4" size="177x26">
+															<container size="58x26">
+																<container size="15x26">
+																	<spacer size="15x5"/>
+																	<image fillMode="contain" pos="0,5" rsc="info-72abff-15.svg" size="15x15"/>
+																	<spacer pos="0,20" size="15x5"/>
+																</container>
+																<container pos="23,0" size="35x26">
+																	<spacer size="35x4"/>
+																	<text pos="0,4" size="35x16">About</text>
+																	<spacer pos="0,21" size="35x4"/>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</container>
+										</container>
+									</widget>
+								</container>
+							</container>
+							<container pos="0,807" size="220x30">
+								<container pos="8,4" size="208x14">
+									<container size="3x14">
+										<rectangle size="3x14"/>
+										<rectangle size="3x14"/>
+									</container>
+									<container pos="3,0" size="205x14">
+										<text color="disabled" pos="12,0" size="193x14" textSize="11">v0.1.0  ·  fully offline</text>
+									</container>
+								</container>
+							</container>
+						</container>
+					</container>
+				</container>
+			</container>
+			<container pos="220,0" size="1122x900">
+				<container size="1122x55">
+					<widget pos="32,24" size="1058x31" type="*widget.Label">
+						<widget size="1058x31" type="*widget.RichText">
+							<text bold pos="4,4" size="97x23" textSize="18">Quick value</text>
+						</widget>
+					</widget>
+				</container>
+				<container pos="0,55" size="1122x844">
+					<container size="1122x844">
+						<container size="1122x117">
+							<container pos="32,16" size="1058x85">
+								<text color="disabled" size="1058x16">Make test values to copy into a form or a test. Nothing on this screen is written to a file.</text>
+								<container pos="0,32" size="1058x52">
+									<container size="1058x52">
+										<container size="442x52">
+											<container size="339x52">
+												<container size="118x52">
+													<text color="disabled" size="118x14" textSize="11">Kind</text>
+													<widget pos="0,18" size="118x34" type="*parts.Select">
+														<container size="118x34">
+															<container size="118x34">
+																<rectangle size="118x34"/>
+																<container size="118x34">
+																	<container size="118x34">
+																		<rectangle fillColor="button" pos="1,1" radius="6" size="116x32" strokeColor="inputBorder" strokeWidth="2"/>
+																	</container>
+																	<container size="118x34">
+																		<container pos="12,4" size="98x26">
+																			<container size="71x26">
+																				<spacer size="71x4"/>
+																				<text pos="0,4" size="71x16">iban</text>
+																				<spacer pos="0,21" size="71x4"/>
+																			</container>
+																			<container pos="71,0" size="27x26">
+																				<container pos="8,4" size="15x18">
+																					<spacer size="15x1"/>
+																					<image fillMode="contain" pos="0,1" rsc="chevron-down-acb4bd-15.svg" size="15x15"/>
+																					<spacer pos="0,16" size="15x1"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</widget>
+												</container>
+												<container pos="130,0" size="63x52">
+													<text color="disabled" size="63x14" textSize="11">How many</text>
+													<container pos="0,18" size="63x34">
+														<rectangle size="63x34"/>
+														<container size="63x34">
+															<rectangle size="63x34"/>
+															<container size="63x34">
+																<container size="63x34">
+																	<rectangle fillColor="button" pos="1,1" radius="6" size="61x32" strokeColor="inputBorder" strokeWidth="2"/>
+																</container>
+																<container size="63x34">
+																	<widget pos="8,8" size="47x26" type="*container.ThemeOverride">
+																		<container size="47x26">
+																			<widget size="47x26" type="*parts.FieldEntry">
+																				<rectangle pos="2,2" radius="6" size="43x22"/>
+																				<widget pos="0,2" size="47x22" type="*widget.Scroll">
+																					<widget size="47x22" type="*widget.entryContent">
+																						<widget size="47x22" type="*widget.RichText">
+																							<text pos="4,2" size="15x16">10</text>
+																						</widget>
+																					</widget>
+																				</widget>
+																			</widget>
+																		</container>
+																	</widget>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+												<container pos="205,0" size="134x52">
+													<text color="disabled" size="134x14" textSize="11">Seed</text>
+													<container pos="0,18" size="134x34">
+														<rectangle size="134x34"/>
+														<container size="134x34">
+															<rectangle size="134x34"/>
+															<container size="134x34">
+																<container size="134x34">
+																	<rectangle fillColor="button" pos="1,1" radius="6" size="132x32" strokeColor="inputBorder" strokeWidth="2"/>
+																</container>
+																<container size="134x34">
+																	<widget pos="8,8" size="118x26" type="*container.ThemeOverride">
+																		<container size="118x26">
+																			<widget size="118x26" type="*parts.FieldEntry">
+																				<rectangle pos="2,2" radius="6" size="114x22"/>
+																				<widget pos="0,2" size="118x22" type="*widget.Scroll">
+																					<widget size="118x22" type="*widget.entryContent">
+																						<widget size="118x22" type="*widget.RichText">
+																							<text pos="4,2" size="86x16">for-the-picture</text>
+																						</widget>
+																					</widget>
+																				</widget>
+																			</widget>
+																		</container>
+																	</widget>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</container>
+											<container pos="339,0" size="103x52">
+												<container pos="16,0" size="87x52">
+													<container size="87x14">
+														<rectangle size="87x14"/>
+														<rectangle size="87x14"/>
+													</container>
+													<widget pos="0,18" size="87x34" type="*parts.Button">
+														<container size="87x34">
+															<container size="87x34">
+																<rectangle size="87x34"/>
+																<container size="87x34">
+																	<rectangle fillColor="rgba(41,113,213,255)" radius="6" size="87x34"/>
+																	<container size="87x34">
+																		<container pos="16,4" size="55x26">
+																			<container pos="0,4" size="55x16">
+																				<container size="55x16">
+																					<spacer size="55x0"/>
+																					<text bold color="foregroundOnPrimary" size="55x16">Generate</text>
+																					<spacer pos="0,16" size="55x0"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</widget>
+												</container>
+											</container>
+										</container>
+										<spacer pos="442,0" size="615x52"/>
+									</container>
+								</container>
+							</container>
+						</container>
+						<container pos="0,117" size="1122x669">
+							<container pos="32,24" size="1058x621">
+								<container size="700x621">
+									<container size="700x621">
+										<container size="700x82">
+											<container pos="4,4" size="692x66">
+												<container size="692x34">
+													<spacer pos="62,0" size="432x34"/>
+													<container size="62x34">
+														<spacer size="62x7"/>
+														<text bold pos="0,7" size="62x18" textSize="14">10 values</text>
+														<spacer pos="0,26" size="62x7"/>
+													</container>
+													<container pos="494,0" size="197x34">
+														<widget size="101x34" type="*parts.Button">
+															<container size="101x34">
+																<container size="101x34">
+																	<rectangle size="101x34"/>
+																	<container size="101x34">
+																		<container size="101x34">
+																			<rectangle pos="1,1" radius="6" size="99x32" strokeColor="inputBorder" strokeWidth="2"/>
+																		</container>
+																		<container size="101x34">
+																			<container pos="16,4" size="69x26">
+																				<container pos="0,4" size="69x16">
+																					<container size="15x16">
+																						<spacer size="15x0"/>
+																						<image fillMode="contain" rsc="copy-72abff-15.svg" size="15x15"/>
+																						<spacer pos="0,15" size="15x0"/>
+																					</container>
+																					<container pos="23,0" size="46x16">
+																						<spacer size="46x0"/>
+																						<text size="46x16">Copy all</text>
+																						<spacer pos="0,16" size="46x0"/>
+																					</container>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</widget>
+														<widget pos="109,0" size="87x34" type="*parts.Button">
+															<container size="87x34">
+																<container size="87x34">
+																	<rectangle size="87x34"/>
+																	<container size="87x34">
+																		<container size="87x34">
+																			<rectangle pos="1,1" radius="6" size="85x32" strokeColor="inputBorder" strokeWidth="2"/>
+																		</container>
+																		<container size="87x34">
+																			<container pos="16,4" size="55x26">
+																				<container pos="0,4" size="55x16">
+																					<container size="15x16">
+																						<spacer size="15x0"/>
+																						<image fillMode="contain" rsc="refresh-cw-72abff-15.svg" size="15x15"/>
+																						<spacer pos="0,15" size="15x0"/>
+																					</container>
+																					<container pos="23,0" size="32x16">
+																						<spacer size="32x0"/>
+																						<text size="32x16">Again</text>
+																						<spacer pos="0,16" size="32x0"/>
+																					</container>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</widget>
+													</container>
+												</container>
+												<widget pos="0,42" size="692x24" type="*widget.Label">
+													<widget size="692x24" type="*widget.RichText">
+														<text color="disabled" pos="4,4" size="328x16">Values are drawn rather than dealt, so some may repeat.</text>
+													</widget>
+												</widget>
+											</container>
+										</container>
+										<container pos="0,82" size="700x538">
+											<widget size="700x538" type="*parts.KeyScroll">
+												<container size="700x538">
+													<container size="700x538">
+														<rectangle fillColor="menuBackground" radius="10" size="700x538"/>
+														<container size="700x538">
+															<container pos="8,8" size="684x522">
+																<widget size="684x52" type="*parts.TapRow">
+																	<container size="684x52">
+																		<container size="684x52">
+																			<rectangle size="684x52"/>
+																			<container size="684x52">
+																				<container pos="16,4" size="652x44">
+																					<container size="297x44">
+																						<container size="13x44">
+																							<spacer size="13x14"/>
+																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 1</text>
+																							<spacer pos="0,29" size="13x14"/>
+																						</container>
+																						<container pos="29,0" size="268x44">
+																							<spacer size="268x11"/>
+																							<text monospace pos="0,11" size="268x20" textSize="16">PL21720505430388326568309147</text>
+																							<spacer pos="0,32" size="268x11"/>
+																						</container>
+																					</container>
+																					<rectangle pos="651,0" size="1x44"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</widget>
+																<widget pos="0,52" size="684x52" type="*parts.TapRow">
+																	<container size="684x52">
+																		<container size="684x52">
+																			<rectangle fillColor="button" size="684x52"/>
+																			<container size="684x52">
+																				<container pos="16,4" size="652x44">
+																					<container size="297x44">
+																						<container size="13x44">
+																							<spacer size="13x14"/>
+																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 2</text>
+																							<spacer pos="0,29" size="13x14"/>
+																						</container>
+																						<container pos="29,0" size="268x44">
+																							<spacer size="268x11"/>
+																							<text monospace pos="0,11" size="268x20" textSize="16">PL49167313274604006275517452</text>
+																							<spacer pos="0,32" size="268x11"/>
+																						</container>
+																					</container>
+																					<rectangle pos="651,0" size="1x44"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</widget>
+																<widget pos="0,104" size="684x52" type="*parts.TapRow">
+																	<container size="684x52">
+																		<container size="684x52">
+																			<rectangle size="684x52"/>
+																			<container size="684x52">
+																				<container pos="16,4" size="652x44">
+																					<container size="297x44">
+																						<container size="13x44">
+																							<spacer size="13x14"/>
+																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 3</text>
+																							<spacer pos="0,29" size="13x14"/>
+																						</container>
+																						<container pos="29,0" size="268x44">
+																							<spacer size="268x11"/>
+																							<text monospace pos="0,11" size="268x20" textSize="16">PL25266203541268665452621184</text>
+																							<spacer pos="0,32" size="268x11"/>
+																						</container>
+																					</container>
+																					<rectangle pos="651,0" size="1x44"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</widget>
+																<widget pos="0,156" size="684x52" type="*parts.TapRow">
+																	<container size="684x52">
+																		<container size="684x52">
+																			<rectangle fillColor="button" size="684x52"/>
+																			<container size="684x52">
+																				<container pos="16,4" size="652x44">
+																					<container size="297x44">
+																						<container size="13x44">
+																							<spacer size="13x14"/>
+																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 4</text>
+																							<spacer pos="0,29" size="13x14"/>
+																						</container>
+																						<container pos="29,0" size="268x44">
+																							<spacer size="268x11"/>
+																							<text monospace pos="0,11" size="268x20" textSize="16">PL34018465089412327019313674</text>
+																							<spacer pos="0,32" size="268x11"/>
+																						</container>
+																					</container>
+																					<rectangle pos="651,0" size="1x44"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</widget>
+																<widget pos="0,208" size="684x52" type="*parts.TapRow">
+																	<container size="684x52">
+																		<container size="684x52">
+																			<rectangle size="684x52"/>
+																			<container size="684x52">
+																				<container pos="16,4" size="652x44">
+																					<container size="297x44">
+																						<container size="13x44">
+																							<spacer size="13x14"/>
+																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 5</text>
+																							<spacer pos="0,29" size="13x14"/>
+																						</container>
+																						<container pos="29,0" size="268x44">
+																							<spacer size="268x11"/>
+																							<text monospace pos="0,11" size="268x20" textSize="16">PL90971516696434377185266540</text>
+																							<spacer pos="0,32" size="268x11"/>
+																						</container>
+																					</container>
+																					<rectangle pos="651,0" size="1x44"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</widget>
+																<widget pos="0,261" size="684x52" type="*parts.TapRow">
+																	<container size="684x52">
+																		<container size="684x52">
+																			<rectangle fillColor="button" size="684x52"/>
+																			<container size="684x52">
+																				<container pos="16,4" size="652x44">
+																					<container size="297x44">
+																						<container size="13x44">
+																							<spacer size="13x14"/>
+																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 6</text>
+																							<spacer pos="0,29" size="13x14"/>
+																						</container>
+																						<container pos="29,0" size="268x44">
+																							<spacer size="268x11"/>
+																							<text monospace pos="0,11" size="268x20" textSize="16">PL66342832933235052859740013</text>
+																							<spacer pos="0,32" size="268x11"/>
+																						</container>
+																					</container>
+																					<rectangle pos="651,0" size="1x44"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</widget>
+																<widget pos="0,313" size="684x52" type="*parts.TapRow">
+																	<container size="684x52">
+																		<container size="684x52">
+																			<rectangle size="684x52"/>
+																			<container size="684x52">
+																				<container pos="16,4" size="652x44">
+																					<container size="297x44">
+																						<container size="13x44">
+																							<spacer size="13x14"/>
+																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 7</text>
+																							<spacer pos="0,29" size="13x14"/>
+																						</container>
+																						<container pos="29,0" size="268x44">
+																							<spacer size="268x11"/>
+																							<text monospace pos="0,11" size="268x20" textSize="16">PL21369024286191510999386336</text>
+																							<spacer pos="0,32" size="268x11"/>
+																						</container>
+																					</container>
+																					<rectangle pos="651,0" size="1x44"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</widget>
+																<widget pos="0,365" size="684x52" type="*parts.TapRow">
+																	<container size="684x52">
+																		<container size="684x52">
+																			<rectangle fillColor="button" size="684x52"/>
+																			<container size="684x52">
+																				<container pos="16,4" size="652x44">
+																					<container size="297x44">
+																						<container size="13x44">
+																							<spacer size="13x14"/>
+																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 8</text>
+																							<spacer pos="0,29" size="13x14"/>
+																						</container>
+																						<container pos="29,0" size="268x44">
+																							<spacer size="268x11"/>
+																							<text monospace pos="0,11" size="268x20" textSize="16">PL31724802492638712416794818</text>
+																							<spacer pos="0,32" size="268x11"/>
+																						</container>
+																					</container>
+																					<rectangle pos="651,0" size="1x44"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</widget>
+																<widget pos="0,417" size="684x52" type="*parts.TapRow">
+																	<container size="684x52">
+																		<container size="684x52">
+																			<rectangle size="684x52"/>
+																			<container size="684x52">
+																				<container pos="16,4" size="652x44">
+																					<container size="297x44">
+																						<container size="13x44">
+																							<spacer size="13x14"/>
+																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 9</text>
+																							<spacer pos="0,29" size="13x14"/>
+																						</container>
+																						<container pos="29,0" size="268x44">
+																							<spacer size="268x11"/>
+																							<text monospace pos="0,11" size="268x20" textSize="16">PL67688607058655894906328981</text>
+																							<spacer pos="0,32" size="268x11"/>
+																						</container>
+																					</container>
+																					<rectangle pos="651,0" size="1x44"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</widget>
+																<widget pos="0,470" size="684x52" type="*parts.TapRow">
+																	<container size="684x52">
+																		<container size="684x52">
+																			<rectangle fillColor="button" size="684x52"/>
+																			<container size="684x52">
+																				<container pos="16,4" size="652x44">
+																					<container size="297x44">
+																						<container size="13x44">
+																							<spacer size="13x14"/>
+																							<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11">10</text>
+																							<spacer pos="0,29" size="13x14"/>
+																						</container>
+																						<container pos="29,0" size="268x44">
+																							<spacer size="268x11"/>
+																							<text monospace pos="0,11" size="268x20" textSize="16">PL24093366035587826345176269</text>
+																							<spacer pos="0,32" size="268x11"/>
+																						</container>
+																					</container>
+																					<rectangle pos="651,0" size="1x44"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</widget>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<rectangle radius="10" size="700x538" strokeWidth="2"/>
+										</container>
+									</container>
+								</container>
+								<container pos="700,0" size="358x621">
+									<container size="358x464">
+										<container size="358x464">
+											<container pos="24,4" size="330x456">
+												<rectangle size="330x456"/>
+												<container size="330x456">
+													<rectangle fillColor="menuBackground" radius="10" size="330x456"/>
+													<container size="330x456">
+														<container pos="16,16" size="298x424">
+															<text bold size="298x18" textSize="14">iban</text>
+															<container pos="0,34" size="298x35">
+																<text bold color="focus" size="298x14" textSize="11">PRODUCES</text>
+																<text monospace pos="0,18" size="298x16">identifier (iban)</text>
+															</container>
+															<container pos="0,85" size="298x43">
+																<text bold color="focus" size="298x14" textSize="11">GENERATED FOR</text>
+																<container pos="0,18" size="298x24">
+																	<widget size="298x24" type="*widget.Label">
+																		<widget size="298x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="40x16">Poland</text>
+																		</widget>
+																	</widget>
+																</container>
+															</container>
+															<container pos="0,144" size="298x68">
+																<text bold color="focus" size="298x14" textSize="11">FORMAT</text>
+																<text monospace pos="0,18" size="298x20" textSize="16">PL00000000000000000000000000</text>
+																<container pos="0,43" size="298x24">
+																	<widget size="298x24" type="*widget.Label">
+																		<widget size="298x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="50x16">26 digits</text>
+																		</widget>
+																	</widget>
+																</container>
+															</container>
+															<container pos="0,228" size="298x77">
+																<text bold color="focus" size="298x14" textSize="11">CHECK DIGIT</text>
+																<container pos="0,18" size="298x58">
+																	<widget size="298x58" type="*widget.Label">
+																		<widget size="298x58" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="272x16">Yes. One wrong character can be caught by the</text>
+																			<text color="disabled" pos="4,20" size="261x16">number itself, so an import that checks it can</text>
+																			<text color="disabled" pos="4,37" size="93x16">reject the value.</text>
+																		</widget>
+																	</widget>
+																</container>
+															</container>
+															<rectangle fillColor="separator" pos="0,321" size="298x1"/>
+															<container pos="0,338" size="298x85">
+																<container size="298x23">
+																	<container size="114x23">
+																		<rectangle fillColor="rgba(232,163,61,36)" radius="999" size="114x23"/>
+																		<container size="114x23">
+																			<container pos="8,4" size="98x15">
+																				<container size="15x15">
+																					<spacer size="15x0"/>
+																					<image fillMode="contain" rsc="triangle-alert-e8a33d-15.svg" size="15x15"/>
+																					<spacer pos="0,15" size="15x0"/>
+																				</container>
+																				<container pos="19,0" size="79x15">
+																					<spacer size="79x0"/>
+																					<text bold color="warning" size="79x14" textSize="11">Reserved range</text>
+																					<spacer pos="0,14" size="79x0"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																	<spacer pos="118,0" size="183x23"/>
+																</container>
+																<container pos="0,27" size="298x58">
+																	<widget size="298x58" type="*widget.Label">
+																		<widget size="298x58" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="289x16">No block of this scheme is set aside for testing, so</text>
+																			<text color="disabled" pos="4,20" size="251x16">a value here may match one that was really</text>
+																			<text color="disabled" pos="4,37" size="222x16">issued. Treat it as you would real data.</text>
+																		</widget>
+																	</widget>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</container>
+										</container>
+									</container>
+								</container>
+							</container>
+						</container>
+						<container pos="0,786" size="1122x58">
+							<rectangle fillColor="menuBackground" size="1122x58"/>
+							<container size="1122x58">
+								<container pos="32,12" size="1058x34">
+									<container pos="7,0" size="904x34">
+										<spacer size="904x4"/>
+										<widget pos="0,4" size="904x24" type="*widget.Label">
+											<widget size="904x24" type="*widget.RichText">
+												<text monospace pos="4,4" size="382x16">qadg quick --count 10 --seed for-the-picture iban</text>
+											</widget>
+										</widget>
+										<spacer pos="0,29" size="904x4"/>
+									</container>
+									<container size="7x34">
+										<spacer size="7x8"/>
+										<text color="focus" monospace pos="0,8" size="7x16">$</text>
+										<spacer pos="0,25" size="7x8"/>
+									</container>
+									<container pos="912,0" size="145x34">
+										<spacer size="145x0"/>
+										<widget size="145x34" type="*parts.Button">
+											<container size="145x34">
+												<container size="145x34">
+													<rectangle size="145x34"/>
+													<container size="145x34">
+														<container size="145x34">
+															<rectangle pos="1,1" radius="6" size="143x32" strokeColor="inputBorder" strokeWidth="2"/>
+														</container>
+														<container size="145x34">
+															<container pos="16,4" size="113x26">
+																<container pos="0,4" size="113x16">
+																	<container size="15x16">
+																		<spacer size="15x0"/>
+																		<image fillMode="contain" rsc="copy-72abff-15.svg" size="15x15"/>
+																		<spacer pos="0,15" size="15x0"/>
+																	</container>
+																	<container pos="23,0" size="90x16">
+																		<spacer size="90x0"/>
+																		<text size="90x16">Copy command</text>
+																		<spacer pos="0,16" size="90x0"/>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</container>
+										</widget>
+										<spacer pos="0,34" size="145x0"/>
+									</container>
+								</container>
+							</container>
+						</container>
+					</container>
+				</container>
+			</container>
+		</container>
+	</content>
+</canvas>

@@ -59,6 +59,36 @@ func TestHelpNamesEveryGeneratorThisBuildHasAndNothingElse(t *testing.T) {
 	}
 }
 
+// A scheme of no one country that covers some countries only says which in its
+// row, because the column of locales beside it says yes everywhere and an
+// account number asked for in en-US is still Polish (DEC-281). Held against the
+// register rather than against a name, so the next such scheme is covered too.
+func TestHelpNamesTheCountriesOfASchemeThatCoversSomeOnly(t *testing.T) {
+	got := run(commandHelp, subjectGenerators)
+	if got.code != 0 {
+		t.Fatalf("the run ended with %d and said %q", got.code, got.log)
+	}
+
+	source := values.New("", "guard")
+	scoped := 0
+	for _, name := range source.Names() {
+		countries := source.CountriesOf(name)
+		if len(countries) == 0 {
+			continue
+		}
+		scoped++
+		scheme, _ := source.ProviderOf(name)
+		said := "(" + scheme + ", " + strings.Join(countries, ", ") + generatorsOnly + ")"
+		if !strings.Contains(got.data, said) {
+			t.Errorf("%s produces for %v alone and its row does not say %q", name, countries, said)
+		}
+	}
+	if scoped == 0 {
+		t.Fatal("no generator covers some countries only, so this guard passed without " +
+			"looking at anything. It has to be rewritten rather than removed")
+	}
+}
+
 // 🔴 A column saying no without saying why would send somebody to look for a
 // mistake in their own recipe. Measured on this build: three pairs cannot be
 // produced, and each of them is a list this build does not carry rather than

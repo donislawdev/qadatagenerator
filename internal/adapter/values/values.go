@@ -255,6 +255,23 @@ func (s Source) ProviderOf(generator string) (string, bool) {
 	return known.behind.ID(), true
 }
 
+// CountriesOf names the countries a generator's scheme produces values for,
+// where that scheme belongs to no one country and covers some countries only.
+// It is empty for every other generator.
+//
+// The one place the provider's list is read, so the shelf a surface puts the
+// kind on and the words it says about it cannot name different countries.
+func (s Source) CountriesOf(generator string) []string {
+	known, found := producers[generator]
+	if !found || known.behind == nil {
+		return nil
+	}
+	if scoped, saysSo := known.behind.(provider.CountryScoped); saysSo {
+		return scoped.Countries()
+	}
+	return nil
+}
+
 // TopicOf says which shelf a generator without a scheme stands on, and whether
 // it stands on one at all.
 //

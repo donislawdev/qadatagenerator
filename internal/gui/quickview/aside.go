@@ -45,6 +45,11 @@ func (v *View) aside(generator string) fyne.CanvasObject {
 		paint.Strong(about.Generator, palette.TypeSection, palette.TextPrimary),
 		v.fact(i18n.QuickAboutProduces, produces(about)),
 	}
+	// Right under what the kind produces, because it narrows that line: the
+	// kind is an account number, and the account numbers are Polish (DEC-281).
+	if len(about.Countries) > 0 {
+		blocks = append(blocks, v.countries(about))
+	}
 
 	// 🔴 The two claims below are shown only for a kind that HAS a numbering
 	// scheme, and that is not a tidy up. A first name has no check digit in the
@@ -121,6 +126,17 @@ func (v *View) format(about quick.Description) fyne.CanvasObject {
 		lines = append(lines, paint.Mono(mask, palette.TypeValue, palette.TextPrimary))
 	}
 	lines = append(lines, v.paragraph(v.length(about.Masks)))
+	return paint.Column(palette.NameStepHairline, lines...)
+}
+
+// countries names the countries a scheme of no one country produces values for,
+// one to a line the way the forms of a scheme are, so that no separator has to
+// be written in this file.
+func (v *View) countries(about quick.Description) fyne.CanvasObject {
+	lines := []fyne.CanvasObject{paint.Caption(v.text.T(i18n.QuickAboutCountries))}
+	for _, country := range about.Countries {
+		lines = append(lines, v.paragraph(v.text.T(countryKey(country))))
+	}
 	return paint.Column(palette.NameStepHairline, lines...)
 }
 

@@ -1,6 +1,7 @@
 package quick_test
 
 import (
+	"slices"
 	"strings"
 	"testing"
 
@@ -110,6 +111,20 @@ func TestAnUnknownKindIsDescribedAsClaimingNothing(t *testing.T) {
 	}
 }
 
+// The account number stands under Poland, and says so, because Polish numbers
+// are the only ones it produces (DEC-281). Named rather than found by the walk
+// below, because the walk accepts a kind on either shelf as long as its facts
+// agree, and the decision is about which shelf.
+func TestTheAccountNumberStandsUnderTheOneCountryItProducesFor(t *testing.T) {
+	about := quick.Describe("iban", quick.DefaultLocale)
+	if about.Group != (quick.Group{Kind: quick.GroupCountry, Country: "PL"}) {
+		t.Errorf("the account number stands on %+v rather than under Poland", about.Group)
+	}
+	if !slices.Equal(about.Countries, []string{"PL"}) {
+		t.Errorf("the account number says it produces for %v rather than for Poland", about.Countries)
+	}
+}
+
 // Every kind this build has stands on a shelf a list can name, and the shelf
 // follows the scheme where there is one.
 //
@@ -129,12 +144,22 @@ func TestEveryKindStandsOnAShelfAListCanName(t *testing.T) {
 				if len(about.Group.Country) != 2 || about.Group.Country != strings.ToUpper(about.Group.Country) {
 					t.Errorf("%s is shelved under the country %q, which is not an alpha-2 code", generator, about.Group.Country)
 				}
-				if !strings.HasPrefix(about.Scheme, about.Group.Country+".") {
-					t.Errorf("%s is shelved under %s and its scheme is %q", generator, about.Group.Country, about.Scheme)
+				// The country comes from the scheme's identifier, or from
+				// the one country a scheme of no country produces for.
+				fromScheme := strings.HasPrefix(about.Scheme, about.Group.Country+".")
+				fromValues := !strings.Contains(about.Scheme, ".") &&
+					slices.Equal(about.Countries, []string{about.Group.Country})
+				if !fromScheme && !fromValues {
+					t.Errorf("%s is shelved under %s, its scheme is %q and it produces for %v",
+						generator, about.Group.Country, about.Scheme, about.Countries)
 				}
 			case quick.GroupInternational:
 				if about.Scheme == "" || strings.Contains(about.Scheme, ".") {
 					t.Errorf("%s is shelved as international and its scheme is %q", generator, about.Scheme)
+				}
+				if len(about.Countries) == 1 {
+					t.Errorf("%s is shelved as international and produces for %s alone",
+						generator, about.Countries[0])
 				}
 			case quick.GroupPeople, quick.GroupPlaces:
 				if about.Scheme != "" {
