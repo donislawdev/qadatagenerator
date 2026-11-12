@@ -36,15 +36,17 @@ type Implied struct {
 // name follows the gender and a PESEL follows the date of birth and the gender.
 // A declared rule is completed the same way, because a PESEL told to match the
 // gender alone used to carry a date of birth of its own beside a birth_date
-// column, and nobody writes a rule meaning that. Three things keep this from
+// column, and nobody writes a rule meaning that. Two things keep this from
 // being a guess:
 //
 //   - a role the rule already reads through a column it names is left alone,
 //     so a recipe that writes its rules out produces what it produced before,
 //   - a role played by two columns binds neither, because which of them a name
-//     follows is the recipe's to say, and the plan says so in a note,
-//   - a column a declared rule binds plays no role here, because a run resolves
-//     one level of agreement and a rule resting on a bound column is refused.
+//     follows is the recipe's to say, and the plan says so in a note.
+//
+// A column bound by a rule still plays its role, because a run draws the rules
+// of a row in the order inAgreementOrder gives: a state that follows its city
+// is drawn before the postal code that follows both (DEC-283).
 func Rules(entity recipe.Entity, values Values) []recipe.Rule {
 	rules, _ := keep(entity, values)
 	return rules
@@ -60,7 +62,7 @@ func implied(entity recipe.Entity, values Values) []recipe.Rule {
 // recipe: for each field, only the columns it follows that no rule names.
 func keep(entity recipe.Entity, values Values) (rules, added []recipe.Rule) {
 	bound := boundFields(entity.Consistency)
-	players := playersOf(entity, values, bound)
+	players := playersOf(entity, values)
 	for _, rule := range entity.Consistency {
 		if rule.Kind == recipe.Matches {
 			if extra := missing(entity, values, players, rule.Field, rule.With); len(extra) > 0 {
@@ -110,8 +112,7 @@ func missing(entity recipe.Entity, values Values, players map[string][]string,
 // what the recipe produced before rules were implied. What would be wrong is
 // saying nothing, since the reader expects the name to follow one of them.
 func unsure(entity recipe.Entity, values Values) []Note {
-	bound := boundFields(entity.Consistency)
-	players := playersOf(entity, values, bound)
+	players := playersOf(entity, values)
 	named := map[string][]string{}
 	for _, rule := range entity.Consistency {
 		named[rule.Field] = append(named[rule.Field], rule.With...)
@@ -149,13 +150,11 @@ func rolesOf(entity recipe.Entity, values Values, names []string) map[string]boo
 	return roles
 }
 
-// playersOf names the columns playing each role, leaving out the ones a
-// declared rule binds.
-func playersOf(entity recipe.Entity, values Values, bound map[string]bool) map[string][]string {
+// playersOf names the columns playing each role, bound by a rule or not.
+func playersOf(entity recipe.Entity, values Values) map[string][]string {
 	players := map[string][]string{}
 	for _, field := range entity.Fields {
-		role, plays := values.RoleOf(field.Generator)
-		if plays && !bound[field.Name] {
+		if role, plays := values.RoleOf(field.Generator); plays {
 			players[role] = append(players[role], field.Name)
 		}
 	}
@@ -171,27 +170,107 @@ func boundFields(rules []recipe.Rule) map[string]bool {
 	return bound
 }
 
-// chained refuses a rule that has to agree with a field another rule binds.
+// inAgreementOrder returns the rules of an entity in an order a row can be
+// drawn in, or refuses rules that wait on each other in a circle (DEC-283).
+//
+// # What one rule waits for
+//
+// A rule waits for every rule binding a column whose value it reads, and it
+// reads a column that plays a role its generator takes account of. A column
+// named in a rule and read by nobody is no reason to wait: a city told to match
+// its state reads nothing, so it cannot close a circle with the state that
+// follows it. A second rule for the same field waits for the first, so the
+// rule written last is still the one whose value stays, as it was.
+//
+// # Why the order is otherwise left alone
+//
+// Rules that wait for nothing keep the order they came in, and each value is
+// drawn at an address of its own field and row, so a recipe without a chain
+// produces the bytes it produced before chains were resolved.
 //
 // It is asked twice, by the plan and by the run, and the sentence is written
-// once. Until 2026-10-21 only the run asked, so validate called such a recipe
-// usable and generate then refused it on the first row.
-//
-// Only a bound field playing a role is refused, because only its value is
-// read. A rule naming a first name as well as a gender reads the gender alone,
-// and refusing it because the first name follows the gender would turn a recipe
-// that ran into one that does not, for the sake of a value nobody reads.
-func chained(entity recipe.Entity, rule recipe.Rule, bound map[string]bool, values Values) error {
-	for _, with := range rule.With {
-		field, known := entity.Field(with)
-		if !known || !bound[with] {
-			continue
+// once, so that validate refuses what generate refuses.
+func inAgreementOrder(entity recipe.Entity, rules []recipe.Rule, values Values) ([]recipe.Rule, error) {
+	waits := make([][]int, len(rules))
+	for at, rule := range rules {
+		waits[at] = waitsFor(entity, rules, at, rule, values)
+	}
+	placed := make([]bool, len(rules))
+	ordered := make([]recipe.Rule, 0, len(rules))
+	for len(ordered) < len(rules) {
+		moved := false
+		for at, rule := range rules {
+			if placed[at] || !allPlaced(waits[at], placed) {
+				continue
+			}
+			placed[at], moved = true, true
+			ordered = append(ordered, rule)
 		}
-		if _, plays := values.RoleOf(field.Generator); plays {
-			return fault.New(fault.Config, "entities."+entity.Name+
-				".consistency: "+rule.Field+" has to agree with "+with+
-				", which is itself bound by a rule, and this build resolves one level")
+		if !moved {
+			return nil, inACircle(entity, rules, placed)
 		}
 	}
-	return nil
+	return ordered, nil
+}
+
+// waitsFor names the rules the one at that place has to be drawn after.
+func waitsFor(entity recipe.Entity, rules []recipe.Rule, at int, rule recipe.Rule, values Values) []int {
+	var waits []int
+	for earlier := 0; earlier < at; earlier++ {
+		if rules[earlier].Field == rule.Field {
+			waits = append(waits, earlier)
+		}
+	}
+	subject, known := entity.Field(rule.Field)
+	if !known || subject.Generator == "" {
+		return waits
+	}
+	for _, with := range rule.With {
+		if !readsValueOf(entity, values, subject.Generator, with) {
+			continue
+		}
+		for other, binding := range rules {
+			if other != at && binding.Field == with {
+				waits = append(waits, other)
+			}
+		}
+	}
+	return waits
+}
+
+// readsValueOf reports whether a generator takes account of the value of that
+// column, which it does when the column plays a role the generator reads.
+func readsValueOf(entity recipe.Entity, values Values, generator, column string) bool {
+	field, known := entity.Field(column)
+	if !known {
+		return false
+	}
+	role, plays := values.RoleOf(field.Generator)
+	return plays && reads(values, generator, role)
+}
+
+func allPlaced(waits []int, placed []bool) bool {
+	for _, at := range waits {
+		if !placed[at] {
+			return false
+		}
+	}
+	return true
+}
+
+// inACircle refuses the rules left over, naming their fields once each in the
+// order the recipe gave them. Some of them may only wait on the circle rather
+// than close it, and the sentence says so rather than pretending to know which.
+func inACircle(entity recipe.Entity, rules []recipe.Rule, placed []bool) error {
+	var left []string
+	seen := map[string]bool{}
+	for at, rule := range rules {
+		if !placed[at] && !seen[rule.Field] {
+			seen[rule.Field] = true
+			left = append(left, rule.Field)
+		}
+	}
+	return fault.New(fault.Config, "entities."+entity.Name+".consistency: the rules of "+
+		strings.Join(left, ", ")+" wait on each other in a circle, so no row can draw "+
+		"them in any order").DoInstead("remove one of the rules that closes the circle")
 }

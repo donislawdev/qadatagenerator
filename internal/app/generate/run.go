@@ -65,7 +65,10 @@ func writeTable(planned dataset.Table, entity recipe.Entity, values Values, writ
 	if err := writer.Begin(planned); err != nil {
 		return err
 	}
-	table := newTableRun(planned, entity, values, source)
+	table, err := newTableRun(planned, entity, values, source)
+	if err != nil {
+		return err
+	}
 	for row := 0; row < planned.Rows; row++ {
 		// A table left without its End is not a problem here: what a stopped run
 		// wrote never gets its real name, so an unfinished table is thrown away
@@ -107,14 +110,21 @@ type tableRun struct {
 	domains map[string]askedDomain
 }
 
-func newTableRun(planned dataset.Table, entity recipe.Entity, values Values, source seed.Source) *tableRun {
-	rules := Rules(entity, values)
+// newTableRun prepares one table, with its rules in the order a row is drawn in.
+// The plan has refused a circle already, so the error here is reached only by a
+// run handed a plan that did not come from Prepare.
+func newTableRun(planned dataset.Table, entity recipe.Entity, values Values,
+	source seed.Source) (*tableRun, error) {
+	rules, err := inAgreementOrder(entity, Rules(entity, values), values)
+	if err != nil {
+		return nil, err
+	}
 	table := &tableRun{entity: entity, rows: planned.Rows, rules: rules, bound: boundFields(rules),
 		values: values, source: source, taken: newUniqueSet(entity), domains: make(map[string]askedDomain)}
 	if parts, held := keyParts(entity, values); held {
 		table.key = newKeySet(parts)
 	}
-	return table
+	return table, nil
 }
 
 // row produces one record, holding the primary key when the run holds it.
@@ -156,9 +166,10 @@ func (t *tableRun) row(row int) ([]string, error) {
 // build produces the values of one row.
 //
 // Fields that agree with nothing come first and fields bound by a consistency
-// rule come second, because the second kind is generated from the first. A rule
-// pointing at a field that is itself bound is refused rather than resolved in
-// whatever order the recipe happened to list them.
+// rule come second, because the second kind is generated from the first. The
+// rules are in the order inAgreementOrder gave them, so a field reading another
+// bound field is drawn after it, the postal code after the state that follows
+// its city (DEC-283).
 //
 // Forced values are the parts of a key the run chose by walking, and they take
 // the place of a draw.
@@ -219,20 +230,30 @@ func (t *tableRun) ordered(built map[string]string) []string {
 // first name is drawn from both lists.
 func agreementFor(rule recipe.Rule, entity recipe.Entity, built map[string]string,
 	bound map[string]bool, values Values) (provider.Agreement, error) {
-	if err := chained(entity, rule, bound, values); err != nil {
-		return provider.Agreement{}, err
-	}
+	subject, _ := entity.Field(rule.Field)
 	roles := make(map[string]string, len(rule.With))
 	for _, with := range rule.With {
 		field, known := entity.Field(with)
-		if !known || built[with] == "" {
+		if !known {
+			continue
+		}
+		// 🔴 Loud rather than an agreement with a hole in it. A bound column
+		// not drawn yet would look exactly like a blank one, and the value
+		// would be drawn as if it agreed with nothing.
+		value, drawn := built[with]
+		if !drawn && bound[with] && readsValueOf(entity, values, subject.Generator, with) {
+			return provider.Agreement{}, fault.New(fault.Runtime, "entities."+entity.Name+": "+
+				rule.Field+" was about to be drawn before "+with+", whose value it reads, so "+
+				"the rules of this table were not put in order")
+		}
+		if value == "" {
 			continue
 		}
 		role, plays := values.RoleOf(field.Generator)
 		if !plays {
 			continue
 		}
-		roles[role] = built[with]
+		roles[role] = value
 	}
 	return provider.NewAgreement(roles), nil
 }

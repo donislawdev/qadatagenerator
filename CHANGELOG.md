@@ -12,6 +12,19 @@ repository once they are released.
 
 ### BREAKING
 
+- **In en-US a postal code belongs to the city and the state of its row.** A
+  dataset with a postal code beside a city, a state or both gets a code of that
+  place, where it used to get a code from anywhere in the country. With the
+  same seed such a dataset now has different postal codes. A postal code with
+  no city and no state beside it is drawn exactly as before.
+- **A consistency rule may rest on a column another rule binds.** generate and
+  validate used to refuse such a recipe with exit code 3, saying the build
+  resolves one level. The rules of a table are now drawn in the order they
+  depend on each other, so a state that follows its city can be followed by
+  a postal code. Only rules that wait on each other in a circle are refused,
+  still with exit code 3. A column bound by a rule of yours still counts as
+  the one a first name or a PESEL follows, so such a recipe can get a rule it
+  did not write, which validate lists as "follows, though no rule says so".
 - **quick ends with exit code 2 when the value asked for has no data in the
   locale given.** `qadg quick postal_code --locale pl-PL` used to end with
   exit code 3 and advise generating a dataset or leaving a field out, neither

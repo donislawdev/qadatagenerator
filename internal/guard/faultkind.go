@@ -63,7 +63,7 @@ var RefusalKinds = map[string]string{
 	"internal/app/corrupt.Selector.somethingToDamage Config": "the policy excludes every field there is, so the policy asks for damage it has itself made impossible",
 	"internal/app/corrupt.UsablePerRow Config":               "per_row names something the engine does not know, which is a value in the policy",
 	"internal/app/corrupt.shareOf Config":                    "policy.rows is not a share this build can read, or is outside nought to a hundred. Both are the policy being wrong",
-	"internal/app/generate.chained Config":                   "a consistency rule points at a field that is itself bound by a rule, and this build resolves one level. The recipe has to be written differently. Moved out of agreementFor on 2026-10-21, when the plan began asking it too, so that validate refuses what generate refuses",
+	"internal/app/generate.inACircle Config":                 "the consistency rules of a table wait on each other in a circle, so the recipe describes an order of drawing that cannot exist (DEC-283)",
 	"internal/app/generate.checkGenerators Config":           "the recipe names a generator this build does not have",
 	"internal/app/generate.checkListed Config":               "an entry the recipe wrote under values is not of the type beside it or is longer than the field accepts, so the entry or the declaration is what has to change",
 	"internal/app/generate.inDependencyOrder Config":         "the relations form a loop, so the recipe describes an order that cannot exist",

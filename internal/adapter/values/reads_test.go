@@ -40,6 +40,9 @@ func TestEveryGeneratorReadsExactlyTheRolesTheRegisterSays(t *testing.T) {
 		// Chicago lies in Illinois alone and Houston almost always in Texas,
 		// so a region taking any account of the city has to move (DEC-278).
 		provider.RoleCity: {"Chicago", "Houston"},
+		// Two states with no code in common, so a postal code taking any
+		// account of the region has to move (DEC-282).
+		provider.RoleRegion: {"TX", "AK"},
 	}
 
 	// Every locale, because the register answers per locale and a surname
@@ -98,7 +101,10 @@ func measureOneLocale(t *testing.T, locale string, contrasts map[string][2]strin
 // measurement above cannot see it, because nothing reads a role that is not a
 // role either.
 func TestARoleTheRegisterNamesIsARoleThatExists(t *testing.T) {
-	known := map[string]bool{provider.RoleBirthDate: true, provider.RoleGender: true, provider.RoleCity: true}
+	known := map[string]bool{
+		provider.RoleBirthDate: true, provider.RoleGender: true,
+		provider.RoleCity: true, provider.RoleRegion: true,
+	}
 	for _, locale := range Locales() {
 		source := New(locale, "")
 		for _, generator := range source.Names() {

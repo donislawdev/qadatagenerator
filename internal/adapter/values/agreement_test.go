@@ -221,18 +221,22 @@ func TestARuleTheGeneratorIgnoresIsNamedInThePlan(t *testing.T) {
 	}
 }
 
-// A rule resting on a column another rule binds is refused by the plan, in the
-// words the run uses, so that validate refuses what generate would.
-func TestAChainOfRulesIsRefusedBeforeAnyRow(t *testing.T) {
-	rec := person(5, []recipe.Field{
-		field("first_name", "first_name"), field("gender", "gender"), field("pesel", "pesel"),
+// A rule resting on a column another rule binds is drawn after that rule, so the
+// value agrees with what the column holds in the end (DEC-283). The same recipe
+// was refused while a run resolved one level, and the gender here is bound by a
+// rule it takes no account of, which is the shape that recipe had.
+func TestARuleRestingOnABoundColumnIsDrawnAfterIt(t *testing.T) {
+	rec := person(50, []recipe.Field{
+		field("pesel", "pesel"), field("first_name", "first_name"), field("gender", "gender"),
 	},
-		recipe.Rule{Field: "gender", Kind: recipe.Matches, With: []string{"first_name"}},
 		recipe.Rule{Field: "pesel", Kind: recipe.Matches, With: []string{"gender"}},
+		recipe.Rule{Field: "gender", Kind: recipe.Matches, With: []string{"first_name"}},
 	)
-	_, err := generate.Prepare(rec, values.New(rec.Locale, rec.Seed), generate.NeverStops{})
-	if err == nil || !strings.Contains(err.Error(), "resolves one level") {
-		t.Errorf("the plan accepted a rule resting on a bound column, answering %v", err)
+	_, rows := produced(t, rec)
+	for i, row := range rows {
+		if even := (row["pesel"][9]-'0')%2 == 0; even != (genderIn(row) == provider.Female) {
+			t.Errorf("row %d: the PESEL %s disagrees with %q", i, row["pesel"], row["gender"])
+		}
 	}
 }
 

@@ -75,3 +75,14 @@ func whereRegionsFollowCities(locale string) []string {
 	}
 	return nil
 }
+
+// wherePostalCodesFollowPlaces is the city and the region, in the locales whose
+// register says which place each code belongs to (DEC-282). How the code
+// narrows to them, and what it does with a pair the register does not hold, is
+// written at us.Postal.Generate.
+func wherePostalCodesFollowPlaces(locale string) []string {
+	if placesFromRegister(locale) {
+		return []string{provider.RoleCity, provider.RoleRegion}
+	}
+	return nil
+}

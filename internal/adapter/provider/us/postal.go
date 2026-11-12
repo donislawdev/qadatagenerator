@@ -102,6 +102,29 @@ var (
 	postalRegionsByPlace = regionsByPlace(postalRegistry)
 )
 
+// The codes of the registry gathered three ways, for a code that follows the
+// place of its row (DEC-282): by the place, by the name of the place whatever
+// its region, and by the region. Built with the registry for the same reason,
+// and each list is in the order of the codes, so the answer is the same on
+// every run whatever order a map is walked in.
+var (
+	// postalCodesOfRegistry is every code in the order of the registry, which
+	// is the order a row with no place has always drawn from.
+	postalCodesOfRegistry = codesBy(postalRegistry, func(postalEntry) bool { return true })[true]
+	postalCodesByPlace    = codesBy(postalRegistry, func(e postalEntry) provider.Place { return e.place })
+	postalCodesByName     = codesBy(postalRegistry, func(e postalEntry) string { return e.place.Name })
+	postalCodesByRegion   = codesBy(postalRegistry, func(e postalEntry) string { return e.place.Region })
+)
+
+func codesBy[K comparable](entries []postalEntry, keyOf func(postalEntry) K) map[K][]string {
+	codes := map[K][]string{}
+	for _, entry := range entries {
+		key := keyOf(entry)
+		codes[key] = append(codes[key], entry.code)
+	}
+	return codes
+}
+
 // PlacesLocale is the locale whose places this registry describes.
 const PlacesLocale = postalLocale
 
@@ -226,20 +249,56 @@ func (Postal) Capabilities() []capability.Name {
 
 // Generate produces one postal code for the place described by the request.
 //
-// The agreement is not read. Binding a postal code to a birth date or a gender
-// is meaningless, and the binding that would matter, a code agreeing with a
-// place already in the record, is the other direction: the caller draws the code
-// and asks PlaceFor for the place that goes with it. Doing it the other way
-// would need the place to be drawn first by somebody who does not have the
-// registry.
+// # The place of the row, where the row has one (DEC-282)
+//
+// The agreement may carry the city and the region of the row, and the code is
+// then drawn from the codes of that place: the codes of the pair when both are
+// bound, of every place of that name when only the city is, of the region when
+// only the region is. With neither, every code of the registry, which is the
+// draw a row without a place always had, so a dataset with no city and no
+// region is the same byte for byte.
+//
+// # A place the registry does not hold
+//
+// A pair it does not hold falls back to the region and then to the name, and
+// a name or a region it does not hold to every code, the way a region falls
+// back to every region for a city it does not know. The region comes first
+// because a code that disagrees with its state is the mismatch an address form
+// is most likely to check. Nothing in a recipe reaches the fallback today: the
+// city and the region come from this same registry, and the region follows the
+// city.
 func (p Postal) Generate(req provider.Request) (string, error) {
+	codes := codesOfPlace(req.Agrees)
 	index := req.Source.IntN(seed.Coordinate{
 		Entity:  req.At.Entity,
 		Row:     req.At.Row,
 		Field:   req.At.Field,
 		Purpose: req.At.Purpose + ":postal-code",
-	}, int64(len(postalRegistry)))
-	return postalRegistry[index].code, nil
+	}, int64(len(codes)))
+	return codes[index], nil
+}
+
+// codesOfPlace narrows the registry to the place an agreement describes. See
+// Generate for the order it falls back in.
+func codesOfPlace(agrees provider.Agreement) []string {
+	city, hasCity := agrees.Value(provider.RoleCity)
+	region, hasRegion := agrees.Value(provider.RoleRegion)
+	candidates := [][]string{}
+	if hasCity && hasRegion {
+		candidates = append(candidates, postalCodesByPlace[provider.Place{Name: city, Region: region}])
+	}
+	if hasRegion {
+		candidates = append(candidates, postalCodesByRegion[region])
+	}
+	if hasCity {
+		candidates = append(candidates, postalCodesByName[city])
+	}
+	for _, codes := range candidates {
+		if len(codes) > 0 {
+			return codes
+		}
+	}
+	return postalCodesOfRegistry
 }
 
 // Validate answers whether a value is a correctly written postal code.

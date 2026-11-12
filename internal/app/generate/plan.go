@@ -149,7 +149,7 @@ func Prepare(rec recipe.Recipe, values Values, stop Halt) (Plan, error) {
 		if err := checkGenerators(entity, values, rec.Locale, &plan); err != nil {
 			return Plan{}, err
 		}
-		if err := refuseChains(entity, values); err != nil {
+		if err := refuseCircles(entity, values); err != nil {
 			return Plan{}, err
 		}
 		planned, err := planEntity(entity, produced, source, stop)
@@ -565,17 +565,11 @@ func reads(values Values, generator, role string) bool {
 	return false
 }
 
-// refuseChains refuses a declared rule resting on a column another rule binds,
-// in the words the run uses, so that validate refuses what generate would.
-func refuseChains(entity recipe.Entity, values Values) error {
-	rules := Rules(entity, values)
-	bound := boundFields(rules)
-	for _, rule := range rules {
-		if err := chained(entity, rule, bound, values); err != nil {
-			return err
-		}
-	}
-	return nil
+// refuseCircles refuses rules that wait on each other in a circle, in the words
+// the run uses, so that validate refuses what generate would.
+func refuseCircles(entity recipe.Entity, values Values) error {
+	_, err := inAgreementOrder(entity, Rules(entity, values), values)
+	return err
 }
 
 // inDependencyOrder returns the entities with parents before children.

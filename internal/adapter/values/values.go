@@ -56,16 +56,19 @@ const (
 
 // roles maps a generator onto the role it plays in a consistency rule.
 //
-// Only two generators play one today, and both are read by an identifier. The
-// role comes from here rather than from the name of the column, because a
+// The role comes from here rather than from the name of the column, because a
 // recipe may call a column anything and half of them will not be in English.
 var roles = map[string]string{
 	BirthDate: provider.RoleBirthDate,
 	Gender:    provider.RoleGender,
-	// A city plays its role in every locale, and only en-US has a reader for
-	// it today (DEC-278): a city nobody reads binds nothing, as a gender
-	// beside a column of ISBNs binds nothing.
-	City: provider.RoleCity,
+	// A city and a region play their roles in every locale, and only en-US
+	// has readers for them today (DEC-278, DEC-282): a place nobody reads
+	// binds nothing, as a gender beside a column of ISBNs binds nothing.
+	//
+	// A region both reads the city and is read by the postal code, which is
+	// a chain of two rules the run draws in order (DEC-283).
+	City:   provider.RoleCity,
+	Region: provider.RoleRegion,
 }
 
 // The field types the catalog uses in applies_to. They are constants here
@@ -606,7 +609,7 @@ var producers = map[string]generator{
 	Region: {entries: Source.regions, list: "regions", needs: placesOr("regions"),
 		reads: whereRegionsFollowCities, byLocale: true, topic: TopicPlaces},
 	PostalCode: {produce: Source.postalCode, behind: us.Postal{}, needs: postalRegister,
-		byLocale: true},
+		reads: wherePostalCodesFollowPlaces, byLocale: true},
 	Pesel: {produce: fromProvider(pl.PESEL{}), behind: pl.PESEL{},
 		reads: everywhere(provider.RoleBirthDate, provider.RoleGender)},
 	Nip:   {produce: fromProvider(pl.NIP{}), behind: pl.NIP{}},
@@ -829,7 +832,7 @@ func (s Source) postalCode(req generate.Request) (string, error) {
 	if fine, why := postalRegister(s.locale); !fine {
 		return "", fault.New(fault.Config, why)
 	}
-	return us.Postal{}.Generate(provider.Request{Source: s.seed, At: req.At})
+	return us.Postal{}.Generate(provider.Request{Source: s.seed, At: req.At, Agrees: req.Agrees})
 }
 
 // noList is the sentence saying this build carries no such word list.

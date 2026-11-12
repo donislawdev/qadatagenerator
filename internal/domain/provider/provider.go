@@ -177,6 +177,10 @@ const (
 	// RoleCity is the place a row is in, which a region takes account of
 	// where this build knows which region a place lies in (DEC-278).
 	RoleCity = "city"
+	// RoleRegion is the region a row is in, written the way the region
+	// generator of the locale writes it, which a postal code takes account of
+	// together with the city (DEC-282).
+	RoleRegion = "region"
 )
 
 // Agreement is the values a generated value has to be consistent with, keyed

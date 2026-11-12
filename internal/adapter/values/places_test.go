@@ -105,6 +105,60 @@ func TestARecipeInEnglishPairsTheRegionWithTheCity(t *testing.T) {
 	}
 }
 
+// TestARecipeInEnglishPairsThePostalCodeWithItsPlace holds DEC-282 for the three
+// shapes a recipe can give a postal code a place in, and the chain of DEC-283
+// with it: with a city and a region, the region follows the city and the code
+// follows both, so the code is drawn after a value that is itself bound.
+//
+// The postal code stands first among the fields on purpose. Its implied rule
+// then comes before the rule of the region it reads, and only the order the
+// run puts the rules in makes the code agree with the region the row ends with.
+func TestARecipeInEnglishPairsThePostalCodeWithItsPlace(t *testing.T) {
+	inEnglish := func(fields ...recipe.Field) recipe.Recipe {
+		rec := person(300, fields)
+		rec.Locale = "en-US"
+		return rec
+	}
+	placeOf := func(code string) provider.Place {
+		place, found := us.Postal{}.PlaceFor(code)
+		if !found {
+			t.Fatalf("the code %s is not in the register it was drawn from", code)
+		}
+		return place
+	}
+
+	plan, rows := produced(t, inEnglish(
+		field("zip", "postal_code"), field("city", "city"), field("region", "region")))
+	for i, row := range rows {
+		if got := placeOf(row["zip"]); got != (provider.Place{Name: row["city"], Region: row["region"]}) {
+			t.Errorf("row %d says %s, %s and its code %s belongs to %s, %s",
+				i, row["city"], row["region"], row["zip"], got.Name, got.Region)
+		}
+	}
+	follows := map[string][]string{}
+	for _, implied := range plan.Implied {
+		follows[implied.Rule.Field] = implied.Rule.With
+	}
+	if !slices.Equal(follows["zip"], []string{"city", "region"}) || !slices.Equal(follows["region"], []string{"city"}) {
+		t.Errorf("the plan says %v about what follows what, and should say the code follows the "+
+			"city and the region, and the region the city", follows)
+	}
+
+	_, rows = produced(t, inEnglish(field("zip", "postal_code"), field("city", "city")))
+	for i, row := range rows {
+		if got := placeOf(row["zip"]); got.Name != row["city"] {
+			t.Errorf("row %d says %s and its code %s belongs to %s", i, row["city"], row["zip"], got.Name)
+		}
+	}
+
+	_, rows = produced(t, inEnglish(field("zip", "postal_code"), field("region", "region")))
+	for i, row := range rows {
+		if got := placeOf(row["zip"]); got.Region != row["region"] {
+			t.Errorf("row %d says %s and its code %s lies in %s", i, row["region"], row["zip"], got.Region)
+		}
+	}
+}
+
 func setOf(entries []string) map[string]bool {
 	set := make(map[string]bool, len(entries))
 	for _, entry := range entries {
