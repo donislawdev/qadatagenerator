@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/test"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/commandline"
 	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/quick"
@@ -219,6 +220,48 @@ func TestATypedFieldWaitsForTheButtonAndAChoiceDoesNot(t *testing.T) {
 	if view.Value() == chosen {
 		t.Error("a kind was chosen and nothing was produced, so the screen now asks for " +
 			"two acts where DEC-213 promised one")
+	}
+}
+
+// 🔴 A field that is not on screen is not part of the request.
+//
+// The owner chose a gender for a first name and then asked for an ISBN, and
+// the screen refused with "That value takes no account of what was chosen
+// beside it". The gender field had gone, because an ISBN reads no gender, and
+// the choice made in it was still sent, so the refusal named a field nobody
+// could see or clear. The command at the foot carried the same flag, which the
+// command line refuses too.
+//
+// The way back is checked as well: the choice is kept while its field is
+// hidden, so returning to a kind that reads it applies it again rather than
+// asking for it twice.
+func TestAFieldTheChosenKindDoesNotReadIsNotSent(t *testing.T) {
+	view := New(i18n.English, &heldClipboard{})
+	view.UseSeed("for-the-test")
+	view.Choose("pesel")
+	view.ChooseGender("female")
+	view.SetBorn("1990-05-17")
+	if view.Value() == "" {
+		t.Fatalf("a PESEL with a gender and a date produced nothing, so nothing below "+
+			"proves anything: %q", view.Told())
+	}
+
+	view.Choose("isbn")
+	if view.Value() == "" {
+		t.Errorf("an ISBN was refused after a gender and a date were chosen for a PESEL, "+
+			"with fields that are no longer on screen: %q", view.Told())
+	}
+	for _, flag := range []string{commandline.Gender, commandline.BirthDate} {
+		if strings.Contains(view.command.Text, flag) {
+			t.Errorf("the command for an ISBN carries %s, which the command line refuses: %q",
+				flag, view.command.Text)
+		}
+	}
+
+	view.Choose("pesel")
+	if !strings.Contains(view.command.Text, commandline.Gender+" female") {
+		t.Errorf("back on a PESEL the gender chosen before is no longer applied: %q",
+			view.command.Text)
 	}
 }
 

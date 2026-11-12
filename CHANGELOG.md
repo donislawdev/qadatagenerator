@@ -55,6 +55,14 @@ repository once they are released.
 
 ### Fixed
 
+- **Quick value no longer refuses a value because of a field it has hidden.**
+  Choosing a gender or a date of birth for one kind, such as a PESEL or a
+  first name, and then a kind that takes no account of them, such as an ISBN,
+  ended in "That value takes no account of what was chosen beside it", with
+  no field on screen to change. A field that is not shown is now left out of
+  the request and out of the command at the foot of the screen. What was
+  chosen in it is kept, and applies again when you go back to a kind that
+  reads it.
 - **Damage a file writes the damaged copy beside the file you chose.** The
   screen said so, and wrote it into the folder the program was started from
   instead, which after starting it from a file manager is the folder of the

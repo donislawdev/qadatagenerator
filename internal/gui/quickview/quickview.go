@@ -630,12 +630,21 @@ func (v *View) countAsked() (int, string) {
 
 // bindings are the values the two fields carry, with an unchosen gender
 // carrying nothing.
+//
+// 🔴 Only a field that is ON SCREEN is part of the request, which is what
+// v.showing records. A field showRows took away keeps what was typed into it,
+// so coming back to a kind that reads it applies it again, but it is not sent
+// while hidden. It was sent until 2026-11-12, and the mode refuses a role the
+// chosen kind does not read: a gender chosen for a first name turned the next
+// ISBN into a refusal naming a field nobody could see or clear, and the command
+// at the foot carried the same flag (B-365).
 func (v *View) bindings() map[string]string {
 	bound := map[string]string{}
-	if v.gender.Selected != "" && v.gender.Selected != v.text.T(i18n.QuickGenderAny) {
+	if v.showing[quick.RoleGender] && v.gender.Selected != "" &&
+		v.gender.Selected != v.text.T(i18n.QuickGenderAny) {
 		bound[quick.RoleGender] = v.gender.Selected
 	}
-	if v.born.Text != "" {
+	if v.showing[quick.RoleBirthDate] && v.born.Text != "" {
 		bound[quick.RoleBirthDate] = v.born.Text
 	}
 	return bound
