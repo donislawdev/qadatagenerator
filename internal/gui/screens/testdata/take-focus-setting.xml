@@ -1,236 +1,221 @@
 <canvas padded size="1342x900">
 	<content>
 		<container size="1342x900">
-			<container size="220x900">
-				<rectangle fillColor="menuBackground" size="220x900"/>
-				<container size="220x900">
-					<container size="220x900">
-						<container size="220x62">
-							<container pos="8,4" size="208x34">
-								<rectangle size="208x34"/>
-								<container size="208x34">
-									<container size="3x34">
-										<rectangle size="3x34"/>
-										<rectangle size="3x34"/>
-									</container>
-									<container pos="3,0" size="205x34">
-										<container pos="12,0" size="193x34">
-											<spacer size="193x8"/>
-											<text bold pos="0,8" size="193x16">QA Data Generator</text>
-											<spacer pos="0,25" size="193x8"/>
-										</container>
-									</container>
+			<rectangle fillColor="menuBackground" size="220x900"/>
+			<container size="220x785">
+				<container size="220x62">
+					<container pos="8,4" size="208x34">
+						<rectangle size="208x34"/>
+						<container size="208x34">
+							<container size="3x34">
+								<rectangle size="3x34"/>
+								<rectangle size="3x34"/>
+							</container>
+							<container pos="3,0" size="205x34">
+								<container pos="12,0" size="193x34">
+									<spacer size="193x8"/>
+									<text bold pos="0,8" size="193x16">QA Data Generator</text>
+									<spacer pos="0,25" size="193x8"/>
 								</container>
 							</container>
 						</container>
-						<container pos="0,62" size="220x838">
-							<container size="220x30">
-								<container pos="8,12" size="208x14">
-									<container size="3x14">
-										<rectangle size="3x14"/>
-										<rectangle size="3x14"/>
-									</container>
-									<container pos="3,0" size="205x14">
-										<text bold color="focus" pos="12,0" size="193x14" textSize="11">MAKE DATA</text>
-									</container>
-								</container>
+					</container>
+				</container>
+				<container pos="0,62" size="220x723">
+					<container size="220x30">
+						<container pos="8,12" size="208x14">
+							<container size="3x14">
+								<rectangle size="3x14"/>
+								<rectangle size="3x14"/>
 							</container>
-							<container pos="0,30" size="220x42">
-								<container size="3x42">
-									<rectangle size="3x42"/>
-									<rectangle size="3x42"/>
-								</container>
-								<container pos="3,0" size="217x42">
-									<widget pos="8,4" size="201x34" type="*parts.Button">
+							<container pos="3,0" size="205x14">
+								<text bold color="focus" pos="12,0" size="193x14" textSize="11">MAKE DATA</text>
+							</container>
+						</container>
+					</container>
+					<container pos="0,30" size="220x42">
+						<container size="3x42">
+							<rectangle size="3x42"/>
+							<rectangle size="3x42"/>
+						</container>
+						<container pos="3,0" size="217x42">
+							<widget pos="8,4" size="201x34" type="*parts.Button">
+								<container size="201x34">
+									<container size="201x34">
+										<rectangle size="201x34"/>
 										<container size="201x34">
+											<rectangle size="201x34"/>
 											<container size="201x34">
-												<rectangle size="201x34"/>
-												<container size="201x34">
-													<rectangle size="201x34"/>
-													<container size="201x34">
-														<container pos="12,4" size="177x26">
-															<container size="90x26">
-																<container size="15x26">
-																	<spacer size="15x5"/>
-																	<image fillMode="contain" pos="0,5" rsc="zap-72abff-15.svg" size="15x15"/>
-																	<spacer pos="0,20" size="15x5"/>
-																</container>
-																<container pos="23,0" size="67x26">
-																	<spacer size="67x4"/>
-																	<text pos="0,4" size="67x16">Quick value</text>
-																	<spacer pos="0,21" size="67x4"/>
-																</container>
-															</container>
+												<container pos="12,4" size="177x26">
+													<container size="90x26">
+														<container size="15x26">
+															<spacer size="15x5"/>
+															<image fillMode="contain" pos="0,5" rsc="zap-72abff-15.svg" size="15x15"/>
+															<spacer pos="0,20" size="15x5"/>
+														</container>
+														<container pos="23,0" size="67x26">
+															<spacer size="67x4"/>
+															<text pos="0,4" size="67x16">Quick value</text>
+															<spacer pos="0,21" size="67x4"/>
 														</container>
 													</container>
 												</container>
 											</container>
 										</container>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,72" size="220x42">
-								<container size="3x42">
-									<rectangle size="3x42"/>
-									<rectangle fillColor="focus" size="3x42"/>
-								</container>
-								<container pos="3,0" size="217x42">
-									<widget pos="8,4" size="201x34" type="*parts.Button">
-										<container size="201x34">
-											<container size="201x34">
-												<rectangle size="201x34"/>
-												<container size="201x34">
-													<rectangle fillColor="rgba(37,51,72,255)" radius="6" size="201x34"/>
-													<container size="201x34">
-														<container pos="12,4" size="177x26">
-															<container size="101x26">
-																<container size="15x26">
-																	<spacer size="15x5"/>
-																	<image fillMode="contain" pos="0,5" rsc="file-x-72abff-15.svg" size="15x15"/>
-																	<spacer pos="0,20" size="15x5"/>
-																</container>
-																<container pos="23,0" size="78x26">
-																	<spacer size="78x4"/>
-																	<text pos="0,4" size="78x16">Damage a file</text>
-																	<spacer pos="0,21" size="78x4"/>
-																</container>
-															</container>
-														</container>
-													</container>
-												</container>
-											</container>
-										</container>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,114" size="220x42">
-								<container size="3x42">
-									<rectangle size="3x42"/>
-									<rectangle size="3x42"/>
-								</container>
-								<container pos="3,0" size="217x42">
-									<widget pos="8,4" size="201x34" type="*parts.Button">
-										<container size="201x34">
-											<container size="201x34">
-												<rectangle size="201x34"/>
-												<container size="201x34">
-													<rectangle size="201x34"/>
-													<container size="201x34">
-														<container pos="12,4" size="177x26">
-															<container size="62x26">
-																<container size="15x26">
-																	<spacer size="15x5"/>
-																	<image fillMode="contain" pos="0,5" rsc="file-cog-72abff-15.svg" size="15x15"/>
-																	<spacer pos="0,20" size="15x5"/>
-																</container>
-																<container pos="23,0" size="39x26">
-																	<spacer size="39x4"/>
-																	<text pos="0,4" size="39x16">Recipe</text>
-																	<spacer pos="0,21" size="39x4"/>
-																</container>
-															</container>
-														</container>
-													</container>
-												</container>
-											</container>
-										</container>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,156" size="220x30">
-								<container pos="8,12" size="208x14">
-									<container size="3x14">
-										<rectangle size="3x14"/>
-										<rectangle size="3x14"/>
-									</container>
-									<container pos="3,0" size="205x14">
-										<text bold color="focus" pos="12,0" size="193x14" textSize="11">VERIFY</text>
 									</container>
 								</container>
-							</container>
-							<container pos="0,186" size="220x42">
-								<container size="3x42">
-									<rectangle size="3x42"/>
-									<rectangle size="3x42"/>
-								</container>
-								<container pos="3,0" size="217x42">
-									<widget pos="8,4" size="201x34" type="*parts.Button">
-										<container size="201x34">
-											<container size="201x34">
-												<rectangle size="201x34"/>
-												<container size="201x34">
-													<rectangle size="201x34"/>
-													<container size="201x34">
-														<container pos="12,4" size="177x26">
-															<container size="101x26">
-																<container size="15x26">
-																	<spacer size="15x5"/>
-																	<image fillMode="contain" pos="0,5" rsc="clipboard-check-72abff-15.svg" size="15x15"/>
-																	<spacer pos="0,20" size="15x5"/>
-																</container>
-																<container pos="23,0" size="78x26">
-																	<spacer size="78x4"/>
-																	<text pos="0,4" size="78x16">Check results</text>
-																	<spacer pos="0,21" size="78x4"/>
-																</container>
-															</container>
-														</container>
-													</container>
-												</container>
-											</container>
-										</container>
-									</widget>
-								</container>
-							</container>
-							<spacer pos="0,228" size="220x536"/>
-							<widget pos="0,764" size="220x1" type="*widget.Separator">
-								<rectangle fillColor="separator" size="220x1"/>
 							</widget>
-							<container pos="0,765" size="220x42">
-								<container size="3x42">
-									<rectangle size="3x42"/>
-									<rectangle size="3x42"/>
-								</container>
-								<container pos="3,0" size="217x42">
-									<widget pos="8,4" size="201x34" type="*parts.Button">
+						</container>
+					</container>
+					<container pos="0,72" size="220x42">
+						<container size="3x42">
+							<rectangle size="3x42"/>
+							<rectangle fillColor="focus" size="3x42"/>
+						</container>
+						<container pos="3,0" size="217x42">
+							<widget pos="8,4" size="201x34" type="*parts.Button">
+								<container size="201x34">
+									<container size="201x34">
+										<rectangle size="201x34"/>
 										<container size="201x34">
+											<rectangle fillColor="rgba(37,51,72,255)" radius="6" size="201x34"/>
 											<container size="201x34">
-												<rectangle size="201x34"/>
-												<container size="201x34">
-													<rectangle size="201x34"/>
-													<container size="201x34">
-														<container pos="12,4" size="177x26">
-															<container size="58x26">
-																<container size="15x26">
-																	<spacer size="15x5"/>
-																	<image fillMode="contain" pos="0,5" rsc="info-72abff-15.svg" size="15x15"/>
-																	<spacer pos="0,20" size="15x5"/>
-																</container>
-																<container pos="23,0" size="35x26">
-																	<spacer size="35x4"/>
-																	<text pos="0,4" size="35x16">About</text>
-																	<spacer pos="0,21" size="35x4"/>
-																</container>
-															</container>
+												<container pos="12,4" size="177x26">
+													<container size="101x26">
+														<container size="15x26">
+															<spacer size="15x5"/>
+															<image fillMode="contain" pos="0,5" rsc="file-x-72abff-15.svg" size="15x15"/>
+															<spacer pos="0,20" size="15x5"/>
+														</container>
+														<container pos="23,0" size="78x26">
+															<spacer size="78x4"/>
+															<text pos="0,4" size="78x16">Damage a file</text>
+															<spacer pos="0,21" size="78x4"/>
 														</container>
 													</container>
 												</container>
 											</container>
 										</container>
-									</widget>
-								</container>
-							</container>
-							<container pos="0,807" size="220x30">
-								<container pos="8,4" size="208x14">
-									<container size="3x14">
-										<rectangle size="3x14"/>
-										<rectangle size="3x14"/>
-									</container>
-									<container pos="3,0" size="205x14">
-										<text color="disabled" pos="12,0" size="193x14" textSize="11">v0.1.0  ·  fully offline</text>
 									</container>
 								</container>
+							</widget>
+						</container>
+					</container>
+					<container pos="0,114" size="220x42">
+						<container size="3x42">
+							<rectangle size="3x42"/>
+							<rectangle size="3x42"/>
+						</container>
+						<container pos="3,0" size="217x42">
+							<widget pos="8,4" size="201x34" type="*parts.Button">
+								<container size="201x34">
+									<container size="201x34">
+										<rectangle size="201x34"/>
+										<container size="201x34">
+											<rectangle size="201x34"/>
+											<container size="201x34">
+												<container pos="12,4" size="177x26">
+													<container size="62x26">
+														<container size="15x26">
+															<spacer size="15x5"/>
+															<image fillMode="contain" pos="0,5" rsc="file-cog-72abff-15.svg" size="15x15"/>
+															<spacer pos="0,20" size="15x5"/>
+														</container>
+														<container pos="23,0" size="39x26">
+															<spacer size="39x4"/>
+															<text pos="0,4" size="39x16">Recipe</text>
+															<spacer pos="0,21" size="39x4"/>
+														</container>
+													</container>
+												</container>
+											</container>
+										</container>
+									</container>
+								</container>
+							</widget>
+						</container>
+					</container>
+					<container pos="0,156" size="220x30">
+						<container pos="8,12" size="208x14">
+							<container size="3x14">
+								<rectangle size="3x14"/>
+								<rectangle size="3x14"/>
 							</container>
+							<container pos="3,0" size="205x14">
+								<text bold color="focus" pos="12,0" size="193x14" textSize="11">VERIFY</text>
+							</container>
+						</container>
+					</container>
+					<container pos="0,186" size="220x42">
+						<container size="3x42">
+							<rectangle size="3x42"/>
+							<rectangle size="3x42"/>
+						</container>
+						<container pos="3,0" size="217x42">
+							<widget pos="8,4" size="201x34" type="*parts.Button">
+								<container size="201x34">
+									<container size="201x34">
+										<rectangle size="201x34"/>
+										<container size="201x34">
+											<rectangle size="201x34"/>
+											<container size="201x34">
+												<container pos="12,4" size="177x26">
+													<container size="101x26">
+														<container size="15x26">
+															<spacer size="15x5"/>
+															<image fillMode="contain" pos="0,5" rsc="clipboard-check-72abff-15.svg" size="15x15"/>
+															<spacer pos="0,20" size="15x5"/>
+														</container>
+														<container pos="23,0" size="78x26">
+															<spacer size="78x4"/>
+															<text pos="0,4" size="78x16">Check results</text>
+															<spacer pos="0,21" size="78x4"/>
+														</container>
+													</container>
+												</container>
+											</container>
+										</container>
+									</container>
+								</container>
+							</widget>
+						</container>
+					</container>
+					<spacer pos="0,228" size="220x452"/>
+					<widget pos="0,680" size="220x1" type="*widget.Separator">
+						<rectangle fillColor="separator" size="220x1"/>
+					</widget>
+					<container pos="0,681" size="220x42">
+						<container size="3x42">
+							<rectangle size="3x42"/>
+							<rectangle size="3x42"/>
+						</container>
+						<container pos="3,0" size="217x42">
+							<widget pos="8,4" size="201x34" type="*parts.Button">
+								<container size="201x34">
+									<container size="201x34">
+										<rectangle size="201x34"/>
+										<container size="201x34">
+											<rectangle size="201x34"/>
+											<container size="201x34">
+												<container pos="12,4" size="177x26">
+													<container size="58x26">
+														<container size="15x26">
+															<spacer size="15x5"/>
+															<image fillMode="contain" pos="0,5" rsc="info-72abff-15.svg" size="15x15"/>
+															<spacer pos="0,20" size="15x5"/>
+														</container>
+														<container pos="23,0" size="35x26">
+															<spacer size="35x4"/>
+															<text pos="0,4" size="35x16">About</text>
+															<spacer pos="0,21" size="35x4"/>
+														</container>
+													</container>
+												</container>
+											</container>
+										</container>
+									</container>
+								</container>
+							</widget>
 						</container>
 					</container>
 				</container>
@@ -1231,6 +1216,87 @@
 									</container>
 								</container>
 							</container>
+						</container>
+					</container>
+				</container>
+			</container>
+			<container pos="0,785" size="220x114">
+				<container size="220x42">
+					<container size="3x42">
+						<rectangle size="3x42"/>
+						<rectangle size="3x42"/>
+					</container>
+					<container pos="3,0" size="217x42">
+						<widget pos="8,4" size="201x34" type="*parts.Button">
+							<container size="201x34">
+								<container size="201x34">
+									<rectangle size="201x34"/>
+									<container size="201x34">
+										<rectangle size="201x34"/>
+										<container size="201x34">
+											<container pos="12,4" size="177x26">
+												<container size="63x26">
+													<container size="15x26">
+														<spacer size="15x5"/>
+														<image fillMode="contain" pos="0,5" rsc="code-xml-72abff-15.svg" size="15x15"/>
+														<spacer pos="0,20" size="15x5"/>
+													</container>
+													<container pos="23,0" size="40x26">
+														<spacer size="40x4"/>
+														<text pos="0,4" size="40x16">GitHub</text>
+														<spacer pos="0,21" size="40x4"/>
+													</container>
+												</container>
+											</container>
+										</container>
+									</container>
+								</container>
+							</container>
+						</widget>
+					</container>
+				</container>
+				<container pos="0,42" size="220x42">
+					<container size="3x42">
+						<rectangle size="3x42"/>
+						<rectangle size="3x42"/>
+					</container>
+					<container pos="3,0" size="217x42">
+						<widget pos="8,4" size="201x34" type="*parts.Button">
+							<container size="201x34">
+								<container size="201x34">
+									<rectangle size="201x34"/>
+									<container size="201x34">
+										<rectangle size="201x34"/>
+										<container size="201x34">
+											<container pos="12,4" size="177x26">
+												<container size="64x26">
+													<container size="15x26">
+														<spacer size="15x5"/>
+														<image fillMode="contain" pos="0,5" rsc="heart-72abff-15.svg" size="15x15"/>
+														<spacer pos="0,20" size="15x5"/>
+													</container>
+													<container pos="23,0" size="41x26">
+														<spacer size="41x4"/>
+														<text pos="0,4" size="41x16">Donate</text>
+														<spacer pos="0,21" size="41x4"/>
+													</container>
+												</container>
+											</container>
+										</container>
+									</container>
+								</container>
+							</container>
+						</widget>
+					</container>
+				</container>
+				<container pos="0,84" size="220x30">
+					<container pos="8,4" size="208x14">
+						<container size="3x14">
+							<rectangle size="3x14"/>
+							<rectangle size="3x14"/>
+						</container>
+						<container pos="3,0" size="205x14">
+							<text color="disabled" pos="12,0" size="193x14" textSize="11">v0.1.0  ·  fully offline</text>
 						</container>
 					</container>
 				</container>

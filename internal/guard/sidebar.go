@@ -66,7 +66,7 @@ func SidebarScreens(root string) ([]string, error) {
 	// Both roots are named rather than discovered, because the fault this
 	// guard exists for is a list living in two places, and a walk of the whole
 	// tree would go quiet the day one of them moved.
-	roots := []string{ViewRoot, "cmd/qadg-gui"}
+	roots := []string{ViewRoot, WindowProgram}
 
 	var findings []string
 	built := 0

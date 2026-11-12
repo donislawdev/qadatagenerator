@@ -56,6 +56,7 @@ var windowGuards = []Guard{
 	// about behaviour needs a guard about behaviour.
 	{"nothing we wrote asks the toolkit to leave this machine", "TestNothingInTheWindowAsksTheToolkitToLeaveThisMachine", "internal/guard", ByMutation},
 	{"the scanner sees a call that leaves the machine", "TestTheToolkitGuardSeesACallThatLeavesTheMachine", "internal/guard", ByProbe},
+	{"the one file allowed to open a page names only its own addresses, takes none from a caller and is reported when it moves", "TestTheOneFileAllowedToOpenAPageMayOpenOnlyItsOwnPages", "internal/guard", ByProbe},
 	{"a window that is gone is reported rather than read as clean", "TestTheToolkitGuardIsLoudWhenTheWindowIsGone", "internal/guard", ByProbe},
 	{"every banned call records why it is banned", "TestEveryBannedToolkitCallSaysWhyItIsBanned", "internal/guard", ByProbe},
 

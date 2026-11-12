@@ -46,9 +46,11 @@ const (
 	// files covers it. This sentence is here so that nobody later reads the
 	// file as one of theirs and looks for it in their catalogue.
 	IconChevronUp = "chevron-up"
+	IconCode      = "code-xml"
 	IconCopy      = "copy"
 	IconDoc       = "file-code"
 	IconFolder    = "folder-open"
+	IconHeart     = "heart"
 	IconInfo      = "info"
 	IconPlay      = "play"
 	IconRecipe    = "file-cog"
@@ -63,8 +65,8 @@ const (
 // side the constants are on.
 var IconNames = []string{
 	IconAgain, IconAlert, IconArrow, IconBolt, IconBug, IconBreak,
-	IconCheck, IconChecklist, IconChevron, IconChevronUp, IconCopy, IconDoc, IconFolder,
-	IconInfo, IconPlay, IconRecipe, IconSearch, IconShield, IconSwap,
+	IconCheck, IconChecklist, IconChevron, IconChevronUp, IconCode, IconCopy, IconDoc, IconFolder,
+	IconHeart, IconInfo, IconPlay, IconRecipe, IconSearch, IconShield, IconSwap,
 	IconWarn, IconClose,
 }
 

@@ -61,6 +61,16 @@ sidebar.group.check: Verify
 # product's name at the foot of the column, beside the version.
 sidebar.offline: fully offline
 
+# The two pages outside this program at the foot of the column. Pressing one
+# hands its address to the system, which opens it in the browser. The second
+# group is what the window says when the system does not, with the address and
+# the system's own reason shown under these words.
+sidebar.link.project: GitHub
+sidebar.link.support: Donate
+sidebar.link.refused.title: The page did not open
+sidebar.link.refused.body: "Your system did not open this page in a browser. You can type the address into a browser yourself:"
+sidebar.link.refused.reason: "What the system reported:"
+
 screen.about: About
 screen.manifest: Check results
 screen.take: Damage a file

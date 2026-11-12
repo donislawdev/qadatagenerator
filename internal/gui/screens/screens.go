@@ -41,6 +41,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/catalogue"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
+	"github.com/donislawdev/qadatagenerator/internal/gui/outward"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/quickview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/recipeview"
@@ -294,7 +295,7 @@ func (s State) Buildable(data Data) (bool, string) {
 // makes, so nothing here can reach a state a person cannot.
 func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	if state.Catalogue {
-		return catalogue.Content(text, brandOf(text), CatalogueSamples(), state.Screen)
+		return catalogue.Content(text, Brand(text), CatalogueSamples(), state.Screen)
 	}
 	// The clipboard is nothing at all, for the reason given at the other
 	// screens: a state of this list is a picture, and a picture that reached
@@ -328,7 +329,12 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	// itself. That the button really copies is held by a test in the screen's
 	// own package against a clipboard of its own.
 	quickScreen := quickview.New(text, nil)
-	frame := shell.New(screenColumn(text, quickScreen, takeScreen, recipeScreen, view), brandOf(text))
+	// The two pages outside this program are there, so a picture has the
+	// buttons the window has, and they open nothing, for the reason the
+	// clipboard above is nothing. That they really reach the system is held by
+	// the package that opens them.
+	frame := shell.New(screenColumn(text, quickScreen, takeScreen, recipeScreen, view),
+		WindowBrand(text, outward.Nowhere{}, background.ReadHere, func(string, string) {}))
 	settleScreens(state, data, quickScreen, takeScreen, recipeScreen, view)
 	frame.Open(state.Screen)
 	return frame.Content()
@@ -414,17 +420,43 @@ func settleScreens(state State, data Data, quickScreen *quickview.View, takeScre
 	}
 }
 
-// brandOf is the brand the program carries, so a render shows what a person
-// sees. This copy of the list has been wrong about the sidebar once already: it
-// carried icons the program did not, and every picture anybody looked at
-// showed them. The catalogue of controls wears it too, with its own line under
-// the name.
-func brandOf(text i18n.Catalogue) shell.Brand {
+// Brand is the name, the version and the promise of the column, which the
+// catalogue of controls wears as it is and the window wears with its links.
+//
+// # Why the program takes it from here
+//
+// Until 2026-11-12 cmd/qadg-gui built the same three fields in a copy of its
+// own, and a copy of the sidebar has been wrong once already: the list of
+// screens carried icons here and not there, and every picture anybody looked
+// at showed what the program did not (B-244). One function, which both the
+// program and every picture call, cannot disagree with itself.
+func Brand(text i18n.Catalogue) shell.Brand {
 	return shell.Brand{
-		Name:    text.T(i18n.WindowTitle),
+		// The same name the window carries in its title bar, from the same
+		// key, so the two can never say different things.
+		Name: text.T(i18n.WindowTitle),
+		// The tool's own version and not the catalog's or the manifest's. The
+		// window has four version numbers behind it and the About screen names
+		// them all, which is the right place for that: here there is room for
+		// one, and the one somebody means by "which version is this" is the
+		// program's.
 		Version: "v" + version.Current().Tool,
 		Promise: text.T(i18n.SidebarOffline),
 	}
+}
+
+// WindowBrand is Brand with the two pages outside this program at the foot of
+// the column (DEC-276), opened through the desktop handed in.
+//
+// The window hands in the toolkit's application and its place of work for
+// reading, and a picture hands in a desktop that opens nothing. Both get the
+// same two buttons in the same place, which is what lets a picture count the
+// stops of the keyboard the window has.
+func WindowBrand(text i18n.Catalogue, desktop outward.Desktop, read background.Read,
+	refused outward.Refused) shell.Brand {
+	brand := Brand(text)
+	brand.Links = outward.Links(text, desktop, read, refused)
+	return brand
 }
 
 // settleQuick puts the screen that produces one value into the state asked for,

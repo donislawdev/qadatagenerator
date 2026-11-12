@@ -90,21 +90,141 @@ func TestAskingForAScreenThatIsNotThereChangesNothing(t *testing.T) {
 // translated and when the desktop scales, so everything beside it would shift
 // sideways for no reason the person caused.
 func TestTheColumnOfNamesKeepsOneWidth(t *testing.T) {
-	layout := fixedWidth{width: palette.SidebarWidth}
-	narrow := widget.NewLabel("A")
-	wide := widget.NewLabel("a name considerably longer than the one above it")
+	for _, name := range []string{"A", "a name considerably longer than the column has room for it"} {
+		frame := New([]Screen{{Name: name, Content: widget.NewLabel("the screen")}},
+			Brand{Promise: name, Links: []Link{{Name: name, Open: func() {}}}})
+		arranged := frameOf(t, frame.Content(), fyne.NewSize(palette.SidebarWidth*4, 600))
 
-	for _, object := range []fyne.CanvasObject{narrow, wide} {
-		if got := layout.MinSize([]fyne.CanvasObject{object}).Width; got != palette.SidebarWidth {
-			t.Errorf("the column asks for %v rather than for the width in the theme, %v",
-				got, palette.SidebarWidth)
+		for part, object := range map[string]fyne.CanvasObject{
+			"column": arranged.column, "foot": arranged.foot, "ground": arranged.ground,
+		} {
+			if got := object.Size().Width; got != palette.SidebarWidth {
+				t.Errorf("with %q the %s is %v wide rather than the width in the theme, %v",
+					name, part, got, palette.SidebarWidth)
+			}
+		}
+		if got := arranged.screen.Position().X; got != palette.SidebarWidth {
+			t.Errorf("with %q the screen starts at %v rather than where the column ends, %v",
+				name, got, palette.SidebarWidth)
 		}
 	}
+}
 
-	layout.Layout([]fyne.CanvasObject{wide}, fyne.NewSize(palette.SidebarWidth*2, 400))
-	if wide.Size().Width != palette.SidebarWidth {
-		t.Errorf("the column laid its content out at %v rather than at %v",
-			wide.Size().Width, palette.SidebarWidth)
+// frameOf lays the content of a frame out at a size and hands back its parts.
+func frameOf(t *testing.T, content fyne.CanvasObject, size fyne.Size) *frame {
+	t.Helper()
+	holder, ok := content.(*fyne.Container)
+	if !ok {
+		t.Fatalf("the content of the frame is %T rather than a container", content)
+	}
+	arranged, ok := holder.Layout.(*frame)
+	if !ok {
+		t.Fatalf("the content of the frame is laid out by %T rather than by the frame", holder.Layout)
+	}
+	holder.Resize(size)
+	return arranged
+}
+
+// The foot stands under the column, the full width of it and down to the bottom
+// edge, however it was handed over.
+//
+// 🔴 Asked because the foot is handed over AFTER the screen, for the keyboard,
+// and the layout is what puts it back. A layout that placed it by its position
+// in the list would draw it beside the screen or on top of it, and the keyboard
+// test below would still pass.
+func TestTheFootStandsUnderTheColumn(t *testing.T) {
+	frame := New(screens(), Brand{Promise: "fully offline", Links: []Link{
+		{Name: "GitHub", Open: func() {}}, {Name: "Donate", Open: func() {}},
+	}})
+	size := fyne.NewSize(900, 600)
+	arranged := frameOf(t, frame.Content(), size)
+
+	foot := arranged.foot
+	if foot.Position().X != 0 || foot.Position().Y+foot.Size().Height != size.Height {
+		t.Errorf("the foot is at %v, %v tall, rather than against the leading and the bottom edge",
+			foot.Position(), foot.Size().Height)
+	}
+	if foot.Size().Height == 0 {
+		t.Fatal("the foot has no height, so neither link nor promise can be seen")
+	}
+	if bottom := arranged.column.Position().Y + arranged.column.Size().Height; bottom != foot.Position().Y {
+		t.Errorf("the column ends at %v and the foot starts at %v, so the two overlap or leave a gap",
+			bottom, foot.Position().Y)
+	}
+	if arranged.ground.Size().Height != size.Height {
+		t.Errorf("the ground of the column is %v tall in a frame %v tall, so the foot stands on nothing",
+			arranged.ground.Size().Height, size.Height)
+	}
+	if got := frame.Content().MinSize().Height; got < arranged.column.MinSize().Height+foot.MinSize().Height {
+		t.Errorf("the frame asks for %v, less than the column and its foot need together", got)
+	}
+}
+
+// The keyboard reaches the pages outside this program after the open screen,
+// the way the footer of a page is reached last (DEC-276).
+//
+// Asked as a whole walk, names then screen then links, because what the owner
+// chose is an ORDER: links reached first would put every control of every
+// screen two presses further away, and links not reached at all would leave
+// them to a mouse alone.
+func TestTheKeyboardMeetsThePagesOutsideLast(t *testing.T) {
+	inside := parts.NewButton("something inside the screen", func() {})
+	frame := New([]Screen{
+		{Name: "Manifest browser", Content: inside},
+		{Name: "About", Content: widget.NewLabel("the about screen")},
+	}, Brand{Links: []Link{{Name: "GitHub", Open: func() {}}, {Name: "Donate", Open: func() {}}}})
+
+	window := test.NewWindow(frame.Content())
+	defer window.Close()
+	window.Resize(fyne.NewSize(900, 600))
+
+	canvas := window.Canvas()
+	wanted := []string{"Manifest browser", "About", "something inside the screen", "GitHub", "Donate",
+		"Manifest browser"}
+	for at, name := range wanted {
+		canvas.FocusNext()
+		button, ok := canvas.Focused().(*parts.Button)
+		if !ok {
+			t.Fatalf("stop %d of the walk is %T rather than a button", at+1, canvas.Focused())
+		}
+		if button.Text != name {
+			t.Errorf("stop %d of the walk is %q, and it should be %q", at+1, button.Text, name)
+		}
+	}
+}
+
+// A link is drawn as a name of the column is, opens its page when pressed, and
+// is never marked as the screen the window is on.
+func TestALinkOpensItsPageAndIsNeverTheOpenScreen(t *testing.T) {
+	opened := ""
+	frame := New(screens(), Brand{Links: []Link{
+		{Name: "GitHub", Icon: "code-xml", Open: func() { opened = "GitHub" }},
+		{Name: "Donate", Icon: "heart", Open: func() { opened = "Donate" }},
+	}})
+	if len(frame.links) != 2 {
+		t.Fatalf("two links were handed over and the foot holds %d", len(frame.links))
+	}
+	for _, link := range frame.links {
+		button := link.button
+		if !button.Leading || !button.Plain || button.Icon == "" {
+			t.Errorf("%q is not drawn as a name of the column: leading %v, plain %v, icon %q",
+				button.Text, button.Leading, button.Plain, button.Icon)
+		}
+		button.Tapped(nil)
+		if opened != button.Text {
+			t.Errorf("pressing %q opened %q", button.Text, opened)
+		}
+	}
+	for index := range screens() {
+		frame.Open(index)
+		for _, link := range frame.links {
+			if link.mark.FillColor != color.Transparent || link.button.Current {
+				t.Errorf("with screen %d open, %q is marked as the open screen", index, link.button.Text)
+			}
+		}
+	}
+	if bare := New(screens(), Brand{}); len(bare.links) != 0 || strings.Contains(spokenIn(bare.Content()), "GitHub") {
+		t.Error("a frame given no links still draws one")
 	}
 }
 

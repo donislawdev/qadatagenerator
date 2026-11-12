@@ -34,6 +34,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/gui/catalogue"
 	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
+	"github.com/donislawdev/qadatagenerator/internal/gui/outward"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/quickview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/recipeview"
@@ -90,7 +91,7 @@ func main() {
 	}
 	window := application.NewWindow(text.T(i18n.WindowTitle))
 
-	frame := frameFor(asked, text, window, application.Clipboard())
+	frame := frameFor(asked, text, window, application)
 
 	// Dropping is a property of the window rather than of a control, so the
 	// frame is what receives it and hands it to whichever screen is open.
@@ -111,14 +112,16 @@ func main() {
 //
 // Only one of the two is built. The window proper starts places of work and a
 // watch on the signal that closes it, and none of that belongs behind a view
-// of controls that does no work.
-func frameFor(asked launch, text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipboard) *shell.Shell {
+// of controls that does no work. The catalogue carries no links to pages
+// outside this program either: it is a view of controls, and the control those
+// links are drawn as is already on its page of buttons.
+func frameFor(asked launch, text i18n.Catalogue, window fyne.Window, application fyne.App) *shell.Shell {
 	if asked.catalogue {
-		// The samples come from the package the stored pictures take them
-		// from, so the window and the pictures of it show the same words.
-		return catalogue.Frame(text, brand(text), screens.CatalogueSamples())
+		// The samples and the brand come from the package the stored pictures
+		// take them from, so the window and the pictures of it say the same.
+		return catalogue.Frame(text, screens.Brand(text), screens.CatalogueSamples())
 	}
-	return assemble(text, window, clipboard)
+	return assemble(text, window, application.Clipboard(), application)
 }
 
 // revealOnShortcut opens the quick screen on Ctrl+K.
@@ -194,7 +197,8 @@ func saveReport(window fyne.Window) about.Saver {
 // Every screen is handed its readers and its places of work here rather than
 // reaching for them, which is what lets each of them be built in a test with no
 // disk and no goroutine.
-func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipboard) *shell.Shell {
+func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipboard,
+	desktop outward.Desktop) *shell.Shell {
 	// 🔴 One place of work for the whole window, handed to every screen as
 	// the same value. Until 2026-10-27 each screen was given a literal of its
 	// own, and the one for the recipe screen was written without the watch
@@ -231,7 +235,12 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 	// application behind it, and the clipboard of the toolkit asks for one.
 	value := quickview.New(text, clipboard)
 
-	return shell.New(sidebar(text, window, value, damage, editor, browser), brand(text))
+	// The two pages outside this program open through the application, off
+	// the thread that draws, and a page the system did not open is said in a
+	// dialog with its address, so a button that did nothing is never silent.
+	refused := func(title, message string) { dialog.ShowInformation(title, message, window) }
+	return shell.New(sidebar(text, window, value, damage, editor, browser),
+		screens.WindowBrand(text, desktop, work.Read, refused))
 }
 
 // placesOfWork is where every screen sends what must not happen on the thread
@@ -307,22 +316,5 @@ func sidebar(text i18n.Catalogue, window fyne.Window, value *quickview.View, dam
 		{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,
 			Content: about.Content(text, license.Current(), version.Current(),
 				saveReport(window), assets.Notice)},
-	}
-}
-
-// brand is the name, the mark and the version at the foot of the column, which
-// the catalogue of controls wears too, with a line of its own under the name.
-func brand(text i18n.Catalogue) shell.Brand {
-	return shell.Brand{
-		// The same name the window carries in its title bar, from the same key,
-		// so the two can never say different things.
-		Name: text.T(i18n.WindowTitle),
-		// The tool's own version and not the catalog's or the manifest's. This
-		// window has four version numbers behind it and the About screen names
-		// them all, which is the right place for that: here there is room for
-		// one, and the one somebody means by "which version is this" is the
-		// program's.
-		Version: "v" + version.Current().Tool,
-		Promise: text.T(i18n.SidebarOffline),
 	}
 }

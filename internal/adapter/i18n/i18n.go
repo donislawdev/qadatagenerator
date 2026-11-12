@@ -86,6 +86,16 @@ const (
 
 	SidebarGroupMake  Key = "sidebar.group.make"
 	SidebarGroupCheck Key = "sidebar.group.check"
+
+	// The two pages outside this program at the foot of the column (DEC-276),
+	// and what the window says when the desktop does not open one. The
+	// addresses are not words and are not here: a translation must not be
+	// able to change where a button goes.
+	SidebarLinkProject       Key = "sidebar.link.project"
+	SidebarLinkSupport       Key = "sidebar.link.support"
+	SidebarLinkRefusedTitle  Key = "sidebar.link.refused.title"
+	SidebarLinkRefusedBody   Key = "sidebar.link.refused.body"
+	SidebarLinkRefusedReason Key = "sidebar.link.refused.reason"
 )
 
 // The keys of the About screen.
@@ -611,6 +621,8 @@ var windowKeys = []Key{
 	ToolkitSelectAll, ToolkitUndo, ToolkitRedo, ToolkitQuit, ToolkitSelectOne,
 	WindowTitle, ScreenAbout, ScreenManifest, ScreenTake, ScreenRecipe, ScreenQuick,
 	SidebarGroupMake, SidebarGroupCheck, SidebarOffline,
+	SidebarLinkProject, SidebarLinkSupport, SidebarLinkRefusedTitle, SidebarLinkRefusedBody,
+	SidebarLinkRefusedReason,
 
 	QuickNothingWritten, QuickLabelValue, QuickValueHeading, QuickValuesCounted,
 	QuickAboutProduces, QuickAboutCheckDigit, QuickAboutRange,

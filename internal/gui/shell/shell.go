@@ -87,6 +87,23 @@ type Brand struct {
 	// Version is what this build is, and Promise what it does not do.
 	Version string
 	Promise string
+	// Links are the pages outside this program that the foot of the column
+	// offers, between the last name and the promise (DEC-276). None for a frame
+	// that was not given any, which is every test here and the catalogue of
+	// controls.
+	Links []Link
+}
+
+// Link is a page outside this program that the foot of the column opens.
+//
+// The frame draws it and calls Open when it is pressed, and knows nothing about
+// where it goes. The addresses, and the one call that hands an address to the
+// system, live in internal/gui/outward, the only place in the window allowed
+// to make that call.
+type Link struct {
+	Name string
+	Icon string
+	Open func()
 }
 
 // Shell is the frame and which screen is showing.
@@ -95,7 +112,11 @@ type Shell struct {
 	brand   Brand
 	buttons []*parts.Button
 	items   []*item
-	body    *fyne.Container
+	// links are the items of the foot, built like the names above them so the
+	// two cannot come to look different. Their bar never shows, because no
+	// screen of this window is ever open on them.
+	links []*item
+	body  *fyne.Container
 	// title is the name of the screen being read, drawn above it.
 	//
 	// One label rewritten rather than one per screen, for the reason parts.Title
@@ -113,6 +134,9 @@ func New(screens []Screen, brand Brand) *Shell {
 		frame.buttons = append(frame.buttons, button)
 		frame.items = append(frame.items, newItem(button))
 	}
+	for _, link := range brand.Links {
+		frame.links = append(frame.links, newItem(place(link.Name, link.Icon, link.Open)))
+	}
 	if len(screens) > 0 {
 		frame.Open(0)
 	}
@@ -127,12 +151,21 @@ func New(screens []Screen, brand Brand) *Shell {
 // draws a focus ring around. That ring is measured: the focus colour stands at
 // 9.02 against the window, where the guideline asks for three.
 func (s *Shell) button(index int) *parts.Button {
-	button := parts.NewButton(s.screens[index].Name, func() { s.Open(index) })
-	if name := s.screens[index].Icon; name != "" {
-		// The icon leads the words, which is the order every column of
-		// places to go is read in and the order the accepted drawing has.
-		button.ShowIcon(name)
-	}
+	return place(s.screens[index].Name, s.screens[index].Icon, func() { s.Open(index) })
+}
+
+// place is one name in the column with its icon, the button every screen and
+// every link of the foot is drawn as. One builder for both, so that a name
+// leading a screen and a name leading a page outside cannot drift into two
+// looks the day somebody adjusts one of them.
+//
+// 🔴 The icon is put on LAST. ShowIcon redraws, and a redraw builds the face
+// from whatever the fields say at that moment. With the icon first, the face
+// was built with an edge, before Plain was set, and kept it: the names of the
+// screens hid that, because opening a screen redraws every name, and the links
+// of the foot, which nothing redraws, showed it on every state of the window.
+func place(label, icon string, tapped func()) *parts.Button {
+	button := parts.NewButton(label, tapped)
 	// 🔴 The names line up down the left edge rather than being centred, which
 	// is what the toolkit does when nobody says otherwise.
 	//
@@ -146,6 +179,11 @@ func (s *Shell) button(index int) *parts.Button {
 	// No edge either. Five boxes down a column read as five boxes rather than
 	// as a list, and the mark of the current screen is what says where you are.
 	button.Plain = true
+	if icon != "" {
+		// The icon leads the words, which is the order every column of
+		// places to go is read in and the order the accepted drawing has.
+		button.ShowIcon(icon)
+	}
 	return button
 }
 
@@ -272,7 +310,9 @@ func (s *Shell) Content() fyne.CanvasObject {
 	// as words floating beside the content. It was a rule until 2026-10-21, and
 	// the rule was four units thick and read as the handle of a splitter that
 	// does not move (DEC-261). A ground says the same thing with no line at all.
-	side := paint.On(paint.Fill(palette.BgSurface, 0), s.column())
+	// It runs under the foot as well, which frame lays out apart from the
+	// column for the reason it gives.
+	ground := paint.Fill(palette.BgSurface, 0)
 	// The title carries the side margin every screen gives its header and its
 	// content, so that the name starts where the words under it start. It was
 	// the section step while the header used the major one, and the name of
@@ -281,7 +321,10 @@ func (s *Shell) Content() fyne.CanvasObject {
 	edge := palette.StepOf(palette.NameStepMajor)
 	titled := container.New(layout.NewCustomPaddedLayout(top, 0, edge, edge), s.title)
 	screen := container.New(layout.NewBorderLayout(titled, nil, nil, nil), titled, s.body)
-	return container.New(layout.NewBorderLayout(nil, nil, side, nil), side, screen)
+	arranged := &frame{ground: ground, column: s.column(), screen: screen, foot: s.foot()}
+	// Handed over in the order the keyboard is to meet them, which is not the
+	// order a person reads them in. frame says why the two differ.
+	return container.New(arranged, arranged.ground, arranged.column, arranged.screen, arranged.foot)
 }
 
 // column is the names down the side, with the headings that group them.
@@ -320,26 +363,15 @@ func (s *Shell) column() fyne.CanvasObject {
 		group = s.screens[at].Group
 		items = append(items, s.items[at].onScreen)
 	}
-	// The promise goes under the last name rather than beside it, because it
-	// belongs to the program and not to the screen above it.
-	if s.brand.Promise != "" {
-		// It starts where the names above it start and keeps off the foot of
-		// the window, rather than standing in the corner as it did until
-		// 2026-10-21, a step further left than anything else in the column.
-		items = append(items, paint.Pad(palette.NameStepHairline, palette.NameStepRelated,
-			palette.NameStepTight, palette.NameStepHairline,
-			alongTheBar(paint.Text(s.footnote(), palette.TypeLabel, palette.TextSecondary))))
-	}
 	column := container.NewVBox(items...)
 	// 🔴 A border rather than another entry in the column, because the mark has
 	// to stay at the top while the names below it grow. A column of the toolkit
 	// gives every child its minimum height, so the spacer that pushes About to
 	// the foot would have nothing to push against if the mark were one of them.
-	whole := fyne.CanvasObject(column)
 	if mark := s.brandMark(); mark != nil {
-		whole = container.New(layout.NewBorderLayout(mark, nil, nil, nil), mark, column)
+		return container.New(layout.NewBorderLayout(mark, nil, nil, nil), mark, column)
 	}
-	return container.New(fixedWidth{width: palette.SidebarWidth}, whole)
+	return column
 }
 
 // brandMark is the product's name at the head of the column, or nothing when
@@ -358,6 +390,29 @@ func (s *Shell) brandMark() fyne.CanvasObject {
 		palette.NameStepTight, palette.NameStepHairline,
 		paint.AtLeast(0, palette.ControlHeight, alongTheBar(
 			paint.Middle(paint.Strong(s.brand.Name, palette.TypeBody, palette.TextPrimary)))))
+}
+
+// foot is what stands under the last name of the column: the pages outside
+// this program, then the version and the promise.
+//
+// The promise goes under the last name rather than beside it, because it
+// belongs to the program and not to the screen above it. The links go between
+// the two, because they are about the program as well and are the only part of
+// the foot a person can press.
+func (s *Shell) foot() fyne.CanvasObject {
+	var items []fyne.CanvasObject
+	for _, link := range s.links {
+		items = append(items, link.onScreen)
+	}
+	if s.brand.Promise != "" {
+		// It starts where the names above it start and keeps off the foot of
+		// the window, rather than standing in the corner as it did until
+		// 2026-10-21, a step further left than anything else in the column.
+		items = append(items, paint.Pad(palette.NameStepHairline, palette.NameStepRelated,
+			palette.NameStepTight, palette.NameStepHairline,
+			alongTheBar(paint.Text(s.footnote(), palette.TypeLabel, palette.TextSecondary))))
+	}
+	return container.NewVBox(items...)
 }
 
 // alongTheBar puts words where the words of the column begin: past the room the
@@ -414,29 +469,51 @@ func heading(name string) fyne.CanvasObject {
 		alongTheBar(paint.Caption(name)))
 }
 
-// fixedWidth gives what it holds one width whatever is in it.
+// frame puts the column down the leading edge with its foot under it, the
+// screen beside both, and one ground under the column and the foot together.
 //
 // # Why the column does not simply take the width of its longest name
 //
 // It would then change width when a screen is added, when a name is translated
 // and when the desktop scales the interface, so the content beside it would
 // start at a different place on every build. A person moving between two
-// screens would see everything shift sideways for no reason they caused.
-type fixedWidth struct{ width float32 }
-
-func (f fixedWidth) MinSize(objects []fyne.CanvasObject) fyne.Size {
-	height := float32(0)
-	for _, object := range objects {
-		if tall := object.MinSize().Height; tall > height {
-			height = tall
-		}
-	}
-	return fyne.NewSize(f.width, height)
+// screens would see everything shift sideways for no reason they caused. So the
+// column and its foot are one width from the theme, whatever is in them.
+//
+// # Why the foot is a part of its own rather than the last entries of the column
+//
+// The keyboard walks a container in the order its objects were handed over,
+// and the foot holds the two pages outside this program (DEC-276). They are not
+// work, so the owner chose on 2026-11-12 that Tab reaches them after the last
+// control of the open screen, the way the footer of a page is reached last.
+// Kept in the column, every control of every screen would sit two presses of
+// Tab further away than it does, for links a person opens rarely.
+//
+// So what is drawn at the foot of the column is handed over after the screen,
+// and this layout puts it back where it is read. The parts are held by name
+// rather than found by their place in a list, so the order they are handed over
+// in can change without moving any of them.
+type frame struct {
+	ground, column, screen, foot fyne.CanvasObject
 }
 
-func (f fixedWidth) Layout(objects []fyne.CanvasObject, size fyne.Size) {
-	for _, object := range objects {
-		object.Resize(fyne.NewSize(f.width, size.Height))
-		object.Move(fyne.NewPos(0, 0))
-	}
+func (f *frame) MinSize([]fyne.CanvasObject) fyne.Size {
+	screen := f.screen.MinSize()
+	return fyne.NewSize(palette.SidebarWidth+screen.Width,
+		max(f.column.MinSize().Height+f.foot.MinSize().Height, screen.Height))
+}
+
+func (f *frame) Layout(_ []fyne.CanvasObject, size fyne.Size) {
+	side, under := palette.SidebarWidth, f.foot.MinSize().Height
+	f.ground.Move(fyne.NewPos(0, 0))
+	f.ground.Resize(fyne.NewSize(side, size.Height))
+	// Never a negative size, which a window squeezed below its minimum would
+	// otherwise hand on: the window's own minimum keeps that from happening
+	// on a desktop, and a test is free to ask for any size at all.
+	f.column.Move(fyne.NewPos(0, 0))
+	f.column.Resize(fyne.NewSize(side, max(size.Height-under, 0)))
+	f.foot.Move(fyne.NewPos(0, size.Height-under))
+	f.foot.Resize(fyne.NewSize(side, under))
+	f.screen.Move(fyne.NewPos(side, 0))
+	f.screen.Resize(fyne.NewSize(max(size.Width-side, 0), size.Height))
 }

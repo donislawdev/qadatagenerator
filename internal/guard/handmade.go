@@ -104,12 +104,16 @@ var HandmadeAllowed = map[string]Handmade{
 			"word saying what a click does is absent until the pointer arrives. Swapping a subtree is " +
 			"what a renderer is for, and no toolkit widget exposes that",
 	},
-	"fixedWidth": {
-		Instead: "layout.NewGridWrapLayout, which does force a size on what it holds",
-		Why: "it wants a whole cell size, height included, and the column of screen names has no " +
-			"height of its own until the names in it are laid out. Border, the other candidate, " +
-			"gives a side whatever width its content asks for, which is the thing being avoided: " +
-			"the column would change width when a screen is added or a name is translated",
+	"frame": {
+		Instead: "layout.NewBorderLayout, which held the column beside the screen until 2026-11-12, " +
+			"and layout.NewGridWrapLayout, which does force a size on what it holds",
+		Why: "Border gives a side whatever width its content asks for, so the column would change width " +
+			"when a screen is added or a name is translated. GridWrap wants a whole cell size, height " +
+			"included, and the column has no height until its names are laid out. And no layout of the " +
+			"library puts an object anywhere but where its place in the list puts it, while the foot of " +
+			"the column is handed over after the screen so that Tab reaches the two pages outside this " +
+			"program last (DEC-276), and is drawn under the column. It took over fixedWidth, which kept " +
+			"the width alone, so the register did not grow",
 	},
 	"evenRows": {
 		Instead: "layout.NewGridLayoutWithRows, read on the source of v2.8.1 (layout/gridlayout.go), " +

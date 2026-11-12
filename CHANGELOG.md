@@ -517,6 +517,13 @@ repository once they are released.
 
 ### Added
 
+- **Links to the project and to supporting it.** Two buttons at the foot of
+  the column, under About, open the project's source on GitHub and the page
+  for supporting its author in your browser. The program itself still
+  connects to nothing: it hands the address to your system, which opens it.
+  When the system does not open the page, the window says so and shows the
+  address, so you can type it into a browser yourself. The keyboard reaches
+  both buttons last, after the controls of the screen you are on.
 - **Cities and states for en-US.** `city` and `region` work in en-US, where
   they used to be refused. Both come from the U.S. Census Bureau list of postal
   code areas this build already carries, and a place with more postal codes
