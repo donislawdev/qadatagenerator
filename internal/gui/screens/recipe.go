@@ -207,8 +207,8 @@ func recipeStatesOfTheHints() []State {
 		{
 			Name: "recipe-generators",
 			Purpose: "the vocabulary this build carries, opened. It is the answer to the " +
-				"question an empty screen used to leave unanswered, and the three " +
-				"generators that cannot be filled in a locale say why rather than saying no",
+				"question an empty screen used to leave unanswered, and a generator that " +
+				"cannot be filled in a locale says why rather than saying no",
 			Screen:     screenRecipe,
 			Generators: true,
 		},

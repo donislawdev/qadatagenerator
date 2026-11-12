@@ -94,6 +94,65 @@ var postalRegistry = loadPostalRegistry()
 // postalByCode indexes the registry for lookup by code.
 var postalByCode = indexPostalByCode(postalRegistry)
 
+// The places and regions of the registry, one per code, built with it and for
+// the same reason: before anything can be concurrent (DEC-278).
+var (
+	postalPlaceNames     = placeNamesOf(postalRegistry)
+	postalRegions        = regionsOf(postalRegistry)
+	postalRegionsByPlace = regionsByPlace(postalRegistry)
+)
+
+// PlacesLocale is the locale whose places this registry describes.
+const PlacesLocale = postalLocale
+
+// PlaceNames is the name of the place of every code, one per code and in the
+// order of the codes.
+//
+// # Why a place stands in it as often as it has codes
+//
+// That repetition is the weighting DEC-278 chose: drawing one entry draws a
+// place as often as the registry gives it a code, so Houston turns up more often
+// than a village with one. The slice is shared and must not be changed.
+func PlaceNames() []string { return postalPlaceNames }
+
+// Regions is the region of every code, one per code and in the order of the
+// codes, weighted the way PlaceNames is. The slice is shared and must not be
+// changed.
+func Regions() []string { return postalRegions }
+
+// RegionsOf is the region of every code whose place has that name, one per
+// code, so that a region holding more of that place stands in it more often.
+// Nil for a name the registry does not hold. The slice is shared and must not
+// be changed.
+func RegionsOf(place string) []string { return postalRegionsByPlace[place] }
+
+func placeNamesOf(entries []postalEntry) []string {
+	names := make([]string, len(entries))
+	for i, entry := range entries {
+		names[i] = entry.place.Name
+	}
+	return names
+}
+
+func regionsOf(entries []postalEntry) []string {
+	regions := make([]string, len(entries))
+	for i, entry := range entries {
+		regions[i] = entry.place.Region
+	}
+	return regions
+}
+
+// regionsByPlace gathers the regions of the codes under the name of their place,
+// in the order of the codes, so that the answer for a name is the same on every
+// run whatever order a map is walked in.
+func regionsByPlace(entries []postalEntry) map[string][]string {
+	byPlace := map[string][]string{}
+	for _, entry := range entries {
+		byPlace[entry.place.Name] = append(byPlace[entry.place.Name], entry.place.Region)
+	}
+	return byPlace
+}
+
 // loadPostalRegistry turns the embedded list into entries, once, while this
 // package is being loaded.
 //

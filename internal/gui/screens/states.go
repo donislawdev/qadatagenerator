@@ -132,7 +132,9 @@ func quickStatesOfARefusal() []State {
 			Purpose: "a value this build carries no data for in the locale chosen, which " +
 				"is the refusal that comes from the engine rather than from the screen",
 			Screen: screenQuick,
-			Quick:  Quick{Generator: "city", Seed: "for-the-picture"},
+			// The postal code of pl-PL since 2026-11-12, when the city of en-US
+			// got its data (DEC-278). The last kind lacking data in a locale.
+			Quick: Quick{Generator: "postal_code", Locale: "pl-PL", Seed: "for-the-picture"},
 		},
 		{
 			Name: "quick-refused",

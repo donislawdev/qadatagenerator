@@ -506,11 +506,11 @@
 										</container>
 										<container pos="0,34" size="513x621">
 											<widget size="513x621" type="*parts.KeyScroll">
-												<container size="513x829">
-													<container size="513x829">
-														<rectangle fillColor="menuBackground" radius="10" size="513x829"/>
-														<container size="513x829">
-															<container pos="16,16" size="481x797">
+												<container size="513x771">
+													<container size="513x771">
+														<rectangle fillColor="menuBackground" radius="10" size="513x771"/>
+														<container size="513x771">
+															<container pos="16,16" size="481x739">
 																<container size="481x41">
 																	<widget size="481x41" type="*widget.Label">
 																		<widget size="481x41" type="*widget.RichText">
@@ -551,7 +551,7 @@
 																	<spacer pos="184,0" size="296x34"/>
 																</container>
 																<rectangle fillColor="separator" pos="0,107" size="481x1"/>
-																<container pos="0,124" size="481x672">
+																<container pos="0,124" size="481x614">
 																	<widget size="481x34" type="*parts.Button">
 																		<container size="481x34">
 																			<container size="481x34">
@@ -578,7 +578,7 @@
 																			</container>
 																		</container>
 																	</widget>
-																	<container pos="0,34" size="481x638">
+																	<container pos="0,34" size="481x580">
 																		<container size="481x24">
 																			<widget size="481x24" type="*widget.Label">
 																				<widget size="481x24" type="*widget.RichText">
@@ -706,25 +706,11 @@
 																			</widget>
 																		</container>
 																		<text bold color="focus" pos="0,520" size="481x14" textSize="11">WHERE THIS BUILD HAS NOTHING TO DRAW FROM</text>
-																		<container pos="0,538" size="481x24">
-																			<widget size="481x24" type="*widget.Label">
-																				<widget size="481x24" type="*widget.RichText">
-																					<text color="disabled" pos="4,4" size="358x16">city is not available in en-US: this build has no cities for en-US</text>
-																				</widget>
-																			</widget>
-																		</container>
-																		<container pos="0,567" size="481x41">
+																		<container pos="0,538" size="481x41">
 																			<widget size="481x41" type="*widget.Label">
 																				<widget size="481x41" type="*widget.RichText">
 																					<text color="disabled" pos="4,4" size="469x16">postal_code is not available in pl-PL: this build has no register of postal codes for</text>
 																					<text color="disabled" pos="4,20" size="285x16">pl-PL, so a postal code cannot be produced there</text>
-																				</widget>
-																			</widget>
-																		</container>
-																		<container pos="0,613" size="481x24">
-																			<widget size="481x24" type="*widget.Label">
-																				<widget size="481x24" type="*widget.RichText">
-																					<text color="disabled" pos="4,4" size="386x16">region is not available in en-US: this build has no regions for en-US</text>
 																				</widget>
 																			</widget>
 																		</container>
@@ -738,8 +724,8 @@
 													<linearGradient endColor="shadow" pos="0,-8" size="513x8"/>
 												</widget>
 												<widget pos="507,0" size="6x621" type="*widget.scrollBarArea">
-													<widget pos="3,0" size="3x465" type="*widget.scrollBar">
-														<rectangle fillColor="scrollbar" radius="3" size="3x465"/>
+													<widget pos="3,0" size="3x500" type="*widget.scrollBar">
+														<rectangle fillColor="scrollbar" radius="3" size="3x500"/>
 													</widget>
 												</widget>
 											</widget>

@@ -266,7 +266,7 @@
 																		<container pos="12,4" size="98x26">
 																			<container size="71x26">
 																				<spacer size="71x4"/>
-																				<text pos="0,4" size="71x16">city</text>
+																				<text pos="0,4" size="71x16">postal_code</text>
 																				<spacer pos="0,21" size="71x4"/>
 																			</container>
 																			<container pos="71,0" size="27x26">
@@ -327,7 +327,7 @@
 																		<container pos="12,4" size="97x26">
 																			<container size="70x26">
 																				<spacer size="70x4"/>
-																				<text pos="0,4" size="70x16">en-US</text>
+																				<text pos="0,4" size="70x16">pl-PL</text>
 																				<spacer pos="0,21" size="70x4"/>
 																			</container>
 																			<container pos="70,0" size="27x26">
@@ -416,31 +416,87 @@
 									<container size="700x621">
 										<widget size="700x24" type="*widget.Label">
 											<widget size="700x24" type="*widget.RichText">
-												<text color="disabled" pos="4,4" size="187x16">this build has no cities for en-US</text>
+												<text color="disabled" pos="4,4" size="542x16">this build has no register of postal codes for pl-PL, so a postal code cannot be produced there</text>
 											</widget>
 										</widget>
 									</container>
 								</container>
 								<container pos="700,0" size="358x621">
-									<container size="358x168">
-										<container size="358x168">
-											<container pos="24,4" size="330x160">
-												<rectangle size="330x160"/>
-												<container size="330x160">
-													<rectangle fillColor="menuBackground" radius="10" size="330x160"/>
-													<container size="330x160">
-														<container pos="16,16" size="298x128">
-															<text bold size="298x18" textSize="14">city</text>
+									<container size="358x481">
+										<container size="358x481">
+											<container pos="24,4" size="330x473">
+												<rectangle size="330x473"/>
+												<container size="330x473">
+													<rectangle fillColor="menuBackground" radius="10" size="330x473"/>
+													<container size="330x473">
+														<container pos="16,16" size="298x441">
+															<text bold size="298x18" textSize="14">postal_code</text>
 															<container pos="0,34" size="298x35">
 																<text bold color="focus" size="298x14" textSize="11">PRODUCES</text>
-																<text monospace pos="0,18" size="298x16">string</text>
+																<text monospace pos="0,18" size="298x16">postal_code (US.postal)</text>
 															</container>
-															<container pos="0,85" size="298x43">
-																<text bold color="focus" size="298x14" textSize="11">NOT AVAILABLE IN THIS LOCALE</text>
-																<container pos="0,18" size="298x24">
+															<container pos="0,85" size="298x68">
+																<text bold color="focus" size="298x14" textSize="11">FORMAT</text>
+																<text monospace pos="0,18" size="298x20" textSize="16">00000</text>
+																<container pos="0,43" size="298x24">
 																	<widget size="298x24" type="*widget.Label">
 																		<widget size="298x24" type="*widget.RichText">
-																			<text color="disabled" pos="4,4" size="187x16">this build has no cities for en-US</text>
+																			<text color="disabled" pos="4,4" size="42x16">5 digits</text>
+																		</widget>
+																	</widget>
+																</container>
+															</container>
+															<container pos="0,169" size="298x77">
+																<text bold color="focus" size="298x14" textSize="11">CHECK DIGIT</text>
+																<container pos="0,18" size="298x58">
+																	<widget size="298x58" type="*widget.Label">
+																		<widget size="298x58" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="279x16">None. One wrong character cannot be caught by</text>
+																			<text color="disabled" pos="4,20" size="283x16">the number itself, so an import has no way to tell</text>
+																			<text color="disabled" pos="4,37" size="199x16">a damaged value from a good one.</text>
+																		</widget>
+																	</widget>
+																</container>
+															</container>
+															<rectangle fillColor="separator" pos="0,262" size="298x1"/>
+															<container pos="0,279" size="298x85">
+																<container size="298x23">
+																	<container size="114x23">
+																		<rectangle fillColor="rgba(232,163,61,36)" radius="999" size="114x23"/>
+																		<container size="114x23">
+																			<container pos="8,4" size="98x15">
+																				<container size="15x15">
+																					<spacer size="15x0"/>
+																					<image fillMode="contain" rsc="triangle-alert-e8a33d-15.svg" size="15x15"/>
+																					<spacer pos="0,15" size="15x0"/>
+																				</container>
+																				<container pos="19,0" size="79x15">
+																					<spacer size="79x0"/>
+																					<text bold color="warning" size="79x14" textSize="11">Reserved range</text>
+																					<spacer pos="0,14" size="79x0"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																	<spacer pos="118,0" size="183x23"/>
+																</container>
+																<container pos="0,27" size="298x58">
+																	<widget size="298x58" type="*widget.Label">
+																		<widget size="298x58" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="289x16">No block of this scheme is set aside for testing, so</text>
+																			<text color="disabled" pos="4,20" size="251x16">a value here may match one that was really</text>
+																			<text color="disabled" pos="4,37" size="222x16">issued. Treat it as you would real data.</text>
+																		</widget>
+																	</widget>
+																</container>
+															</container>
+															<container pos="0,381" size="298x60">
+																<text bold color="focus" size="298x14" textSize="11">NOT AVAILABLE IN THIS LOCALE</text>
+																<container pos="0,18" size="298x41">
+																	<widget size="298x41" type="*widget.Label">
+																		<widget size="298x41" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="253x16">this build has no register of postal codes for</text>
+																			<text color="disabled" pos="4,20" size="285x16">pl-PL, so a postal code cannot be produced there</text>
 																		</widget>
 																	</widget>
 																</container>
@@ -462,7 +518,7 @@
 										<spacer size="904x4"/>
 										<widget pos="0,4" size="904x24" type="*widget.Label">
 											<widget size="904x24" type="*widget.RichText">
-												<text monospace pos="4,4" size="499x16">qadg quick --count 10 --locale en-US --seed for-the-picture city</text>
+												<text monospace pos="4,4" size="553x16">qadg quick --count 10 --locale pl-PL --seed for-the-picture postal_code</text>
 											</widget>
 										</widget>
 										<spacer pos="0,29" size="904x4"/>

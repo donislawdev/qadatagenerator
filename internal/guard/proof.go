@@ -307,7 +307,7 @@ var toolGuards = []Guard{
 	{"a draw asked for more digits than the number it returns can hold is capped rather than walking off the end of the arithmetic", "TestADrawWiderThanTheNumbersItReturnsIsCappedRatherThanPanicking", "internal/adapter/values", ByMutation},
 	{"a generator this build cannot fill in the recipe's locale is refused by the plan rather than on the first row", "TestAGeneratorTheLocaleCannotFillIsRefusedByThePlan", "internal/app/generate", ByMutation},
 	{"validate refuses the generator and locale pair that generate refuses, so the two verbs agree about one file", "TestAGeneratorTheLocaleCannotFillIsAProblem", "internal/app/validate", ByMutation},
-	{"the role a field plays comes from its generator and not from the name of the column", "TestTheRoleComesFromTheGeneratorAndOnlyTwoPlayOne", "internal/adapter/values", ByMutation},
+	{"the role a field plays comes from its generator and not from the name of the column", "TestTheRoleComesFromTheGeneratorAndOnlyThreePlayOne", "internal/adapter/values", ByMutation},
 	{"every drawn date is a day that exists", "TestEveryDrawnDateIsARealDay", "internal/adapter/values", ByMutation},
 
 	// --- the disk, where a mistake costs somebody else's files ---------------

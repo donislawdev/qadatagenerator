@@ -149,31 +149,36 @@ func TestEveryKindStandsOnAShelfAListCanName(t *testing.T) {
 
 // The locale decides whether a kind can be produced at all, and the description
 // has to say so rather than describing something this build cannot make.
+//
+// Every locale rather than the default one since 2026-11-12, when the cities
+// and regions of en-US got their data (DEC-278) and the default locale stopped
+// lacking any. What still lacks it is the postal code of pl-PL (DEC-92).
 func TestAKindWithoutDataInThisLocaleSaysWhyNot(t *testing.T) {
-	source := values.New(quick.DefaultLocale, "")
 	found := false
-	for _, generator := range quick.Generators(quick.DefaultLocale) {
-		fine, why := source.CanProduce(generator, quick.DefaultLocale)
-		about := quick.Describe(generator, quick.DefaultLocale)
-		if fine {
-			if about.Unavailable != "" {
-				t.Errorf("%s can be produced in %s and the description says it cannot: %q",
-					generator, quick.DefaultLocale, about.Unavailable)
+	for _, locale := range quick.Locales() {
+		source := values.New(locale, "")
+		for _, generator := range quick.Generators(locale) {
+			fine, why := source.CanProduce(generator, locale)
+			about := quick.Describe(generator, locale)
+			if fine {
+				if about.Unavailable != "" {
+					t.Errorf("%s can be produced in %s and the description says it cannot: %q",
+						generator, locale, about.Unavailable)
+				}
+				continue
 			}
-			continue
-		}
-		found = true
-		if about.Unavailable != why {
-			t.Errorf("%s cannot be produced in %s because %q and the description says %q",
-				generator, quick.DefaultLocale, why, about.Unavailable)
+			found = true
+			if about.Unavailable != why {
+				t.Errorf("%s cannot be produced in %s because %q and the description says %q",
+					generator, locale, why, about.Unavailable)
+			}
 		}
 	}
 	// 🔴 A failure and not a skip (B-319). The day the last kind gets its data
 	// is a good day, and it is also the day this guard stops guarding, so it
 	// says so rather than going quiet.
 	if !found {
-		t.Fatal("every kind this build carries can be produced in the default locale, so " +
-			"nothing here is described as unavailable. Point this test at a locale or a " +
-			"kind that still lacks data")
+		t.Fatal("every kind this build carries can be produced in every locale, so nothing " +
+			"here is described as unavailable. This guard has nothing left to guard")
 	}
 }

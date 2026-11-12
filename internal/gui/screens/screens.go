@@ -83,6 +83,9 @@ type Quick struct {
 	// HowMany is the count as it is chosen in the list, left empty for a state
 	// that says nothing about it and therefore shows what the screen opens on.
 	HowMany string
+	// Locale is the data locale chosen, left empty for the one the screen
+	// opens on. Chosen before the kind, so that the kind is drawn once.
+	Locale string
 }
 
 // Chosen reports whether this state asks for anything on that screen.
@@ -446,6 +449,9 @@ func settleQuick(screen *quickview.View, asked Quick) {
 	// The seed goes in before the kind, so that choosing produces the value this
 	// state names rather than one value and then another.
 	screen.UseSeed(asked.Seed)
+	if asked.Locale != "" {
+		screen.UseLocale(asked.Locale)
+	}
 	screen.Choose(asked.Generator)
 	if asked.Gender != "" {
 		screen.ChooseGender(asked.Gender)

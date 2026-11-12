@@ -606,14 +606,20 @@ func TestARefusalIsShownRatherThanHiddenWithTheValue(t *testing.T) {
 	for _, refusal := range []struct {
 		name      string
 		generator string
+		locale    string
 		born      string
 	}{
-		{"a date this screen cannot read", "pesel", "05-05-1980"},
-		{"a value this build has no data for", "city", ""},
+		{"a date this screen cannot read", "pesel", "", "05-05-1980"},
+		// The postal code of pl-PL since 2026-11-12, when the city of en-US got
+		// its data (DEC-278) and stopped being a refusal (DEC-92 holds this one).
+		{"a value this build has no data for", "postal_code", "pl-PL", ""},
 	} {
 		t.Run(refusal.name, func(t *testing.T) {
 			view := New(i18n.English, &heldClipboard{})
 			view.UseSeed("for-the-test")
+			if refusal.locale != "" {
+				view.UseLocale(refusal.locale)
+			}
 			view.Choose(refusal.generator)
 			if refusal.born != "" {
 				view.SetBorn(refusal.born)

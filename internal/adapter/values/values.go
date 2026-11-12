@@ -62,6 +62,10 @@ const (
 var roles = map[string]string{
 	BirthDate: provider.RoleBirthDate,
 	Gender:    provider.RoleGender,
+	// A city plays its role in every locale, and only en-US has a reader for
+	// it today (DEC-278): a city nobody reads binds nothing, as a gender
+	// beside a column of ISBNs binds nothing.
+	City: provider.RoleCity,
 }
 
 // The field types the catalog uses in applies_to. They are constants here
@@ -580,10 +584,10 @@ var producers = map[string]generator{
 		reads: whereSurnamesInflect, byLocale: true, topic: TopicPeople},
 	Gender:    {produce: Source.gender, byLocale: true, topic: TopicPeople},
 	BirthDate: {produce: Source.birthDate, topic: TopicPeople},
-	City: {entries: fromList("cities"), list: "cities", needs: fromLists("cities"),
+	City: {entries: Source.cities, list: "cities", needs: placesOr("cities"),
 		byLocale: true, topic: TopicPlaces},
-	Region: {entries: fromList("regions"), list: "regions", needs: fromLists("regions"),
-		byLocale: true, topic: TopicPlaces},
+	Region: {entries: Source.regions, list: "regions", needs: placesOr("regions"),
+		reads: whereRegionsFollowCities, byLocale: true, topic: TopicPlaces},
 	PostalCode: {produce: Source.postalCode, behind: us.Postal{}, needs: postalRegister,
 		byLocale: true},
 	Pesel: {produce: fromProvider(pl.PESEL{}), behind: pl.PESEL{},
@@ -606,13 +610,6 @@ var producers = map[string]generator{
 func fromProvider(p provider.Provider) producer {
 	return func(s Source, req generate.Request) (string, error) {
 		return p.Generate(provider.Request{Source: s.seed, At: req.At, Agrees: req.Agrees})
-	}
-}
-
-// fromList names the entries of one word list.
-func fromList(name string) listed {
-	return func(s Source, _ generate.Request) (listing, error) {
-		return s.entriesOf(name)
 	}
 }
 

@@ -174,6 +174,9 @@ type Request struct {
 const (
 	RoleBirthDate = "birth_date"
 	RoleGender    = "gender"
+	// RoleCity is the place a row is in, which a region takes account of
+	// where this build knows which region a place lies in (DEC-278).
+	RoleCity = "city"
 )
 
 // Agreement is the values a generated value has to be consistent with, keyed

@@ -327,21 +327,24 @@ func TestAnUnknownGeneratorIsRefusedAndTheKnownOnesCanBeListed(t *testing.T) {
 	}
 }
 
-// Only the generators an identifier can read play a role, and the role comes
-// from the generator rather than from the name of the column.
-func TestTheRoleComesFromTheGeneratorAndOnlyTwoPlayOne(t *testing.T) {
+// Only the generators another one can read play a role, and the role comes from
+// the generator rather than from the name of the column. The city joined the
+// date of birth and the gender on 2026-11-12, read by a region in en-US
+// (DEC-278).
+func TestTheRoleComesFromTheGeneratorAndOnlyThreePlayOne(t *testing.T) {
 	source := values.New("pl-PL", "roles")
 	for generator, wanted := range map[string]string{
 		values.BirthDate: provider.RoleBirthDate,
 		values.Gender:    provider.RoleGender,
+		values.City:      provider.RoleCity,
 	} {
 		role, plays := source.RoleOf(generator)
 		if !plays || role != wanted {
 			t.Errorf("%s plays %q and should play %q", generator, role, wanted)
 		}
 	}
-	if _, plays := source.RoleOf(values.City); plays {
-		t.Error("a city plays a role no identifier reads")
+	if _, plays := source.RoleOf(values.ISBN); plays {
+		t.Error("an ISBN plays a role nothing reads")
 	}
 }
 

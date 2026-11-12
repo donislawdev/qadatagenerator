@@ -12,6 +12,10 @@ repository once they are released.
 
 ### BREAKING
 
+- **Two voivodeships are spelled the official way.** The region generator in
+  pl-PL writes `Kujawsko-pomorskie` and `Warmińsko-mazurskie`, where it wrote
+  them with a space on each side of the hyphen. A pl-PL dataset with a region
+  column differs in those two values and nowhere else.
 - **In pl-PL the gender generator writes `kobieta` and `mężczyzna`.** Polish
   data used to say `female` and `male`, as English data still does. A dataset
   made in pl-PL with the same seed now differs in its gender column and nowhere
@@ -487,6 +491,15 @@ repository once they are released.
 
 ### Added
 
+- **Cities and states for en-US.** `city` and `region` work in en-US, where
+  they used to be refused. Both come from the U.S. Census Bureau list of postal
+  code areas this build already carries, and a place with more postal codes
+  turns up more often, so Houston appears more often than a village. A state is
+  written as its two letter code, such as `CA`. In a table with both columns
+  the state is one the city really lies in, without a rule saying so, and
+  `validate` and `generate` say "region follows city". Polish cities and
+  voivodeships are still drawn independently of each other, because the Polish
+  lists do not say which city lies where.
 - **The About screen and `qadg --license` name the author.** Both now show
   "Author: DonislawDev" beside the licenses, and `qadg --license --json`
   carries it as `author`.
