@@ -218,6 +218,12 @@ repository once they are released.
 
 ### Changed
 
+- **The How many field of Quick value turns red as you type a number it would
+  refuse.** Nought and anything over the limit of the screen get a red edge at
+  once, before Generate is pressed, and the edge goes back to normal as soon as
+  the number is one the screen takes. Why the number is refused is still said
+  above the values after Generate. An empty field stays as it is while you type
+  the next number.
 - **Quick value shows the Locale list only beside a kind the locale changes.**
   A first name, a surname, a city, a region and a postal code come out
   differently in each locale, so the list stays beside them. Every other kind,

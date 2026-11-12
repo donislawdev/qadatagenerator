@@ -265,6 +265,50 @@ func TestAFieldTheChosenKindDoesNotReadIsNotSent(t *testing.T) {
 	}
 }
 
+// TestTheCountFieldShowsARefusalWhileItIsTyped holds B-363: the count field is
+// marked as wrong the moment it holds a number Generate would refuse, and not
+// only after the press.
+//
+// 🔴 The mark and the press are held to ONE rule rather than each to a list of
+// numbers written here. Every number below is typed, judged by the mark, then
+// pressed, and the press has to refuse exactly the ones the mark called wrong.
+// A field that turned red by a rule of its own would drift from the refusal the
+// first time either moved, and a person would be told no by one and yes by the
+// other.
+//
+// An empty field is not marked, which is the one place the two differ on
+// purpose: a person clearing the field to type another number is half way
+// through, and a field going red under a deleted digit is the screen arguing
+// mid sentence, the reason the date of birth waits for Enter.
+func TestTheCountFieldShowsARefusalWhileItIsTyped(t *testing.T) {
+	view := New(i18n.English, &heldClipboard{})
+	view.UseSeed("for-the-test")
+	view.Choose("pesel")
+
+	view.howMany.SetText("")
+	if view.howMany.Invalid() {
+		t.Error("an empty count field is marked as wrong while somebody may be about to type a number")
+	}
+	ceiling := MostShown()
+	for _, typed := range []string{
+		"0", "00", "1", "007", "10", strconv.Itoa(ceiling - 1), strconv.Itoa(ceiling),
+		strconv.Itoa(ceiling + 1), strings.Repeat("9", countDigits),
+	} {
+		shown := view.Value()
+		view.howMany.SetText(typed)
+		marked := view.howMany.Invalid()
+		if view.Value() != shown {
+			t.Errorf("typing %q produced values before Generate was pressed (DEC-235)", typed)
+		}
+		view.Generate()
+		refused := view.Value() == ""
+		if marked != refused {
+			t.Errorf("the count field holding %q is marked wrong %v and Generate refuses it %v, "+
+				"so the mark and the press disagree", typed, marked, refused)
+		}
+	}
+}
+
 // TestTheLocaleIsOfferedOnlyBesideAKindItChanges holds B-367: the choice of
 // locale stands beside a kind only where another locale gives something else,
 // which is asked of the mode rather than listed here.

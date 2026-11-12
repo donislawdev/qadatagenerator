@@ -196,8 +196,8 @@ func Check(req Request) Refusal {
 	// Before the generator is asked anything, because how many were wanted is
 	// a question about the request rather than about the value, and a run of
 	// nought values would otherwise be refused by nothing at all.
-	if req.Count < 1 {
-		return Refusal{Kind: CountNotPositive, Value: strconv.Itoa(req.Count)}
+	if refused := CheckCount(req.Count); refused.Refused() {
+		return refused
 	}
 	for _, role := range sortedRoles(req.Agrees) {
 		if !source.ReadsRole(req.Generator, role) {
@@ -221,6 +221,19 @@ func Check(req Request) Refusal {
 			// surface writes the readable one in its own words.
 			return Refusal{Kind: UnreadableDate, Value: bound, Role: provider.RoleBirthDate}
 		}
+	}
+	return Refusal{}
+}
+
+// CheckCount says whether a number is a number of values this mode produces,
+// which is at least one.
+//
+// Check asks it, and a surface asks it on its own while somebody is still typing
+// the number (B-363), so the answer given before the press and the one given by
+// it are one rule rather than two.
+func CheckCount(count int) Refusal {
+	if count < 1 {
+		return Refusal{Kind: CountNotPositive, Value: strconv.Itoa(count)}
 	}
 	return Refusal{}
 }

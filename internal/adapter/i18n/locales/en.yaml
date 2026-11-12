@@ -108,6 +108,7 @@ catalogue.variant.banded: Row with a band
 catalogue.variant.empty: Empty
 catalogue.variant.hinted: Empty, with a hint
 catalogue.variant.short: One word
+catalogue.variant.refused: A value the screen refuses
 catalogue.variant.extreme: Wider than the field
 catalogue.variant.lines: Several lines, some too long
 catalogue.variant.rows: More rows than it shows

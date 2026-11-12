@@ -1,9 +1,11 @@
 package paint
 
 import (
+	"image/color"
 	"math"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 
@@ -417,6 +419,15 @@ func FieldFace(value, rung string, width float32) fyne.CanvasObject {
 // disabled field - a press focuses it so its text can be copied, at
 // widget/entry.go:397 and internal/app/focus_manager.go:48 of v2.8.1 - and
 // neither may make it look like something that can be changed (DEC-253).
+//
+// # Why a refused value is the edge and focus then moves inside it
+//
+// A field holding what its screen would refuse wears its edge in state.danger,
+// which is the colour this window gives a refusal, and it does so whether or
+// not the keyboard is in it - somebody typing the wrong number is exactly the
+// person who has to see it (B-363). Focus is shown by the colour of that same
+// edge, so on a refused field it is drawn as a second edge just inside the
+// first rather than being lost under the red.
 func FieldGround(look FieldLook) fyne.CanvasObject {
 	if look.Disabled {
 		return disabledGround()
@@ -425,20 +436,40 @@ func FieldGround(look FieldLook) fyne.CanvasObject {
 	if under == "" {
 		under = theme.BgControl
 	}
+	if look.Invalid {
+		refused := inside(Bordered(under, theme.StateDanger, theme.RadiusControl))
+		if !look.Focused {
+			return refused
+		}
+		return container.NewStack(refused, innerRing(theme.MarkFocus))
+	}
 	if look.Focused {
 		edge = theme.MarkFocus
 	}
 	return inside(Bordered(under, edge, theme.RadiusControl))
 }
 
+// innerRing is an edge with nothing inside it, drawn one thickness in from the
+// edge of the control, so that it touches the first edge and covers none of it.
+func innerRing(token string) fyne.CanvasObject {
+	ring := canvas.NewRectangle(color.Transparent)
+	ring.CornerRadius = theme.RadiusControl - theme.BorderThickness
+	ring.StrokeColor = theme.Ink(token)
+	ring.StrokeWidth = theme.BorderThickness
+	in := theme.InnerRingInset
+	return container.New(layout.NewCustomPaddedLayout(in, in, in, in), ring)
+}
+
 // FieldLook is everything the ground of a text field depends on.
 //
 // A struct for the reason ChooserLook is one, and with its names: the states
-// mean here exactly what they mean on the chooser beside it.
+// mean here exactly what they mean on the chooser beside it. Invalid is the
+// field's own: it holds what its screen would refuse.
 type FieldLook struct {
 	Focused  bool
 	Hovered  bool
 	Disabled bool
+	Invalid  bool
 }
 
 // disabledGround is what a control that holds a value wears when nobody can

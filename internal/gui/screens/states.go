@@ -141,6 +141,19 @@ func quickStatesOfARefusal() []State {
 			Screen: screenQuick,
 			Quick:  Quick{Generator: "pesel", Born: "05-05-1980", Seed: "for-the-picture"},
 		},
+		{
+			Name: "quick-count-typed",
+			Purpose: "a count Generate would refuse, typed and not yet pressed: the field turns red " +
+				"at once and keeps the mark of the keyboard inside the red edge (B-363)",
+			Screen: screenQuick,
+			Quick:  Quick{Generator: "pesel", Seed: "for-the-picture"},
+			// Stop 7 is the count field, from tools/klawiatura. End and two
+			// deletions clear the ten the screen opens on, wherever the caret
+			// arrived, and the nought is what is left.
+			Keyboard: Keyboard{Tabs: 7,
+				Keys:  []fyne.KeyName{fyne.KeyEnd, fyne.KeyBackspace, fyne.KeyBackspace},
+				Typed: "0"},
+		},
 	}
 }
 

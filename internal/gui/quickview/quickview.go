@@ -179,6 +179,11 @@ func (v *View) buildFields() {
 	// that, typing 500 would produce at 5, at 50 and at 500.
 	v.howMany = parts.NewFieldEntry()
 	v.howMany.OnSubmitted = func(string) { v.draw() }
+	// 🔴 Judged on every keystroke and NOT produced on any (DEC-235): the field
+	// turns red the moment it holds a number Generate would refuse, and the
+	// sentence saying why still waits for the press (B-363). Set before Bounded,
+	// which keeps whatever was set here and calls it after its own filter.
+	v.howMany.OnChanged = func(typed string) { v.howMany.SetInvalid(v.countIsWrong(typed)) }
 	// 🔴 The field will not take a character that could never be a count, and
 	// it will not take more digits than the ceiling has. Added on 2026-09-09
 	// after the owner typed a thirty seven digit number into the real window:
@@ -553,7 +558,7 @@ func (v *View) produce() {
 	// this a number of values - keep their two answers: the first is the mode's
 	// CountFrom, the second is the mode's Check in ask below, and only the
 	// ceiling in between belongs to this screen.
-	wanted, saidAboutCount := v.countAsked()
+	wanted, saidAboutCount := v.countAsked(v.howMany.Text)
 	if saidAboutCount != "" {
 		v.values = nil
 		v.told.SetText(saidAboutCount)
@@ -625,11 +630,11 @@ func (v *View) localeAsked() string {
 // quick.Check further down, so a nought is refused by the same rule on both
 // surfaces. Writing either of those here would be a second answer to a question
 // that already has one.
-func (v *View) countAsked() (int, string) {
+func (v *View) countAsked(typed string) (int, string) {
 	// Trimmed, because a field is pasted into and a person cannot see the
 	// spaces they brought with them. The flag is NOT trimmed, and the reason is
 	// written beside CountFrom.
-	wanted, refused := quick.CountFrom(strings.TrimSpace(v.howMany.Text))
+	wanted, refused := quick.CountFrom(strings.TrimSpace(typed))
 	if refused.Refused() {
 		return 0, v.text.T(i18n.QuickRefusedCountShape)
 	}
@@ -641,6 +646,25 @@ func (v *View) countAsked() (int, string) {
 		return 0, strconv.Itoa(mostShown) + " " + v.text.T(i18n.QuickRefusedCountMany)
 	}
 	return wanted, ""
+}
+
+// countIsWrong reports whether a press of Generate would refuse the count
+// field as it now stands, asked while somebody types so that the field can say
+// so at once (B-363).
+//
+// It asks what the press asks, in the same order: countAsked for the shape and
+// the ceiling, then the mode's own rule that a count is at least one. The guard
+// beside this file types numbers, presses, and holds the two answers equal.
+//
+// An empty field is not wrong here, although the press refuses it. Somebody
+// who has just deleted the old number is half way to typing the new one, and a
+// field turning red under a deleted digit argues with them mid sentence.
+func (v *View) countIsWrong(typed string) bool {
+	if strings.TrimSpace(typed) == "" {
+		return false
+	}
+	wanted, said := v.countAsked(typed)
+	return said != "" || quick.CheckCount(wanted).Refused()
 }
 
 // bindings are the values the two fields carry, with an unchosen gender

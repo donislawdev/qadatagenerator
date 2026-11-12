@@ -188,6 +188,10 @@ func texts() []control {
 			// longer stood side by side and the page ran past the window.
 			{name: i18n.CatalogueHinted, alone: true, build: hinted},
 			{name: i18n.CatalogueShort, build: field(word)},
+			// A row rather than a column, because a screen marks a field as
+			// refused for what it holds, which is what a row is (B-363). The
+			// guard beside this file holds it apart from the row above.
+			{name: i18n.CatalogueRefused, build: refusedField},
 			{name: i18n.CatalogueExtreme, build: field(extreme)},
 			{name: i18n.CatalogueLongValue, build: field(long)},
 		},
@@ -210,6 +214,15 @@ func field(value func(Samples) string) builder {
 		made.SetText(value(samples))
 		return made, paint.AtLeast(paint.FieldWidth(samples.Word), 0, parts.Standing(parts.Field(made)))
 	}
+}
+
+// refusedField is the field of one word marked as holding what its screen
+// would refuse, which is how the count of the quick screen stands while
+// somebody types a number Generate would not take.
+func refusedField(text i18n.Catalogue, samples Samples) (any, fyne.CanvasObject) {
+	made, drawn := field(word)(text, samples)
+	made.(*parts.FieldEntry).SetInvalid(true)
+	return made, drawn
 }
 
 // hinted is an empty field showing what leaving it empty means, which is how

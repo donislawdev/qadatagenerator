@@ -328,6 +328,48 @@ func checkState(t *testing.T, each control, candidate state) {
 	}
 }
 
+// TestARefusedFieldIsDrawnApartFromTheSameValueAccepted holds the row of a
+// refused value against the row of the same value accepted, on the drawing
+// (B-363).
+//
+// # Why the guard above cannot see this
+//
+// It judges the columns, and a refused value is a row: a field drawn refused
+// exactly as it is drawn accepted would leave every column of it changing as
+// before, and pass. So the two rows are compared here, column by column.
+//
+// Out of reach the two have to be the SAME, because nobody can change the value
+// there and nothing should say it ought to be changed.
+//
+// 🔴 Whether the keyboard on a refused field can be SEEN is not asked here, and
+// it was until it was tried: the keyboard also brings the caret, so this
+// picture changed with the mark of the keyboard taken out. The ground alone is
+// held for that in paint, TestEveryLookOfAFieldIsDrawnApart.
+func TestARefusedFieldIsDrawnApartFromTheSameValueAccepted(t *testing.T) {
+	accepted, refused := textVariant(t, i18n.CatalogueShort), textVariant(t, i18n.CatalogueRefused)
+	for _, in := range typeable {
+		apart := !bytes.Equal(pixels(t, accepted, in), pixels(t, refused, in))
+		if want := in != disabled; apart != want {
+			t.Errorf("%q: a refused value is drawn apart from the same value accepted %v, where it "+
+				"should be %v", i18n.English.T(stateNames[in]), apart, want)
+		}
+	}
+}
+
+// textVariant is the row of the text field of that name.
+func textVariant(t *testing.T, name i18n.Key) variant {
+	t.Helper()
+	for _, each := range texts() {
+		for _, shown := range each.variants {
+			if shown.name == name {
+				return shown
+			}
+		}
+	}
+	t.Fatalf("the page of text has no row named %q", i18n.English.T(name))
+	return variant{}
+}
+
 // pixels is a fresh control of this variant in this state, drawn on its own,
 // with room around it for a mark drawn outside its edge.
 func pixels(t *testing.T, shown variant, in state) []byte {

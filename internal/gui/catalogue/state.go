@@ -14,6 +14,11 @@ import (
 // decided here: the guard beside this file draws each control before and after
 // each state, and a state that changes nothing is refused as firmly as a state
 // that changes something and is missing.
+//
+// A refused value is not among them, and that is a decision rather than a gap.
+// The driver puts a control into these five, while a screen marks a field as
+// refused for what it holds, which is what a variant is: so a refused field is
+// a row, shown in the same columns as every other value (B-363).
 type state int
 
 const (

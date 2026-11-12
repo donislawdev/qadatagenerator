@@ -132,7 +132,9 @@ func (e *Editor) Framed() fyne.CanvasObject {
 	if e.dressed != nil {
 		return e.dressed
 	}
-	grounds, look := textGrounds(e.Disabled())
+	// Never refused: what is wrong with a recipe is said line by line under the
+	// editor, and an edge in red would point at the whole document.
+	grounds, look := textGrounds(e.Disabled(), false)
 	e.onFocus, e.onHover, e.onDisable = look.focus, look.hover, look.disable
 	step := palette.StepOf(palette.NameStepTight)
 	typed := container.NewThemeOverride(e, bareField{})

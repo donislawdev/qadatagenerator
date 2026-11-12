@@ -299,7 +299,7 @@
 				<container pos="0,55" size="1122x844">
 					<container size="1122x844">
 						<container pos="32,24" size="1058x796">
-							<container size="1058x489">
+							<container size="1058x539">
 								<container size="1058x18">
 									<spacer pos="60,0" size="997x18"/>
 									<container size="60x18">
@@ -308,13 +308,13 @@
 										<spacer pos="0,18" size="60x0"/>
 									</container>
 								</container>
-								<container pos="0,34" size="1058x222">
+								<container pos="0,34" size="1058x272">
 									<container size="1058x22">
-										<container size="130x22">
-											<rectangle size="130x22"/>
-											<rectangle size="130x22"/>
+										<container size="169x22">
+											<rectangle size="169x22"/>
+											<rectangle size="169x22"/>
 										</container>
-										<container pos="130,0" size="927x22">
+										<container pos="169,0" size="888x22">
 											<container size="101x22">
 												<container pos="4,4" size="89x14">
 													<container size="89x14">
@@ -346,15 +346,15 @@
 										</container>
 									</container>
 									<container pos="0,30" size="1058x42">
-										<container size="130x42">
-											<rectangle size="130x42"/>
-											<container size="130x42">
-												<spacer size="130x12"/>
-												<text pos="0,12" size="130x16">Empty</text>
-												<spacer pos="0,29" size="130x12"/>
+										<container size="169x42">
+											<rectangle size="169x42"/>
+											<container size="169x42">
+												<spacer size="169x12"/>
+												<text pos="0,12" size="169x16">Empty</text>
+												<spacer pos="0,29" size="169x12"/>
 											</container>
 										</container>
-										<container pos="130,0" size="927x42">
+										<container pos="169,0" size="888x42">
 											<container size="101x42">
 												<container pos="4,4" size="89x34">
 													<container size="89x34">
@@ -501,15 +501,15 @@
 										</container>
 									</container>
 									<container pos="0,80" size="1058x42">
-										<container size="130x42">
-											<rectangle size="130x42"/>
-											<container size="130x42">
-												<spacer size="130x12"/>
-												<text pos="0,12" size="130x16">One word</text>
-												<spacer pos="0,29" size="130x12"/>
+										<container size="169x42">
+											<rectangle size="169x42"/>
+											<container size="169x42">
+												<spacer size="169x12"/>
+												<text pos="0,12" size="169x16">One word</text>
+												<spacer pos="0,29" size="169x12"/>
 											</container>
 										</container>
-										<container pos="130,0" size="927x42">
+										<container pos="169,0" size="888x42">
 											<container size="101x42">
 												<container pos="4,4" size="89x34">
 													<container size="89x34">
@@ -644,15 +644,163 @@
 										</container>
 									</container>
 									<container pos="0,130" size="1058x42">
-										<container size="130x42">
-											<rectangle size="130x42"/>
-											<container size="130x42">
-												<spacer size="130x12"/>
-												<text pos="0,12" size="130x16">Wider than the field</text>
-												<spacer pos="0,29" size="130x12"/>
+										<container size="169x42">
+											<rectangle size="169x42"/>
+											<container size="169x42">
+												<spacer size="169x12"/>
+												<text pos="0,12" size="169x16">A value the screen refuses</text>
+												<spacer pos="0,29" size="169x12"/>
 											</container>
 										</container>
-										<container pos="130,0" size="927x42">
+										<container pos="169,0" size="888x42">
+											<container size="101x42">
+												<container pos="4,4" size="89x34">
+													<container size="89x34">
+														<container size="87x34">
+															<rectangle size="87x34"/>
+															<container size="87x34">
+																<rectangle size="87x34"/>
+																<container size="87x34">
+																	<container size="87x34">
+																		<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="error" strokeWidth="2"/>
+																	</container>
+																	<container size="87x34">
+																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
+																			<container size="71x26">
+																				<widget size="71x26" type="*parts.FieldEntry">
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="71x22" type="*widget.entryContent">
+																							<widget size="71x22" type="*widget.RichText">
+																								<text pos="4,2" size="54x16">Generate</text>
+																							</widget>
+																						</widget>
+																					</widget>
+																				</widget>
+																			</container>
+																		</widget>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</container>
+											<container pos="101,0" size="101x42">
+												<container pos="4,4" size="89x34">
+													<container size="89x34">
+														<container size="87x34">
+															<rectangle size="87x34"/>
+															<container size="87x34">
+																<rectangle size="87x34"/>
+																<container size="87x34">
+																	<container size="87x34">
+																		<rectangle fillColor="hover" pos="1,1" radius="6" size="85x32" strokeColor="error" strokeWidth="2"/>
+																	</container>
+																	<container size="87x34">
+																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
+																			<container size="71x26">
+																				<widget size="71x26" type="*parts.FieldEntry">
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="71x22" type="*widget.entryContent">
+																							<widget size="71x22" type="*widget.RichText">
+																								<text pos="4,2" size="54x16">Generate</text>
+																							</widget>
+																						</widget>
+																					</widget>
+																				</widget>
+																			</container>
+																		</widget>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</container>
+											<container pos="203,0" size="101x42">
+												<container pos="4,4" size="89x34">
+													<container size="89x34">
+														<container size="87x34">
+															<rectangle size="87x34"/>
+															<container size="87x34">
+																<rectangle size="87x34"/>
+																<container size="87x34">
+																	<container size="87x34">
+																		<container size="87x34">
+																			<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="error" strokeWidth="2"/>
+																		</container>
+																		<container size="87x34">
+																			<rectangle pos="3,3" radius="4" size="81x28" strokeColor="focus" strokeWidth="2"/>
+																		</container>
+																	</container>
+																	<container size="87x34">
+																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
+																			<container size="71x26">
+																				<widget size="71x26" type="*parts.FieldEntry">
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="71x22" type="*widget.entryContent">
+																							<widget size="71x22" type="*widget.RichText">
+																								<text pos="4,2" size="54x16">Generate</text>
+																							</widget>
+																							<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
+																						</widget>
+																					</widget>
+																				</widget>
+																			</container>
+																		</widget>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</container>
+											<container pos="305,0" size="101x42">
+												<container pos="4,4" size="89x34">
+													<container size="89x34">
+														<container size="87x34">
+															<rectangle size="87x34"/>
+															<container size="87x34">
+																<rectangle size="87x34"/>
+																<container size="87x34">
+																	<rectangle fillColor="button" radius="6" size="87x34"/>
+																	<container size="87x34">
+																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
+																			<container size="71x26">
+																				<widget size="71x26" type="*parts.FieldEntry">
+																					<rectangle pos="2,2" radius="6" size="67x22"/>
+																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																						<widget size="71x22" type="*widget.entryContent">
+																							<widget size="71x22" type="*widget.RichText">
+																								<text color="disabled" pos="4,2" size="54x16">Generate</text>
+																							</widget>
+																						</widget>
+																					</widget>
+																				</widget>
+																			</container>
+																		</widget>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</container>
+										</container>
+									</container>
+									<container pos="0,180" size="1058x42">
+										<container size="169x42">
+											<rectangle size="169x42"/>
+											<container size="169x42">
+												<spacer size="169x12"/>
+												<text pos="0,12" size="169x16">Wider than the field</text>
+												<spacer pos="0,29" size="169x12"/>
+											</container>
+										</container>
+										<container pos="169,0" size="888x42">
 											<container size="101x42">
 												<container pos="4,4" size="89x34">
 													<container size="89x34">
@@ -818,16 +966,16 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,180" size="1058x42">
-										<container size="130x42">
-											<rectangle size="130x42"/>
-											<container size="130x42">
-												<spacer size="130x12"/>
-												<text pos="0,12" size="130x16">Very long value</text>
-												<spacer pos="0,29" size="130x12"/>
+									<container pos="0,230" size="1058x42">
+										<container size="169x42">
+											<rectangle size="169x42"/>
+											<container size="169x42">
+												<spacer size="169x12"/>
+												<text pos="0,12" size="169x16">Very long value</text>
+												<spacer pos="0,29" size="169x12"/>
 											</container>
 										</container>
-										<container pos="130,0" size="927x42">
+										<container pos="169,0" size="888x42">
 											<container size="101x42">
 												<container pos="4,4" size="89x34">
 													<container size="89x34">
@@ -994,20 +1142,20 @@
 										</container>
 									</container>
 								</container>
-								<container pos="0,272" size="1058x216">
+								<container pos="0,322" size="1058x216">
 									<text size="1058x16">Empty, with a hint</text>
 									<container pos="0,24" size="1058x42">
-										<container size="130x42">
-											<rectangle size="130x42"/>
-											<container size="130x42">
-												<spacer size="130x13"/>
-												<text bold color="focus" pos="0,13" size="130x14" textSize="11">AT REST</text>
-												<spacer pos="0,28" size="130x13"/>
+										<container size="169x42">
+											<rectangle size="169x42"/>
+											<container size="169x42">
+												<spacer size="169x13"/>
+												<text bold color="focus" pos="0,13" size="169x14" textSize="11">AT REST</text>
+												<spacer pos="0,28" size="169x13"/>
 											</container>
 										</container>
-										<container pos="130,0" size="927x42">
-											<container pos="4,4" size="915x34">
-												<container size="915x34">
+										<container pos="169,0" size="888x42">
+											<container pos="4,4" size="876x34">
+												<container size="876x34">
 													<container size="204x34">
 														<rectangle size="204x34"/>
 														<container size="204x34">
@@ -1043,17 +1191,17 @@
 										</container>
 									</container>
 									<container pos="0,74" size="1058x42">
-										<container size="130x42">
-											<rectangle size="130x42"/>
-											<container size="130x42">
-												<spacer size="130x13"/>
-												<text bold color="focus" pos="0,13" size="130x14" textSize="11">POINTER ON IT</text>
-												<spacer pos="0,28" size="130x13"/>
+										<container size="169x42">
+											<rectangle size="169x42"/>
+											<container size="169x42">
+												<spacer size="169x13"/>
+												<text bold color="focus" pos="0,13" size="169x14" textSize="11">POINTER ON IT</text>
+												<spacer pos="0,28" size="169x13"/>
 											</container>
 										</container>
-										<container pos="130,0" size="927x42">
-											<container pos="4,4" size="915x34">
-												<container size="915x34">
+										<container pos="169,0" size="888x42">
+											<container pos="4,4" size="876x34">
+												<container size="876x34">
 													<container size="204x34">
 														<rectangle size="204x34"/>
 														<container size="204x34">
@@ -1089,17 +1237,17 @@
 										</container>
 									</container>
 									<container pos="0,124" size="1058x42">
-										<container size="130x42">
-											<rectangle size="130x42"/>
-											<container size="130x42">
-												<spacer size="130x13"/>
-												<text bold color="focus" pos="0,13" size="130x14" textSize="11">KEYBOARD ON IT</text>
-												<spacer pos="0,28" size="130x13"/>
+										<container size="169x42">
+											<rectangle size="169x42"/>
+											<container size="169x42">
+												<spacer size="169x13"/>
+												<text bold color="focus" pos="0,13" size="169x14" textSize="11">KEYBOARD ON IT</text>
+												<spacer pos="0,28" size="169x13"/>
 											</container>
 										</container>
-										<container pos="130,0" size="927x42">
-											<container pos="4,4" size="915x34">
-												<container size="915x34">
+										<container pos="169,0" size="888x42">
+											<container pos="4,4" size="876x34">
+												<container size="876x34">
 													<container size="204x34">
 														<rectangle size="204x34"/>
 														<container size="204x34">
@@ -1136,17 +1284,17 @@
 										</container>
 									</container>
 									<container pos="0,174" size="1058x42">
-										<container size="130x42">
-											<rectangle size="130x42"/>
-											<container size="130x42">
-												<spacer size="130x13"/>
-												<text bold color="focus" pos="0,13" size="130x14" textSize="11">OUT OF REACH</text>
-												<spacer pos="0,28" size="130x13"/>
+										<container size="169x42">
+											<rectangle size="169x42"/>
+											<container size="169x42">
+												<spacer size="169x13"/>
+												<text bold color="focus" pos="0,13" size="169x14" textSize="11">OUT OF REACH</text>
+												<spacer pos="0,28" size="169x13"/>
 											</container>
 										</container>
-										<container pos="130,0" size="927x42">
-											<container pos="4,4" size="915x34">
-												<container size="915x34">
+										<container pos="169,0" size="888x42">
+											<container pos="4,4" size="876x34">
+												<container size="876x34">
 													<container size="204x34">
 														<rectangle size="204x34"/>
 														<container size="204x34">

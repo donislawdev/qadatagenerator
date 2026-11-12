@@ -75,6 +75,11 @@ type FieldEntry struct {
 	onFocus   func(bool)
 	onHover   func(bool)
 	onDisable func(bool)
+	onInvalid func(bool)
+	// invalid is whether the field holds what its screen would refuse. It is
+	// kept here as well as told, because a screen may judge its field before
+	// the field is dressed, and the dressing has to start in that state.
+	invalid bool
 	// dressed is this field in the ground and the marks of the window, made
 	// once. See Field for why once.
 	dressed fyne.CanvasObject
@@ -173,6 +178,28 @@ func (f *FieldEntry) Enable() {
 	}
 }
 
+// SetInvalid marks the field as holding what its screen would refuse, or takes
+// the mark away, and tells whoever draws around it.
+//
+// # Why the screen judges and the field only shows
+//
+// What is wrong with a value belongs to the screen and to the mode behind it,
+// and a field that knew the rule would be a second copy of it. So the field
+// carries a yes or no and the drawing answers it, the way it answers Disable.
+func (f *FieldEntry) SetInvalid(wrong bool) {
+	if f.invalid == wrong {
+		return
+	}
+	f.invalid = wrong
+	if f.onInvalid != nil {
+		f.onInvalid(wrong)
+	}
+}
+
+// Invalid reports whether the field is marked as holding what its screen would
+// refuse.
+func (f *FieldEntry) Invalid() bool { return f.invalid }
+
 // Field dresses a text field in the ground, the edge and the marks this window
 // gives every control, and it does so ONCE: asked again for the same field it
 // hands back the same object, the way OnScreen does on a button or a chooser.
@@ -212,8 +239,9 @@ func fieldWith(entry *FieldEntry, shown fyne.CanvasObject, leading fyne.CanvasOb
 		return entry.dressed
 	}
 
-	grounds, look := textGrounds(entry.Disabled())
+	grounds, look := textGrounds(entry.Disabled(), entry.invalid)
 	entry.onFocus, entry.onHover, entry.onDisable = look.focus, look.hover, look.disable
+	entry.onInvalid = look.refuse
 
 	// The words are placed by this space rather than by the toolkit: eight from
 	// the left, to which the renderer adds its own four, which is where a
@@ -231,16 +259,21 @@ func fieldWith(entry *FieldEntry, shown fyne.CanvasObject, leading fyne.CanvasOb
 }
 
 // textLooks are the grounds a text control can stand on: resting, under the
-// pointer, with the keyboard, both, and out of reach.
+// pointer, with the keyboard, both, and out of reach - and the first four again
+// for a field holding what its screen would refuse (B-363).
 //
-// Five rather than eight, because out of reach is one ground whoever is on the
-// field. See paint.FieldGround for why.
+// Nine rather than sixteen, because out of reach is one ground whoever is on the
+// field and whatever it holds. See paint.FieldGround for why.
 var textLooks = []paint.FieldLook{
 	{},
 	{Hovered: true},
 	{Focused: true},
 	{Focused: true, Hovered: true},
 	{Disabled: true},
+	{Invalid: true},
+	{Invalid: true, Hovered: true},
+	{Invalid: true, Focused: true},
+	{Invalid: true, Focused: true, Hovered: true},
 }
 
 // textGrounds builds the grounds a text control stands on, all but the one it
@@ -252,7 +285,7 @@ var textLooks = []paint.FieldLook{
 // wears it wires its own hooks to the look: the text field does, and so does
 // the recipe editor, which is the second text control and the reason this is a
 // helper rather than a block inside one of them.
-func textGrounds(disabled bool) ([]fyne.CanvasObject, *groundLook) {
+func textGrounds(disabled, invalid bool) ([]fyne.CanvasObject, *groundLook) {
 	shown := &groundLook{each: make(map[paint.FieldLook]fyne.CanvasObject, len(textLooks))}
 	grounds := make([]fyne.CanvasObject, 0, len(textLooks))
 	resting := paint.FieldLook{}
@@ -265,6 +298,7 @@ func textGrounds(disabled bool) ([]fyne.CanvasObject, *groundLook) {
 		grounds = append(grounds, ground)
 	}
 	shown.current = shown.each[resting]
+	shown.look.Invalid = invalid
 	shown.disable(disabled)
 	return grounds, shown
 }
@@ -284,9 +318,11 @@ type groundLook struct {
 func (g *groundLook) focus(here bool)  { g.look.Focused = here; g.show() }
 func (g *groundLook) hover(here bool)  { g.look.Hovered = here; g.show() }
 func (g *groundLook) disable(off bool) { g.look.Disabled = off; g.show() }
+func (g *groundLook) refuse(bad bool)  { g.look.Invalid = bad; g.show() }
 
 // show puts up the ground the states ask for. Out of reach wins over the
-// pointer and the keyboard, as it does on the chooser and the button.
+// pointer, the keyboard and a refused value, as it does on the chooser and the
+// button: nobody can change the value, so nothing says it should be changed.
 func (g *groundLook) show() {
 	wanted := g.look
 	if wanted.Disabled {

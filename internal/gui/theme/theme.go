@@ -131,6 +131,21 @@ const BorderThickness float32 = 2
 // the boundary.
 const OutlineInset float32 = BorderThickness / 2
 
+// InnerRingInset is how far inside a control a second edge is drawn, so that
+// it stands just inside the first one and touches it without covering it.
+//
+// # Why a control ever has two edges
+//
+// A text field holding what its screen would refuse wears its edge in
+// state.danger, and focus is shown on a field by the colour of that same edge.
+// Somebody typing a refused number holds both at once, so the mark of the
+// keyboard moves one edge inward rather than being lost under the red (B-363).
+//
+// Derived for the reason OutlineInset is: the first edge ends one whole
+// thickness inside its own inset, and a second one placed by a number of its
+// own would overlap it or leave a gap the first time the thickness moved.
+const InnerRingInset float32 = OutlineInset + BorderThickness
+
 // StartWidth and StartHeight are the size a window opens at.
 //
 // # Why this is here rather than in the screen that opens the window
