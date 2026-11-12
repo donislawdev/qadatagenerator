@@ -12,6 +12,15 @@ repository once they are released.
 
 ### BREAKING
 
+- **In pl-PL the gender generator writes `kobieta` and `mężczyzna`.** Polish
+  data used to say `female` and `male`, as English data still does. A dataset
+  made in pl-PL with the same seed now differs in its gender column and nowhere
+  else. Everything that reads a gender takes both pairs, so a PESEL, a first
+  name and a surname that follow the column agree with it as before.
+  `mężczyzna` is 9 characters and 11 bytes, so a gender column with a
+  `max_length` needs room for that. The gender list of Quick value still
+  offers female and male, since that is a choice made in the language of the
+  window.
 - **A word beginning with a dash among the paths of verify is read as a
   flag.** `qadg verify manifest.json -x` used to look for a response record
   named `-x` and end with exit code 6. It is now refused as an unknown flag
@@ -225,8 +234,8 @@ repository once they are released.
   above the values after Generate. An empty field stays as it is while you type
   the next number.
 - **Quick value shows the Locale list only beside a kind the locale changes.**
-  A first name, a surname, a city, a region and a postal code come out
-  differently in each locale, so the list stays beside them. Every other kind,
+  A first name, a surname, a gender, a city, a region and a postal code come
+  out differently in each locale, so the list stays beside them. Every other kind,
   such as a PESEL, an SSN or a date of birth, is the same in every locale, so
   the list is gone there and the command at the foot leaves out `--locale` too.
   The locale chosen before is kept and comes back with the list.

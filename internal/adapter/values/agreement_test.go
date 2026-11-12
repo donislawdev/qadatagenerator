@@ -9,8 +9,17 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
+	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 )
+
+// genderIn reads the gender column of a row the way everything in the product
+// reads one, so that these tests hold the rule rather than one spelling of it.
+// The column of a Polish recipe says kobieta and mężczyzna (DEC-274).
+func genderIn(row map[string]string) provider.Gender {
+	gender, _ := provider.ParseGender(row["gender"])
+	return gender
+}
 
 // kept is a writer that holds the rows of one table in memory, keyed by column.
 type kept struct {
@@ -87,13 +96,13 @@ func TestANameFollowsTheGenderColumnThoughNoRuleSaysSo(t *testing.T) {
 	female, male := listed(t, "first-names-female"), listed(t, "first-names-male")
 	women := 0
 	for i, row := range rows {
-		switch row["gender"] {
-		case "female":
+		switch genderIn(row) {
+		case provider.Female:
 			women++
 			if !female[row["first_name"]] {
 				t.Errorf("row %d gives the woman the name %q", i, row["first_name"])
 			}
-		case "male":
+		case provider.Male:
 			if !male[row["first_name"]] {
 				t.Errorf("row %d gives the man the name %q", i, row["first_name"])
 			}
@@ -193,7 +202,7 @@ func TestABlankGenderLeavesTheIdentifierToDrawItsOwn(t *testing.T) {
 			blank++
 			continue
 		}
-		if even := (row["pesel"][9]-'0')%2 == 0; even != (row["gender"] == "female") {
+		if even := (row["pesel"][9]-'0')%2 == 0; even != (genderIn(row) == provider.Female) {
 			t.Errorf("row %d: the PESEL %s disagrees with %q", i, row["pesel"], row["gender"])
 		}
 	}

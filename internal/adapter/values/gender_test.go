@@ -138,3 +138,54 @@ func TestAnUnreadableGenderIsRefusedByTheSchemeAndDrawnAroundByAWordList(t *test
 			"nonsense gender column reads as one sex", addresses)
 	}
 }
+
+// TestAGenderIsWrittenInTheLanguageOfItsLocale holds DEC-274: Polish data says
+// kobieta and mężczyzna, English data female and male, and nothing else.
+//
+// # Why every word is read back as well
+//
+// A gender written in one place is read in another: a rule binds it to a PESEL,
+// and a surname in Polish takes its form from it. A word the vocabulary of the
+// domain does not read as the gender it was drawn for would give a woman a
+// man's identifier without a word, which is the defect DEC-214 closed. So each
+// drawn word has to parse back to a gender, and the two words of a locale to
+// two different ones.
+//
+// Each of the two words has to turn up as well, because a draw that always
+// wrote one of them would pass every other line here.
+func TestAGenderIsWrittenInTheLanguageOfItsLocale(t *testing.T) {
+	written := map[string][]string{
+		"en-US": {"female", "male"},
+		"pl-PL": {"kobieta", "mężczyzna"},
+	}
+	for _, locale := range Locales() {
+		words, named := written[locale]
+		if !named {
+			t.Errorf("%s is a locale of this build and this test does not say how it writes a gender", locale)
+			continue
+		}
+		source := New(locale, "gender-words")
+		drawn := map[string]provider.Gender{}
+		for row := int64(0); row < 64; row++ {
+			at := seed.Coordinate{Entity: "people", Row: row, Field: Gender, Purpose: "value"}
+			value, err := source.Produce(generate.Request{Generator: Gender, At: at})
+			if err != nil {
+				t.Fatalf("in %s a gender could not be produced: %v", locale, err)
+			}
+			read, known := provider.ParseGender(value)
+			if !known {
+				t.Errorf("in %s the gender %q is not a word the domain reads as a gender", locale, value)
+			}
+			drawn[value] = read
+		}
+		for _, word := range words {
+			if _, seen := drawn[word]; !seen {
+				t.Errorf("in %s sixty four genders never once said %q, and drew %v", locale, word, drawn)
+			}
+		}
+		if len(drawn) != len(words) || drawn[words[0]] == drawn[words[1]] {
+			t.Errorf("in %s the genders drawn are %v, where two words standing for two genders "+
+				"are expected", locale, drawn)
+		}
+	}
+}

@@ -578,7 +578,7 @@ var producers = map[string]generator{
 		reads: everywhere(provider.RoleGender), byLocale: true, topic: TopicPeople},
 	LastName: {entries: Source.lastNames, list: "last-names", needs: surnameLists,
 		reads: whereSurnamesInflect, byLocale: true, topic: TopicPeople},
-	Gender:    {produce: Source.gender, topic: TopicPeople},
+	Gender:    {produce: Source.gender, byLocale: true, topic: TopicPeople},
 	BirthDate: {produce: Source.birthDate, topic: TopicPeople},
 	City: {entries: fromList("cities"), list: "cities", needs: fromLists("cities"),
 		byLocale: true, topic: TopicPlaces},
@@ -757,12 +757,36 @@ const (
 	latestBirth   = 2007
 )
 
-// gender draws one of the two values a numbering scheme can encode.
+// gender draws one of the two values a numbering scheme can encode, written in
+// the language of the locale.
 func (s Source) gender(req generate.Request) (string, error) {
+	female, male := genderWords(s.locale)
 	if s.seed.IntN(req.At, 2) == 0 {
-		return string(provider.Female), nil
+		return female, nil
 	}
-	return string(provider.Male), nil
+	return male, nil
+}
+
+// genderWords are how a drawn gender is written in a locale: the Polish words
+// where the data is Polish, the English ones everywhere else (DEC-274).
+//
+// # Why one function, asked by the draw and by the domain
+//
+// A unique column of genders walks the domain and promises only what it holds,
+// so the domain and the draw have to name the same two words. Two lists would
+// let one of them move alone, which is the drift DomainOf exists to prevent.
+//
+// # Why the words can change while everything reading them stays
+//
+// Everything that reads a gender reads it through provider.ParseGender, which
+// takes both pairs, so a PESEL bound to kobieta and a surname drawn for
+// mężczyzna read them as they read female and male. The test beside this file
+// reads every drawn word back to hold that.
+func genderWords(locale string) (female, male string) {
+	if strings.HasPrefix(locale, "pl") {
+		return "kobieta", "mężczyzna"
+	}
+	return string(provider.Female), string(provider.Male)
 }
 
 // birthDate draws a date, written the one way that does not depend on the

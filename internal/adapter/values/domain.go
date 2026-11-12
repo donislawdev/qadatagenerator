@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
-	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 )
 
 // What a field can take, asked before a row exists and again when a unique
@@ -52,7 +51,8 @@ func (s Source) DomainOf(req generate.Request) (generate.Domain, bool) {
 		}
 		return listDomain(found.key, s.entriesWithin(found, req)), true
 	case req.Generator == Gender:
-		return listDomain(Gender, fitting([]string{string(provider.Female), string(provider.Male)}, req)), true
+		female, male := genderWords(s.locale)
+		return listDomain(Gender, fitting([]string{female, male}, req)), true
 	case req.Generator == BirthDate:
 		return birthDates(req), true
 	}

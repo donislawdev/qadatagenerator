@@ -10,6 +10,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
+	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
@@ -238,8 +239,11 @@ func TestTheIdentifierAgreesWithTheColumnsItWasBoundTo(t *testing.T) {
 		if want := born[2:4] + born[5:7] + born[8:10]; !bornAgrees(national, want) {
 			t.Errorf("the number %s does not carry the date %s", national, born)
 		}
+		// Read as the product reads a gender, since the column of a Polish
+		// recipe says kobieta and mężczyzna (DEC-274).
+		read, _ := provider.ParseGender(gender)
 		even := (national[9]-'0')%2 == 0
-		if even != (gender == "female") {
+		if even != (read == provider.Female) {
 			t.Errorf("the number %s disagrees with the gender column %q", national, gender)
 		}
 	}
