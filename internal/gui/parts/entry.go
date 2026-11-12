@@ -10,48 +10,41 @@ import (
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
-// Editor is the toolkit's multi line text field that gives the Tab key back to
-// the window instead of typing with it.
+// Editor is the toolkit's multi line text field, in which Tab indents a recipe
+// the way YAML is indented and Esc, then Tab, leaves the field (DEC-275).
 //
 // # What the toolkit does, and why that is not enough here
 //
-// widget.Entry answers fyne.Tabbable, and its answer is its own MultiLine
-// field. Read in the toolkit source at widget/entry.go:152, unchanged between
-// v2.8.0 and v2.8.1:
+// widget.Entry answers fyne.Tabbable with its own MultiLine field
+// (widget/entry.go:152 of v2.8.2), and the driver then delivers Tab to it
+// rather than moving the focus on. Left as it is, the field types a TAB
+// CHARACTER, and a recipe indented with tab characters is refused by our
+// reader at the first one (measured 2026-09-02: a character that cannot start
+// any token). So the key a person writing YAML presses to indent would produce
+// a recipe this tool refuses, and the keyboard could not leave the field, which
+// is the trap WCAG names in 2.1.2.
 //
-//	func (e *Entry) AcceptsTab() bool { return e.MultiLine }
+// # What this does instead
 //
-// The driver asks the FOCUSED object that question and, when the answer is yes,
-// delivers Tab to the control rather than moving the focus on. So a person who
-// reaches a multi line field with the keyboard cannot leave it with the
-// keyboard: not forward to the buttons, not back to the column of screen names.
-// That is a keyboard trap, which WCAG names in 2.1.2 and which this project
-// refuses everywhere else.
+// Tab types two spaces where the caret is, which is how a recipe is indented.
+// Shift+Tab takes up to two spaces off the start of the line the caret is on.
+// No tab character is ever typed, so the one this field produced is gone.
 //
-// # Why refusing the key costs almost nothing here
-//
-// This field holds a recipe, and a recipe is YAML. Measured on 2026-09-02
-// against our own reader rather than against the specification, because a rule
-// nobody ran is prose: a recipe indented with tab characters is refused at the
-// first one, with the reader answering that it found a character that cannot
-// start any token. The control file indented with spaces was read and reported
-// real problems.
-//
-// So the key that traps the keyboard is also a key that cannot produce a recipe
-// this tool will accept. Refusing it frees the keyboard and removes an illegal
-// character in the same move, which is why this is a refusal rather than a
-// second shortcut a person has to learn.
-//
-// The cost is stated rather than discovered. A tab is legal INSIDE a quoted
-// scalar, and one can no longer be typed here. YAML writes that one as the
-// escape \t inside a double quoted value, so the character is still reachable
-// and only the keystroke is gone.
+// Esc arms the way out: the next Tab moves the focus on and the next Shift+Tab
+// moves it back. Anything else a person does in the field disarms it - another
+// key, a shortcut, a click - and so does the keyboard going elsewhere. WCAG
+// 2.1.2 does not forbid a field that keeps Tab. It forbids one a person cannot
+// leave, and allows a way out other than Tab alone when the person is told it,
+// which is why the screen says so under the field rather than in a manual.
 //
 // # Why an extension rather than a control of our own
 //
 // Everything this field does stays the toolkit's: the drawing, the caret, the
-// selection, the wrapping, the scrolling. What changes is the answer to one
-// question and the mark it shows for focus. That is the toolkit's own extension
+// selection, the wrapping, the scrolling, and the history Ctrl+Z walks back.
+// Indenting is typed through the toolkit's own handling of a key, so it can be
+// undone like anything else typed, one press of Ctrl+Z per space as for spaces
+// typed by hand: the toolkit keeps every space as a step of its own
+// (widget/entry.go:2072 of v2.8.2). That is the toolkit's own extension
 // mechanism, so the rule against rebuilding pieces of it is untouched and there
 // is no renderer here to go stale when the toolkit moves.
 //
@@ -79,18 +72,35 @@ type Editor struct {
 	onHover   func(bool)
 	onDisable func(bool)
 	dressed   fyne.CanvasObject
+
+	// leaving is Esc having been pressed, so that the next Tab leaves the
+	// field rather than indenting.
+	leaving bool
+	// shiftDown is whether Shift is held, as this field has seen it, for when
+	// the driver cannot say. See shifted.
+	shiftDown bool
 }
 
 // Asserted so that dropping one of these is a compile error rather than a field
-// that silently stops answering the pointer, which is how the chooser once lost
-// its hover.
+// that silently stops answering the pointer or the keys, which is how the
+// chooser once lost its hover. Tabbable is what makes the driver hand Tab to
+// this field at all, and Keyable is how it learns that Shift is held.
 var (
 	_ fyne.Widget       = (*Editor)(nil)
 	_ fyne.Focusable    = (*Editor)(nil)
+	_ fyne.Tabbable     = (*Editor)(nil)
 	_ desktop.Hoverable = (*Editor)(nil)
+	_ desktop.Keyable   = (*Editor)(nil)
+	_ desktop.Mouseable = (*Editor)(nil)
 )
 
-// NewEditor builds a multi line field the keyboard can leave.
+// indent is what one press of Tab types, and Shift+Tab takes away up to as many
+// spaces as it holds: the indent every recipe this project writes uses. Text
+// rather than a count, because it is two characters of the recipe and not a
+// distance on the screen.
+const indent = "  "
+
+// NewEditor builds a multi line field in which Tab indents.
 func NewEditor(changed func(string)) *Editor {
 	editor := &Editor{}
 	editor.MultiLine = true
@@ -113,13 +123,234 @@ func NewEditor(changed func(string)) *Editor {
 	return editor
 }
 
-// AcceptsTab refuses the Tab key, so that the focus moves on instead.
+// AcceptsTab takes the Tab key, so that the driver hands it to TypedKey below
+// rather than moving the focus on.
 //
 // The driver reaches this by asserting fyne.Tabbable on whatever the canvas has
-// focused, at internal/driver/glfw/window.go:679. What is focused is this type,
-// because this type is what goes into the container, so the assertion finds the
-// answer below rather than the embedded one.
-func (e *Editor) AcceptsTab() bool { return false }
+// focused (internal/driver/glfw/window.go:710 of v2.8.2), and Shift+Tab takes
+// the same road (:777). What is focused is this type, because this type is what
+// goes into the container, so the assertion finds this answer rather than the
+// embedded one.
+func (e *Editor) AcceptsTab() bool { return true }
+
+// TypedKey indents on Tab, takes the indent back on Shift+Tab, arms the way out
+// on Esc, and hands every other key to the toolkit.
+//
+// A key that only modifies another, Shift above all, leaves the way out armed:
+// the driver hands this field a press of Shift on its own before Shift+Tab, and
+// disarming on it would make Esc, then Shift+Tab, indent instead of leaving.
+//
+// Tab with Ctrl, Alt or Super held does nothing. The driver delivers it here
+// rather than moving the focus, and until 2026-11-12 the toolkit typed a tab
+// character with it, which is the one character a recipe may not be indented
+// with.
+func (e *Editor) TypedKey(key *fyne.KeyEvent) {
+	if key == nil || e.Disabled() {
+		return
+	}
+	switch {
+	case key.Name == fyne.KeyTab:
+		e.tab()
+	case key.Name == fyne.KeyEscape:
+		e.leaving = true
+	case modifierKeys[key.Name]:
+		e.Entry.TypedKey(key)
+	default:
+		e.leaving = false
+		e.Entry.TypedKey(key)
+	}
+}
+
+// modifierKeys are the keys that only change what another key means.
+var modifierKeys = map[fyne.KeyName]bool{
+	desktop.KeyShiftLeft: true, desktop.KeyShiftRight: true,
+	desktop.KeyControlLeft: true, desktop.KeyControlRight: true,
+	desktop.KeyAltLeft: true, desktop.KeyAltRight: true,
+	desktop.KeySuperLeft: true, desktop.KeySuperRight: true,
+}
+
+// tab is one press of Tab, with or without Shift.
+func (e *Editor) tab() {
+	held := e.held()
+	if held&^fyne.KeyModifierShift != 0 {
+		return
+	}
+	shifted := held&fyne.KeyModifierShift != 0
+	if e.leaving {
+		e.leaving = false
+		e.leave(shifted)
+		return
+	}
+	if shifted {
+		e.outdent()
+		return
+	}
+	for _, space := range indent {
+		e.Entry.TypedRune(space)
+	}
+}
+
+// leave moves the focus to the next control, or to the one before.
+func (e *Editor) leave(back bool) {
+	app := fyne.CurrentApp()
+	if app == nil {
+		return
+	}
+	canvas := app.Driver().CanvasForObject(e)
+	if canvas == nil {
+		return
+	}
+	if back {
+		canvas.FocusPrevious()
+		return
+	}
+	canvas.FocusNext()
+}
+
+// held is the modifier keys held now.
+//
+// Asked of the driver, which is what the toolkit's own field does for Shift+Tab
+// (widget/entry.go:858), because a key pressed before the keyboard arrived in
+// this field was never seen by it. A driver that cannot say, which is the one
+// a test runs on, leaves the answer to what this field saw of Shift.
+func (e *Editor) held() fyne.KeyModifier {
+	if app := fyne.CurrentApp(); app != nil {
+		if keys, ok := app.Driver().(desktop.Driver); ok {
+			return keys.CurrentKeyModifiers()
+		}
+	}
+	if e.shiftDown {
+		return fyne.KeyModifierShift
+	}
+	return 0
+}
+
+// outdent takes up to two spaces off the start of the line the caret is on,
+// and keeps the caret beside the same character.
+//
+// # Why the caret is moved by hand and the spaces taken by the toolkit's Delete
+//
+// The toolkit has no call that puts the caret at a place in the text, and
+// SetText, which could replace the line, empties the history Ctrl+Z walks.
+// So the caret is placed through the two fields the toolkit exports (caretTo),
+// and the spaces are taken by pressing Delete through the toolkit's own
+// handling of the key, which records them and tells whoever watches the text.
+//
+// The toolkit is told Shift went up for the length of this, because it still
+// believes Shift is down and would select rather than move. It is told Shift
+// went down again afterwards, which is what a person pressing it again would
+// tell it.
+func (e *Editor) outdent() {
+	e.Entry.KeyUp(&fyne.KeyEvent{Name: desktop.KeyShiftLeft})
+	defer func() {
+		if e.held()&fyne.KeyModifierShift != 0 {
+			e.Entry.KeyDown(&fyne.KeyEvent{Name: desktop.KeyShiftLeft})
+		}
+	}()
+	if e.SelectedText() != "" {
+		// Left with no Shift puts the caret at the start of what was selected
+		// and ends the selection, so the line is the one the selection begins
+		// on and no Delete below can take the selection with it.
+		e.Entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyLeft})
+	}
+	text := []rune(e.Text)
+	at := min(max(e.CursorTextOffset(), 0), len(text))
+	start := at
+	for start > 0 && text[start-1] != '\n' {
+		start--
+	}
+	spaces := 0
+	for spaces < len(indent) && start+spaces < len(text) && text[start+spaces] == ' ' {
+		spaces++
+	}
+	if spaces == 0 {
+		return
+	}
+	e.caretTo(start)
+	for range spaces {
+		e.Entry.TypedKey(&fyne.KeyEvent{Name: fyne.KeyDelete})
+	}
+	e.caretTo(max(start, at-spaces))
+}
+
+// caretTo puts the caret at a place in the text, counted in characters.
+//
+// The toolkit counts the caret in rows as drawn, so a long line folded under
+// itself is several rows, and a place in the text is found by walking the rows
+// from the top to the last one beginning at or before it.
+//
+// Setting the two fields is the whole of it. The caret is drawn from them
+// (widget/entry.go:234 of v2.8.2), and the second copy the toolkit keeps for
+// drawing a selection is brought level by its own handling of every key and
+// click before anything reads it.
+func (e *Editor) caretTo(place int) {
+	row := 0
+	for {
+		next, there := e.rowStart(row + 1)
+		if !there || next > place {
+			break
+		}
+		row++
+	}
+	begin, _ := e.rowStart(row)
+	e.CursorRow, e.CursorColumn = row, place-begin
+	e.Refresh()
+}
+
+// rowStart is where a row as drawn begins in the text, and false when the field
+// has no such row.
+//
+// Every row after the first begins past the first character, and the toolkit
+// answers a row it does not have with the column it was given, which is nought
+// here. So nought for a row after the first is the answer for a row that is not
+// there (widget/entry.go, textPosFromRowCol, of v2.8.2).
+func (e *Editor) rowStart(row int) (int, bool) {
+	e.CursorRow, e.CursorColumn = row, 0
+	begin := e.CursorTextOffset()
+	return begin, row == 0 || begin > 0
+}
+
+// TypedRune types a character, and never a tab character: Tab is a key this
+// field answers in TypedKey, and a tab cannot indent a recipe. Typing disarms
+// the way out, because a person typing is still writing.
+func (e *Editor) TypedRune(r rune) {
+	e.leaving = false
+	if r == '\t' {
+		return
+	}
+	e.Entry.TypedRune(r)
+}
+
+// TypedShortcut disarms the way out, for the same reason typing does, and lets
+// the toolkit copy, paste and undo.
+func (e *Editor) TypedShortcut(shortcut fyne.Shortcut) {
+	e.leaving = false
+	e.Entry.TypedShortcut(shortcut)
+}
+
+// KeyDown notes Shift for when the driver cannot say, and lets the toolkit
+// note it for selecting.
+func (e *Editor) KeyDown(key *fyne.KeyEvent) {
+	if key != nil && (key.Name == desktop.KeyShiftLeft || key.Name == desktop.KeyShiftRight) {
+		e.shiftDown = true
+	}
+	e.Entry.KeyDown(key)
+}
+
+// KeyUp notes that Shift went up.
+func (e *Editor) KeyUp(key *fyne.KeyEvent) {
+	if key != nil && (key.Name == desktop.KeyShiftLeft || key.Name == desktop.KeyShiftRight) {
+		e.shiftDown = false
+	}
+	e.Entry.KeyUp(key)
+}
+
+// MouseDown disarms the way out: a click in the field is a person going on
+// writing, not leaving.
+func (e *Editor) MouseDown(event *desktop.MouseEvent) {
+	e.leaving = false
+	e.Entry.MouseDown(event)
+}
 
 // Framed is the editor dressed in the grounds and the mark every text control
 // in this window wears, which is what a screen puts on itself. Built once, for
@@ -150,16 +381,21 @@ func (e *Editor) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // FocusGained tells the grounds the keyboard is here, then lets the toolkit
-// place the caret.
+// place the caret. The way out starts disarmed, whatever happened on the last
+// visit.
 func (e *Editor) FocusGained() {
+	e.leaving = false
 	if e.onFocus != nil {
 		e.onFocus(true)
 	}
 	e.Entry.FocusGained()
 }
 
-// FocusLost tells them it left, then lets the toolkit take the caret.
+// FocusLost tells them it left, then lets the toolkit take the caret. The way
+// out is disarmed, and Shift is forgotten, because its release will go to
+// whatever holds the keyboard next.
 func (e *Editor) FocusLost() {
+	e.leaving, e.shiftDown = false, false
 	if e.onFocus != nil {
 		e.onFocus(false)
 	}

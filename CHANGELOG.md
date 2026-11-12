@@ -251,6 +251,12 @@ repository once they are released.
 
 ### Changed
 
+- **Tab indents in the recipe field.** In "Your recipe" Tab types two spaces
+  and Shift+Tab takes up to two spaces off the start of the line, the way a
+  recipe is indented. To leave the field with the keyboard, press Esc, then
+  Tab, or Esc, then Shift+Tab to go back. The line under the field says so.
+  Tab used to move to the next control, and Ctrl+Tab typed a tab character,
+  which no recipe may be indented with. No tab character is typed any more.
 - **The bank account number is listed under Poland and says its numbers are
   Polish.** It is an international standard, and this build generates Polish
   account numbers only, starting with `PL`. Quick value now lists it under

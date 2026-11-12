@@ -252,8 +252,14 @@ func (v *View) lay() {
 		palette.NameStepHairline, palette.NameStepHairline, steps[0])
 	generate := paint.Pad(palette.NameStepSection, palette.NameStepHairline,
 		palette.NameStepHairline, palette.NameStepHairline, v.generateStep(steps[1]))
-	left := container.New(layout.NewBorderLayout(recipeHeading, generate, nil, nil),
-		recipeHeading, v.editor.Framed(), generate)
+	// What Tab does in the field and how the keyboard leaves it, right under
+	// the field, where the person typing looks (DEC-275). A column, because a
+	// paragraph folds only inside one.
+	keys := paint.Pad(palette.NameStepTight, palette.NameStepHairline,
+		palette.NameStepHairline, palette.NameStepHairline, paint.Paragraph(v.text.T(i18n.RecipeEditorKeys)))
+	under := container.NewVBox(keys, generate)
+	left := container.New(layout.NewBorderLayout(recipeHeading, under, nil, nil),
+		recipeHeading, v.editor.Framed(), under)
 	right := container.New(layout.NewBorderLayout(v.cardHeading, nil, nil, nil),
 		v.cardHeading, v.card.Framed())
 	// Two equal columns: as many columns as halves, so the count is read from

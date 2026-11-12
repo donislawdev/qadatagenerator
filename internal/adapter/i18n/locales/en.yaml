@@ -458,6 +458,9 @@ screen.recipe: Recipe
 
 recipe.empty: Write or paste a recipe on the left. It is checked as you type, and nothing is written to disk until you ask for it.
 recipe.placeholder: A recipe, in YAML
+# Under the field. Tab indents in it, so the way out has to be said where the
+# person typing can see it.
+recipe.editor.keys: Tab indents by two spaces. Esc, then Tab, leaves the field.
 recipe.checking: Checking this recipe.
 recipe.name: this recipe
 recipe.example: Start from an example

@@ -328,6 +328,11 @@ const (
 	RecipePlaceholder Key = "recipe.placeholder"
 	RecipeChecking    Key = "recipe.checking"
 	RecipeName        Key = "recipe.name"
+	// RecipeEditorKeys is the line under the field saying what Tab does in it
+	// and how the keyboard leaves it (DEC-275). On the screen rather than in a
+	// manual, because WCAG 2.1.2 allows a way out other than Tab only when the
+	// person is told it.
+	RecipeEditorKeys Key = "recipe.editor.keys"
 
 	// What this screen says to somebody who has never written a recipe: the
 	// offer of one that runs, and the vocabulary this build carries.
@@ -729,7 +734,7 @@ var windowKeys = []Key{
 	VerifyVerdictAccepted, VerifyVerdictRejected,
 	VerifyKindHole, VerifyKindOverzealous, VerifyKindSilent, VerifyKindMissing,
 
-	RecipeEmpty, RecipePlaceholder, RecipeChecking, RecipeName,
+	RecipeEmpty, RecipePlaceholder, RecipeChecking, RecipeName, RecipeEditorKeys,
 	RecipeExample, RecipeCanGenerate, RecipeGenerator, RecipeGenerators,
 	RecipeNotIn, RecipeNothingToDrawFrom,
 	RecipeHeadingRecipe, RecipeHeadingDescribes, RecipeHeadingResult, RecipeHeadingProblems,

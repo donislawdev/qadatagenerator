@@ -221,6 +221,11 @@ func recipeStatesOfTheHints() []State {
 // a control is added to this one, because the column of screen names is walked
 // first and every screen is one stop. They are checked by rendering rather than
 // by counting in anybody's head.
+//
+// 🔴 A count is a stop of the keyboard, which the canvas is asked to move to, and
+// past the editor it is no longer the number of times a person presses Tab. Tab
+// indents inside the editor since 2026-11-12 (DEC-275), so a person reaching a
+// control past it presses Esc once before the Tab that leaves the field.
 func recipeStatesOfTheKeyboard() []State {
 	return []State{
 		{
