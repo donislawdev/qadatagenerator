@@ -58,7 +58,39 @@ const (
 	// to one question are how two surfaces come to disagree about the same
 	// value.
 	CountNotWhole
+	// Unavailable is a kind this build cannot produce in the locale asked
+	// for, because the data it is drawn from is not carried there: the postal
+	// codes of pl-PL, or any word list in a locale this build has never heard
+	// of. Allowed names the locales the kind is produced in.
+	//
+	// 🔴 Refused here rather than left to the run, because the run knows why
+	// and not what to do about it in this mode. The run is shared with
+	// recipes, and the next move for a recipe - another locale for the whole
+	// dataset, or the field left out - names two things this mode does not
+	// have. What both surfaces of this mode can point at is another locale.
+	Unavailable
+
+	// kindsEnd is not a refusal. It stands after the last one so that Kinds
+	// counts up to it rather than keeping a second list of the kinds above,
+	// which a new one could be left out of.
+	kindsEnd
 )
+
+// Kinds is every refusal this mode can produce, so that a surface can be held
+// to answering for each of them.
+//
+// 🔴 Counted rather than listed. Each surface turns a kind into words through
+// a register, and a guard beside each register holds it against this answer in
+// both directions. A list written out here would be one more place to forget a
+// new kind in, and the guards would then agree with the list instead of with
+// the constants.
+func Kinds() []RefusalKind {
+	kinds := make([]RefusalKind, 0, int(kindsEnd-NotRefused-1))
+	for kind := NotRefused + 1; kind < kindsEnd; kind++ {
+		kinds = append(kinds, kind)
+	}
+	return kinds
+}
 
 // MostShownAtOnce is the largest number of values a SCREEN draws at once.
 //
@@ -152,11 +184,13 @@ type Refusal struct {
 	Value string
 	// Role is which role was bound, for a refusal about one.
 	Role string
-	// Locale is named only where it is what makes the answer no, which is a
-	// role read in one locale and not in another.
+	// Locale is named only where it is what makes the answer no: a role read
+	// in one locale and not in another, or a kind produced in one and not in
+	// another.
 	Locale string
 	// Allowed is what this build would have taken: the generators it has, the
-	// spellings of a gender, or the generators that do read the role.
+	// spellings of a gender, the generators that do read the role, or the
+	// locales the kind is produced in.
 	Allowed []string
 }
 
@@ -198,6 +232,14 @@ func Check(req Request) Refusal {
 	// nought values would otherwise be refused by nothing at all.
 	if refused := CheckCount(req.Count); refused.Refused() {
 		return refused
+	}
+	// Before the roles, because a kind that cannot be produced here makes
+	// every question about what is bound to it beside the point.
+	if fine, _ := source.CanProduce(req.Generator, req.Locale); !fine {
+		return Refusal{
+			Kind: Unavailable, Value: req.Generator, Locale: req.Locale,
+			Allowed: localesOf(source, req.Generator),
+		}
 	}
 	for _, role := range sortedRoles(req.Agrees) {
 		if !source.ReadsRole(req.Generator, role) {
@@ -248,6 +290,19 @@ func readersOf(source values.Source, role string) []string {
 		}
 	}
 	return readers
+}
+
+// localesOf names the locales a kind is produced in, so that a refusal for the
+// one asked about points at the ones that would do. It can be empty, and each
+// surface words its next move so that it still reads true when it is.
+func localesOf(source values.Source, generator string) []string {
+	var producing []string
+	for _, locale := range Locales() {
+		if fine, _ := source.CanProduce(generator, locale); fine {
+			producing = append(producing, locale)
+		}
+	}
+	return producing
 }
 
 func sortedRoles(agrees map[string]string) []string {

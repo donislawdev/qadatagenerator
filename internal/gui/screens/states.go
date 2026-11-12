@@ -130,7 +130,7 @@ func quickStatesOfARefusal() []State {
 		{
 			Name: "quick-unavailable",
 			Purpose: "a value this build carries no data for in the locale chosen, which " +
-				"is the refusal that comes from the engine rather than from the screen",
+				"is a refusal about this build rather than about what was typed",
 			Screen: screenQuick,
 			// The postal code of pl-PL since 2026-11-12, when the city of en-US
 			// got its data (DEC-278). The last kind lacking data in a locale.

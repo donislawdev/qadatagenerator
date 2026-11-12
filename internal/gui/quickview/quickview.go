@@ -636,7 +636,7 @@ func (v *View) countAsked(typed string) (int, string) {
 	// written beside CountFrom.
 	wanted, refused := quick.CountFrom(strings.TrimSpace(typed))
 	if refused.Refused() {
-		return 0, v.text.T(i18n.QuickRefusedCountShape)
+		return 0, v.text.T(refusedSays[refused.Kind])
 	}
 	if wanted > mostShown {
 		// The number is put into the sentence here rather than into the
@@ -1071,11 +1071,14 @@ func (v *View) genderChoices() []string {
 // A register rather than a switch, for the reason the command line writes
 // beside its own: a switch has a last branch, and a kind added to the mode and
 // forgotten here would land in it and show a confident sentence about a
-// different refusal.
+// different refusal. The guard beside this file holds it against quick.Kinds in
+// both directions.
 var refusedSays = map[quick.RefusalKind]i18n.Key{
 	quick.UnknownGenerator: i18n.QuickRefusedGenerator,
 	quick.RoleNotRead:      i18n.QuickRefusedRole,
 	quick.UnreadableGender: i18n.QuickRefusedGender,
 	quick.UnreadableDate:   i18n.QuickRefusedDate,
 	quick.CountNotPositive: i18n.QuickRefusedCount,
+	quick.CountNotWhole:    i18n.QuickRefusedCountShape,
+	quick.Unavailable:      i18n.QuickRefusedUnavailable,
 }

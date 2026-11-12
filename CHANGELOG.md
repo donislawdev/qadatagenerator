@@ -12,6 +12,13 @@ repository once they are released.
 
 ### BREAKING
 
+- **quick ends with exit code 2 when the value asked for has no data in the
+  locale given.** `qadg quick postal_code --locale pl-PL` used to end with
+  exit code 3 and advise generating a dataset or leaving a field out, neither
+  of which quick has. It now says which locales the value is made in and to
+  choose one with `--locale`. The same holds for a first name, a surname, a
+  city or a region asked for in a locale this build does not know. Quick value
+  says the same in a sentence of its own and asks for another locale.
 - **Two voivodeships are spelled the official way.** The region generator in
   pl-PL writes `Kujawsko-pomorskie` and `Warmińsko-mazurskie`, where it wrote
   them with a space on each side of the hyphen. A pl-PL dataset with a region

@@ -166,8 +166,8 @@ func TestEachEndsWhereTheEngineRefuses(t *testing.T) {
 //
 // # Why the kinds are checked rather than the sentences
 //
-// The sentences live on the surfaces, one set per surface, and both are held
-// against this list of kinds by their own registers. What has to be true here
+// The sentences live on the surfaces, one set per surface, and a guard beside
+// each register holds it against Kinds in both directions. What has to be true here
 // is that the kind a request produces is the kind that request deserves, since
 // a refusal of the wrong kind is a confident four part message about something
 // that did not happen.
@@ -208,6 +208,22 @@ func TestQuickRefusesWhatItCannotProduce(t *testing.T) {
 			Request{Generator: "pesel", Count: 0}, CountNotPositive},
 		{"fewer values than none",
 			Request{Generator: "pesel", Count: -3}, CountNotPositive},
+		// The postal code of pl-PL is the one kind lacking data in a locale
+		// this build knows (DEC-92 holds it). The day it arrives this row has
+		// to find another, and the one below it keeps the refusal reachable.
+		{"a value this build carries no data for in that locale",
+			Request{Generator: "postal_code", Locale: "pl-PL"}, Unavailable},
+		{"a value drawn from a list, in a locale this build has never heard of",
+			Request{Generator: "first_name", Locale: "xx-XX"}, Unavailable},
+		{"the same value in a locale that has its data",
+			Request{Generator: "postal_code", Locale: "en-US"}, NotRefused},
+		{"a value no locale changes, in a locale this build has never heard of",
+			Request{Generator: "pesel", Locale: "xx-XX"}, NotRefused},
+		// Unavailable comes before the roles: a gender beside a first name
+		// that cannot be drawn at all is not the thing to fix first.
+		{"a gender beside a value that cannot be produced in that locale",
+			Request{Generator: "first_name", Locale: "xx-XX",
+				Agrees: map[string]string{RoleGender: "yes"}}, Unavailable},
 	}
 
 	for _, one := range cases {
@@ -222,6 +238,58 @@ func TestQuickRefusesWhatItCannotProduce(t *testing.T) {
 		if got != one.want {
 			t.Errorf("%s was answered with kind %d where %d is the one about it",
 				one.named, got, one.want)
+		}
+		// The registers on the surfaces are held against Kinds, so a kind
+		// Check can reach and Kinds leaves out would be one nobody has words
+		// for, with every guard green.
+		if got != NotRefused && !slices.Contains(Kinds(), got) {
+			t.Errorf("%s was refused as kind %d, which Kinds does not name", one.named, got)
+		}
+	}
+}
+
+// TestARefusedLocaleNamesTheLocalesTheValueIsProducedIn holds the next move
+// both surfaces point at, which is why this refusal is made before the run
+// rather than by it.
+//
+// Allowed is held against what Check itself answers in each locale, so the
+// two cannot disagree: a locale named here is one where the same request is
+// carried out, and every such locale is named.
+func TestARefusedLocaleNamesTheLocalesTheValueIsProducedIn(t *testing.T) {
+	refusal := Check(Request{Generator: "postal_code", Locale: "pl-PL", Count: 1})
+	if refusal.Kind != Unavailable {
+		t.Fatalf("a postal code in pl-PL was answered with kind %d. If its data has "+
+			"arrived (DEC-92), choose another kind this build lacks data for", refusal.Kind)
+	}
+	if refusal.Value != "postal_code" || refusal.Locale != "pl-PL" {
+		t.Errorf("the refusal names %q in %q rather than what was asked for",
+			refusal.Value, refusal.Locale)
+	}
+	if len(refusal.Allowed) == 0 {
+		t.Fatal("the refusal names no locale at all, so the next move points nowhere")
+	}
+	for _, locale := range Locales() {
+		carried := !Check(Request{Generator: "postal_code", Locale: locale, Count: 1}).Refused()
+		named := slices.Contains(refusal.Allowed, locale)
+		if carried != named {
+			t.Errorf("postal_code is carried out in %s: %v, and the refusal names it: %v",
+				locale, carried, named)
+		}
+	}
+}
+
+// TestKindsIsEveryRefusalAndNothingElse holds the count Kinds is made by.
+func TestKindsIsEveryRefusalAndNothingElse(t *testing.T) {
+	kinds := Kinds()
+	if slices.Contains(kinds, NotRefused) {
+		t.Error("Kinds names the absence of a refusal as one of them")
+	}
+	if slices.Contains(kinds, kindsEnd) {
+		t.Error("Kinds names the marker after the last refusal as one of them")
+	}
+	for _, kind := range []RefusalKind{UnknownGenerator, CountNotWhole, Unavailable} {
+		if !slices.Contains(kinds, kind) {
+			t.Errorf("Kinds leaves out kind %d", kind)
 		}
 	}
 }

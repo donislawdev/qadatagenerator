@@ -178,6 +178,18 @@ var quickRefusalSays = map[quick.RefusalKind]refusalWords{
 		what: problemQuickCount, why: problemQuickCountWhy,
 		allowed: problemQuickCountAllowed, instead: problemQuickCountDo,
 	},
+	// Worded although this surface reads the count itself and never hands
+	// the mode text, because the register is closed in both directions and a
+	// kind left unworded is a refusal with nothing to say on the day it is
+	// reached. The words are the ones the reading of --count already uses.
+	quick.CountNotWhole: {
+		what: problemQuickCountShape, why: problemQuickCountShapeWhy,
+		instead: problemQuickCountShapeDo,
+	},
+	quick.Unavailable: {
+		what: problemQuickUnavailable, why: problemQuickUnavailableWhy,
+		instead: problemQuickUnavailableDo,
+	},
 }
 
 // quickRefusalOf turns a refusal of the mode into the four parts a person reads.
@@ -194,8 +206,11 @@ func quickRefusalOf(refusal quick.Refusal) problem {
 		}
 	}
 	what := words.what + refusal.Value
-	if refusal.Kind == quick.RoleNotRead {
+	switch refusal.Kind {
+	case quick.RoleNotRead:
 		what += problemQuickRoleNotReadJoin + refusal.Role + inLocale(refusal.Locale)
+	case quick.Unavailable:
+		what += inLocale(refusal.Locale)
 	}
 	// The register wins where it has an answer, because a refusal whose
 	// accepted values are a sentence rather than a list has no list to carry.

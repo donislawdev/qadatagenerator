@@ -149,6 +149,14 @@ const (
 	problemQuickDateWhy     = "a date of birth is read as a calendar date, and the scheme carrying it accepts one way of writing one"
 	problemQuickDateDo      = "qadg quick pesel --birth-date 1980-05-05"
 
+	// problemQuickUnavailable names the generator, and the locale follows it
+	// the way it follows a role nothing reads. The locales that would do are
+	// the allowed part, so the next move is written to read true even when
+	// that list is empty.
+	problemQuickUnavailable    = "this build cannot produce "
+	problemQuickUnavailableWhy = "values of this kind are drawn from data this build carries for some locales, and it carries none for that one"
+	problemQuickUnavailableDo  = "choose a locale it is produced in with --locale. qadg help generators lists the locales of every generator"
+
 	problemQuickUnknownRefusal    = "a refusal arrived with no words for it"
 	problemQuickUnknownRefusalWhy = "the mode refused this request and this surface has no sentence for that refusal, so the reason cannot be shown"
 

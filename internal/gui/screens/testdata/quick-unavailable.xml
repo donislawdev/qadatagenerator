@@ -416,7 +416,7 @@
 									<container size="700x621">
 										<widget size="700x24" type="*widget.Label">
 											<widget size="700x24" type="*widget.RichText">
-												<text color="disabled" pos="4,4" size="542x16">this build has no register of postal codes for pl-PL, so a postal code cannot be produced there</text>
+												<text color="disabled" pos="4,4" size="451x16">This build cannot produce that value in the chosen locale. Pick another locale.</text>
 											</widget>
 										</widget>
 									</container>

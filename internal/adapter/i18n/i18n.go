@@ -507,21 +507,23 @@ const (
 	// with a rule of its own.
 	QuickLabelCount Key = "quick.label.count"
 	QuickMayRepeat  Key = "quick.may-repeat"
-	// QuickRefusedCount is a refusal this screen cannot reach, because the
-	// number comes from a list. It is worded for the reason the other two
-	// unreachable ones are: the register is closed in both directions.
+	// QuickRefusedCount is a nought or less typed into the field saying how
+	// many values to produce.
 	QuickRefusedCount Key = "quick.refused.count"
 
 	// The refusals this mode can produce, in the words of this surface.
 	//
-	// Two of the four cannot be reached from this screen, because a gender is
-	// chosen from a list and a field that is not read is not shown. They are
-	// worded anyway: the register is closed in both directions by a test, and
-	// a screen that met an unworded refusal would have nothing to say.
+	// Some cannot be reached from this screen, because a kind and a gender
+	// are chosen from lists and a field that is not read is not shown. They
+	// are worded anyway: the register is closed in both directions by a test,
+	// and a screen that met an unworded refusal would have nothing to say.
 	QuickRefusedGenerator Key = "quick.refused.generator"
 	QuickRefusedRole      Key = "quick.refused.role"
 	QuickRefusedGender    Key = "quick.refused.gender"
 	QuickRefusedDate      Key = "quick.refused.date"
+	// QuickRefusedUnavailable is a kind this build carries no data for in the
+	// locale chosen beside it, and the list of locales is the way out.
+	QuickRefusedUnavailable Key = "quick.refused.unavailable"
 
 	// The panel a kind is picked from, which groups the kinds under headings
 	// and filters them as somebody types (DEC-244).
@@ -617,7 +619,7 @@ var windowKeys = []Key{
 	QuickGenderAny, QuickCopy, QuickCopyAll, QuickAgain, QuickCopied, QuickGenerate,
 	QuickLabelCount, QuickMayRepeat,
 	QuickRefusedGenerator, QuickRefusedRole, QuickRefusedGender, QuickRefusedDate,
-	QuickRefusedCount, QuickRefusedCountShape, QuickRefusedCountMany,
+	QuickRefusedUnavailable, QuickRefusedCount, QuickRefusedCountShape, QuickRefusedCountMany,
 	QuickGroupInternational, QuickGroupPeople, QuickGroupPlaces, CountryPL, CountryUS,
 	QuickPickPrompt, QuickPickKinds, QuickPickMatches, QuickPickEnter, QuickPickNothing,
 	KindAba, KindBirthDate, KindCard, KindCity, KindEan, KindFirstName, KindGender, KindIban, KindImei,

@@ -802,9 +802,15 @@ func (s Source) birthDate(req generate.Request) (string, error) {
 
 // postalCode draws a code, and only where this build carries a register of
 // them.
+//
+// The refusal says why and leaves what to do about it to whoever asked, since
+// the next move depends on that. A recipe is refused by its plan before
+// anything is drawn and the validator words the advice for a recipe. The quick
+// mode refuses in its own Check and each of its surfaces words it for itself.
+// This one is reached only by a caller that skipped both.
 func (s Source) postalCode(req generate.Request) (string, error) {
 	if fine, why := postalRegister(s.locale); !fine {
-		return "", fault.New(fault.Config, why).DoInstead(postalInstead)
+		return "", fault.New(fault.Config, why)
 	}
 	return us.Postal{}.Generate(provider.Request{Source: s.seed, At: req.At})
 }
@@ -829,16 +835,6 @@ func postalRegister(locale string) (bool, string) {
 	return false, "this build has no register of postal codes for " + locale +
 		", so a postal code cannot be produced there"
 }
-
-// postalInstead is what to do about it, kept apart from the reason above.
-//
-// 🔴 The two used to be one string, which put them in two places at once: the
-// listing of what this build cannot fill showed the advice as part of the
-// reason, and the refusal took the advice into its message and then had the
-// sentence for its kind added underneath. Two next moves, and the second one
-// about a recipe that is not the matter here.
-const postalInstead = "generate the dataset for a locale this build carries a register for, " +
-	"or leave the field out"
 
 // fromLists answers whether every named list is carried for a locale.
 func fromLists(names ...string) func(string) (bool, string) {

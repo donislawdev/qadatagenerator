@@ -599,9 +599,9 @@ func TestManyValuesSayTheyMayRepeatAndOneDoesNot(t *testing.T) {
 // drawn.
 //
 // It asks about VISIBILITY rather than about the text, because the text was
-// right the whole time. Both refusals are covered rather than one: one comes
-// from this screen judging what was typed, the other from the mode judging what
-// this build carries, and they travel by different paths to the same label.
+// right the whole time. Both refusals are covered rather than one: one is about
+// what was typed, the other about what this build carries, and a screen that
+// shows one of them may still hide the other.
 func TestARefusalIsShownRatherThanHiddenWithTheValue(t *testing.T) {
 	for _, refusal := range []struct {
 		name      string
