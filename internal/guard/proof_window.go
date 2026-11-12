@@ -59,6 +59,9 @@ var windowGuards = []Guard{
 	{"the one file allowed to open a page names only its own addresses, takes none from a caller and is reported when it moves", "TestTheOneFileAllowedToOpenAPageMayOpenOnlyItsOwnPages", "internal/guard", ByProbe},
 	{"a window that is gone is reported rather than read as clean", "TestTheToolkitGuardIsLoudWhenTheWindowIsGone", "internal/guard", ByProbe},
 	{"every banned call records why it is banned", "TestEveryBannedToolkitCallSaysWhyItIsBanned", "internal/guard", ByProbe},
+	{"nothing in the window gives itself a theme of its own, which would cost a set of fonts on every return to a screen", "TestNothingInTheWindowGivesItselfAThemeOfItsOwn", "internal/guard", ByMutation},
+	{"the scanner sees every way of naming a theme of its own and nothing else", "TestTheThemeScopeGuardSeesEveryWayToNameOneAndNothingElse", "internal/guard", ByProbe},
+	{"a window that is gone is reported rather than read as having no theme of its own", "TestTheThemeScopeGuardIsLoudWhenTheWindowIsGone", "internal/guard", ByProbe},
 
 	// --- what the window says, and in which language -------------------------
 	{"the About screen carries every fact the licence flag prints", "TestTheScreenCarriesEveryFactTheLicenceFlagPrints", "internal/gui/about", ByMutation},

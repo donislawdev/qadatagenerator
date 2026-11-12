@@ -1,14 +1,11 @@
 package parts
 
 import (
-	"image/color"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
-	toolkit "fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
@@ -50,15 +47,24 @@ import (
 // widget.Select, so taking its renderer means writing the caret, the selection,
 // the scrolling and the shortcuts again.
 //
-// So the toolkit's chrome is switched OFF rather than replaced, through a theme
-// handed to this subtree alone:
+// So the toolkit's chrome is put away rather than replaced, and this draws the
+// ground and the edge out of the tokens every other control uses:
 //
-//   - the ground and the edge of an input are transparent, and this draws both,
-//     out of the tokens every other control uses
-//   - the edge the toolkit strokes round the field is put away (withoutEdge),
-//     in every state INCLUDING focus, since the focused edge is that same
-//     rectangle in another colour. That is what frees the focus mark. Until
-//     2026-10-21 it was given no width instead, which took the caret with it
+//   - the ground and the edge the toolkit draws for an input are hidden
+//     (withoutEdge), in every state INCLUDING focus, since the focused edge is
+//     that same rectangle in another colour. That is what frees the focus mark
+//   - the shadow the toolkit lays at the end of a field holding more than it
+//     shows is gone from the whole window (fynetheme, unpainted)
+//
+// 🔴 No theme is handed to the field alone, and that is measured rather than
+// tidy: the toolkit gives such a theme a new scope every time it draws the
+// field again after a minute out of sight, and parses every font for the scope
+// anew, about 6 MB that stay until the program ends (B-370, the reason is
+// beside fynetheme's unpainted). What comes back with that: a field holding
+// more than it shows draws the toolkit's scroll bar along its foot, as thin as
+// a resting bar and as thick as a bar under the pointer, because the theme of
+// the window has one width for the bars of a field and of a list. The owner
+// took that on 2026-11-12, having seen it drawn, as the price of the memory.
 //
 // With the edge gone, where the words sit is this file's business, and the space
 // around the field is what places them: eight from the left plus the four the
@@ -248,7 +254,7 @@ func fieldWith(entry *FieldEntry, shown fyne.CanvasObject, leading fyne.CanvasOb
 	// chooser starts its word. Nothing at the foot, so the field keeps whatever
 	// height the row gives it.
 	step := palette.StepOf(palette.NameStepTight)
-	var typed fyne.CanvasObject = container.NewThemeOverride(shown, bareField{oneLine: true})
+	typed := shown
 	if leading != nil {
 		typed = container.New(layout.NewBorderLayout(nil, nil, leading, nil), leading, typed)
 	}
@@ -342,23 +348,25 @@ func (g *groundLook) show() {
 	g.current = ground
 }
 
-// withoutEdge is the toolkit's drawing of a text field with the edge it strokes
-// round itself put away, and nothing else changed.
+// withoutEdge is the toolkit's drawing of a text field with the ground it lays
+// under the words and the edge it strokes round them put away, and nothing
+// else changed.
 //
-// # Why the edge is put away rather than given no width
+// # Why put away rather than given no colour or no width
 //
-// Until 2026-10-21 the bare theme below set the width of that edge to nought,
-// which took the edge away in every state and the caret with it: widget.Entry
-// of v2.8.2 draws its caret as wide as the same number, widget/entry.go:1918.
-// The width is now the caret's, so the toolkit would draw its edge again - at
-// rest in a colour the bare theme makes transparent, but with the keyboard in
-// the field in the colour of the caret, and out of reach in the grey of
-// disabled words. Neither colour can be taken away without the caret or the
-// words.
+// Both are the toolkit's rectangles, and neither can be taken away through its
+// theme without taking something else: widget.Entry of v2.8.2 draws its caret
+// as wide as the edge, widget/entry.go:1918, so an edge of no width took the
+// caret with it, which the owner reported on 2026-10-21 as not seeing where
+// they typed. Its colour is the caret's under the keyboard and the grey of
+// disabled words out of reach. And a colour handed to the field alone needs a
+// theme of the field's own, which costs the window a set of fonts every time
+// the field is drawn again after a minute out of sight (FieldEntry says why).
 //
-// The edge is the one rectangle among the toolkit's objects that has a stroke,
-// widget/entry.go:183, and nothing in the toolkit shows it again once hidden:
-// it sets its colour and its size and never its visibility. The words stay
+// They are the only two rectangles among the objects the renderer of the entry
+// hands over, widget/entry.go:181 to 186, the caret living inside the content
+// rather than here. Nothing in the toolkit shows either again once hidden: it
+// sets their colours and sizes and never their visibility. The words stay
 // where they were, because the entry moves them in by the width of the edge and
 // its text takes the same number away again, widget/richtext.go:608.
 //
@@ -373,87 +381,15 @@ func (g *groundLook) show() {
 // A picture that differs from the window is the fault GUI rule six names.
 func withoutEdge(drawing fyne.WidgetRenderer) fyne.WidgetRenderer {
 	for _, object := range drawing.Objects() {
-		if edge, ok := object.(*canvas.Rectangle); ok && edge.StrokeWidth > 0 {
-			edge.Hide()
+		if chrome, ok := object.(*canvas.Rectangle); ok {
+			chrome.Hide()
 		}
 	}
 	return drawing
 }
 
-// CreateRenderer is the toolkit's drawing of the field without its edge. See
-// withoutEdge.
+// CreateRenderer is the toolkit's drawing of the field without its ground and
+// its edge. See withoutEdge.
 func (f *FieldEntry) CreateRenderer() fyne.WidgetRenderer {
 	return withoutEdge(f.Entry.CreateRenderer())
-}
-
-// bareField is this window's theme with the chrome of an input taken out of it.
-//
-// # Why it asks the running application rather than naming a theme
-//
-// So that it cannot drift. The window has swapped themes once already, and a
-// theme named here would go on answering with the old palette on the day the
-// next swap happens, with nothing failing: the field would simply be the one
-// control still wearing the previous window.
-//
-// oneLine is set for a field of one line. Such a field scrolls sideways under
-// a value longer than itself, and the toolkit draws a bar for that along its
-// foot: the owner measured it on 2026-10-21 as half the field under the
-// pointer, on the seed. A field of one line follows its caret on its own, so
-// the bar is given no width there and the recipe editor keeps its own.
-type bareField struct {
-	oneLine bool
-}
-
-var _ fyne.Theme = bareField{}
-
-// Color hides the things this control draws itself, and the shadow, and defers
-// the rest.
-//
-// The shadow is what the toolkit lays along the side of a field where more of
-// the text lies out of sight. On a field of one line that is a dark smear at
-// its end, and on the recipe editor it was the shadow along its right side the
-// owner did not want on 2026-10-21. The caret moving and the bar of the editor
-// already say that there is more.
-func (b bareField) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
-	switch name {
-	case toolkit.ColorNameInputBackground, toolkit.ColorNameInputBorder, toolkit.ColorNameShadow:
-		return color.Transparent
-	}
-	return current().Color(name, variant)
-}
-
-// Size gives the toolkit's edge the width of the caret, and the bars of a
-// field of one line no width.
-//
-// 🔴 The edge itself is put away by withoutEdge, so the focus mark stays the
-// one every other control uses. It was nought until 2026-10-21, see withoutEdge
-// for why that cost the caret.
-func (b bareField) Size(name fyne.ThemeSizeName) float32 {
-	switch name {
-	case toolkit.SizeNameInputBorder:
-		return palette.CaretThickness
-	case toolkit.SizeNameScrollBar, toolkit.SizeNameScrollBarSmall:
-		if b.oneLine {
-			return 0
-		}
-	}
-	return current().Size(name)
-}
-
-func (b bareField) Font(style fyne.TextStyle) fyne.Resource { return current().Font(style) }
-
-func (b bareField) Icon(name fyne.ThemeIconName) fyne.Resource { return current().Icon(name) }
-
-// current is the theme the window is wearing right now.
-func current() fyne.Theme {
-	if app := fyne.CurrentApp(); app != nil {
-		if settings := app.Settings(); settings != nil {
-			if wearing := settings.Theme(); wearing != nil {
-				return wearing
-			}
-		}
-	}
-	// A control built before an application exists is a test, and the toolkit's
-	// own theme is what it would otherwise have got.
-	return toolkit.DefaultTheme()
 }

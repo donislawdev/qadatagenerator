@@ -327,7 +327,7 @@
 																	</container>
 																</container>
 																<widget pos="0,136" size="507x0" type="*widget.Shadow">
-																	<linearGradient endColor="shadow" pos="0,-8" size="507x8"/>
+																	<linearGradient pos="0,-8" size="507x8"/>
 																</widget>
 																<widget pos="501,0" size="6x136" type="*widget.scrollBarArea">
 																	<widget pos="3,0" size="3x65" type="*widget.scrollBar">
@@ -374,7 +374,7 @@
 																	</container>
 																</container>
 																<widget pos="0,136" size="507x0" type="*widget.Shadow">
-																	<linearGradient endColor="shadow" pos="0,-8" size="507x8"/>
+																	<linearGradient pos="0,-8" size="507x8"/>
 																</widget>
 																<widget pos="501,0" size="6x136" type="*widget.scrollBarArea">
 																	<widget pos="3,0" size="3x65" type="*widget.scrollBar">

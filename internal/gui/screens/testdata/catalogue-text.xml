@@ -352,22 +352,17 @@
 																		<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="inputBorder" strokeWidth="2"/>
 																	</container>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="71x22" type="*widget.entryContent">
-																							<widget size="71x22" type="*widget.RichText">
-																								<text color="disabled" pos="4,2" size="0x16"></text>
-																							</widget>
-																							<widget size="71x22" type="*widget.RichText">
-																								<text pos="4,2" size="0x16"></text>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="71x22" type="*widget.entryContent">
+																					<widget size="71x22" type="*widget.RichText">
+																						<text color="disabled" pos="4,2" size="0x16"></text>
+																					</widget>
+																					<widget size="71x22" type="*widget.RichText">
+																						<text pos="4,2" size="0x16"></text>
 																					</widget>
 																				</widget>
-																			</container>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -388,22 +383,17 @@
 																		<rectangle fillColor="hover" pos="1,1" radius="6" size="85x32" strokeColor="inputBorder" strokeWidth="2"/>
 																	</container>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="71x22" type="*widget.entryContent">
-																							<widget size="71x22" type="*widget.RichText">
-																								<text color="disabled" pos="4,2" size="0x16"></text>
-																							</widget>
-																							<widget size="71x22" type="*widget.RichText">
-																								<text pos="4,2" size="0x16"></text>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="71x22" type="*widget.entryContent">
+																					<widget size="71x22" type="*widget.RichText">
+																						<text color="disabled" pos="4,2" size="0x16"></text>
+																					</widget>
+																					<widget size="71x22" type="*widget.RichText">
+																						<text pos="4,2" size="0x16"></text>
 																					</widget>
 																				</widget>
-																			</container>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -424,23 +414,18 @@
 																		<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="focus" strokeWidth="2"/>
 																	</container>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="71x22" type="*widget.entryContent">
-																							<widget size="71x22" type="*widget.RichText">
-																								<text color="disabled" pos="4,2" size="0x16"></text>
-																							</widget>
-																							<widget size="71x22" type="*widget.RichText">
-																								<text pos="4,2" size="0x16"></text>
-																							</widget>
-																							<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="71x22" type="*widget.entryContent">
+																					<widget size="71x22" type="*widget.RichText">
+																						<text color="disabled" pos="4,2" size="0x16"></text>
 																					</widget>
+																					<widget size="71x22" type="*widget.RichText">
+																						<text pos="4,2" size="0x16"></text>
+																					</widget>
+																					<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																				</widget>
-																			</container>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -459,22 +444,17 @@
 																<container size="87x34">
 																	<rectangle fillColor="button" radius="6" size="87x34"/>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="71x22" type="*widget.entryContent">
-																							<widget size="71x22" type="*widget.RichText">
-																								<text color="disabled" pos="4,2" size="0x16"></text>
-																							</widget>
-																							<widget size="71x22" type="*widget.RichText">
-																								<text color="disabled" pos="4,2" size="0x16"></text>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="71x22" type="*widget.entryContent">
+																					<widget size="71x22" type="*widget.RichText">
+																						<text color="disabled" pos="4,2" size="0x16"></text>
+																					</widget>
+																					<widget size="71x22" type="*widget.RichText">
+																						<text color="disabled" pos="4,2" size="0x16"></text>
 																					</widget>
 																				</widget>
-																			</container>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -507,19 +487,14 @@
 																		<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="inputBorder" strokeWidth="2"/>
 																	</container>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="71x22" type="*widget.entryContent">
-																							<widget size="71x22" type="*widget.RichText">
-																								<text pos="4,2" size="54x16">Generate</text>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="71x22" type="*widget.entryContent">
+																					<widget size="71x22" type="*widget.RichText">
+																						<text pos="4,2" size="54x16">Generate</text>
 																					</widget>
 																				</widget>
-																			</container>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -540,19 +515,14 @@
 																		<rectangle fillColor="hover" pos="1,1" radius="6" size="85x32" strokeColor="inputBorder" strokeWidth="2"/>
 																	</container>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="71x22" type="*widget.entryContent">
-																							<widget size="71x22" type="*widget.RichText">
-																								<text pos="4,2" size="54x16">Generate</text>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="71x22" type="*widget.entryContent">
+																					<widget size="71x22" type="*widget.RichText">
+																						<text pos="4,2" size="54x16">Generate</text>
 																					</widget>
 																				</widget>
-																			</container>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -573,20 +543,15 @@
 																		<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="focus" strokeWidth="2"/>
 																	</container>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="71x22" type="*widget.entryContent">
-																							<widget size="71x22" type="*widget.RichText">
-																								<text pos="4,2" size="54x16">Generate</text>
-																							</widget>
-																							<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="71x22" type="*widget.entryContent">
+																					<widget size="71x22" type="*widget.RichText">
+																						<text pos="4,2" size="54x16">Generate</text>
 																					</widget>
+																					<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																				</widget>
-																			</container>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -605,19 +570,14 @@
 																<container size="87x34">
 																	<rectangle fillColor="button" radius="6" size="87x34"/>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="71x22" type="*widget.entryContent">
-																							<widget size="71x22" type="*widget.RichText">
-																								<text color="disabled" pos="4,2" size="54x16">Generate</text>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="71x22" type="*widget.entryContent">
+																					<widget size="71x22" type="*widget.RichText">
+																						<text color="disabled" pos="4,2" size="54x16">Generate</text>
 																					</widget>
 																				</widget>
-																			</container>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -650,19 +610,14 @@
 																		<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="error" strokeWidth="2"/>
 																	</container>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="71x22" type="*widget.entryContent">
-																							<widget size="71x22" type="*widget.RichText">
-																								<text pos="4,2" size="54x16">Generate</text>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="71x22" type="*widget.entryContent">
+																					<widget size="71x22" type="*widget.RichText">
+																						<text pos="4,2" size="54x16">Generate</text>
 																					</widget>
 																				</widget>
-																			</container>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -683,19 +638,14 @@
 																		<rectangle fillColor="hover" pos="1,1" radius="6" size="85x32" strokeColor="error" strokeWidth="2"/>
 																	</container>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="71x22" type="*widget.entryContent">
-																							<widget size="71x22" type="*widget.RichText">
-																								<text pos="4,2" size="54x16">Generate</text>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="71x22" type="*widget.entryContent">
+																					<widget size="71x22" type="*widget.RichText">
+																						<text pos="4,2" size="54x16">Generate</text>
 																					</widget>
 																				</widget>
-																			</container>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -721,20 +671,15 @@
 																		</container>
 																	</container>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="71x22" type="*widget.entryContent">
-																							<widget size="71x22" type="*widget.RichText">
-																								<text pos="4,2" size="54x16">Generate</text>
-																							</widget>
-																							<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="71x22" type="*widget.entryContent">
+																					<widget size="71x22" type="*widget.RichText">
+																						<text pos="4,2" size="54x16">Generate</text>
 																					</widget>
+																					<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																				</widget>
-																			</container>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -753,19 +698,14 @@
 																<container size="87x34">
 																	<rectangle fillColor="button" radius="6" size="87x34"/>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="71x22" type="*widget.entryContent">
-																							<widget size="71x22" type="*widget.RichText">
-																								<text color="disabled" pos="4,2" size="54x16">Generate</text>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="71x22" type="*widget.entryContent">
+																					<widget size="71x22" type="*widget.RichText">
+																						<text color="disabled" pos="4,2" size="54x16">Generate</text>
 																					</widget>
 																				</widget>
-																			</container>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -798,27 +738,22 @@
 																		<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="inputBorder" strokeWidth="2"/>
 																	</container>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="752x22" type="*widget.entryContent">
-																							<widget size="752x22" type="*widget.RichText">
-																								<text pos="4,2" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
-																							</widget>
-																						</widget>
-																						<widget pos="71,0" size="0x22" type="*widget.Shadow">
-																							<linearGradient angle="270" pos="-8,0" size="8x22"/>
-																						</widget>
-																						<widget pos="0,22" size="71x0" type="*widget.scrollBarArea">
-																							<widget size="6x0" type="*widget.scrollBar">
-																								<rectangle fillColor="scrollbar" radius="3" size="6x0"/>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="752x22" type="*widget.entryContent">
+																					<widget size="752x22" type="*widget.RichText">
+																						<text pos="4,2" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
 																					</widget>
 																				</widget>
-																			</container>
+																				<widget pos="71,0" size="0x22" type="*widget.Shadow">
+																					<linearGradient angle="270" pos="-8,0" size="8x22"/>
+																				</widget>
+																				<widget pos="0,16" size="71x6" type="*widget.scrollBarArea">
+																					<widget pos="0,3" size="6x3" type="*widget.scrollBar">
+																						<rectangle fillColor="scrollbar" radius="3" size="6x3"/>
+																					</widget>
+																				</widget>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -839,27 +774,22 @@
 																		<rectangle fillColor="hover" pos="1,1" radius="6" size="85x32" strokeColor="inputBorder" strokeWidth="2"/>
 																	</container>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="752x22" type="*widget.entryContent">
-																							<widget size="752x22" type="*widget.RichText">
-																								<text pos="4,2" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
-																							</widget>
-																						</widget>
-																						<widget pos="71,0" size="0x22" type="*widget.Shadow">
-																							<linearGradient angle="270" pos="-8,0" size="8x22"/>
-																						</widget>
-																						<widget pos="0,22" size="71x0" type="*widget.scrollBarArea">
-																							<widget size="6x0" type="*widget.scrollBar">
-																								<rectangle fillColor="scrollbar" radius="3" size="6x0"/>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="752x22" type="*widget.entryContent">
+																					<widget size="752x22" type="*widget.RichText">
+																						<text pos="4,2" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
 																					</widget>
 																				</widget>
-																			</container>
+																				<widget pos="71,0" size="0x22" type="*widget.Shadow">
+																					<linearGradient angle="270" pos="-8,0" size="8x22"/>
+																				</widget>
+																				<widget pos="0,16" size="71x6" type="*widget.scrollBarArea">
+																					<widget pos="0,3" size="6x3" type="*widget.scrollBar">
+																						<rectangle fillColor="scrollbar" radius="3" size="6x3"/>
+																					</widget>
+																				</widget>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -880,28 +810,23 @@
 																		<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="focus" strokeWidth="2"/>
 																	</container>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="752x22" type="*widget.entryContent">
-																							<widget size="752x22" type="*widget.RichText">
-																								<text pos="4,2" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
-																							</widget>
-																							<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
-																						</widget>
-																						<widget pos="71,0" size="0x22" type="*widget.Shadow">
-																							<linearGradient angle="270" pos="-8,0" size="8x22"/>
-																						</widget>
-																						<widget pos="0,22" size="71x0" type="*widget.scrollBarArea">
-																							<widget size="6x0" type="*widget.scrollBar">
-																								<rectangle fillColor="scrollbar" radius="3" size="6x0"/>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="752x22" type="*widget.entryContent">
+																					<widget size="752x22" type="*widget.RichText">
+																						<text pos="4,2" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
+																					</widget>
+																					<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
+																				</widget>
+																				<widget pos="71,0" size="0x22" type="*widget.Shadow">
+																					<linearGradient angle="270" pos="-8,0" size="8x22"/>
+																				</widget>
+																				<widget pos="0,16" size="71x6" type="*widget.scrollBarArea">
+																					<widget pos="0,3" size="6x3" type="*widget.scrollBar">
+																						<rectangle fillColor="scrollbar" radius="3" size="6x3"/>
 																					</widget>
 																				</widget>
-																			</container>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -920,27 +845,22 @@
 																<container size="87x34">
 																	<rectangle fillColor="button" radius="6" size="87x34"/>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="752x22" type="*widget.entryContent">
-																							<widget size="752x22" type="*widget.RichText">
-																								<text color="disabled" pos="4,2" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
-																							</widget>
-																						</widget>
-																						<widget pos="71,0" size="0x22" type="*widget.Shadow">
-																							<linearGradient angle="270" pos="-8,0" size="8x22"/>
-																						</widget>
-																						<widget pos="0,22" size="71x0" type="*widget.scrollBarArea">
-																							<widget size="6x0" type="*widget.scrollBar">
-																								<rectangle fillColor="scrollbar" radius="3" size="6x0"/>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="752x22" type="*widget.entryContent">
+																					<widget size="752x22" type="*widget.RichText">
+																						<text color="disabled" pos="4,2" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
 																					</widget>
 																				</widget>
-																			</container>
+																				<widget pos="71,0" size="0x22" type="*widget.Shadow">
+																					<linearGradient angle="270" pos="-8,0" size="8x22"/>
+																				</widget>
+																				<widget pos="0,16" size="71x6" type="*widget.scrollBarArea">
+																					<widget pos="0,3" size="6x3" type="*widget.scrollBar">
+																						<rectangle fillColor="scrollbar" radius="3" size="6x3"/>
+																					</widget>
+																				</widget>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -973,27 +893,22 @@
 																		<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="inputBorder" strokeWidth="2"/>
 																	</container>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="519x22" type="*widget.entryContent">
-																							<widget size="519x22" type="*widget.RichText">
-																								<text pos="4,2" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
-																							</widget>
-																						</widget>
-																						<widget pos="71,0" size="0x22" type="*widget.Shadow">
-																							<linearGradient angle="270" pos="-8,0" size="8x22"/>
-																						</widget>
-																						<widget pos="0,22" size="71x0" type="*widget.scrollBarArea">
-																							<widget size="9x0" type="*widget.scrollBar">
-																								<rectangle fillColor="scrollbar" radius="3" size="9x0"/>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="519x22" type="*widget.entryContent">
+																					<widget size="519x22" type="*widget.RichText">
+																						<text pos="4,2" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
 																					</widget>
 																				</widget>
-																			</container>
+																				<widget pos="71,0" size="0x22" type="*widget.Shadow">
+																					<linearGradient angle="270" pos="-8,0" size="8x22"/>
+																				</widget>
+																				<widget pos="0,16" size="71x6" type="*widget.scrollBarArea">
+																					<widget pos="0,3" size="9x3" type="*widget.scrollBar">
+																						<rectangle fillColor="scrollbar" radius="3" size="9x3"/>
+																					</widget>
+																				</widget>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -1014,27 +929,22 @@
 																		<rectangle fillColor="hover" pos="1,1" radius="6" size="85x32" strokeColor="inputBorder" strokeWidth="2"/>
 																	</container>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="519x22" type="*widget.entryContent">
-																							<widget size="519x22" type="*widget.RichText">
-																								<text pos="4,2" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
-																							</widget>
-																						</widget>
-																						<widget pos="71,0" size="0x22" type="*widget.Shadow">
-																							<linearGradient angle="270" pos="-8,0" size="8x22"/>
-																						</widget>
-																						<widget pos="0,22" size="71x0" type="*widget.scrollBarArea">
-																							<widget size="9x0" type="*widget.scrollBar">
-																								<rectangle fillColor="scrollbar" radius="3" size="9x0"/>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="519x22" type="*widget.entryContent">
+																					<widget size="519x22" type="*widget.RichText">
+																						<text pos="4,2" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
 																					</widget>
 																				</widget>
-																			</container>
+																				<widget pos="71,0" size="0x22" type="*widget.Shadow">
+																					<linearGradient angle="270" pos="-8,0" size="8x22"/>
+																				</widget>
+																				<widget pos="0,16" size="71x6" type="*widget.scrollBarArea">
+																					<widget pos="0,3" size="9x3" type="*widget.scrollBar">
+																						<rectangle fillColor="scrollbar" radius="3" size="9x3"/>
+																					</widget>
+																				</widget>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -1055,28 +965,23 @@
 																		<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="focus" strokeWidth="2"/>
 																	</container>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="519x22" type="*widget.entryContent">
-																							<widget size="519x22" type="*widget.RichText">
-																								<text pos="4,2" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
-																							</widget>
-																							<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
-																						</widget>
-																						<widget pos="71,0" size="0x22" type="*widget.Shadow">
-																							<linearGradient angle="270" pos="-8,0" size="8x22"/>
-																						</widget>
-																						<widget pos="0,22" size="71x0" type="*widget.scrollBarArea">
-																							<widget size="9x0" type="*widget.scrollBar">
-																								<rectangle fillColor="scrollbar" radius="3" size="9x0"/>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="519x22" type="*widget.entryContent">
+																					<widget size="519x22" type="*widget.RichText">
+																						<text pos="4,2" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
+																					</widget>
+																					<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
+																				</widget>
+																				<widget pos="71,0" size="0x22" type="*widget.Shadow">
+																					<linearGradient angle="270" pos="-8,0" size="8x22"/>
+																				</widget>
+																				<widget pos="0,16" size="71x6" type="*widget.scrollBarArea">
+																					<widget pos="0,3" size="9x3" type="*widget.scrollBar">
+																						<rectangle fillColor="scrollbar" radius="3" size="9x3"/>
 																					</widget>
 																				</widget>
-																			</container>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -1095,27 +1000,22 @@
 																<container size="87x34">
 																	<rectangle fillColor="button" radius="6" size="87x34"/>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*container.ThemeOverride">
-																			<container size="71x26">
-																				<widget size="71x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="67x22"/>
-																					<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																						<widget size="519x22" type="*widget.entryContent">
-																							<widget size="519x22" type="*widget.RichText">
-																								<text color="disabled" pos="4,2" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
-																							</widget>
-																						</widget>
-																						<widget pos="71,0" size="0x22" type="*widget.Shadow">
-																							<linearGradient angle="270" pos="-8,0" size="8x22"/>
-																						</widget>
-																						<widget pos="0,22" size="71x0" type="*widget.scrollBarArea">
-																							<widget size="9x0" type="*widget.scrollBar">
-																								<rectangle fillColor="scrollbar" radius="3" size="9x0"/>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																				<widget size="519x22" type="*widget.entryContent">
+																					<widget size="519x22" type="*widget.RichText">
+																						<text color="disabled" pos="4,2" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
 																					</widget>
 																				</widget>
-																			</container>
+																				<widget pos="71,0" size="0x22" type="*widget.Shadow">
+																					<linearGradient angle="270" pos="-8,0" size="8x22"/>
+																				</widget>
+																				<widget pos="0,16" size="71x6" type="*widget.scrollBarArea">
+																					<widget pos="0,3" size="9x3" type="*widget.scrollBar">
+																						<rectangle fillColor="scrollbar" radius="3" size="9x3"/>
+																					</widget>
+																				</widget>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>
@@ -1150,22 +1050,17 @@
 																	<rectangle fillColor="button" pos="1,1" radius="6" size="202x32" strokeColor="inputBorder" strokeWidth="2"/>
 																</container>
 																<container size="204x34">
-																	<widget pos="8,8" size="188x26" type="*container.ThemeOverride">
-																		<container size="188x26">
-																			<widget size="188x26" type="*parts.FieldEntry">
-																				<rectangle pos="2,2" radius="6" size="184x22"/>
-																				<widget pos="0,2" size="188x22" type="*widget.Scroll">
-																					<widget size="188x22" type="*widget.entryContent">
-																						<widget size="188x22" type="*widget.RichText">
-																							<text color="disabled" pos="4,2" size="130x16">Same folder as the file</text>
-																						</widget>
-																						<widget size="188x22" type="*widget.RichText">
-																							<text pos="4,2" size="0x16"></text>
-																						</widget>
-																					</widget>
+																	<widget pos="8,8" size="188x26" type="*parts.FieldEntry">
+																		<widget pos="0,2" size="188x22" type="*widget.Scroll">
+																			<widget size="188x22" type="*widget.entryContent">
+																				<widget size="188x22" type="*widget.RichText">
+																					<text color="disabled" pos="4,2" size="130x16">Same folder as the file</text>
+																				</widget>
+																				<widget size="188x22" type="*widget.RichText">
+																					<text pos="4,2" size="0x16"></text>
 																				</widget>
 																			</widget>
-																		</container>
+																		</widget>
 																	</widget>
 																</container>
 															</container>
@@ -1196,22 +1091,17 @@
 																	<rectangle fillColor="hover" pos="1,1" radius="6" size="202x32" strokeColor="inputBorder" strokeWidth="2"/>
 																</container>
 																<container size="204x34">
-																	<widget pos="8,8" size="188x26" type="*container.ThemeOverride">
-																		<container size="188x26">
-																			<widget size="188x26" type="*parts.FieldEntry">
-																				<rectangle pos="2,2" radius="6" size="184x22"/>
-																				<widget pos="0,2" size="188x22" type="*widget.Scroll">
-																					<widget size="188x22" type="*widget.entryContent">
-																						<widget size="188x22" type="*widget.RichText">
-																							<text color="disabled" pos="4,2" size="130x16">Same folder as the file</text>
-																						</widget>
-																						<widget size="188x22" type="*widget.RichText">
-																							<text pos="4,2" size="0x16"></text>
-																						</widget>
-																					</widget>
+																	<widget pos="8,8" size="188x26" type="*parts.FieldEntry">
+																		<widget pos="0,2" size="188x22" type="*widget.Scroll">
+																			<widget size="188x22" type="*widget.entryContent">
+																				<widget size="188x22" type="*widget.RichText">
+																					<text color="disabled" pos="4,2" size="130x16">Same folder as the file</text>
+																				</widget>
+																				<widget size="188x22" type="*widget.RichText">
+																					<text pos="4,2" size="0x16"></text>
 																				</widget>
 																			</widget>
-																		</container>
+																		</widget>
 																	</widget>
 																</container>
 															</container>
@@ -1242,23 +1132,18 @@
 																	<rectangle fillColor="button" pos="1,1" radius="6" size="202x32" strokeColor="focus" strokeWidth="2"/>
 																</container>
 																<container size="204x34">
-																	<widget pos="8,8" size="188x26" type="*container.ThemeOverride">
-																		<container size="188x26">
-																			<widget size="188x26" type="*parts.FieldEntry">
-																				<rectangle pos="2,2" radius="6" size="184x22"/>
-																				<widget pos="0,2" size="188x22" type="*widget.Scroll">
-																					<widget size="188x22" type="*widget.entryContent">
-																						<widget size="188x22" type="*widget.RichText">
-																							<text color="disabled" pos="4,2" size="130x16">Same folder as the file</text>
-																						</widget>
-																						<widget size="188x22" type="*widget.RichText">
-																							<text pos="4,2" size="0x16"></text>
-																						</widget>
-																						<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
-																					</widget>
+																	<widget pos="8,8" size="188x26" type="*parts.FieldEntry">
+																		<widget pos="0,2" size="188x22" type="*widget.Scroll">
+																			<widget size="188x22" type="*widget.entryContent">
+																				<widget size="188x22" type="*widget.RichText">
+																					<text color="disabled" pos="4,2" size="130x16">Same folder as the file</text>
 																				</widget>
+																				<widget size="188x22" type="*widget.RichText">
+																					<text pos="4,2" size="0x16"></text>
+																				</widget>
+																				<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																			</widget>
-																		</container>
+																		</widget>
 																	</widget>
 																</container>
 															</container>
@@ -1287,22 +1172,17 @@
 															<container size="204x34">
 																<rectangle fillColor="button" radius="6" size="204x34"/>
 																<container size="204x34">
-																	<widget pos="8,8" size="188x26" type="*container.ThemeOverride">
-																		<container size="188x26">
-																			<widget size="188x26" type="*parts.FieldEntry">
-																				<rectangle pos="2,2" radius="6" size="184x22"/>
-																				<widget pos="0,2" size="188x22" type="*widget.Scroll">
-																					<widget size="188x22" type="*widget.entryContent">
-																						<widget size="188x22" type="*widget.RichText">
-																							<text color="disabled" pos="4,2" size="130x16">Same folder as the file</text>
-																						</widget>
-																						<widget size="188x22" type="*widget.RichText">
-																							<text color="disabled" pos="4,2" size="0x16"></text>
-																						</widget>
-																					</widget>
+																	<widget pos="8,8" size="188x26" type="*parts.FieldEntry">
+																		<widget pos="0,2" size="188x22" type="*widget.Scroll">
+																			<widget size="188x22" type="*widget.entryContent">
+																				<widget size="188x22" type="*widget.RichText">
+																					<text color="disabled" pos="4,2" size="130x16">Same folder as the file</text>
+																				</widget>
+																				<widget size="188x22" type="*widget.RichText">
+																					<text color="disabled" pos="4,2" size="0x16"></text>
 																				</widget>
 																			</widget>
-																		</container>
+																		</widget>
 																	</widget>
 																</container>
 															</container>

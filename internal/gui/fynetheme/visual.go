@@ -103,12 +103,44 @@ var tokenFor = map[fyne.ThemeColorName]string{
 	toolkit.ColorNameFocus:   palette.MarkCurrent,
 }
 
+// unpainted are the colours the toolkit asks for and this window answers with
+// nothing at all, each with what disappears.
+//
+// # Why a register of its own rather than a token
+//
+// Every token of the palette is a colour somebody can see, and a test holds
+// all of them to that, because a transparent token is how a typo becomes an
+// invisible control. These are the opposite claim, that the toolkit must not
+// paint this anywhere, so they stand apart where the claim can be read.
+//
+// # 🔴 The shadow, since 2026-11-12 (B-370)
+//
+// The toolkit lays it along the edge of anything that scrolls and under its
+// dialogs. The owner did not want it on the list a kind is picked from, on the
+// recipe editor or at the end of a field holding more than it shows, and a
+// theme handed to those controls alone is not available: the toolkit takes a
+// new theme scope every time it draws such a control again after a minute out
+// of sight, and parses every font for the scope anew, about 6 MB of live heap
+// each time, kept until the program ends. Measured on 2026-11-12 with the
+// in-process probe, four walks of the screens a minute and a half apart held
+// 78.6, 111.3, 144.0 and 176.7 MB. So the shadow goes everywhere or nowhere,
+// and the owner chose everywhere, having seen both drawn. What that takes with
+// it: the shadow at the foot of a scrolling area saying there is more below,
+// which the scroll bar beside it still says, and the shadow under the
+// toolkit's dialogs, which open over a window they dim.
+var unpainted = map[fyne.ThemeColorName]string{
+	toolkit.ColorNameShadow: "the shadow of the toolkit, along what scrolls and under its dialogs",
+}
+
 // Color answers with a token where this project has one.
 //
 // The variant is ignored on purpose. There is one theme by decision, so being
 // asked for the light one and getting this one is the decision working rather
 // than a branch somebody forgot.
 func (Visual) Color(name fyne.ThemeColorName, _ fyne.ThemeVariant) color.Color {
+	if _, none := unpainted[name]; none {
+		return color.Transparent
+	}
 	if token, ours := tokenFor[name]; ours {
 		return palette.Ink(token)
 	}

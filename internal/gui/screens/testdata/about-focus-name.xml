@@ -1397,7 +1397,7 @@
 									</container>
 								</container>
 								<widget pos="0,737" size="1122x0" type="*widget.Shadow">
-									<linearGradient endColor="shadow" pos="0,-8" size="1122x8"/>
+									<linearGradient pos="0,-8" size="1122x8"/>
 								</widget>
 								<widget pos="1116,0" size="6x737" type="*widget.scrollBarArea">
 									<widget pos="3,0" size="3x268" type="*widget.scrollBar">

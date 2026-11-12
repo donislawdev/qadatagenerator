@@ -68,7 +68,7 @@ func TestEveryPressableControlDrawsItsOwnEdge(t *testing.T) {
 	for _, state := range All() {
 		content := Assemble(i18n.English, data, state)
 		found := 0
-		walkTree(content, false, func(object fyne.CanvasObject, _ bool) {
+		walkTree(content, func(object fyne.CanvasObject) {
 			control, name := ourControl(object)
 			if control == nil || !object.Visible() {
 				return
@@ -270,13 +270,13 @@ func TestTheFilledActionIsTheNamedExceptionToTheEdgeRule(t *testing.T) {
 	for _, state := range All() {
 		content := Assemble(i18n.English, data, state)
 
-		walkTree(content, false, func(object fyne.CanvasObject, _ bool) {
+		walkTree(content, func(object fyne.CanvasObject) {
 			if filledAction(object) != nil {
 				slabs++
 			}
 		})
 
-		walkTree(content, false, func(object fyne.CanvasObject, _ bool) {
+		walkTree(content, func(object fyne.CanvasObject) {
 			group, isGroup := object.(*fyne.Container)
 			if !isGroup {
 				return

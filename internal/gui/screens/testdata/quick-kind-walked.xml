@@ -279,19 +279,14 @@
 																	<rectangle fillColor="button" pos="1,1" radius="6" size="61x32" strokeColor="inputBorder" strokeWidth="2"/>
 																</container>
 																<container size="63x34">
-																	<widget pos="8,8" size="47x26" type="*container.ThemeOverride">
-																		<container size="47x26">
-																			<widget size="47x26" type="*parts.FieldEntry">
-																				<rectangle pos="2,2" radius="6" size="43x22"/>
-																				<widget pos="0,2" size="47x22" type="*widget.Scroll">
-																					<widget size="47x22" type="*widget.entryContent">
-																						<widget size="47x22" type="*widget.RichText">
-																							<text pos="4,2" size="15x16">10</text>
-																						</widget>
-																					</widget>
+																	<widget pos="8,8" size="47x26" type="*parts.FieldEntry">
+																		<widget pos="0,2" size="47x22" type="*widget.Scroll">
+																			<widget size="47x22" type="*widget.entryContent">
+																				<widget size="47x22" type="*widget.RichText">
+																					<text pos="4,2" size="15x16">10</text>
 																				</widget>
 																			</widget>
-																		</container>
+																		</widget>
 																	</widget>
 																</container>
 															</container>
@@ -338,22 +333,17 @@
 																<rectangle fillColor="button" pos="1,1" radius="6" size="101x32" strokeColor="inputBorder" strokeWidth="2"/>
 															</container>
 															<container size="103x34">
-																<widget pos="8,8" size="87x26" type="*container.ThemeOverride">
-																	<container size="87x26">
-																		<widget size="87x26" type="*parts.FieldEntry">
-																			<rectangle pos="2,2" radius="6" size="83x22"/>
-																			<widget pos="0,2" size="87x22" type="*widget.Scroll">
-																				<widget size="87x22" type="*widget.entryContent">
-																					<widget size="87x22" type="*widget.RichText">
-																						<text color="disabled" pos="4,2" size="79x16">YYYY-MM-DD</text>
-																					</widget>
-																					<widget size="87x22" type="*widget.RichText">
-																						<text pos="4,2" size="0x16"></text>
-																					</widget>
-																				</widget>
+																<widget pos="8,8" size="87x26" type="*parts.FieldEntry">
+																	<widget pos="0,2" size="87x22" type="*widget.Scroll">
+																		<widget size="87x22" type="*widget.entryContent">
+																			<widget size="87x22" type="*widget.RichText">
+																				<text color="disabled" pos="4,2" size="79x16">YYYY-MM-DD</text>
+																			</widget>
+																			<widget size="87x22" type="*widget.RichText">
+																				<text pos="4,2" size="0x16"></text>
 																			</widget>
 																		</widget>
-																	</container>
+																	</widget>
 																</widget>
 															</container>
 														</container>
@@ -370,19 +360,14 @@
 																	<rectangle fillColor="button" pos="1,1" radius="6" size="132x32" strokeColor="inputBorder" strokeWidth="2"/>
 																</container>
 																<container size="134x34">
-																	<widget pos="8,8" size="118x26" type="*container.ThemeOverride">
-																		<container size="118x26">
-																			<widget size="118x26" type="*parts.FieldEntry">
-																				<rectangle pos="2,2" radius="6" size="114x22"/>
-																				<widget pos="0,2" size="118x22" type="*widget.Scroll">
-																					<widget size="118x22" type="*widget.entryContent">
-																						<widget size="118x22" type="*widget.RichText">
-																							<text pos="4,2" size="86x16">for-the-picture</text>
-																						</widget>
-																					</widget>
+																	<widget pos="8,8" size="118x26" type="*parts.FieldEntry">
+																		<widget pos="0,2" size="118x22" type="*widget.Scroll">
+																			<widget size="118x22" type="*widget.entryContent">
+																				<widget size="118x22" type="*widget.RichText">
+																					<text pos="4,2" size="86x16">for-the-picture</text>
 																				</widget>
 																			</widget>
-																		</container>
+																		</widget>
 																	</widget>
 																</container>
 															</container>
@@ -1004,23 +989,18 @@
 														<spacer pos="0,15" size="15x0"/>
 													</container>
 												</container>
-												<widget pos="27,0" size="405x24" type="*container.ThemeOverride">
-													<container size="405x24">
-														<widget size="405x24" type="*parts.searchEntry">
-															<rectangle pos="2,2" radius="6" size="401x20"/>
-															<widget pos="0,2" size="405x20" type="*widget.Scroll">
-																<widget size="405x20" type="*widget.entryContent">
-																	<widget size="405x20" type="*widget.RichText">
-																		<text color="disabled" pos="4,2" size="229x16">Type to filter, for example pesel or bank</text>
-																	</widget>
-																	<widget size="405x20" type="*widget.RichText">
-																		<text pos="4,2" size="0x16"></text>
-																	</widget>
-																	<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
-																</widget>
+												<widget pos="27,0" size="405x24" type="*parts.searchEntry">
+													<widget pos="0,2" size="405x20" type="*widget.Scroll">
+														<widget size="405x20" type="*widget.entryContent">
+															<widget size="405x20" type="*widget.RichText">
+																<text color="disabled" pos="4,2" size="229x16">Type to filter, for example pesel or bank</text>
 															</widget>
+															<widget size="405x20" type="*widget.RichText">
+																<text pos="4,2" size="0x16"></text>
+															</widget>
+															<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 														</widget>
-													</container>
+													</widget>
 												</widget>
 											</container>
 										</container>
@@ -1036,718 +1016,714 @@
 									</container>
 								</container>
 								<container pos="0,44" size="456x336">
-									<widget size="456x336" type="*container.ThemeOverride">
-										<container size="456x336">
-											<widget size="456x336" type="*widget.Scroll">
-												<container pos="0,-126" size="456x979">
-													<container size="456x34">
-														<text bold color="focus" pos="12,16" size="440x14" textSize="11">UNITED STATES</text>
+									<widget size="456x336" type="*widget.Scroll">
+										<container pos="0,-126" size="456x979">
+											<container size="456x34">
+												<text bold color="focus" pos="12,16" size="440x14" textSize="11">UNITED STATES</text>
+											</container>
+											<widget pos="0,38" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="368x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">aba</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="122x32">
+																			<spacer size="122x7"/>
+																			<text color="disabled" pos="0,7" size="122x16">Bank routing number</text>
+																			<spacer pos="0,24" size="122x7"/>
+																		</container>
+																	</container>
+																	<container pos="368,0" size="63x32">
+																		<container size="36x32">
+																			<spacer size="36x8"/>
+																			<text color="disabled" pos="0,8" size="36x14" textSize="11">9 digits</text>
+																			<spacer pos="0,23" size="36x8"/>
+																		</container>
+																		<container pos="48,0" size="15x32">
+																			<rectangle size="15x32"/>
+																			<rectangle size="15x32"/>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
 													</container>
-													<widget pos="0,38" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="368x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">aba</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="122x32">
-																					<spacer size="122x7"/>
-																					<text color="disabled" pos="0,7" size="122x16">Bank routing number</text>
-																					<spacer pos="0,24" size="122x7"/>
-																				</container>
-																			</container>
-																			<container pos="368,0" size="63x32">
-																				<container size="36x32">
-																					<spacer size="36x8"/>
-																					<text color="disabled" pos="0,8" size="36x14" textSize="11">9 digits</text>
-																					<spacer pos="0,23" size="36x8"/>
-																				</container>
-																				<container pos="48,0" size="15x32">
-																					<rectangle size="15x32"/>
-																					<rectangle size="15x32"/>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<widget pos="0,82" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="368x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">postal_code</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="52x32">
-																					<spacer size="52x7"/>
-																					<text color="disabled" pos="0,7" size="52x16">ZIP code</text>
-																					<spacer pos="0,24" size="52x7"/>
-																				</container>
-																			</container>
-																			<container pos="368,0" size="63x32">
-																				<container size="36x32">
-																					<spacer size="36x8"/>
-																					<text color="disabled" pos="0,8" size="36x14" textSize="11">5 digits</text>
-																					<spacer pos="0,23" size="36x8"/>
-																				</container>
-																				<container pos="48,0" size="15x32">
-																					<rectangle size="15x32"/>
-																					<rectangle size="15x32"/>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<widget pos="0,126" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="368x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">ssn</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="134x32">
-																					<spacer size="134x7"/>
-																					<text color="disabled" pos="0,7" size="134x16">Social Security number</text>
-																					<spacer pos="0,24" size="134x7"/>
-																				</container>
-																			</container>
-																			<container pos="368,0" size="63x32">
-																				<container size="36x32">
-																					<spacer size="36x8"/>
-																					<text color="disabled" pos="0,8" size="36x14" textSize="11">9 digits</text>
-																					<spacer pos="0,23" size="36x8"/>
-																				</container>
-																				<container pos="48,0" size="15x32">
-																					<rectangle size="15x32"/>
-																					<rectangle size="15x32"/>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<container pos="0,170" size="456x34">
-														<text bold color="focus" pos="12,16" size="440x14" textSize="11">POLAND</text>
-													</container>
-													<widget pos="0,208" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="362x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">iban</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="127x32">
-																					<spacer size="127x7"/>
-																					<text color="disabled" pos="0,7" size="127x16">Bank account number</text>
-																					<spacer pos="0,24" size="127x7"/>
-																				</container>
-																			</container>
-																			<container pos="362,0" size="69x32">
-																				<container size="42x32">
-																					<spacer size="42x8"/>
-																					<text color="disabled" pos="0,8" size="42x14" textSize="11">26 digits</text>
-																					<spacer pos="0,23" size="42x8"/>
-																				</container>
-																				<container pos="54,0" size="15x32">
-																					<rectangle size="15x32"/>
-																					<rectangle size="15x32"/>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<widget pos="0,252" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="362x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">nip</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="148x32">
-																					<spacer size="148x7"/>
-																					<text color="disabled" pos="0,7" size="148x16">Tax identification number</text>
-																					<spacer pos="0,24" size="148x7"/>
-																				</container>
-																			</container>
-																			<container pos="362,0" size="69x32">
-																				<container size="42x32">
-																					<spacer size="42x8"/>
-																					<text color="disabled" pos="0,8" size="42x14" textSize="11">10 digits</text>
-																					<spacer pos="0,23" size="42x8"/>
-																				</container>
-																				<container pos="54,0" size="15x32">
-																					<rectangle size="15x32"/>
-																					<rectangle size="15x32"/>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<widget pos="0,296" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle fillColor="rgba(37,51,72,255)" radius="6" size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="362x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text color="focus" pos="0,7" size="71x16">pesel</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="114x32">
-																					<spacer size="114x7"/>
-																					<text color="disabled" pos="0,7" size="114x16">National ID number</text>
-																					<spacer pos="0,24" size="114x7"/>
-																				</container>
-																			</container>
-																			<container pos="362,0" size="69x32">
-																				<container size="42x32">
-																					<spacer size="42x8"/>
-																					<text color="disabled" pos="0,8" size="42x14" textSize="11">11 digits</text>
-																					<spacer pos="0,23" size="42x8"/>
-																				</container>
-																				<container pos="54,0" size="15x32">
-																					<spacer size="15x8"/>
-																					<image fillMode="contain" pos="0,8" rsc="check-72abff-15.svg" size="15x15"/>
-																					<spacer pos="0,23" size="15x8"/>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<widget pos="0,340" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="368x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">regon</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="148x32">
-																					<spacer size="148x7"/>
-																					<text color="disabled" pos="0,7" size="148x16">Business register number</text>
-																					<spacer pos="0,24" size="148x7"/>
-																				</container>
-																			</container>
-																			<container pos="368,0" size="63x32">
-																				<container size="36x32">
-																					<spacer size="36x8"/>
-																					<text color="disabled" pos="0,8" size="36x14" textSize="11">9 digits</text>
-																					<spacer pos="0,23" size="36x8"/>
-																				</container>
-																				<container pos="48,0" size="15x32">
-																					<rectangle size="15x32"/>
-																					<rectangle size="15x32"/>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<container pos="0,384" size="456x34">
-														<text bold color="focus" pos="12,16" size="440x14" textSize="11">INTERNATIONAL</text>
-													</container>
-													<widget pos="0,422" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle fillColor="hover" radius="6" size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="333x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">card</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="156x32">
-																					<spacer size="156x7"/>
-																					<text color="disabled" pos="0,7" size="156x16">Test payment card number</text>
-																					<spacer pos="0,24" size="156x7"/>
-																				</container>
-																			</container>
-																			<container pos="333,0" size="98x32">
-																				<container size="71x32">
-																					<spacer size="71x8"/>
-																					<text color="disabled" pos="0,8" size="71x14" textSize="11">15 or 16 digits</text>
-																					<spacer pos="0,23" size="71x8"/>
-																				</container>
-																				<container pos="83,0" size="15x32">
-																					<rectangle size="15x32"/>
-																					<rectangle size="15x32"/>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<widget pos="0,466" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="362x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">ean</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="145x32">
-																					<spacer size="145x7"/>
-																					<text color="disabled" pos="0,7" size="145x16">Product barcode number</text>
-																					<spacer pos="0,24" size="145x7"/>
-																				</container>
-																			</container>
-																			<container pos="362,0" size="69x32">
-																				<container size="42x32">
-																					<spacer size="42x8"/>
-																					<text color="disabled" pos="0,8" size="42x14" textSize="11">13 digits</text>
-																					<spacer pos="0,23" size="42x8"/>
-																				</container>
-																				<container pos="54,0" size="15x32">
-																					<rectangle size="15x32"/>
-																					<rectangle size="15x32"/>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<widget pos="0,510" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="362x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">imei</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="128x32">
-																					<spacer size="128x7"/>
-																					<text color="disabled" pos="0,7" size="128x16">Mobile device number</text>
-																					<spacer pos="0,24" size="128x7"/>
-																				</container>
-																			</container>
-																			<container pos="362,0" size="69x32">
-																				<container size="42x32">
-																					<spacer size="42x8"/>
-																					<text color="disabled" pos="0,8" size="42x14" textSize="11">15 digits</text>
-																					<spacer pos="0,23" size="42x8"/>
-																				</container>
-																				<container pos="54,0" size="15x32">
-																					<rectangle size="15x32"/>
-																					<rectangle size="15x32"/>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<widget pos="0,554" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="362x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">isbn</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="78x32">
-																					<spacer size="78x7"/>
-																					<text color="disabled" pos="0,7" size="78x16">Book number</text>
-																					<spacer pos="0,24" size="78x7"/>
-																				</container>
-																			</container>
-																			<container pos="362,0" size="69x32">
-																				<container size="42x32">
-																					<spacer size="42x8"/>
-																					<text color="disabled" pos="0,8" size="42x14" textSize="11">13 digits</text>
-																					<spacer pos="0,23" size="42x8"/>
-																				</container>
-																				<container pos="54,0" size="15x32">
-																					<rectangle size="15x32"/>
-																					<rectangle size="15x32"/>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<widget pos="0,598" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="314x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">vin</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="108x32">
-																					<spacer size="108x7"/>
-																					<text color="disabled" pos="0,7" size="108x16">Vehicle ID number</text>
-																					<spacer pos="0,24" size="108x7"/>
-																				</container>
-																			</container>
-																			<container pos="314,0" size="117x32">
-																				<container size="90x32">
-																					<spacer size="90x8"/>
-																					<text color="disabled" pos="0,8" size="90x14" textSize="11">17 letters or digits</text>
-																					<spacer pos="0,23" size="90x8"/>
-																				</container>
-																				<container pos="102,0" size="15x32">
-																					<rectangle size="15x32"/>
-																					<rectangle size="15x32"/>
-																				</container>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<container pos="0,642" size="456x34">
-														<text bold color="focus" pos="12,16" size="440x14" textSize="11">PEOPLE</text>
-													</container>
-													<widget pos="0,681" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="417x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">birth_date</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="72x32">
-																					<spacer size="72x7"/>
-																					<text color="disabled" pos="0,7" size="72x16">Date of birth</text>
-																					<spacer pos="0,24" size="72x7"/>
-																				</container>
-																			</container>
-																			<container pos="417,0" size="15x32">
-																				<rectangle size="15x32"/>
-																				<rectangle size="15x32"/>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<widget pos="0,725" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="417x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">first_name</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="68x32">
-																					<spacer size="68x7"/>
-																					<text color="disabled" pos="0,7" size="68x16">Given name</text>
-																					<spacer pos="0,24" size="68x7"/>
-																				</container>
-																			</container>
-																			<container pos="417,0" size="15x32">
-																				<rectangle size="15x32"/>
-																				<rectangle size="15x32"/>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<widget pos="0,769" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="417x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">gender</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="90x32">
-																					<spacer size="90x7"/>
-																					<text color="disabled" pos="0,7" size="90x16">Female or male</text>
-																					<spacer pos="0,24" size="90x7"/>
-																				</container>
-																			</container>
-																			<container pos="417,0" size="15x32">
-																				<rectangle size="15x32"/>
-																				<rectangle size="15x32"/>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<widget pos="0,813" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="417x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">last_name</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="74x32">
-																					<spacer size="74x7"/>
-																					<text color="disabled" pos="0,7" size="74x16">Family name</text>
-																					<spacer pos="0,24" size="74x7"/>
-																				</container>
-																			</container>
-																			<container pos="417,0" size="15x32">
-																				<rectangle size="15x32"/>
-																				<rectangle size="15x32"/>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<container pos="0,857" size="456x34">
-														<text bold color="focus" pos="12,16" size="440x14" textSize="11">PLACES</text>
-													</container>
-													<widget pos="0,895" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="417x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">city</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="69x32">
-																					<spacer size="69x7"/>
-																					<text color="disabled" pos="0,7" size="69x16">City or town</text>
-																					<spacer pos="0,24" size="69x7"/>
-																				</container>
-																			</container>
-																			<container pos="417,0" size="15x32">
-																				<rectangle size="15x32"/>
-																				<rectangle size="15x32"/>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
-													<widget pos="0,939" size="456x40" type="*parts.TapRow">
-														<container size="456x40">
-															<container size="456x40">
-																<rectangle size="456x40"/>
-																<container size="456x40">
-																	<rectangle size="456x40"/>
-																	<container size="456x40">
-																		<container pos="12,4" size="432x32">
-																			<container size="417x32">
-																				<container size="71x32">
-																					<rectangle size="71x32"/>
-																					<container size="71x32">
-																						<spacer size="71x7"/>
-																						<text pos="0,7" size="71x16">region</text>
-																						<spacer pos="0,24" size="71x7"/>
-																					</container>
-																				</container>
-																				<container pos="83,0" size="131x32">
-																					<spacer size="131x7"/>
-																					<text color="disabled" pos="0,7" size="131x16">Province (voivodeship)</text>
-																					<spacer pos="0,24" size="131x7"/>
-																				</container>
-																			</container>
-																			<container pos="417,0" size="15x32">
-																				<rectangle size="15x32"/>
-																				<rectangle size="15x32"/>
-																			</container>
-																		</container>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</widget>
 												</container>
-												<widget size="456x0" type="*widget.Shadow">
-													<linearGradient size="456x8"/>
-												</widget>
-												<widget pos="0,336" size="456x0" type="*widget.Shadow">
-													<linearGradient pos="0,-8" size="456x8"/>
-												</widget>
-												<widget pos="450,0" size="6x336" type="*widget.scrollBarArea">
-													<widget pos="3,43" size="3x115" type="*widget.scrollBar">
-														<rectangle fillColor="scrollbar" radius="3" size="3x115"/>
-													</widget>
-												</widget>
+											</widget>
+											<widget pos="0,82" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="368x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">postal_code</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="52x32">
+																			<spacer size="52x7"/>
+																			<text color="disabled" pos="0,7" size="52x16">ZIP code</text>
+																			<spacer pos="0,24" size="52x7"/>
+																		</container>
+																	</container>
+																	<container pos="368,0" size="63x32">
+																		<container size="36x32">
+																			<spacer size="36x8"/>
+																			<text color="disabled" pos="0,8" size="36x14" textSize="11">5 digits</text>
+																			<spacer pos="0,23" size="36x8"/>
+																		</container>
+																		<container pos="48,0" size="15x32">
+																			<rectangle size="15x32"/>
+																			<rectangle size="15x32"/>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<widget pos="0,126" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="368x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">ssn</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="134x32">
+																			<spacer size="134x7"/>
+																			<text color="disabled" pos="0,7" size="134x16">Social Security number</text>
+																			<spacer pos="0,24" size="134x7"/>
+																		</container>
+																	</container>
+																	<container pos="368,0" size="63x32">
+																		<container size="36x32">
+																			<spacer size="36x8"/>
+																			<text color="disabled" pos="0,8" size="36x14" textSize="11">9 digits</text>
+																			<spacer pos="0,23" size="36x8"/>
+																		</container>
+																		<container pos="48,0" size="15x32">
+																			<rectangle size="15x32"/>
+																			<rectangle size="15x32"/>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<container pos="0,170" size="456x34">
+												<text bold color="focus" pos="12,16" size="440x14" textSize="11">POLAND</text>
+											</container>
+											<widget pos="0,208" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="362x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">iban</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="127x32">
+																			<spacer size="127x7"/>
+																			<text color="disabled" pos="0,7" size="127x16">Bank account number</text>
+																			<spacer pos="0,24" size="127x7"/>
+																		</container>
+																	</container>
+																	<container pos="362,0" size="69x32">
+																		<container size="42x32">
+																			<spacer size="42x8"/>
+																			<text color="disabled" pos="0,8" size="42x14" textSize="11">26 digits</text>
+																			<spacer pos="0,23" size="42x8"/>
+																		</container>
+																		<container pos="54,0" size="15x32">
+																			<rectangle size="15x32"/>
+																			<rectangle size="15x32"/>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<widget pos="0,252" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="362x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">nip</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="148x32">
+																			<spacer size="148x7"/>
+																			<text color="disabled" pos="0,7" size="148x16">Tax identification number</text>
+																			<spacer pos="0,24" size="148x7"/>
+																		</container>
+																	</container>
+																	<container pos="362,0" size="69x32">
+																		<container size="42x32">
+																			<spacer size="42x8"/>
+																			<text color="disabled" pos="0,8" size="42x14" textSize="11">10 digits</text>
+																			<spacer pos="0,23" size="42x8"/>
+																		</container>
+																		<container pos="54,0" size="15x32">
+																			<rectangle size="15x32"/>
+																			<rectangle size="15x32"/>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<widget pos="0,296" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle fillColor="rgba(37,51,72,255)" radius="6" size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="362x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text color="focus" pos="0,7" size="71x16">pesel</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="114x32">
+																			<spacer size="114x7"/>
+																			<text color="disabled" pos="0,7" size="114x16">National ID number</text>
+																			<spacer pos="0,24" size="114x7"/>
+																		</container>
+																	</container>
+																	<container pos="362,0" size="69x32">
+																		<container size="42x32">
+																			<spacer size="42x8"/>
+																			<text color="disabled" pos="0,8" size="42x14" textSize="11">11 digits</text>
+																			<spacer pos="0,23" size="42x8"/>
+																		</container>
+																		<container pos="54,0" size="15x32">
+																			<spacer size="15x8"/>
+																			<image fillMode="contain" pos="0,8" rsc="check-72abff-15.svg" size="15x15"/>
+																			<spacer pos="0,23" size="15x8"/>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<widget pos="0,340" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="368x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">regon</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="148x32">
+																			<spacer size="148x7"/>
+																			<text color="disabled" pos="0,7" size="148x16">Business register number</text>
+																			<spacer pos="0,24" size="148x7"/>
+																		</container>
+																	</container>
+																	<container pos="368,0" size="63x32">
+																		<container size="36x32">
+																			<spacer size="36x8"/>
+																			<text color="disabled" pos="0,8" size="36x14" textSize="11">9 digits</text>
+																			<spacer pos="0,23" size="36x8"/>
+																		</container>
+																		<container pos="48,0" size="15x32">
+																			<rectangle size="15x32"/>
+																			<rectangle size="15x32"/>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<container pos="0,384" size="456x34">
+												<text bold color="focus" pos="12,16" size="440x14" textSize="11">INTERNATIONAL</text>
+											</container>
+											<widget pos="0,422" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle fillColor="hover" radius="6" size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="333x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">card</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="156x32">
+																			<spacer size="156x7"/>
+																			<text color="disabled" pos="0,7" size="156x16">Test payment card number</text>
+																			<spacer pos="0,24" size="156x7"/>
+																		</container>
+																	</container>
+																	<container pos="333,0" size="98x32">
+																		<container size="71x32">
+																			<spacer size="71x8"/>
+																			<text color="disabled" pos="0,8" size="71x14" textSize="11">15 or 16 digits</text>
+																			<spacer pos="0,23" size="71x8"/>
+																		</container>
+																		<container pos="83,0" size="15x32">
+																			<rectangle size="15x32"/>
+																			<rectangle size="15x32"/>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<widget pos="0,466" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="362x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">ean</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="145x32">
+																			<spacer size="145x7"/>
+																			<text color="disabled" pos="0,7" size="145x16">Product barcode number</text>
+																			<spacer pos="0,24" size="145x7"/>
+																		</container>
+																	</container>
+																	<container pos="362,0" size="69x32">
+																		<container size="42x32">
+																			<spacer size="42x8"/>
+																			<text color="disabled" pos="0,8" size="42x14" textSize="11">13 digits</text>
+																			<spacer pos="0,23" size="42x8"/>
+																		</container>
+																		<container pos="54,0" size="15x32">
+																			<rectangle size="15x32"/>
+																			<rectangle size="15x32"/>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<widget pos="0,510" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="362x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">imei</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="128x32">
+																			<spacer size="128x7"/>
+																			<text color="disabled" pos="0,7" size="128x16">Mobile device number</text>
+																			<spacer pos="0,24" size="128x7"/>
+																		</container>
+																	</container>
+																	<container pos="362,0" size="69x32">
+																		<container size="42x32">
+																			<spacer size="42x8"/>
+																			<text color="disabled" pos="0,8" size="42x14" textSize="11">15 digits</text>
+																			<spacer pos="0,23" size="42x8"/>
+																		</container>
+																		<container pos="54,0" size="15x32">
+																			<rectangle size="15x32"/>
+																			<rectangle size="15x32"/>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<widget pos="0,554" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="362x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">isbn</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="78x32">
+																			<spacer size="78x7"/>
+																			<text color="disabled" pos="0,7" size="78x16">Book number</text>
+																			<spacer pos="0,24" size="78x7"/>
+																		</container>
+																	</container>
+																	<container pos="362,0" size="69x32">
+																		<container size="42x32">
+																			<spacer size="42x8"/>
+																			<text color="disabled" pos="0,8" size="42x14" textSize="11">13 digits</text>
+																			<spacer pos="0,23" size="42x8"/>
+																		</container>
+																		<container pos="54,0" size="15x32">
+																			<rectangle size="15x32"/>
+																			<rectangle size="15x32"/>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<widget pos="0,598" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="314x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">vin</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="108x32">
+																			<spacer size="108x7"/>
+																			<text color="disabled" pos="0,7" size="108x16">Vehicle ID number</text>
+																			<spacer pos="0,24" size="108x7"/>
+																		</container>
+																	</container>
+																	<container pos="314,0" size="117x32">
+																		<container size="90x32">
+																			<spacer size="90x8"/>
+																			<text color="disabled" pos="0,8" size="90x14" textSize="11">17 letters or digits</text>
+																			<spacer pos="0,23" size="90x8"/>
+																		</container>
+																		<container pos="102,0" size="15x32">
+																			<rectangle size="15x32"/>
+																			<rectangle size="15x32"/>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<container pos="0,642" size="456x34">
+												<text bold color="focus" pos="12,16" size="440x14" textSize="11">PEOPLE</text>
+											</container>
+											<widget pos="0,681" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="417x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">birth_date</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="72x32">
+																			<spacer size="72x7"/>
+																			<text color="disabled" pos="0,7" size="72x16">Date of birth</text>
+																			<spacer pos="0,24" size="72x7"/>
+																		</container>
+																	</container>
+																	<container pos="417,0" size="15x32">
+																		<rectangle size="15x32"/>
+																		<rectangle size="15x32"/>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<widget pos="0,725" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="417x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">first_name</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="68x32">
+																			<spacer size="68x7"/>
+																			<text color="disabled" pos="0,7" size="68x16">Given name</text>
+																			<spacer pos="0,24" size="68x7"/>
+																		</container>
+																	</container>
+																	<container pos="417,0" size="15x32">
+																		<rectangle size="15x32"/>
+																		<rectangle size="15x32"/>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<widget pos="0,769" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="417x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">gender</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="90x32">
+																			<spacer size="90x7"/>
+																			<text color="disabled" pos="0,7" size="90x16">Female or male</text>
+																			<spacer pos="0,24" size="90x7"/>
+																		</container>
+																	</container>
+																	<container pos="417,0" size="15x32">
+																		<rectangle size="15x32"/>
+																		<rectangle size="15x32"/>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<widget pos="0,813" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="417x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">last_name</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="74x32">
+																			<spacer size="74x7"/>
+																			<text color="disabled" pos="0,7" size="74x16">Family name</text>
+																			<spacer pos="0,24" size="74x7"/>
+																		</container>
+																	</container>
+																	<container pos="417,0" size="15x32">
+																		<rectangle size="15x32"/>
+																		<rectangle size="15x32"/>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<container pos="0,857" size="456x34">
+												<text bold color="focus" pos="12,16" size="440x14" textSize="11">PLACES</text>
+											</container>
+											<widget pos="0,895" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="417x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">city</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="69x32">
+																			<spacer size="69x7"/>
+																			<text color="disabled" pos="0,7" size="69x16">City or town</text>
+																			<spacer pos="0,24" size="69x7"/>
+																		</container>
+																	</container>
+																	<container pos="417,0" size="15x32">
+																		<rectangle size="15x32"/>
+																		<rectangle size="15x32"/>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<widget pos="0,939" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="417x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">region</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="131x32">
+																			<spacer size="131x7"/>
+																			<text color="disabled" pos="0,7" size="131x16">Province (voivodeship)</text>
+																			<spacer pos="0,24" size="131x7"/>
+																		</container>
+																	</container>
+																	<container pos="417,0" size="15x32">
+																		<rectangle size="15x32"/>
+																		<rectangle size="15x32"/>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
 											</widget>
 										</container>
+										<widget size="456x0" type="*widget.Shadow">
+											<linearGradient size="456x8"/>
+										</widget>
+										<widget pos="0,336" size="456x0" type="*widget.Shadow">
+											<linearGradient pos="0,-8" size="456x8"/>
+										</widget>
+										<widget pos="450,0" size="6x336" type="*widget.scrollBarArea">
+											<widget pos="3,43" size="3x115" type="*widget.scrollBar">
+												<rectangle fillColor="scrollbar" radius="3" size="3x115"/>
+											</widget>
+										</widget>
 									</widget>
 								</container>
 							</container>

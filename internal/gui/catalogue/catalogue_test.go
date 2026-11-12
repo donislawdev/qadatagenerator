@@ -304,16 +304,26 @@ func checkState(t *testing.T, each control, candidate state) {
 	t.Helper()
 	listed := slices.Contains(each.states, candidate)
 	name := i18n.English.T(stateNames[candidate])
-	takes, changes := false, false
+	takes, changes, keyboard := false, false, true
 	for _, shown := range each.variants {
-		made, _ := shown.build(i18n.English, samples)
-		if !candidate.apply(made) {
+		in, took := pixels(t, shown, candidate)
+		if !took {
 			continue
 		}
 		takes = true
-		if !bytes.Equal(pixels(t, shown, candidate), pixels(t, shown, candidate.before())) {
+		keyboard = keyboard && in.keyboard
+		if !bytes.Equal(in.pix, picture(t, shown, candidate.before())) {
 			changes = true
 		}
+	}
+	// A press on a text control is not a state of its own: it hands the control
+	// the keyboard, as a press in a window does (widget.Entry.MouseDown asks for
+	// focus), and what that draws is the column of the keyboard. So a press that
+	// changes the picture is shown when it left the keyboard with the control
+	// and the keyboard is a column. Asked of the canvas rather than assumed of
+	// the type, so a press that draws something else stays a finding.
+	if candidate == pressed && !listed && changes && keyboard && slices.Contains(each.states, focus) {
+		return
 	}
 	switch {
 	case listed && !takes:
@@ -348,7 +358,7 @@ func checkState(t *testing.T, each control, candidate state) {
 func TestARefusedFieldIsDrawnApartFromTheSameValueAccepted(t *testing.T) {
 	accepted, refused := textVariant(t, i18n.CatalogueShort), textVariant(t, i18n.CatalogueRefused)
 	for _, in := range typeable {
-		apart := !bytes.Equal(pixels(t, accepted, in), pixels(t, refused, in))
+		apart := !bytes.Equal(picture(t, accepted, in), picture(t, refused, in))
 		if want := in != disabled; apart != want {
 			t.Errorf("%q: a refused value is drawn apart from the same value accepted %v, where it "+
 				"should be %v", i18n.English.T(stateNames[in]), apart, want)
@@ -371,15 +381,30 @@ func textVariant(t *testing.T, name i18n.Key) variant {
 }
 
 // pixels is a fresh control of this variant in this state, drawn on its own,
-// with room around it for a mark drawn outside its edge.
-func pixels(t *testing.T, shown variant, in state) []byte {
+// with room around it for a mark drawn outside its edge, and whether the
+// control takes that state at all.
+//
+// # Why the control is on a canvas before the state arrives
+//
+// That is the order of a window: nobody points at, presses or types into a
+// control that has not been drawn, and the driver hands events only to what it
+// drew. The toolkit's text field relies on it, reaching in its MouseDown for a
+// part its renderer makes (widget/entry.go:413 of v2.8.2), so a press handed
+// to a field nobody drew is a nil pointer. A theme of the field's own used to
+// build that renderer as a side effect of being built, and hid the order.
+func pixels(t *testing.T, shown variant, in state) (drawing, bool) {
 	t.Helper()
 	made, drawn := shown.build(i18n.English, samples)
-	in.apply(made)
 	content := paint.PadAll(palette.NameStepGroup, drawn)
 	window := test.NewWindow(content)
 	defer window.Close()
 	window.Resize(content.MinSize())
+	if !in.apply(made) {
+		return drawing{}, false
+	}
+	window.Resize(content.MinSize())
+	focused := window.Canvas().Focused()
+	keyboard := focused != nil && focused == made
 	captured := window.Canvas().Capture()
 	bounds := captured.Bounds()
 	rgba := image.NewRGBA(bounds)
@@ -388,5 +413,23 @@ func pixels(t *testing.T, shown variant, in state) []byte {
 			rgba.Set(x, y, captured.At(x, y))
 		}
 	}
-	return append([]byte(bounds.String()), rgba.Pix...)
+	return drawing{pix: append([]byte(bounds.String()), rgba.Pix...), keyboard: keyboard}, true
+}
+
+// drawing is one control drawn in one state: its pixels, and whether the
+// state left the keyboard with it.
+type drawing struct {
+	pix      []byte
+	keyboard bool
+}
+
+// picture is the pixels for a state the control is known to take.
+func picture(t *testing.T, shown variant, in state) []byte {
+	t.Helper()
+	drawn, takes := pixels(t, shown, in)
+	if !takes {
+		t.Fatalf("%s cannot be put in the state %q it was drawn in", i18n.English.T(shown.name),
+			i18n.English.T(stateNames[in]))
+	}
+	return drawn.pix
 }

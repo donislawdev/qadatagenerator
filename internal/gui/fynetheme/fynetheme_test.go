@@ -3,6 +3,7 @@ package fynetheme
 import (
 	"image/color"
 	"os"
+	"strings"
 	"testing"
 
 	"fyne.io/fyne/v2"
@@ -51,6 +52,28 @@ func TestEveryColourAnsweredHereComesFromTheMeasuredPalette(t *testing.T) {
 		}
 		if _, found := known[nrgba]; !found {
 			t.Errorf("%s answered with %v, which is the ink of no measured token", name, nrgba)
+		}
+	}
+}
+
+// 🔴 The toolkit's shadow is painted nowhere in this window, which is the look
+// the owner chose on 2026-11-12 together with no theme of a control's own
+// (B-370). Each name the window paints with nothing says what disappears, and
+// none is also given a colour, which would leave one of the two answers dead.
+func TestTheShadowOfTheToolkitIsPaintedNowhere(t *testing.T) {
+	if _, _, _, alpha := (Visual{}).Color(toolkit.ColorNameShadow, toolkit.VariantDark).RGBA(); alpha != 0 {
+		t.Error("the toolkit's shadow is painted, so it comes back along every list that scrolls, " +
+			"on the recipe editor and at the end of a field holding more than it shows")
+	}
+	for name, what := range unpainted {
+		if _, _, _, alpha := (Visual{}).Color(name, toolkit.VariantDark).RGBA(); alpha != 0 {
+			t.Errorf("%s is meant to be painted with nothing and is answered with a colour", name)
+		}
+		if strings.TrimSpace(what) == "" {
+			t.Errorf("%s is painted with nothing and nothing says what that takes away", name)
+		}
+		if _, coloured := tokenFor[name]; coloured {
+			t.Errorf("%s is both painted with nothing and given a token", name)
 		}
 	}
 }

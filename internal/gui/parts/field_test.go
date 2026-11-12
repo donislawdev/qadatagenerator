@@ -23,16 +23,13 @@ import (
 // half: what a person sees is where the text begins, not which of the two
 // numbers put it there.
 func TestAFieldStartsItsWordsWhereAChooserDoes(t *testing.T) {
+	// The renderer adds the inner padding of the window's own theme, since no
+	// field wears a theme of its own (FieldEntry says why).
 	window := fyne.CurrentApp().Settings().Theme()
 	around := palette.StepOf(palette.NameStepTight)
-	fromRenderer := (bareField{}).Size(toolkit.SizeNameInnerPadding)
+	fromRenderer := window.Size(toolkit.SizeNameInnerPadding)
 	if got, want := around+fromRenderer, palette.StepOf(palette.NameStepRelated); got != want {
 		t.Errorf("the words of a field start %v in, where a chooser starts its own at %v", got, want)
-	}
-	// And the inner padding is still the window's, so this is space put around
-	// the field rather than a second palette living inside it.
-	if fromRenderer != window.Size(toolkit.SizeNameInnerPadding) {
-		t.Error("a field answers the inner padding itself, which would be a value the window does not know about")
 	}
 }
 
@@ -223,10 +220,80 @@ func TestATextControlShowsItsCaretAndNoEdgeOfTheToolkit(t *testing.T) {
 	}
 }
 
+// 🔴 The toolkit's ground and edge stay put away in every state a text control
+// goes through, with no theme of the control's own to make them transparent.
+//
+// A theme handed to each field could make the ground transparent, and it would
+// cost the window a set of fonts every time the field came back on screen
+// (B-370). So the only thing keeping the toolkit's ground off the window's own
+// is that it is hidden, and this asks after everything that redraws a field:
+// the keyboard, the pointer, being out of reach and back, a value longer than
+// the field, and a refresh.
+func TestATextControlNeverShowsTheGroundOrEdgeOfTheToolkit(t *testing.T) {
+	for _, each := range textControls() {
+		t.Run(each.name, func(t *testing.T) {
+			control, dress := each.build()
+			window := test.NewWindow(dress())
+			t.Cleanup(window.Close)
+			drawn := control.(fyne.Widget)
+			// The canary: the renderer hands over the two rectangles this is
+			// about. Nought of them would make the count below nought for the
+			// wrong reason.
+			if all := len(toolkitChromeIn(drawn, false)); all != 2 {
+				t.Fatalf("%s hands over %d rectangles of the toolkit's own, want its ground and "+
+					"its edge, so this no longer asks about them", each.name, all)
+			}
+
+			steps := []struct {
+				what string
+				do   func()
+			}{
+				{"at rest", func() {}},
+				{"with the keyboard in it", func() { window.Canvas().Focus(control) }},
+				{"under the pointer", func() { control.MouseIn(&desktop.MouseEvent{}) }},
+				{"holding more than it shows", func() {
+					if typed, ok := control.(interface{ SetText(string) }); ok {
+						typed.SetText(strings.Repeat("a value longer than the field ", 20))
+					}
+				}},
+				{"out of reach", control.Disable},
+				{"back in reach", control.Enable},
+				{"refreshed", drawn.Refresh},
+			}
+			for _, step := range steps {
+				step.do()
+				if shown := toolkitChromeIn(drawn, true); len(shown) > 0 {
+					t.Errorf("%s %s shows the toolkit's own %s", each.name, step.what,
+						strings.Join(shown, " and "))
+				}
+			}
+		})
+	}
+}
+
+// toolkitChromeIn names the rectangles among the objects the toolkit's own
+// renderer of a text control hands over, only the visible ones when asked.
+// They are its ground and its edge, widget/entry.go:181 to 186 of v2.8.2.
+func toolkitChromeIn(control fyne.Widget, visibleOnly bool) []string {
+	var found []string
+	for _, object := range test.WidgetRenderer(control).Objects() {
+		shape, ok := object.(*canvas.Rectangle)
+		if !ok || (visibleOnly && !shape.Visible()) {
+			continue
+		}
+		if shape.StrokeWidth > 0 {
+			found = append(found, "edge")
+		} else {
+			found = append(found, "ground")
+		}
+	}
+	return found
+}
+
 // widestCaretIn is the widest visible bar, taller than it is wide and filled
 // with something, inside a control's own drawing. That is what a caret is: the
-// ground the toolkit lays under the words is there too, in any shape a small
-// window gives it, but transparent, since the window draws its own.
+// toolkit's ground under the words would be one too, in any shape a small
+// window gives it, which is why it is hidden rather than left to be found.
 func widestCaretIn(control fyne.CanvasObject) float32 {
 	widest := float32(0)
 	walkDrawing(control, func(shape *canvas.Rectangle) {

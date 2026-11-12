@@ -132,7 +132,7 @@ func newPicker(choices []Choice, chosen string, words PanelWords,
 		return p
 	}
 	p.body = paint.On(paint.PanelGround(),
-		paint.PadAll(palette.NameStepRelated, container.NewThemeOverride(p.scroll, bareField{})))
+		paint.PadAll(palette.NameStepRelated, p.scroll))
 	return p
 }
 
@@ -213,9 +213,11 @@ func (p *picker) buildGrouped() {
 	// 🔴 No shadow along the edge the rows run under, since 2026-10-21: it lay
 	// over the half row at the foot of the panel and the owner read the pair as
 	// a list cut off. The panel now ends on a whole row (Fitted) and the bar at
-	// the side is what says there are more. The theme is the one the fields
-	// wear, whose shadow is transparent and whose bars are the window's.
-	middle := container.NewStack(container.NewThemeOverride(p.scroll, bareField{}), p.nothing)
+	// the side is what says there are more. The shadow is gone from the whole
+	// window (fynetheme, unpainted) rather than from this list alone, because a
+	// theme of the list's own would be a new scope, and a new set of fonts, every
+	// time the panel opens (B-370).
+	middle := container.NewStack(p.scroll, p.nothing)
 	// 🔴 The rows are the MIDDLE of the border and the field and the foot are
 	// its edges, and that is the rule this project paid for once: only what
 	// cannot grow may stand in an edge. An open list put in an edge gave the

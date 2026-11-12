@@ -590,22 +590,17 @@
 																			<rectangle fillColor="button" pos="1,1" radius="6" size="553x32" strokeColor="inputBorder" strokeWidth="2"/>
 																		</container>
 																		<container size="555x34">
-																			<widget pos="8,8" size="539x26" type="*container.ThemeOverride">
-																				<container size="539x26">
-																					<widget size="539x26" type="*parts.FieldEntry">
-																						<rectangle pos="2,2" radius="6" size="535x22"/>
-																						<widget pos="0,2" size="539x22" type="*widget.Scroll">
-																							<widget size="539x22" type="*widget.entryContent">
-																								<widget size="539x22" type="*widget.RichText">
-																									<text color="disabled" pos="4,2" size="130x16">Same folder as the file</text>
-																								</widget>
-																								<widget size="539x22" type="*widget.RichText">
-																									<text pos="4,2" size="0x16"></text>
-																								</widget>
-																							</widget>
+																			<widget pos="8,8" size="539x26" type="*parts.FieldEntry">
+																				<widget pos="0,2" size="539x22" type="*widget.Scroll">
+																					<widget size="539x22" type="*widget.entryContent">
+																						<widget size="539x22" type="*widget.RichText">
+																							<text color="disabled" pos="4,2" size="130x16">Same folder as the file</text>
+																						</widget>
+																						<widget size="539x22" type="*widget.RichText">
+																							<text pos="4,2" size="0x16"></text>
 																						</widget>
 																					</widget>
-																				</container>
+																				</widget>
 																			</widget>
 																		</container>
 																	</container>

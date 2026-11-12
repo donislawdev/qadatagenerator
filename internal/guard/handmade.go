@@ -70,19 +70,20 @@ type Handmade struct {
 // entries - and chose the second knowing the price.
 var HandmadeAllowed = map[string]Handmade{
 	// The two text controls answer CreateRenderer with the toolkit's OWN
-	// renderer, one rectangle of it hidden. Nothing is drawn again, but the
+	// renderer, its two rectangles hidden. Nothing is drawn again, but the
 	// method is what this guard reads, and rightly: it is the seam through which
 	// a control is taken over.
 	"FieldEntry": {
-		Instead: "widget.Entry drawn as it is, with SizeNameInputBorder set to nought by a theme " +
-			"handed to the field alone, which is how its edge was put away until 2026-10-21",
-		Why: "the toolkit draws its caret as wide as that same number, widget/entry.go:1918 of v2.8.2, " +
-			"so the edge went and the caret with it - the owner could not see where they typed. With " +
-			"the width given back, the edge returns in the colour of the caret under the keyboard and in " +
-			"the grey of disabled words out of reach, and neither colour can be taken away alone. A clip " +
-			"cutting the edge off was tried the same day and the software painter of the toolkit moves a " +
-			"clipped rounded rectangle INTO the clip, so every render lied. Hiding the one stroked " +
-			"rectangle among the renderer's objects is the smallest change that keeps both",
+		Instead: "widget.Entry drawn as it is, with its ground and edge made transparent and the edge " +
+			"given no width by a theme handed to the field alone",
+		Why: "the toolkit draws its caret as wide as the edge, widget/entry.go:1918 of v2.8.2, so an edge " +
+			"of no width took the caret with it - the owner could not see where they typed - and the edge " +
+			"is the colour of the caret under the keyboard and the grey of disabled words out of reach. A " +
+			"theme of the field's own costs the window a set of fonts, about 6 MB kept to the end, every " +
+			"time the field is drawn again after a minute out of sight (B-370). A clip cutting the edge off " +
+			"was tried and the software painter of the toolkit moves a clipped rounded rectangle INTO the " +
+			"clip, so every render lied. Hiding the two rectangles among the renderer's objects, its " +
+			"ground and its edge, is the smallest change that keeps the caret, the words and the memory",
 	},
 	"Editor": {
 		Instead: "widget.Entry drawn as it is, the same as FieldEntry",

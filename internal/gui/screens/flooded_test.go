@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/test"
 	"fyne.io/fyne/v2/widget"
 
@@ -56,7 +55,7 @@ func TestNoScreenHoldsAControlTheToolkitFloods(t *testing.T) {
 	ours := 0
 	for _, state := range All() {
 		content := Assemble(i18n.English, data, state)
-		walkTree(content, false, func(object fyne.CanvasObject, _ bool) {
+		walkTree(content, func(object fyne.CanvasObject) {
 			switch object.(type) {
 			case *parts.Button, *parts.Select:
 				if object.Visible() {
@@ -132,28 +131,24 @@ func rgba(from interface {
 	return [4]uint32{r, g, b, a}
 }
 
-// walkTree visits an object and everything drawn inside it, carrying whether
-// the way down passed through a theme of its own.
+// walkTree visits an object and everything drawn inside it.
 //
 // A widget is opened through its renderer, because the children of a widget are
 // the objects its renderer holds and there is no other way in from outside the
 // toolkit.
-func walkTree(object fyne.CanvasObject, dressed bool, visit func(fyne.CanvasObject, bool)) {
+func walkTree(object fyne.CanvasObject, visit func(fyne.CanvasObject)) {
 	if object == nil {
 		return
 	}
-	if _, own := object.(*container.ThemeOverride); own {
-		dressed = true
-	}
-	visit(object, dressed)
+	visit(object)
 	switch typed := object.(type) {
 	case *fyne.Container:
 		for _, child := range typed.Objects {
-			walkTree(child, dressed, visit)
+			walkTree(child, visit)
 		}
 	case fyne.Widget:
 		for _, child := range test.WidgetRenderer(typed).Objects() {
-			walkTree(child, dressed, visit)
+			walkTree(child, visit)
 		}
 	}
 }

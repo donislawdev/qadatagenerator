@@ -258,13 +258,6 @@ func buttons(object fyne.CanvasObject) []*parts.Button {
 		return buttons(typed.Content)
 	case *parts.KeyScroll:
 		return buttons(typed.Content)
-	case *container.ThemeOverride:
-		// A control is handed to a layout wrapped, never bare: the toolkit
-		// floods a focused one with the focus colour and the label on it has to
-		// change colour to stay readable, which only a container can answer
-		// for. A walk that stops at this type finds nothing and says the screen
-		// has no controls, which is a green answer about an empty room.
-		return buttons(typed.Content)
 	}
 	return nil
 }

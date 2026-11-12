@@ -219,7 +219,6 @@ func concurrencyIn(path, name string) ([]string, error) {
 		findings = append(findings, fmt.Sprintf("%s:%d %s", name, fileSet.Position(node.Pos()).Line, what))
 	}
 
-	timeName := ""
 	for _, spec := range parsed.Imports {
 		unquoted, err := strconv.Unquote(spec.Path.Value)
 		if err != nil {
@@ -228,12 +227,10 @@ func concurrencyIn(path, name string) ([]string, error) {
 		if concurrencyPackages[unquoted] {
 			at(spec, "imports "+unquoted)
 		}
-		if unquoted == "time" {
-			timeName = "time"
-			if spec.Name != nil {
-				timeName = spec.Name.Name
-			}
-		}
+	}
+	timeName, err := importedAs(parsed, "time")
+	if err != nil {
+		return nil, err
 	}
 
 	ast.Inspect(parsed, func(node ast.Node) bool {

@@ -270,28 +270,23 @@
 												<rectangle fillColor="button" pos="1,1" radius="6" size="511x353" strokeColor="focus" strokeWidth="2"/>
 											</container>
 											<container size="513x355">
-												<widget pos="8,8" size="497x339" type="*container.ThemeOverride">
-													<container size="497x339">
-														<widget size="497x339" type="*parts.Editor">
-															<rectangle pos="2,2" radius="6" size="493x335"/>
-															<widget pos="0,2" size="497x335" type="*widget.Scroll">
-																<widget size="497x335" type="*widget.entryContent">
-																	<widget size="497x335" type="*widget.RichText">
-																		<text monospace pos="4,2" size="109x16">version: "0.1"</text>
-																		<text monospace pos="4,18" size="109x16">seed: "sample"</text>
-																		<text monospace pos="4,35" size="70x16">entities:</text>
-																		<text monospace pos="4,52" size="85x16">  customer:</text>
-																		<text monospace pos="4,69" size="93x16">    count: 3</text>
-																		<text monospace pos="4,86" size="85x16">    fields:</text>
-																		<text monospace pos="4,103" size="93x16">      email:</text>
-																		<text monospace pos="4,120" size="241x16">        generator: person.email</text>
-																		<text monospace pos="4,137" size="0x16"></text>
-																	</widget>
-																	<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
-																</widget>
+												<widget pos="8,8" size="497x339" type="*parts.Editor">
+													<widget pos="0,2" size="497x335" type="*widget.Scroll">
+														<widget size="497x335" type="*widget.entryContent">
+															<widget size="497x335" type="*widget.RichText">
+																<text monospace pos="4,2" size="109x16">version: "0.1"</text>
+																<text monospace pos="4,18" size="109x16">seed: "sample"</text>
+																<text monospace pos="4,35" size="70x16">entities:</text>
+																<text monospace pos="4,52" size="85x16">  customer:</text>
+																<text monospace pos="4,69" size="93x16">    count: 3</text>
+																<text monospace pos="4,86" size="85x16">    fields:</text>
+																<text monospace pos="4,103" size="93x16">      email:</text>
+																<text monospace pos="4,120" size="241x16">        generator: person.email</text>
+																<text monospace pos="4,137" size="0x16"></text>
 															</widget>
+															<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 														</widget>
-													</container>
+													</widget>
 												</widget>
 											</container>
 										</container>
@@ -337,22 +332,17 @@
 																		<rectangle fillColor="button" pos="1,1" radius="6" size="382x32" strokeColor="inputBorder" strokeWidth="2"/>
 																	</container>
 																	<container size="384x34">
-																		<widget pos="8,8" size="368x26" type="*container.ThemeOverride">
-																			<container size="368x26">
-																				<widget size="368x26" type="*parts.FieldEntry">
-																					<rectangle pos="2,2" radius="6" size="364x22"/>
-																					<widget pos="0,2" size="368x22" type="*widget.Scroll">
-																						<widget size="368x22" type="*widget.entryContent">
-																							<widget size="368x22" type="*widget.RichText">
-																								<text color="disabled" pos="4,2" size="133x16">Choose or paste a path</text>
-																							</widget>
-																							<widget size="368x22" type="*widget.RichText">
-																								<text pos="4,2" size="0x16"></text>
-																							</widget>
-																						</widget>
+																		<widget pos="8,8" size="368x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="368x22" type="*widget.Scroll">
+																				<widget size="368x22" type="*widget.entryContent">
+																					<widget size="368x22" type="*widget.RichText">
+																						<text color="disabled" pos="4,2" size="133x16">Choose or paste a path</text>
+																					</widget>
+																					<widget size="368x22" type="*widget.RichText">
+																						<text pos="4,2" size="0x16"></text>
 																					</widget>
 																				</widget>
-																			</container>
+																			</widget>
 																		</widget>
 																	</container>
 																</container>

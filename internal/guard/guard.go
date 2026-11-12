@@ -11,6 +11,8 @@
 package guard
 
 import (
+	"fmt"
+	"go/ast"
 	"go/parser"
 	"go/token"
 	"os"
@@ -42,6 +44,59 @@ var skippedDirs = map[string]bool{
 	"spec":     true,
 	"testdata": true,
 	"vendor":   true,
+}
+
+// importedAs is the name a file calls an imported package by: its last path
+// element, the alias it was given, "." for a dot import, or "" when the file
+// does not import it. The last element stands in for the package's own name,
+// which is what every package this module reads by name has.
+func importedAs(parsed *ast.File, path string) (string, error) {
+	for _, spec := range parsed.Imports {
+		unquoted, err := strconv.Unquote(spec.Path.Value)
+		if err != nil {
+			return "", err
+		}
+		if unquoted != path {
+			continue
+		}
+		if spec.Name != nil {
+			return spec.Name.Name, nil
+		}
+		return path[strings.LastIndex(path, "/")+1:], nil
+	}
+	return "", nil
+}
+
+// eachProductFile hands every Go source file under where, tests left out, to
+// visit with its path on disk and its name relative to root.
+//
+// A tree that is not there is an error rather than nothing found, because a
+// guard reading an empty directory reports a clean window.
+func eachProductFile(root, where string, visit func(path, name string) error) error {
+	dir := filepath.Join(root, filepath.FromSlash(where))
+	if _, err := os.Stat(dir); err != nil {
+		return fmt.Errorf("%s is not there, so this guard would check nothing there: %w", where, err)
+	}
+	return filepath.WalkDir(dir, func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			name := entry.Name()
+			if path != dir && (skippedDirs[name] || strings.HasPrefix(name, ".") || strings.HasPrefix(name, "_")) {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !strings.HasSuffix(entry.Name(), ".go") || strings.HasSuffix(entry.Name(), "_test.go") {
+			return nil
+		}
+		relative, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+		return visit(path, filepath.ToSlash(relative))
+	})
 }
 
 // ModuleRoot returns the directory holding go.mod, starting from the working

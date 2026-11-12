@@ -358,7 +358,8 @@ func (e *Editor) MouseDown(event *desktop.MouseEvent) {
 // it twice would hand the keyboard to a ground nobody mounted (B-279).
 //
 // The words are placed by this padding rather than by the toolkit: a step of
-// the scale on every side, which is where a field's text sits.
+// the scale on every side, which is where a field's text sits. No theme of the
+// editor's own stands around it, for the reason FieldEntry gives.
 func (e *Editor) Framed() fyne.CanvasObject {
 	if e.dressed != nil {
 		return e.dressed
@@ -368,8 +369,7 @@ func (e *Editor) Framed() fyne.CanvasObject {
 	grounds, look := textGrounds(e.Disabled(), false)
 	e.onFocus, e.onHover, e.onDisable = look.focus, look.hover, look.disable
 	step := palette.StepOf(palette.NameStepTight)
-	typed := container.NewThemeOverride(e, bareField{})
-	inside := container.New(layout.NewCustomPaddedLayout(step, step, step, step), typed)
+	inside := container.New(layout.NewCustomPaddedLayout(step, step, step, step), e)
 	e.dressed = container.NewStack(append(grounds, inside)...)
 	return e.dressed
 }

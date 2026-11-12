@@ -88,6 +88,13 @@ repository once they are released.
 
 ### Fixed
 
+- **The window no longer takes more memory every time you come back to a
+  screen.** Each return to a screen you had not looked at for a minute or
+  more used to add about 33 MB that stayed until the program closed, and each
+  search in the list of kinds on Quick value about 8 MB. A day of moving
+  between screens could reach several hundred MB. The window now holds about
+  the same however often you come back, and after walking all five screens it
+  holds about a third less than before.
 - **The window gives memory back once it has been left alone.** After work
   such as drawing a thousand values five times, the window used to hold about
   200 MB for as long as nobody touched it. About a minute and a half after the
@@ -265,6 +272,12 @@ repository once they are released.
 
 ### Changed
 
+- **No shadows at the edges of scrolling areas.** The dark band at the foot of
+  a list, a table or a page with more below it, and the shadow under the
+  dialogs for choosing a file, are gone, as they already were in the list of
+  kinds and the recipe field. The scroll bar beside a list still shows that
+  there is more. A text field holding more than fits in it now shows a thin
+  scroll bar along its bottom edge, which grows under the pointer.
 - **Tab indents in the recipe field.** In "Your recipe" Tab types two spaces
   and Shift+Tab takes up to two spaces off the start of the line, the way a
   recipe is indented. To leave the field with the keyboard, press Esc, then

@@ -938,16 +938,21 @@ const (
 // on whole pixels, which is the same thing that would change the other value.
 const HairlineThickness float32 = 1
 
-// CaretThickness is how wide the caret of a text field is drawn.
+// CaretThickness is the least width the caret of a text field is drawn at.
 //
 // # Why it is a token of its own, read in the toolkit source
 //
 // widget.Entry of v2.8.2 draws its caret as wide as SizeNameInputBorder,
 // widget/entry.go:1918, the same number it strokes its own edge with. Every
-// field of this window set that number to nought so that the toolkit's edge
-// would disappear, and the caret disappeared with it: the stored tree of a
-// field with the keyboard in it held a rectangle 0 wide. The owner reported it
-// on 2026-10-21 as not seeing where they were typing in the recipe.
+// field of this window once set that number to nought so that the toolkit's
+// edge would disappear, and the caret disappeared with it: the stored tree of
+// a field with the keyboard in it held a rectangle 0 wide. The owner reported
+// it on 2026-10-21 as not seeing where they were typing in the recipe.
+//
+// No field sets that number any more. The caret is as wide as the window
+// answers SizeNameInputBorder with, BorderThickness, and this token is the
+// width a test holds the DRAWN caret to, so that thinning the strokes of the
+// window cannot thin the caret below it unnoticed.
 //
 // Two, the width of every stroke in this window, which is three pixels at the
 // owner's scale of 1.5. What would change it: a caret that has to be found on a

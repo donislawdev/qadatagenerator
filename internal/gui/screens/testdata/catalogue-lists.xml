@@ -577,7 +577,7 @@
 																		</widget>
 																	</widget>
 																	<widget pos="0,111" size="401x0" type="*widget.Shadow">
-																		<linearGradient endColor="shadow" pos="0,-8" size="401x8"/>
+																		<linearGradient pos="0,-8" size="401x8"/>
 																	</widget>
 																	<widget pos="395,0" size="6x111" type="*widget.scrollBarArea">
 																		<widget pos="3,0" size="3x82" type="*widget.scrollBar">
@@ -716,7 +716,7 @@
 																		</widget>
 																	</widget>
 																	<widget pos="0,111" size="401x0" type="*widget.Shadow">
-																		<linearGradient endColor="shadow" pos="0,-8" size="401x8"/>
+																		<linearGradient pos="0,-8" size="401x8"/>
 																	</widget>
 																	<widget pos="395,0" size="6x111" type="*widget.scrollBarArea">
 																		<widget pos="3,0" size="3x82" type="*widget.scrollBar">

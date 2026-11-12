@@ -569,23 +569,18 @@
 																							<rectangle fillColor="button" pos="1,1" radius="6" size="78x32" strokeColor="focus" strokeWidth="2"/>
 																						</container>
 																						<container size="80x34">
-																							<widget pos="8,8" size="64x26" type="*container.ThemeOverride">
-																								<container size="64x26">
-																									<widget size="64x26" type="*parts.FieldEntry">
-																										<rectangle pos="2,2" radius="6" size="60x22"/>
-																										<widget pos="0,2" size="64x22" type="*widget.Scroll">
-																											<widget size="64x22" type="*widget.entryContent">
-																												<widget size="64x22" type="*widget.RichText">
-																													<text color="disabled" pos="4,2" size="0x16"></text>
-																												</widget>
-																												<widget size="64x22" type="*widget.RichText">
-																													<text pos="4,2" size="0x16"></text>
-																												</widget>
-																												<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
-																											</widget>
+																							<widget pos="8,8" size="64x26" type="*parts.FieldEntry">
+																								<widget pos="0,2" size="64x22" type="*widget.Scroll">
+																									<widget size="64x22" type="*widget.entryContent">
+																										<widget size="64x22" type="*widget.RichText">
+																											<text color="disabled" pos="4,2" size="0x16"></text>
 																										</widget>
+																										<widget size="64x22" type="*widget.RichText">
+																											<text pos="4,2" size="0x16"></text>
+																										</widget>
+																										<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																									</widget>
-																								</container>
+																								</widget>
 																							</widget>
 																						</container>
 																					</container>
@@ -634,19 +629,14 @@
 																							<rectangle fillColor="button" pos="1,1" radius="6" size="132x32" strokeColor="inputBorder" strokeWidth="2"/>
 																						</container>
 																						<container size="134x34">
-																							<widget pos="8,8" size="118x26" type="*container.ThemeOverride">
-																								<container size="118x26">
-																									<widget size="118x26" type="*parts.FieldEntry">
-																										<rectangle pos="2,2" radius="6" size="114x22"/>
-																										<widget pos="0,2" size="118x22" type="*widget.Scroll">
-																											<widget size="118x22" type="*widget.entryContent">
-																												<widget size="118x22" type="*widget.RichText">
-																													<text pos="4,2" size="7x16">0</text>
-																												</widget>
-																											</widget>
+																							<widget pos="8,8" size="118x26" type="*parts.FieldEntry">
+																								<widget pos="0,2" size="118x22" type="*widget.Scroll">
+																									<widget size="118x22" type="*widget.entryContent">
+																										<widget size="118x22" type="*widget.RichText">
+																											<text pos="4,2" size="7x16">0</text>
 																										</widget>
 																									</widget>
-																								</container>
+																								</widget>
 																							</widget>
 																						</container>
 																					</container>
@@ -666,22 +656,17 @@
 																							<rectangle fillColor="button" pos="1,1" radius="6" size="295x32" strokeColor="inputBorder" strokeWidth="2"/>
 																						</container>
 																						<container size="297x34">
-																							<widget pos="8,8" size="281x26" type="*container.ThemeOverride">
-																								<container size="281x26">
-																									<widget size="281x26" type="*parts.FieldEntry">
-																										<rectangle pos="2,2" radius="6" size="277x22"/>
-																										<widget pos="0,2" size="281x22" type="*widget.Scroll">
-																											<widget size="281x22" type="*widget.entryContent">
-																												<widget size="281x22" type="*widget.RichText">
-																													<text color="disabled" pos="4,2" size="0x16"></text>
-																												</widget>
-																												<widget size="281x22" type="*widget.RichText">
-																													<text pos="4,2" size="0x16"></text>
-																												</widget>
-																											</widget>
+																							<widget pos="8,8" size="281x26" type="*parts.FieldEntry">
+																								<widget pos="0,2" size="281x22" type="*widget.Scroll">
+																									<widget size="281x22" type="*widget.entryContent">
+																										<widget size="281x22" type="*widget.RichText">
+																											<text color="disabled" pos="4,2" size="0x16"></text>
+																										</widget>
+																										<widget size="281x22" type="*widget.RichText">
+																											<text pos="4,2" size="0x16"></text>
 																										</widget>
 																									</widget>
-																								</container>
+																								</widget>
 																							</widget>
 																						</container>
 																					</container>
@@ -702,19 +687,14 @@
 																							<rectangle fillColor="button" pos="1,1" radius="6" size="72x32" strokeColor="inputBorder" strokeWidth="2"/>
 																						</container>
 																						<container size="74x34">
-																							<widget pos="8,8" size="58x26" type="*container.ThemeOverride">
-																								<container size="58x26">
-																									<widget size="58x26" type="*parts.FieldEntry">
-																										<rectangle pos="2,2" radius="6" size="54x22"/>
-																										<widget pos="0,2" size="58x22" type="*widget.Scroll">
-																											<widget size="58x22" type="*widget.entryContent">
-																												<widget size="58x22" type="*widget.RichText">
-																													<text pos="4,2" size="3x16">,</text>
-																												</widget>
-																											</widget>
+																							<widget pos="8,8" size="58x26" type="*parts.FieldEntry">
+																								<widget pos="0,2" size="58x22" type="*widget.Scroll">
+																									<widget size="58x22" type="*widget.entryContent">
+																										<widget size="58x22" type="*widget.RichText">
+																											<text pos="4,2" size="3x16">,</text>
 																										</widget>
 																									</widget>
-																								</container>
+																								</widget>
 																							</widget>
 																						</container>
 																					</container>
@@ -732,19 +712,14 @@
 																							<rectangle fillColor="button" pos="1,1" radius="6" size="61x32" strokeColor="inputBorder" strokeWidth="2"/>
 																						</container>
 																						<container size="63x34">
-																							<widget pos="8,8" size="47x26" type="*container.ThemeOverride">
-																								<container size="47x26">
-																									<widget size="47x26" type="*parts.FieldEntry">
-																										<rectangle pos="2,2" radius="6" size="43x22"/>
-																										<widget pos="0,2" size="47x22" type="*widget.Scroll">
-																											<widget size="47x22" type="*widget.entryContent">
-																												<widget size="47x22" type="*widget.RichText">
-																													<text pos="4,2" size="36x16">en-US</text>
-																												</widget>
-																											</widget>
+																							<widget pos="8,8" size="47x26" type="*parts.FieldEntry">
+																								<widget pos="0,2" size="47x22" type="*widget.Scroll">
+																									<widget size="47x22" type="*widget.entryContent">
+																										<widget size="47x22" type="*widget.RichText">
+																											<text pos="4,2" size="36x16">en-US</text>
 																										</widget>
 																									</widget>
-																								</container>
+																								</widget>
 																							</widget>
 																						</container>
 																					</container>
@@ -820,22 +795,17 @@
 																			<rectangle fillColor="button" pos="1,1" radius="6" size="553x32" strokeColor="inputBorder" strokeWidth="2"/>
 																		</container>
 																		<container size="555x34">
-																			<widget pos="8,8" size="539x26" type="*container.ThemeOverride">
-																				<container size="539x26">
-																					<widget size="539x26" type="*parts.FieldEntry">
-																						<rectangle pos="2,2" radius="6" size="535x22"/>
-																						<widget pos="0,2" size="539x22" type="*widget.Scroll">
-																							<widget size="539x22" type="*widget.entryContent">
-																								<widget size="539x22" type="*widget.RichText">
-																									<text color="disabled" pos="4,2" size="130x16">Same folder as the file</text>
-																								</widget>
-																								<widget size="539x22" type="*widget.RichText">
-																									<text pos="4,2" size="0x16"></text>
-																								</widget>
-																							</widget>
+																			<widget pos="8,8" size="539x26" type="*parts.FieldEntry">
+																				<widget pos="0,2" size="539x22" type="*widget.Scroll">
+																					<widget size="539x22" type="*widget.entryContent">
+																						<widget size="539x22" type="*widget.RichText">
+																							<text color="disabled" pos="4,2" size="130x16">Same folder as the file</text>
+																						</widget>
+																						<widget size="539x22" type="*widget.RichText">
+																							<text pos="4,2" size="0x16"></text>
 																						</widget>
 																					</widget>
-																				</container>
+																				</widget>
 																			</widget>
 																		</container>
 																	</container>
@@ -936,7 +906,7 @@
 											</container>
 										</container>
 										<widget pos="0,681" size="696x0" type="*widget.Shadow">
-											<linearGradient endColor="shadow" pos="0,-8" size="696x8"/>
+											<linearGradient pos="0,-8" size="696x8"/>
 										</widget>
 										<widget pos="690,0" size="6x681" type="*widget.scrollBarArea">
 											<widget pos="3,0" size="3x662" type="*widget.scrollBar">
@@ -1145,7 +1115,7 @@
 																		</container>
 																	</container>
 																	<widget pos="0,340" size="298x0" type="*widget.Shadow">
-																		<linearGradient endColor="shadow" pos="0,-8" size="298x8"/>
+																		<linearGradient pos="0,-8" size="298x8"/>
 																	</widget>
 																	<widget pos="292,0" size="6x340" type="*widget.scrollBarArea">
 																		<widget pos="3,0" size="3x132" type="*widget.scrollBar">

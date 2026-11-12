@@ -279,19 +279,14 @@
 																	<rectangle fillColor="button" pos="1,1" radius="6" size="61x32" strokeColor="inputBorder" strokeWidth="2"/>
 																</container>
 																<container size="63x34">
-																	<widget pos="8,8" size="47x26" type="*container.ThemeOverride">
-																		<container size="47x26">
-																			<widget size="47x26" type="*parts.FieldEntry">
-																				<rectangle pos="2,2" radius="6" size="43x22"/>
-																				<widget pos="0,2" size="47x22" type="*widget.Scroll">
-																					<widget size="47x22" type="*widget.entryContent">
-																						<widget size="47x22" type="*widget.RichText">
-																							<text pos="4,2" size="15x16">10</text>
-																						</widget>
-																					</widget>
+																	<widget pos="8,8" size="47x26" type="*parts.FieldEntry">
+																		<widget pos="0,2" size="47x22" type="*widget.Scroll">
+																			<widget size="47x22" type="*widget.entryContent">
+																				<widget size="47x22" type="*widget.RichText">
+																					<text pos="4,2" size="15x16">10</text>
 																				</widget>
 																			</widget>
-																		</container>
+																		</widget>
 																	</widget>
 																</container>
 															</container>
@@ -338,22 +333,17 @@
 																<rectangle fillColor="button" pos="1,1" radius="6" size="101x32" strokeColor="inputBorder" strokeWidth="2"/>
 															</container>
 															<container size="103x34">
-																<widget pos="8,8" size="87x26" type="*container.ThemeOverride">
-																	<container size="87x26">
-																		<widget size="87x26" type="*parts.FieldEntry">
-																			<rectangle pos="2,2" radius="6" size="83x22"/>
-																			<widget pos="0,2" size="87x22" type="*widget.Scroll">
-																				<widget size="87x22" type="*widget.entryContent">
-																					<widget size="87x22" type="*widget.RichText">
-																						<text color="disabled" pos="4,2" size="79x16">YYYY-MM-DD</text>
-																					</widget>
-																					<widget size="87x22" type="*widget.RichText">
-																						<text pos="4,2" size="0x16"></text>
-																					</widget>
-																				</widget>
+																<widget pos="8,8" size="87x26" type="*parts.FieldEntry">
+																	<widget pos="0,2" size="87x22" type="*widget.Scroll">
+																		<widget size="87x22" type="*widget.entryContent">
+																			<widget size="87x22" type="*widget.RichText">
+																				<text color="disabled" pos="4,2" size="79x16">YYYY-MM-DD</text>
+																			</widget>
+																			<widget size="87x22" type="*widget.RichText">
+																				<text pos="4,2" size="0x16"></text>
 																			</widget>
 																		</widget>
-																	</container>
+																	</widget>
 																</widget>
 															</container>
 														</container>
@@ -370,19 +360,14 @@
 																	<rectangle fillColor="button" pos="1,1" radius="6" size="132x32" strokeColor="inputBorder" strokeWidth="2"/>
 																</container>
 																<container size="134x34">
-																	<widget pos="8,8" size="118x26" type="*container.ThemeOverride">
-																		<container size="118x26">
-																			<widget size="118x26" type="*parts.FieldEntry">
-																				<rectangle pos="2,2" radius="6" size="114x22"/>
-																				<widget pos="0,2" size="118x22" type="*widget.Scroll">
-																					<widget size="118x22" type="*widget.entryContent">
-																						<widget size="118x22" type="*widget.RichText">
-																							<text pos="4,2" size="86x16">for-the-picture</text>
-																						</widget>
-																					</widget>
+																	<widget pos="8,8" size="118x26" type="*parts.FieldEntry">
+																		<widget pos="0,2" size="118x22" type="*widget.Scroll">
+																			<widget size="118x22" type="*widget.entryContent">
+																				<widget size="118x22" type="*widget.RichText">
+																					<text pos="4,2" size="86x16">for-the-picture</text>
 																				</widget>
 																			</widget>
-																		</container>
+																		</widget>
 																	</widget>
 																</container>
 															</container>
@@ -1004,20 +989,15 @@
 														<spacer pos="0,15" size="15x0"/>
 													</container>
 												</container>
-												<widget pos="27,0" size="405x24" type="*container.ThemeOverride">
-													<container size="405x24">
-														<widget size="405x24" type="*parts.searchEntry">
-															<rectangle pos="2,2" radius="6" size="401x20"/>
-															<widget pos="0,2" size="405x20" type="*widget.Scroll">
-																<widget size="405x20" type="*widget.entryContent">
-																	<widget size="405x20" type="*widget.RichText">
-																		<text pos="4,2" size="18x16">zzz</text>
-																	</widget>
-																	<rectangle fillColor="foreground" pos="21,2" size="2x16"/>
-																</widget>
+												<widget pos="27,0" size="405x24" type="*parts.searchEntry">
+													<widget pos="0,2" size="405x20" type="*widget.Scroll">
+														<widget size="405x20" type="*widget.entryContent">
+															<widget size="405x20" type="*widget.RichText">
+																<text pos="4,2" size="18x16">zzz</text>
 															</widget>
+															<rectangle fillColor="foreground" pos="21,2" size="2x16"/>
 														</widget>
-													</container>
+													</widget>
 												</widget>
 											</container>
 										</container>
@@ -1033,10 +1013,6 @@
 									</container>
 								</container>
 								<container pos="0,44" size="456x64">
-									<widget size="456x64" type="*container.ThemeOverride">
-										<container size="456x64">
-										</container>
-									</widget>
 									<container size="456x64">
 										<text color="disabled" pos="12,24" size="432x16">Nothing matches. Try a shorter word, or a country.</text>
 									</container>
