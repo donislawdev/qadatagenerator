@@ -88,6 +88,12 @@ repository once they are released.
 
 ### Fixed
 
+- **The window no longer keeps the processor busy after a list of choices is
+  closed.** Closing a list that has a search field at its top, such as the
+  list of kinds on Quick value, left the search field thinking it still had
+  the keyboard. Its hidden cursor went on blinking, and every blink redrew the
+  whole window, even while nobody touched it. The search field is now told it
+  lost the keyboard however the list closes.
 - **Quick value no longer refuses a value because of a field it has hidden.**
   Choosing a gender or a date of birth for one kind, such as a PESEL or a
   first name, and then a kind that takes no account of them, such as an ISBN,

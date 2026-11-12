@@ -388,11 +388,32 @@ func place(room fyne.Size, at fyne.Position, chooser fyne.Size, wanted fyne.Size
 // closePanel takes the panel down. Focus goes back to whatever the canvas had
 // under the overlay, which is this chooser, since an overlay has a focus of
 // its own and never moved the one beneath it.
+//
+// # 🔴 Why the panel lets go of the keyboard before it goes
+//
+// Taking an overlay away does not tell what held its keyboard that it lost
+// it: OverlayStack.Remove of v2.8.2 drops the overlay's focus manager and
+// nothing else. So the search field of a closed panel went on believing it
+// was typed into, and its caret went on blinking where nobody could see it.
+// Every blink redraws the whole window. Measured on 2026-11-12 with
+// tools/pamiec_w_oknie.py on the real window, three panels opened and closed
+// with Esc: the window then used 1.06 to 1.50 seconds of the processor in
+// every half minute of nobody touching it, against 0.00 to 0.09 without the
+// panels, and still did a minute later. With the panel letting go first, the
+// two could no longer be told apart.
+//
+// Unfocus speaks to the focus manager of the TOP overlay, so it is asked only
+// while that is this panel: under a dialog it would take the keyboard from the
+// dialog instead. Every way the panel closes passes here, so the field is told
+// whichever one it was.
 func (s *Select) closePanel() {
 	if s.panel == nil {
 		return
 	}
 	if canvas := fyne.CurrentApp().Driver().CanvasForObject(s); canvas != nil {
+		if canvas.Overlays().Top() == s.overlay {
+			canvas.Unfocus()
+		}
 		canvas.Overlays().Remove(s.overlay)
 	}
 	s.panel, s.overlay = nil, nil

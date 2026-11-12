@@ -195,6 +195,57 @@ func TestEscapeAndATapOutsideCloseWithoutChoosing(t *testing.T) {
 	}
 }
 
+// TestEveryWayOutTellsTheSearchFieldItLostTheKeyboard holds the caret of a
+// closed panel still. Taking an overlay away does not tell what held its
+// keyboard (OverlayStack.Remove of v2.8.2), and a search field nobody told goes
+// on blinking where nobody can see it, redrawing the whole window at every
+// blink. See closePanel.
+//
+// A tap outside is told by the toolkit itself, which takes the keyboard away on
+// a tap that lands on nothing focusable, so that row passed before closePanel
+// said anything (checked on 2026-11-12 with the Unfocus taken out: Esc and
+// Enter failed, the tap did not). It stays so that every way out is one list.
+func TestEveryWayOutTellsTheSearchFieldItLostTheKeyboard(t *testing.T) {
+	ways := []struct {
+		name string
+		out  func(t *testing.T, window fyne.Window)
+	}{
+		{"Esc", func(t *testing.T, window fyne.Window) { press(t, window, fyne.KeyEscape) }},
+		{"Enter on a row", func(t *testing.T, window fyne.Window) { press(t, window, fyne.KeyReturn) }},
+		{"a tap outside", func(_ *testing.T, window fyne.Window) {
+			test.TapCanvas(window.Canvas(), fyne.NewPos(880, 680))
+		}},
+	}
+	for _, way := range ways {
+		t.Run(way.name, func(t *testing.T) {
+			chooser, window := opened(t, "ssn")
+			field := chooser.panel.search
+			if window.Canvas().Focused() != fyne.Focusable(field) {
+				t.Fatalf("the keyboard is on %T, not in the search field, so nothing below is about it",
+					window.Canvas().Focused())
+			}
+			told := false
+			drawn := field.onFocus
+			field.onFocus = func(here bool) {
+				if !here {
+					told = true
+				}
+				if drawn != nil {
+					drawn(here)
+				}
+			}
+			way.out(t, window)
+			if chooser.IsOpen() {
+				t.Fatalf("%s left the panel open", way.name)
+			}
+			if !told {
+				t.Errorf("%s closed the panel and the search field was never told the keyboard left it, "+
+					"so its caret goes on blinking unseen", way.name)
+			}
+		})
+	}
+}
+
 // TestATapOnARowPicksIt holds the pointer road.
 func TestATapOnARowPicksIt(t *testing.T) {
 	chooser, _ := opened(t, "ssn")
