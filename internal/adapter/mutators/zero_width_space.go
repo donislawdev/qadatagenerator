@@ -33,7 +33,7 @@ func (zeroWidthSpace) Damage(target mutator.Target) mutator.Outcome {
 		return mutator.Skipped(refusal)
 	}
 	if target.Value == "" {
-		return mutator.Skipped("the value is empty, and an invisible character on its own is a " +
+		return mutator.Unfit("the value is empty, and an invisible character on its own is a " +
 			"value that only looks empty, which is a different test")
 	}
 	damaged, refusal := placed(target.Value, zeroWidthSpaceText, position)

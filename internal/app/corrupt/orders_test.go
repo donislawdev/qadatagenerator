@@ -1,6 +1,7 @@
 package corrupt_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -76,6 +77,107 @@ func TestEveryKindOfDamageIsOrderedBeforeAnyRepeats(t *testing.T) {
 		if times != 1 {
 			t.Errorf("%s was ordered %d times before the others had their turn", id, times)
 		}
+	}
+}
+
+// realLayers builds a catalog shaped like the real one, eight layers of 5, 5,
+// 9, 7, 7, 6, 6 and 7 entries, all aimed at text so that every one of them can
+// be ordered here. It returns the catalog, the layers and how many entries.
+func realLayers(t *testing.T) (catalog.Catalog, []string, int) {
+	t.Helper()
+	sizes := []struct {
+		layer string
+		count int
+	}{{"L0", 5}, {"L1", 5}, {"L2", 9}, {"L3", 7}, {"L4", 7}, {"L5", 6}, {"UNI", 6}, {"REV", 7}}
+	var ids []catalog.ID
+	var layers []string
+	for _, each := range sizes {
+		layers = append(layers, each.layer)
+		for i := 0; i < each.count; i++ {
+			ids = append(ids, catalog.ID(fmt.Sprintf("%s.area.v%c", each.layer, 'a'+i)))
+		}
+	}
+	return aCatalog(t, ids...), layers, len(ids)
+}
+
+// 🔴 A few rows touch as many layers as there are rows, wherever the walk
+// starts.
+//
+// Walked in identifier order, a file of three rows with every layer named got
+// the first three entries of L0 for every seed. One run over the whole walk and
+// three rows more reads every window of three and four consecutive rows, which
+// is every starting place a seed could draw.
+func TestAFewRowsTouchAsManyLayersAsThereAreRows(t *testing.T) {
+	described, layers, count := realLayers(t)
+	rows := count + 3
+	selector := selectorFor(t, recipe.Policy{Layers: layers, Rows: "100%"}, described, aView("name"))
+
+	var walked []string
+	seen := map[catalog.ID]bool{}
+	for row := 0; row < rows; row++ {
+		orders := selector.Orders("customer", row, rows)
+		if len(orders) != 1 {
+			t.Fatalf("row %d carries %d orders, want one", row, len(orders))
+		}
+		walked = append(walked, strings.SplitN(string(orders[0].Mutator), ".", 2)[0])
+		if row < count {
+			seen[orders[0].Mutator] = true
+		}
+	}
+	if len(seen) != count {
+		t.Errorf("the first %d rows reached %d of the %d entries, so some repeated", count, len(seen), count)
+	}
+	for _, width := range []int{3, 4} {
+		if problem := crowdedWindow(walked, width); problem != "" {
+			t.Error(problem)
+		}
+	}
+	// The canary is the shape of the defect: the walk in identifier order.
+	if crowdedWindow([]string{"L0", "L0", "L0", "L0", "L1"}, 3) == "" {
+		t.Fatal("the check does not notice rows that all land in one layer")
+	}
+}
+
+// crowdedWindow names the first run of consecutive rows touching fewer layers
+// than there are rows, and nothing when there is none.
+func crowdedWindow(walked []string, width int) string {
+	for start := 0; start+width <= len(walked); start++ {
+		distinct := map[string]bool{}
+		for _, layer := range walked[start : start+width] {
+			distinct[layer] = true
+		}
+		if len(distinct) < width {
+			return fmt.Sprintf("rows %d to %d touched %d layers: %v",
+				start+1, start+width, len(distinct), walked[start:start+width])
+		}
+	}
+	return ""
+}
+
+// The walk starts at a place drawn from the seed: one seed starts at the same
+// entry every time, and other seeds reach other entries.
+func TestTheWalkStartsWhereTheSeedSays(t *testing.T) {
+	described, layers, _ := realLayers(t)
+	policy := recipe.Policy{Layers: layers, Rows: "100%"}
+	firstOf := func(name string) catalog.ID {
+		made, err := corrupt.NewSelector(policy, described, aView("name"), seed.New(name))
+		if err != nil {
+			t.Fatalf("the selector refused this policy: %v", err)
+		}
+		return made.Orders("customer", 0, 10)[0].Mutator
+	}
+	// Two selectors built from one seed, so the comparison is between runs.
+	first, again := firstOf("one seed"), firstOf("one seed")
+	if first != again {
+		t.Fatalf("one seed started the walk at %s and then at %s", first, again)
+	}
+	starts := map[catalog.ID]bool{}
+	for i := 0; i < 20; i++ {
+		starts[firstOf(fmt.Sprintf("seed %d", i))] = true
+	}
+	// Twenty draws over 52 places reach about seventeen of them.
+	if len(starts) < 5 {
+		t.Errorf("twenty seeds started the walk at only %d entries", len(starts))
 	}
 }
 
@@ -224,11 +326,10 @@ func (schemeView) EntityNames() []string { return []string{"customer"} }
 // 🔴 Two identifiers and five columns that are neither, and the count is not
 // decoration.
 //
-// Which column damage lands on is one draw per entry. With three columns a
-// build that ignored the scheme would still land on the right one often enough
-// to look correct, and a mutation removing the check came back PRZEOCZONA for
-// exactly that reason. With seven, being right by luck is not a plausible
-// reading of a green test.
+// Which column damage lands on is drawn for each entry and each row. With few
+// columns and few draws a build that ignored the scheme would still land on the
+// right one often enough to look correct. With seven columns and twenty rows,
+// being right by luck is not a plausible reading of a green test.
 func (schemeView) FieldsOf(string) []recipe.FieldInfo {
 	fields := []recipe.FieldInfo{
 		{Name: "ssn", Type: "identifier", Scheme: "US.ssn"},
@@ -247,13 +348,10 @@ func (schemeView) PrimaryKeyOf(string) []string         { return nil }
 // Damage meant for one scheme lands on the column that follows it, when the
 // dataset carries columns of several.
 //
-// 🔴 Four entries rather than one, and that is what makes this test worth
-// having. Which column an entry lands on is ONE draw, keyed by the entry, so a
-// single entry checked against a build that ignores the scheme is right or
-// wrong by luck and stays that way for every row. A mutation removing the check
-// came back as missed twice for exactly that reason. Four entries are four
-// independent draws over seven columns, and all four landing correctly by
-// chance is not a reading anybody has to entertain.
+// 🔴 Four entries over twenty rows, and the number of draws is what makes this
+// test worth having. Which column an order lands on is drawn for each entry and
+// each row, so a build that ignores the scheme is wrong on most of them. Every
+// draw landing correctly by chance is not a reading anybody has to entertain.
 func TestDamageMeantForOneSchemeLandsOnThatScheme(t *testing.T) {
 	described := schemeCatalog(t, "PL.pesel",
 		"L3.checksum.off_by_one", "L3.checksum.transposed_digits",
@@ -274,6 +372,67 @@ func TestDamageMeantForOneSchemeLandsOnThatScheme(t *testing.T) {
 	if seen < 4 {
 		t.Fatalf("only %d orders were produced, so not every entry had its turn", seen)
 	}
+}
+
+// 🔴 One kind of damage ordered on many rows spreads over every column it
+// covers, rather than landing on the same one for the whole run.
+//
+// Drawn once per entry, damage made of letters lands on a column of identifiers
+// read as text in every row it is ordered and is refused every time, while the
+// columns of names beside it never get it. Forty rows over four columns leave
+// any one column out with a chance well under one in a thousand.
+func TestOneKindOfDamageSpreadsOverEveryColumnItCovers(t *testing.T) {
+	columns := []string{"name", "city", "street", "note"}
+	selector := selectorFor(t, recipe.Policy{Layers: []string{"L2"}, Rows: "100%"},
+		aCatalog(t, "L2.a.one"), aView(columns...))
+
+	var landed []string
+	for row := 0; row < 40; row++ {
+		for _, order := range selector.Orders("customer", row, 40) {
+			landed = append(landed, order.Field)
+		}
+	}
+	if missed := columnsMissed(columns, landed); len(missed) > 0 {
+		t.Errorf("forty orders of one kind of damage never landed on %v", missed)
+	}
+	// The canary is the shape of the defect: one column for every row.
+	if len(columnsMissed(columns, []string{"name", "name", "name"})) == 0 {
+		t.Fatal("the check does not notice damage that always lands on one column")
+	}
+}
+
+// The order carries every other column the damage covers, so that a decline in
+// the drawn one can move on, and never the drawn one twice. A column the policy
+// excluded is not among them.
+func TestAnOrderCarriesEveryOtherCoveredColumnOnce(t *testing.T) {
+	selector := selectorFor(t, recipe.Policy{
+		Layers: []string{"L2"}, Rows: "100%", ExcludeFields: []string{"note"},
+	}, aCatalog(t, "L2.a.one"), aView("name", "city", "street", "note"))
+
+	for row := 0; row < 20; row++ {
+		for _, order := range selector.Orders("customer", row, 20) {
+			places := append([]string{order.Field}, order.Instead...)
+			if missed := columnsMissed([]string{"name", "city", "street"}, places); len(missed) > 0 ||
+				len(places) != 3 {
+				t.Fatalf("row %d carries %v, want name, city and street once each", row, places)
+			}
+		}
+	}
+}
+
+// columnsMissed lists the columns no order landed on.
+func columnsMissed(columns, landed []string) []string {
+	hit := map[string]bool{}
+	for _, field := range landed {
+		hit[field] = true
+	}
+	var missed []string
+	for _, column := range columns {
+		if !hit[column] {
+			missed = append(missed, column)
+		}
+	}
+	return missed
 }
 
 // 🔴 When no column follows the scheme, the order points at one of the right
@@ -304,9 +463,9 @@ type limitedView struct{}
 func (limitedView) EntityNames() []string { return []string{"customer"} }
 
 // Five columns without a limit and one with it. The count is not decoration:
-// which column damage lands on is one draw per entry, so with two candidates a
-// build that ignored the limit would still have an even chance of looking
-// right. With six, being right by luck is not a plausible reading.
+// which column damage lands on is drawn for each row, and a build that ignored
+// the limit would land on one of the five in almost every row. With six columns
+// and twenty rows, being right by luck is not a plausible reading.
 func (limitedView) FieldsOf(string) []recipe.FieldInfo {
 	fields := []recipe.FieldInfo{
 		{Name: "last_name", Type: "string", MaxLength: 20, HasMaxLength: true},

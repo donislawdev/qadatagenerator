@@ -61,7 +61,7 @@ func (stringInNumeric) Damage(target mutator.Target) mutator.Outcome {
 		// Nothing would change, and an entry claiming damage that left the
 		// value alone would send a test looking for a difference that is not
 		// there.
-		return mutator.Skipped(fmt.Sprintf(
+		return mutator.Unfit(fmt.Sprintf(
 			"the value is already %q, so writing it again would change nothing", replacement))
 	}
 	return mutator.Done(replacement)

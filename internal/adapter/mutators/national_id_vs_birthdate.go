@@ -57,7 +57,7 @@ func (nationalIDVsBirthdate) Damage(target mutator.Target) mutator.Outcome {
 	}
 	carried, readable := encoder.EncodedDate(target.Value)
 	if !readable {
-		return mutator.Skipped("no birth date can be read out of this value, so there is none to move")
+		return mutator.Unfit("no birth date can be read out of this value, so there is none to move")
 	}
 
 	moved := provider.Date{Year: carried.Year + years, Month: carried.Month, Day: carried.Day}

@@ -59,7 +59,7 @@ func (exceedsMaxLength) Damage(target mutator.Target) mutator.Outcome {
 	wanted := target.Field.MaxLength + overshoot
 	have := lengthIn(target.Value, declared)
 	if have >= wanted {
-		return mutator.Skipped(fmt.Sprintf(
+		return mutator.Unfit(fmt.Sprintf(
 			"the value is already %d %s long, which is not short of %d", have, declared, wanted))
 	}
 	// 🔴 The overshoot has to land ON the mark, not past it, and that is the
@@ -75,7 +75,7 @@ func (exceedsMaxLength) Damage(target mutator.Target) mutator.Outcome {
 	last, _ := utf8.DecodeLastRuneInString(target.Value)
 	step := lengthIn(string(last), declared)
 	if (wanted-have)%step != 0 {
-		return mutator.Skipped(fmt.Sprintf(
+		return mutator.Unfit(fmt.Sprintf(
 			"the value ends in a character of %d %s and is %d short of %d, so repeating it "+
 				"steps over the mark rather than onto it", step, declared, wanted-have, wanted))
 	}

@@ -34,7 +34,7 @@ func (stringEmpty) Damage(target mutator.Target) mutator.Outcome {
 		// would send a test looking for a difference that is not there. It is
 		// an ordinary case rather than a fault: a column with a share of empty
 		// values has some, by design.
-		return mutator.Skipped("the value is already empty, so emptying it would change nothing")
+		return mutator.Unfit("the value is already empty, so emptying it would change nothing")
 	}
 	return mutator.Done("")
 }

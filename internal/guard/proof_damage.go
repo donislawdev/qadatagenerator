@@ -544,4 +544,5 @@ var damageGuards = []Guard{
 	{"an inference edited by hand to lose its basis is refused on reading by the rule that refused it at writing", "TestAnInferenceEditedToLoseItsBasisIsRefusedOnReading", "internal/adapter/manifestjson", ByMutation},
 	{"Every run carries the Unicode corpus the Unicode entries require, so neither the recipe mode nor the file mode refuses them for want of a capability", "TestTheDamageCarriesWhatTheUnicodeEntriesRequire", "internal/adapter/mutators", ByMutation},
 	{"The Unicode damage produces the exact values the published catalog shows for it", "TestTheUnicodeEntriesProduceTheirPublishedExamples", "internal/adapter/mutators", ByMutation},
+	{"A damaged value is written to the column the manifest names, also when the damage moved there from the column drawn for it", "TestDamageThatMovedColumnsIsWrittenWhereTheManifestSays", "internal/adapter/corrupted", ByMutation},
 }

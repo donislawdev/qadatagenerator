@@ -30,6 +30,8 @@ package corrupt
 
 import (
 	"fmt"
+	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
@@ -76,6 +78,10 @@ type Order struct {
 	Entity string
 	Row    int
 	Field  string
+	// Instead holds the other columns this damage covers in the same entity,
+	// in schema order. They are tried, in an order drawn for this row, when
+	// the damage finds the value in Field unfit (ApplyInRow says why).
+	Instead []string
 	// ID is what this entry will be called in the manifest, so that a test
 	// can refer to the case.
 	ID string
@@ -122,9 +128,17 @@ func New(described catalog.Catalog, implementations Mutators, schemes Providers,
 // original otherwise, so a caller that writes the result back is correct in
 // both cases without asking which it got.
 func (e Engine) Apply(order Order, field recipe.FieldInfo, value string, at seed.Coordinate) (string, manifest.Defect) {
+	damaged, entry, _ := e.attempt(order, field, value, at)
+	return damaged, entry
+}
+
+// attempt is Apply that also says whether the damage declined for what the
+// value itself shows, which is the one refusal another column might not repeat.
+func (e Engine) attempt(order Order, field recipe.FieldInfo, value string,
+	at seed.Coordinate) (string, manifest.Defect, bool) {
 	entry, described := e.catalog.Lookup(order.Mutator)
 	if !described {
-		return value, undescribed(order)
+		return value, undescribed(order), false
 	}
 
 	// 🔴 Asked for once, here, and handed to the refusal below rather than
@@ -140,7 +154,7 @@ func (e Engine) Apply(order Order, field recipe.FieldInfo, value string, at seed
 	// the path walked once per ordered defect per row.
 	damage, implemented := e.mutators.Lookup(order.Mutator)
 	if kind, why := e.refuse(entry, field, implemented); kind != "" {
-		return value, refused(entry, order, kind, why)
+		return value, refused(entry, order, kind, why), false
 	}
 
 	outcome := damage.Damage(mutator.Target{
@@ -152,9 +166,105 @@ func (e Engine) Apply(order Order, field recipe.FieldInfo, value string, at seed
 		Provider: e.schemeOf(field),
 	})
 	if !outcome.Applied() {
-		return value, refused(entry, order, manifest.DeclinedByMutator, outcome.Reason())
+		return value, refused(entry, order, manifest.DeclinedByMutator, outcome.Reason()), outcome.ValueUnfit()
 	}
-	return outcome.Value(), applied(entry, order, value, outcome.Value())
+	return outcome.Value(), applied(entry, order, value, outcome.Value()), false
+}
+
+// Cell is one column of the row being damaged, as the engine needs it.
+type Cell struct {
+	Field recipe.FieldInfo
+	Value string
+	// At is the address the damage draws from in this column.
+	At seed.Coordinate
+}
+
+// Change is a damaged value to be written back to the row.
+type Change struct {
+	Field string
+	Value string
+}
+
+// ApplyInRow carries out one order against a row. It returns the entry, and the
+// change to write back with true, or false when nothing is to be written.
+//
+// The cell function answers for a column by name, and says false when the row
+// has no such column.
+//
+// # Why an unfit value moves the order on to another column
+//
+// An order names the column drawn for it and the other columns its damage
+// covers. A mutator that finds the value unfit, such as a value with no letter
+// for damage made of letters, has read that off the value alone, so another
+// covered column of the same row may well take the damage. Leaving the order
+// refused while a column that could carry it sits beside it would make the
+// manifest report the draw rather than the data.
+//
+// Nothing else moves on. A decline that came from trying the damage, such as a
+// swap of digits the scheme still accepts, is a finding about this row, and
+// carrying the damage on until some column notices it would erase exactly that.
+// So the search stops at the first column that does not answer unfit, whatever
+// it answers, and the entry is that answer. Every other refusal is about the
+// damage or the run and would read the same in every column anyway.
+//
+// # Why the next column is drawn rather than taken in turn
+//
+// Each next column is drawn from those not yet tried, so the column that takes
+// the damage is equally likely to be any of those that would. Walking on from
+// the first would not be: a column standing right after a run of columns the
+// damage declines would collect every row they turn away. It is drawn only
+// after a decline, so an order that lands at once costs the one draw the
+// selector made.
+//
+// When every column finds its value unfit, the entry is the refusal from the
+// column drawn first, because that is where the order was aimed.
+func (e Engine) ApplyInRow(order Order, cell func(field string) (Cell, bool)) (manifest.Defect, Change, bool) {
+	found, addressed := cell(order.Field)
+	first := e.applyAt(order, order.Field, found, addressed)
+	if !first.unfit {
+		return first.entry, first.change, first.wrote
+	}
+	remaining := slices.Clone(order.Instead)
+	for round := 1; len(remaining) > 0; round++ {
+		drawn := int(e.source.IntN(seed.Coordinate{
+			Entity: order.Entity, Row: int64(order.Row), Field: string(order.Mutator),
+			Purpose: "corrupt:field:" + strconv.Itoa(round),
+		}, int64(len(remaining))))
+		next := remaining[drawn]
+		remaining = slices.Delete(remaining, drawn, drawn+1)
+		found, addressed := cell(next)
+		if !addressed {
+			continue
+		}
+		if tried := e.applyAt(order, next, found, addressed); !tried.unfit {
+			return tried.entry, tried.change, tried.wrote
+		}
+	}
+	return first.entry, Change{}, false
+}
+
+// attemptAt is one try of an order on one column.
+type attemptAt struct {
+	entry  manifest.Defect
+	change Change
+	wrote  bool
+	// unfit says the damage declined for what the value itself shows.
+	unfit bool
+}
+
+// applyAt carries out an order on one named column.
+//
+// Damage aimed at no column of this row still gets an answer from the engine,
+// and the answer is an entry with a reason. Nothing is written back then, since
+// there is no cell to write it to.
+func (e Engine) applyAt(order Order, field string, found Cell, addressed bool) attemptAt {
+	aimed := order
+	aimed.Field, aimed.Instead = field, nil
+	value, entry, unfit := e.attempt(aimed, found.Field, found.Value, found.At)
+	if !addressed || !entry.Applied {
+		return attemptAt{entry: entry, unfit: unfit}
+	}
+	return attemptAt{entry: entry, change: Change{Field: field, Value: value}, wrote: true}
 }
 
 // schemeOf returns the provider behind a column, or nothing.

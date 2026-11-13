@@ -58,11 +58,11 @@ func (emojiBasic) Damage(target mutator.Target) mutator.Outcome {
 // they are.
 func withEmoji(value, emoji, position string) mutator.Outcome {
 	if value == "" {
-		return mutator.Skipped("the value is empty, so the emoji would be the whole value rather " +
+		return mutator.Unfit("the value is empty, so the emoji would be the whole value rather " +
 			"than part of one")
 	}
 	if strings.IndexFunc(value, unicode.IsLetter) < 0 {
-		return mutator.Skipped("the value holds no letter, so it reads as a code such as a number " +
+		return mutator.Unfit("the value holds no letter, so it reads as a code such as a number " +
 			"or a date rather than as text, and the acceptance this damage expects is about text")
 	}
 	insertion := emoji

@@ -133,6 +133,12 @@ func TestATranspositionTheSchemeCannotSeeIsDeclinedRatherThanPromisedAsARejectio
 	if !strings.Contains(outcome.Reason(), "still accepts") {
 		t.Errorf("the reason does not say the scheme still accepts the value: %s", outcome.Reason())
 	}
+	// 🔴 A swap the scheme cannot see is a finding about this row (DEC-221).
+	// Called unfit, it would send the damage on to another column of the row
+	// until one noticed, and the finding would never reach the manifest.
+	if outcome.ValueUnfit() {
+		t.Error("a swap the scheme still accepts is called unfit, so the engine would move it on")
+	}
 }
 
 // 🔴 The case DEC-269 opened, and the reason a wider scheme is asked as well.

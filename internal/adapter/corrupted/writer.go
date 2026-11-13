@@ -158,23 +158,27 @@ func (w *Writer) Write(record dataset.Record) error {
 
 // apply carries out one order against the record and returns the entry.
 //
-// A record whose values are changed in place is what the writer then receives,
-// which is why the engine returning the original on refusal matters: the caller
-// writes back whatever it got and is correct either way.
+// The record's values are changed in place, and that record is what the writer
+// then receives. The engine names the column it damaged, which need not be the
+// one the order was drawn for, and nothing when it damaged none.
 func (w *Writer) apply(order corrupt.Order, record dataset.Record, row int) manifest.Defect {
-	at := seed.Coordinate{
-		Entity: order.Entity, Row: int64(row), Field: order.Field, Purpose: "corrupt",
+	entry, change, wrote := w.engine.ApplyInRow(order, func(field string) (corrupt.Cell, bool) {
+		cell := corrupt.Cell{
+			Field: w.fields[field],
+			At:    seed.Coordinate{Entity: order.Entity, Row: int64(row), Field: field, Purpose: "corrupt"},
+		}
+		// A column this table does not have is damage aimed at no field:
+		// either the entry damages the bytes or the container, or no column
+		// suited it. The engine still answers with an entry and a reason.
+		column, addressed := w.columns[field]
+		if addressed {
+			cell.Value = record.Values[column]
+		}
+		return cell, addressed
+	})
+	if wrote {
+		record.Values[w.columns[change.Field]] = change.Value
 	}
-	column, addressed := w.columns[order.Field]
-	if !addressed {
-		// Damage aimed at no column of this table: either the entry damages the
-		// bytes or the container rather than a field, or no column suited it.
-		// The engine still answers, and the answer is an entry with a reason.
-		_, entry := w.engine.Apply(order, w.fields[order.Field], "", at)
-		return entry
-	}
-	value, entry := w.engine.Apply(order, w.fields[order.Field], record.Values[column], at)
-	record.Values[column] = value
 	return entry
 }
 

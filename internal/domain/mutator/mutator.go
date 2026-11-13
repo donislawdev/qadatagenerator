@@ -147,11 +147,12 @@ func (p Parameters) Whole(name string) (int, bool) {
 	}
 }
 
-// Outcome is what a mutator did. It is built by one of two constructors, so
-// the combination that says both things at once cannot be written down.
+// Outcome is what a mutator did. It is built by one of three constructors, so
+// a combination that says two things at once cannot be written down.
 type Outcome struct {
 	value   string
 	applied bool
+	unfit   bool
 	reason  string
 }
 
@@ -165,8 +166,28 @@ func Done(value string) Outcome { return Outcome{value: value, applied: true} }
 // it is a sentence about the data rather than about the code.
 func Skipped(reason string) Outcome { return Outcome{reason: reason} }
 
+// Unfit reports damage that did not happen because the value as it stands
+// cannot carry it, which can be read off the value before any damage is done:
+// it is empty, it holds no letter for damage made of letters, it already is
+// what the damage would make of it.
+//
+// # Why this is not Skipped
+//
+// The engine may try an unfit order on another column of the same row that the
+// damage covers, and it never does that for Skipped. The line matters because
+// some declines are findings about the row. Damage that asked a validator
+// whether it would be noticed, and heard no, has learnt something about this
+// value, and moving the damage to the next column until one notices would erase
+// it. So a decline that came from trying the damage, or from asking anything
+// beyond the value, is Skipped.
+func Unfit(reason string) Outcome { return Outcome{reason: reason, unfit: true} }
+
 // Applied reports whether the damage happened.
 func (o Outcome) Applied() bool { return o.applied }
+
+// ValueUnfit reports whether the damage did not happen for what the value
+// itself shows, and so might happen in another column.
+func (o Outcome) ValueUnfit() bool { return o.unfit }
 
 // Value is what took the old value's place, meaningful only when the damage
 // happened.

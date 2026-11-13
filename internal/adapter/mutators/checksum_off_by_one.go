@@ -77,7 +77,7 @@ func (checksumOffByOne) Damage(target mutator.Target) mutator.Outcome {
 				"check of every scheme it applies to", where, lastPosition))
 	}
 	if target.Value == "" {
-		return mutator.Skipped("the value is empty, so there is no digit to change")
+		return mutator.Unfit("the value is empty, so there is no digit to change")
 	}
 	at := len(target.Value) - 1
 	// 🔴 Compared as a byte against the ten ASCII digits, and deliberately not
@@ -88,7 +88,7 @@ func (checksumOffByOne) Damage(target mutator.Target) mutator.Outcome {
 	// rather than mangled.
 	digit := target.Value[at]
 	if digit < '0' || digit > '9' {
-		return mutator.Skipped(
+		return mutator.Unfit(
 			"the value does not end in a digit, so there is nothing at the last position to add one to")
 	}
 	return mutator.Done(target.Value[:at] + string(rune(next(digit))))

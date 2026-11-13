@@ -52,11 +52,11 @@ func (nationalIDVsGender) Damage(target mutator.Target) mutator.Outcome {
 	}
 	carried, readable := encoder.EncodedGender(target.Value)
 	if !readable {
-		return mutator.Skipped("no gender can be read out of this value, so there is none to change")
+		return mutator.Unfit("no gender can be read out of this value, so there is none to change")
 	}
 	other, opposite := theOther(carried)
 	if !opposite {
-		return mutator.Skipped(fmt.Sprintf(
+		return mutator.Unfit(fmt.Sprintf(
 			"this value carries no gender to turn round, it reads as %s", carried))
 	}
 	rebuilt, err := encoder.WithGender(target.Value, other)

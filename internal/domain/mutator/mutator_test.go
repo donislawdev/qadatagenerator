@@ -123,6 +123,16 @@ func TestAnOutcomeSaysEitherWhatItWroteOrWhyItWroteNothing(t *testing.T) {
 	if skipped.Value() != "" {
 		t.Errorf("damage that did not happen also carried the value %q", skipped.Value())
 	}
+	if skipped.ValueUnfit() || done.ValueUnfit() {
+		t.Error("only a value found unfit may say so, and a plain refusal or done damage did")
+	}
+
+	const unfitWhy = "the value is empty"
+	unfit := mutator.Unfit(unfitWhy)
+	if unfit.Applied() || !unfit.ValueUnfit() || unfit.Reason() != unfitWhy || unfit.Value() != "" {
+		t.Errorf("an unfit value came back as applied %v, unfit %v, reason %q, value %q",
+			unfit.Applied(), unfit.ValueUnfit(), unfit.Reason(), unfit.Value())
+	}
 }
 
 // An outcome nobody built is a refusal without a reason rather than damage that

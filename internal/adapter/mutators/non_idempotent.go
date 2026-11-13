@@ -63,7 +63,7 @@ func (nonIdempotent) Damage(target mutator.Target) mutator.Outcome {
 		at += size
 	}
 	if !changed {
-		return mutator.Skipped("the value holds no Latin letter that has a raised capital form, " +
+		return mutator.Unfit("the value holds no Latin letter that has a raised capital form, " +
 			"such as the B of bigbird, so nothing in it changes between two normalisations")
 	}
 	return mutator.Done(built.String())

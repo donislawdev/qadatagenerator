@@ -133,11 +133,11 @@ func whatStopsATransposition(target mutator.Target) (provider.Provider, mutator.
 // different things to read in a report.
 func nothingHereToTranspose(identical int) mutator.Outcome {
 	if identical > 0 {
-		return mutator.Skipped(
+		return mutator.Unfit(
 			"every pair of adjacent digits in the value holds one digit twice, so swapping " +
 				"any of them would leave the value exactly as it is")
 	}
-	return mutator.Skipped(
+	return mutator.Unfit(
 		"no two adjacent characters of the value are both digits, so there is no pair here " +
 			"to transpose")
 }
