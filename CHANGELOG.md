@@ -576,9 +576,12 @@ repository once they are released.
   cannot change is left alone and the damage
   goes to another text column of the row. A value with no letter, such as a
   number or a date, gets no emoji, because the manifest expects the emoji to
-  be accepted and a code is not text. The Manifest browser writes characters
-  that draw nothing as their code points, such as `<U+200B>`, so the value
-  before and after does not look the same.
+  be accepted and a code is not text. Check results writes characters that
+  draw nothing as their code points, such as `<U+200B>`. When the two values
+  are the same text with its accents stored differently, it writes an accent
+  stored apart in one value and not in the other the same way, such as
+  `Z<U+0307>`, and draws the rest as it is. So the value before and after does
+  not look the same.
 - **Links to the project and to supporting it.** Two buttons at the foot of
   the column, under About, open the project's source on GitHub and the page
   for supporting its author in your browser. The program itself still

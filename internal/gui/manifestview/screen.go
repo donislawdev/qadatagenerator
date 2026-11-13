@@ -612,17 +612,25 @@ func failureOf(text i18n.Catalogue, defect manifest.Defect) Line {
 //
 // Each half is shown only when the manifest carries it, because an empty string
 // is a value one entry of the catalog produces on purpose and the model keeps a
-// flag to tell that from nothing recorded.
+// flag to tell that from nothing recorded. When it carries both, they are
+// written as a pair, because only the pair tells whether an accent stored as a
+// character of its own has to be written out (pairShown).
 func valuesOf(text i18n.Catalogue, defect manifest.Defect) Line {
+	var before, after string
+	if defect.HasValueBefore && defect.HasValueAfter {
+		before, after = pairShown(defect.ValueBefore, defect.ValueAfter)
+	} else {
+		before, after = visible(defect.ValueBefore), visible(defect.ValueAfter)
+	}
 	phrase := ""
 	if defect.HasValueBefore {
-		phrase = text.T(i18n.ManifestEntryBefore) + " " + quoted(defect.ValueBefore)
+		phrase = text.T(i18n.ManifestEntryBefore) + " " + quoted(before)
 	}
 	if defect.HasValueAfter {
 		if phrase != "" {
 			phrase += separator
 		}
-		phrase += text.T(i18n.ManifestEntryAfter) + " " + quoted(defect.ValueAfter)
+		phrase += text.T(i18n.ManifestEntryAfter) + " " + quoted(after)
 	}
 	if phrase == "" {
 		return Line{}
@@ -630,12 +638,10 @@ func valuesOf(text i18n.Catalogue, defect manifest.Defect) Line {
 	return Line{Text: phrase, Color: palette.TextAccent}
 }
 
-// quoted puts a value in marks so that an empty one and a missing one do not
-// look the same on screen, which is the whole reason the model keeps them
-// apart. The characters inside that draw nothing are written out (visible), so
-// that a value differing from the one before it only by such a character does
-// not look the same as it either.
-func quoted(value string) string { return "\"" + visible(value) + "\"" }
+// quoted puts a value, already written as the screen shows it, in marks so that
+// an empty one and a missing one do not look the same on screen, which is the
+// whole reason the model keeps them apart.
+func quoted(shown string) string { return "\"" + shown + "\"" }
 
 // visible writes every character that draws nothing as its code point.
 //
@@ -659,12 +665,19 @@ func visible(value string) string {
 	var built strings.Builder
 	for _, r := range value {
 		if drawsNothing(r) {
-			fmt.Fprintf(&built, "<U+%04X>", r)
+			writeCodePoint(&built, r)
 			continue
 		}
 		built.WriteRune(r)
 	}
 	return built.String()
+}
+
+// writeCodePoint writes one character in the notation Unicode uses for a code
+// point, which is the one notation this screen has for a character that cannot
+// be told apart by looking at it.
+func writeCodePoint(built *strings.Builder, r rune) {
+	fmt.Fprintf(built, "<U+%04X>", r)
 }
 
 // drawsNothing reports a control, format or separator character other than the
