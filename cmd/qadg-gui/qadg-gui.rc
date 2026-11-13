@@ -1,0 +1,60 @@
+/* The Windows resources of qadg-gui.exe: its icon and its file properties.
+ *
+ * Both are read by Windows rather than by this program. File Explorer, a
+ * shortcut and the taskbar button show the icon, and the Details tab of the
+ * file and Task Manager show the properties. A binary without them gets a
+ * blank placeholder and an empty Details tab.
+ *
+ * Compiled by hand, on Windows, with the compiler the window already needs.
+ * The icon file comes first when the drawing changes, see
+ * internal/gui/appicon/appicon.go:
+ *
+ *   windres -i cmd/qadg-gui/qadg-gui.rc -O coff -o cmd/qadg-gui/rsrc_windows_amd64.syso
+ *
+ * Resource id 1, because Windows shows the lowest numbered icon in a binary as
+ * that binary's icon. The icon file is the one in internal/gui/appicon, reached
+ * across the tree rather than copied here, so the two executables cannot come
+ * to wear different pictures.
+ */
+1 ICON "../../internal/gui/appicon/lentils.ico"
+
+/* The version is NOT decided here. It is version.Tool in internal/version,
+ * the one place it lives and the only place the owner sets it, and this is a
+ * copy, because a resource script cannot ask a Go constant. A test in
+ * internal/guard reads the compiled resource back and holds it against
+ * version.Tool and against the author in internal/license, so a copy left
+ * behind after a version change fails a test instead of shipping.
+ *
+ * FILEVERSION takes four numbers and a version here has three, so the fourth
+ * is zero rather than a build counter, which would change without anybody
+ * deciding it had.
+ */
+1 VERSIONINFO
+FILEVERSION 0,1,0,0
+PRODUCTVERSION 0,1,0,0
+FILEOS 0x40004L
+FILETYPE 0x1L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            /* Task Manager and the Windows firewall prompt name a program by
+             * this line, so it is the name rather than a sentence. */
+            VALUE "FileDescription", "QA Data Generator"
+            VALUE "ProductName", "QA Data Generator"
+            VALUE "CompanyName", "DonislawDev"
+            VALUE "LegalCopyright", "Copyright (C) 2026 DonislawDev. Licensed under GPL-3.0-only."
+            VALUE "FileVersion", "0.1.0"
+            VALUE "ProductVersion", "0.1.0"
+            VALUE "InternalName", "qadg-gui"
+            VALUE "OriginalFilename", "qadg-gui.exe"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        /* US English and the Unicode code page. A reader that finds no
+         * translation matching the block above shows nothing at all. */
+        VALUE "Translation", 0x409, 1200
+    END
+END

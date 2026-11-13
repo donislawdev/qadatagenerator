@@ -29,6 +29,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/responsejson"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/about"
+	"github.com/donislawdev/qadatagenerator/internal/gui/appicon"
 	"github.com/donislawdev/qadatagenerator/internal/gui/assets"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/catalogue"
@@ -62,6 +63,11 @@ func main() {
 	}
 
 	application := app.New()
+	// The picture on the window, in the window switcher and on the taskbar
+	// button while the window is open. File Explorer reads another copy of the
+	// same drawing out of the .exe, and internal/gui/appicon says why there
+	// are two and where neither reaches.
+	application.SetIcon(fyne.NewStaticResource(appicon.Name, appicon.SVG))
 	application.Settings().SetTheme(fynetheme.Current())
 
 	text := i18n.English

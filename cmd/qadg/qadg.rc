@@ -1,0 +1,52 @@
+/* The Windows resources of qadg.exe: its icon and its file properties.
+ *
+ * A command line tool is exactly the kind of binary somebody finds on a build
+ * agent months later and has to identify. Without these File Explorer draws it
+ * with a blank placeholder and its Details tab says nothing about what it is,
+ * who made it or which version it is.
+ *
+ * Compiled by hand, on Windows. The icon file comes first when the drawing
+ * changes, see internal/gui/appicon/appicon.go:
+ *
+ *   windres -i cmd/qadg/qadg.rc -O coff -o cmd/qadg/rsrc_windows_amd64.syso
+ *
+ * Nothing here needs a C compiler when the command line is BUILT. The .syso is
+ * committed, the Go linker takes it as it is, and qadg still builds with cgo
+ * off. Its name carries GOOS and GOARCH, so a build for any other system
+ * ignores it.
+ *
+ * The icon is the window's own, reached across the tree rather than copied, so
+ * the two executables cannot come to wear different pictures. Reading a file
+ * there is not an import: the command line links nothing of the window.
+ */
+1 ICON "../../internal/gui/appicon/lentils.ico"
+
+/* A copy of version.Tool and of the author in internal/license, held against
+ * both by a test in internal/guard that reads the compiled resource. See
+ * cmd/qadg-gui/qadg-gui.rc for why the fourth number is zero.
+ */
+1 VERSIONINFO
+FILEVERSION 0,1,0,0
+PRODUCTVERSION 0,1,0,0
+FILEOS 0x40004L
+FILETYPE 0x1L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "FileDescription", "QA Data Generator, command line"
+            VALUE "ProductName", "QA Data Generator"
+            VALUE "CompanyName", "DonislawDev"
+            VALUE "LegalCopyright", "Copyright (C) 2026 DonislawDev. Licensed under GPL-3.0-only."
+            VALUE "FileVersion", "0.1.0"
+            VALUE "ProductVersion", "0.1.0"
+            VALUE "InternalName", "qadg"
+            VALUE "OriginalFilename", "qadg.exe"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

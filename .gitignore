@@ -63,6 +63,12 @@ CHANGELOG-DEV.md
 *.dylib
 *.a
 *.syso
+# Except the two Windows resources, which are compiled by hand from the .rc
+# script beside each and committed, because the Go toolchain links a .syso it
+# finds and runs no resource compiler of its own. Named exactly, so a stray
+# object left by cgo stays ignored.
+!/cmd/qadg/rsrc_windows_amd64.syso
+!/cmd/qadg-gui/rsrc_windows_amd64.syso
 
 # Test binaries and coverage. Named exactly rather than by extension, because
 # a pattern like *.out would also swallow golden files under testdata.

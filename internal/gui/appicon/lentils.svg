@@ -1,0 +1,238 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!--
+    The application icon: a wooden spoon heaped with red lentils, and a few
+    spilled beside it.
+
+    This is the master. The window wears this file, drawn by the toolkit at
+    256 px, and every size of lentils.ico from 40 px up is this file drawn at
+    256 px and reduced. 32 px and below come from lentils-small.svg instead.
+
+    Every lentil is a flat disc seen at a tilt: an edge band under a face,
+    growing as the disc tips. That is what tells a lentil from a ball, which
+    looks round from every side. They are matte and in three tones, because a
+    gloss and one even colour read as sugar coated sweets.
+
+    The spoon lies along x inside a group turned by -40 degrees. The front lip
+    of the bowl is drawn last, over the lowest lentils, so the heap sits in
+    the spoon rather than on it.
+
+    Drawn from shapes. No artwork by anybody else is in this file.
+  -->
+  <defs>
+    <radialGradient id="face0" cx="0.4" cy="0.35" r="0.75">
+      <stop offset="0" stop-color="#FBAE7E"/>
+      <stop offset="0.6" stop-color="#F2915B"/>
+      <stop offset="1" stop-color="#E67D46"/>
+    </radialGradient>
+    <radialGradient id="face1" cx="0.4" cy="0.35" r="0.75">
+      <stop offset="0" stop-color="#FAB98C"/>
+      <stop offset="0.6" stop-color="#F49E68"/>
+      <stop offset="1" stop-color="#EA8A52"/>
+    </radialGradient>
+    <radialGradient id="face2" cx="0.4" cy="0.35" r="0.75">
+      <stop offset="0" stop-color="#F6A06C"/>
+      <stop offset="0.6" stop-color="#EC8752"/>
+      <stop offset="1" stop-color="#DF733B"/>
+    </radialGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#CC6330"/>
+      <stop offset="1" stop-color="#B0511F"/>
+    </linearGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F2CF9C"/>
+      <stop offset="1" stop-color="#CC955C"/>
+    </linearGradient>
+    <linearGradient id="hollow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#A86F3C"/>
+      <stop offset="1" stop-color="#D9A56C"/>
+    </linearGradient>
+    <linearGradient id="lip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F4D4A4"/>
+      <stop offset="1" stop-color="#C48B52"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(132.6 124.1) rotate(-40)" stroke-linejoin="round">
+    <path d="M -10 -8 L -128 -13.5 A 13.5 13.5 0 0 0 -128 13.5 L -10 8 Z" fill="url(#wood)" stroke="#6E4219" stroke-width="3.6"/>
+    <path d="M -30 -1.5 C -58 -4 -88 2 -122 -3" fill="none" stroke="#B9814B" stroke-width="1.6" stroke-opacity="0.7"/>
+    <path d="M -54 4 C -76 6 -98 2.5 -116 5.5" fill="none" stroke="#B9814B" stroke-width="1.3" stroke-opacity="0.6"/>
+    <ellipse cx="56" cy="0" rx="72" ry="54" fill="url(#wood)" stroke="#6E4219" stroke-width="3.6"/>
+    <ellipse cx="58" cy="-3" rx="61" ry="43" fill="url(#hollow)"/>
+  </g>
+  <g transform="translate(165.7 58.6) rotate(-11)">
+    <ellipse rx="11.0" ry="10.0" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.6" rx="10.3" ry="9.2" fill="url(#face1)"/>
+  </g>
+  <g transform="translate(142.7 81.3) rotate(-13)">
+    <ellipse rx="11.0" ry="8.2" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.9" rx="10.3" ry="7.1" fill="url(#face2)"/>
+  </g>
+  <g transform="translate(190.1 43.5) rotate(10)">
+    <ellipse rx="11.0" ry="9.0" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.8" rx="10.3" ry="8.0" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(153.8 70.9) rotate(-31)">
+    <ellipse rx="11.0" ry="9.5" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.7" rx="10.3" ry="8.6" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(180.8 49.6) rotate(-10)">
+    <ellipse rx="11.0" ry="5.9" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-1.1" rx="10.3" ry="4.4" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(154.8 61.5) rotate(19)">
+    <ellipse rx="11.0" ry="9.5" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.7" rx="10.3" ry="8.6" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(165.8 56.0) rotate(15)">
+    <ellipse rx="11.0" ry="6.6" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-1.1" rx="10.3" ry="5.3" fill="url(#face1)"/>
+  </g>
+  <g transform="translate(145.5 93.7) rotate(51)">
+    <ellipse rx="11.0" ry="7.7" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.9" rx="10.3" ry="6.6" fill="url(#face1)"/>
+  </g>
+  <g transform="translate(167.3 73.8) rotate(69)">
+    <ellipse rx="11.0" ry="7.6" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.9" rx="10.3" ry="6.4" fill="url(#face1)"/>
+  </g>
+  <g transform="translate(194.8 53.9) rotate(17)">
+    <ellipse rx="11.0" ry="5.7" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-1.2" rx="10.3" ry="4.3" fill="url(#face2)"/>
+  </g>
+  <g transform="translate(179.6 64.7) rotate(-37)">
+    <ellipse rx="11.0" ry="6.0" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-1.1" rx="10.3" ry="4.6" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(157.2 85.5) rotate(-33)">
+    <ellipse rx="11.0" ry="6.4" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-1.1" rx="10.3" ry="5.0" fill="url(#face1)"/>
+  </g>
+  <g transform="translate(179.5 56.1) rotate(18)">
+    <ellipse rx="11.0" ry="8.1" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.9" rx="10.3" ry="7.0" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(156.1 80.7) rotate(-29)">
+    <ellipse rx="11.0" ry="8.0" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.9" rx="10.3" ry="6.9" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(170.0 67.3) rotate(-32)">
+    <ellipse rx="11.0" ry="9.5" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.7" rx="10.3" ry="8.6" fill="url(#face1)"/>
+  </g>
+  <g transform="translate(196.6 66.9) rotate(-65)">
+    <ellipse rx="11.0" ry="5.6" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-1.2" rx="10.3" ry="4.1" fill="url(#face2)"/>
+  </g>
+  <g transform="translate(181.1 51.8) rotate(7)">
+    <ellipse rx="11.0" ry="6.4" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-1.1" rx="10.3" ry="5.1" fill="url(#face1)"/>
+  </g>
+  <g transform="translate(169.6 62.1) rotate(-36)">
+    <ellipse rx="11.0" ry="7.7" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.9" rx="10.3" ry="6.6" fill="url(#face2)"/>
+  </g>
+  <g transform="translate(217.9 56.8) rotate(45)">
+    <ellipse rx="11.0" ry="7.6" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.9" rx="10.3" ry="6.5" fill="url(#face1)"/>
+  </g>
+  <g transform="translate(159.5 102.2) rotate(6)">
+    <ellipse rx="11.0" ry="9.9" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.7" rx="10.3" ry="9.1" fill="url(#face2)"/>
+  </g>
+  <g transform="translate(208.0 62.6) rotate(-27)">
+    <ellipse rx="11.0" ry="6.6" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-1.1" rx="10.3" ry="5.2" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(170.0 91.6) rotate(-22)">
+    <ellipse rx="11.0" ry="9.6" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.7" rx="10.3" ry="8.8" fill="url(#face2)"/>
+  </g>
+  <g transform="translate(149.9 115.9) rotate(32)">
+    <ellipse rx="11.0" ry="6.2" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-1.1" rx="10.3" ry="4.8" fill="url(#face1)"/>
+  </g>
+  <g transform="translate(185.8 79.7) rotate(67)">
+    <ellipse rx="11.0" ry="9.6" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.7" rx="10.3" ry="8.8" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(156.2 96.8) rotate(-60)">
+    <ellipse rx="11.0" ry="9.2" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.7" rx="10.3" ry="8.2" fill="url(#face1)"/>
+  </g>
+  <g transform="translate(185.5 70.0) rotate(-10)">
+    <ellipse rx="11.0" ry="5.8" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-1.2" rx="10.3" ry="4.3" fill="url(#face2)"/>
+  </g>
+  <g transform="translate(170.8 84.7) rotate(48)">
+    <ellipse rx="11.0" ry="9.8" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.7" rx="10.3" ry="9.0" fill="url(#face2)"/>
+  </g>
+  <g transform="translate(199.3 63.8) rotate(66)">
+    <ellipse rx="11.0" ry="8.5" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.8" rx="10.3" ry="7.4" fill="url(#face2)"/>
+  </g>
+  <g transform="translate(171.2 108.4) rotate(-29)">
+    <ellipse rx="11.0" ry="7.8" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.9" rx="10.3" ry="6.6" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(182.1 69.3) rotate(-32)">
+    <ellipse rx="11.0" ry="5.5" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-1.2" rx="10.3" ry="4.0" fill="url(#face1)"/>
+  </g>
+  <g transform="translate(196.0 87.5) rotate(65)">
+    <ellipse rx="11.0" ry="10.3" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.6" rx="10.3" ry="9.6" fill="url(#face2)"/>
+  </g>
+  <g transform="translate(160.3 125.4) rotate(-25)">
+    <ellipse rx="11.0" ry="5.7" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-1.2" rx="10.3" ry="4.2" fill="url(#face1)"/>
+  </g>
+  <g transform="translate(186.6 98.8) rotate(-39)">
+    <ellipse rx="11.0" ry="6.4" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-1.1" rx="10.3" ry="5.1" fill="url(#face1)"/>
+  </g>
+  <g transform="translate(211.8 80.2) rotate(-17)">
+    <ellipse rx="11.0" ry="7.8" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.9" rx="10.3" ry="6.7" fill="url(#face2)"/>
+  </g>
+  <g transform="translate(196.7 82.7) rotate(22)">
+    <ellipse rx="11.0" ry="6.7" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-1.0" rx="10.3" ry="5.4" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(187.6 91.3) rotate(-57)">
+    <ellipse rx="11.0" ry="9.5" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.7" rx="10.3" ry="8.7" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(200.2 104.9) rotate(-14)">
+    <ellipse rx="11.0" ry="5.7" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-1.2" rx="10.3" ry="4.3" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(210.2 98.7) rotate(-28)">
+    <ellipse rx="11.0" ry="8.6" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.8" rx="10.3" ry="7.6" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(187.0 118.6) rotate(12)">
+    <ellipse rx="11.0" ry="8.1" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.9" rx="10.3" ry="7.0" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(132.6 124.1) rotate(-40)" stroke-linejoin="round">
+    <path d="M -16 0 A 72 54 0 0 0 128 0 L 119 -3 A 61 43 0 0 1 -3 -3 Z" fill="url(#lip)"/>
+    <path d="M -16 0 A 72 54 0 0 0 128 0" fill="none" stroke="#6E4219" stroke-width="3.6" stroke-linecap="round"/>
+    <path d="M 119 -3 A 61 43 0 0 1 -3 -3" fill="none" stroke="#8A5A2B" stroke-width="2.2" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(206.0 182.0) rotate(25)">
+    <ellipse rx="11.0" ry="8.8" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.8" rx="10.3" ry="7.8" fill="url(#face2)"/>
+  </g>
+  <g transform="translate(228.0 204.0) rotate(-35)">
+    <ellipse rx="11.0" ry="6.1" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-1.1" rx="10.3" ry="4.6" fill="url(#face2)"/>
+  </g>
+  <g transform="translate(200.0 212.0) rotate(10)">
+    <ellipse rx="11.0" ry="10.4" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.6" rx="10.3" ry="9.7" fill="url(#face2)"/>
+  </g>
+  <g transform="translate(234.0 232.0) rotate(40)">
+    <ellipse rx="11.0" ry="7.7" fill="url(#edge)" stroke="#9A4318" stroke-width="1.8"/>
+    <ellipse cy="-0.9" rx="10.3" ry="6.5" fill="url(#face1)"/>
+  </g>
+</svg>

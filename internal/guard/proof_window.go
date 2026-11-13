@@ -122,4 +122,14 @@ var windowGuards = []Guard{
 	// mutation runner runs. An entry claiming it was proven by mutation would
 	// be a sentence nobody has checked.
 	{"a response record opened as a manifest is told apart rather than judged as one", "TestAResponseRecordOpenedAsAManifestIsToldApart", "internal/adapter/manifestjson", ByMutation},
+	// The program's icon and the properties of both executables. Each is
+	// proven by a fault planted in the test file itself: an older version in
+	// the resource, the call turned into a comment, a picture from the other
+	// drawing, a resource with one picture changed, an empty drawing.
+	{"both executables say who made them and which version they are, and the version is the one this build is", "TestBothExecutablesSayWhoMadeThemAndWhichVersion", "internal/guard", ByProbe},
+	{"a resource still carrying another version is told apart", "TestAnExecutableWithAnOlderVersionIsNoticed", "internal/guard", ByProbe},
+	{"the window wears the program's icon rather than the toolkit's logo", "TestTheWindowIsHandedTheProgramIcon", "internal/guard", ByProbe},
+	{"the icon file both executables carry is the drawing at every size Windows asks for", "TestTheIconFileIsDrawnFromTheDrawings", "internal/gui/appicon", ByProbe},
+	{"both executables carry the icon file as it is now", "TestBothExecutablesCarryTheIconFile", "internal/gui/appicon", ByProbe},
+	{"both drawings of the icon draw something the rasteriser could read", "TestBothDrawingsDrawASpoonRatherThanNothing", "internal/gui/appicon", ByProbe},
 }

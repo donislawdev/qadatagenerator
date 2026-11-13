@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!--
+    The same spoon drawn for 32 px and below, used only by lentils.ico for its
+    16, 20, 24 and 32 px entries.
+
+    At those sizes the master is a thin diagonal line with a dot at its end, so
+    this one has a larger bowl and a shorter handle and fills its square. The
+    outlines are about twice as heavy, there is no wood grain, and seven big
+    lentils stand in for the heap, because detail finer than a pixel turns
+    into noise rather than into a smaller picture.
+  -->
+  <defs>
+    <radialGradient id="face0" cx="0.4" cy="0.35" r="0.75">
+      <stop offset="0" stop-color="#FBAE7E"/>
+      <stop offset="0.6" stop-color="#F2915B"/>
+      <stop offset="1" stop-color="#E67D46"/>
+    </radialGradient>
+    <radialGradient id="face1" cx="0.4" cy="0.35" r="0.75">
+      <stop offset="0" stop-color="#FAB98C"/>
+      <stop offset="0.6" stop-color="#F49E68"/>
+      <stop offset="1" stop-color="#EA8A52"/>
+    </radialGradient>
+    <radialGradient id="face2" cx="0.4" cy="0.35" r="0.75">
+      <stop offset="0" stop-color="#F6A06C"/>
+      <stop offset="0.6" stop-color="#EC8752"/>
+      <stop offset="1" stop-color="#DF733B"/>
+    </radialGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#CC6330"/>
+      <stop offset="1" stop-color="#B0511F"/>
+    </linearGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F2CF9C"/>
+      <stop offset="1" stop-color="#CC955C"/>
+    </linearGradient>
+    <linearGradient id="hollow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#A86F3C"/>
+      <stop offset="1" stop-color="#D9A56C"/>
+    </linearGradient>
+    <linearGradient id="lip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F4D4A4"/>
+      <stop offset="1" stop-color="#C48B52"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(115.7 138.3) rotate(-40)" stroke-linejoin="round">
+    <path d="M -10 -11 L -98 -17 A 17 17 0 0 0 -98 17 L -10 11 Z" fill="#E2B27A" stroke="#6E4219" stroke-width="9"/>
+    <ellipse cx="60" cy="0" rx="84" ry="64" fill="#E2B27A" stroke="#6E4219" stroke-width="9"/>
+    <ellipse cx="62" cy="-4" rx="68" ry="48" fill="#B98049"/>
+  </g>
+  <g transform="translate(128.2 106.6) rotate(20)">
+    <ellipse rx="21.0" ry="16.8" fill="url(#edge)" stroke="#7E3410" stroke-width="6"/>
+    <ellipse cy="-1.5" rx="19.7" ry="14.9" fill="url(#face2)"/>
+  </g>
+  <g transform="translate(149.1 77.6) rotate(-30)">
+    <ellipse rx="21.0" ry="14.7" fill="url(#edge)" stroke="#7E3410" stroke-width="6"/>
+    <ellipse cy="-1.8" rx="19.7" ry="12.5" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(182.8 66.9) rotate(15)">
+    <ellipse rx="21.0" ry="17.8" fill="url(#edge)" stroke="#7E3410" stroke-width="6"/>
+    <ellipse cy="-1.4" rx="19.7" ry="16.1" fill="url(#face2)"/>
+  </g>
+  <g transform="translate(152.3 123.9) rotate(-10)">
+    <ellipse rx="21.0" ry="18.9" fill="url(#edge)" stroke="#7E3410" stroke-width="6"/>
+    <ellipse cy="-1.3" rx="19.7" ry="17.3" fill="url(#face1)"/>
+  </g>
+  <g transform="translate(178.8 94.4) rotate(35)">
+    <ellipse rx="21.0" ry="15.8" fill="url(#edge)" stroke="#7E3410" stroke-width="6"/>
+    <ellipse cy="-1.6" rx="19.7" ry="13.7" fill="url(#face0)"/>
+  </g>
+  <g transform="translate(205.7 82.7) rotate(-20)">
+    <ellipse rx="21.0" ry="16.8" fill="url(#edge)" stroke="#7E3410" stroke-width="6"/>
+    <ellipse cy="-1.5" rx="19.7" ry="14.9" fill="url(#face1)"/>
+  </g>
+  <g transform="translate(162.2 82.1) rotate(0)">
+    <ellipse rx="21.0" ry="19.9" fill="url(#edge)" stroke="#7E3410" stroke-width="6"/>
+    <ellipse cy="-1.1" rx="19.7" ry="18.5" fill="url(#face1)"/>
+  </g>
+  <g transform="translate(115.7 138.3) rotate(-40)" stroke-linejoin="round">
+    <path d="M -24 0 A 84 64 0 0 0 144 0 L 130 -4 A 68 48 0 0 1 -6 -4 Z" fill="#E2B27A"/>
+    <path d="M -24 0 A 84 64 0 0 0 144 0" fill="none" stroke="#6E4219" stroke-width="9" stroke-linecap="round"/>
+    <path d="M 130 -4 A 68 48 0 0 1 -6 -4" fill="none" stroke="#8A5A2B" stroke-width="5.4" stroke-linecap="round"/>
+  </g>
+</svg>

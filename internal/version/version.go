@@ -17,6 +17,13 @@ package version
 // manifest format, which is to say about files sitting in somebody else's test
 // repository. Raising it is never housekeeping, which is why the next session
 // does not get to do it either.
+//
+// Two copies of it live in the Windows resource scripts, cmd/qadg/qadg.rc and
+// cmd/qadg-gui/qadg-gui.rc, because Windows shows a version in the properties
+// of each .exe and a resource script cannot read this constant. Raising it
+// means writing the new number in both scripts and compiling them again with
+// the windres command each one carries. A test in internal/guard fails until
+// that is done.
 const Tool = "0.1.0"
 
 // Catalog is the version of the corruption catalog this build carries. It

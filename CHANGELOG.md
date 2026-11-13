@@ -572,6 +572,10 @@ repository once they are released.
 
 ### Added
 
+- **The program has its own icon: a wooden spoon of red lentils.**
+  It shows on the window and, on Windows, in File Explorer for both
+  qadg.exe and qadg-gui.exe, whose properties now also say what they are,
+  who made them and which version they are.
 - **Six kinds of damage that work on any text.** A file you damage with
   corrupt or Damage a file can now get, in its text columns: an emoji, a family
   emoji that is one character built from seven, an invisible character in the
