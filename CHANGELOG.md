@@ -604,8 +604,11 @@ repository once they are released.
   you damage with corrupt or Damage a file it is a column whose header is a
   common English or Polish word for a given name or a surname, such as
   `first_name`, `surname`, `imię` or `nazwisko`, and the screen and the log say
-  that this was read from the header. O'Brien and Null go only to surnames, and
-  a given name is replaced by a given name. A column under any other header
+  that this was read from the header. A column holding a whole name, such as
+  `full_name` or `imię i nazwisko`, gets a whole real name in its place, such
+  as Sean O'Brien, Łukasz Wójcik, 李明 or Anna Null. O'Brien and Null go only to
+  surnames and whole names, and a given name is replaced by a given name. A
+  column under any other header
   never gets a name, and the manifest says why. A column with a maximum length
   never gets a name longer than it allows. The catalog says what these entries
   need with two new capabilities, `schema.person-name` and `schema.surname`.

@@ -37,6 +37,10 @@ import (
 // keyboard rather than the curly one a word processor puts in its place.
 var apostropheSurnames = []string{"O'Brien", "O'Connor", "D'Angelo", "D'Arcy"}
 
+// apostropheFullNames are the same surnames each after a given name of the
+// language it comes from, for a column holding a whole name.
+var apostropheFullNames = []string{"Sean O'Brien", "Mary O'Connor", "Marco D'Angelo", "Claire D'Arcy"}
+
 // diacriticGivenNames are given names with a letter that carries a mark, each
 // written as one composed character. The decomposed writing is another entry.
 var diacriticGivenNames = []string{
@@ -59,6 +63,18 @@ var diacriticSurnames = []string{
 	"Gon\U000000E7alves",        // Gonçalves
 }
 
+// diacriticFullNames are whole names with a marked letter, each a given name
+// and a surname of one language, and a Polish surname in the form that agrees
+// with the given name, so no pair reads as a name nobody could have.
+var diacriticFullNames = []string{
+	"\U00000141ukasz W\U000000F3jcik",                 // Łukasz Wójcik
+	"Ma\U00000142gorzata K\U00000119dzierska",         // Małgorzata Kędzierska
+	"J\U000000F3zef Ga\U00000142\U00000105zka",        // Józef Gałązka
+	"Jos\U000000E9 Gon\U000000E7alves",                // José Gonçalves
+	"Fran\U000000E7ois Lef\U000000E8vre",              // François Lefèvre
+	"Ji\U00000159\U000000ED Dvo\U00000159\U000000E1k", // Jiří Dvořák
+}
+
 // cjkGivenNames are given names in Chinese, Japanese and Korean writing, each
 // two characters long, which is the length the entry is about: complete, and
 // shorter than a minimum of three.
@@ -77,17 +93,46 @@ var cjkSurnames = []string{
 	"\U0000B0A8\U0000AD81", // 남궁, Namgung
 }
 
+// cjkFullNames are whole Chinese names of two characters, a surname of one and
+// a given name of one, written as they are written at home: the surname
+// first and nothing between. Two characters is the length the entry is about,
+// and a whole Japanese or Korean name is three characters or more, so only
+// Chinese ones are here.
+var cjkFullNames = []string{
+	"\U0000674E\U0000660E", // 李明, Li Ming
+	"\U0000738B\U000082B3", // 王芳, Wang Fang
+	"\U00005F20\U00004F1F", // 张伟, Zhang Wei
+	"\U00005218\U00006D0B", // 刘洋, Liu Yang
+}
+
 // nullSurname is the real surname that reads as an absent value.
 var nullSurname = []string{"Null"}
 
-// namesFor picks the list for the part of a name a column holds, and nothing
-// for a column holding no names.
-func namesFor(part recipe.NamePart, given, surnames []string) []string {
+// nullFullNames carry the surname Null after a common given name.
+var nullFullNames = []string{"Anna Null", "John Null"}
+
+// nameLists are the names one entry supplies, a list for each part of a name a
+// column can hold. A part the entry has nothing for is left empty, and the
+// entry then supplies nothing to such a column.
+type nameLists struct {
+	given, surnames, whole []string
+}
+
+// For picks the list for the part of a name a column holds, and nothing for a
+// column holding no names.
+//
+// A whole name is given for a whole name. A surname put alone into a column
+// that holds whole names would be a value the column was not meant to hold,
+// and the report would ask whether the application was right to refuse it
+// for that rather than the one question the entry asks.
+func (l nameLists) For(part recipe.NamePart) []string {
 	switch part {
 	case recipe.GivenName:
-		return given
+		return l.given
 	case recipe.Surname:
-		return surnames
+		return l.surnames
+	case recipe.FullName:
+		return l.whole
 	}
 	return nil
 }
@@ -115,8 +160,8 @@ func namesFor(part recipe.NamePart, given, surnames []string) []string {
 // than something the value shows.
 func replacedByName(target mutator.Target, names []string, purpose string) mutator.Outcome {
 	if len(names) == 0 {
-		return mutator.Skipped("nothing says this column holds a part of a person's name, " +
-			"and the name this damage supplies is expected accepted only in such a column")
+		return mutator.Skipped("nothing says this column holds the kind of name this damage " +
+			"supplies, and that name is expected accepted only in such a column")
 	}
 	differing, fitting := 0, 0
 	for _, name := range names {

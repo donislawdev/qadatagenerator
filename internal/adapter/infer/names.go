@@ -30,7 +30,8 @@ import (
 //
 // # Why these words and no others
 //
-// Each one names a part of a person's name and nothing else. A bare name is
+// Each one names a part of a person's name, or the whole of it, and nothing
+// else. A bare name is
 // left out because a column called name holds products, companies and logins
 // as often as people. Abbreviations such as fname are left out because a file
 // name is abbreviated the same way. English and Polish because those are the
@@ -53,6 +54,19 @@ var namedHeaders = map[string]recipe.NamePart{
 	"surname":             recipe.Surname,
 	"familyname":          recipe.Surname,
 	"nazwisko":            recipe.Surname,
+	// A whole name, in the words of a form in either language. The Polish
+	// ones in both orders, because an official list puts the surname first.
+	"fullname":               recipe.FullName,
+	"nameandsurname":         recipe.FullName,
+	"firstandlastname":       recipe.FullName,
+	"imi\U00000119inazwisko": recipe.FullName,
+	"imieinazwisko":          recipe.FullName,
+	"nazwiskoiimi\U00000119": recipe.FullName,
+	"nazwiskoiimie":          recipe.FullName,
+	"imi\U00000119nazwisko":  recipe.FullName,
+	"imienazwisko":           recipe.FullName,
+	"nazwiskoimi\U00000119":  recipe.FullName,
+	"nazwiskoimie":           recipe.FullName,
 }
 
 // namePartOfHeader returns the part of a person's name a header says its column
@@ -63,8 +77,9 @@ func namePartOfHeader(header string) (recipe.NamePart, bool) {
 }
 
 // foldedHeader writes a header the way namedHeaders is keyed: in small letters,
-// composed, and without the spaces, underscores, hyphens and dots that one
-// file puts between the words of a header and another leaves out.
+// composed, and without the spaces, underscores, hyphens, dots, commas and
+// slashes that one file puts between the words of a header and another leaves
+// out, such as Nazwisko, imię or Imię/Nazwisko.
 //
 // # Why composed
 //
@@ -75,7 +90,7 @@ func namePartOfHeader(header string) (recipe.NamePart, bool) {
 func foldedHeader(header string) string {
 	var folded strings.Builder
 	for _, r := range norm.NFC.String(strings.ToLower(header)) {
-		if unicode.IsSpace(r) || r == '_' || r == '-' || r == '.' {
+		if unicode.IsSpace(r) || strings.ContainsRune("_-.,/", r) {
 			continue
 		}
 		folded.WriteRune(r)
@@ -84,11 +99,14 @@ func foldedHeader(header string) string {
 }
 
 // nameBasis is what a column's basis adds when its header names a part of a
-// person's name.
+// person's name, or the whole of it.
 func nameBasis(part recipe.NamePart) string {
 	held := "given names"
-	if part == recipe.Surname {
+	switch part {
+	case recipe.Surname:
 		held = "surnames"
+	case recipe.FullName:
+		held = "full names"
 	}
 	return ", and its header is one this build reads as naming " + held
 }

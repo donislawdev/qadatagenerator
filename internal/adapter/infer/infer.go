@@ -358,7 +358,7 @@ func NotInferred() []string {
 		// reader seeing names recognised under last_name would otherwise
 		// expect them recognised under Nachname too.
 		"people's names, except in a column whose header is a common English or Polish word " +
-			"for a given name or a surname, such as first_name or nazwisko",
+			"for a given name, a surname or a full name, such as first_name, nazwisko or full_name",
 		"numeric, date and postal column types, because a column of digits is not a column " +
 			"of numbers",
 	}

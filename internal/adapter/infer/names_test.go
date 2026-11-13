@@ -14,13 +14,22 @@ import (
 // statement read from a proof found.
 const headerReading = "its header is one this build reads"
 
+// partSaid is how the basis names what a column holds, so that a reader of the
+// manifest learns which part of a name was read and not only that one was.
+var partSaid = map[recipe.NamePart]string{
+	recipe.GivenName: "given names",
+	recipe.Surname:   "surnames",
+	recipe.FullName:  "full names",
+}
+
 // 🔴 A header from the short list marks its column as holding that part of a
-// name, however the file spells the words apart, and no other header does.
+// name, or the whole of it, however the file spells the words apart, and no
+// other header does.
 //
 // The headers that must not match are the point as much as the ones that must.
-// A bare name holds products as often as people, fname is also a file name, and
-// a column holding whole names has no part this build can damage, so each of
-// those would land a hard expectation of acceptance on a column it does not
+// A bare name holds products as often as people, fname is also a file name,
+// and a customer name is a company as often as a person, so each of those
+// would land a hard expectation of acceptance on a column it does not
 // describe.
 func TestAHeaderNamingAPartOfANameMarksItsColumn(t *testing.T) {
 	for header, want := range map[string]recipe.NamePart{
@@ -40,11 +49,22 @@ func TestAHeaderNamingAPartOfANameMarksItsColumn(t *testing.T) {
 		"surname":                  recipe.Surname,
 		"Family Name":              recipe.Surname,
 		"Nazwisko":                 recipe.Surname,
+		"nazwisko,":                recipe.Surname,
+		"full_name":                recipe.FullName,
+		"Full Name":                recipe.FullName,
+		"Name and Surname":         recipe.FullName,
+		"first and last name":      recipe.FullName,
+		"imi\U00000119 i nazwisko": recipe.FullName,
+		"Imie i nazwisko":          recipe.FullName,
+		"NAZWISKO I IMI\U00000118": recipe.FullName,
+		"imie_nazwisko":            recipe.FullName,
+		"Nazwisko, imi\U00000119":  recipe.FullName,
+		"Imi\U00000119/Nazwisko":   recipe.FullName,
 		"name":                     "",
 		"fname":                    "",
 		"Nachname":                 "",
-		"full_name":                "",
-		"imi\U00000119 i nazwisko": "",
+		"customer name":            "",
+		"full_name_2":              "",
 		"nazwiska":                 "",
 		"first_name_2":             "",
 		"city":                     "",
@@ -58,6 +78,9 @@ func TestAHeaderNamingAPartOfANameMarksItsColumn(t *testing.T) {
 		if read := strings.Contains(finding.Basis, headerReading); read != (want != "") {
 			t.Errorf("the header %+q: the basis says it was read off the header %v, want %v: %s",
 				header, read, want != "", finding.Basis)
+		}
+		if said, named := partSaid[want]; named && !strings.HasSuffix(finding.Basis, "naming "+said) {
+			t.Errorf("the header %+q: the basis does not say it names %s: %s", header, said, finding.Basis)
 		}
 		if fields := shape.FieldsOf("records"); len(fields) != 1 || fields[0].NamePart != want {
 			t.Errorf("the header %+q reaches the engine as %+v, want a column holding %q",

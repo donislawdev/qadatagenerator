@@ -36,14 +36,32 @@ var nameEntries = []struct {
 	carries func(string) bool
 	about   string
 }{
-	{nameApostrophe, []recipe.NamePart{recipe.Surname}, carriesApostrophe,
+	{nameApostrophe, []recipe.NamePart{recipe.Surname, recipe.FullName}, carriesApostrophe,
 		"an apostrophe, the plain one, in a name of letters"},
-	{nameDiacritics, []recipe.NamePart{recipe.GivenName, recipe.Surname}, carriesMarkedLetter,
-		"a Latin letter outside ASCII, composed"},
-	{nameNullSurname, []recipe.NamePart{recipe.Surname}, func(name string) bool { return name == "Null" },
-		"the surname Null"},
-	{nameCJK, []recipe.NamePart{recipe.GivenName, recipe.Surname}, carriesTwoCJKCharacters,
-		"two Chinese, Japanese or Korean characters"},
+	{nameDiacritics, []recipe.NamePart{recipe.GivenName, recipe.Surname, recipe.FullName},
+		carriesMarkedLetter, "a Latin letter outside ASCII, composed"},
+	{nameNullSurname, []recipe.NamePart{recipe.Surname, recipe.FullName},
+		func(name string) bool { return name == "Null" }, "the surname Null"},
+	{nameCJK, []recipe.NamePart{recipe.GivenName, recipe.Surname, recipe.FullName},
+		carriesTwoCJKCharacters, "two Chinese, Japanese or Korean characters"},
+}
+
+// carriesAsPart asks a part of a name whether it carries what its entry is
+// about, and a whole name whether it does or one of its words does, because
+// the apostrophe of Sean O'Brien and the Null of Anna Null are in the surname.
+func carriesAsPart(carries func(string) bool, name string, part recipe.NamePart) bool {
+	if carries(name) {
+		return true
+	}
+	if part != recipe.FullName {
+		return false
+	}
+	for _, word := range strings.Fields(name) {
+		if carries(word) {
+			return true
+		}
+	}
+	return false
 }
 
 func nameColumn(part recipe.NamePart) recipe.FieldInfo {
@@ -89,7 +107,7 @@ func TestEveryNameSuppliedCarriesWhatItsEntryIsAbout(t *testing.T) {
 		for _, part := range entry.parts {
 			names := supplied(t, entry.id, nameColumn(part), "Nowak", "names")
 			for _, name := range names {
-				if !entry.carries(name) {
+				if !carriesAsPart(entry.carries, name, part) {
 					t.Errorf("%s gave %q for a column of %s, which is not %s",
 						entry.id, name, part, entry.about)
 				}
@@ -115,6 +133,32 @@ func TestAGivenNameReplacesAGivenNameAndASurnameASurname(t *testing.T) {
 		for name := range distinct(supplied(t, id, nameColumn(recipe.Surname), "Nowak", "parts")) {
 			if given[name] {
 				t.Errorf("%s supplies %q both as a given name and as a surname", id, name)
+			}
+		}
+	}
+}
+
+// 🔴 A whole name replaces a whole name: a given name and a surname with one
+// space between, or two Chinese characters with none, and never a name the
+// same entry gives a column of surnames.
+//
+// A column of whole names that got O'Brien alone would hold a value it was not
+// meant to hold, and the report would ask whether the application was right to
+// refuse it for that rather than the one question the entry asks.
+func TestAWholeNameReplacesAWholeName(t *testing.T) {
+	if isWholeName("O'Brien") || isWholeName("Sean  O'Brien") || isWholeName("Sean O'Brien Jr") ||
+		!isWholeName("Sean O'Brien") || !isWholeName("\U0000674E\U0000660E") {
+		t.Fatal("the shape of a whole name is not told apart from a part of one")
+	}
+	for _, entry := range nameEntries {
+		surnames := distinct(supplied(t, entry.id, nameColumn(recipe.Surname), "Nowak", "whole"))
+		for name := range distinct(supplied(t, entry.id, nameColumn(recipe.FullName), "Anna Nowak", "whole")) {
+			if !isWholeName(name) {
+				t.Errorf("%s gave %q to a column of whole names, which is not a whole name",
+					entry.id, name)
+			}
+			if surnames[name] {
+				t.Errorf("%s supplies %q both as a surname and as a whole name", entry.id, name)
 			}
 		}
 	}
@@ -230,13 +274,26 @@ func TestANameLongerThanTheColumnAllowsIsNeverSupplied(t *testing.T) {
 // engine, which stops it first. The engine is the one that decides, and this
 // is what a caller that skipped it would meet instead of a name in a column of
 // towns.
+//
+// The same holds for a column of given names and the two entries about
+// surnames, which have no given name to supply.
 func TestAColumnHoldingNoNamesIsRefused(t *testing.T) {
-	for _, id := range []catalog.ID{nameDiacritics, nameCJK} {
-		outcome := damage(t, id, mutator.Target{Value: "Szczyrk", Field: nameColumn(""),
+	for _, given := range []struct {
+		id   catalog.ID
+		part recipe.NamePart
+	}{
+		{nameDiacritics, ""},
+		{nameCJK, ""},
+		{nameApostrophe, ""},
+		{nameNullSurname, ""},
+		{nameApostrophe, recipe.GivenName},
+		{nameNullSurname, recipe.GivenName},
+	} {
+		outcome := damage(t, given.id, mutator.Target{Value: "Szczyrk", Field: nameColumn(given.part),
 			Source: seed.New("towns")})
 		if outcome.Applied() || outcome.ValueUnfit() {
-			t.Errorf("%s in a column of towns came back applied %v, unfit %v",
-				id, outcome.Applied(), outcome.ValueUnfit())
+			t.Errorf("%s in a column holding %q came back applied %v, unfit %v",
+				given.id, given.part, outcome.Applied(), outcome.ValueUnfit())
 		}
 	}
 }
@@ -283,6 +340,30 @@ func carriesMarkedLetter(name string) bool {
 		}
 	}
 	return false
+}
+
+// isWholeName says whether a name is a given name and a surname: two words of
+// letters with one space between, or two Chinese characters written with
+// nothing between, as a whole Chinese name is.
+func isWholeName(name string) bool {
+	if carriesTwoCJKCharacters(name) {
+		return true
+	}
+	words := strings.Split(name, " ")
+	if len(words) != 2 {
+		return false
+	}
+	for _, word := range words {
+		if word == "" {
+			return false
+		}
+		for _, r := range word {
+			if r != '\'' && !unicode.IsLetter(r) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func carriesTwoCJKCharacters(name string) bool {

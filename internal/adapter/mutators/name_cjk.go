@@ -31,5 +31,5 @@ func (nameCJK) ID() catalog.ID { return nameCJKID }
 // Damage puts one of the names in these writings in place of the value.
 func (nameCJK) Damage(target mutator.Target) mutator.Outcome {
 	return replacedByName(target,
-		namesFor(target.Field.NamePart, cjkGivenNames, cjkSurnames), ":name-cjk")
+		nameLists{cjkGivenNames, cjkSurnames, cjkFullNames}.For(target.Field.NamePart), ":name-cjk")
 }

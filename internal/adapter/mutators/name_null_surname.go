@@ -8,7 +8,8 @@ import (
 // nameNullSurnameID is the catalog entry this implements.
 const nameNullSurnameID catalog.ID = "REV.name.null_surname"
 
-// nameNullSurname puts the surname Null in place of a surname.
+// nameNullSurname puts the surname Null in place of a surname, and a whole name
+// ending in Null in place of a whole name.
 //
 // # What the application is expected to do
 //
@@ -27,7 +28,8 @@ type nameNullSurname struct{}
 // ID is the catalog identifier.
 func (nameNullSurname) ID() catalog.ID { return nameNullSurnameID }
 
-// Damage puts Null in place of the value.
+// Damage puts Null, or a whole name ending in it, in place of the value.
 func (nameNullSurname) Damage(target mutator.Target) mutator.Outcome {
-	return replacedByName(target, nullSurname, ":name-null-surname")
+	return replacedByName(target, nameLists{surnames: nullSurname, whole: nullFullNames}.
+		For(target.Field.NamePart), ":name-null-surname")
 }

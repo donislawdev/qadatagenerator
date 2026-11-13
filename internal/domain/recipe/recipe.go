@@ -377,19 +377,22 @@ type FieldInfo struct {
 	NamePart NamePart
 }
 
-// NamePart is a part of a person's name.
+// NamePart is the part of a person's name a column holds, or the whole of it.
 type NamePart string
 
 // The parts of a name a column can hold.
 //
-// A column holding a whole name in one value has no part here, and that is a
-// gap rather than a choice made for good: damage that supplies a surname would
-// have to find the surname inside the value first.
+// A whole name is one of them rather than a pair of the other two, because
+// nothing in its value says where the given name ends. Jan Kowalski and
+// Kowalski Jan are both written, and the damage that needs a column of names
+// replaces the whole value with a whole name, so it never has to know.
 const (
 	// GivenName is a first name, or a second one.
 	GivenName NamePart = "given"
 	// Surname is a family name.
 	Surname NamePart = "surname"
+	// FullName is a given name and a surname in one value.
+	FullName NamePart = "full"
 )
 
 // Unit returns how the maximum length of this field is counted, defaulting to

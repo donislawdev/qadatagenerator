@@ -103,6 +103,49 @@ func TestNamesLandOnlyUnderAHeaderNamingThem(t *testing.T) {
 	}
 }
 
+// 🔴 Under a header naming a whole name, every entry about names lands, and each
+// puts a whole name in place of the whole value.
+//
+// The column holds a given name and a surname in one value, and nothing in the
+// value says where one ends. The damage never looks for the surname, it
+// replaces all of it, so the value written has to be a whole name rather than
+// a surname alone.
+func TestAWholeNameGetsAWholeNameInItsPlace(t *testing.T) {
+	const whole = "imi\U00000119 i nazwisko"
+	landed := map[catalog.ID]int{}
+	for _, defect := range namesDamaged(t, "miasto,"+whole, "Szczyrk,Anna Nowak") {
+		if !defect.Applied {
+			t.Errorf("%s was refused in row %d of a file with a column for it: %s",
+				defect.Mutator, defect.Location.Row, defect.FailureReason)
+			continue
+		}
+		landed[defect.Mutator]++
+		if defect.Location.Field != whole {
+			t.Errorf("%s landed on %q, which holds no names", defect.Mutator, defect.Location.Field)
+		}
+		if defect.ValueBefore != "Anna Nowak" || defect.ValueAfter == "Anna Nowak" ||
+			!wholeNameShape(defect.ValueAfter) {
+			t.Errorf("%s put %q in place of %q, where a whole name was due", defect.Mutator,
+				defect.ValueAfter, defect.ValueBefore)
+		}
+	}
+	for _, id := range []catalog.ID{"REV.name.apostrophe", "REV.name.null_surname",
+		"REV.name.diacritics", "REV.name.cjk"} {
+		if landed[id] == 0 {
+			t.Errorf("%s never landed on a column of whole names", id)
+		}
+	}
+}
+
+// wholeNameShape is a given name and a surname with one space between, or two
+// characters with none, which is how a whole Chinese name is written.
+func wholeNameShape(value string) bool {
+	if words := strings.Split(value, " "); len(words) == 2 && words[0] != "" && words[1] != "" {
+		return true
+	}
+	return !strings.Contains(value, " ") && len([]rune(value)) == 2
+}
+
 // Without a header naming them, every order about names is refused in the
 // manifest rather than guessed onto a column of text, and the refusal is about
 // what the run lacks rather than about the value.

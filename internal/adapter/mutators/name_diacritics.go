@@ -10,7 +10,7 @@ const nameDiacriticsID catalog.ID = "REV.name.diacritics"
 
 // nameDiacritics puts a real name with a letter that carries a mark in place of
 // a name of the same part: a given name for a given name, a surname for a
-// surname.
+// surname, a whole name for a whole name.
 //
 // # What the application is expected to do
 //
@@ -33,5 +33,6 @@ func (nameDiacritics) ID() catalog.ID { return nameDiacriticsID }
 // Damage puts one of the names with a marked letter in place of the value.
 func (nameDiacritics) Damage(target mutator.Target) mutator.Outcome {
 	return replacedByName(target,
-		namesFor(target.Field.NamePart, diacriticGivenNames, diacriticSurnames), ":name-diacritics")
+		nameLists{diacriticGivenNames, diacriticSurnames, diacriticFullNames}.For(target.Field.NamePart),
+		":name-diacritics")
 }

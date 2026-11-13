@@ -1562,13 +1562,15 @@ capabilities:
   schema.person-name:
     supplied_by: schema
     description: >-
-      Know which fields hold a part of a person's name, a given name or a
-      surname, as opposed to other text such as a town or a product name.
+      Know which fields hold a person's name, whole or a part of it such as a
+      given name or a surname, as opposed to other text such as a town or a
+      product name.
 
   schema.surname:
     supplied_by: schema
     description: >-
-      Know which fields hold surnames as opposed to given names or other text.
+      Know which fields hold surnames, alone or together with the given name in
+      one value, as opposed to given names alone or other text.
 
   date.arithmetic:
     supplied_by: provider

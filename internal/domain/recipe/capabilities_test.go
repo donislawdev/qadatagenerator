@@ -7,8 +7,9 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 )
 
-// 🔴 A column of surnames answers for names and for surnames, a column of given
-// names for names only, and a column holding no names for neither.
+// 🔴 A column of surnames answers for names and for surnames, and so does a
+// column of whole names, a column of given names for names only, and a column
+// holding no names for neither.
 //
 // The engine asks the column rather than the run for both, so this is the
 // whole of what keeps O'Brien off a column of first names and off a column of
@@ -22,6 +23,7 @@ func TestAColumnSaysWhichPartOfANameItHolds(t *testing.T) {
 		surnameOnly bool
 	}{
 		{recipe.Surname, true, true},
+		{recipe.FullName, true, true},
 		{recipe.GivenName, true, false},
 		{"", false, false},
 	} {

@@ -71,7 +71,7 @@ var columnWords = map[Name]string{
 	SchemaMaxLength:      "with a declared maximum length",
 	SchemaEnumValues:     "with a declared list of allowed values",
 	SchemaRequiredFields: "declared as required",
-	SchemaPersonName:     "known to hold given names or surnames",
+	SchemaPersonName:     "known to hold people's names",
 	SchemaSurname:        "known to hold surnames",
 	KeyUnique:            "declared as unique",
 }

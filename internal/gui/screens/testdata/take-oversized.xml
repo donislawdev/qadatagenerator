@@ -918,10 +918,10 @@
 																							<text color="disabled" pos="4,206" size="283x16">relations between tables, because one file is one</text>
 																							<text color="disabled" pos="4,223" size="284x16">table, people's names, except in a column whose</text>
 																							<text color="disabled" pos="4,240" size="278x16">header is a common English or Polish word for a</text>
-																							<text color="disabled" pos="4,257" size="278x16">given name or a surname, such as first_name or</text>
-																							<text color="disabled" pos="4,274" size="272x16">nazwisko and numeric, date and postal column</text>
-																							<text color="disabled" pos="4,291" size="284x16">types, because a column of digits is not a column</text>
-																							<text color="disabled" pos="4,308" size="66x16">of numbers</text>
+																							<text color="disabled" pos="4,257" size="267x16">given name, a surname or a full name, such as</text>
+																							<text color="disabled" pos="4,274" size="279x16">first_name, nazwisko or full_name and numeric,</text>
+																							<text color="disabled" pos="4,291" size="283x16">date and postal column types, because a column</text>
+																							<text color="disabled" pos="4,308" size="207x16">of digits is not a column of numbers</text>
 																						</widget>
 																					</widget>
 																				</container>
