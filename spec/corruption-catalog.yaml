@@ -1222,12 +1222,13 @@ mutators:
     requires:
       - unicode.normalization
     example:
-      before: "Żółć in NFC"
-      after: "Żółć in NFD, each accent a separate code point"
+      before: "Żółć"
+      after: "Z\\u0307o\\u0301łc\\u0301"
       note: >-
         Confidence is hard because the two forms are the same text by
         specification. An application that treats them as different values will
-        also fail to find a user who registered from another device.
+        also fail to find a user who registered from another device. The l with a
+        stroke has no decomposition and stays one code point.
 
   - id: UNI.normalization.non_idempotent
     layer: UNI

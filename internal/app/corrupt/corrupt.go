@@ -225,6 +225,7 @@ func (e Engine) ApplyInRow(order Order, cell func(field string) (Cell, bool)) (m
 		return first.entry, first.change, first.wrote
 	}
 	remaining := slices.Clone(order.Instead)
+	tried := false
 	for round := 1; len(remaining) > 0; round++ {
 		drawn := int(e.source.IntN(seed.Coordinate{
 			Entity: order.Entity, Row: int64(order.Row), Field: string(order.Mutator),
@@ -236,12 +237,24 @@ func (e Engine) ApplyInRow(order Order, cell func(field string) (Cell, bool)) (m
 		if !addressed {
 			continue
 		}
-		if tried := e.applyAt(order, next, found, addressed); !tried.unfit {
-			return tried.entry, tried.change, tried.wrote
+		tried = true
+		if attempt := e.applyAt(order, next, found, addressed); !attempt.unfit {
+			return attempt.entry, attempt.change, attempt.wrote
 		}
 	}
-	return first.entry, Change{}, false
+	refusal := first.entry
+	if tried {
+		// The entry names one column, and without this a reader would ask why
+		// the damage was not put in another one that looks as if it could.
+		refusal.FailureReason += ". " + otherColumnsTried
+	}
+	return refusal, Change{}, false
 }
+
+// otherColumnsTried closes the reason of a refusal that every covered column of
+// the row gave.
+const otherColumnsTried = "The other columns of this row that this damage covers were tried " +
+	"as well, and none of them could carry it"
 
 // attemptAt is one try of an order on one column.
 type attemptAt struct {

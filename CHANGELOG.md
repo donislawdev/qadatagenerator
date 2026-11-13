@@ -12,6 +12,15 @@ repository once they are released.
 
 ### BREAKING
 
+- **The same seed damages a file differently.** corrupt and Damage a file
+  choose the column for each damaged row on its own, where one kind of damage
+  used to land in the same column in every row. A file of a few rows with
+  several layers named gets damage from as many layers as it has rows, where it
+  used to get the first few kinds of the first layer for every seed. Damage a
+  value cannot take, such as an emoji for a column of digits, goes to another
+  column of the same row that it applies to, and the manifest names the column
+  it landed in. With the same seed, a damaged file and its manifest differ from
+  before.
 - **In en-US a postal code belongs to the city and the state of its row.** A
   dataset with a postal code beside a city, a state or both gets a code of that
   place, where it used to get a code from anywhere in the country. With the
@@ -556,6 +565,18 @@ repository once they are released.
 
 ### Added
 
+- **Five kinds of damage that work on any text.** A file you damage with
+  corrupt or Damage a file can now get, in its text columns: an emoji, a family
+  emoji that is one character built from seven, an invisible character in the
+  middle of a value, letters rewritten as raised capitals, which give a
+  different result when they are lower cased and normalised a second time, and
+  the same text written with every accent as a separate character (Unicode
+  NFD). A value that one of them cannot change is left alone and the damage
+  goes to another text column of the row. A value with no letter, such as a
+  number or a date, gets no emoji, because the manifest expects the emoji to
+  be accepted and a code is not text. The Manifest browser writes characters
+  that draw nothing as their code points, such as `<U+200B>`, so the value
+  before and after does not look the same.
 - **Links to the project and to supporting it.** Two buttons at the foot of
   the column, under About, open the project's source on GitHub and the page
   for supporting its author in your browser. The program itself still

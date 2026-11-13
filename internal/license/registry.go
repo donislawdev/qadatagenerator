@@ -291,8 +291,10 @@ type Component struct {
 //
 // # The one entry that deserves a note, and it is fyne.io/fyne/v2
 //
-// It is the only module here that reaches one of the two binaries rather than
-// both. The command line binary never imports it, which a guard checks
+// It is the only module here that this project imports for one of the two
+// binaries alone, and most of what it brings reaches the window binary only
+// (golang.org/x/text is the exception, below). The command line binary never
+// imports it, which a guard checks
 // transitively, because that import would pull in the C toolchain and stop it
 // cross compiling from one machine.
 //
@@ -307,6 +309,16 @@ type Component struct {
 // rather than by waiting for the toolkit to do it. A dependency arrives with
 // its own dependencies and their history, which is what sieve question (c) is
 // about.
+//
+// # golang.org/x/text reaches both binaries
+//
+// The toolkit brings it to the window binary, and the command line binary
+// imports its normalisation package itself, for damage that writes text in
+// another normalisation form. Measured 2026-11-13: that took the command line
+// binary from 171 packages to 173 and from 8590848 bytes to 8720384, which is
+// the size of the Unicode tables. Neither package it brings imports anything
+// that reaches files, the network or the system. They import io only to wrap a
+// reader or a writer the caller hands them.
 var ThirdParty = []Component{
 	{
 		Module:  "fyne.io/fyne/v2",

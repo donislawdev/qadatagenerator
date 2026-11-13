@@ -92,6 +92,15 @@ func TestEveryColumnDecliningLeavesTheRefusalOfTheFirst(t *testing.T) {
 	if len(row.asked) != 2 {
 		t.Errorf("the engine asked for %v, and both columns should have been tried", row.asked)
 	}
+	// The entry names one column, so it says the others were tried too.
+	if !strings.Contains(entry.FailureReason, "were tried as well") {
+		t.Errorf("the refusal %q does not say the other columns were tried", entry.FailureReason)
+	}
+	alone := &aRow{values: map[string]string{"ssn": "123456789"}}
+	entry, _, _ = letteredEngine(t).ApplyInRow(letteredOrder(1, "ssn"), alone.cell)
+	if strings.Contains(entry.FailureReason, "were tried as well") {
+		t.Errorf("an order with no other column says others were tried: %q", entry.FailureReason)
+	}
 }
 
 // 🔴 A refusal about the damage or the run does not move on. It reads the same
@@ -143,6 +152,9 @@ func TestAColumnTheRowDoesNotHaveIsPassedOver(t *testing.T) {
 
 	if entry.Applied || wrote {
 		t.Fatalf("the damage landed on %q, a column the row does not have", entry.Location.Field)
+	}
+	if strings.Contains(entry.FailureReason, "were tried as well") {
+		t.Errorf("a column the row does not have was counted as tried: %q", entry.FailureReason)
 	}
 }
 

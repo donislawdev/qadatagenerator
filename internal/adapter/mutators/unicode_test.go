@@ -17,17 +17,19 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 )
 
-// The two libraries imported above are oracles and nothing else. They hold
-// the Unicode tables this build deliberately does not carry, so they can say
-// whether a character normalises to the letter the code claims and whether a
-// place inside a value is between two characters, which are the two things
-// these mutators would otherwise be trusted on.
+// The two libraries imported above are oracles in this file. They hold the
+// Unicode tables, so they can say whether a character normalises to the letter
+// the code claims and whether a place inside a value is between two
+// characters, which are the two things these mutators would otherwise be
+// trusted on. The product also normalises with golang.org/x/text for one entry,
+// and that entry's tests write the expected code points out instead.
 
 const (
 	emojiBasic     catalog.ID = "UNI.emoji.basic"
 	emojiZWJ       catalog.ID = "UNI.emoji.zwj_sequence"
 	zeroWidthSpace catalog.ID = "UNI.zero_width.space"
 	nonIdempotent  catalog.ID = "UNI.normalization.non_idempotent"
+	nfcVsNFD       catalog.ID = "UNI.normalization.nfc_vs_nfd"
 )
 
 // The characters the tests look for, written as escapes because two of them
@@ -37,7 +39,9 @@ const (
 	zwj  = '\U0000200D'
 )
 
-var unicodeEntries = []catalog.ID{emojiBasic, emojiZWJ, zeroWidthSpace, nonIdempotent}
+// unicodeEntries are the Unicode entries this build implements. Every one of
+// them has to run on what the damage carries and produce its published example.
+var unicodeEntries = []catalog.ID{emojiBasic, emojiZWJ, zeroWidthSpace, nonIdempotent, nfcVsNFD}
 
 func textColumn() recipe.FieldInfo {
 	return recipe.FieldInfo{Name: "first_name", Type: "string"}
@@ -60,9 +64,10 @@ func at(t *testing.T, id catalog.ID, value, position string) mutator.Outcome {
 	})
 }
 
-// The four published examples are exact values rather than shapes, so this
-// build has to produce them. The catalog writes an invisible character as an
-// escape inside the text, and the escape is read the way Go reads one.
+// The published examples are exact values rather than shapes, so this build
+// has to produce them. The catalog writes an invisible character, and an accent
+// standing apart from its letter, as an escape inside the text, and the escape
+// is read the way Go reads one.
 func TestTheUnicodeEntriesProduceTheirPublishedExamples(t *testing.T) {
 	for _, id := range unicodeEntries {
 		t.Run(string(id), func(t *testing.T) {

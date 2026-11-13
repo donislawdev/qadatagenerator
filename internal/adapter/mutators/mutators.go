@@ -41,6 +41,7 @@ var registry = map[catalog.ID]mutator.Mutator{
 	emojiZWJSequenceID:         emojiZWJSequence{},
 	zeroWidthSpaceID:           zeroWidthSpace{},
 	nonIdempotentID:            nonIdempotent{},
+	nfcVsNFDID:                 nfcVsNFD{},
 }
 
 // Brings is what the damage in this build carries with it, so that every run
