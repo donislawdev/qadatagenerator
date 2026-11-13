@@ -31,10 +31,12 @@ import "time"
 //
 // A field holding the keyboard counts as use. Its caret fades in and out, and
 // the toolkit repaints the whole window on every frame of a fade
-// (widget/entry_cursor_anim.go), which allocated 5.1 to 6.3 MB in twenty
-// seconds. That is use for as long as the window has the keyboard of the
-// desktop: going to another program takes it away, the caret stops
-// (internal/driver/glfw/window.go, processFocused), and the quiet starts.
+// (widget/entry_cursor_anim.go), which allocated 1.1 to 1.8 MB in twenty
+// seconds on every screen with a field, measured on 2026-11-13. That is use
+// until the window loses the keyboard of the desktop: going to another
+// program takes it away, the caret stops (internal/driver/glfw/window.go,
+// processFocused), and the quiet starts. Only the losing stops it, so in a
+// window that never had the desktop's keyboard the caret goes on fading.
 //
 // # What happens, in order
 //
@@ -76,8 +78,10 @@ const (
 	// tidyBudget is what the window may allocate across a whole quiet and
 	// still be quiet. Left alone it allocated at most 0.3 MB in any seventy
 	// seconds seen, the toolkit's own sparse jumps included (89 and 189 KB,
-	// once in five and a half minutes), and a fading caret 18 MB or more, so
-	// neither sits near it.
+	// once in five and a half minutes), and a fading caret 3.8 MB or more on
+	// the lightest screen, measured on 2026-11-13. A caret that ever came
+	// under the budget would be tidied after like a window left alone, which
+	// costs one frame and one release and nothing worse.
 	//
 	// Counted over the quiet rather than per look, and that is measured rather
 	// than tidy. The first version asked each look for under 256 KB, and the
