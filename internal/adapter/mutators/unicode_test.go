@@ -30,6 +30,7 @@ const (
 	zeroWidthSpace catalog.ID = "UNI.zero_width.space"
 	nonIdempotent  catalog.ID = "UNI.normalization.non_idempotent"
 	nfcVsNFD       catalog.ID = "UNI.normalization.nfc_vs_nfd"
+	turkishI       catalog.ID = "UNI.case.turkish_dotless_i"
 )
 
 // The characters the tests look for, written as escapes because two of them
@@ -41,7 +42,7 @@ const (
 
 // unicodeEntries are the Unicode entries this build implements. Every one of
 // them has to run on what the damage carries and produce its published example.
-var unicodeEntries = []catalog.ID{emojiBasic, emojiZWJ, zeroWidthSpace, nonIdempotent, nfcVsNFD}
+var unicodeEntries = []catalog.ID{emojiBasic, emojiZWJ, zeroWidthSpace, nonIdempotent, nfcVsNFD, turkishI}
 
 func textColumn() recipe.FieldInfo {
 	return recipe.FieldInfo{Name: "first_name", Type: "string"}
@@ -95,8 +96,8 @@ func unescaped(t *testing.T, written string) string {
 	return read
 }
 
-// Every one of the four runs on what the damage carries with it, so neither
-// mode can refuse them for want of a capability. A corpus dropped from the list
+// Every one of them runs on what the damage carries with it, so neither mode
+// can refuse them for want of a capability. A corpus dropped from the list
 // would leave every one of them refused in the manifest and every test of the
 // mutators themselves still green.
 func TestTheDamageCarriesWhatTheUnicodeEntriesRequire(t *testing.T) {

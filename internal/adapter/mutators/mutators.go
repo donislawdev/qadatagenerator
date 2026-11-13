@@ -42,6 +42,7 @@ var registry = map[catalog.ID]mutator.Mutator{
 	zeroWidthSpaceID:           zeroWidthSpace{},
 	nonIdempotentID:            nonIdempotent{},
 	nfcVsNFDID:                 nfcVsNFD{},
+	turkishDotlessIID:          turkishDotlessI{},
 }
 
 // Brings is what the damage in this build carries with it, so that every run
@@ -60,10 +61,10 @@ var registry = map[catalog.ID]mutator.Mutator{
 // # What each one stands on
 //
 // The Unicode corpus is the handful of characters in unicode_corpus.go. The
-// normalisation is the engine's own claim, made before any entry needed it: no
-// code in this build normalises yet, and the entry about two forms of the same
-// text, the first that would, is not implemented. The entry that does run under
-// it supplies a value from a fixed table and normalises nothing.
+// normalisation is golang.org/x/text, which the entry about two forms of the
+// same text writes with. The entry about normalising twice runs under the same
+// capability and supplies a value from a fixed table without normalising
+// anything.
 func Brings() []capability.Name {
 	return []capability.Name{capability.UnicodeNormalization, capability.CorpusUnicode}
 }

@@ -1263,25 +1263,29 @@ mutators:
   - id: UNI.case.turkish_dotless_i
     layer: UNI
     summary: >-
-      Supplies text whose case conversion depends on the locale of the
-      converter.
+      Swaps each i for the Turkish dotless ı and each I for the dotted İ, which
+      a change of case can quietly turn into a plain i or I.
     applies_to:
-      field_types: [string, email]
+      field_types: [string]
       formats: [any]
       providers: [any]
     parameters: []
     expectation: acceptance
-    confidence: hard
+    confidence: soft
     reversible: true
     requires:
       - corpus.unicode
     example:
-      before: "INFO"
-      after: "info uppercased in a Turkish locale becomes \\u0130NFO"
+      before: "Irina"
+      after: "İrına"
       note: >-
-        The defect appears when a value is upper cased or lower cased with the
-        system locale rather than an invariant one, which silently changes the
-        value on some machines and not on others.
+        Every i becomes the dotless ı (U+0131) and every I the dotted İ
+        (U+0130). Confidence is soft because a field may allow only some
+        alphabets by design. The defect shows in what the application stores
+        and finds rather than in whether it accepts. Upper casing turns ı into a
+        plain I, which lower casing outside a Turkish locale turns into i. Lower
+        casing İ gives a plain i in a Turkish or Azerbaijani locale and in some
+        libraries, and an i followed by one or more combining dots in others.
 
   # =========================================================================
   # REV - reverse mutators

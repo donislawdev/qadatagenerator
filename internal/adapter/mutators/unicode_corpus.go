@@ -39,6 +39,26 @@ const (
 	zeroWidthSpaceText = "\U0000200B"
 )
 
+// turkishCounterparts maps the letters i and I to the other Turkish letter of
+// the same case: the small i to the dotless small ı, and the capital I to the
+// dotted capital İ.
+//
+// # Why these two and not the plain letters themselves
+//
+// A plain i or I already changes case differently in a Turkish locale, but only
+// there, so a test run anywhere else passes. These two change case irregularly
+// on every machine. Upper casing ı gives a plain I in every locale measured, so
+// a comparison by upper case matches the value with the same word spelt with i.
+// Lower casing İ gives three different results: a plain i in a Turkish or
+// Azerbaijani locale and in the standard library, which maps one character to
+// one, an i followed by a combining dot with no locale and in Polish, German or
+// Greek, and an i followed by two in Lithuanian. Measured 2026-11-13 against
+// golang.org/x/text v0.43.0 and the standard library, both on Unicode 17.
+var turkishCounterparts = map[rune]rune{
+	'i': '\U00000131',
+	'I': '\U00000130',
+}
+
 // capitalModifiers maps a Latin letter to the modifier letter that looks like
 // its capital, raised.
 //

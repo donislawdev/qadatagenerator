@@ -270,7 +270,7 @@ Every entry here is `soft` on purpose. Business rules belong to the system under
 | `UNI.zero_width.space` | rejection | soft |
 | `UNI.normalization.nfc_vs_nfd` | acceptance | hard |
 | `UNI.normalization.non_idempotent` | rejection | soft |
-| `UNI.case.turkish_dotless_i` | acceptance | hard |
+| `UNI.case.turkish_dotless_i` | acceptance | soft |
 
 `UNI.emoji.zwj_sequence` supplies a single visible character built from seven code points. It breaks length counters that measure the wrong unit.
 

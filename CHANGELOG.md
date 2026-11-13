@@ -565,13 +565,15 @@ repository once they are released.
 
 ### Added
 
-- **Five kinds of damage that work on any text.** A file you damage with
+- **Six kinds of damage that work on any text.** A file you damage with
   corrupt or Damage a file can now get, in its text columns: an emoji, a family
   emoji that is one character built from seven, an invisible character in the
   middle of a value, letters rewritten as raised capitals, which give a
-  different result when they are lower cased and normalised a second time, and
-  the same text written with every accent as a separate character (Unicode
-  NFD). A value that one of them cannot change is left alone and the damage
+  different result when they are lower cased and normalised a second time, the
+  same text written with every accent as a separate character (Unicode NFD),
+  and every i and I swapped for the Turkish dotless ı and dotted İ, which a
+  change of case can quietly turn into plain letters. A value that one of them
+  cannot change is left alone and the damage
   goes to another text column of the row. A value with no letter, such as a
   number or a date, gets no emoji, because the manifest expects the emoji to
   be accepted and a code is not text. The Manifest browser writes characters
