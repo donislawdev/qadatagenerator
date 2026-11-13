@@ -463,7 +463,8 @@ func (o *Opened) canDo() capability.Set {
 	names := format.CapabilitiesOf(format.NameCSV)
 	names = append(names, recipe.CapabilitiesOf(o.shape)...)
 	names = append(names, values.CapabilitiesOfView(o.shape, o.from)...)
-	names = append(names, capability.UnicodeNormalization)
+	// What the damage carries with it is added by damage.Start, as it is for a
+	// recipe.
 	return capability.NewSet(names...)
 }
 

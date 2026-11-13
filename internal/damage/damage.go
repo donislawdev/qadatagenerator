@@ -263,7 +263,10 @@ func Start(ask Ask) (*Run, error) {
 	if err != nil {
 		return nil, err
 	}
-	engine := corrupt.New(ask.Described, mutatorRegistry{}, schemeRegistry{ask.Schemes}, ask.Can, source)
+	// What the damage carries with it is added here, once, rather than by each
+	// mode that builds an Ask (mutators.Brings).
+	can := ask.Can.With(mutators.Brings()...)
+	engine := corrupt.New(ask.Described, mutatorRegistry{}, schemeRegistry{ask.Schemes}, can, source)
 	wrapped := corrupted.New(ask.Next, engine, &selector, sinks.all, ask.Schema)
 	return &Run{
 		writer: wrapped, entries: sinks.canonical, selector: &selector,

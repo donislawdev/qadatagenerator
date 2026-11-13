@@ -84,9 +84,8 @@ func canDo(rec recipe.Recipe, source values.Source, schema recipe.SchemaView) ca
 	names := format.CapabilitiesOf(rec.Output.Format)
 	names = append(names, recipe.CapabilitiesOf(schema)...)
 	names = append(names, values.CapabilitiesOf(rec, source)...)
-	// The engine needs nothing external for this one, so it is the only
-	// capability that is present in every run.
-	names = append(names, capability.UnicodeNormalization)
+	// What the damage carries with it, the engine's and the corpus's share, is
+	// added by damage.Start for every mode at once.
 	return capability.NewSet(names...)
 }
 

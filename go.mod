@@ -10,7 +10,9 @@ go 1.27.3
 
 require (
 	fyne.io/fyne/v2 v2.8.2
+	github.com/clipperhouse/uax29/v2 v2.7.0
 	github.com/goccy/go-yaml v1.19.2
+	golang.org/x/text v0.43.0
 )
 
 require (
@@ -18,7 +20,6 @@ require (
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/FyshOS/fancyfs v0.0.1 // indirect
 	github.com/anthonynsimon/bild v0.17.1 // indirect
-	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/fyne-io/gl-js v0.2.1-0.20260315212741-029c47fd27e8 // indirect
 	github.com/fyne-io/glfw-js v0.4.0 // indirect
@@ -45,5 +46,4 @@ require (
 	golang.org/x/image v0.47.0 // indirect
 	golang.org/x/net v0.61.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
-	golang.org/x/text v0.43.0 // indirect
 )

@@ -35,7 +35,7 @@ func TestEveryImplementedMutatorHasACatalogEntry(t *testing.T) {
 //
 // 🔴 It is the half of the closure that can exist while the catalog is ahead of
 // the engine. The architecture asks for the two sets to be equal, and they are
-// not: fifty two kinds of damage are described and this build carries eight of
+// not: fifty two kinds of damage are described and this build carries twelve of
 // them. A test declaring equality with a list of forty four exceptions would be
 // green against a build with no mechanism at all, which is the shape that once
 // left this project with three guards defending nothing.
@@ -57,7 +57,7 @@ func TestEveryImplementedMutatorHasACatalogEntry(t *testing.T) {
 // A number that fails in both directions cannot be left behind. Raising it is
 // one line and it is part of adding damage, which is exactly when somebody is
 // looking at this file anyway.
-const implementedCount = 8
+const implementedCount = 12
 
 func TestThisBuildHasNotLostAMutator(t *testing.T) {
 	got := len(mutators.IDs())

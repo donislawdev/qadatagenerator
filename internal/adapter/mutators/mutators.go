@@ -17,6 +17,7 @@ package mutators
 import (
 	"sort"
 
+	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/mutator"
 )
@@ -36,6 +37,34 @@ var registry = map[catalog.ID]mutator.Mutator{
 	rangeUnassignedID:          rangeUnassigned{},
 	exceedsMaxLengthID:         exceedsMaxLength{},
 	stringEmptyID:              stringEmpty{},
+	emojiBasicID:               emojiBasic{},
+	emojiZWJSequenceID:         emojiZWJSequence{},
+	zeroWidthSpaceID:           zeroWidthSpace{},
+	nonIdempotentID:            nonIdempotent{},
+}
+
+// Brings is what the damage in this build carries with it, so that every run
+// has it whatever the recipe, the file or the writer.
+//
+// # Why this is asked of the damage rather than written into each mode
+//
+// It was written into each mode: the run from a recipe and the run over
+// somebody else's file each added the same capability by hand, with the same
+// sentence beside it. A second capability arriving meant a second pair of
+// lines, and a mode that missed one would have had every entry needing it
+// refused there and applied in the other mode, for a reason nobody chose. The
+// corpus it names lives in this package, so this package is the one that knows
+// it is here.
+//
+// # What each one stands on
+//
+// The Unicode corpus is the handful of characters in unicode_corpus.go. The
+// normalisation is the engine's own claim, made before any entry needed it: no
+// code in this build normalises yet, and the entry about two forms of the same
+// text, the first that would, is not implemented. The entry that does run under
+// it supplies a value from a fixed table and normalises nothing.
+func Brings() []capability.Name {
+	return []capability.Name{capability.UnicodeNormalization, capability.CorpusUnicode}
 }
 
 // Lookup returns the mutator for an identifier and whether this build has one.

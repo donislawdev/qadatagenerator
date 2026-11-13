@@ -12,7 +12,8 @@ const checksumOffByOneID catalog.ID = "L3.checksum.off_by_one"
 
 // positionParameter is the knob the entry declares, and lastPosition is the one
 // value of it this build can carry out. The default lives in the catalog and
-// arrives already applied, so there is no copy of it here.
+// arrives already applied, so there is no copy of it here. Other entries
+// declare a knob of the same name with values of their own (position.go).
 const (
 	positionParameter = "position"
 	lastPosition      = "last"

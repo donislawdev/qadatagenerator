@@ -640,3 +640,28 @@ func TestNoPhraseRendersAsItsOwnKey(t *testing.T) {
 		}
 	}
 }
+
+// Damage that adds an invisible character leaves a before and an after that
+// are the same words, and the screen is where a person goes to see the
+// difference. Each character that draws nothing is written out, and an
+// ordinary value, spaces included, is shown as it is.
+func TestACharacterThatDrawsNothingIsWrittenOutOnTheScreen(t *testing.T) {
+	cases := []struct{ after, shown string }{
+		{"maria@exa\U0000200Bmple.test", "maria@exa<U+200B>mple.test"},
+		{"Kowal\U00000000ski", "Kowal<U+0000>ski"},
+		{"Anna\U000000A0Maria\tNowak", "Anna<U+00A0>Maria<U+0009>Nowak"},
+		{"abc\U0000202Edef", "abc<U+202E>def"},
+		{"Anna Maria \U0001F642", "Anna Maria \U0001F642"},
+	}
+	for _, one := range cases {
+		defect := applied("one", 1, catalog.Rejection, catalog.Soft)
+		defect.ValueBefore, defect.ValueAfter = "maria@example.test", one.after
+		line := screenOf(t, nil, defect).Rows[0].Values.Text
+		if !strings.Contains(line, "\""+one.shown+"\"") {
+			t.Errorf("%+q is shown as %q, which does not hold %q", one.after, line, one.shown)
+		}
+		if !strings.Contains(line, "\"maria@example.test\"") {
+			t.Errorf("the value before, which has nothing invisible in it, is shown as %q", line)
+		}
+	}
+}

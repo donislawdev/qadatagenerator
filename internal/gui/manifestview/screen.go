@@ -35,6 +35,7 @@
 package manifestview
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"unicode"
@@ -631,8 +632,46 @@ func valuesOf(text i18n.Catalogue, defect manifest.Defect) Line {
 
 // quoted puts a value in marks so that an empty one and a missing one do not
 // look the same on screen, which is the whole reason the model keeps them
-// apart.
-func quoted(value string) string { return "\"" + value + "\"" }
+// apart. The characters inside that draw nothing are written out (visible), so
+// that a value differing from the one before it only by such a character does
+// not look the same as it either.
+func quoted(value string) string { return "\"" + visible(value) + "\"" }
+
+// visible writes every character that draws nothing as its code point.
+//
+// # Why the screen has to show what the data does not
+//
+// The damage that puts an invisible character into a value exists to make two
+// values that look the same compare different. Shown as they are, the before
+// and the after of that damage are the same words on this screen, and the one
+// thing the entry is about cannot be seen where a person goes to look for it.
+// The same is true of a zero byte, a tab, a no break space and the controls
+// that reverse the direction of the text after them, which would also turn
+// the rest of the line around.
+//
+// The space keeps its own shape, because it is seen as a gap. The notation is
+// the one Unicode uses for a code point, and it is not translated for the same
+// reason a number is not.
+func visible(value string) string {
+	if strings.IndexFunc(value, drawsNothing) < 0 {
+		return value
+	}
+	var built strings.Builder
+	for _, r := range value {
+		if drawsNothing(r) {
+			fmt.Fprintf(&built, "<U+%04X>", r)
+			continue
+		}
+		built.WriteRune(r)
+	}
+	return built.String()
+}
+
+// drawsNothing reports a control, format or separator character other than the
+// ordinary space.
+func drawsNothing(r rune) bool {
+	return r != ' ' && unicode.In(r, unicode.Cc, unicode.Cf, unicode.Zl, unicode.Zp, unicode.Zs)
+}
 
 // answerOf is what the application did about this row: a word or two for the
 // table, and the sentence for the card.

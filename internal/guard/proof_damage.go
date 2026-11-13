@@ -542,4 +542,6 @@ var damageGuards = []Guard{
 	{"a real day a numbering scheme cannot write is not reported in the manifest as a day the calendar lacks", "TestADayPastTheSchemeIsRefusedAsOneItCannotWrite", "internal/adapter/mutators", ByMutation},
 	{"the inference a run wrote into its manifest is the one read back, and is held to the rules it was written under", "TestAnInferenceSurvivesBeingWrittenAndRead", "internal/adapter/manifestjson", ByMutation},
 	{"an inference edited by hand to lose its basis is refused on reading by the rule that refused it at writing", "TestAnInferenceEditedToLoseItsBasisIsRefusedOnReading", "internal/adapter/manifestjson", ByMutation},
+	{"Every run carries the Unicode corpus the Unicode entries require, so neither the recipe mode nor the file mode refuses them for want of a capability", "TestTheDamageCarriesWhatTheUnicodeEntriesRequire", "internal/adapter/mutators", ByMutation},
+	{"The Unicode damage produces the exact values the published catalog shows for it", "TestTheUnicodeEntriesProduceTheirPublishedExamples", "internal/adapter/mutators", ByMutation},
 }
