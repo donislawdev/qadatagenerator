@@ -235,8 +235,8 @@
 								<text color="disabled" size="1058x16">Make test values to copy into a form or a test. Nothing on this screen is written to a file.</text>
 								<container pos="0,32" size="1058x52">
 									<container size="1058x52">
-										<container size="701x52">
-											<container size="597x52">
+										<container size="717x52">
+											<container size="613x52">
 												<container size="118x52">
 													<text color="disabled" size="118x14" textSize="11">Kind</text>
 													<widget pos="0,18" size="118x34" type="*parts.Select">
@@ -268,21 +268,21 @@
 														</container>
 													</widget>
 												</container>
-												<container pos="130,0" size="63x52">
-													<text color="disabled" size="63x14" textSize="11">How many</text>
-													<container pos="0,18" size="63x34">
-														<rectangle size="63x34"/>
-														<container size="63x34">
-															<rectangle size="63x34"/>
-															<container size="63x34">
-																<container size="63x34">
-																	<rectangle fillColor="button" pos="1,1" radius="6" size="61x32" strokeColor="inputBorder" strokeWidth="2"/>
+												<container pos="130,0" size="79x52">
+													<text color="disabled" size="79x14" textSize="11">How many</text>
+													<container pos="0,18" size="79x34">
+														<rectangle size="79x34"/>
+														<container size="79x34">
+															<rectangle size="79x34"/>
+															<container size="79x34">
+																<container size="79x34">
+																	<rectangle fillColor="button" pos="1,1" radius="6" size="77x32" strokeColor="inputBorder" strokeWidth="2"/>
 																</container>
-																<container size="63x34">
-																	<widget pos="8,8" size="47x26" type="*parts.FieldEntry">
-																		<widget pos="0,2" size="47x22" type="*widget.Scroll">
-																			<widget size="47x22" type="*widget.entryContent">
-																				<widget size="47x22" type="*widget.RichText">
+																<container size="79x34">
+																	<widget pos="8,8" size="63x26" type="*parts.FieldEntry">
+																		<widget pos="0,2" size="63x22" type="*widget.Scroll">
+																			<widget size="63x22" type="*widget.entryContent">
+																				<widget size="63x22" type="*widget.RichText">
 																					<text pos="4,2" size="15x16">10</text>
 																				</widget>
 																			</widget>
@@ -293,7 +293,7 @@
 														</container>
 													</container>
 												</container>
-												<container pos="205,0" size="117x52">
+												<container pos="221,0" size="117x52">
 													<text color="disabled" size="117x14" textSize="11">Locale</text>
 													<widget pos="0,18" size="117x34" type="*parts.Select">
 														<container size="117x34">
@@ -324,7 +324,7 @@
 														</container>
 													</widget>
 												</container>
-												<container pos="334,0" size="117x52">
+												<container pos="350,0" size="117x52">
 													<text color="disabled" size="117x14" textSize="11">Gender</text>
 													<widget pos="0,18" size="117x34" type="*parts.Select">
 														<container size="117x34">
@@ -355,7 +355,7 @@
 														</container>
 													</widget>
 												</container>
-												<container pos="463,0" size="134x52">
+												<container pos="479,0" size="134x52">
 													<text color="disabled" size="134x14" textSize="11">Seed</text>
 													<container pos="0,18" size="134x34">
 														<rectangle size="134x34"/>
@@ -381,7 +381,7 @@
 													</container>
 												</container>
 											</container>
-											<container pos="597,0" size="103x52">
+											<container pos="613,0" size="103x52">
 												<container pos="16,0" size="87x52">
 													<container size="87x14">
 														<rectangle size="87x14"/>
@@ -411,7 +411,7 @@
 												</container>
 											</container>
 										</container>
-										<spacer pos="701,0" size="356x52"/>
+										<spacer pos="717,0" size="340x52"/>
 									</container>
 								</container>
 							</container>
@@ -915,7 +915,7 @@
 				</container>
 			</widget>
 			<container size="1342x900">
-				<widget pos="457,160" size="117x108" type="*parts.picker">
+				<widget pos="473,160" size="117x108" type="*parts.picker">
 					<container size="117x108">
 						<rectangle fillColor="menuBackground" radius="10" shadowBlurRadius="26" shadowColor="rgba(0,0,0,156)" shadowOffset="0,10" shadowSpread="2" shadowVariant="1" size="117x108" strokeColor="separator" strokeWidth="2"/>
 						<container size="117x108">

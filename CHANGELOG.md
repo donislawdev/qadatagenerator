@@ -382,11 +382,12 @@ repository once they are released.
 - **The button over the quick values is Copy all, with the copy icon.** A
   click on one row copies that one value, so the button says it takes them
   all.
-- **Quick value shows at most 1000 values, and says so when asked for more.**
+- **Quick value shows up to 100 000 values, and says so when asked for more.**
   The field takes one digit more than that, so a larger number is refused in
   words that point to the command line below, which takes any number. Until
   now the field silently kept the first five digits, so typing a million drew
-  ten thousand values and the window lagged.
+  ten thousand values and the window lagged. Producing 100 000 values holds
+  the window still for up to about a tenth of a second, depending on the kind.
 - **The list of kinds names each kind and says how long its values are.** A
   row reads pesel, National ID number, 11 digits instead of pesel beside a row
   of zeros. Typing in the search field also finds a kind by its name, such as

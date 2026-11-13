@@ -111,20 +111,26 @@ func Kinds() []RefusalKind {
 // the whole window lagged under the pointer from then on, because the card
 // held a row for every value and every frame walked them all.
 //
-// A thousand is the owner's choice, made on what this screen is for: values to
-// paste into a form or a test. A set larger than that is a file, and the line at
-// the foot of the screen carries no limit at all.
+// A thousand was the owner's choice then, made on what the screen is for:
+// values to paste into a form or a test. The line at the foot of the screen
+// carries no limit at all.
 //
-// # 🔴 What bounds it since 2026-11-13, and why it is still a thousand
+// # 🔴 Why a hundred thousand, raised on 2026-11-13 (DEC-286)
 //
 // The card no longer holds a row for every value. It builds rows only for what
 // is in view (DEC-285), so neither the memory of the window nor the cost of a
 // frame grows with this number: a draw of a thousand takes 3.2 ms on the thread
 // that draws, where it took 28.7 (B-370). What grows is producing the values,
-// 20 to 87 ms for a hundred thousand by kind, and positions stop being whole
-// pixels past about 266 000 rows at a scale of 1.5. A higher number is the
-// owner's decision, and this one stays until it is made.
-const MostShownAtOnce = 1000
+// which the window still does on that thread: 20 to 87 ms for a hundred
+// thousand by kind, measured in Go without a window, and the values themselves,
+// 1.7 to 4.2 MB. The owner chose a hundred thousand from those numbers, over
+// ten thousand and over a quarter of a million.
+//
+// What would move it again: a million was what the owner typed first, and it
+// is out of reach for two reasons, both of the window. Producing it would hold
+// the window still for about a second, and the toolkit places rows in float32,
+// whose whole pixels end past about 266 000 rows at a scale of 1.5.
+const MostShownAtOnce = 100000
 
 // CountFrom reads how many values were asked for out of the text somebody
 // typed or passed on a flag.
