@@ -104,6 +104,8 @@ func namesFor(part recipe.NamePart, given, surnames []string) []string {
 // The entry expects the name accepted. A column that declares a limit refuses a
 // longer value for its length, rightly, and a manifest saying it should have
 // been accepted would blame the application for a rule it was right to keep.
+// The engine refuses such a value from any damage, and choosing among the names
+// that fit is what lets a shorter one land here instead of a refusal.
 //
 // # Which refusal is which
 //
@@ -122,7 +124,7 @@ func replacedByName(target mutator.Target, names []string, purpose string) mutat
 			continue
 		}
 		differing++
-		if fits(name, target.Field) {
+		if target.Field.Fits(name) {
 			fitting++
 		}
 	}
@@ -139,7 +141,7 @@ func replacedByName(target mutator.Target, names []string, purpose string) mutat
 	at.Purpose += purpose
 	wanted := target.Source.IntN(at, int64(fitting))
 	for _, name := range names {
-		if name == target.Value || !fits(name, target.Field) {
+		if name == target.Value || !target.Field.Fits(name) {
 			continue
 		}
 		if wanted == 0 {
@@ -151,10 +153,4 @@ func replacedByName(target mutator.Target, names []string, purpose string) mutat
 	// drawn one is among them. Said rather than left as a panic, because a
 	// mutator answers with an outcome and never with nothing.
 	return mutator.Skipped("no name was left to supply after the draw")
-}
-
-// fits reports whether a name is within the limit a column declares, if it
-// declares one.
-func fits(name string, field recipe.FieldInfo) bool {
-	return !field.HasMaxLength || lengthIn(name, field.Unit()) <= field.MaxLength
 }

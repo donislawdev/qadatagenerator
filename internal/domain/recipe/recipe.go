@@ -6,7 +6,10 @@
 // exercised without a disk and reused by the window later.
 package recipe
 
-import "sort"
+import (
+	"sort"
+	"unicode/utf8"
+)
 
 // What a recipe that leaves the seed or the locale out is read with.
 //
@@ -218,6 +221,27 @@ const (
 	Graphemes LengthUnit = "graphemes"
 )
 
+// Count measures a value in this unit.
+//
+// It is the one count in the build. The generator refusing a value for being
+// too long, the damage that goes past a limit on purpose and the engine keeping
+// every other damage inside it all ask here, so a value one of them calls too
+// long is a value the others agree is too long. Two counts either side of one
+// limit would be a tool arguing with itself.
+//
+// Graphemes are counted as characters, and this build says so rather than
+// pretending otherwise: the standard library has no grapheme segmentation, and
+// the package that does would be a second dependency. A value never has more
+// graphemes than characters, so a value this count lets through fits a limit
+// in graphemes too, and what is lost is the other direction: a family emoji
+// that a reader sees as one symbol counts as seven.
+func (u LengthUnit) Count(value string) int {
+	if u == Bytes {
+		return len(value)
+	}
+	return utf8.RuneCountInString(value)
+}
+
 // Unit returns how the maximum length of this field is counted, defaulting to
 // characters. Callers use it rather than reading LengthUnit, so the default
 // lives in one place.
@@ -380,6 +404,12 @@ func (f FieldInfo) Unit() LengthUnit {
 		return Characters
 	}
 	return f.LengthUnit
+}
+
+// Fits reports whether a value is within the maximum length the field
+// declares, counted in its unit. A field that declares none fits anything.
+func (f FieldInfo) Fits(value string) bool {
+	return !f.HasMaxLength || f.Unit().Count(value) <= f.MaxLength
 }
 
 // ParentInfo is what the engine is allowed to know about a relation.

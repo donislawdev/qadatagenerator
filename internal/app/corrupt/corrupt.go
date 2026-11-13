@@ -133,7 +133,8 @@ func (e Engine) Apply(order Order, field recipe.FieldInfo, value string, at seed
 }
 
 // attempt is Apply that also says whether the damage declined for what the
-// value itself shows, which is the one refusal another column might not repeat.
+// value itself shows, or would have overrun the column, which are the refusals
+// another column might not repeat.
 func (e Engine) attempt(order Order, field recipe.FieldInfo, value string,
 	at seed.Coordinate) (string, manifest.Defect, bool) {
 	entry, described := e.catalog.Lookup(order.Mutator)
@@ -168,7 +169,50 @@ func (e Engine) attempt(order Order, field recipe.FieldInfo, value string,
 	if !outcome.Applied() {
 		return value, refused(entry, order, manifest.DeclinedByMutator, outcome.Reason()), outcome.ValueUnfit()
 	}
+	if why := overruns(entry, field, outcome.Value()); why != "" {
+		return value, refused(entry, order, manifest.DeclinedByMutator, why), true
+	}
 	return outcome.Value(), applied(entry, order, value, outcome.Value()), false
+}
+
+// overruns returns why a damaged value cannot stand in its column, or nothing
+// when it can.
+//
+// # Why the engine asks rather than each mutator
+//
+// A column that declares a maximum length refuses a longer value, rightly, and
+// for its length. Damage about something else would then be answered by the
+// length check, so the manifest would promise an acceptance the application is
+// right to withhold, or a rejection it gives for a reason other than the one
+// the entry names. Damage to text grows the value: a decomposed accent adds a
+// character, an emoji two or more, a Turkish i one byte. Asked here, the
+// question covers every mutator, including those not written yet, rather than
+// relying on each of them to remember it.
+//
+// # Why damage that needs the limit is left alone
+//
+// An entry that requires schema.max-length is about the limit, and going past
+// it is the damage. No other entry is about length, whatever it does to one.
+//
+// # Why it moves on like an unfit value
+//
+// Whether the result overruns follows from the length of the value and the
+// limit of the column, both known before the damage, and it says nothing about
+// the application. Another covered column of the row, with a shorter value or
+// no limit, may carry the same damage (DEC-297).
+func overruns(entry catalog.Entry, field recipe.FieldInfo, damaged string) string {
+	if field.Fits(damaged) || slices.Contains(entry.Requires, capability.SchemaMaxLength) {
+		return ""
+	}
+	if field.Unit() == recipe.Graphemes {
+		return fmt.Sprintf("with this damage the value would be %d characters long, and the "+
+			"column allows at most %d graphemes. This build counts a grapheme as a character, "+
+			"so it cannot promise that the value fits",
+			recipe.Characters.Count(damaged), field.MaxLength)
+	}
+	return fmt.Sprintf("with this damage the value would be %d %s long, and the column allows "+
+		"at most %d, so the application would be right to refuse it for its length rather "+
+		"than for this damage", field.Unit().Count(damaged), field.Unit(), field.MaxLength)
 }
 
 // Cell is one column of the row being damaged, as the engine needs it.
@@ -199,6 +243,10 @@ type Change struct {
 // covered column of the same row may well take the damage. Leaving the order
 // refused while a column that could carry it sits beside it would make the
 // manifest report the draw rather than the data.
+//
+// A damaged value longer than its column allows moves on the same way, because
+// whether it would be is a matter of the value's length and the column's limit
+// (overruns says more).
 //
 // Nothing else moves on. A decline that came from trying the damage, such as a
 // swap of digits the scheme still accepts, is a finding about this row, and
@@ -261,7 +309,8 @@ type attemptAt struct {
 	entry  manifest.Defect
 	change Change
 	wrote  bool
-	// unfit says the damage declined for what the value itself shows.
+	// unfit says the damage declined for what the value itself shows, or
+	// would have left it longer than the column allows.
 	unfit bool
 }
 

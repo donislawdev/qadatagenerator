@@ -574,7 +574,13 @@ repository once they are released.
   and every i and I swapped for the Turkish dotless ı and dotted İ, which a
   change of case can quietly turn into plain letters. A value that one of them
   cannot change is left alone and the damage
-  goes to another text column of the row. A value with no letter, such as a
+  goes to another text column of the row. In a recipe, a column with a maximum
+  length never gets a value that this damage makes longer than it allows,
+  because the application would be right to refuse it for its length. The
+  damage goes to another column of the row instead, and when none can take it
+  the manifest says how long the value would be and what the column allows.
+  Only the damage that goes past a maximum length on purpose goes past it.
+  A value with no letter, such as a
   number or a date, gets no emoji, because the manifest expects the emoji to
   be accepted and a code is not text. Check results writes characters that
   draw nothing as their code points, such as `<U+200B>`. When the two values

@@ -177,7 +177,10 @@ const (
 	// DeclinedByMutator means the damage itself refused, for a reason only it
 	// could know. It is often the correct outcome rather than a shortfall: a
 	// value already sitting in the block a corruption aims at is the example
-	// the catalog itself gives.
+	// the catalog itself gives. A damaged value longer than its column allows
+	// is declined under this kind too, by the engine rather than the mutator,
+	// because it is a fact about this damage on this value rather than about
+	// the run (DEC-297).
 	DeclinedByMutator FailureKind = "declined_by_mutator"
 )
 

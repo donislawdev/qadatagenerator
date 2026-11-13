@@ -57,7 +57,7 @@ func (exceedsMaxLength) Damage(target mutator.Target) mutator.Outcome {
 
 	declared := target.Field.Unit()
 	wanted := target.Field.MaxLength + overshoot
-	have := lengthIn(target.Value, declared)
+	have := declared.Count(target.Value)
 	if have >= wanted {
 		return mutator.Unfit(fmt.Sprintf(
 			"the value is already %d %s long, which is not short of %d", have, declared, wanted))
@@ -73,7 +73,7 @@ func (exceedsMaxLength) Damage(target mutator.Target) mutator.Outcome {
 	// ending in a two byte letter, three bytes short of the target, lands four
 	// bytes on and looks like it worked.
 	last, _ := utf8.DecodeLastRuneInString(target.Value)
-	step := lengthIn(string(last), declared)
+	step := declared.Count(string(last))
 	if (wanted-have)%step != 0 {
 		return mutator.Unfit(fmt.Sprintf(
 			"the value ends in a character of %d %s and is %d short of %d, so repeating it "+
@@ -133,19 +133,6 @@ func unusable(target mutator.Target) string {
 	return ""
 }
 
-// lengthIn measures a value the way the schema says its column is measured.
-//
-// It counts the same two ways the generator counts, so a value this build
-// refuses to produce for being too long is a value this mutator agrees is too
-// long. Two different counts either side of one limit would be a tool arguing
-// with itself.
-func lengthIn(value string, unit recipe.LengthUnit) int {
-	if unit == recipe.Bytes {
-		return len(value)
-	}
-	return utf8.RuneCountInString(value)
-}
-
 // padTo repeats the last character of a value until it reaches the wanted
 // length.
 //
@@ -170,7 +157,7 @@ func lengthIn(value string, unit recipe.LengthUnit) int {
 func padTo(value string, wanted int, unit recipe.LengthUnit) string {
 	last, _ := utf8.DecodeLastRuneInString(value)
 	filler := string(last)
-	times := (wanted - lengthIn(value, unit)) / lengthIn(filler, unit)
+	times := (wanted - unit.Count(value)) / unit.Count(filler)
 	var built strings.Builder
 	built.Grow(len(value) + times*len(filler))
 	built.WriteString(value)

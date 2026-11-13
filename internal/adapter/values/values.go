@@ -19,7 +19,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/provider/corpus"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/provider/intl"
@@ -921,18 +920,11 @@ func fits(value string, req generate.Request) bool {
 	return !req.HasMaxLength || measure(value, req.Unit) <= req.MaxLength
 }
 
-// measure counts a value in the unit the field declared.
-//
-// Graphemes are counted as characters and this build says so rather than
-// pretending otherwise: the standard library has no grapheme segmentation, and
-// the package that does would be a second dependency. The two differ on emoji
-// and on combining marks, which is exactly the case the unit exists for, so the
-// gap is real and named rather than hidden.
+// measure counts a value in the unit the field declared, which a request holds
+// as text. The count itself is the one the whole build uses, including how it
+// treats graphemes, and says why beside it.
 func measure(value, unit string) int {
-	if unit == string(recipe.Bytes) {
-		return len(value)
-	}
-	return utf8.RuneCountInString(value)
+	return recipe.LengthUnit(unit).Count(value)
 }
 
 // coordinate returns the address of one part of a composite value.
