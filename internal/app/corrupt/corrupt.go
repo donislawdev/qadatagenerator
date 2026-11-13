@@ -365,8 +365,8 @@ func (e Engine) refuse(entry catalog.Entry, field recipe.FieldInfo,
 			"this build carries no implementation of this damage, only its description"
 	}
 	if missing := e.can.Missing(entry.Requires); len(missing) > 0 {
-		return manifest.RunLacksCapability,
-			fmt.Sprintf("this run cannot %s, which this damage needs", list(missing))
+		return manifest.RunLacksCapability, fmt.Sprintf(
+			"this damage needs %s, which this run does not have", inWords(missing, capability.Name.Words))
 	}
 	// 🔴 The same question asked of the column, because for a handful of
 	// capabilities the run is the wrong thing to ask.
@@ -379,8 +379,8 @@ func (e Engine) refuse(entry catalog.Entry, field recipe.FieldInfo,
 	// another column is.
 	if missing := columnCannot(entry.Requires, field); len(missing) > 0 {
 		return manifest.RunLacksCapability, fmt.Sprintf(
-			"the column %s does not supply %s, which this damage needs of the column it "+
-				"lands on rather than of the run", field.Name, list(missing))
+			"this damage needs to land on a column %s, and the column %q is not one",
+			inWords(missing, capability.Name.ColumnWords), field.Name)
 	}
 	if !entry.CoversFieldType(field.Type) {
 		return manifest.FieldTypeNotCovered, fmt.Sprintf(
@@ -524,11 +524,19 @@ func describeProvider(id string) string {
 	return id + " values"
 }
 
-// list joins capability names for a sentence a person reads.
-func list(names []capability.Name) string {
+// inWords joins what several capabilities are, in words, for a sentence a
+// person reads: "a, b and c".
+//
+// Joined with and, because a refusal lists everything that is missing and the
+// damage needs all of it. The names themselves stay out of the sentence, for
+// the reason given beside the words.
+func inWords(names []capability.Name, words func(capability.Name) string) string {
 	written := make([]string, 0, len(names))
 	for _, name := range names {
-		written = append(written, string(name))
+		written = append(written, words(name))
 	}
-	return strings.Join(written, " or ")
+	if len(written) < 2 {
+		return strings.Join(written, "")
+	}
+	return strings.Join(written[:len(written)-1], ", ") + " and " + written[len(written)-1]
 }

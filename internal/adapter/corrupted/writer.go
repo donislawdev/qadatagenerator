@@ -208,7 +208,7 @@ func (w *Writer) ByKind() []string {
 		// damages somebody else's file has no recipe, so the clause became a
 		// sentence pointing at a thing the reader does not have. What replaced
 		// it is true in both modes and points at where the answer is either way.
-		manifest.RunLacksCapability:  "this run cannot do what they need, and the manifest names the missing capability for each one",
+		manifest.RunLacksCapability:  "this run lacks something they need, and the manifest says what for each one",
 		manifest.FieldTypeNotCovered: "the dataset has no column of the kind they apply to",
 		manifest.SchemeNotCovered:    "no column follows a numbering scheme they apply to",
 		manifest.DeclinedByMutator:   "the values in those rows did not suit them",

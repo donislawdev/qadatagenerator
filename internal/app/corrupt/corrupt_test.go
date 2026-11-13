@@ -184,7 +184,7 @@ func TestEveryWayDamageCanFailStillProducesAnEntry(t *testing.T) {
 		{"the run cannot do what it needs",
 			corrupt.New(described(t, entry()),
 				registry{damageID: stated{damageID, mutator.Done("n/a")}}, noSchemes{}, capability.NewSet(), seed.New("corrupt test")),
-			"this run cannot schema.field-type"},
+			"this damage needs a declared type for every column, which this run does not have"},
 		{"the mutator declined",
 			corrupt.New(described(t, entry()),
 				registry{damageID: stated{damageID, mutator.Skipped("the value is already n/a")}}, noSchemes{}, able(), seed.New("corrupt test")),
@@ -312,10 +312,10 @@ func TestACapabilityThatBelongsToAColumnIsAskedOfTheColumn(t *testing.T) {
 	if defect.Applied {
 		t.Fatal("damage about a maximum length was applied to a column that declares none")
 	}
-	for _, want := range []string{"the column surname does not supply", "schema.max-length"} {
-		if !strings.Contains(defect.FailureReason, want) {
-			t.Errorf("the reason does not say %q: %s", want, defect.FailureReason)
-		}
+	want := `this damage needs to land on a column with a declared maximum length, and the ` +
+		`column "surname" is not one`
+	if defect.FailureReason != want {
+		t.Errorf("the reason is %q, want %q", defect.FailureReason, want)
 	}
 
 	// The same damage on a column that does declare one goes ahead.

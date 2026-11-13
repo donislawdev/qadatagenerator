@@ -286,6 +286,13 @@ repository once they are released.
 
 ### Changed
 
+- **Damage that cannot be applied says what it needs in plain words.** The
+  manifest and Check results used to give the reason with an internal name,
+  such as "this run cannot schema.surname, which this damage needs". They now
+  say what is missing, such as "this damage needs a column known to hold
+  surnames, which this run does not have", and give an example where one
+  helps, such as "an identifier that encodes a date (such as a PESEL)". The
+  summary at the end of generate and corrupt says the same in one line.
 - **No shadows at the edges of scrolling areas.** The dark band at the foot of
   a list, a table or a page with more below it, and the shadow under the
   dialogs for choosing a file, are gone, as they already were in the list of
