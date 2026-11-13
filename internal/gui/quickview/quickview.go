@@ -112,13 +112,19 @@ type View struct {
 	// change anything about how they looked.
 	values []string
 	told   *widget.Label
+	// list is the card of values, built once and handed each new set, and
+	// listShown is it with the ring the keyboard lights (valuesCard says why).
+	list      *parts.ScrolledRows
+	listShown fyne.CanvasObject
 
 	// result is the card and its heading, or the sentence saying why there is
 	// no card. Refilled by settle, for the reason settings is.
 	result *fyne.Container
 	// about is the panel describing the chosen kind, refilled whenever the kind
-	// or the locale changes, which are the only two things it depends on.
-	about *fyne.Container
+	// or the locale changes, which are the only two things it depends on, and
+	// described is which kind and locale it holds now.
+	about     *fyne.Container
+	described describedFor
 	// terminal is the band at the foot, held so that settle can take it away
 	// when there is no line to show.
 	terminal fyne.CanvasObject
@@ -304,6 +310,8 @@ func (v *View) build() {
 	v.told.Importance = widget.LowImportance
 	v.told.Wrapping = fyne.TextWrapWord
 	v.showing = map[string]bool{}
+	v.list = NewValueList()
+	v.listShown = v.list.Framed()
 
 	// 🔴 In reading order, because the toolkit walks the objects in the order
 	// they were given and not in the order they are drawn. The screen next door
@@ -1006,8 +1014,8 @@ func (v *View) unconfirm() {
 // internal/guard refuses any bare number inside the window, because a number
 // there is almost always a distance and distances come from the scale. This one
 // is a COUNT and the guard has no way to tell the two apart - so the honest
-// place for it is beside the mode that produces the values, where the
-// measurement behind it is written out in full.
+// place for it is beside the mode that produces the values, where what bounds
+// it is written out.
 const mostShown = quick.MostShownAtOnce
 
 // 🔴 opensOn and commandDefault are both "how many by default" and they are

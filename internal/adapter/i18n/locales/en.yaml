@@ -87,11 +87,13 @@ catalogue.page.checks: Check boxes
 catalogue.page.text: Text
 catalogue.page.lines: Several lines
 catalogue.page.lists: Lists
+catalogue.page.values: Values
 catalogue.page.areas: Areas
 catalogue.control.button: Button
 catalogue.control.select: Chooser
 catalogue.control.check: Check box
 catalogue.control.taprow: Row of a value
+catalogue.control.values: List of values
 catalogue.control.field: Text field
 catalogue.control.editor: Text of several lines
 catalogue.control.table: Table

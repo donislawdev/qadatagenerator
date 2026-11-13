@@ -65,11 +65,19 @@ type KeyScroll struct {
 // Vertical only, because every scrolling area in this window is a column and a
 // direction nobody uses is a direction nobody checks.
 func NewKeyScroll(content fyne.CanvasObject) *KeyScroll {
-	scroll := &KeyScroll{ring: newRing(palette.RadiusCard)}
-	scroll.Direction = container.ScrollVerticalOnly
-	scroll.Content = content
+	scroll := &KeyScroll{}
+	scroll.setUp(content)
 	scroll.ExtendBaseWidget(scroll)
 	return scroll
+}
+
+// setUp is everything a scrolling area of this window is before the toolkit is
+// told what object it is, so that a type built on this one, ScrolledRows, is
+// the same area and then extends the base widget with itself.
+func (s *KeyScroll) setUp(content fyne.CanvasObject) {
+	s.ring = newRing(palette.RadiusCard)
+	s.Direction = container.ScrollVerticalOnly
+	s.Content = content
 }
 
 // Framed is this scrolling area together with the frame that says when it holds
@@ -113,7 +121,7 @@ func (s *KeyScroll) TypedKey(event *fyne.KeyEvent) {
 	case fyne.KeyPageUp:
 		s.by(-s.page())
 	case fyne.KeyHome:
-		s.ScrollToTop()
+		s.to(fyne.Position{})
 	case fyne.KeyEnd:
 		s.ScrollToBottom()
 	}
@@ -137,5 +145,27 @@ func (s *KeyScroll) page() float32 {
 }
 
 func (s *KeyScroll) by(delta float32) {
-	s.ScrollToOffset(fyne.NewPos(s.Offset.X, s.Offset.Y+delta))
+	s.to(fyne.NewPos(s.Offset.X, s.Offset.Y+delta))
+}
+
+// to moves the area and tells OnScrolled, which the toolkit's ScrollToOffset
+// does not do.
+//
+// 🔴 Read on the source of v2.8.2 (internal/widget/scroller.go): OnScrolled is
+// called by the wheel, by the bar and by an offset the toolkit had to clamp, and
+// ScrollToOffset sets the offset it was given before asking whether it moved, so
+// a move the keys make is never reported. Content that builds only what is in
+// view, ScrolledRows, would then stay where the keys left it, showing empty
+// card. End needs nothing here, because ScrollToBottom goes through the path the
+// wheel takes.
+//
+// A move the toolkit clamped is reported twice, once by it and once here, and
+// whoever listens is asked to treat a second report of the same place as
+// nothing.
+func (s *KeyScroll) to(offset fyne.Position) {
+	before := s.Offset
+	s.ScrollToOffset(offset)
+	if s.Offset != before && s.OnScrolled != nil {
+		s.OnScrolled(s.Offset)
+	}
 }

@@ -68,7 +68,7 @@ type Samples struct {
 // under it. The constants in internal/gui/screens say why that is measured
 // rather than tidy.
 //
-// # Why seven pages, and what would change the number
+// # Why eight pages, and what would change the number
 //
 // A page holds what fits the window at the size it opens in, StartWidth by
 // StartHeight, because a page that runs past the foot of the window is a page
@@ -77,7 +77,10 @@ type Samples struct {
 // a page has under its title, so they cannot share one. The seventh came on
 // 2026-11-11 with the row of an empty field with a hint: the text page holding
 // the editor as well asked for 855 units of height against the 780 the window
-// opens at, and the page of areas given the editor instead asked for 995. A
+// opens at, and the page of areas given the editor instead asked for 995. The
+// eighth came on 2026-11-12 with the list of values (B-370): the page of lists
+// holding it as well asked for 1077 units, and the page of areas 1096, so the
+// row of a value and the list it stands in became a page of their own. A
 // page is a family of controls a person would look for together. What would
 // change the number: a control added to a family, or a change to the size the
 // window opens in.
@@ -88,6 +91,7 @@ const (
 	PageText
 	PageLines
 	PageLists
+	PageValues
 	PageAreas
 	// PageCount is how many pages there are, so that a caller can ask for a
 	// picture of every one of them.
@@ -118,6 +122,8 @@ func Frame(text i18n.Catalogue, brand shell.Brand, samples Samples) *shell.Shell
 		Icon: paint.IconRecipe, Content: page(text, samples, editors())}
 	pages[PageLists] = shell.Screen{Name: text.T(i18n.CataloguePageLists), Group: controls,
 		Icon: paint.IconChecklist, Content: page(text, samples, lists())}
+	pages[PageValues] = shell.Screen{Name: text.T(i18n.CataloguePageValues), Group: controls,
+		Icon: paint.IconCopy, Content: page(text, samples, values())}
 	pages[PageAreas] = shell.Screen{Name: text.T(i18n.CataloguePageAreas), Group: controls,
 		Icon: paint.IconChevron, Content: page(text, samples, areas())}
 	return shell.New(pages, brand)

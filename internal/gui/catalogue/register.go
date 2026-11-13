@@ -1,6 +1,7 @@
 package catalogue
 
 import (
+	"strconv"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -159,22 +160,48 @@ func longCheck(_ i18n.Catalogue, samples Samples) (any, fyne.CanvasObject) {
 }
 
 // valueRow is a row of the list of values on the quick screen, drawn by that
-// screen, because the row itself holds behaviour and no picture.
-func valueRow(banded bool) builder {
+// screen, because the row itself holds behaviour and no picture. The index
+// says which row it is, and the screen bands every second one.
+func valueRow(at int) builder {
 	return func(text i18n.Catalogue, samples Samples) (any, fyne.CanvasObject) {
 		value := samples.Word
 		if len(samples.Values) > 0 {
 			value = samples.Values[0]
 		}
 		made := parts.NewTapRow(func(hovered bool) fyne.CanvasObject {
-			hint := ""
-			if hovered {
-				hint = text.T(i18n.QuickCopy)
-			}
-			return quickview.RowFace(1, 1, value, banded, hovered, hint)
+			return quickview.RowFace(at, 1, value, hovered, rowHint(text, hovered))
 		}, nil)
 		return made, made
 	}
+}
+
+// rowHint is what a row of values says under the pointer and nothing
+// otherwise, as on the quick screen.
+func rowHint(text i18n.Catalogue, hovered bool) string {
+	if hovered {
+		return text.T(i18n.QuickCopy)
+	}
+	return ""
+}
+
+// valueList is the list of values on the quick screen, built by that screen,
+// holding more values than it shows: the samples once for every row of a
+// control's height the area stands, so several times what it shows.
+func valueList(text i18n.Catalogue, samples Samples) (any, fyne.CanvasObject) {
+	var values []string
+	for range palette.CatalogueAreaRows {
+		values = append(values, samples.Values...)
+	}
+	digits := len(strconv.Itoa(len(values)))
+	made := quickview.NewValueList()
+	made.Hold(len(values), 0, func(row fyne.CanvasObject, at int) {
+		if tap, isRow := row.(*parts.TapRow); isRow {
+			tap.Rebind(func(hovered bool) fyne.CanvasObject {
+				return quickview.RowFace(at, digits, values[at], hovered, rowHint(text, hovered))
+			}, nil)
+		}
+	})
+	return made, paint.AtLeast(0, areaHeight(), made.Framed())
 }
 
 // texts is the page of the controls a person types into.
@@ -246,20 +273,30 @@ func editor(value func(Samples) string) builder {
 	}
 }
 
-// lists is the page of the controls that show values a row at a time.
+// lists is the page of the controls that show records a row at a time.
 //
 // The table stands alone, on its side, because one table is wider than half
 // the page and two of them side by side would run past its edge.
 func lists() []control {
 	return []control{{
-		kind: "TapRow", name: i18n.CatalogueTapRow, states: hoverable,
-		variants: []variant{
-			{name: i18n.CatalogueUnbanded, alone: true, fills: true, build: valueRow(false)},
-			{name: i18n.CatalogueBanded, alone: true, fills: true, build: valueRow(true)},
-		},
-	}, {
 		kind: "KeyTable", name: i18n.CatalogueTable, states: focusable,
 		variants: []variant{{name: i18n.CatalogueRows, alone: true, build: table}},
+	}}
+}
+
+// values is the page of the list of values on the quick screen: one row under
+// the pointer, which no other picture shows, and the list holding more values
+// than it shows.
+func values() []control {
+	return []control{{
+		kind: "TapRow", name: i18n.CatalogueTapRow, states: hoverable,
+		variants: []variant{
+			{name: i18n.CatalogueUnbanded, alone: true, fills: true, build: valueRow(0)},
+			{name: i18n.CatalogueBanded, alone: true, fills: true, build: valueRow(1)},
+		},
+	}, {
+		kind: "ScrolledRows", name: i18n.CatalogueValueList, states: focusable,
+		variants: []variant{{name: i18n.CatalogueRows, alone: true, fills: true, build: valueList}},
 	}}
 }
 

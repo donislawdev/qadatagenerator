@@ -96,8 +96,8 @@ func Kinds() []RefusalKind {
 //
 // 🔴 It is NOT a limit of this mode and Check does not apply it. Run will
 // produce a million values if asked, and the command line asks for them - the
-// number here exists because a window has to build a row for each one on the
-// thread that draws, and that is a cost the command line does not have.
+// number here exists because a window produces them on the thread that draws,
+// and that is a cost the command line does not have.
 //
 // It lives in the mode for the same reason DateShape does: a fact a surface
 // needs, kept where both surfaces can see it, so that the window is not the
@@ -108,40 +108,22 @@ func Kinds() []RefusalKind {
 //
 // The owner typed a million into the real window. The field took its first five
 // digits, so ten thousand values were drawn without a word about the rest, and
-// the whole window lagged under the pointer from then on. The measurement below
-// says why the number had been twenty thousand, and its own last paragraph says
-// what it left out, which is exactly what the owner ran into: a window that has
-// built the card still repaints and walks it on every move of the pointer.
+// the whole window lagged under the pointer from then on, because the card
+// held a row for every value and every frame walked them all.
 //
 // A thousand is the owner's choice, made on what this screen is for: values to
 // paste into a form or a test. A set larger than that is a file, and the line at
-// the foot of the screen carries no limit at all. Not measured against painting
-// either, and the margin is now a factor of twenty under the size that lagged.
+// the foot of the screen carries no limit at all.
 //
-// What follows is the measurement that set the number until then, kept because
-// the building half of it is still true.
+// # 🔴 What bounds it since 2026-11-13, and why it is still a thousand
 //
-// Measured on the card that draws them, three runs of ten at each size, median:
-//
-//	   500 values     0.52 ms     0.57 MB     11 761 allocations
-//	 5 000 values     5.7  ms     5.7  MB    119 762 allocations
-//	20 000 values    27.4  ms    22.8  MB    479 765 allocations
-//	50 000 values    99    ms    57.0  MB  1 199 768 allocations
-//
-// Building is linear and cheap - about 1.1 microseconds and 1.14 kB a value -
-// so the first number tried, five hundred, was picked to sound safe rather than
-// measured, which is the thing the list of four counts was replaced for. Twenty
-// thousand rather than fifty: at fifty the spread opens to 77 against 133 ms,
-// so the measurement has stopped being stable, and the memory is the card alone,
-// rebuilt whole on every draw.
-//
-// 🔴 What it is NOT measured against: painting. The benchmark builds the card
-// and asks its size, which is what blocks the drawing thread. How long the
-// toolkit then spends painting half a million objects a frame is not measured,
-// so this number carries the margin of that ignorance. Verified by hand at the
-// size the window is kept: twenty thousand values are on screen and it answers.
-// (That sentence was about the window answering ONCE, and it did not survive
-// the owner using it, see the top of this comment.)
+// The card no longer holds a row for every value. It builds rows only for what
+// is in view (DEC-285), so neither the memory of the window nor the cost of a
+// frame grows with this number: a draw of a thousand takes 3.2 ms on the thread
+// that draws, where it took 28.7 (B-370). What grows is producing the values,
+// 20 to 87 ms for a hundred thousand by kind, and positions stop being whole
+// pixels past about 266 000 rows at a scale of 1.5. A higher number is the
+// owner's decision, and this one stays until it is made.
 const MostShownAtOnce = 1000
 
 // CountFrom reads how many values were asked for out of the text somebody

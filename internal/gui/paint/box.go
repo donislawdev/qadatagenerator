@@ -38,8 +38,13 @@ import (
 // The padding is named by the caller because a card of rows and a card of
 // paragraphs want different room, and neither is more correct than the other.
 func Card(padding string, content fyne.CanvasObject) fyne.CanvasObject {
-	return On(Fill(theme.BgSurface, theme.RadiusCard), PadAll(padding, content))
+	return On(CardGround(), PadAll(padding, content))
 }
+
+// CardGround is the ground of a card without what stands on it, for a card
+// whose rows something else places: the list of values on the quick screen
+// builds only the rows in view and puts them on this itself.
+func CardGround() *canvas.Rectangle { return Fill(theme.BgSurface, theme.RadiusCard) }
 
 // Band is a strip of chrome touching the left and right edges of the window.
 //

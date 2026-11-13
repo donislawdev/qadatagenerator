@@ -55,7 +55,7 @@ var samples = Samples{
 
 // every is the whole register, page after page.
 func every() []control {
-	return slices.Concat(buttons(), choosers(), checks(), texts(), editors(), lists(), areas())
+	return slices.Concat(buttons(), choosers(), checks(), texts(), editors(), lists(), values(), areas())
 }
 
 // TestTheCatalogueShowsEveryControlTheScreensBuildAndNothingElse closes the

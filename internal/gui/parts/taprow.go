@@ -89,9 +89,37 @@ func (r *TapRow) MouseIn(*desktop.MouseEvent) {
 	r.Refresh()
 }
 
-// MouseMoved has nothing to do, since a row looks the same wherever inside
-// itself the pointer is.
-func (r *TapRow) MouseMoved(*desktop.MouseEvent) {}
+// MouseMoved puts the pointer back on a row that forgot it.
+//
+// A row looks the same wherever inside itself the pointer is, so this is
+// nothing for a row that stays put. It matters for a row a list moved to
+// another value, which forgets the pointer (Rebind): the driver still holds it
+// as the object under the pointer and so sends it MouseMoved rather than
+// MouseIn, read on the source of v2.8.2 (internal/driver/glfw/window.go,
+// processMouseMoved). Without this, a row moved to where the pointer stands
+// would stay unlit until the pointer left it and came back.
+func (r *TapRow) MouseMoved(*desktop.MouseEvent) {
+	if !r.pointerIsHere {
+		r.pointerIsHere = true
+		r.Refresh()
+	}
+}
+
+// Rebind gives the row another value to show and another act, which is what a
+// list that builds rows only for what is in view does as it scrolls.
+//
+// The pointer and the word saying a click worked both belong to the value the
+// row showed, so both are forgotten: kept, the row would come back into view at
+// the other end of the list lit up, or saying it copied a value it never held.
+// The driver does not say where the pointer is after a scroll, so a row the
+// pointer really is on lights up again on the next move (MouseMoved).
+func (r *TapRow) Rebind(draw func(hovered bool) fyne.CanvasObject, tapped func()) {
+	r.Draw = draw
+	r.OnTapped = tapped
+	r.pointerIsHere = false
+	r.confirm.end(func() {})
+	r.Refresh()
+}
 
 // MouseOut notes that the pointer left and redraws.
 func (r *TapRow) MouseOut() {

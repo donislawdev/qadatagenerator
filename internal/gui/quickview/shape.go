@@ -3,6 +3,7 @@ package quickview
 import (
 	"fmt"
 	"strconv"
+	"unicode/utf8"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -101,54 +102,56 @@ const commandPrompt = "$"
 // itself, which reads as a fault rather than as room. Rows that grow spend the
 // space on the thing the screen is for, and the ceiling in the theme is what
 // stops four values in a tall window becoming four paragraphs.
+//
+// # 🔴 Why the card is one list handed each new set, rather than built anew
+//
+// The list builds rows only for what is in view and keeps them from one draw
+// to the next (parts.ScrolledRows, which carries the measurement). Built anew
+// per draw, as the card was until 2026-11-12, every draw of a thousand values
+// left 1018 renderers and about 3.5 MB behind for a minute, and every frame
+// walked rows nobody could see (B-370).
+//
+// What the list keeps from the card it replaced: it scrolls, with the keys of
+// KeyScroll (DEC-187), and it is Framed, since the frame is the whole of what
+// shows the keyboard has reached it (B-279).
 func (v *View) valuesCard(values []string) fyne.CanvasObject {
-	rows := make([]fyne.CanvasObject, 0, len(values))
 	// The width of the widest number there will be, so that a one and a ten
 	// line up under each other. Derived rather than written down: the face is
 	// monospace, so padding to the digits of the LAST index is exactly the
 	// column every index needs, and a list of a hundred widens itself.
 	digits := len(strconv.Itoa(len(values)))
-	// Toggled rather than tested for an even index, and not only to keep the
-	// guard on values quiet. The guard is right that it cannot tell a two that
-	// means a distance from a two that means every other one, and a flag says
-	// what this is in a word instead of in arithmetic a reader has to run.
-	banded := false
-	for at, value := range values {
-		rows = append(rows, v.valueRow(at+1, digits, value, banded))
-		banded = !banded
-	}
-	card := paint.Card(palette.NameStepTight, paint.EvenRows(rows...))
-	// 🔴 Scrolled, because this screen offers up to fifty values and a window is
-	// not always tall enough for them.
-	//
-	// Without it the card asked for fifty rows at their smallest, which is over
-	// two thousand pixels, and was handed that much whatever the window had.
-	// Fyne does not clip children, so it drew over the band of chrome under it
-	// and off the bottom of the window. The layout next door refuses to overflow
-	// now, but on its own that only trades an overflow for rows squashed thinner
-	// than a line of text, which is the same collision by another route.
-	//
-	// The two together are the answer, and the toolkit does the arithmetic:
-	// scrollContainerRenderer.Layout resizes its content to the LARGER of the
-	// content's minimum and its own size. So when the window has room the card
-	// still grows into it, and when it has not the rows keep their floor and
-	// the list scrolls. Neither behaviour is written here.
-	//
-	// KeyScroll rather than the toolkit's own, for the reason DEC-187 settled:
-	// container.Scroll carries no keyboard method at all, so a person without a
-	// mouse could reach the values on the About screen only by not needing to.
-	// 73.6% of that screen was unreachable before the same repair.
-	//
-	// 🔴 Framed, and it was bare until 2026-09-14. The frame is the whole of
-	// what shows the keyboard has reached the card, and a scrolling area put on
-	// a screen without it keeps recolouring a rectangle that is not there:
-	// nought pixels on the real window at the fourteenth stop, with every test
-	// of the type green (B-279). The frame lands on the edge of the card and
-	// recolours it, which is how every other control here marks focus.
-	return parts.NewKeyScroll(paint.FitHeight(len(values), palette.NameStepTight, card)).Framed()
+	// The row the list asks its width of, since it builds only the rows in view
+	// and the widest value may be anywhere. Found by its letters rather than by
+	// measuring every value, which a hundred thousand values would make slow,
+	// and right because the face of a value is monospace.
+	widest := RowFace(len(values)-1, digits, longest(values), false, "").MinSize().Width
+	v.list.Hold(len(values), widest, func(row fyne.CanvasObject, at int) {
+		if tap, isRow := row.(*parts.TapRow); isRow {
+			v.bindRow(tap, at, digits, values[at])
+		}
+	})
+	return v.listShown
 }
 
-// valueRow is one produced value, numbered.
+// longest is the value with the most letters, or nothing for no values.
+func longest(values []string) string {
+	most, found := 0, ""
+	for _, value := range values {
+		if letters := utf8.RuneCountInString(value); letters > most {
+			most, found = letters, value
+		}
+	}
+	return found
+}
+
+// NewValueList is the list the card is, built once with the screen. Exported
+// for the catalogue of controls, for the reason RowFace is.
+func NewValueList() *parts.ScrolledRows {
+	return parts.NewScrolledRows(paint.CardGround(), palette.NameStepTight,
+		func() fyne.CanvasObject { return parts.NewTapRow(nil, nil) })
+}
+
+// bindRow puts one produced value, numbered, into a row of the list.
 //
 // # Why the number is there at all
 //
@@ -174,17 +177,15 @@ func (v *View) valuesCard(values []string) fyne.CanvasObject {
 // how a person learns the row can be clicked at all. A hint on every row would
 // be twenty thousand copies of the same sentence in a list of values, which is
 // the state the manifest browser was in before its columns were cut down.
-func (v *View) valueRow(number, digits int, value string, banded bool) fyne.CanvasObject {
-	var row *parts.TapRow
-	row = parts.NewTapRow(
+func (v *View) bindRow(row *parts.TapRow, at, digits int, value string) {
+	row.Rebind(
 		func(hovered bool) fyne.CanvasObject {
 			// The words the button in the heading carries, because it is the
 			// same act on a smaller amount. A second pair of words for it would
 			// be a second thing to learn.
-			return RowFace(number, digits, value, banded, hovered, v.rowHint(row, hovered))
+			return RowFace(at, digits, value, hovered, v.rowHint(row, hovered))
 		},
 		func() { v.copyOne(row, value) })
-	return row
 }
 
 // rowHint is what a row says beside its value: that a click copies it while
@@ -214,18 +215,26 @@ func (v *View) rowHint(row *parts.TapRow, hovered bool) string {
 // state of this row no picture had, since the keyboard never lands on a row and
 // the stored states reach a control through the keyboard. Drawing a row of its
 // own there would be a second picture of one control, and the two would drift.
-func RowFace(number, digits int, value string, banded, hovered bool, hint string) fyne.CanvasObject {
+//
+// # Why it takes the index rather than the number and the band
+//
+// Both follow from where the value stands, and the list of values binds
+// whichever rows come into view in no fixed order. So the number is the index
+// counted from one, and the band falls on every second value, the first having
+// none, as when the card was built top to bottom. Worked out here, the screen
+// and the catalogue cannot draw them two ways.
+func RowFace(at, digits int, value string, hovered bool, hint string) fyne.CanvasObject {
 	var ground fyne.CanvasObject = paint.Clear()
 	switch {
 	case hovered:
 		// The ground any control takes under the pointer, so a row lights up
 		// the same way every other thing in this window does.
 		ground = paint.Fill(palette.BgHover, 0)
-	case banded:
+	case at&1 == 1:
 		ground = paint.Fill(palette.BgControl, 0)
 	}
 
-	index := paint.Mono(fmt.Sprintf("%*d", digits, number), palette.TypeLabel, palette.TextSecondary)
+	index := paint.Mono(fmt.Sprintf("%*d", digits, at+1), palette.TypeLabel, palette.TextSecondary)
 	index.Alignment = fyne.TextAlignTrailing
 
 	var said fyne.CanvasObject = paint.Clear()

@@ -72,6 +72,26 @@ func TestARowWithNothingWiredToItIsSilent(t *testing.T) {
 	row.MouseOut()
 }
 
+// A row given another value stops saying it copied the one before, and draws
+// the new one.
+func TestARowGivenAnotherValueDropsTheWordOfTheOneBefore(t *testing.T) {
+	row := parts.NewTapRow(func(bool) fyne.CanvasObject { return canvas.NewText("666-94-2223", nil) }, nil)
+	window := test.NewWindow(row)
+	defer window.Close()
+
+	row.Confirm()
+	if !row.Confirmed() {
+		t.Fatal("the row did not take the word of a click, so this says nothing")
+	}
+	row.Rebind(func(bool) fyne.CanvasObject { return canvas.NewText("666-01-0001", nil) }, nil)
+	if row.Confirmed() {
+		t.Error("a row given another value still says it copied the value before")
+	}
+	if words := textIn(row); words != "666-01-0001" {
+		t.Errorf("a row given another value draws %q", words)
+	}
+}
+
 // textIn reads whatever text the row is drawing right now, which is the only
 // thing a person can see of it.
 func textIn(row *parts.TapRow) string {

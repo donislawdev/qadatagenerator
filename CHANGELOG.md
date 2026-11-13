@@ -88,6 +88,11 @@ repository once they are released.
 
 ### Fixed
 
+- **Producing many values on Quick value is faster and no longer leaves memory
+  behind.** Each press of Generate with a thousand values used to keep the
+  window busy for about 30 ms and leave about 3.5 MB behind for a minute. It
+  now takes about 3 ms and leaves almost nothing behind, because the list keeps
+  only the rows you can see. The list looks and scrolls as before.
 - **The window no longer takes more memory every time you come back to a
   screen.** Each return to a screen you had not looked at for a minute or
   more used to add about 33 MB that stayed until the program closed, and each

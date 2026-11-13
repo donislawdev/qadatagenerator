@@ -219,7 +219,18 @@ func (v *View) paragraph(words string) fyne.CanvasObject {
 // or not that choice produced anything. Hanging it off the values instead would
 // have left the wrong scheme described beside every refusal, which is exactly
 // the state where somebody most needs to read what the kind is.
+//
+// Built again only when the kind or the locale differs from the last time, the
+// two things it reads. Every draw passes through here, and rebuilding it each
+// time made nine widgets per draw that the toolkit kept for a minute: measured
+// on 2026-11-13 as nine renderers more after every draw of a thousand values
+// (B-370).
 func (v *View) describe(generator string) {
+	asked := describedFor{generator: generator, locale: v.locale}
+	if asked == v.described {
+		return
+	}
+	v.described = asked
 	drawn := v.aside(generator)
 	if drawn == nil {
 		v.about.Objects = nil
@@ -229,3 +240,6 @@ func (v *View) describe(generator string) {
 	v.about.Objects = []fyne.CanvasObject{drawn}
 	v.about.Refresh()
 }
+
+// describedFor is what the panel describing a kind was last drawn for.
+type describedFor struct{ generator, locale string }

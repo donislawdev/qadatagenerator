@@ -29,6 +29,7 @@ const (
 	CataloguePageText     Key = "catalogue.page.text"
 	CataloguePageLines    Key = "catalogue.page.lines"
 	CataloguePageLists    Key = "catalogue.page.lists"
+	CataloguePageValues   Key = "catalogue.page.values"
 	CataloguePageAreas    Key = "catalogue.page.areas"
 
 	// The controls, one per type of internal/gui/parts a screen builds.
@@ -36,6 +37,7 @@ const (
 	CatalogueSelect     Key = "catalogue.control.select"
 	CatalogueCheck      Key = "catalogue.control.check"
 	CatalogueTapRow     Key = "catalogue.control.taprow"
+	CatalogueValueList  Key = "catalogue.control.values"
 	CatalogueField      Key = "catalogue.control.field"
 	CatalogueEditor     Key = "catalogue.control.editor"
 	CatalogueTable      Key = "catalogue.control.table"
@@ -79,8 +81,8 @@ const (
 var catalogueKeys = []Key{
 	CataloguePromise, CatalogueGroup,
 	CataloguePageButtons, CataloguePageChoosers, CataloguePageChecks, CataloguePageText,
-	CataloguePageLines, CataloguePageLists, CataloguePageAreas,
-	CatalogueButton, CatalogueSelect, CatalogueCheck, CatalogueTapRow, CatalogueField,
+	CataloguePageLines, CataloguePageLists, CataloguePageValues, CataloguePageAreas,
+	CatalogueButton, CatalogueSelect, CatalogueCheck, CatalogueTapRow, CatalogueValueList, CatalogueField,
 	CatalogueEditor, CatalogueTable, CatalogueScroll, CatalogueDisclosure,
 	CatalogueStateRest, CatalogueStatePointer, CatalogueStatePressed, CatalogueStateFocus,
 	CatalogueStateDisabled,

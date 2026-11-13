@@ -116,22 +116,16 @@ var HandmadeAllowed = map[string]Handmade{
 			"program last (DEC-276), and is drawn under the column. It took over fixedWidth, which kept " +
 			"the width alone, so the register did not grow",
 	},
-	"evenRows": {
-		Instead: "layout.NewGridLayoutWithRows, read on the source of v2.8.1 (layout/gridlayout.go), " +
-			"which also divides its height into equal cells",
-		Why: "it puts theme.Padding() between the cells, a value of the GLOBAL theme that this window " +
-			"answers with nought in one theme and with a step of the scale in the other, so the gap " +
-			"between the values on the quick screen would follow whichever theme happened to be set. " +
-			"And its minimum is the tallest child times the rows, where a list of values needs a floor " +
-			"per row that the window can fall back to when it has nothing to spare",
-	},
-	"fitHeight": {
-		Instead: "container.NewVBox and layout.NewSpacer, and the scrolling container around them",
-		Why: "a box gives each child its minimum and not one pixel more, and a spacer stretches the " +
-			"gaps between children rather than the children, so nothing in the library grows a card " +
-			"with the window up to a ceiling per row and leaves the surplus undrawn. The surplus has " +
-			"to stay off the card because an empty framed box read as a failure on the render of " +
-			"2026-09-08 (450 pixels of empty interior at 1600 by 1180)",
+	"rowsInView": {
+		Instead: "widget.List, which builds only the rows in view, and layout.NewGridLayoutWithRows " +
+			"in a scrolling container, which divides its height into equal cells",
+		Why: "the list gives every row a fixed height and lights a row for the keyboard, while the card " +
+			"of values shares spare height between a few rows up to a ceiling and marks the keyboard " +
+			"with its edge (DEC-242, DEC-243). The grid builds a cell for every value and puts the " +
+			"global theme's padding between them, and a row built for every value was what cost the " +
+			"window 1018 renderers and about 3.5 MB on each draw of a thousand, with every frame " +
+			"walking rows nobody could see (B-370). It took over evenRows and fitHeight, the two " +
+			"layouts the card was made of, so the register shrank by one",
 	},
 	"Button": {
 		Instead: "widget.Button, which this was an extension of until 2026-09-09",
@@ -250,11 +244,14 @@ var HandmadeAllowed = map[string]Handmade{
 // renderer with its edge hidden, so that the caret has a width (the entries say
 // why). It is still two entries, so it is still stated rather than folded in.
 //
+// 🔴 Lowered from 15 to 14 on 2026-11-12, when one layout that builds only the
+// rows in view took the place of evenRows and fitHeight (B-370).
+//
 // What lowers it again: a control going back to the library, which will happen
 // if the toolkit ever lets a caller supply the content of a button, or draws
 // its caret at a width of its own rather than the width of its edge. Nothing
 // else does.
-const HandmadeCeiling = 15
+const HandmadeCeiling = 14
 
 // Handmades reports every layout and widget written inside the window, and
 // every register entry naming one that is no longer there.

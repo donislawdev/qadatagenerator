@@ -49,8 +49,14 @@ func catalogueStates() []State {
 		},
 		{
 			Name:      "catalogue-lists",
-			Purpose:   "the row of a value under the pointer, which no other picture shows, and the table",
+			Purpose:   "the table, at rest and with the keyboard on it",
 			Screen:    catalogue.PageLists,
+			Catalogue: true,
+		},
+		{
+			Name:      "catalogue-values",
+			Purpose:   "the row of a value under the pointer, which no other picture shows, and the list of values holding more than it shows",
+			Screen:    catalogue.PageValues,
 			Catalogue: true,
 		},
 		{

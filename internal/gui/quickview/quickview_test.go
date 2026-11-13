@@ -2,6 +2,7 @@ package quickview
 
 import (
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -27,21 +28,21 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-// BenchmarkTheCardOfValues is what the ceiling on this screen is measured
-// against, and it is here rather than in a comment because a constant that says
-// it was measured has to be re-measurable.
+// BenchmarkTheCardOfValues is what a new set of values costs the card on the
+// thread that draws, and it is here rather than in a comment because a
+// constant that says it was measured has to be re-measurable.
 //
-// What it measures is the half that is NOT cheap. Producing is: a hundred
-// thousand PESELs leave the command line in 402 ms including starting the
-// process. Drawing them is another matter - every value is a row of several
-// canvas objects built on the thread that draws, and nothing hands control back
-// to the window while that happens.
+// Until 2026-11-12 every value was a row of several canvas objects built on
+// that thread, and this grew with the set. The card now hands the set to a list
+// that builds rows only for what is in view (B-370), so what is left to grow is
+// finding the widest value, which reads every value once. Producing the values
+// is the mode's cost and is not timed here.
 //
 // Run it as:
 //
 //	go test ./internal/gui/quickview/ -run x -bench Card -benchtime 20x
 func BenchmarkTheCardOfValues(b *testing.B) {
-	for _, howMany := range []int{500, 5000, 20000, 50000} {
+	for _, howMany := range []int{1000, 10000, 100000} {
 		values := make([]string, howMany)
 		for at := range values {
 			values[at] = "66685370" + strconv.Itoa(at%10)
@@ -736,9 +737,15 @@ func TestClickingOneValueCopiesThatValueAndNotTheSet(t *testing.T) {
 		t.Fatalf("the screen produced %d values, so this cannot ask about the third", len(values))
 	}
 
+	// In a window of a size, because the list builds rows only for what is in
+	// view, and a screen nobody has laid out has no view.
+	window := test.NewWindow(view.Content())
+	defer window.Close()
+	window.Resize(fyne.NewSize(1100, 800))
+
 	rows := tapRowsOf(view.Content())
 	if len(rows) != len(values) {
-		t.Fatalf("the card holds %d rows for %d values", len(rows), len(values))
+		t.Fatalf("the card shows %d rows for %d values", len(rows), len(values))
 	}
 	rows[2].Tapped(nil)
 
@@ -757,11 +764,45 @@ func TestClickingOneValueCopiesThatValueAndNotTheSet(t *testing.T) {
 	}
 }
 
-// tapRowsOf finds the rows of the card, in the order they are drawn.
+// The panel describing a kind is built again when the kind or the locale
+// changes and at no other draw, since every draw passes through the place that
+// settles it and a panel built anew each time cost nine widgets a draw (B-370).
+func TestThePanelOfAKindIsBuiltAgainOnlyWhenTheKindOrTheLocaleChanges(t *testing.T) {
+	view := New(i18n.English, &heldClipboard{})
+	view.Choose("pesel")
+	if len(view.about.Objects) == 0 {
+		t.Fatal("the panel describes nothing, so this says nothing")
+	}
+	first := view.about.Objects[0]
+
+	view.Generate()
+	if view.about.Objects[0] != first {
+		t.Error("drawing the same kind again built its panel anew")
+	}
+	view.Choose("ssn")
+	if view.about.Objects[0] == first {
+		t.Error("choosing another kind left the panel of the kind before")
+	}
+	second := view.about.Objects[0]
+	view.UseLocale("pl-PL")
+	if view.about.Objects[0] == second {
+		t.Error("choosing another locale left the panel drawn for the locale before")
+	}
+}
+
+// tapRowsOf finds the rows the card shows, top to bottom.
+//
+// Sorted by place rather than taken in the order of the tree, because the list
+// keeps its rows from one set to the next and binds whichever it has to
+// whichever value comes into view, and hidden ones are left out, since they
+// stand for nothing.
 func tapRowsOf(object fyne.CanvasObject) []*parts.TapRow {
 	var found []*parts.TapRow
 	var walk func(fyne.CanvasObject)
 	walk = func(each fyne.CanvasObject) {
+		if !each.Visible() {
+			return
+		}
 		switch shape := each.(type) {
 		case *parts.TapRow:
 			found = append(found, shape)
@@ -780,5 +821,6 @@ func tapRowsOf(object fyne.CanvasObject) []*parts.TapRow {
 		}
 	}
 	walk(object)
+	sort.SliceStable(found, func(i, j int) bool { return found[i].Position().Y < found[j].Position().Y })
 	return found
 }

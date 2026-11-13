@@ -251,6 +251,40 @@
 											<rectangle size="201x34"/>
 											<container size="201x34">
 												<container pos="12,4" size="177x26">
+													<container size="61x26">
+														<container size="15x26">
+															<spacer size="15x5"/>
+															<image fillMode="contain" pos="0,5" rsc="copy-72abff-15.svg" size="15x15"/>
+															<spacer pos="0,20" size="15x5"/>
+														</container>
+														<container pos="23,0" size="38x26">
+															<spacer size="38x4"/>
+															<text pos="0,4" size="38x16">Values</text>
+															<spacer pos="0,21" size="38x4"/>
+														</container>
+													</container>
+												</container>
+											</container>
+										</container>
+									</container>
+								</container>
+							</widget>
+						</container>
+					</container>
+					<container pos="0,324" size="220x42">
+						<container size="3x42">
+							<rectangle size="3x42"/>
+							<rectangle size="3x42"/>
+						</container>
+						<container pos="3,0" size="217x42">
+							<widget pos="8,4" size="201x34" type="*parts.Button">
+								<container size="201x34">
+									<container size="201x34">
+										<rectangle size="201x34"/>
+										<container size="201x34">
+											<rectangle size="201x34"/>
+											<container size="201x34">
+												<container pos="12,4" size="177x26">
 													<container size="56x26">
 														<container size="15x26">
 															<spacer size="15x5"/>

@@ -378,6 +378,7 @@ func TestEveryStateOpensTheScreenItsNameSays(t *testing.T) {
 		"catalogue-text":     catalogue.PageText,
 		"catalogue-lines":    catalogue.PageLines,
 		"catalogue-lists":    catalogue.PageLists,
+		"catalogue-values":   catalogue.PageValues,
 		"catalogue-areas":    catalogue.PageAreas,
 	}
 	for _, state := range All() {
