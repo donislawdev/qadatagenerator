@@ -121,6 +121,35 @@ func TestAnUnknownGeneratorLeavesTheTypeEmpty(t *testing.T) {
 	}
 }
 
+// 🔴 A field drawn from a list of people's names says which part of a name it
+// holds, and a field drawn from a list of towns says none.
+//
+// Both are text, so the type cannot tell them apart. Damage that supplies a
+// real surname expects it accepted, and in a column of towns, or in a column a
+// recipe calls surname without a generator behind it, that expectation would
+// rest on nothing.
+func TestAFieldDrawnFromNamesSaysWhichPartOfAName(t *testing.T) {
+	source := values.New("pl-PL", "schema")
+	view := values.SchemaOf(shaped(
+		recipe.Field{Name: "given", Generator: "first_name"},
+		recipe.Field{Name: "family", Generator: "last_name"},
+		recipe.Field{Name: "town", Generator: "city"},
+		recipe.Field{Name: "province", Generator: "region"},
+		recipe.Field{Name: "sex", Generator: "gender"},
+		recipe.Field{Name: "surname", Type: values.TypeString},
+	), source)
+
+	want := map[string]recipe.NamePart{
+		"given": recipe.GivenName, "family": recipe.Surname,
+		"town": "", "province": "", "sex": "", "surname": "",
+	}
+	for _, info := range view.FieldsOf("customer") {
+		if info.NamePart != want[info.Name] {
+			t.Errorf("%s came out holding %q, want %q", info.Name, info.NamePart, want[info.Name])
+		}
+	}
+}
+
 // The rest of the view is the recipe's own answer and has to survive the
 // wrapping. A decorator that quietly drops a relation would leave the mutators
 // that damage keys with nothing to work on.

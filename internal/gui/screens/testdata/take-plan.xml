@@ -781,8 +781,8 @@
 														<container size="330x372">
 															<container pos="16,16" size="298x340">
 																<widget size="298x340" type="*parts.KeyScroll">
-																	<container size="298x876">
-																		<container size="298x876">
+																	<container size="298x993">
+																		<container size="298x993">
 																			<container size="298x18">
 																				<container size="17x18">
 																					<spacer size="17x0"/>
@@ -805,22 +805,18 @@
 																					</widget>
 																				</container>
 																			</container>
-																			<container pos="0,96" size="298x322">
+																			<container pos="0,96" size="298x388">
 																				<text bold color="focus" size="298x14" textSize="11">COLUMNS</text>
-																				<container pos="0,22" size="298x299">
+																				<container pos="0,22" size="298x366">
 																					<container size="298x16">
 																						<text bold size="11x16">id</text>
 																						<text color="disabled" pos="19,0" size="88x16">taken for string</text>
 																					</container>
 																					<container pos="0,24" size="298x16">
-																						<text bold size="65x16">first_name</text>
-																						<text color="disabled" pos="73,0" size="88x16">taken for string</text>
-																					</container>
-																					<container pos="0,49" size="298x16">
 																						<text bold size="26x16">note</text>
 																						<text color="disabled" pos="34,0" size="88x16">taken for string</text>
 																					</container>
-																					<container pos="0,74" size="298x41">
+																					<container pos="0,49" size="298x41">
 																						<widget size="298x41" type="*widget.Label">
 																							<widget size="298x41" type="*widget.RichText">
 																								<text color="disabled" pos="4,4" size="281x16">because no numbering scheme this build carries</text>
@@ -828,11 +824,24 @@
 																							</widget>
 																						</widget>
 																					</container>
-																					<container pos="0,124" size="298x16">
+																					<container pos="0,99" size="298x16">
+																						<text bold size="65x16">first_name</text>
+																						<text color="disabled" pos="73,0" size="88x16">taken for string</text>
+																					</container>
+																					<container pos="0,124" size="298x58">
+																						<widget size="298x58" type="*widget.Label">
+																							<widget size="298x58" type="*widget.RichText">
+																								<text color="disabled" pos="4,4" size="281x16">because no numbering scheme this build carries</text>
+																								<text color="disabled" pos="4,20" size="288x16">accepted 12 values of this column, and its header</text>
+																								<text color="disabled" pos="4,37" size="265x16">is one this build reads as naming given names</text>
+																							</widget>
+																						</widget>
+																					</container>
+																					<container pos="0,191" size="298x16">
 																						<text bold size="32x16">pesel</text>
 																						<text color="disabled" pos="40,0" size="104x16">taken for PL.pesel</text>
 																					</container>
-																					<container pos="0,149" size="298x58">
+																					<container pos="0,216" size="298x58">
 																						<widget size="298x58" type="*widget.Label">
 																							<widget size="298x58" type="*widget.RichText">
 																								<text color="disabled" pos="4,4" size="268x16">because every one of 12 values of this column</text>
@@ -841,11 +850,11 @@
 																							</widget>
 																						</widget>
 																					</container>
-																					<container pos="0,216" size="298x16">
+																					<container pos="0,282" size="298x16">
 																						<text bold size="22x16">aba</text>
 																						<text color="disabled" pos="30,0" size="96x16">taken for US.aba</text>
 																					</container>
-																					<container pos="0,241" size="298x58">
+																					<container pos="0,307" size="298x58">
 																						<widget size="298x58" type="*widget.Label">
 																							<widget size="298x58" type="*widget.RichText">
 																								<text color="disabled" pos="4,4" size="268x16">because every one of 12 values of this column</text>
@@ -856,7 +865,7 @@
 																					</container>
 																				</container>
 																			</container>
-																			<container pos="0,434" size="298x41">
+																			<container pos="0,500" size="298x41">
 																				<widget size="298x41" type="*widget.Label">
 																					<widget size="298x41" type="*widget.RichText">
 																						<text color="disabled" pos="4,4" size="280x16">Nothing declared what these columns hold, so it</text>
@@ -864,8 +873,8 @@
 																					</widget>
 																				</widget>
 																			</container>
-																			<rectangle fillColor="separator" pos="0,491" size="298x1"/>
-																			<container pos="0,508" size="298x367">
+																			<rectangle fillColor="separator" pos="0,558" size="298x1"/>
+																			<container pos="0,575" size="298x418">
 																				<text bold color="focus" size="298x14" textSize="11">NOT WORKED OUT</text>
 																				<container pos="0,22" size="298x58">
 																					<widget size="298x58" type="*widget.Label">
@@ -876,9 +885,9 @@
 																						</widget>
 																					</widget>
 																				</container>
-																				<container pos="0,89" size="298x278">
-																					<widget size="298x278" type="*widget.Label">
-																						<widget size="298x278" type="*widget.RichText">
+																				<container pos="0,89" size="298x329">
+																					<widget size="298x329" type="*widget.Label">
+																						<widget size="298x329" type="*widget.RichText">
 																							<text color="disabled" pos="4,4" size="279x16">maximum length, because the longest value in a</text>
 																							<text color="disabled" pos="4,20" size="258x16">file is not a declared limit, required columns,</text>
 																							<text color="disabled" pos="4,37" size="266x16">because a column with no blanks in it was not</text>
@@ -892,9 +901,12 @@
 																							<text color="disabled" pos="4,173" size="277x16">numbering scheme encodes, which are the only</text>
 																							<text color="disabled" pos="4,189" size="238x16">two a value can prove without being told,</text>
 																							<text color="disabled" pos="4,206" size="283x16">relations between tables, because one file is one</text>
-																							<text color="disabled" pos="4,223" size="287x16">table and numeric, date and postal column types,</text>
-																							<text color="disabled" pos="4,240" size="260x16">because a column of digits is not a column of</text>
-																							<text color="disabled" pos="4,257" size="51x16">numbers</text>
+																							<text color="disabled" pos="4,223" size="284x16">table, people's names, except in a column whose</text>
+																							<text color="disabled" pos="4,240" size="278x16">header is a common English or Polish word for a</text>
+																							<text color="disabled" pos="4,257" size="278x16">given name or a surname, such as first_name or</text>
+																							<text color="disabled" pos="4,274" size="272x16">nazwisko and numeric, date and postal column</text>
+																							<text color="disabled" pos="4,291" size="284x16">types, because a column of digits is not a column</text>
+																							<text color="disabled" pos="4,308" size="66x16">of numbers</text>
 																						</widget>
 																					</widget>
 																				</container>
@@ -905,8 +917,8 @@
 																		<linearGradient pos="0,-8" size="298x8"/>
 																	</widget>
 																	<widget pos="292,0" size="6x340" type="*widget.scrollBarArea">
-																		<widget pos="3,0" size="3x132" type="*widget.scrollBar">
-																			<rectangle fillColor="scrollbar" radius="3" size="3x132"/>
+																		<widget pos="3,0" size="3x116" type="*widget.scrollBar">
+																			<rectangle fillColor="scrollbar" radius="3" size="3x116"/>
 																		</widget>
 																	</widget>
 																</widget>

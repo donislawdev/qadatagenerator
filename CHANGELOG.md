@@ -582,6 +582,20 @@ repository once they are released.
   stored apart in one value and not in the other the same way, such as
   `Z<U+0307>`, and draws the rest as it is. So the value before and after does
   not look the same.
+- **Four kinds of damage about people's names.** A real surname with an
+  apostrophe, such as O'Brien, a real name with an accented letter, such as
+  Łukasz or Wójcik, a name in Chinese, Japanese or Korean characters, such as
+  佐藤, and the surname Null. The manifest expects each of them accepted,
+  because people are called that. They land only on a column that holds names.
+  In a recipe that is a column made with `first_name` or `last_name`. In a file
+  you damage with corrupt or Damage a file it is a column whose header is a
+  common English or Polish word for a given name or a surname, such as
+  `first_name`, `surname`, `imię` or `nazwisko`, and the screen and the log say
+  that this was read from the header. O'Brien and Null go only to surnames, and
+  a given name is replaced by a given name. A column under any other header
+  never gets a name, and the manifest says why. A column with a maximum length
+  never gets a name longer than it allows. The catalog says what these entries
+  need with two new capabilities, `schema.person-name` and `schema.surname`.
 - **Links to the project and to supporting it.** Two buttons at the foot of
   the column, under About, open the project's source on GitHub and the page
   for supporting its author in your browser. The program itself still

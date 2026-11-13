@@ -80,4 +80,12 @@ func gatherField(field FieldInfo, found map[capability.Name]bool) {
 	if field.Unique {
 		found[capability.KeyUnique] = true
 	}
+	// A surname is a name as well, so a column of surnames answers both
+	// questions and a column of first names answers one.
+	if field.NamePart != "" {
+		found[capability.SchemaPersonName] = true
+	}
+	if field.NamePart == Surname {
+		found[capability.SchemaSurname] = true
+	}
 }

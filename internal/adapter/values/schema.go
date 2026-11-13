@@ -78,6 +78,12 @@ func (s Schema) FieldsOf(entity string) []recipe.FieldInfo {
 		if scheme, draws := s.source.ProviderOf(field.Generator); draws {
 			fields[i].Scheme = scheme
 		}
+		// Which part of a person's name the column holds, from the same place
+		// again. A recipe that writes names into a field of type string, with
+		// no generator, says nothing about what is in it, so nothing is set.
+		if part, names := s.source.NamePartOf(field.Generator); names {
+			fields[i].NamePart = part
+		}
 	}
 	return fields
 }

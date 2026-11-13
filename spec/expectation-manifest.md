@@ -59,7 +59,7 @@ A manifest has three top level members: `spec_version`, an **envelope** under `r
 
 ### `schema_inference`, when the tool had to work the shape out
 
-A run that damages a file it did not produce has nothing declaring what the columns hold. It works that out by looking at the values, and this member carries both the conclusion and the evidence for it. It is absent from a run driven by a recipe, where nothing was guessed.
+A run that damages a file it did not produce has nothing declaring what the columns hold. It works that out by looking at the values, and this member carries both the conclusion and the evidence for it. The one thing no value can prove is that a column holds people's names, so that is read from the header of a column of text when the header is one of a few common words for a given name or a surname, and the basis of such a column says so. It is absent from a run driven by a recipe, where nothing was guessed.
 
 ```
 "schema_inference": {

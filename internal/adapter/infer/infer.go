@@ -25,6 +25,13 @@
 //
 // So this answers two questions, identifier with its scheme, or text, and says
 // out loud that it answered no others.
+//
+// # The one exception, and why it is the header and not the values
+//
+// A column of text whose header is one of a short list of words for a given
+// name or a surname is taken to hold that part of people's names. No value
+// can prove it, so this is a statement read rather than a fact found, and the
+// basis of such a column says so. The reasons and the list are in names.go.
 package infer
 
 import (
@@ -73,6 +80,10 @@ type Finding struct {
 	Type   string
 	Scheme string
 	Basis  string
+	// NamePart is the part of a person's name the header says the column
+	// holds, empty for every other column. It is never set beside a scheme:
+	// a check digit is a proof, and a header disagreeing with one loses.
+	NamePart recipe.NamePart
 }
 
 // Schema is a shape worked out by looking, and the evidence for it.
@@ -118,9 +129,13 @@ func From(table dataset.Table, samples []dataset.Sample, schemes []provider.Prov
 		}
 		finding := look(byName[column], selfChecking)
 		finding.Field = column
+		if part, named := namePartOfHeader(column); named && finding.Scheme == "" {
+			finding.NamePart = part
+			finding.Basis += nameBasis(part)
+		}
 		built.findings = append(built.findings, finding)
 		built.fields = append(built.fields, recipe.FieldInfo{
-			Name: column, Type: finding.Type, Scheme: finding.Scheme,
+			Name: column, Type: finding.Type, Scheme: finding.Scheme, NamePart: finding.NamePart,
 		})
 	}
 
@@ -339,6 +354,11 @@ func NotInferred() []string {
 		"relations between columns beyond the date and the gender a numbering scheme encodes, " +
 			"which are the only two a value can prove without being told",
 		"relations between tables, because one file is one table",
+		// The one thing read off a header, said with its limit, because a
+		// reader seeing names recognised under last_name would otherwise
+		// expect them recognised under Nachname too.
+		"people's names, except in a column whose header is a common English or Polish word " +
+			"for a given name or a surname, such as first_name or nazwisko",
 		"numeric, date and postal column types, because a column of digits is not a column " +
 			"of numbers",
 	}

@@ -100,6 +100,8 @@ const (
 	SchemaEnumValues     Name = "schema.enum-values"
 	SchemaRequiredFields Name = "schema.required-fields"
 	SchemaFieldRelations Name = "schema.field-relations"
+	SchemaPersonName     Name = "schema.person-name"
+	SchemaSurname        Name = "schema.surname"
 	RelationForeignKey   Name = "relation.foreign-key"
 	KeyPrimary           Name = "key.primary"
 	KeyUnique            Name = "key.unique"
@@ -137,6 +139,8 @@ var suppliers = map[Name]Supplier{
 	SchemaEnumValues:     Schema,
 	SchemaRequiredFields: Schema,
 	SchemaFieldRelations: Schema,
+	SchemaPersonName:     Schema,
+	SchemaSurname:        Schema,
 	RelationForeignKey:   Schema,
 	KeyPrimary:           Schema,
 	KeyUnique:            Schema,
@@ -179,10 +183,21 @@ var suppliers = map[Name]Supplier{
 // identifier family: applies_to.field_types answers it already, per column, and
 // it is a published field. Two mechanisms for one question part company the
 // first time somebody widens one of them.
+//
+// # Why the names of people are here although they are not a type
+//
+// A column of surnames and a column of towns are both text, and the catalog
+// has no type for either, so applies_to cannot tell them apart. Damage that
+// supplies O'Brien expects it accepted, which holds for a surname and not for
+// a product code, so it has to land on a column that holds names. A run
+// carrying the capability says only that some column does, which is the same
+// trap as a maximum length.
 var fieldScoped = map[Name]bool{
 	SchemaMaxLength:      true,
 	SchemaEnumValues:     true,
 	SchemaRequiredFields: true,
+	SchemaPersonName:     true,
+	SchemaSurname:        true,
 	KeyUnique:            true,
 }
 

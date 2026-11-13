@@ -1333,6 +1333,7 @@ mutators:
     reversible: true
     requires:
       - corpus.names-international
+      - schema.surname
     example:
       before: "Brien"
       after: "O'Brien"
@@ -1355,9 +1356,10 @@ mutators:
     reversible: true
     requires:
       - corpus.names-international
+      - schema.person-name
     example:
-      before: "Lukasz Zolc"
-      after: "Łukasz Żółć"
+      before: "Lukasz"
+      after: "Łukasz"
       note: >-
         A validator restricted to the ASCII alphabet refuses a large share of
         Polish names. The failure often appears only after deployment to a
@@ -1377,6 +1379,7 @@ mutators:
     reversible: true
     requires:
       - corpus.names-international
+      - schema.surname
     example:
       before: "Nowak"
       after: "Null"
@@ -1399,9 +1402,10 @@ mutators:
     reversible: true
     requires:
       - corpus.names-international
+      - schema.person-name
     example:
-      before: "Li Ming"
-      after: "李明"
+      before: "Sato"
+      after: "佐藤"
       note: >-
         Two characters are a complete name here, so a minimum length of three
         refuses it. This entry pairs with REV.name.single_letter, which is the
@@ -1554,6 +1558,17 @@ capabilities:
     description: >-
       Know which fields are bound to each other by a rule, such as two dates in
       order or a total over its lines.
+
+  schema.person-name:
+    supplied_by: schema
+    description: >-
+      Know which fields hold a part of a person's name, a given name or a
+      surname, as opposed to other text such as a town or a product name.
+
+  schema.surname:
+    supplied_by: schema
+    description: >-
+      Know which fields hold surnames as opposed to given names or other text.
 
   date.arithmetic:
     supplied_by: provider

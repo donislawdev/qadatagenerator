@@ -57,7 +57,7 @@ func TestEveryImplementedMutatorHasACatalogEntry(t *testing.T) {
 // A number that fails in both directions cannot be left behind. Raising it is
 // one line and it is part of adding damage, which is exactly when somebody is
 // looking at this file anyway.
-const implementedCount = 14
+const implementedCount = 18
 
 func TestThisBuildHasNotLostAMutator(t *testing.T) {
 	got := len(mutators.IDs())

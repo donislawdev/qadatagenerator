@@ -71,6 +71,17 @@ var roles = map[string]string{
 	Region: provider.RoleRegion,
 }
 
+// nameParts maps a generator of people's names onto the part of a name it
+// produces.
+//
+// A city and a region are drawn from word lists as well, and they are absent on
+// purpose: damage that supplies a real surname expects it accepted, and in a
+// column of towns that expectation is a guess.
+var nameParts = map[string]recipe.NamePart{
+	FirstName: recipe.GivenName,
+	LastName:  recipe.Surname,
+}
+
 // The field types the catalog uses in applies_to. They are constants here
 // because the corruption engine matches on them, so a typo would silently make
 // every mutator inapplicable to a column rather than fail to build.
@@ -229,6 +240,13 @@ func (s Source) Names() []string {
 func (s Source) RoleOf(generator string) (string, bool) {
 	role, plays := roles[generator]
 	return role, plays
+}
+
+// NamePartOf says which part of a person's name a generator produces, and
+// whether it produces names of people at all.
+func (s Source) NamePartOf(generator string) (recipe.NamePart, bool) {
+	part, names := nameParts[generator]
+	return part, names
 }
 
 // TypeOf says what kind of value a generator produces, and whether this build

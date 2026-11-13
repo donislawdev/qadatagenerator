@@ -43,6 +43,10 @@ var registry = map[catalog.ID]mutator.Mutator{
 	nonIdempotentID:            nonIdempotent{},
 	nfcVsNFDID:                 nfcVsNFD{},
 	turkishDotlessIID:          turkishDotlessI{},
+	nameApostropheID:           nameApostrophe{},
+	nameDiacriticsID:           nameDiacritics{},
+	nameNullSurnameID:          nameNullSurname{},
+	nameCJKID:                  nameCJK{},
 }
 
 // Brings is what the damage in this build carries with it, so that every run
@@ -64,9 +68,12 @@ var registry = map[catalog.ID]mutator.Mutator{
 // normalisation is golang.org/x/text, which the entry about two forms of the
 // same text writes with. The entry about normalising twice runs under the same
 // capability and supplies a value from a fixed table without normalising
-// anything.
+// anything. The corpus of names is the short lists in names_corpus.go, which
+// the entries about names draw from and which no recipe has to supply.
 func Brings() []capability.Name {
-	return []capability.Name{capability.UnicodeNormalization, capability.CorpusUnicode}
+	return []capability.Name{
+		capability.UnicodeNormalization, capability.CorpusUnicode, capability.CorpusNamesInternational,
+	}
 }
 
 // Lookup returns the mutator for an identifier and whether this build has one.
