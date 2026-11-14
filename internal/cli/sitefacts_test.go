@@ -2,7 +2,6 @@ package cli
 
 import (
 	"bytes"
-	"encoding/json"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -27,7 +26,7 @@ import (
 // What it does not check: the sentences the site writes around these facts,
 // and the README, which TestTheReadmeShowsWhatTheProgramDoes walks.
 func TestTheSiteFactsAreWhatTheProgramSays(t *testing.T) {
-	now := encodeSiteFacts(t, gatherSiteFacts(t))
+	now := encodeForSite(t, gatherSiteFacts(t))
 	if *updateDataset {
 		if err := os.WriteFile(siteFactsFile, now, 0o644); err != nil {
 			t.Fatalf("cannot write %s: %v", siteFactsFile, err)
@@ -49,9 +48,9 @@ func TestTheSiteFactsAreWhatTheProgramSays(t *testing.T) {
 // not name, so a website that fell behind the program cannot pass.
 func TestTheSiteFactsCheckNoticesAProgramThatMovedOn(t *testing.T) {
 	facts := gatherSiteFacts(t)
-	before := encodeSiteFacts(t, facts)
+	before := encodeForSite(t, facts)
 	facts.Generators = append(facts.Generators, siteGenerator{Name: "planted", Produces: "string"})
-	after := encodeSiteFacts(t, facts)
+	after := encodeForSite(t, facts)
 	if siteFactsProblem(before, after) == "" {
 		t.Fatal("facts naming one more generator read as the same facts, so the website " +
 			"could show a list the program no longer has")
@@ -189,21 +188,6 @@ func unwrapped(text string) string {
 	return strings.Join(strings.Fields(text), " ")
 }
 
-// encodeSiteFacts writes the facts the way they are committed: indented, with
-// a final newline, and with < and > left as they are, because the site prints
-// <recipe> and a reader of the diff should see it too.
-func encodeSiteFacts(t *testing.T, facts siteFacts) []byte {
-	t.Helper()
-	var b bytes.Buffer
-	encoder := json.NewEncoder(&b)
-	encoder.SetEscapeHTML(false)
-	encoder.SetIndent("", "  ")
-	if err := encoder.Encode(facts); err != nil {
-		t.Fatalf("cannot encode the site facts: %v", err)
-	}
-	return b.Bytes()
-}
-
 // siteFactsProblem compares the committed file with what the program says now,
 // and names the first line where they part.
 func siteFactsProblem(committed, now []byte) string {
@@ -211,15 +195,22 @@ func siteFactsProblem(committed, now []byte) string {
 	if bytes.Equal(committed, now) {
 		return ""
 	}
+	return firstDifference(filepath.ToSlash(siteFactsFile), committed, now, siteFactsRedo)
+}
+
+// firstDifference says where a file of the site first parts from what the
+// program makes now, and how to write it again. Both the facts and the runs
+// of the site are held this way.
+func firstDifference(name string, committed, now []byte, redo string) string {
 	was, is := strings.Split(string(committed), "\n"), strings.Split(string(now), "\n")
 	at := 0
 	for at < len(was) && at < len(is) && was[at] == is[at] {
 		at++
 	}
-	return "the website shows facts the program no longer says, first at line " +
-		strconv.Itoa(at+1) + " of " + filepath.ToSlash(siteFactsFile) + ":\n  file:    " +
+	return "the website shows what the program no longer does, first at line " +
+		strconv.Itoa(at+1) + " of " + name + ":\n  file:    " +
 		lineOr(was, at) + "\n  program: " + lineOr(is, at) +
-		"\nWrite it again with\n  " + siteFactsRedo + "\nthen read the diff and commit it."
+		"\nWrite it again with\n  " + redo + "\nthen read the diff and commit it."
 }
 
 func lineOr(lines []string, at int) string {

@@ -1,0 +1,38 @@
+{
+  "spec_version": "0.2",
+  "defects": [
+    {"id":"number-1-L3.range.unassigned","location":{"entity":"number","row":1,"field":"aba"},"mutator":"L3.range.unassigned","layer":"L3","applied":true,"value_before":"015363538","value_after":"135363531","expectation":"rejection","confidence":"soft","rationale":"Uses an identifier from a range the issuing authority does not assign."},
+    {"id":"number-13-L3.sentinel.placeholder_value","location":{"entity":"number","row":13,"field":"isbn"},"mutator":"L3.sentinel.placeholder_value","layer":"L3","applied":false,"expectation":"warning","confidence":"soft","rationale":"Replaces a real value with a placeholder that passes every format check and carries no meaning.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"number-18-L3.checksum.off_by_one","location":{"entity":"number","row":18,"field":"iban"},"mutator":"L3.checksum.off_by_one","layer":"L3","applied":true,"value_before":"PL07160964007342802353835453","value_after":"PL07160964007342802353835454","expectation":"rejection","confidence":"hard","rationale":"Changes one digit so the format stays valid and the check digit no longer matches."},
+    {"id":"number-22-L3.checksum.transposed_digits","location":{"entity":"number","row":22,"field":"ean"},"mutator":"L3.checksum.transposed_digits","layer":"L3","applied":true,"value_before":"9525381113411","value_after":"9552381113411","expectation":"rejection","confidence":"hard","rationale":"Swaps two adjacent digits, which is the most common human typing mistake."},
+    {"id":"number-31-L3.currency.wrong_scale","location":{"entity":"number","row":31,"field":"card"},"mutator":"L3.currency.wrong_scale","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Writes an amount with more or fewer decimal places than the currency has.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"number-33-L3.date.future_birthdate","location":{"entity":"number","row":33,"field":"card"},"mutator":"L3.date.future_birthdate","layer":"L3","applied":false,"expectation":"rejection","confidence":"soft","rationale":"Sets a birth date in the future.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"number-36-L3.national_id.impossible_date","location":{"entity":"number","row":36,"field":"card"},"mutator":"L3.national_id.impossible_date","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Builds a national identifier that encodes a date which does not exist.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"number-39-L3.range.unassigned","location":{"entity":"number","row":39,"field":"aba"},"mutator":"L3.range.unassigned","layer":"L3","applied":true,"value_before":"096941474","value_after":"136941473","expectation":"rejection","confidence":"soft","rationale":"Uses an identifier from a range the issuing authority does not assign."},
+    {"id":"number-53-L3.sentinel.placeholder_value","location":{"entity":"number","row":53,"field":"isbn"},"mutator":"L3.sentinel.placeholder_value","layer":"L3","applied":false,"expectation":"warning","confidence":"soft","rationale":"Replaces a real value with a placeholder that passes every format check and carries no meaning.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"number-60-L3.checksum.off_by_one","location":{"entity":"number","row":60,"field":"iban"},"mutator":"L3.checksum.off_by_one","layer":"L3","applied":true,"value_before":"PL60234212066174273701894916","value_after":"PL60234212066174273701894917","expectation":"rejection","confidence":"hard","rationale":"Changes one digit so the format stays valid and the check digit no longer matches."},
+    {"id":"number-65-L3.checksum.transposed_digits","location":{"entity":"number","row":65,"field":"imei"},"mutator":"L3.checksum.transposed_digits","layer":"L3","applied":true,"value_before":"002406616175821","value_after":"020406616175821","expectation":"rejection","confidence":"hard","rationale":"Swaps two adjacent digits, which is the most common human typing mistake."},
+    {"id":"number-68-L3.currency.wrong_scale","location":{"entity":"number","row":68,"field":"card"},"mutator":"L3.currency.wrong_scale","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Writes an amount with more or fewer decimal places than the currency has.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"number-69-L3.date.future_birthdate","location":{"entity":"number","row":69,"field":"card"},"mutator":"L3.date.future_birthdate","layer":"L3","applied":false,"expectation":"rejection","confidence":"soft","rationale":"Sets a birth date in the future.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"number-85-L3.national_id.impossible_date","location":{"entity":"number","row":85,"field":"card"},"mutator":"L3.national_id.impossible_date","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Builds a national identifier that encodes a date which does not exist.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"number-94-L3.range.unassigned","location":{"entity":"number","row":94,"field":"aba"},"mutator":"L3.range.unassigned","layer":"L3","applied":true,"value_before":"037697839","value_after":"137697836","expectation":"rejection","confidence":"soft","rationale":"Uses an identifier from a range the issuing authority does not assign."},
+    {"id":"number-95-L3.sentinel.placeholder_value","location":{"entity":"number","row":95,"field":"iban"},"mutator":"L3.sentinel.placeholder_value","layer":"L3","applied":false,"expectation":"warning","confidence":"soft","rationale":"Replaces a real value with a placeholder that passes every format check and carries no meaning.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"number-100-L3.checksum.off_by_one","location":{"entity":"number","row":100,"field":"vin"},"mutator":"L3.checksum.off_by_one","layer":"L3","applied":true,"value_before":"9TR4H4AJ9N9Y31858","value_after":"9TR4H4AJ9N9Y31859","expectation":"rejection","confidence":"hard","rationale":"Changes one digit so the format stays valid and the check digit no longer matches."}
+  ],
+  "run": {
+    "generated_at": "2026-11-14T12:33:56Z",
+    "seed": "bad-check-digits",
+    "locale": "en-US",
+    "catalog_version": "0.1",
+    "rows_total": 100,
+    "entities": [
+      {
+        "entity": "number",
+        "rows_total": 100
+      }
+    ],
+    "rows_mutated": 8,
+    "defects_requested": 17,
+    "defects_applied": 8
+  }
+}

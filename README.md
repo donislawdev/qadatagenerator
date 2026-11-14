@@ -311,7 +311,7 @@ The first line builds `qadg`, the command line, and needs nothing but Go. The se
 | Generator | Makes |
 |---|---|
 | `first_name`, `last_name`, `gender`, `birth_date` | people. First and last names can follow the gender column |
-| `city`, `region`, `postal_code` | places that belong together. In `en-US` a region is a state and a postal code is a ZIP code |
+| `city`, `region`, `postal_code` | places. In `en-US` a city, its state and its ZIP code belong together. In `pl-PL` a town and a voivodeship are drawn apart, and there are no postal codes yet |
 | `card` | card numbers, only from the published test numbers |
 | `isbn`, `ean`, `imei`, `vin` | book numbers, barcodes, mobile phone identities and vehicle identification numbers |
 | `ssn`, `aba` | US social security numbers and bank routing numbers |
@@ -362,6 +362,9 @@ once, and the Recipe screen checks it as you type.
 | `empty` | field | the share of rows left empty, such as `15%` |
 | `policy` | top | what to damage: `layers`, the share of `rows`, `per_row` and `exclude_fields` |
 | `output` | top | `format` (`csv` or `json`), `dir`, `file_per_entity` and the CSV `delimiter` |
+
+The [examples](examples/) folder holds ready-made recipes, from one table of people to a shop in three
+related tables and data with damage to catch. Each one runs as it is.
 
 ---
 

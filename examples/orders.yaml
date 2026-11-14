@@ -1,0 +1,51 @@
+# A shop in three related tables: customers, their orders and the lines of each
+# order, written as one JSON file with every order inside its customer and every
+# line inside its order.
+#
+# Every customer has zero to five orders and every order one to four lines, so
+# the number of rows comes from the relations rather than from a count. Each
+# child also carries the key of its parent. Plans, statuses and quantities come
+# from lists, totals and prices are decimal numbers, and about seven coupons in
+# ten are left empty.
+#
+#   qadg generate orders.yaml
+#
+# writes dataset.json and run-note.json. The same seed gives the same rows on
+# every machine.
+version: "0.1"
+seed: "orders"
+locale: en-US
+entities:
+  customer:
+    count: 50
+    primary_key: [customer_id]
+    fields:
+      customer_id: { type: integer, unique: true }
+      first_name:  { generator: first_name, required: true, max_length: 40 }
+      last_name:   { generator: last_name, required: true, max_length: 40 }
+      gender:      { generator: gender }
+      plan:        { values: [free, pro, team] }
+      city:        { generator: city }
+      state:       { generator: region }
+      zip:         { generator: postal_code }
+    consistency:
+      - first_name matches: [gender]
+  order:
+    belongs_to: { customer: 0-5 }
+    primary_key: [order_id]
+    fields:
+      order_id: { type: integer, unique: true }
+      status:   { values: [new, paid, shipped, cancelled] }
+      total:    { type: decimal }
+      card:     { generator: card }
+      coupon:   { values: [SPRING10, WELCOME, FREESHIP], empty: 70% }
+  order_line:
+    belongs_to: { order: 1-4 }
+    primary_key: [line_id]
+    fields:
+      line_id:  { type: integer, unique: true }
+      isbn:     { generator: isbn }
+      quantity: { values: ["1", "2", "3", "4", "5"] }
+      price:    { type: decimal }
+output:
+  format: json

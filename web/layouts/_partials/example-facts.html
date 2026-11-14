@@ -1,0 +1,17 @@
+{{- /*
+  What a ready-made recipe makes, in a line: its locale, how many tables and
+  rows, the format, and the groups of damage it asks for. Every number is read
+  from the recipe and from the note of its run, none is written by hand.
+  Takes: the dict example.html returns.
+*/ -}}
+{{- $rows := 0 }}
+{{- range .made.tables }}{{ $rows = add $rows (int .rows) }}{{ end }}
+<span class="example-facts">
+  <span>{{ .data.locale }}</span>
+  <span>{{ T "example_tables" (len .made.tables) }}</span>
+  <span>{{ T "example_rows" (dict "Count" $rows "Shown" (lang.FormatNumber 0 $rows)) }}</span>
+  <span>{{ upper .data.output.format }}</span>
+  {{- with .data.policy }}
+  <span class="pill">{{ T "example_damages" (delimit .layers ", ") }}</span>
+  {{- end }}
+</span>

@@ -1,0 +1,16 @@
+{{- /*
+  A value as a reader can see it. Characters that take no room on the screen
+  are written as their escape, the way the catalog writes its own examples on
+  the page of damage, so a value with a zero-width space in it does not look the
+  same as the value without. Takes: the value. Returns: the text to show.
+*/ -}}
+{{- $value := . | default "" }}
+{{- $unseen := dict
+  "\U0000200B" "u200b"
+  "\U0000200C" "u200c"
+  "\U00002060" "u2060"
+  "\U0000FEFF" "ufeff"
+  "\U000000AD" "u00ad"
+}}
+{{- range $char, $escape := $unseen }}{{ $value = replace $value $char (printf "\\%s" $escape) }}{{ end }}
+{{- return $value }}

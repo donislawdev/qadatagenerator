@@ -14,6 +14,10 @@ key = "nav_recipes"
 page = "/docs/recipes"
 
 [[main]]
+key = "nav_examples"
+page = "/examples"
+
+[[main]]
 key = "nav_damage"
 page = "/docs/damage"
 
@@ -29,7 +33,7 @@ pages = ["/docs", "/docs/getting-started", "/download"]
 
 [[sidebar]]
 key = "side_make"
-pages = ["/docs/recipes", "/docs/generators"]
+pages = ["/docs/recipes", "/examples", "/docs/generators"]
 
 [[sidebar]]
 key = "side_break"
@@ -53,7 +57,7 @@ pages = ["/download", "/docs/getting-started", "/security", "/faq"]
 
 [[footer]]
 key = "footer_docs"
-pages = ["/docs/recipes", "/docs/generators", "/docs/damage", "/docs/manifest"]
+pages = ["/docs/recipes", "/examples", "/docs/generators", "/docs/damage", "/docs/manifest"]
 
 [[footer]]
 key = "footer_cli"

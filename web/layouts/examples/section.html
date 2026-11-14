@@ -1,0 +1,51 @@
+{{- /*
+  Every ready-made recipe of examples/, in two groups: data an application
+  should take, and data with damage it should catch. Which group a recipe is in
+  is read from the recipe, by whether it has a policy, and the order inside a
+  group is the weight of each page, simplest first. A recipe with no page in the
+  language being built stops the build, so no language lists fewer than the
+  repository holds.
+*/ -}}
+{{ define "main" }}
+{{- $pages := .Pages.ByWeight }}
+{{- range resources.Match "examples/*.yaml" }}
+  {{- $name := path.BaseName .Name }}
+  {{- if not (where $pages "File.ContentBaseName" $name) }}
+    {{- errorf "examples/%s.yaml has no page in %s. Add content/%s/examples/%s.md" $name site.Language.Lang site.Language.Lang $name }}
+  {{- end }}
+{{- end }}
+{{- $groups := slice
+  (dict "id" "examples-valid" "title" (T "example_group_valid") "damaged" false)
+  (dict "id" "examples-damaged" "title" (T "example_group_damaged") "damaged" true)
+}}
+{{- $extra := slice }}
+{{- range $groups }}{{ $extra = $extra | append (dict "id" .id "title" .title) }}{{ end }}
+<div class="container docs">
+  {{ partial "sidebar.html" . }}
+  <article class="prose">
+    {{ partial "breadcrumbs.html" . }}
+    <h1>{{ .Title }}</h1>
+    {{- with .Params.lead }}
+    <p class="lead">{{ . | markdownify }}</p>
+    {{- end }}
+    {{ .Content }}
+    {{- range $group := $groups }}
+    <h2 id="{{ .id }}">{{ .title }}</h2>
+    <div class="grid two">
+      {{- range $pages }}
+      {{- $example := partial "example.html" . }}
+      {{- if eq (isset $example.data "policy") $group.damaged }}
+      <a class="card" href="{{ .RelPermalink }}">
+        <h3>{{ .LinkTitle }}</h3>
+        <p>{{ .Description }}</p>
+        <div class="foot">{{ partial "example-facts.html" $example }}</div>
+      </a>
+      {{- end }}
+      {{- end }}
+    </div>
+    {{- end }}
+    {{ partial "pager.html" . }}
+  </article>
+  {{ partial "toc.html" (dict "page" . "extra" $extra) }}
+</div>
+{{ end }}

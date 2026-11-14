@@ -1,0 +1,32 @@
+{{- /*
+  One ready-made recipe of examples/, found by the file name of its page:
+  content/<language>/examples/people-us.md is examples/people-us.yaml. Returns
+  the recipe and the manifest published for download, the recipe as data, the
+  command its page shows, and what TestTheSiteShowsWhatTheProgramDoes saw it
+  write. A page with no recipe, or a recipe the test never ran, stops the build.
+  Takes: the page.
+*/ -}}
+{{- $name := .File.ContentBaseName }}
+{{- $recipe := resources.Get (printf "examples/%s.yaml" $name) }}
+{{- if not $recipe }}
+  {{- errorf "%s in %s is the page of examples/%s.yaml, which is not there" .File.Path site.Language.Lang $name }}
+{{- end }}
+{{- $made := index hugo.Data.examples $name }}
+{{- if not $made }}
+  {{- errorf "data/examples has nothing for examples/%s.yaml, which %s in %s shows. Run\n  go test ./internal/cli -run TestTheSiteShowsWhatTheProgramDoes -update" $name .File.Path site.Language.Lang }}
+{{- end }}
+{{- $manifest := false }}
+{{- with resources.Get (printf "example-runs/%s/expectation-manifest.json" $name) }}
+  {{- $manifest = resources.Copy (printf "examples/%s/expectation-manifest.json" $name) . }}
+{{- end }}
+{{- /* data reads the resource rather than its text: from text alone Hugo
+       guesses the format, and took a recipe that opens with comments for CSV. */}}
+{{- return dict
+  "name" $name
+  "file" (printf "%s.yaml" $name)
+  "command" (printf "qadg generate %s.yaml" $name)
+  "recipe" ($recipe | resources.Copy (printf "examples/%s.yaml" $name))
+  "data" ($recipe | transform.Unmarshal)
+  "made" $made
+  "manifest" $manifest
+}}

@@ -1,0 +1,30 @@
+# Names and cities that careless code mishandles, asked for in about a fifth of
+# the rows.
+#
+# Real names a strict check refuses, such as Null, Łukasz or a name in Chinese,
+# Japanese or Korean characters, which your application should accept. Emoji,
+# an invisible zero-width space, a Turkish dotless i or another Unicode form of
+# the same text, where the right answer depends on your own rules. The manifest
+# says which is which for every value it changed, and lists the damage this
+# build could not carry out, with the reason.
+#
+#   qadg generate names-and-unicode.yaml
+#
+# writes person.csv, expectation-manifest.json and run-note.json. The same seed
+# changes the same values on every machine.
+version: "0.1"
+seed: "names-and-unicode"
+locale: en-US
+entities:
+  person:
+    count: 100
+    fields:
+      first_name: { generator: first_name, max_length: 40 }
+      last_name:  { generator: last_name, max_length: 40 }
+      city:       { generator: city }
+policy:
+  layers: [UNI, REV]
+  rows: 20%
+  per_row: exactly_one
+output:
+  format: csv

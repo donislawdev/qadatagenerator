@@ -1,0 +1,36 @@
+# Sign-ups for a Polish form, with one thing the form should catch asked for in
+# about a fifth of them.
+#
+# Names are required and have a longest length, and the PESEL has to agree with
+# the birth date and the gender. The damage breaks rules like these, such as a
+# name past its longest length or a PESEL that disagrees with the birth date or
+# the gender beside it. The manifest names every broken value and says your form
+# should reject it. It also lists the damage this build could not carry out,
+# with the reason.
+#
+#   qadg generate form-validation.yaml
+#
+# writes signup.csv, expectation-manifest.json and run-note.json. The same seed
+# breaks the same values on every machine.
+version: "0.1"
+seed: "form-validation"
+locale: pl-PL
+entities:
+  signup:
+    count: 100
+    primary_key: [pesel]
+    fields:
+      first_name: { generator: first_name, required: true, max_length: 30 }
+      last_name:  { generator: last_name, required: true, max_length: 40 }
+      gender:     { generator: gender }
+      birth_date: { generator: birth_date }
+      pesel:      { generator: pesel, required: true }
+    consistency:
+      - first_name matches: [gender]
+      - pesel matches: [birth_date, gender]
+policy:
+  layers: [L2, L4]
+  rows: 20%
+  per_row: exactly_one
+output:
+  format: csv

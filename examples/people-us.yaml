@@ -1,0 +1,31 @@
+# A hundred people in the United States, in one table.
+#
+# Each row has a name, a gender, a birth date, a social security number, a city,
+# its state and a ZIP code. First names follow the gender, and the state and the
+# ZIP code follow the city. Every social security number is in area 666, which
+# is never issued.
+#
+#   qadg generate people-us.yaml
+#
+# writes person.csv and run-note.json. The same seed gives the same rows on
+# every machine.
+version: "0.1"
+seed: "people-us"
+locale: en-US
+entities:
+  person:
+    count: 100
+    primary_key: [ssn]
+    fields:
+      first_name: { generator: first_name }
+      last_name:  { generator: last_name }
+      gender:     { generator: gender }
+      birth_date: { generator: birth_date }
+      ssn:        { generator: ssn, unique: true }
+      city:       { generator: city }
+      state:      { generator: region }
+      zip:        { generator: postal_code }
+    consistency:
+      - first_name matches: [gender]
+output:
+  format: csv

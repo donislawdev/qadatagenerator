@@ -1,0 +1,33 @@
+{
+  "spec_version": "0.2",
+  "defects": [
+    {"id":"signup-11-L2.string.exceeds_maxlength","location":{"entity":"signup","row":11,"field":"last_name"},"mutator":"L2.string.exceeds_maxlength","layer":"L2","applied":true,"value_before":"Klemczak","value_after":"Klemczakkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk","expectation":"rejection","confidence":"hard","rationale":"Makes a text value longer than the declared maximum."},
+    {"id":"signup-41-L2.type.string_in_numeric","location":{"entity":"signup","row":41,"field":"first_name"},"mutator":"L2.type.string_in_numeric","layer":"L2","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Puts text where the schema declares a number.","failure_reason":"the field is string and this damage applies to integer or decimal","failure_kind":"field_type_not_covered"},
+    {"id":"signup-52-L4.sum.invoice_total_mismatch","location":{"entity":"signup","row":52,"field":"first_name"},"mutator":"L4.sum.invoice_total_mismatch","layer":"L4","applied":false,"expectation":"rejection","confidence":"soft","rationale":"Leaves a total that does not match the sum of the lines it should equal.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"signup-56-L2.coercion.text_to_date","location":{"entity":"signup","row":56,"field":"pesel"},"mutator":"L2.coercion.text_to_date","layer":"L2","applied":false,"expectation":"acceptance","confidence":"soft","rationale":"Supplies a text value that spreadsheet software silently converts into a date.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"signup-61-L4.coherence.declared_rule","location":{"entity":"signup","row":61,"field":"last_name"},"mutator":"L4.coherence.declared_rule","layer":"L4","applied":false,"expectation":"rejection","confidence":"soft","rationale":"Breaks a consistency rule the recipe declares, whichever pair of fields that rule binds together.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"signup-66-L2.coercion.text_to_number","location":{"entity":"signup","row":66,"field":"last_name"},"mutator":"L2.coercion.text_to_number","layer":"L2","applied":false,"expectation":"acceptance","confidence":"soft","rationale":"Supplies a text value with meaningful leading zeros that spreadsheet and import tools convert into a number, dropping them.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"signup-72-L4.coherence.national_id_vs_birthdate","location":{"entity":"signup","row":72,"field":"pesel"},"mutator":"L4.coherence.national_id_vs_birthdate","layer":"L4","applied":true,"value_before":"35092417472","value_after":"40092417476","expectation":"rejection","confidence":"soft","rationale":"Leaves a valid national identifier that encodes a different birth date than the birth date field beside it."},
+    {"id":"signup-80-L2.date.impossible","location":{"entity":"signup","row":80,"field":"birth_date"},"mutator":"L2.date.impossible","layer":"L2","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Writes a date that is correctly formatted and does not exist.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"signup-84-L2.date.wrong_format","location":{"entity":"signup","row":84,"field":"birth_date"},"mutator":"L2.date.wrong_format","layer":"L2","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Writes a real date in a different format than the schema declares.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"signup-88-L4.coherence.national_id_vs_gender","location":{"entity":"signup","row":88,"field":"pesel"},"mutator":"L4.coherence.national_id_vs_gender","layer":"L4","applied":true,"value_before":"01320155821","value_after":"01320155838","expectation":"rejection","confidence":"soft","rationale":"Leaves a valid national identifier that encodes a different gender than the gender field beside it."},
+    {"id":"signup-94-L2.enum.outside_set","location":{"entity":"signup","row":94,"field":"first_name"},"mutator":"L2.enum.outside_set","layer":"L2","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Uses a value outside the declared set.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"signup-99-L4.coherence.postal_vs_city","location":{"entity":"signup","row":99,"field":"first_name"},"mutator":"L4.coherence.postal_vs_city","layer":"L4","applied":false,"expectation":"rejection","confidence":"soft","rationale":"Puts a real postal code next to a place it does not belong to.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"}
+  ],
+  "run": {
+    "generated_at": "2026-11-14T12:33:56Z",
+    "seed": "form-validation",
+    "locale": "pl-PL",
+    "catalog_version": "0.1",
+    "rows_total": 100,
+    "entities": [
+      {
+        "entity": "signup",
+        "rows_total": 100
+      }
+    ],
+    "rows_mutated": 3,
+    "defects_requested": 12,
+    "defects_applied": 3
+  }
+}

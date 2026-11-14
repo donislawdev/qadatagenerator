@@ -1,0 +1,8 @@
+{{- /*
+  {{< run "qadg quick pesel --count 3" >}} shows a command and what it printed.
+  TestTheSiteShowsWhatTheProgramDoes finds every one of these in the pages,
+  runs it and writes what it printed to data/runs.json, so write the command
+  here first and then run that test with -update. One command, in quotes, and
+  no quotes inside it.
+*/ -}}
+{{- partial "run.html" (dict "command" (.Get 0)) }}

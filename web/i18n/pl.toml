@@ -4,12 +4,13 @@
 #
 # The English file of words this was translated from, by its git blob id.
 # .github/scripts/translations.py names this file when en.toml has changed.
-# translatedFrom: de7ca11343f740c443bbce46032cf6dcc7361720
+# translatedFrom: a1790ef6392dffe8c63872bbbf5dd2476190e875
 
 skip_to_content = "Przejdź do treści"
 nav_label = "Menu główne"
 nav_docs = "Dokumentacja"
 nav_recipes = "Przepisy"
+nav_examples = "Przykłady"
 nav_damage = "Co psuje"
 nav_download = "Instalacja"
 menu = "Menu"
@@ -73,3 +74,74 @@ footer_project = "Projekt"
 
 not_found_title = "Tu nie ma strony"
 not_found_text = "Adres mógł się zmienić. Zacznij od strony głównej."
+
+example_group_valid = "Dane, które aplikacja ma przyjąć"
+example_group_damaged = "Dane z uszkodzeniami, które aplikacja ma wyłapać"
+example_download_recipe = "Pobierz przepis"
+example_download_manifest = "Pobierz manifest"
+example_damages = "psuje {{ . }}"
+example_recipe = "Przepis"
+example_run = "Uruchomienie"
+example_run_where = "Zapisz przepis i w tym samym folderze uruchom to polecenie. Niżej jest to, co program przy nim wypisał."
+example_writes = "Co zapisuje"
+example_manifest_file = "Każde uszkodzenie zamówione przez przepis: gdzie jest, wartość przed i po oraz co ma z nią zrobić twoja aplikacja. Uszkodzenie, którego ta wersja nie umiała zastosować, też tu jest, z powodem."
+example_note_file = "Seed, locale i wersje, z którymi ruszył przebieg, oraz każda zapisana tabela z liczbą wierszy i kolumn."
+example_damage = "Co zepsuł"
+example_where = "{{ .Entity }} {{ .Row }}, kolumna {{ .Field }}"
+
+# Words that change with a number. Count picks the form, of which Polish has
+# four: one, few, many and other. The sentences about defects put their other
+# numbers after a colon, so that no word has to agree with a number other than
+# Count.
+[example_tables]
+one = "1 tabela"
+few = "{{ .Count }} tabele"
+many = "{{ .Count }} tabel"
+other = "{{ .Count }} tabeli"
+
+[example_rows]
+one = "1 wiersz"
+few = "{{ .Shown }} wiersze"
+many = "{{ .Shown }} wierszy"
+other = "{{ .Shown }} wiersza"
+
+[example_first_rows]
+one = "Jedyny wiersz."
+few = "Pierwsze {{ .Shown }} z {{ .Total }} wierszy."
+many = "Pierwsze {{ .Shown }} z {{ .Total }} wierszy."
+other = "Pierwsze {{ .Shown }} z {{ .Total }} wierszy."
+
+[example_all_rows]
+one = "Jedyny wiersz."
+few = "Wszystkie {{ .Total }} wiersze."
+many = "Wszystkie {{ .Total }} wierszy."
+other = "Wszystkie {{ .Total }} wiersza."
+
+[example_first_lines]
+one = "Jedyna linia."
+few = "Pierwsze {{ .Shown }} z {{ .Total }} linii."
+many = "Pierwsze {{ .Shown }} z {{ .Total }} linii."
+other = "Pierwsze {{ .Shown }} z {{ .Total }} linii."
+
+[example_all_lines]
+one = "Jedyna linia."
+few = "Wszystkie {{ .Total }} linie."
+many = "Wszystkie {{ .Total }} linii."
+other = "Wszystkie {{ .Total }} linii."
+
+[example_damage_all]
+one = "Przepis zamówił jedno uszkodzenie i ta wersja je zastosowała."
+few = "Zamówione uszkodzenia: {{ .Count }}. Ta wersja zastosowała wszystkie."
+many = "Zamówione uszkodzenia: {{ .Count }}. Ta wersja zastosowała wszystkie."
+other = "Zamówione uszkodzenia: {{ .Count }}. Ta wersja zastosowała wszystkie."
+
+[example_damage_none]
+one = "Przepis zamówił jedno uszkodzenie i ta wersja nie umiała go zastosować. Manifest mówi dlaczego."
+few = "Zamówione uszkodzenia: {{ .Count }}. Ta wersja nie umiała zastosować żadnego, a manifest mówi przy każdym dlaczego."
+many = "Zamówione uszkodzenia: {{ .Count }}. Ta wersja nie umiała zastosować żadnego, a manifest mówi przy każdym dlaczego."
+other = "Zamówione uszkodzenia: {{ .Count }}. Ta wersja nie umiała zastosować żadnego, a manifest mówi przy każdym dlaczego."
+
+[example_damage_some]
+few = "Zamówione uszkodzenia: {{ .Count }}. Zastosowane przez tę wersję: {{ .Applied }}, w tabeli niżej. Niezastosowane: {{ .Refused }}, każde jest w manifeście z powodem, a przebieg wyżej liczy je według powodu."
+many = "Zamówione uszkodzenia: {{ .Count }}. Zastosowane przez tę wersję: {{ .Applied }}, w tabeli niżej. Niezastosowane: {{ .Refused }}, każde jest w manifeście z powodem, a przebieg wyżej liczy je według powodu."
+other = "Zamówione uszkodzenia: {{ .Count }}. Zastosowane przez tę wersję: {{ .Applied }}, w tabeli niżej. Niezastosowane: {{ .Refused }}, każde jest w manifeście z powodem, a przebieg wyżej liczy je według powodu."

@@ -1,0 +1,14 @@
+{{- /*
+  A command and what it printed, from data/runs.json. That file holds only what
+  TestTheSiteShowsWhatTheProgramDoes saw the program print, in a directory that
+  holds the ready-made recipes, so a page shows a run rather than a copy of one.
+  A command the file does not have stops the build. Takes: command.
+*/ -}}
+{{- $run := dict }}
+{{- with where hugo.Data.runs.runs "command" .command }}{{ $run = index . 0 }}{{ end }}
+{{- if not $run }}
+  {{- errorf "a page in %s shows %q, which data/runs.json does not hold. Run it with\n  go test ./internal/cli -run TestTheSiteShowsWhatTheProgramDoes -update" site.Language.Lang .command }}
+{{- end }}
+{{- $exit := "" }}
+{{- if ne (int $run.exit) 0 }}{{ $exit = int $run.exit }}{{ end }}
+{{- partial "terminal.html" (dict "caption" (T "terminal") "commands" $run.command "output" (strings.TrimSuffix "\n" $run.printed) "exit" $exit) }}

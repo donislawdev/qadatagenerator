@@ -572,6 +572,12 @@ repository once they are released.
 
 ### Added
 
+- **Ready-made recipes in the examples folder.** Eight recipes that run as they
+  are with `qadg generate`: people in the US and in Poland, a table of test
+  numbers, Polish companies, a shop in three related tables written as JSON,
+  and three that order damage for your application to catch: wrong check
+  digits, the rules of a sign-up form, and names and Unicode. The comment at
+  the top of each says what it makes and which files it writes.
 - **The program has its own icon: a wooden spoon of red lentils.**
   It shows on the window and, on Windows, in File Explorer for both
   qadg.exe and qadg-gui.exe, whose properties now also say what they are,

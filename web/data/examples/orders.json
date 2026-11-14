@@ -1,0 +1,72 @@
+{
+  "files": [
+    {
+      "name": "dataset.json",
+      "kind": "json",
+      "lines": [
+        "{",
+        "  \"customer\": [",
+        "    {",
+        "      \"customer_id\": \"351940\",",
+        "      \"first_name\": \"Claudia\",",
+        "      \"last_name\": \"Russell\",",
+        "      \"gender\": \"female\",",
+        "      \"plan\": \"pro\",",
+        "      \"city\": \"Winston-Salem\",",
+        "      \"state\": \"NC\",",
+        "      \"zip\": \"27103\",",
+        "      \"order\": [",
+        "      ]",
+        "    },",
+        "    {",
+        "      \"customer_id\": \"743231\",",
+        "      \"first_name\": \"Taylor\",",
+        "      \"last_name\": \"Mejia\",",
+        "      \"gender\": \"female\",",
+        "      \"plan\": \"team\",",
+        "      \"city\": \"Plains\",",
+        "      \"state\": \"KS\",",
+        "      \"zip\": \"67869\",",
+        "      \"order\": [",
+        "      ]",
+        "    },",
+        "    {",
+        "      \"customer_id\": \"386830\",",
+        "      \"first_name\": \"Desiree\",",
+        "      \"last_name\": \"Orr\",",
+        "      \"gender\": \"female\",",
+        "      \"plan\": \"team\",",
+        "      \"city\": \"Miami\",",
+        "      \"state\": \"FL\",",
+        "      \"zip\": \"33136\",",
+        "      \"order\": [",
+        "        {",
+        "          \"order_id\": \"35172\",",
+        "          \"status\": \"new\",",
+        "          \"total\": \"359.60\","
+      ],
+      "total": 3960
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    }
+  ],
+  "tables": [
+    {
+      "entity": "customer",
+      "rows": 50,
+      "columns": 8
+    },
+    {
+      "entity": "order",
+      "rows": 120,
+      "columns": 5
+    },
+    {
+      "entity": "order_line",
+      "rows": 308,
+      "columns": 4
+    }
+  ]
+}

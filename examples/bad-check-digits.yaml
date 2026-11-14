@@ -1,0 +1,32 @@
+# Numbers your application should refuse, mixed in with numbers it should take.
+#
+# The same columns as test-numbers.yaml, with one broken value asked for in about
+# a fifth of the rows: a check digit moved by one, two digits swapped, a number
+# from a block that is never issued. The manifest names every value that was
+# broken, what it was before and that your application should reject it. It also
+# lists the damage this build could not carry out, with the reason.
+#
+#   qadg generate bad-check-digits.yaml
+#
+# writes number.csv, expectation-manifest.json and run-note.json. The same seed
+# breaks the same values on every machine.
+version: "0.1"
+seed: "bad-check-digits"
+locale: en-US
+entities:
+  number:
+    count: 100
+    fields:
+      card: { generator: card }
+      iban: { generator: iban }
+      aba:  { generator: aba }
+      isbn: { generator: isbn }
+      ean:  { generator: ean }
+      imei: { generator: imei }
+      vin:  { generator: vin }
+policy:
+  layers: [L3]
+  rows: 20%
+  per_row: exactly_one
+output:
+  format: csv

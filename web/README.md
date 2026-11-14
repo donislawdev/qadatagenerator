@@ -16,15 +16,34 @@ or from files a test holds to it, and never writes by hand:
 | the six values of the first screen | `../.github/social-preview/says.txt`, mounted | `go test ./internal/gui/socialcard` |
 | the oldest Go a build from source takes | `../go.mod`, mounted | the module itself |
 | the pictures of the window, on the home page and on The window | `assets/window/`, drawn by the program from the data of the README, with the list of texts each one shows beside it | `go test ./internal/gui/screens` compares the texts everywhere and the pixels on windows/amd64 |
+| the ready-made recipes, offered for download and shown on the pages of Examples | `../examples/`, mounted | `go test ./internal/cli -run TestTheSiteShowsWhatTheProgramDoes` runs each one |
+| what each recipe printed, the first rows of the files it wrote, the tables with their rows, and its manifest | `data/runs.json`, `data/examples/`, `assets/example-runs/` | the same test, which writes them |
+| any other command a page shows, with what it printed | `{{< run "qadg ..." >}}` in the page, `data/runs.json` | the same test finds every one in `content/` and runs it |
 
-When the program changes, the two facts tests fail until the facts are written again:
+When the program changes, the facts and runs tests fail until their files are written again:
 
 ```
 go test ./internal/cli -run TestTheSiteFactsAreWhatTheProgramSays -update
 go test ./internal/gui/damageparts -run TestTheWindowFactsAreWhatTheWindowSays -update
+go test ./internal/cli -run TestTheSiteShowsWhatTheProgramDoes -update
 ```
 
-Then read the diff of `data/facts` before committing it.
+Then read the diff of `data/facts`, `data/runs.json`, `data/examples` and `assets/example-runs` before
+committing it. A manifest is compared without the time of its run, so a run that changed nothing
+else leaves it as it is.
+
+### Examples and commands outside the README
+
+A command a page shows is written once, as `{{< run "qadg quick pesel --count 3" >}}`, with no
+quotes inside it. Run the test above with `-update` and the page shows the command and what the
+program printed, the same in every language. A command `data/runs.json` does not have stops the build.
+
+Each file in `../examples/` has a page of the same name in every language,
+`content/<language>/examples/<name>.md`, and the build stops on a recipe with no page, a page with no
+recipe, or a recipe the test has not run. The page holds only the sentences. The facts above it, the
+downloads, the recipe, its run, the first rows of what it writes and each value it damaged come from
+the recipe and from what the test saw it make, and the list of examples puts each one among the data
+to take or the data with damage by whether its recipe has a `policy`.
 
 A change to the window, or to what the program produces for the README, fails the test of the
 pictures until they are drawn again, on Windows or Linux on amd64:

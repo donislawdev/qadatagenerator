@@ -1,0 +1,70 @@
+{
+  "files": [
+    {
+      "name": "person.csv",
+      "kind": "table",
+      "header": [
+        "first_name",
+        "last_name",
+        "gender",
+        "birth_date",
+        "pesel",
+        "city"
+      ],
+      "rows": [
+        [
+          "Melania",
+          "Pakos",
+          "kobieta",
+          "1953-02-07",
+          "53020761228",
+          "Zakopane"
+        ],
+        [
+          "Nela",
+          "Matura",
+          "kobieta",
+          "1954-04-05",
+          "54040548743",
+          "Jawor"
+        ],
+        [
+          "Krystyna",
+          "Korda",
+          "kobieta",
+          "1970-04-27",
+          "70042718906",
+          "Siemianowice Śląskie"
+        ],
+        [
+          "Sara",
+          "Fraszczyk",
+          "kobieta",
+          "1964-11-16",
+          "64111624922",
+          "Czerwionka-Leszczyny"
+        ],
+        [
+          "Stanisław",
+          "Borkiewicz",
+          "mężczyzna",
+          "1969-10-21",
+          "69102121811",
+          "Koszalin"
+        ]
+      ],
+      "total": 100
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    }
+  ],
+  "tables": [
+    {
+      "entity": "person",
+      "rows": 100,
+      "columns": 6
+    }
+  ]
+}

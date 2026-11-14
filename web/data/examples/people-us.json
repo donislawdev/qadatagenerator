@@ -1,0 +1,82 @@
+{
+  "files": [
+    {
+      "name": "person.csv",
+      "kind": "table",
+      "header": [
+        "first_name",
+        "last_name",
+        "gender",
+        "birth_date",
+        "ssn",
+        "city",
+        "state",
+        "zip"
+      ],
+      "rows": [
+        [
+          "Isabella",
+          "Hill",
+          "female",
+          "1937-04-01",
+          "666-97-2936",
+          "Haskins",
+          "OH",
+          "43525"
+        ],
+        [
+          "David",
+          "Osborn",
+          "male",
+          "1940-05-06",
+          "666-20-1309",
+          "St. Francis",
+          "AR",
+          "72464"
+        ],
+        [
+          "John",
+          "Hanson",
+          "male",
+          "1965-04-09",
+          "666-01-5721",
+          "Argonia",
+          "KS",
+          "67004"
+        ],
+        [
+          "Javier",
+          "Santos",
+          "male",
+          "1958-02-25",
+          "666-64-3250",
+          "Elizabeth",
+          "NJ",
+          "07206"
+        ],
+        [
+          "Kirk",
+          "Bean",
+          "male",
+          "2000-04-05",
+          "666-31-2967",
+          "Wolcott",
+          "NY",
+          "14590"
+        ]
+      ],
+      "total": 100
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    }
+  ],
+  "tables": [
+    {
+      "entity": "person",
+      "rows": 100,
+      "columns": 8
+    }
+  ]
+}

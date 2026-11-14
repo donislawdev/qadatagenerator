@@ -1,0 +1,26 @@
+# Fifty Polish companies, in one table.
+#
+# Each row has a tax number (NIP), a business register number (REGON), a legal
+# form, a city and a bank account number (IBAN), each identifier with a correct
+# check digit. A correct number can belong to a real company, so keep the file
+# in test systems.
+#
+#   qadg generate companies-pl.yaml
+#
+# writes company.csv and run-note.json. The same seed gives the same rows on
+# every machine.
+version: "0.1"
+seed: "companies-pl"
+locale: pl-PL
+entities:
+  company:
+    count: 50
+    primary_key: [nip]
+    fields:
+      nip:        { generator: nip, unique: true }
+      regon:      { generator: regon, unique: true }
+      legal_form: { values: [sp. z o.o., S.A., sp.j., sp.k.] }
+      city:       { generator: city }
+      iban:       { generator: iban }
+output:
+  format: csv

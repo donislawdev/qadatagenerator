@@ -1,0 +1,44 @@
+{
+  "runs": [
+    {
+      "command": "qadg generate bad-check-digits.yaml",
+      "exit": 0,
+      "printed": "       number: 100 rows, 7 columns\n1 table, 100 rows written\n17 defects ordered, 8 applied, manifest in expectation-manifest.json\n9 defects could not be applied, and the manifest carries the reason for each one\n  9 because this build has no implementation of them yet\n"
+    },
+    {
+      "command": "qadg generate companies-pl.yaml",
+      "exit": 0,
+      "printed": "       company: 50 rows, 5 columns\n1 table, 50 rows written\n"
+    },
+    {
+      "command": "qadg generate form-validation.yaml",
+      "exit": 0,
+      "printed": "       signup: 100 rows, 5 columns\n       signup: last_name follows gender, though no rule says so\n1 table, 100 rows written\n12 defects ordered, 3 applied, manifest in expectation-manifest.json\n9 defects could not be applied, and the manifest carries the reason for each one\n  1 because the dataset has no column of the kind they apply to\n  8 because this build has no implementation of them yet\n"
+    },
+    {
+      "command": "qadg generate names-and-unicode.yaml",
+      "exit": 0,
+      "printed": "       person: 100 rows, 3 columns\n1 table, 100 rows written\n26 defects ordered, 17 applied, manifest in expectation-manifest.json\n9 defects could not be applied, and the manifest carries the reason for each one\n  3 because the values in those rows did not suit them\n  6 because this build has no implementation of them yet\n"
+    },
+    {
+      "command": "qadg generate orders.yaml",
+      "exit": 0,
+      "printed": "       customer: 50 rows, 8 columns\n       order: 120 rows, 5 columns\n       order_line: 308 rows, 4 columns\n       customer: state follows city, though no rule says so\n       customer: zip follows city and state, though no rule says so\n3 tables, 478 rows written\n"
+    },
+    {
+      "command": "qadg generate people-pl.yaml",
+      "exit": 0,
+      "printed": "       person: 100 rows, 6 columns\n       person: last_name follows gender, though no rule says so\n1 table, 100 rows written\n"
+    },
+    {
+      "command": "qadg generate people-us.yaml",
+      "exit": 0,
+      "printed": "       person: 100 rows, 8 columns\n       person: state follows city, though no rule says so\n       person: zip follows city and state, though no rule says so\n1 table, 100 rows written\n"
+    },
+    {
+      "command": "qadg generate test-numbers.yaml",
+      "exit": 0,
+      "printed": "       number: 100 rows, 7 columns\n1 table, 100 rows written\n"
+    }
+  ]
+}

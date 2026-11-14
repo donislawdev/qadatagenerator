@@ -1,0 +1,68 @@
+{
+  "files": [
+    {
+      "name": "expectation-manifest.json",
+      "kind": "manifest"
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    },
+    {
+      "name": "signup.csv",
+      "kind": "table",
+      "header": [
+        "first_name",
+        "last_name",
+        "gender",
+        "birth_date",
+        "pesel"
+      ],
+      "rows": [
+        [
+          "Karina",
+          "Lipińska",
+          "kobieta",
+          "1987-08-24",
+          "87082469583"
+        ],
+        [
+          "Konstanty",
+          "Sobisz",
+          "mężczyzna",
+          "2007-06-17",
+          "07261758439"
+        ],
+        [
+          "Mieszko",
+          "Spólnik",
+          "mężczyzna",
+          "1999-07-12",
+          "99071282154"
+        ],
+        [
+          "Norbert",
+          "Majczyna",
+          "mężczyzna",
+          "1987-01-10",
+          "87011033652"
+        ],
+        [
+          "Eliza",
+          "Samson",
+          "kobieta",
+          "1957-08-06",
+          "57080687562"
+        ]
+      ],
+      "total": 100
+    }
+  ],
+  "tables": [
+    {
+      "entity": "signup",
+      "rows": 100,
+      "columns": 5
+    }
+  ]
+}

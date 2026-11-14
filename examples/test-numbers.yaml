@@ -1,0 +1,27 @@
+# A hundred rows of numbers with correct check digits, one kind to a column.
+#
+# Card numbers come only from the test numbers payment providers publish, and
+# every EAN starts with 952, which GS1 sets aside for examples. The account,
+# routing, book, phone and vehicle numbers can match real ones, so keep the file
+# in test systems.
+#
+#   qadg generate test-numbers.yaml
+#
+# writes number.csv and run-note.json. The same seed gives the same rows on
+# every machine.
+version: "0.1"
+seed: "test-numbers"
+locale: en-US
+entities:
+  number:
+    count: 100
+    fields:
+      card: { generator: card }
+      iban: { generator: iban }
+      aba:  { generator: aba }
+      isbn: { generator: isbn }
+      ean:  { generator: ean }
+      imei: { generator: imei }
+      vin:  { generator: vin }
+output:
+  format: csv

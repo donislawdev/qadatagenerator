@@ -1,0 +1,103 @@
+{{- /*
+  The page of one ready-made recipe. Above the page's own words: what the
+  recipe makes and the downloads. Below them, every part is read from the
+  recipe and from what TestTheSiteShowsWhatTheProgramDoes saw it make: the
+  recipe itself, its run, the first rows of every file it writes, and each
+  value it damaged. Only the sentences are written by hand.
+*/ -}}
+{{ define "main" }}
+{{- $example := partial "example.html" . }}
+{{- $extra := slice
+  (dict "id" "example-recipe" "title" (T "example_recipe"))
+  (dict "id" "example-run" "title" (T "example_run"))
+  (dict "id" "example-writes" "title" (T "example_writes"))
+}}
+{{- if $example.manifest }}{{ $extra = $extra | append (dict "id" "example-damage" "title" (T "example_damage")) }}{{ end }}
+<div class="container docs">
+  {{ partial "sidebar.html" . }}
+  <article class="prose">
+    {{ partial "breadcrumbs.html" . }}
+    <h1>{{ .Title }}</h1>
+    {{- with .Params.lead }}
+    <p class="lead">{{ . | markdownify }}</p>
+    {{- end }}
+    <p>{{ partial "example-facts.html" $example }}</p>
+    <div class="actions downloads">
+      <a class="button primary" href="{{ $example.recipe.RelPermalink }}" download>{{ T "example_download_recipe" }}</a>
+      {{- with $example.manifest }}
+      <a class="button" href="{{ .RelPermalink }}" download>{{ T "example_download_manifest" }}</a>
+      {{- end }}
+    </div>
+    {{ .Content }}
+
+    <h2 id="example-recipe">{{ T "example_recipe" }}</h2>
+    {{ partial "code-panel.html" (dict "caption" $example.file "code" $example.recipe.Content) }}
+
+    <h2 id="example-run">{{ T "example_run" }}</h2>
+    <p>{{ T "example_run_where" }}</p>
+    {{ partial "run.html" (dict "command" $example.command) }}
+
+    <h2 id="example-writes">{{ T "example_writes" }}</h2>
+    {{- /* The data first, then what was said about it. */}}
+    {{- $files := slice }}
+    {{- range slice "table" "json" "manifest" "note" }}{{ $files = $files | append (where $example.made.files "kind" .) }}{{ end }}
+    {{- if ne (len $files) (len $example.made.files) }}
+      {{- errorf "examples/%s writes a file of a kind this page has no way to show" $example.file }}
+    {{- end }}
+    {{- range $files }}
+    <h3><code>{{ .name }}</code></h3>
+    {{- if eq .kind "table" }}
+    <p>{{ T (cond (eq (len .rows) (int .total)) "example_all_rows" "example_first_rows") (dict "Count" (int .total) "Shown" (len .rows) "Total" (lang.FormatNumber 0 .total)) }}</p>
+    <div class="table-wrap"><table class="example-rows">
+      <thead><tr>{{ range .header }}<th>{{ . }}</th>{{ end }}</tr></thead>
+      <tbody>
+        {{- range .rows }}
+        <tr>{{ range . }}<td>{{ partial "visible.html" . }}</td>{{ end }}</tr>
+        {{- end }}
+      </tbody>
+    </table></div>
+    {{- else if eq .kind "json" }}
+    <p>{{ T (cond (eq (len .lines) (int .total)) "example_all_lines" "example_first_lines") (dict "Count" (int .total) "Shown" (len .lines) "Total" (lang.FormatNumber 0 .total)) }}</p>
+    {{ partial "code-panel.html" (dict "caption" .name "code" (delimit .lines "\n")) }}
+    {{- else if eq .kind "manifest" }}
+    <p>{{ T "example_manifest_file" }}</p>
+    {{- else }}
+    <p>{{ T "example_note_file" }}</p>
+    {{- end }}
+    {{- end }}
+
+    {{- with $example.manifest }}
+    {{- $defects := (. | transform.Unmarshal).defects }}
+    {{- $applied := where $defects "applied" true }}
+    <h2 id="example-damage">{{ T "example_damage" }}</h2>
+    {{- $counts := dict "Count" (len $defects) "Applied" (len $applied) "Refused" (sub (len $defects) (len $applied)) }}
+    {{- if not $applied }}
+    <p>{{ T "example_damage_none" $counts }}</p>
+    {{- else if eq (len $applied) (len $defects) }}
+    <p>{{ T "example_damage_all" $counts }}</p>
+    {{- else }}
+    <p>{{ T "example_damage_some" $counts }}</p>
+    {{- end }}
+    {{- /* A list rather than a table, as on the page of damage: six columns
+           with an identifier in one of them pushed the answer out of sight. */}}
+    {{- with $applied }}
+    <div class="damage-kinds">
+      {{- range . }}
+      <div class="damage-kind">
+        <div class="kind-head"><code>{{ .mutator }}</code>{{ partial "answer.html" (dict "expectation" .expectation "confidence" .confidence) }}</div>
+        <p>{{ T "example_where" (dict "Entity" .location.entity "Row" .location.row "Field" .location.field) }}</p>
+        <p class="kind-example">
+          {{- range $at, $value := slice .value_before .value_after }}
+          {{- if $at }} <span class="arrow">→</span> {{ end }}
+          {{- with partial "visible.html" $value }}<code>{{ . }}</code>{{ else }}<span class="empty">{{ T "defects_empty" }}</span>{{ end }}
+          {{- end -}}
+        </p>
+      </div>
+      {{- end }}
+    </div>
+    {{- end }}
+    {{- end }}
+  </article>
+  {{ partial "toc.html" (dict "page" . "extra" $extra) }}
+</div>
+{{ end }}

@@ -123,3 +123,10 @@ publishDir = "public"
 [[module.mounts]]
   source = "../go.mod"
   target = "assets/go.mod"
+
+# The ready-made recipes, each shown on its own page and offered for download
+# as the file in the repository. What each one writes is in data/examples and
+# assets/example-runs, written by TestTheSiteShowsWhatTheProgramDoes.
+[[module.mounts]]
+  source = "../examples"
+  target = "assets/examples"

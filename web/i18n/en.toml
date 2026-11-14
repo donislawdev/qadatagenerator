@@ -5,6 +5,7 @@ skip_to_content = "Skip to content"
 nav_label = "Main"
 nav_docs = "Docs"
 nav_recipes = "Recipes"
+nav_examples = "Examples"
 nav_damage = "What it breaks"
 nav_download = "Get it"
 menu = "Menu"
@@ -68,3 +69,55 @@ footer_project = "Project"
 
 not_found_title = "There is no page here"
 not_found_text = "The address may have changed. Start again from the home page."
+
+example_group_valid = "Data your application should take"
+example_group_damaged = "Data with damage your application should catch"
+example_download_recipe = "Download the recipe"
+example_download_manifest = "Download the manifest"
+example_damages = "damage {{ . }}"
+example_recipe = "The recipe"
+example_run = "Run it"
+example_run_where = "Save the recipe, then run this in the same folder. This is what the program printed for it."
+example_writes = "What it writes"
+example_manifest_file = "Every defect the recipe ordered: where it is, the value before and after, and what your application should do with it. A defect this build could not apply is there too, with the reason."
+example_note_file = "The seed, the locale and the versions behind the run, and every table it wrote with its rows and columns."
+example_damage = "What it damaged"
+example_where = "{{ .Entity }} {{ .Row }}, column {{ .Field }}"
+
+# Words that change with a number. Count picks the form, and the other values
+# are put in where the words name them.
+[example_tables]
+one = "1 table"
+other = "{{ .Count }} tables"
+
+[example_rows]
+one = "1 row"
+other = "{{ .Shown }} rows"
+
+[example_first_rows]
+one = "Its only row."
+other = "The first {{ .Shown }} of its {{ .Total }} rows."
+
+[example_all_rows]
+one = "Its only row."
+other = "All {{ .Total }} of its rows."
+
+[example_first_lines]
+one = "Its only line."
+other = "The first {{ .Shown }} of its {{ .Total }} lines."
+
+[example_all_lines]
+one = "Its only line."
+other = "All {{ .Total }} of its lines."
+
+[example_damage_all]
+one = "The recipe ordered 1 defect, and this build applied it."
+other = "The recipe ordered {{ .Count }} defects, and this build applied all of them."
+
+[example_damage_none]
+one = "The recipe ordered 1 defect, and this build could not apply it. The manifest says why."
+other = "The recipe ordered {{ .Count }} defects, and this build could not apply any of them. The manifest says why for each one."
+
+# Some applied and some not, so always two defects or more.
+[example_damage_some]
+other = "The recipe ordered {{ .Count }} defects, and this build applied the {{ .Applied }} below. The other {{ .Refused }} are in the manifest as not applied, each with its reason, and the run above counts them by reason."
