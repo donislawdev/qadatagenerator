@@ -1,0 +1,181 @@
+# Every text the picture beside this file shows, in the order the window draws them.
+# Written by go test ./internal/gui/screens -run TestTheWebsiteShowsTheWindowAsItIs -update. Do not edit.
+QA Data Generator
+MAKE DATA
+Quick value
+Damage a file
+Recipe
+VERIFY
+Check results
+About
+Recipe
+A recipe is a file you keep beside your tests. The same recipe and the same seed produce the same data on every machine.
+1
+Your recipe
+version: "0.1"
+seed: "readme"
+locale: en-US
+entities:
+  customer:
+    count: 1000
+    primary_key: ssn
+    fields:
+      first_name: { generator: first_name, required: true }
+      last_name:  { generator: last_name, required: true,
+max_length: 30 }
+      gender:     { generator: gender }
+      birth_date: { generator: birth_date }
+      ssn:        { generator: ssn, unique: true }
+      city:       { generator: city }
+      state:      { generator: region }
+      zip:        { generator: postal_code }
+      plan:       { values: [free, pro, team] }
+    consistency:
+      - first_name matches: [gender]
+  payment:
+    belongs_to: { customer: 0-5 }
+    fields:
+      card: { generator: card }
+output:
+  format: csv
+  dir: ./data
+  file_per_entity: true
+policy:
+  layers: [L2, L3, REV]
+  rows: 5%
+Tab indents by two spaces. Esc, then Tab, leaves the field.
+2
+Write the dataset
+Write to
+Choose or paste a path
+Choose...
+Replace files already there
+Extra manifest form
+none
+Generate this dataset
+What it describes
+No objections. This recipe can be used as it stands.
+2 entities, 10 fields
+FILES THIS WOULD WRITE
+customer.csv, payment.csv, expectation-manifest.json and run-note.json
+Choose a directory first. This window writes nowhere until you say where.
+CARRIED OUT BY THIS BUILD, OF THOSE ORDERED
+Field format (L2)
+3 of 9
+Value meaning (L3)
+3 of 7
+Valid but unusual values (REV)
+4 of 7
+A real run writes one manifest entry for every ordered defect, applied or not.
+The rows below are shown before the policy damages them. The files a run
+writes carry the damage, and the manifest says which rows and how.
+customer
+showing 10 of 1000 rows
+first_name
+last_name
+gender
+birth_date
+ssn
+city
+Joel
+Cook
+male
+1936-11-30
+666-18-0253
+Saginaw
+Brady
+Santos
+male
+1985-10-04
+666-18-1470
+Tryon
+Marco
+Richardson
+male
+1966-05-07
+666-30-3256
+Porterville
+Paula
+Graves
+female
+1972-04-10
+666-12-2466
+Tuba City
+Allison
+Gillespie
+female
+1947-07-16
+666-29-6579
+Milltown
+David
+Nunez
+male
+1943-02-08
+666-80-4046
+Mona
+Evan
+Bullock
+male
+1996-09-29
+666-33-2386
+Salyersville
+Kimberly
+Orr
+female
+2002-07-02
+666-98-9539
+Middleville
+Clarence
+Odom
+male
+1946-12-01
+666-61-4569
+Charlestown
+Hailey
+Reynolds
+female
+1958-12-21
+666-81-5096
+Wagner
+payment
+showing 10 of 2524 rows
+card
+customer
+6243030000000001
+666-18-0253
+378282246310005
+666-18-0253
+371449635398431
+666-18-0253
+371449635398431
+666-18-0253
+6011111111111117
+666-18-0253
+6011111111111117
+666-18-1470
+6011111111111117
+666-18-1470
+378282246310005
+666-18-1470
+4242424242424242
+666-30-3256
+6243030000000001
+666-30-3256
+WHAT WAS NOT CHECKED (3)
+policy.layers: 6 kinds of damage in L2 - described in the catalog and not
+implemented in this build yet, so the manifest will record every one as not
+applied
+policy.layers: 4 kinds of damage in L3 - described in the catalog and not
+implemented in this build yet, so the manifest will record every one as not
+applied
+policy.layers: 3 kinds of damage in REV - described in the catalog and not
+implemented in this build yet, so the manifest will record every one as not
+applied
+What this build can generate, 18 generators
+qadg generate your-recipe.yaml
+$
+Copy command
+The file name above is an example. This window does not write the recipe file, so save the recipe beside your tests and use its name in the command.
+GitHub
+Donate
+v0.1.0  ·  fully offline

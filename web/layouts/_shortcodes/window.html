@@ -1,0 +1,10 @@
+{{- /*
+  A picture of the window with its caption. Takes named arguments name and
+  alt, and the caption between the opening and the closing tag, in Markdown.
+*/ -}}
+{{- $caption := trim .Inner "\n " }}
+{{- if not $caption }}{{ errorf "the picture of the window %q has no caption" (.Get "name") }}{{ end }}
+<figure class="window-figure">
+  {{ partial "window-shot.html" (dict "name" (.Get "name") "alt" (.Get "alt") "sizes" "(min-width: 64rem) 46rem, 92vw") }}
+  <figcaption>{{ $caption | .Page.RenderString }}</figcaption>
+</figure>

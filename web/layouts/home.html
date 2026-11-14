@@ -169,12 +169,19 @@
 <section class="section">
   <div class="container">
     {{ partial "section-head.html" . }}
+    {{- /* Each picture leads to the screen on the page about the window, by
+      the heading that names it, so a card whose title is no heading there is
+      a dead link site_check.py names. */}}
+    {{- $about := partial "find-page.html" .link.page }}
     <div class="grid two">
       {{- range .cards }}
-      <div class="card">
+      <div class="card shot-card">
+        <a class="shot-link" href="{{ $about.RelPermalink }}#{{ anchorize .title }}">{{ partial "window-shot.html" (dict "name" .shot "alt" .alt "sizes" "(min-width: 74rem) 36rem, (min-width: 40rem) 46vw, 92vw") }}</a>
         <h3>{{ .title }}</h3>
         <p>{{ .text }}</p>
-        <div class="foot">{{ .command | markdownify }}</div>
+        {{- /* One span, so a command of two parts stays one line of words
+          rather than three items the footer spreads apart. */}}
+        <div class="foot"><span>{{ .command | markdownify }}</span></div>
       </div>
       {{- end }}
     </div>

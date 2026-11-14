@@ -1,0 +1,63 @@
+# Every text the picture beside this file shows, in the order the window draws them.
+# Written by go test ./internal/gui/screens -run TestTheWebsiteShowsTheWindowAsItIs -update. Do not edit.
+QA Data Generator
+MAKE DATA
+Quick value
+Damage a file
+Recipe
+VERIFY
+Check results
+About
+Quick value
+Make test values to copy into a form or a test. Nothing on this screen is written to a file.
+Kind
+vin
+How many
+10
+Seed
+readme
+Generate
+10 values
+Copy all
+Again
+Values are drawn rather than dealt, so some may repeat.
+ 1
+1BYT5FU9749011245
+ 2
+C2W0U46N5PEY89060
+ 3
+BFXUMNKG544D46596
+ 4
+NZK31JBU2KY037431
+ 5
+UVNFUVVR3L5020866
+ 6
+GR7WKZ1W273M10885
+ 7
+X8JPWAXC37V223805
+ 8
+G3KZB86G61DD45864
+ 9
+B31AXXCA3R7C22818
+10
+ADRHZCHT2BX036529
+vin
+PRODUCES
+identifier (vin)
+FORMAT
+AAAAAAAAAAAAAAAAA
+17 letters or digits
+CHECK DIGIT
+Yes. One wrong character can be caught by the
+number itself, so an import that checks it can
+reject the value.
+Reserved range
+No block of this scheme is set aside for testing, so
+a value here may match one that was really
+issued. Treat it as you would real data.
+qadg quick --count 10 --seed readme vin
+$
+Copy command
+GitHub
+Donate
+v0.1.0  ·  fully offline

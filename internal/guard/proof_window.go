@@ -147,4 +147,11 @@ var windowGuards = []Guard{
 	// canary beside each test plants a program that moved on.
 	{"the website's facts about the command line are what the command line says", "TestTheSiteFactsAreWhatTheProgramSays", "internal/cli", ByProbe},
 	{"the website names every kind of damage the way the window does", "TestTheWindowFactsAreWhatTheWindowSays", "internal/gui/damageparts", ByProbe},
+
+	// The pictures of the window on the website and in the README are drawn by
+	// the program from the data of the README and compared with the window as it
+	// draws now, texts everywhere and pixels on windows/amd64. The canary draws
+	// the same screen from another seed.
+	{"every picture of the window on the website is the window as this build draws it", "TestTheWebsiteShowsTheWindowAsItIs", "internal/gui/screens", ByProbe},
+	{"the picture of Quick value starts with the values the README prints, as its caption says", "TestTheQuickPictureStartsWithTheValuesTheReadmePrints", "internal/gui/screens", ByProbe},
 }

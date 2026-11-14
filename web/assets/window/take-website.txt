@@ -1,0 +1,110 @@
+# Every text the picture beside this file shows, in the order the window draws them.
+# Written by go test ./internal/gui/screens -run TestTheWebsiteShowsTheWindowAsItIs -update. Do not edit.
+QA Data Generator
+MAKE DATA
+Quick value
+Damage a file
+Recipe
+VERIFY
+Check results
+About
+Damage a file
+See how your import behaves when the data is not perfect. The file you choose is never changed, and the damaged copy is written beside it.
+1
+Your file
+Choose a file
+customers.csv
+· 1000 records · 6 columns
+2
+What to damage
+File bytes (L0)
+File structure (L1)
+Field format (L2)
+Value meaning (L3)
+Rules between fields (L4)
+Rules across the set (L5)
+Valid but unusual values (REV)
+Unicode characters (UNI)
+More options
+3
+Write the damaged copy
+Write to
+Same folder as the file
+Choose...
+Replace files already there
+Damage this file
+What would happen
+CARRIED OUT BY THIS BUILD, OF THOSE ORDERED
+Field format (L2)
+3 of 9
+Value meaning (L3)
+3 of 7
+Valid but unusual values (REV)
+4 of 7
+Unicode characters (UNI)
+6 of 6
+FILES THIS WOULD WRITE
+customers.corrupted.csv and
+expectation-manifest.json in .
+A real run writes one manifest entry for every
+ordered defect, applied or not.
+What this file holds
+customers
+1000 records · 6 columns
+COLUMNS
+first_name
+taken for string
+because no numbering scheme this build carries
+accepted 1000 values of this column, and its
+header is one this build reads as naming given
+names
+last_name
+taken for string
+because no numbering scheme this build carries
+accepted 1000 values of this column, and its
+header is one this build reads as naming
+surnames
+birth_date
+taken for string
+city
+taken for string
+zip
+taken for string
+because no numbering scheme this build carries
+accepted 1000 values of this column
+card
+taken for card
+because every one of 1000 values of this column
+was accepted by the card validator, and by no
+other scheme carrying a check digit
+Nothing declared what these columns hold, so it
+was worked out by looking at the values.
+NOT WORKED OUT
+Looking at values cannot establish these. Damage
+that needs them is still ordered, and the manifest
+carries the reason it could not be applied.
+maximum length, because the longest value in a
+file is not a declared limit, required columns,
+because a column with no blanks in it was not
+declared to need one, uniqueness, because
+values that happen not to repeat were not
+declared unique, the set of allowed values of an
+enumerated column, which a file never carries,
+the primary key, and with it every defect about
+the identity of a record, relations between
+columns beyond the date and the gender a
+numbering scheme encodes, which are the only
+two a value can prove without being told,
+relations between tables, because one file is one
+table, people's names, except in a column whose
+header is a common English or Polish word for a
+given name, a surname or a full name, such as
+first_name, nazwisko or full_name and numeric,
+date and postal column types, because a column
+of digits is not a column of numbers
+qadg corrupt --layers 'L2,L3,REV,UNI' --per-row exactly_one --delimiter ',' --locale en-US --seed 0 --out . custo…
+$
+Copy command
+GitHub
+Donate
+v0.1.0  ·  fully offline

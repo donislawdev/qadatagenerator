@@ -1,0 +1,105 @@
+# Every text the picture beside this file shows, in the order the window draws them.
+# Written by go test ./internal/gui/screens -run TestTheWebsiteShowsTheWindowAsItIs -update. Do not edit.
+QA Data Generator
+MAKE DATA
+Quick value
+Damage a file
+Recipe
+VERIFY
+Check results
+About
+Check results
+A manifest says what to expect from every record a run damaged. Add the answer your application gave, and this screen says where the two disagree.
+1
+Open manifest...
+expectation-manifest.json
+· 46 entries · seed readme · en-US
+2
+Open application response...
+application-response.json
+· 1000 of 1000 rows answered
+Ordered damage
+15 of 46 compared
+·
+6 disagree
+·
+0 not settled
+Damage
+Where
+Expected
+Outcome
+UNI.case.turkish_dotless_i
+customers   row 52   city
+~ should be accepted
+accepted
+REV.amount.negative_legal
+customers   row 66   first_na…
+~ should be accepted
+not built yet
+L2.coercion.text_to_number
+customers   row 105   last_n…
+~ should be accepted
+not built yet
+L3.checksum.transposed_digits
+customers   row 135   card
+should be rejected
+accepted
+L2.date.impossible
+customers   row 146   first_…
+should be rejected
+not built yet
+REV.email.plus_addressing
+customers   row 150   first_…
+should be accepted
+not built yet
+UNI.emoji.basic
+customers   row 175   city
+~ should be accepted
+accepted
+L3.currency.wrong_scale
+customers   row 194   first_…
+should be rejected
+not built yet
+L2.date.wrong_format
+customers   row 233   first_…
+should be rejected
+not built yet
+REV.identifier.reserved_range
+customers   row 326   card
+~ should be accepted
+not built yet
+UNI.emoji.zwj_sequence
+customers   row 330   city
+~ should be accepted
+accepted
+L2.enum.outside_set
+customers   row 335   first_…
+should be rejected
+not built yet
+L3.date.future_birthdate
+customers   row 406   first_…
+~ should be rejected
+not built yet
+REV.name.apostrophe
+customers   row 432   last_n…
+should be accepted
+rejected
+L2.number.comma_decimal_separator
+customers   row 486   first_…
+~ should be rejected
+not built yet
+Chosen entry
+What this comparison could not see (3)
+About this run
+L3.checksum.transposed_digits
+ · customers   row 135   card · entry 4 of 46
+should be rejected, and the certainty is hard. The answer does not depend on the rules of your application.
+was "6011111111111117"   now "6011111111111171"
+the application accepted this row   accepted although the manifest expected a rejection   the value was taken. The response record does not say what is held now, so
+whether it survived as sent or was quietly changed is not settled here
+qadg verify expectation-manifest.json application-response.json
+$
+Copy command
+GitHub
+Donate
+v0.1.0  ·  fully offline

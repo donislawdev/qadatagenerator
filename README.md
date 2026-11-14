@@ -279,6 +279,8 @@ is O'Brien, who was turned away. The whole format of that record is in
 - **Check results** - open a manifest, go through every ordered defect, and compare it with what your
   application did.
 
+![The Recipe screen of qadg-gui checking the shop.yaml recipe from this page, with the files a run would write and the first rows of customers](web/assets/window/recipe-website.png)
+
 ---
 
 ## Build it from source

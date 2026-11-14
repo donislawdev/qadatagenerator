@@ -15,6 +15,7 @@ or from files a test holds to it, and never writes by hand:
 | the recipe, the commands and what they printed, the first rows of the files, the entries of the manifest, the record of what an application did, the table of recipe keys and the commands that build the program | `../README.md`, mounted, each block found by the marker or heading above it | `go test ./internal/cli -run TestTheReadme` runs every marked block |
 | the six values of the first screen | `../.github/social-preview/says.txt`, mounted | `go test ./internal/gui/socialcard` |
 | the oldest Go a build from source takes | `../go.mod`, mounted | the module itself |
+| the pictures of the window, on the home page and on The window | `assets/window/`, drawn by the program from the data of the README, with the list of texts each one shows beside it | `go test ./internal/gui/screens` compares the texts everywhere and the pixels on windows/amd64 |
 
 When the program changes, the two facts tests fail until the facts are written again:
 
@@ -24,6 +25,18 @@ go test ./internal/gui/damageparts -run TestTheWindowFactsAreWhatTheWindowSays -
 ```
 
 Then read the diff of `data/facts` before committing it.
+
+A change to the window, or to what the program produces for the README, fails the test of the
+pictures until they are drawn again, on Windows or Linux on amd64:
+
+```
+go test ./internal/gui/screens -update
+```
+
+That draws the stored trees of the window and the pictures together. Look at the pictures before
+committing them. The site turns each into two WebP files at build time, at the size the window is
+laid out at and at the size it was drawn at. Every language shows the same English pictures, and the
+alt text and the caption of each are in the content of the page, so they are translated with it.
 
 The home page lists the generators and the groups of damage on cards whose words are in its front
 matter. A card naming a generator or a group the program does not have, and a generator or group no

@@ -113,15 +113,23 @@ window:
     - title: Quick value
       text: Pick what to generate and get ten values to copy.
       command: "`qadg quick`"
+      shot: quick-website
+      alt: The Quick value screen with ten vehicle identification numbers drawn from the seed readme
     - title: Recipe
       text: Write or paste a recipe. It is checked as you type, shows what it describes, and runs when you ask.
       command: "`qadg validate` and `qadg generate`"
+      shot: recipe-website
+      alt: The Recipe screen checking the shop.yaml recipe, with the files a run would write and the first rows of customers
     - title: Damage a file
       text: Open a CSV file, see what each column holds and why, pick what to damage, see what would happen, then run it.
       command: "`qadg corrupt`"
+      shot: take-website
+      alt: The Damage a file screen with customers.csv read column by column and four kinds of damage chosen
     - title: Check results
       text: Open a manifest, go through every ordered defect, and compare it with what your application did.
       command: "`qadg verify`"
+      shot: browser-website
+      alt: The Check results screen comparing a manifest with what an application did, with row 135 read out in full
   link:
     text: The window
     page: /docs/window

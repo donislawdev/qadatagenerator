@@ -746,6 +746,41 @@ a.card:hover {
   margin-bottom: var(--space-1);
 }
 
+/* A card led by a picture of the window. The picture keeps the corners of the
+   card and a line under it, so it reads as part of the card rather than a
+   second box inside it. */
+.shot-card {
+  padding-top: 0;
+  overflow: hidden;
+}
+
+.shot-card .shot-link {
+  display: block;
+  margin: 0 calc(-1 * var(--space-5)) var(--space-4);
+  border-bottom: var(--border) solid var(--line);
+}
+
+.shot {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.window-figure {
+  margin: 0 0 var(--space-6);
+}
+
+.window-figure .shot {
+  border: var(--border) solid var(--line);
+  border-radius: var(--radius-card);
+}
+
+.window-figure figcaption {
+  margin-top: var(--space-2);
+  color: var(--text-2);
+  font-size: var(--size-small);
+}
+
 .card .foot {
   margin-top: var(--space-4);
   display: flex;

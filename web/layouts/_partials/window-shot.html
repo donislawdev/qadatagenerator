@@ -1,0 +1,23 @@
+{{- /*
+  One picture of the window from assets/window. Takes a dict: name (the state,
+  such as recipe-website), alt, and sizes (the width it takes on the page, for
+  the browser to pick a file).
+
+  The pictures are drawn and held to the window by
+  TestTheWebsiteShowsTheWindowAsItIs in internal/gui/screens, at twice the size
+  the window is laid out at. This hands out two WebP files, one at the size
+  the window is laid out at and one at the size it was drawn at.
+
+  Every language of the site shows these pictures of the English window. A
+  set per language was decided against: the site is meant to reach many more
+  languages than two, and each would need its own run and its own review. The
+  alt text and the caption are in the content of each language, so they are
+  translated with the page. A missing picture or alt stops the build.
+*/ -}}
+{{- $name := .name }}
+{{- with .alt }}{{ else }}{{ errorf "the picture of the window %q has no alt text" $name }}{{ end }}
+{{- $picture := resources.Get (printf "window/%s.png" $name) }}
+{{- if not $picture }}{{ errorf "assets/window has no picture called %s" $name }}{{ end }}
+{{- $drawn := $picture.Process "webp q82" }}
+{{- $laid := $picture.Resize (printf "%dx webp q82" (div $picture.Width 2)) -}}
+<img class="shot" src="{{ $laid.RelPermalink }}" srcset="{{ $laid.RelPermalink }} {{ $laid.Width }}w, {{ $drawn.RelPermalink }} {{ $drawn.Width }}w" sizes="{{ .sizes }}" width="{{ $laid.Width }}" height="{{ $laid.Height }}" alt="{{ .alt }}" loading="lazy" decoding="async">
