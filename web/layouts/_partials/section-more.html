@@ -1,0 +1,4 @@
+{{- /* The link under a section to the page that says more. Takes a map with text and page, or nothing. */ -}}
+{{- with . }}
+<p class="section-more"><a href="{{ (partial "find-page.html" .page).RelPermalink }}">{{ .text }}</a></p>
+{{- end }}

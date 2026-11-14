@@ -1,0 +1,113 @@
+# The project website, built with Hugo.
+#
+# English is served at the root and every other language under its own
+# prefix. A language is listed here only once every one of its pages is
+# translated, because an English page served under another language's address
+# is a duplicate to a search engine and a dead end to a reader.
+
+baseURL = "https://qadatagenerator.donislawdev.com/"
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = false
+# English lives at the root, so the page Hugo would write at /en/ to send
+# readers back to it is an address nobody needs.
+disableDefaultLanguageRedirect = true
+disableKinds = ["taxonomy", "term", "rss"]
+enableRobotsTXT = true
+publishDir = "public"
+
+[params]
+  # The colour a phone gives its bar beside the page: --page in
+  # assets/css/site.css, the window's own ground.
+  themeColor = "#1b1e23"
+  # About how many characters of a title and of a description a search result
+  # shows. site_check.py holds every page to them.
+  titleLimit = 60
+  descriptionLimit = 160
+  repository = "https://github.com/donislawdev/qadatagenerator"
+
+[languages.en]
+  label = "English"
+  locale = "en"
+  title = "QA Data Generator"
+  weight = 1
+  contentDir = "content/en"
+  [languages.en.params]
+    # The locale a link preview asks for, a language and a country.
+    ogLocale = "en_US"
+
+[markup.goldmark.renderer]
+  # Content is Markdown written for this site. Raw HTML in it would be a second
+  # way of writing a page that no template controls.
+  unsafe = false
+
+[markup.tableOfContents]
+  startLevel = 2
+  endLevel = 2
+  ordered = false
+
+[markup.highlight]
+  # Colours come from the stylesheet, so a code block follows the same tokens
+  # as everything else.
+  noClasses = false
+
+[sitemap]
+  changeFreq = ""
+  priority = -1
+
+[privacy]
+  [privacy.disqus]
+    disable = true
+  [privacy.googleAnalytics]
+    disable = true
+  [privacy.instagram]
+    disable = true
+  [privacy.vimeo]
+    disable = true
+  [privacy.x]
+    disable = true
+  [privacy.youTube]
+    disable = true
+
+# What the site shows about the program is read from where the program keeps
+# it, so the site never carries a copy that could drift from the original. A
+# mount replaces the default one for its component only, so static/, data/ and
+# assets/ are named again.
+[[module.mounts]]
+  source = "static"
+  target = "static"
+
+[[module.mounts]]
+  source = "data"
+  target = "data"
+
+[[module.mounts]]
+  source = "assets"
+  target = "assets"
+
+# The program's icon, the drawing the window and both executables carry.
+[[module.mounts]]
+  source = "../internal/gui/appicon/lentils.svg"
+  target = "assets/icon.svg"
+
+# The picture a shared link shows, drawn by internal/gui/socialcard, and the
+# list of every text on it, which the same test holds to the program. The first
+# screen of the home page shows the values the picture shows.
+[[module.mounts]]
+  source = "../.github/social-preview/social-preview.png"
+  target = "assets/social-preview.png"
+
+[[module.mounts]]
+  source = "../.github/social-preview/says.txt"
+  target = "assets/social-says.txt"
+
+# The README, whose examples TestTheReadmeShowsWhatTheProgramDoes runs. The site
+# shows the same blocks, cut out by the marker above each one, rather than
+# copies of them.
+[[module.mounts]]
+  source = "../README.md"
+  target = "assets/readme.md"
+
+# The Go version a build from source needs.
+[[module.mounts]]
+  source = "../go.mod"
+  target = "assets/go.mod"

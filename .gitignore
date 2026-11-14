@@ -3,8 +3,10 @@
 # ---------------------------------------------------------------------------
 # Product documentation, the decision register and the working notes stay on
 # the owner's disk. A fresh clone therefore carries no project context, which
-# is a known and accepted consequence.
-docs/
+# is a known and accepted consequence. Anchored to the root, because the
+# website keeps its documentation pages under web/content/en/docs, and those
+# are published.
+/docs/
 CLAUDE.md
 
 # Internal tooling. Scripts we use ourselves and never ship. Backed up outside

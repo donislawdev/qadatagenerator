@@ -1,0 +1,14 @@
+{{- $here := . }}
+<div class="sidebar-groups">
+  {{- range hugo.Data.menus.sidebar }}
+  <div>
+    <h2>{{ T .key }}</h2>
+    <ul>
+      {{- range .pages }}
+      {{- $page := partial "find-page.html" . }}
+      <li><a href="{{ $page.RelPermalink }}"{{ if eq $page $here }} aria-current="page"{{ end }}>{{ $page.LinkTitle }}</a></li>
+      {{- end }}
+    </ul>
+  </div>
+  {{- end }}
+</div>

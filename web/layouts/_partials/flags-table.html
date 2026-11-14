@@ -1,0 +1,9 @@
+{{- /* Flags with what each one does. Takes the list of flags from the facts. */ -}}
+<div class="table-wrap"><table>
+  <thead><tr><th>{{ T "flags_flag" }}</th><th>{{ T "flags_what" }}</th></tr></thead>
+  <tbody>
+    {{- range . }}
+    <tr><td><code>{{ .name }}</code></td><td>{{ .summary }}</td></tr>
+    {{- end }}
+  </tbody>
+</table></div>

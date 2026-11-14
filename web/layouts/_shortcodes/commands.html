@@ -1,0 +1,15 @@
+{{- /*
+  Every command and its flags as qadg help prints them, from
+  data/facts/cli.json, then the flags every command takes.
+*/ -}}
+{{- $cli := hugo.Data.facts.cli }}
+{{- range $cli.commands }}
+<h2 id="{{ .name }}"><code>qadg {{ .name }}{{ with .arguments }} {{ . }}{{ end }}</code></h2>
+<p>{{ .what }}</p>
+<pre><code>{{ .example }}</code></pre>
+{{- with .flags }}
+{{ partial "flags-table.html" . }}
+{{- end }}
+{{- end }}
+<h2 id="every-command">{{ T "flags_every_command" }}</h2>
+{{ partial "flags-table.html" $cli.flags }}

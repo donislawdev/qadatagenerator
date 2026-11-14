@@ -1,0 +1,13 @@
+{{- /* The heading of a section of the home page. Takes the section's map: eyebrow, title, text, and links shown under the text. */ -}}
+<div class="section-head">
+  <span class="eyebrow">{{ .eyebrow }}</span>
+  <h2>{{ .title }}</h2>
+  {{- range (cond (reflect.IsSlice .text) .text (slice .text)) }}
+  <p>{{ . | markdownify }}</p>
+  {{- end }}
+  {{- with .links }}
+  <p>
+    {{- range $i, $link := . }}{{ if $i }} · {{ end }}<a href="{{ (partial "find-page.html" $link.page).RelPermalink }}">{{ $link.text }}</a>{{ end -}}
+  </p>
+  {{- end }}
+</div>

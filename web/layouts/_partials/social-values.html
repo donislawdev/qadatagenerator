@@ -1,0 +1,23 @@
+{{- /*
+  The values the social preview shows, read from says.txt, which
+  internal/gui/socialcard writes beside the picture and holds to the program:
+  three generated values with what an application should do with them, three
+  damaged ones with the value before and after, and the line saying where they
+  came from. The first screen of the home page shows the same six, so a link
+  preview and the page never disagree. A card drawn some other way stops the
+  build rather than being read wrong.
+*/ -}}
+{{- $says := replace (resources.Get "social-says.txt").Content "\r\n" "\n" }}
+{{- $good := slice }}
+{{- range findRESubmatch `(?m)^([A-Z]+)\n(\S+)\n(accept|reject)$` $says }}
+  {{- $good = $good | append (dict "kind" (index . 1) "value" (index . 2) "answer" (index . 3)) }}
+{{- end }}
+{{- $bad := slice }}
+{{- range findRESubmatch `(?m)^([a-z_]+  ·  [^\n]+)\n([^\n]*)\n→\n([^\n]*)\n(accept|reject)$` $says }}
+  {{- $bad = $bad | append (dict "what" (replace (index . 1) "  ·  " " · ") "before" (index . 2) "after" (index . 3) "answer" (index . 4)) }}
+{{- end }}
+{{- $note := index (findRE `(?m)^From real runs[^\n]*$` $says 1) 0 }}
+{{- if or (ne (len $good) 3) (ne (len $bad) 3) (not $note) }}
+  {{- errorf "says.txt holds %d generated and %d damaged values, and the home page shows three of each as the social preview does" (len $good) (len $bad) }}
+{{- end }}
+{{- return dict "good" $good "bad" $bad "note" $note }}

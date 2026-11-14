@@ -1,0 +1,466 @@
+{
+  "version": "0.1.0",
+  "commands": [
+    {
+      "name": "generate",
+      "arguments": "<recipe>",
+      "summary": "Produce the dataset a recipe describes.",
+      "what": "Reads a recipe, produces the records it describes and writes them as CSV or as JSON, beside a note saying what the run made. Nothing appears under its real name until the whole run has succeeded, so a run that fails or is stopped leaves nothing behind.",
+      "example": "qadg generate --out ./data recipe.yaml",
+      "flags": [
+        {
+          "name": "--out <dir>",
+          "summary": "Write the dataset here rather than where the recipe says."
+        },
+        {
+          "name": "--seed <text>",
+          "summary": "Draw from this seed rather than the one in the recipe. The same seed gives the same data."
+        },
+        {
+          "name": "--format <name>",
+          "summary": "Write csv or json rather than the format the recipe asks for."
+        },
+        {
+          "name": "--manifest <form>",
+          "summary": "Also write the manifest in this form beside the JSON one: gherkin, csv, markdown. Without it only the JSON is written."
+        },
+        {
+          "name": "--overwrite",
+          "summary": "Write over files that are already there. Without it an existing file stops the run."
+        },
+        {
+          "name": "--dry-run",
+          "summary": "Say what would be produced and write nothing."
+        }
+      ]
+    },
+    {
+      "name": "verify",
+      "arguments": "<manifest> <response>",
+      "summary": "Compare a manifest against what your application did.",
+      "what": "Reads the manifest a run wrote and a record of what your application did with that data, and reports where the two disagree. It is the only command that fails because of your application rather than because of itself.",
+      "example": "qadg verify expectation-manifest.json response.json",
+      "flags": []
+    },
+    {
+      "name": "corrupt",
+      "arguments": "<file>",
+      "summary": "Damage a file this tool did not make.",
+      "what": "Reads a comma separated file, works out what its columns hold by looking at the values, and writes them back with damage in them beside a manifest saying what should happen to each one. What could not be worked out is listed rather than guessed.",
+      "example": "qadg corrupt --layers L2,L3 --rows 5% contacts.csv",
+      "flags": [
+        {
+          "name": "--layers <list>",
+          "summary": "Which lines of defence to attack, such as L2,L3. Required, because there is no safe default."
+        },
+        {
+          "name": "--rows <share>",
+          "summary": "The share of rows to damage, such as 5%. Defaults to 5%."
+        },
+        {
+          "name": "--out <dir>",
+          "summary": "Write the damaged file and the manifest here. Defaults to the current directory."
+        },
+        {
+          "name": "--seed <text>",
+          "summary": "Draw from this seed. The same seed and the same file give the same damage."
+        },
+        {
+          "name": "--delimiter <char>",
+          "summary": "The character between fields, for reading and for writing back. Defaults to a comma."
+        },
+        {
+          "name": "--per-row <how>",
+          "summary": "exactly_one or any, for how many defects one damaged row carries."
+        },
+        {
+          "name": "--exclude-fields <list>",
+          "summary": "Columns to leave alone, whatever the layers say."
+        },
+        {
+          "name": "--locale <name>",
+          "summary": "Which locale's damage is available. It does not decide what the columns hold, the values do."
+        },
+        {
+          "name": "--manifest <form>",
+          "summary": "Also write the manifest in this form beside the JSON one: gherkin, csv, markdown. Without it only the JSON is written."
+        },
+        {
+          "name": "--overwrite",
+          "summary": "Write over files that are already there. Without it an existing file stops the run."
+        },
+        {
+          "name": "--dry-run",
+          "summary": "Say what was worked out and what would be damaged, and write nothing."
+        }
+      ]
+    },
+    {
+      "name": "validate",
+      "arguments": "<recipe>",
+      "summary": "Read a recipe and report every problem it has.",
+      "what": "Reports every problem at once rather than stopping at the first, and lists separately what it did not check. A recipe that passes says what would be generated, not that the data exists.",
+      "example": "qadg validate --json recipe.yaml",
+      "flags": []
+    },
+    {
+      "name": "quick",
+      "arguments": "<generator>",
+      "summary": "Produce values, with no recipe and nothing written.",
+      "what": "Writes values of the kind named, one to a line, and nothing else. It is the only command whose runs differ from each other: without a seed it draws a new one every time, so asking twice gives different values, and naming a seed makes it repeatable.",
+      "example": "qadg quick pesel --count 10 --gender female",
+      "flags": [
+        {
+          "name": "--count <number>",
+          "summary": "How many values to produce, one to a line. They are drawn rather than dealt, so with a short list of data behind them some may repeat."
+        },
+        {
+          "name": "--locale <name>",
+          "summary": "Which locale to draw from. A generator that has no data for it is refused with the reason."
+        },
+        {
+          "name": "--seed <text>",
+          "summary": "Draw from this seed. Without it a fresh one is drawn and named on the log channel."
+        },
+        {
+          "name": "--gender <female|male>",
+          "summary": "The gender the value has to agree with. Refused for a generator that takes no account of it."
+        },
+        {
+          "name": "--birth-date <YYYY-MM-DD>",
+          "summary": "The date of birth the value has to agree with. Refused for a generator that takes no account of it."
+        }
+      ]
+    },
+    {
+      "name": "help",
+      "arguments": "[command|generators]",
+      "summary": "Print this text, the help of one command, or what this build can generate.",
+      "what": "With nothing after it, it prints what qadg --help prints. A command named after it is described on its own, with the flags it takes. The word generators lists every value this build can fill a field with and says where each one can be produced.",
+      "example": "qadg help generators",
+      "flags": []
+    }
+  ],
+  "flags": [
+    {
+      "name": "--version",
+      "summary": "Print the four version numbers this build speaks."
+    },
+    {
+      "name": "--license",
+      "summary": "Print the licenses of this tool and of everything inside it."
+    },
+    {
+      "name": "--json",
+      "summary": "Print machine readable output. Supported by --version, --license, validate and generate. One report at a time."
+    },
+    {
+      "name": "--no-color",
+      "summary": "Turn color off even when the output is a terminal."
+    },
+    {
+      "name": "--quiet",
+      "summary": "Print failures only on the log channel."
+    },
+    {
+      "name": "--verbose",
+      "summary": "Print progress detail on the log channel."
+    },
+    {
+      "name": "-h, --help",
+      "summary": "Print this text."
+    }
+  ],
+  "exitCodes": [
+    {
+      "code": 0,
+      "name": "OK",
+      "meaning": "the run succeeded"
+    },
+    {
+      "code": 1,
+      "name": "RUNTIME",
+      "meaning": "a tool failure that belongs nowhere else"
+    },
+    {
+      "code": 2,
+      "name": "USAGE",
+      "meaning": "wrong invocation syntax or an unknown flag"
+    },
+    {
+      "code": 3,
+      "name": "CONFIG",
+      "meaning": "a document this run was given is not valid: a recipe, a policy, a manifest or a response record"
+    },
+    {
+      "code": 4,
+      "name": "EXPECTATION",
+      "meaning": "data was produced, but the application under test did not behave as the manifest says"
+    },
+    {
+      "code": 5,
+      "name": "DATA",
+      "meaning": "the recipe is valid, but it cannot be satisfied"
+    },
+    {
+      "code": 6,
+      "name": "IO",
+      "meaning": "a read or a write failed"
+    },
+    {
+      "code": 130,
+      "name": "INTERRUPTED",
+      "meaning": "stopped by the user"
+    },
+    {
+      "code": 143,
+      "name": "TERMINATED",
+      "meaning": "stopped by the system"
+    }
+  ],
+  "locales": [
+    "en-US",
+    "pl-PL"
+  ],
+  "generators": [
+    {
+      "name": "aba",
+      "produces": "identifier (US.aba)"
+    },
+    {
+      "name": "birth_date",
+      "produces": "date"
+    },
+    {
+      "name": "card",
+      "produces": "identifier (card)"
+    },
+    {
+      "name": "city",
+      "produces": "string"
+    },
+    {
+      "name": "ean",
+      "produces": "identifier (ean)"
+    },
+    {
+      "name": "first_name",
+      "produces": "string"
+    },
+    {
+      "name": "gender",
+      "produces": "string"
+    },
+    {
+      "name": "iban",
+      "produces": "identifier (iban, PL only)"
+    },
+    {
+      "name": "imei",
+      "produces": "identifier (imei)"
+    },
+    {
+      "name": "isbn",
+      "produces": "identifier (isbn)"
+    },
+    {
+      "name": "last_name",
+      "produces": "string"
+    },
+    {
+      "name": "nip",
+      "produces": "identifier (PL.nip)"
+    },
+    {
+      "name": "pesel",
+      "produces": "identifier (PL.pesel)"
+    },
+    {
+      "name": "postal_code",
+      "produces": "postal_code (US.postal)",
+      "missing": {
+        "pl-PL": "this build has no register of postal codes for pl-PL, so a postal code cannot be produced there"
+      }
+    },
+    {
+      "name": "region",
+      "produces": "string"
+    },
+    {
+      "name": "regon",
+      "produces": "identifier (PL.regon)"
+    },
+    {
+      "name": "ssn",
+      "produces": "identifier (US.ssn)"
+    },
+    {
+      "name": "vin",
+      "produces": "identifier (vin)"
+    }
+  ],
+  "damage": [
+    {
+      "id": "L2.string.empty",
+      "group": "L2",
+      "summary": "Replaces a text value with an empty string.",
+      "expectation": "rejection",
+      "confidence": "soft",
+      "before": "Nowak",
+      "after": ""
+    },
+    {
+      "id": "L2.string.exceeds_maxlength",
+      "group": "L2",
+      "summary": "Makes a text value longer than the declared maximum.",
+      "expectation": "rejection",
+      "confidence": "hard",
+      "before": "Nowak",
+      "after": "Nowakkkkkk"
+    },
+    {
+      "id": "L2.type.string_in_numeric",
+      "group": "L2",
+      "summary": "Puts text where the schema declares a number.",
+      "expectation": "rejection",
+      "confidence": "hard",
+      "before": "1250",
+      "after": "n/a"
+    },
+    {
+      "id": "L3.checksum.off_by_one",
+      "group": "L3",
+      "summary": "Changes one digit so the format stays valid and the check digit no longer matches.",
+      "expectation": "rejection",
+      "confidence": "hard",
+      "before": "1234563218",
+      "after": "1234563219"
+    },
+    {
+      "id": "L3.checksum.transposed_digits",
+      "group": "L3",
+      "summary": "Swaps two adjacent digits, which is the most common human typing mistake.",
+      "expectation": "rejection",
+      "confidence": "hard",
+      "before": "1234563218",
+      "after": "1234653218"
+    },
+    {
+      "id": "L3.range.unassigned",
+      "group": "L3",
+      "summary": "Uses an identifier from a range the issuing authority does not assign.",
+      "expectation": "rejection",
+      "confidence": "soft",
+      "before": "666-12-3456",
+      "after": "000-12-3456"
+    },
+    {
+      "id": "L4.coherence.national_id_vs_birthdate",
+      "group": "L4",
+      "summary": "Leaves a valid national identifier that encodes a different birth date than the birth date field beside it.",
+      "expectation": "rejection",
+      "confidence": "soft",
+      "before": "08282298762",
+      "after": "13282298766"
+    },
+    {
+      "id": "L4.coherence.national_id_vs_gender",
+      "group": "L4",
+      "summary": "Leaves a valid national identifier that encodes a different gender than the gender field beside it.",
+      "expectation": "rejection",
+      "confidence": "soft",
+      "before": "85011412345",
+      "after": "85011412352"
+    },
+    {
+      "id": "REV.name.apostrophe",
+      "group": "REV",
+      "summary": "Supplies a surname containing an apostrophe.",
+      "expectation": "acceptance",
+      "confidence": "hard",
+      "before": "Brien",
+      "after": "O'Brien"
+    },
+    {
+      "id": "REV.name.cjk",
+      "group": "REV",
+      "summary": "Supplies a name written in Chinese, Japanese or Korean characters.",
+      "expectation": "acceptance",
+      "confidence": "hard",
+      "before": "Sato",
+      "after": "佐藤"
+    },
+    {
+      "id": "REV.name.diacritics",
+      "group": "REV",
+      "summary": "Supplies a name with diacritical marks.",
+      "expectation": "acceptance",
+      "confidence": "hard",
+      "before": "Lukasz",
+      "after": "Łukasz"
+    },
+    {
+      "id": "REV.name.null_surname",
+      "group": "REV",
+      "summary": "Supplies the surname Null, which is a real surname.",
+      "expectation": "acceptance",
+      "confidence": "hard",
+      "before": "Nowak",
+      "after": "Null"
+    },
+    {
+      "id": "UNI.case.turkish_dotless_i",
+      "group": "UNI",
+      "summary": "Swaps each i for the Turkish dotless ı and each I for the dotted İ, which a change of case can quietly turn into a plain i or I.",
+      "expectation": "acceptance",
+      "confidence": "soft",
+      "before": "Irina",
+      "after": "İrına"
+    },
+    {
+      "id": "UNI.emoji.basic",
+      "group": "UNI",
+      "summary": "Places a single emoji inside a text value.",
+      "expectation": "acceptance",
+      "confidence": "soft",
+      "before": "Maria",
+      "after": "Maria 🙂"
+    },
+    {
+      "id": "UNI.emoji.zwj_sequence",
+      "group": "UNI",
+      "summary": "Supplies one visible character built from several code points joined by zero width joiners.",
+      "expectation": "acceptance",
+      "confidence": "soft",
+      "before": "Maria",
+      "after": "Maria 👩‍👩‍👧‍👦"
+    },
+    {
+      "id": "UNI.normalization.nfc_vs_nfd",
+      "group": "UNI",
+      "summary": "Supplies the same text in a different Unicode normalisation form.",
+      "expectation": "acceptance",
+      "confidence": "hard",
+      "before": "Żółć",
+      "after": "Z\\u0307o\\u0301łc\\u0301"
+    },
+    {
+      "id": "UNI.normalization.non_idempotent",
+      "group": "UNI",
+      "summary": "Supplies a value for which normalising twice differs from normalising once.",
+      "expectation": "rejection",
+      "confidence": "soft",
+      "before": "bigbird",
+      "after": "ᴮᴵᴳᴮᴵᴿᴰ"
+    },
+    {
+      "id": "UNI.zero_width.space",
+      "group": "UNI",
+      "summary": "Inserts a zero width space, which is invisible and still changes the value.",
+      "expectation": "rejection",
+      "confidence": "soft",
+      "before": "maria@example.test",
+      "after": "maria@exa\\u200bmple.test"
+    }
+  ]
+}

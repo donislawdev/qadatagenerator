@@ -1,0 +1,22 @@
+{{- /*
+  What an application should do with a value, as a badge in the colour the
+  window gives it: green to accept, red to reject, amber when the answer
+  depends on the application's own rules, marked ~ the way the manifest's
+  readers mark it. Takes either the README's words (reject, ~ reject, accept,
+  ~ accept) as said, or expectation and confidence as the catalog writes them.
+*/ -}}
+{{- $said := .said }}
+{{- if not $said }}
+  {{- $verb := index (dict "rejection" "reject" "acceptance" "accept" "warning" "warn") .expectation }}
+  {{- if not $verb }}{{ errorf "no badge for the expectation %q" .expectation }}{{ end }}
+  {{- $said = cond (eq .confidence "soft") (printf "~ %s" $verb) $verb }}
+{{- end }}
+{{- $class := "" }}
+{{- if or (hasPrefix $said "~") (eq $said "warn") }}{{ $class = "depends" }}
+{{- else if eq $said "reject" }}{{ $class = "reject" }}
+{{- else if eq $said "accept" }}{{ $class = "accept" }}
+{{- else }}{{ errorf "no badge for the answer %q" $said }}{{ end }}
+{{- $words := T (printf "answer_%s" (replace (replace $said "~ " "maybe_") " " "_")) }}
+{{- if not $words }}{{ errorf "i18n has no words for the answer %q" $said }}{{ end -}}
+<span class="badge {{ $class }}">{{ $words }}</span>
+{{- /* Nothing after the badge, so a table cell holds it alone. */ -}}

@@ -1,0 +1,17 @@
+{{- /*
+  The headings a shortcode writes from the facts, for the table of contents.
+  Hugo reads the headings of a page from its Markdown, and a heading a
+  shortcode writes is not among them, so a page that lists facts names them in
+  its front matter: tocFacts: damage or commands. They come before the page's
+  own headings, because the list stands above the page's closing sections.
+*/ -}}
+{{- $items := slice }}
+{{- if eq .Params.tocFacts "damage" }}
+  {{- range partial "damage-groups.html" . }}{{ $items = $items | append (dict "id" .id "title" .name) }}{{ end }}
+{{- else if eq .Params.tocFacts "commands" }}
+  {{- range hugo.Data.facts.cli.commands }}{{ $items = $items | append (dict "id" .name "title" (printf "qadg %s" .name)) }}{{ end }}
+  {{- $items = $items | append (dict "id" "every-command" "title" (T "flags_every_command")) }}
+{{- else if .Params.tocFacts }}
+  {{- errorf "%s asks for the headings of %q, which no shortcode writes" .File.Path .Params.tocFacts }}
+{{- end }}
+{{- return $items }}

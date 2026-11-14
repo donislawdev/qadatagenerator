@@ -1,0 +1,18 @@
+{{- /*
+  A damaged value with the characters that changed marked, the way the social
+  preview marks them. Only a value as long as the one before it is marked
+  character by character. A value of another length is a different value, and
+  marking it all would say nothing. Takes: before, after.
+*/ -}}
+{{- $before := split .before "" }}
+{{- $after := split .after "" }}
+{{- $html := "" }}
+{{- if eq (len $before) (len $after) }}
+  {{- range $i, $c := $after }}
+    {{- if eq $c (index $before $i) }}{{ $html = printf "%s%s" $html (htmlEscape $c) }}
+    {{- else }}{{ $html = printf "%s<mark>%s</mark>" $html (htmlEscape $c) }}{{ end }}
+  {{- end }}
+{{- else }}
+  {{- $html = htmlEscape .after }}
+{{- end }}
+{{- return safeHTML (replace $html "</mark><mark>" "") }}

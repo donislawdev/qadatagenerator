@@ -1,0 +1,10 @@
+{{- /*
+  The page at a path, in the language being built. A path with no page here
+  stops the build: every language carries every page it links to, or it is not
+  built at all.
+*/ -}}
+{{- $page := site.GetPage . }}
+{{- if not $page }}
+  {{- errorf "a menu or a template links to %s, which is not a page in %s" . site.Language.Lang }}
+{{- end }}
+{{- return $page }}

@@ -1,0 +1,12 @@
+{{- /*
+  The groups this build carries out damage in, in the window's order, each with
+  the name the window gives it and the id of its heading. The list of damage
+  and the table of contents beside it both read this, so they cannot disagree.
+*/ -}}
+{{- $groups := slice }}
+{{- range hugo.Data.facts.window.groups }}
+  {{- if where hugo.Data.facts.cli.damage "group" .code }}
+    {{- $groups = $groups | append (dict "code" .code "name" .name "id" (lower .code)) }}
+  {{- end }}
+{{- end }}
+{{- return $groups }}

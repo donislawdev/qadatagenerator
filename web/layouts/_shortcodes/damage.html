@@ -1,0 +1,20 @@
+{{- /*
+  Every kind of damage this build carries out, group by group, from the facts:
+  the name the window gives the group, then each kind with what an application
+  should do, what the damage does, and the example the catalog holds to the
+  engine. A list rather than a table, because a column of long identifiers left
+  the sentence beside it a few words wide.
+*/ -}}
+{{- $cli := hugo.Data.facts.cli }}
+{{- range partial "damage-groups.html" . }}
+<h2 id="{{ .id }}">{{ .name }} <code>{{ .code }}</code></h2>
+<div class="damage-kinds">
+  {{- range where $cli.damage "group" .code }}
+  <div class="damage-kind">
+    <div class="kind-head"><code>{{ .id }}</code>{{ partial "answer.html" (dict "expectation" .expectation "confidence" .confidence) }}</div>
+    <p>{{ .summary }}</p>
+    <p class="kind-example"><code>{{ .before }}</code> <span class="arrow">→</span> {{ if .after }}<code>{{ .after }}</code>{{ else }}<span class="empty">{{ T "defects_empty" }}</span>{{ end }}</p>
+  </div>
+  {{- end }}
+</div>
+{{- end }}

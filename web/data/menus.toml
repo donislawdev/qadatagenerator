@@ -1,0 +1,75 @@
+# The website's menus, by the path of the page each entry opens.
+#
+# A path is the same in every language. The page found under it is the one in
+# the language being built, and the words are that language's file. A path
+# with no page in a language stops the build, so a menu cannot lead to a page
+# that is not there.
+
+[[main]]
+key = "nav_docs"
+page = "/docs"
+
+[[main]]
+key = "nav_recipes"
+page = "/docs/recipes"
+
+[[main]]
+key = "nav_damage"
+page = "/docs/damage"
+
+[[main]]
+key = "nav_download"
+page = "/download"
+
+# The documentation's own menu, in reading order. The pager at the foot of a
+# page follows it too.
+[[sidebar]]
+key = "side_start"
+pages = ["/docs", "/docs/getting-started", "/download"]
+
+[[sidebar]]
+key = "side_make"
+pages = ["/docs/recipes", "/docs/generators"]
+
+[[sidebar]]
+key = "side_break"
+pages = ["/docs/damage", "/docs/manifest", "/docs/damage-a-file", "/docs/verify"]
+
+[[sidebar]]
+key = "side_use"
+pages = ["/docs/window", "/docs/ci"]
+
+[[sidebar]]
+key = "side_reference"
+pages = ["/docs/cli", "/docs/exit-codes"]
+
+[[sidebar]]
+key = "side_trust"
+pages = ["/security", "/faq"]
+
+[[footer]]
+key = "footer_product"
+pages = ["/download", "/docs/getting-started", "/security", "/faq"]
+
+[[footer]]
+key = "footer_docs"
+pages = ["/docs/recipes", "/docs/generators", "/docs/damage", "/docs/manifest"]
+
+[[footer]]
+key = "footer_cli"
+pages = ["/docs/cli", "/docs/exit-codes", "/docs/ci", "/docs/verify"]
+
+# Addresses outside the site. The repository is the only place they point,
+# except the page that says how to support the project, which is the one the
+# window's Donate button opens.
+[[project]]
+key = "link_github"
+url = "https://github.com/donislawdev/qadatagenerator"
+
+[[project]]
+key = "link_issues"
+url = "https://github.com/donislawdev/qadatagenerator/issues"
+
+[[project]]
+key = "link_support"
+url = "https://donislawdev.com/support/"

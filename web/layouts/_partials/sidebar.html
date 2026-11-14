@@ -1,0 +1,12 @@
+{{- /*
+  The same list twice, because the site has no script to fold a list on a phone
+  only. On a narrow screen it stands above the page and starts folded under its
+  name. On a wide screen it stands beside the page and is always open.
+*/ -}}
+<details class="sidebar sidebar-narrow">
+  <summary>{{ T "nav_docs" }}</summary>
+  {{ partial "sidebar-groups.html" . }}
+</details>
+<nav class="sidebar sidebar-wide" aria-label="{{ T "nav_docs" }}">
+  {{ partial "sidebar-groups.html" . }}
+</nav>

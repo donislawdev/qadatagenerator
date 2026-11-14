@@ -140,4 +140,11 @@ var windowGuards = []Guard{
 	// a generator or group left out or made up, and a Go version other than
 	// go.mod's.
 	{"the commands the README shows run, and print and write what it shows", "TestTheReadmeShowsWhatTheProgramDoes", "internal/cli", ByProbe},
+
+	// The project website reads what the program says about itself from two
+	// files of facts, one for each side of the program, so a page cannot show a
+	// command, a generator or a name of damage the program no longer has. The
+	// canary beside each test plants a program that moved on.
+	{"the website's facts about the command line are what the command line says", "TestTheSiteFactsAreWhatTheProgramSays", "internal/cli", ByProbe},
+	{"the website names every kind of damage the way the window does", "TestTheWindowFactsAreWhatTheWindowSays", "internal/gui/damageparts", ByProbe},
 }

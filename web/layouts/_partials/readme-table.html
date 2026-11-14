@@ -1,0 +1,32 @@
+{{- /*
+  The rows of one table of the README, each a list of its cells as written,
+  without the header and the line under it. The table is found under a marker
+  <!-- readme-check: MARKER --> or under a heading "## HEADING". A table that is
+  not there stops the build. Takes: marker or heading.
+*/ -}}
+{{- $readme := replace (resources.Get "readme.md").Content "\r\n" "\n" }}
+{{- $cut := "" }}
+{{- with .marker }}{{ $cut = printf "<!-- readme-check: %s -->\n" . }}{{ end }}
+{{- with .heading }}{{ $cut = printf "\n## %s\n" . }}{{ end }}
+{{- $parts := split $readme $cut }}
+{{- if lt (len $parts) 2 }}
+  {{- errorf "the README has no %q, and the site shows the table under it" $cut }}
+{{- end }}
+{{- $rows := slice }}
+{{- $started := false }}
+{{- range split (index $parts 1) "\n" }}
+  {{- if hasPrefix . "|" }}
+    {{- $started = true }}
+    {{- if not (findRE `^\|[-|: ]+\|$` .) }}
+      {{- $cells := slice }}
+      {{- range split (strings.Trim . "|") "|" }}{{ $cells = $cells | append (trim . " ") }}{{ end }}
+      {{- $rows = $rows | append (dict "cells" $cells) }}
+    {{- end }}
+  {{- else if $started }}
+    {{- break }}
+  {{- end }}
+{{- end }}
+{{- if lt (len $rows) 2 }}
+  {{- errorf "the README has no table under %q" $cut }}
+{{- end }}
+{{- return after 1 $rows }}

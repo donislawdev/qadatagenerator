@@ -1,0 +1,5 @@
+{{- /* Each command after a prompt, then the output in the colour of the log. Takes: commands, output (optional). */ -}}
+<pre>
+{{- range $i, $line := split .commands "\n" }}{{ if $i }}{{ "\n" }}{{ end }}<span class="prompt">$ </span>{{ $line }}{{ end }}
+{{- with .output }}{{ "\n" }}<span class="log">{{ . }}</span>{{ end -}}
+</pre>

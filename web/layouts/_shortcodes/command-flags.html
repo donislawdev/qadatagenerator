@@ -1,0 +1,4 @@
+{{- /* The flags of one command, from data/facts/cli.json. Takes named arguments: name. */ -}}
+{{- $command := index (where hugo.Data.facts.cli.commands "name" (.Get "name")) 0 }}
+{{- if not $command }}{{ errorf "%s names the command %q, which the program does not have" .Page.File.Path (.Get "name") }}{{ end }}
+{{ partial "flags-table.html" $command.flags }}

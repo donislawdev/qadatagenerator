@@ -1,0 +1,5 @@
+{{- /* Commands and what they printed, in a frame. Takes: caption, commands, output (optional), exit (optional, a code other than 0 the last command ended with). */ -}}
+<div class="panel">
+  <div class="panel-head"><span class="file">{{ .caption }}</span>{{ with .exit }}<span class="badge reject">{{ T "exit_code" }} {{ . }}</span>{{ end }}</div>
+  {{ partial "terminal-body.html" . }}
+</div>

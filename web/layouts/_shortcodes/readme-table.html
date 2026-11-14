@@ -1,0 +1,17 @@
+{{- /*
+  A table of the README under a heading, cells as written, with the README's
+  own header row. Takes named arguments: heading.
+*/ -}}
+{{- $readme := replace (resources.Get "readme.md").Content "\r\n" "\n" }}
+{{- $parts := split $readme (printf "\n## %s\n" (.Get "heading")) }}
+{{- if lt (len $parts) 2 }}{{ errorf "the README has no heading %q" (.Get "heading") }}{{ end }}
+{{- $header := index (findRESubmatch `(?m)^(\|.*\|)\n\|[-|: ]+\|$` (index $parts 1) 1) 0 }}
+{{- if not $header }}{{ errorf "the README has no table under %q" (.Get "heading") }}{{ end }}
+<div class="table-wrap"><table>
+  <thead><tr>{{ range split (strings.Trim (index $header 1) "|") "|" }}<th>{{ trim . " " }}</th>{{ end }}</tr></thead>
+  <tbody>
+    {{- range partial "readme-table.html" (dict "heading" (.Get "heading")) }}
+    <tr>{{ range .cells }}<td>{{ . | markdownify }}</td>{{ end }}</tr>
+    {{- end }}
+  </tbody>
+</table></div>

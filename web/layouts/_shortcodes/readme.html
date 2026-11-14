@@ -1,0 +1,14 @@
+{{- /*
+  A block of the README in a frame, word for word. Takes named arguments:
+  marker, nth (optional), caption, and kind: "file" for a file, "run" for
+  commands, with output naming the marker of what they printed, outputNth its
+  number, and exit the code the last command ended with.
+*/ -}}
+{{- $block := partial "readme-block.html" (dict "marker" (.Get "marker") "heading" (.Get "heading") "nth" (int (.Get "nth" | default 1))) }}
+{{- if eq (.Get "kind") "run" }}
+  {{- $output := "" }}
+  {{- with .Get "output" }}{{ $output = partial "readme-block.html" (dict "marker" . "nth" (int ($.Get "outputNth" | default 1))) }}{{ end }}
+  {{- partial "terminal.html" (dict "caption" (or (.Get "caption") (T "terminal")) "commands" $block "output" $output "exit" (.Get "exit")) }}
+{{- else }}
+  {{- partial "code-panel.html" (dict "caption" (.Get "caption") "code" $block) }}
+{{- end }}

@@ -1,0 +1,36 @@
+{
+  "groups": [
+    {
+      "code": "L0",
+      "name": "File bytes"
+    },
+    {
+      "code": "L1",
+      "name": "File structure"
+    },
+    {
+      "code": "L2",
+      "name": "Field format"
+    },
+    {
+      "code": "L3",
+      "name": "Value meaning"
+    },
+    {
+      "code": "L4",
+      "name": "Rules between fields"
+    },
+    {
+      "code": "L5",
+      "name": "Rules across the set"
+    },
+    {
+      "code": "REV",
+      "name": "Valid but unusual values"
+    },
+    {
+      "code": "UNI",
+      "name": "Unicode characters"
+    }
+  ]
+}

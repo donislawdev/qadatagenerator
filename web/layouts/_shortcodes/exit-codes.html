@@ -1,0 +1,9 @@
+{{- /* Every exit code with its name and meaning, from data/facts/cli.json, as qadg --help prints them. */ -}}
+<div class="table-wrap"><table>
+  <thead><tr><th>{{ T "exit_code" }}</th><th>{{ T "exit_name" }}</th><th>{{ T "exit_meaning" }}</th></tr></thead>
+  <tbody>
+    {{- range hugo.Data.facts.cli.exitCodes }}
+    <tr><td><code>{{ .code }}</code></td><td><code>{{ .name }}</code></td><td>{{ .meaning }}</td></tr>
+    {{- end }}
+  </tbody>
+</table></div>

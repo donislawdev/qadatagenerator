@@ -1,0 +1,21 @@
+{{- /*
+  Every generator this build has, what it produces and the locales it cannot
+  be filled in, from data/facts/cli.json, the way qadg help generators prints
+  them.
+*/ -}}
+{{- $cli := hugo.Data.facts.cli }}
+<div class="table-wrap"><table>
+  <thead><tr><th>{{ T "generators_name" }}</th><th>{{ T "generators_produces" }}</th>{{ range $cli.locales }}<th>{{ . }}</th>{{ end }}</tr></thead>
+  <tbody>
+    {{- range $cli.generators }}
+    {{- $g := . }}
+    <tr><td><code>{{ .name }}</code></td><td>{{ .produces }}</td>{{ range $cli.locales }}<td>{{ if index ($g.missing | default dict) . }}{{ T "no" }}{{ else }}{{ T "yes" }}{{ end }}</td>{{ end }}</tr>
+    {{- end }}
+  </tbody>
+</table></div>
+{{- range $cli.generators }}
+{{- $g := . }}
+{{- range $locale, $why := .missing }}
+<p><code>{{ $g.name }}</code> {{ T "generators_not_in" }} {{ $locale }}: {{ $why }}.</p>
+{{- end }}
+{{- end }}

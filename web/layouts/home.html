@@ -1,0 +1,209 @@
+{{- /*
+  The home page. Its words are the front matter of content/<language>/_index.md.
+  Every example is cut from a file a test holds to the program: the six values
+  of the first screen from the social preview's says.txt, the recipe, the
+  commands and what they printed from the README, the generators and the kinds
+  of damage from the facts in data/facts. The cards of generators and of damage
+  must name exactly what the facts name, or the build stops.
+*/ -}}
+{{ define "main" }}
+{{- $p := .Params }}
+{{- $cli := hugo.Data.facts.cli }}
+{{- $social := partial "social-values.html" . }}
+<div class="container">
+  <section class="hero">
+    <div>
+      <span class="pill">{{ $p.hero.eyebrow }}</span>
+      <h1>{{ $p.hero.title }} <span class="turn">{{ $p.hero.turn }}</span></h1>
+      <p class="lead">{{ $p.hero.lead | markdownify }}</p>
+      <div class="actions">
+        <a class="button primary" href="{{ (partial "find-page.html" "/download").RelPermalink }}">{{ T "get_it" }}</a>
+        <a class="button" href="{{ (partial "find-page.html" "/docs/getting-started").RelPermalink }}">{{ T "read_the_docs" }}</a>
+      </div>
+      <ul class="facts">
+        {{- range $p.hero.facts }}
+        <li>{{ . }}</li>
+        {{- end }}
+      </ul>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-head">{{ $p.hero.good }} <span class="aside">{{ $p.hero.should }}</span></div>
+        {{- range $social.good }}
+        <div class="value-row"><span class="kind">{{ .kind }}</span><span class="value">{{ .value }}</span>{{ partial "answer.html" (dict "said" .answer) }}</div>
+        {{- end }}
+      </div>
+      <div class="panel">
+        <div class="panel-head">{{ $p.hero.bad }} <span class="file">{{ $p.hero.file }}</span></div>
+        {{- range $social.bad }}
+        <div class="damage-row">
+          <span class="what">{{ .what }}</span>
+          <span class="change"><span class="before">{{ .before }}</span><span class="arrow">→</span><span class="after">{{ partial "marked.html" . }}</span></span>
+          {{ partial "answer.html" (dict "said" .answer) }}
+        </div>
+        {{- end }}
+      </div>
+      <p class="panel-note">{{ $p.hero.note }}</p>
+    </div>
+  </section>
+</div>
+
+{{- with $p.recipes }}
+<section class="section">
+  <div class="container">
+    {{ partial "section-head.html" . }}
+    <div class="split">
+      {{ partial "code-panel.html" (dict "caption" "shop.yaml" "code" (partial "readme-block.html" (dict "marker" "file shop.yaml"))) }}
+      <div class="stack">
+        {{ partial "terminal.html" (dict "caption" (T "terminal") "commands" (partial "readme-block.html" (dict "marker" "run" "nth" 2)) "output" (partial "readme-block.html" (dict "marker" "output 1"))) }}
+        {{ partial "code-panel.html" (dict "caption" "data/customer.csv" "code" (partial "readme-block.html" (dict "marker" "head data/customer.csv"))) }}
+        {{ partial "code-panel.html" (dict "caption" "data/payment.csv" "code" (partial "readme-block.html" (dict "marker" "head data/payment.csv"))) }}
+        <ul class="ticks">
+          {{- range .points }}
+          <li>{{ . | markdownify }}</li>
+          {{- end }}
+        </ul>
+      </div>
+    </div>
+    {{ partial "section-more.html" .link }}
+  </div>
+</section>
+{{- end }}
+
+{{- with $p.damage }}
+<section class="section">
+  <div class="container">
+    {{ partial "section-head.html" . }}
+    <div class="split">
+      {{ partial "code-panel.html" (dict "caption" .added "code" (partial "readme-block.html" (dict "marker" "append shop.yaml"))) }}
+      {{ partial "terminal.html" (dict "caption" (T "terminal") "commands" (partial "readme-block.html" (dict "marker" "run" "nth" 3))) }}
+    </div>
+    {{ partial "defects-table.html" (dict "rows" (partial "readme-table.html" (dict "marker" "defects data/expectation-manifest.json"))) }}
+    <p class="panel-note">{{ .note | markdownify }}</p>
+    {{ partial "section-more.html" .link }}
+  </div>
+</section>
+{{- end }}
+
+{{- with $p.good }}
+<section class="section">
+  <div class="container">
+    {{ partial "section-head.html" . }}
+    {{- $carded := slice }}
+    <div class="grid three">
+      {{- range .cards }}
+      <div class="card">
+        <h3>{{ .title }}</h3>
+        <p>{{ .text }}</p>
+        <div class="names">
+          {{- range .generators }}
+          {{- if not (where $cli.generators "name" .) }}{{ errorf "the home page names the generator %q, which the program does not have" . }}{{ end }}
+          {{- $carded = $carded | append . }}
+          <code>{{ . }}</code>
+          {{- end }}
+        </div>
+      </div>
+      {{- end }}
+    </div>
+    {{- range $cli.generators }}
+      {{- if not (in $carded .name) }}{{ errorf "the program has the generator %q and no card of the home page names it" .name }}{{ end }}
+    {{- end }}
+    {{- if ne (len $carded) (len (uniq $carded)) }}{{ errorf "the home page names a generator on two cards" }}{{ end }}
+    <div class="panel after-grid">
+      <div class="panel-head"><span class="file">{{ .quick }}</span></div>
+      {{ partial "terminal-body.html" (dict "commands" (partial "readme-block.html" (dict "marker" "run" "nth" 1)) "output" (partial "readme-block.html" (dict "marker" "output"))) }}
+    </div>
+    {{ partial "section-more.html" .link }}
+  </div>
+</section>
+{{- end }}
+
+{{- with $p.groups }}
+<section class="section">
+  <div class="container">
+    {{ partial "section-head.html" . }}
+    {{- $withDamage := slice }}
+    {{- range $cli.damage }}{{ $withDamage = $withDamage | append .group }}{{ end }}
+    {{- $withDamage = uniq $withDamage }}
+    {{- $shown := slice }}
+    <div class="grid five">
+      {{- range .cards }}
+      {{- if not (in $withDamage .code) }}{{ errorf "the home page describes the group %q, in which the program carries out no damage" .code }}{{ end }}
+      {{- $shown = $shown | append .code }}
+      {{- $name := index (where hugo.Data.facts.window.groups "code" .code) 0 }}
+      <div class="card">
+        <span class="code">{{ .code }}</span>
+        <h3>{{ $name.name }}</h3>
+        <p>{{ .text }}</p>
+        <div class="foot">{{ $p.hero.should }} {{ partial "answer.html" (dict "said" .answer) }}</div>
+      </div>
+      {{- end }}
+    </div>
+    {{- range $withDamage }}
+      {{- if not (in $shown .) }}{{ errorf "the program carries out damage in %q and the home page has no card for it" . }}{{ end }}
+    {{- end }}
+    {{ partial "section-more.html" .link }}
+  </div>
+</section>
+{{- end }}
+
+{{- with $p.yours }}
+<section class="section">
+  <div class="container split centred">
+    {{ partial "section-head.html" . }}
+    {{ partial "terminal.html" (dict "caption" (T "terminal") "commands" (partial "readme-block.html" (dict "marker" "run" "nth" 4)) "output" (partial "readme-block.html" (dict "marker" "output" "nth" 2))) }}
+  </div>
+</section>
+{{- end }}
+
+{{- with $p.pipeline }}
+<section class="section">
+  <div class="container split centred">
+    {{ partial "section-head.html" . }}
+    {{ partial "terminal.html" (dict "caption" (T "terminal") "exit" 4 "commands" (partial "readme-block.html" (dict "marker" "run exit=4")) "output" (partial "readme-block.html" (dict "marker" "output" "nth" 3))) }}
+  </div>
+</section>
+{{- end }}
+
+{{- with $p.window }}
+<section class="section">
+  <div class="container">
+    {{ partial "section-head.html" . }}
+    <div class="grid two">
+      {{- range .cards }}
+      <div class="card">
+        <h3>{{ .title }}</h3>
+        <p>{{ .text }}</p>
+        <div class="foot">{{ .command | markdownify }}</div>
+      </div>
+      {{- end }}
+    </div>
+    {{ partial "section-more.html" .link }}
+  </div>
+</section>
+{{- end }}
+
+{{- with $p.promises }}
+<section class="section">
+  <div class="container">
+    {{ partial "section-head.html" . }}
+    <div class="grid three">
+      {{- range .items }}
+      <div class="promise"><h3>{{ .title }}</h3><p>{{ .text | markdownify }}</p></div>
+      {{- end }}
+    </div>
+    {{ partial "section-more.html" .link }}
+    {{- with $p.cta }}
+    <div class="cta">
+      <h2>{{ .title }}</h2>
+      <p>{{ .text }}</p>
+      <div class="actions">
+        <a class="button primary" href="{{ (partial "find-page.html" "/download").RelPermalink }}">{{ T "get_it" }}</a>
+        <a class="button" href="{{ site.Params.repository }}">{{ T "view_on_github" }}</a>
+      </div>
+    </div>
+    {{- end }}
+  </div>
+</section>
+{{- end }}
+{{ end }}

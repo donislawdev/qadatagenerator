@@ -1,0 +1,24 @@
+{{- /*
+  Entries of a manifest as the README shows them, with the last column as a
+  badge. The README's table has five columns: record, column, before, after,
+  and what the application should do. Takes: rows, from readme-table.html.
+*/ -}}
+<div class="table-wrap"><table>
+  <thead><tr><th>{{ T "defects_record" }}</th><th>{{ T "defects_column" }}</th><th>{{ T "defects_before" }}</th><th>{{ T "defects_after" }}</th><th>{{ T "defects_answer" }}</th></tr></thead>
+  <tbody>
+    {{- range .rows }}
+    {{- if ne (len .cells) 5 }}{{ errorf "a row of the README's table of defects has %d cells rather than five" (len .cells) }}{{ end }}
+    <tr>
+      <td>{{ index .cells 0 }}</td>
+      <td>{{ index .cells 1 }}</td>
+      <td>{{ index .cells 2 | markdownify }}</td>
+      {{- if eq (index .cells 3) "empty" }}
+      <td class="empty">{{ T "defects_empty" }}</td>
+      {{- else }}
+      <td>{{ index .cells 3 | markdownify }}</td>
+      {{- end }}
+      <td>{{ partial "answer.html" (dict "said" (index .cells 4)) }}</td>
+    </tr>
+    {{- end }}
+  </tbody>
+</table></div>

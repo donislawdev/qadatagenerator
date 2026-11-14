@@ -1,0 +1,32 @@
+{{- /*
+  One fenced block of the README, word for word.
+
+  Under a marker: the block right under the Nth <!-- readme-check: MARKER -->.
+  TestTheReadmeShowsWhatTheProgramDoes runs or compares every such block with
+  the program, so the site shows only what the program was seen doing.
+
+  Under a heading: the first block below "## HEADING", for the few blocks the
+  README shows without running them, such as the commands that build the
+  program. The site still shows them once, from the README, rather than a copy.
+
+  A marker or heading the README no longer has, or one with no block under it,
+  stops the build. Takes: marker and nth (from 1, 1 when left out), or heading.
+*/ -}}
+{{- $readme := replace (resources.Get "readme.md").Content "\r\n" "\n" }}
+{{- $nth := .nth | default 1 }}
+{{- $pattern := "(?s)\\A(?:<!--[^\\n]*-->\\n)*```[a-z]*\\n(.*?)\\n```" }}
+{{- $cut := printf "<!-- readme-check: %s -->\n" .marker }}
+{{- with .heading }}
+  {{- $cut = printf "\n## %s\n" . }}
+  {{- $pattern = "(?s)```[a-z]*\\n(.*?)\\n```" }}
+  {{- $nth = 1 }}
+{{- end }}
+{{- $parts := split $readme $cut }}
+{{- if le (len $parts) $nth }}
+  {{- errorf "the README has no %q number %d, and the site shows the block under it" $cut $nth }}
+{{- end }}
+{{- $found := findRESubmatch $pattern (index $parts $nth) 1 }}
+{{- if not $found }}
+  {{- errorf "the README has no fenced block under %q number %d" $cut $nth }}
+{{- end }}
+{{- return index (index $found 0) 1 }}

@@ -1,0 +1,78 @@
+# The words of the site's own interface in English. The words of a page are in
+# its content file, and what the program prints is in data/facts.
+
+skip_to_content = "Skip to content"
+nav_label = "Main"
+nav_docs = "Docs"
+nav_recipes = "Recipes"
+nav_damage = "What it breaks"
+nav_download = "Get it"
+menu = "Menu"
+language = "Language"
+home = "Home"
+link_github = "GitHub"
+link_issues = "Report a problem"
+link_support = "Support the project"
+get_it = "Get it"
+read_the_docs = "Read the docs"
+view_on_github = "View on GitHub"
+picture_alt = "Good data, bad data, and the right answer. On the left what the program does. On the right three values it generated, and three values it damaged, each with what an application should do with it."
+
+terminal = "terminal"
+exit_code = "exit code"
+exit_name = "name"
+exit_meaning = "meaning"
+
+answer_reject = "reject"
+answer_accept = "accept"
+answer_warn = "accept and flag"
+answer_maybe_reject = "~ reject"
+answer_maybe_accept = "~ accept"
+answer_maybe_warn = "~ accept and flag"
+answer_maybe_your_rules = "~ your rules"
+
+defects_record = "Record"
+defects_column = "Column"
+defects_before = "Before"
+defects_after = "After"
+defects_answer = "Your app should"
+defects_empty = "empty"
+
+keys_key = "Key"
+keys_where = "Where"
+keys_what = "What it does"
+
+generators_name = "Generator"
+generators_produces = "Produces"
+generators_not_in = "cannot be filled in"
+yes = "yes"
+no = "no"
+
+damage_kind = "Damage"
+damage_what = "What it does"
+damage_example = "Example"
+
+flags_flag = "Flag"
+flags_what = "What it does"
+flags_every_command = "Flags every command takes"
+
+on_this_page = "On this page"
+pager_label = "Previous and next page"
+previous = "Previous"
+next = "Next"
+
+side_start = "Start"
+side_make = "Make data"
+side_break = "Break data"
+side_use = "Use it"
+side_reference = "Reference"
+side_trust = "Trust"
+
+footer_note = "Test data for QA, good and bad, with the right answer for each value. Free and open source, GPL-3.0."
+footer_product = "Product"
+footer_docs = "Docs"
+footer_cli = "Command line"
+footer_project = "Project"
+
+not_found_title = "There is no page here"
+not_found_text = "The address may have changed. Start again from the home page."
