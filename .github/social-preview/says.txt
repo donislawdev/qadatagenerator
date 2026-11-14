@@ -1,0 +1,48 @@
+# Every text drawn on social-preview.png, one to a line, in the order drawn.
+# Written by go test ./internal/gui/socialcard -run TestTheSocialPreviewSaysWhatTheProgramDoes -update
+QA Data Generator
+GUI + CLI
+Good data. Bad data.
+And the right answer.
+A test data generator for forms, APIs and file imports. It
+makes whole datasets, breaks them on purpose, and tells
+your tests what your app should do with each value.
+Recipes
+ - describe your own dataset in YAML, get thousands
+of rows in CSV or JSON
+Good data
+ - SSN, VIN, ISBN, IMEI, PESEL and 6 more
+Bad data
+ - 18 ways to break a value
+The right answer
+ - accept or reject, in a file your CI reads
+Free, GPL-3.0  ·  works offline  ·  Windows, macOS, Linux
+good data
+your app should
+VIN
+KHG6ZAMH9AZC51150
+accept
+IMEI
+001863552600322
+accept
+PESEL
+04283108226
+accept
+bad and tricky data
+expectation-manifest.json
+isbn  ·  check digit off by one
+9786935210363
+→
+9786935210364
+reject
+isbn  ·  two digits swapped
+9786981485937
+→
+9786981485973
+reject
+last_name  ·  a real surname, Null
+Smith
+→
+Null
+accept
+From real runs of qadg quick and qadg corrupt.

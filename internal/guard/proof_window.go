@@ -132,4 +132,5 @@ var windowGuards = []Guard{
 	{"the icon file both executables carry is the drawing at every size Windows asks for", "TestTheIconFileIsDrawnFromTheDrawings", "internal/gui/appicon", ByProbe},
 	{"both executables carry the icon file as it is now", "TestBothExecutablesCarryTheIconFile", "internal/gui/appicon", ByProbe},
 	{"both drawings of the icon draw something the rasteriser could read", "TestBothDrawingsDrawASpoonRatherThanNothing", "internal/gui/appicon", ByProbe},
+	{"the picture GitHub shows says what this build does and looks the way it is drawn", "TestTheSocialPreviewSaysWhatTheProgramDoes", "internal/gui/socialcard", ByProbe},
 }
