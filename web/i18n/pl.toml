@@ -1,0 +1,75 @@
+# The words of the site's own interface in Polish. The words of a page are in
+# its content file, and what the program prints is in data/facts, in English,
+# because that is the language the program speaks.
+#
+# The English file of words this was translated from, by its git blob id.
+# .github/scripts/translations.py names this file when en.toml has changed.
+# translatedFrom: de7ca11343f740c443bbce46032cf6dcc7361720
+
+skip_to_content = "Przejdź do treści"
+nav_label = "Menu główne"
+nav_docs = "Dokumentacja"
+nav_recipes = "Przepisy"
+nav_damage = "Co psuje"
+nav_download = "Instalacja"
+menu = "Menu"
+language = "Język"
+home = "Strona główna"
+link_github = "GitHub"
+link_issues = "Zgłoś problem"
+link_support = "Wesprzyj projekt"
+get_it = "Zainstaluj"
+read_the_docs = "Dokumentacja"
+view_on_github = "Zobacz na GitHubie"
+picture_alt = "Dobre dane, złe dane i właściwa odpowiedź. Po lewej to, co robi program. Po prawej trzy wartości, które wygenerował, i trzy, które popsuł, każda z tym, co aplikacja powinna z nią zrobić."
+
+terminal = "terminal"
+exit_code = "kod wyjścia"
+exit_name = "nazwa"
+exit_meaning = "znaczenie"
+
+answer_reject = "odrzucić"
+answer_accept = "przyjąć"
+answer_warn = "przyjąć i oznaczyć"
+answer_maybe_reject = "~ odrzucić"
+answer_maybe_accept = "~ przyjąć"
+answer_maybe_warn = "~ przyjąć i oznaczyć"
+answer_maybe_your_rules = "~ twoje reguły"
+
+defects_record = "Rekord"
+defects_column = "Kolumna"
+defects_before = "Przed"
+defects_after = "Po"
+defects_answer = "Aplikacja powinna"
+defects_empty = "puste"
+
+generators_name = "Generator"
+generators_produces = "Co daje"
+generators_not_in = "nie działa w"
+yes = "tak"
+no = "nie"
+
+flags_flag = "Flaga"
+flags_what = "Co robi"
+flags_every_command = "Flagi każdego polecenia"
+
+on_this_page = "Na tej stronie"
+pager_label = "Poprzednia i następna strona"
+previous = "Poprzednia"
+next = "Następna"
+
+side_start = "Na początek"
+side_make = "Tworzenie danych"
+side_break = "Psucie danych"
+side_use = "W praktyce"
+side_reference = "Szczegóły"
+side_trust = "Bezpieczeństwo i pytania"
+
+footer_note = "Dane testowe dla QA, dobre i złe, z właściwą odpowiedzią dla każdej wartości. Program bezpłatny, z otwartym kodem, GPL-3.0."
+footer_product = "Produkt"
+footer_docs = "Dokumentacja"
+footer_cli = "Wiersz poleceń"
+footer_project = "Projekt"
+
+not_found_title = "Tu nie ma strony"
+not_found_text = "Adres mógł się zmienić. Zacznij od strony głównej."

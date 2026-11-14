@@ -84,6 +84,7 @@
   --border: 1px;
   --rule: 3px;
   --dot: 0.5em;
+  --caret: 0.3em;
 
   /* dimensions */
   --width-page: 74rem;
@@ -93,6 +94,7 @@
   --width-toc: 13rem;
   --width-kind: 4.5rem;
   --width-footer-note: 20rem;
+  --width-menu: 12rem;
   --height-header: 3.75rem;
   --gutter: 1rem;
   --icon-logo: 28px;
@@ -245,61 +247,113 @@ img {
   text-decoration: none;
 }
 
+/* The two lists that open from the header, the menu on a narrow screen and
+   the languages, are one control: a summary with a panel under it. */
+
+.menu,
 .languages {
-  display: flex;
-  gap: var(--space-2);
-  font-size: var(--size-meta);
-}
-
-.languages a,
-.languages span {
-  border: var(--border) solid var(--line);
-  border-radius: var(--radius-pill);
-  padding: 0.1rem 0.55rem;
-  color: var(--text-2);
-}
-
-.languages span {
-  color: var(--text);
-  border-color: var(--tint-line);
-  background: var(--tint);
+  position: relative;
 }
 
 .menu {
   display: none;
   margin-left: auto;
-  position: relative;
 }
 
-.menu summary {
+.menu summary,
+.languages summary {
   cursor: pointer;
   list-style: none;
   color: var(--text-2);
   font-size: var(--size-small);
+  white-space: nowrap;
   border: var(--border) solid var(--line);
   border-radius: var(--radius-small);
   padding: var(--space-1) var(--space-3);
 }
 
-.menu summary::-webkit-details-marker {
+.menu summary::-webkit-details-marker,
+.languages summary::-webkit-details-marker {
   display: none;
 }
 
-.menu-panel {
+.menu summary::after,
+.languages summary::after {
+  content: "";
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: var(--space-2);
+  border: var(--caret) solid transparent;
+  border-top-color: currentColor;
+  border-bottom-width: 0;
+}
+
+.menu summary:hover,
+.languages summary:hover,
+.menu[open] > summary,
+.languages details[open] > summary {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.menu-panel,
+.languages-panel {
   position: absolute;
   right: 0;
   top: calc(100% + var(--space-2));
-  display: grid;
-  gap: var(--space-3);
-  min-width: 12rem;
+  max-height: calc(100vh - var(--height-header) - var(--space-4));
+  overflow-y: auto;
+  margin: 0;
   padding: var(--space-4);
   background: var(--surface);
   border: var(--border) solid var(--line);
   border-radius: var(--radius-card);
 }
 
+.menu-panel {
+  display: grid;
+  gap: var(--space-3);
+  min-width: var(--width-menu);
+}
+
 .menu-panel a {
   color: var(--text);
+}
+
+/* Two columns of names, so a site in twenty languages is still a short list. */
+.languages-panel {
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  gap: var(--space-2) var(--space-5);
+  list-style: none;
+  font-size: var(--size-small);
+}
+
+.languages-panel a {
+  color: var(--text-2);
+}
+
+.languages-panel a:hover {
+  color: var(--text);
+}
+
+.languages-panel [aria-current] {
+  color: var(--text);
+  font-weight: var(--weight-semibold);
+}
+
+/* Inside the menu the languages open in place, under their own name. */
+.menu-panel .languages summary {
+  display: inline-block;
+}
+
+.menu-panel .languages-panel {
+  position: static;
+  max-height: none;
+  margin-top: var(--space-3);
+  padding: 0;
+  background: none;
+  border: 0;
 }
 
 @media (max-width: 52rem) {

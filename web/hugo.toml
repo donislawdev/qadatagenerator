@@ -35,6 +35,18 @@ publishDir = "public"
     # The locale a link preview asks for, a language and a country.
     ogLocale = "en_US"
 
+[languages.pl]
+  label = "Polski"
+  locale = "pl"
+  title = "QA Data Generator"
+  weight = 2
+  contentDir = "content/pl"
+  # GitHub Pages serves one 404 page, the one at the root, and it links to the
+  # home page of every language.
+  disableKinds = ["taxonomy", "term", "rss", "404"]
+  [languages.pl.params]
+    ogLocale = "pl_PL"
+
 [markup.goldmark.renderer]
   # Content is Markdown written for this site. Raw HTML in it would be a second
   # way of writing a page that no template controls.

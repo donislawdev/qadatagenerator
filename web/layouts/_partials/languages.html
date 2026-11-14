@@ -1,16 +1,23 @@
 {{- /*
-  The same page in every other language the site is built in. A plain link and
-  nothing else: no script, no cookie, and nothing guessed from the browser.
-  Shown only when there is another language to go to.
+  The same page in every other language the site is built in. The name of the
+  language being read opens a list of the others, so the header holds one
+  short name however many languages the site has. Plain links in a details
+  element: no script, no cookie, and nothing guessed from the browser. Shown
+  only when there is another language to go to.
 */ -}}
 {{- if gt (len .AllTranslations) 1 }}
-<div class="languages" role="navigation" aria-label="{{ T "language" }}">
-  {{- range .AllTranslations }}
-  {{- if eq .Language.Lang site.Language.Lang }}
-  <span aria-current="true">{{ upper .Language.Lang }}</span>
-  {{- else }}
-  <a href="{{ .RelPermalink }}" hreflang="{{ .Language.Locale }}" lang="{{ .Language.Locale }}" title="{{ .Language.Label }}">{{ upper .Language.Lang }}</a>
-  {{- end }}
-  {{- end }}
-</div>
+<nav class="languages" aria-label="{{ T "language" }}">
+  <details>
+    <summary lang="{{ site.Language.Locale }}">{{ site.Language.Label }}</summary>
+    <ul class="languages-panel">
+      {{- range .AllTranslations }}
+      {{- if eq .Language.Lang site.Language.Lang }}
+      <li><span aria-current="true" lang="{{ .Language.Locale }}">{{ .Language.Label }}</span></li>
+      {{- else }}
+      <li><a href="{{ .RelPermalink }}" hreflang="{{ .Language.Locale }}" lang="{{ .Language.Locale }}">{{ .Language.Label }}</a></li>
+      {{- end }}
+      {{- end }}
+    </ul>
+  </details>
+</nav>
 {{- end }}

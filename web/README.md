@@ -58,16 +58,41 @@ that names back, the sitemap, every internal link and fragment, and nothing load
 
 ## Languages
 
-English is served at the root and every other language under its own prefix. A language goes live
-only when every page is translated: an English page under another language's address is a duplicate
-to a search engine.
+English is served at the root and every other language under its own prefix, at the same paths:
+`/pl/docs/recipes/` is the Polish page of `/docs/recipes/`. A language goes live only when every page
+is translated: an English page under another language's address is a duplicate to a search engine.
 
-A language lives in two places, `content/<language>/` with the same file names as `content/en/`
-(that is how Hugo pairs a page with its translations), and `i18n/<language>.toml`, the words of the
-site's interface. It takes an entry under `[languages]` in `hugo.toml`, with `disableKinds` naming
-`404` as well as the site's own three kinds, because GitHub Pages serves one 404 page, at the root.
+A language lives in two places, and adding one changes no template:
 
-What the program prints stays English on every page, because that is what the program prints.
+- `content/<language>/`, with the same file names as `content/en/`, which is how Hugo pairs a page
+  with its translations.
+- `i18n/<language>.toml`, the words of the site's interface.
+
+It takes an entry under `[languages]` in `hugo.toml`, with `disableKinds` naming `404` as well as
+the site's own three kinds, because GitHub Pages serves one 404 page, at the root, and that page
+links to the home page of every language. The header lists the languages under the name of the one
+being read, so it stays one word however many there are.
+
+What the program says stays English on every page, because the program speaks English: the commands
+and what they print, the descriptions its help gives, the names of the window's screens and of its
+groups of damage, and the pictures of the window. The two tables of the README that are prose rather
+than output, the keys of a recipe and what to install before building the window, are translated in
+the front matter of the page that shows them, under `readmeTables`, each row beside the English it
+was made from. A row of the README with no translation stops the build.
+
+### Keeping translations current
+
+Each translated page names, as `translatedFrom` in its front matter, the git blob id of the English
+file it was translated from, and each language's file of words names its English file the same way,
+on a `# translatedFrom:` line. After a change to an English page, from `web/`:
+
+```
+python ../.github/scripts/translations.py --config hugo.toml
+```
+
+It names every translation made from an older English file, with the `git diff` that shows what
+changed. Translate that, then write the id it prints. It reports and never stops the build, and the
+site workflow shows each finding as a warning on its run.
 
 ## Publishing
 

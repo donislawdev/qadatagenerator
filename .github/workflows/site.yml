@@ -105,6 +105,12 @@ jobs:
       - name: check every page
         run: python3 .github/scripts/site_check.py "$RUNNER_TEMP/public" --config web/hugo.toml
 
+      # Which translated pages were made from an older English page. It reports
+      # and never fails: each one shows as a warning on the run, and the site
+      # still goes up.
+      - name: report translations behind the English
+        run: python3 .github/scripts/translations.py --config web/hugo.toml
+
       # The pages that were just checked, and no others. Checked at
       # https://github.com/actions/upload-pages-artifact/releases on 2026-11-14.
       - name: hand the checked pages over

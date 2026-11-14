@@ -6,7 +6,7 @@ lead: "Damage comes in groups. The window shows the group's name, and `--layers`
 tocFacts: damage
 ---
 
-Each kind of damage below is one this version carries out. The example is the one the catalog keeps beside it and holds to what the program really does. The last column is what an application should do with the damaged value, and the manifest writes the same answer for every value it changed.
+Each kind of damage below is one this version carries out. The example is the one the catalog keeps beside it and holds to what the program really does. The badge beside each one is what an application should do with the damaged value, and the manifest writes the same answer for every value it changed.
 
 `~` marks an answer that depends on the rules of your own application. Whether an emoji belongs in a city name is your call. `qadg verify` reports a disagreement on one of those and does not fail on it.
 

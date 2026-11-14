@@ -1,17 +1,59 @@
 {{- /*
-  A table of the README under a heading, cells as written, with the README's
-  own header row. Takes named arguments: heading.
+  A table of the README under a heading, header and cells as written.
+
+  The README is written in English. A page in another language carries a
+  translation of every row of the table in its front matter, each beside the
+  English it was made from, header first:
+
+    readmeTables:
+      - heading: Recipes
+        rows:
+          - from: "Key | Where | What it does"
+            to: [Klucz, Gdzie, Co robi]
+
+  A row of the README with no translation, and a translation of a row the
+  README no longer has, both stop the build, so a change to the README cannot
+  leave a language showing the table as it was. Takes named arguments: heading.
 */ -}}
-{{- $readme := replace (resources.Get "readme.md").Content "\r\n" "\n" }}
-{{- $parts := split $readme (printf "\n## %s\n" (.Get "heading")) }}
-{{- if lt (len $parts) 2 }}{{ errorf "the README has no heading %q" (.Get "heading") }}{{ end }}
-{{- $header := index (findRESubmatch `(?m)^(\|.*\|)\n\|[-|: ]+\|$` (index $parts 1) 1) 0 }}
-{{- if not $header }}{{ errorf "the README has no table under %q" (.Get "heading") }}{{ end }}
+{{- $heading := .Get "heading" }}
+{{- $page := .Page }}
+{{- $rows := partial "readme-table.html" (dict "heading" $heading "header" true) }}
+{{- if ne site.Language.Lang "en" }}
+  {{- $table := dict }}
+  {{- with where ($page.Params.readmeTables | default slice) "heading" $heading }}{{ $table = index . 0 }}{{ end }}
+  {{- if not $table }}
+    {{- errorf "%s in %s shows the README's table under %q, which is in English, and its front matter has no translation of it under readmeTables" $page.File.Path site.Language.Lang $heading }}
+  {{- end }}
+  {{- $english := slice }}
+  {{- $translated := slice }}
+  {{- range $rows }}
+    {{- $from := delimit .cells " | " }}
+    {{- $english = $english | append $from }}
+    {{- $row := dict }}
+    {{- with where ($table.rows | default slice) "from" $from }}{{ $row = index . 0 }}{{ end }}
+    {{- if not $row }}
+      {{- errorf "%s in %s has no translation of the README's row %q under %q" $page.File.Path site.Language.Lang $from $heading }}
+    {{- else if ne (len $row.to) (len .cells) }}
+      {{- errorf "%s in %s translates the README's row %q into %d cells, and it has %d" $page.File.Path site.Language.Lang $from (len $row.to) (len .cells) }}
+    {{- else }}
+      {{- $translated = $translated | append (dict "cells" $row.to) }}
+    {{- end }}
+  {{- end }}
+  {{- range $table.rows }}
+    {{- if not (in $english .from) }}
+      {{- errorf "%s in %s translates %q, a row the README no longer has under %q" $page.File.Path site.Language.Lang .from $heading }}
+    {{- end }}
+  {{- end }}
+  {{- $rows = $translated }}
+{{- end }}
+{{- /* Empty only when a translation is missing, which has stopped the build already. */ -}}
+{{- with $rows }}
 <div class="table-wrap"><table>
-  <thead><tr>{{ range split (strings.Trim (index $header 1) "|") "|" }}<th>{{ trim . " " }}</th>{{ end }}</tr></thead>
+  <thead><tr>{{ range (index . 0).cells }}<th>{{ . | markdownify }}</th>{{ end }}</tr></thead>
   <tbody>
-    {{- range partial "readme-table.html" (dict "heading" (.Get "heading")) }}
+    {{- range after 1 . }}
     <tr>{{ range .cells }}<td>{{ . | markdownify }}</td>{{ end }}</tr>
     {{- end }}
   </tbody>
 </table></div>
+{{- end }}

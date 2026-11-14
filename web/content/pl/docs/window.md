@@ -1,0 +1,43 @@
+---
+translatedFrom: c07997b35a6d5c090398116d7bc07562bdeee3e0
+title: Okno
+seoTitle: "Okno programu: cztery ekrany"
+description: "Quick value, Recipe, Damage a file i Check results: co robi każdy ekran okna i które polecenie robi to samo."
+lead: "`qadg-gui` zamyka ten sam silnik w oknie. Każdy z czterech ekranów robi to samo co jedno z poleceń i pokazuje to polecenie gotowe do skopiowania. Okno mówi po angielsku, więc nazwy ekranów i zrzuty są angielskie."
+---
+
+## Quick value
+
+Wybierz, co wygenerować, i dostań dziesięć wartości do skopiowania. Ekran robi to samo co `qadg quick`.
+
+{{< window name="quick-website" alt="Ekran Quick value z dziesięcioma numerami VIN wylosowanymi z seeda readme" >}}
+Dziesięć numerów VIN z seeda `readme`. Pierwsze trzy to te, które wypisuje przykład z [Pierwszych kroków](/docs/getting-started/), bo okno i `qadg quick` losują te same wartości z tego samego seeda.
+{{< /window >}}
+
+## Recipe
+
+Napisz albo wklej przepis. Okno sprawdza go w trakcie pisania, pokazuje, co opisuje, i uruchamia go, kiedy zechcesz. Ekran robi to samo co `qadg validate` i `qadg generate`.
+
+{{< window name="recipe-website" alt="Ekran Recipe sprawdzający przepis shop.yaml, z plikami, które zapisałby przebieg, i pierwszymi wierszami klientów" >}}
+Przepis z [Pierwszych kroków](/docs/getting-started/), wklejony do okna. Okno sprawdza go w trakcie pisania, wypisuje pliki, które zapisałby przebieg, mówi, jaką część zamówionych uszkodzeń ta wersja wykonuje, i pokazuje pierwsze wiersze, zanim cokolwiek zostanie zapisane.
+{{< /window >}}
+
+## Damage a file
+
+Otwórz plik CSV, zobacz, co zawiera każda kolumna i dlaczego, wybierz, co popsuć, zobacz, co by się stało, a potem uruchom. Ekran robi to samo co `qadg corrupt`.
+
+{{< window name="take-website" alt="Ekran Damage a file z plikiem customers.csv odczytanym kolumna po kolumnie i czterema wybranymi rodzajami uszkodzeń" >}}
+`customers.csv` z przykładu na stronie [Popsuj plik, który już masz](/docs/damage-a-file/), odczytany kolumna po kolumnie, z czterema rodzajami uszkodzeń, które zamawia tamto polecenie. Panel po prawej mówi, co zrobiłby przebieg, zanim cokolwiek zostanie zapisane.
+{{< /window >}}
+
+## Check results
+
+Otwórz manifest, przejdź przez każde zamówione uszkodzenie i porównaj je z tym, co zrobiła twoja aplikacja. Ekran robi to samo co `qadg verify`.
+
+{{< window name="browser-website" alt="Ekran Check results porównujący manifest z tym, co zrobiła aplikacja, z rozpisanym wierszem 135" >}}
+Manifest tamtego przebiegu obok tego, co aplikacja zrobiła z każdym wierszem. Wiersz 135 to numer karty z dwiema zamienionymi cyframi, który aplikacja przyjęła, choć powinna go odrzucić. Wpisy oznaczone `not built yet` to rodzaje uszkodzeń, które ta wersja opisuje, ale jeszcze ich nie wykonuje.
+{{< /window >}}
+
+## About
+
+Licencja programu i wszystkiego, co zawiera, tak jak wypisuje ją `qadg --license`.

@@ -38,19 +38,11 @@ defects_after = "After"
 defects_answer = "Your app should"
 defects_empty = "empty"
 
-keys_key = "Key"
-keys_where = "Where"
-keys_what = "What it does"
-
 generators_name = "Generator"
 generators_produces = "Produces"
 generators_not_in = "cannot be filled in"
 yes = "yes"
 no = "no"
-
-damage_kind = "Damage"
-damage_what = "What it does"
-damage_example = "Example"
 
 flags_flag = "Flag"
 flags_what = "What it does"

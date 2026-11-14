@@ -1,8 +1,9 @@
 {{- /*
   The rows of one table of the README, each a list of its cells as written,
-  without the header and the line under it. The table is found under a marker
-  <!-- readme-check: MARKER --> or under a heading "## HEADING". A table that is
-  not there stops the build. Takes: marker or heading.
+  without the line under the header, and without the header unless header is
+  true. The table is found under a marker <!-- readme-check: MARKER --> or
+  under a heading "## HEADING". A table that is not there stops the build.
+  Takes: marker or heading, and header.
 */ -}}
 {{- $readme := replace (resources.Get "readme.md").Content "\r\n" "\n" }}
 {{- $cut := "" }}
@@ -28,5 +29,8 @@
 {{- end }}
 {{- if lt (len $rows) 2 }}
   {{- errorf "the README has no table under %q" $cut }}
+{{- end }}
+{{- if .header }}
+  {{- return $rows }}
 {{- end }}
 {{- return after 1 $rows }}
