@@ -133,4 +133,11 @@ var windowGuards = []Guard{
 	{"both executables carry the icon file as it is now", "TestBothExecutablesCarryTheIconFile", "internal/gui/appicon", ByProbe},
 	{"both drawings of the icon draw something the rasteriser could read", "TestBothDrawingsDrawASpoonRatherThanNothing", "internal/gui/appicon", ByProbe},
 	{"the picture GitHub shows says what this build does and looks the way it is drawn", "TestTheSocialPreviewSaysWhatTheProgramDoes", "internal/gui/socialcard", ByProbe},
+
+	// The README, the other page a stranger reads first. Its faults are planted
+	// on small pages in the test file: a changed line, an unrun command, a block
+	// of nothing but elisions, a wrong exit code, a defect the manifest lacks,
+	// a generator or group left out or made up, and a Go version other than
+	// go.mod's.
+	{"the commands the README shows run, and print and write what it shows", "TestTheReadmeShowsWhatTheProgramDoes", "internal/cli", ByProbe},
 }

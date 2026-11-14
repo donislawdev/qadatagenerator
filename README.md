@@ -78,10 +78,12 @@ finds out it exists.
 
 ### One value
 
+<!-- readme-check: run -->
 ```
 qadg quick vin --count 3 --seed readme
 ```
 
+<!-- readme-check: output -->
 ```
 1BYT5FU9749011245
 C2W0U46N5PEY89060
@@ -95,6 +97,7 @@ Without `--seed` every run draws new values. With it, the same values come back 
 
 Save this as `shop.yaml`:
 
+<!-- readme-check: file shop.yaml -->
 ```yaml
 version: "0.1"
 seed: "readme"
@@ -130,11 +133,13 @@ output:
 
 Check it, then run it:
 
+<!-- readme-check: run -->
 ```
 qadg validate shop.yaml
 qadg generate shop.yaml
 ```
 
+<!-- readme-check: output 1 -->
 ```
        customer: state follows city, though no rule says so
        customer: zip follows city and state, though no rule says so
@@ -144,6 +149,7 @@ A run of it would write 3524 rows in 2 tables.
 
 `data/customer.csv` starts like this:
 
+<!-- readme-check: head data/customer.csv -->
 ```
 first_name,last_name,gender,birth_date,ssn,city,state,zip,plan
 Joel,Cook,male,1936-11-30,666-18-0253,Saginaw,MI,48601,team
@@ -153,6 +159,7 @@ Marco,Richardson,male,1966-05-07,666-30-3256,Porterville,MS,39352,free
 
 and `data/payment.csv` like this, each payment carrying the key of its customer:
 
+<!-- readme-check: head data/payment.csv -->
 ```
 card,customer
 6243030000000001,666-18-0253
@@ -170,6 +177,7 @@ card,customer
 
 Add three lines to the recipe:
 
+<!-- readme-check: append shop.yaml -->
 ```yaml
 policy:
   layers: [L2, L3, REV]
@@ -178,13 +186,15 @@ policy:
 
 and run it again, asking for the manifest as a Markdown table too:
 
+<!-- readme-check: run -->
 ```
-qadg generate --manifest markdown shop.yaml
+qadg generate --overwrite --manifest markdown shop.yaml
 ```
 
 The data comes out as before, with damage in 5% of the rows, and beside it is
 `expectation-manifest.json`. A few of its entries:
 
+<!-- readme-check: defects data/expectation-manifest.json -->
 | Record | Column | Before | After | Your app should |
 |---|---|---|---|---|
 | payment 233 | card | `6011111111111117` | `6011111111111118` | reject |
@@ -201,10 +211,13 @@ disagreement on one of those and does not fail on it.
 
 ### A file you already have
 
+<!-- readme-check: fixture customers.csv -->
+<!-- readme-check: run -->
 ```
-qadg corrupt --layers L2,L3,UNI,REV customers.csv
+qadg corrupt --layers L2,L3,UNI,REV --seed readme customers.csv
 ```
 
+<!-- readme-check: output -->
 ```
 customers: 1000 rows, 6 columns, nothing declared what any of them holds
        first_name taken for a column of string values, because no numbering scheme this build carries accepted 1000 values of this column, and its header is one this build reads as naming given names
@@ -213,6 +226,7 @@ customers: 1000 rows, 6 columns, nothing declared what any of them holds
 ...
 customers.corrupted.csv and expectation-manifest.json written to .
 46 defects ordered, 15 applied, manifest in expectation-manifest.json
+...
 ```
 
 Your file stays as it was. The damaged copy is `customers.corrupted.csv`. `--layers` is required, so
@@ -224,6 +238,7 @@ otherwise. `--dry-run` shows what it worked out and what it would damage, and wr
 Import `customers.corrupted.csv` into your application and write down what it did with each row,
 one entry per row. A few lines at the end of your test can write it. Three of the entries:
 
+<!-- readme-check: response response.json customers.corrupted.csv -->
 ```json
 {
   "spec_version": "0.2",
@@ -235,10 +250,12 @@ one entry per row. A few lines at the end of your test can write it. Three of th
 }
 ```
 
+<!-- readme-check: run exit=4 -->
 ```
 qadg verify expectation-manifest.json response.json
 ```
 
+<!-- readme-check: output -->
 ```
 compared 15 entries against what the application did
 warning: row 135, card: accepted although it should have been rejected. The value was taken. ...
@@ -288,6 +305,7 @@ The first line builds `qadg`, the command line, and needs nothing but Go. The se
 
 ## What it generates
 
+<!-- readme-check: generators -->
 | Generator | Makes |
 |---|---|
 | `first_name`, `last_name`, `gender`, `birth_date` | people. First and last names can follow the gender column |
@@ -307,6 +325,7 @@ the same list from the program itself.
 
 Damage comes in groups. The window shows the name, `--layers` and `layers:` take the code.
 
+<!-- readme-check: layers -->
 | Group | Code | What it does to a value | Your app should |
 |---|---|---|---|
 | Field format | `L2` | makes it longer than its column allows, empties a required field, puts letters in a number | reject |
