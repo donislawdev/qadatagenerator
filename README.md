@@ -283,7 +283,7 @@ is O'Brien, who was turned away. The whole format of that record is in
 
 ## Build it from source
 
-You need [Go](https://go.dev/dl/) 1.27.3 or newer.
+You need [Go](https://go.dev/dl/) 1.27.4 or newer.
 
 ```
 git clone https://github.com/donislawdev/qadatagenerator

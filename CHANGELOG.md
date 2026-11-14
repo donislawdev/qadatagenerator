@@ -689,8 +689,9 @@ repository once they are released.
 - **The manifest table guards a few more ways of starting a formula.** A column
   name opening with a line feed or with a full width equals, plus, minus or at
   sign went into the spreadsheet form unprotected.
-- **Built with Go 1.27.3**, which fixes a flaw in certificate checking that the
-  earlier version carried into the window binary through a library.
+- **Built with Go 1.27.4**, which fixes a flaw in certificate checking that
+  earlier versions carried into the window binary through a library, and a
+  crash in the web server code of Go, which this tool does not run.
 
 ### Fixed
 

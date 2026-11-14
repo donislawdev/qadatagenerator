@@ -32,7 +32,7 @@ env:
   # Pinned rather than treated as a minimum. Determinism is an unbreakable
   # rule here, so the toolchain that produced a result is part of what has to
   # be reproducible.
-  GOTOOLCHAIN: go1.27.3
+  GOTOOLCHAIN: go1.27.4
   # This was off until 2026-09-05 and the whole file failed because of it.
   # Until 2026-08-12 the entire product built without a C toolchain, so off was
   # the right default. Since that day there is a second binary, cmd/qadg-gui,
@@ -67,7 +67,7 @@ jobs:
           # Quoted on purpose. This project refuses an unquoted version in a
           # recipe because YAML reads 1.0 as a number, and the same reader is
           # reading this file.
-          go-version: "1.27.3"
+          go-version: "1.27.4"
 
       # Linux only. The condition is on the step rather than in the action,
       # because a step that runs on three systems and does nothing on two of
@@ -112,7 +112,7 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.27.3"
+          go-version: "1.27.4"
 
       # There is a guard in internal/guard that asks this question of our own
       # files, and it cannot answer it for the whole binary. It reads the
@@ -151,7 +151,7 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.27.3"
+          go-version: "1.27.4"
 
       # The linter type checks every package, so it needs what the compiler
       # needs. Measured on 2026-09-03: without this it reported the window as
@@ -174,7 +174,7 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.27.3"
+          go-version: "1.27.4"
 
       - uses: ./.github/actions/window-libraries
 
@@ -188,7 +188,7 @@ jobs:
       # it, and the licence flag already answers half of that question.
       - uses: golang/govulncheck-action@v1.1.0
         with:
-          go-version-input: "1.27.3"
+          go-version-input: "1.27.4"
           check-latest: false
 
   coverage:
@@ -209,7 +209,7 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.27.3"
+          go-version: "1.27.4"
 
       - uses: ./.github/actions/window-libraries
 
@@ -269,7 +269,7 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.27.3"
+          go-version: "1.27.4"
 
       - name: build the command line binary for three systems
         shell: bash
