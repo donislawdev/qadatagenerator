@@ -1,0 +1,13 @@
+{{- /*
+  The sources a page names in its front matter, as the last part of the page.
+  The heading's id is the one the table of contents of the page names, and a
+  page with no sources gets nothing. Takes: the page.
+*/ -}}
+{{- with .Params.sources }}
+<h2 id="page-sources">{{ T "page_sources" }}</h2>
+<ul>
+  {{- range . }}
+  <li>{{ . | markdownify }}</li>
+  {{- end }}
+</ul>
+{{- end }}

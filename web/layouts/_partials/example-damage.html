@@ -23,10 +23,13 @@
   <div class="damage-kind">
     <div class="kind-head"><code>{{ .mutator }}</code>{{ partial "answer.html" (dict "expectation" .expectation "confidence" .confidence) }}</div>
     <p>{{ T "example_where" (dict "Entity" .location.entity "Row" .location.row "Field" .location.field) }}</p>
+    {{- $apart := eq .mutator "UNI.normalization.nfc_vs_nfd" }}
     <p class="kind-example">
       {{- range $at, $value := slice .value_before .value_after }}
       {{- if $at }} <span class="arrow">→</span> {{ end }}
-      {{- with partial "visible.html" $value }}<code>{{ . }}</code>{{ else }}<span class="empty">{{ T "defects_empty" }}</span>{{ end }}
+      {{- $shown := partial "visible.html" $value }}
+      {{- if $apart }}{{ $shown = partial "marks-spelled.html" $shown }}{{ end }}
+      {{- with $shown }}<code>{{ . }}</code>{{ else }}<span class="empty">{{ T "defects_empty" }}</span>{{ end }}
       {{- end -}}
     </p>
   </div>

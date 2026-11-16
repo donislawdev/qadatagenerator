@@ -1,0 +1,36 @@
+# Customers, their orders and the lines of each order, in three CSV files whose
+# keys match.
+#
+# Each customer has zero to three orders and each order one to four lines, so
+# the relations decide how many orders and lines there are. Each order carries
+# the customer_id of its customer in a column named customer, and each line the
+# order_id of its order in a column named order.
+#
+#   qadg generate related-test-data.yaml
+#
+# writes customer.csv, order.csv, order_line.csv and run-note.json. The same
+# seed gives the same rows on every machine.
+version: "0.1"
+seed: "related-test-data"
+locale: en-US
+entities:
+  customer:
+    count: 20
+    primary_key: [customer_id]
+    fields:
+      customer_id: { type: integer, unique: true }
+      first_name:  { generator: first_name }
+      last_name:   { generator: last_name }
+  order:
+    belongs_to: { customer: 0-3 }
+    primary_key: [order_id]
+    fields:
+      order_id: { type: integer, unique: true }
+      status:   { values: [new, paid, shipped] }
+  order_line:
+    belongs_to: { order: 1-4 }
+    fields:
+      isbn:     { generator: isbn }
+      quantity: { values: ["1", "2", "3"] }
+output:
+  format: csv

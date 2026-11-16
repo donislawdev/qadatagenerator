@@ -22,7 +22,7 @@
 {{- $rows := (index $example.made.tables 0).rows }}
 {{- $extra := slice
   (dict "id" "identifier-broken" "title" (T "identifier_broken"))
-  (dict "id" "identifier-sources" "title" (T "identifier_sources"))
+  (dict "id" "page-sources" "title" (T "page_sources"))
 }}
 <div class="container docs">
   {{ partial "sidebar.html" . }}
@@ -39,21 +39,15 @@
     {{ partial "example-downloads.html" $example }}
 
     <h3>{{ T "example_recipe" }}</h3>
-    {{ partial "code-panel.html" (dict "caption" $example.file "code" $example.recipe.Content) }}
+    {{ partial "example-recipe.html" $example }}
 
     <h3>{{ T "example_run" }}</h3>
-    <p>{{ T "example_run_where" }}</p>
-    {{ partial "run.html" (dict "command" $example.command) }}
+    {{ partial "example-run.html" $example }}
 
     <h3>{{ T "example_damage" }}</h3>
     {{ partial "example-damage.html" (dict "manifest" $example.manifest) }}
 
-    <h2 id="identifier-sources">{{ T "identifier_sources" }}</h2>
-    <ul>
-      {{- range .Params.sources }}
-      <li>{{ . | markdownify }}</li>
-      {{- end }}
-    </ul>
+    {{ partial "page-sources.html" . }}
   </article>
   {{ partial "toc.html" (dict "page" . "extra" $extra) }}
 </div>

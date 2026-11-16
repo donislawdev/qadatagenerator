@@ -1,0 +1,33 @@
+{{- /*
+  Every file a recipe's run wrote, the data first and then what was said about
+  it: the first rows of each table, the first lines of a JSON file, and a
+  sentence for the manifest and for the note. A file of a kind this has no way
+  to show stops the build. Takes: the map example.html returns. Returns
+  nothing, it renders.
+*/ -}}
+{{- $files := slice }}
+{{- range slice "table" "json" "manifest" "note" }}{{ $files = $files | append (where $.made.files "kind" .) }}{{ end }}
+{{- if ne (len $files) (len .made.files) }}
+  {{- errorf "examples/%s writes a file of a kind this page has no way to show" .file }}
+{{- end }}
+{{- range $files }}
+<h3><code>{{ .name }}</code></h3>
+{{- if eq .kind "table" }}
+<p>{{ T (cond (eq (len .rows) (int .total)) "example_all_rows" "example_first_rows") (dict "Count" (int .total) "Shown" (len .rows) "Total" (lang.FormatNumber 0 .total)) }}</p>
+<div class="table-wrap"><table class="example-rows">
+  <thead><tr>{{ range .header }}<th>{{ . }}</th>{{ end }}</tr></thead>
+  <tbody>
+    {{- range .rows }}
+    <tr>{{ range . }}<td>{{ partial "visible.html" . }}</td>{{ end }}</tr>
+    {{- end }}
+  </tbody>
+</table></div>
+{{- else if eq .kind "json" }}
+<p>{{ T (cond (eq (len .lines) (int .total)) "example_all_lines" "example_first_lines") (dict "Count" (int .total) "Shown" (len .lines) "Total" (lang.FormatNumber 0 .total)) }}</p>
+{{ partial "code-panel.html" (dict "caption" .name "code" (delimit .lines "\n")) }}
+{{- else if eq .kind "manifest" }}
+<p>{{ T "example_manifest_file" }}</p>
+{{- else }}
+<p>{{ T "example_note_file" }}</p>
+{{- end }}
+{{- end }}

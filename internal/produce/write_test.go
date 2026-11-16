@@ -3,6 +3,7 @@ package produce
 import (
 	"encoding/csv"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
@@ -79,6 +80,145 @@ func TestWhatIsWrittenBeginsWithTheRowsThePreviewShowed(t *testing.T) {
 			}
 		}
 	}
+}
+
+// A larger count adds rows at the end and leaves the first ones as they were,
+// with the damage they carried, and a parent table that grows leaves the
+// children of its first rows where they were. The guide to reproducible data
+// on the website says so, because each value is drawn from its own place and
+// not from what came before it.
+//
+// The canary asks the same comparison of a run with another seed and needs it
+// to find a difference, so a comparison that reads nothing cannot pass.
+func TestALargerCountLeavesTheFirstRowsAndTheirDamage(t *testing.T) {
+	const table = `
+version: "0.1"
+seed: "%s"
+locale: en-US
+entities:
+  customer:
+    count: %d
+    fields:
+      first_name: { generator: first_name, required: true, max_length: 30 }
+      last_name:  { generator: last_name, required: true, max_length: 30 }
+      card:       { generator: card }
+policy:
+  layers: [L2, L3, REV]
+  rows: 40%%
+  per_row: exactly_one
+`
+	const relation = `
+version: "0.1"
+seed: "%s"
+locale: en-US
+entities:
+  customer:
+    count: %d
+    primary_key: [customer_id]
+    fields:
+      customer_id: { type: integer, unique: true }
+  order:
+    belongs_to: { customer: 0-3 }
+    fields:
+      status: { values: [new, paid, shipped] }
+`
+	run := func(text string) string {
+		dir := t.TempDir()
+		if _, err := writeInto(decoded(t, text), Settings{Into: dir}); err != nil {
+			t.Fatalf("the run failed: %v", err)
+		}
+		return dir
+	}
+	kept := func(fewer, more string, files ...string) []string {
+		var moved []string
+		for _, name := range files {
+			small := readBack(t, filepath.Join(fewer, name))
+			large := readBack(t, filepath.Join(more, name))
+			if len(large) < len(small) {
+				moved = append(moved, name+" has fewer rows in the larger run")
+				continue
+			}
+			for at, row := range small {
+				if strings.Join(row, "|") != strings.Join(large[at], "|") {
+					moved = append(moved, fmt.Sprintf("%s line %d", name, at+1))
+				}
+			}
+		}
+		if smaller, larger := damageOf(t, fewer), damageOf(t, more); smaller != nil {
+			rows := len(readBack(t, filepath.Join(fewer, files[0]))) - 1
+			for key, value := range larger {
+				if key.row <= rows && smaller[key] != value {
+					moved = append(moved, fmt.Sprintf("%s in row %d, column %s", key.mutator, key.row, key.field))
+				}
+			}
+			for key := range smaller {
+				if _, ok := larger[key]; !ok {
+					moved = append(moved, fmt.Sprintf("%s in row %d, column %s is gone", key.mutator, key.row, key.field))
+				}
+			}
+		}
+		return moved
+	}
+
+	fewer := run(fmt.Sprintf(table, "larger", 100))
+	if moved := kept(fewer, run(fmt.Sprintf(table, "larger", 150)), "customer.csv"); len(moved) > 0 {
+		t.Errorf("fifty more rows moved what the first hundred were: %v", moved)
+	}
+	if len(damageOf(t, fewer)) == 0 {
+		t.Error("the run damaged nothing, so its damage was never compared")
+	}
+	if moved := kept(fewer, run(fmt.Sprintf(table, "another", 150)), "customer.csv"); len(moved) == 0 {
+		t.Error("a run of another seed kept every row and its damage, so the comparison reads nothing")
+	}
+
+	parents := run(fmt.Sprintf(relation, "larger", 10))
+	if moved := kept(parents, run(fmt.Sprintf(relation, "larger", 15)), "customer.csv", "order.csv"); len(moved) > 0 {
+		t.Errorf("five more customers moved what the first ten and their orders were: %v", moved)
+	}
+}
+
+// place is where a defect stands and which damage it is, since one cell can
+// be ordered more than one.
+type place struct {
+	row     int
+	field   string
+	mutator string
+}
+
+// damageOf reads the manifest a run left, as whether each ordered defect was
+// applied and what its value became, or nil when the run left no manifest.
+func damageOf(t *testing.T, dir string) map[place]string {
+	t.Helper()
+	content, err := os.ReadFile(filepath.Join(dir, manifestjson.Name))
+	if os.IsNotExist(err) {
+		return nil
+	}
+	if err != nil {
+		t.Fatalf("cannot read the manifest: %v", err)
+	}
+	var read struct {
+		Defects []struct {
+			Location struct {
+				Row   int    `json:"row"`
+				Field string `json:"field"`
+			} `json:"location"`
+			Mutator string `json:"mutator"`
+			Applied bool   `json:"applied"`
+			After   string `json:"value_after"`
+		} `json:"defects"`
+	}
+	if err := json.Unmarshal(content, &read); err != nil {
+		t.Fatalf("the manifest cannot be read: %v", err)
+	}
+	found := make(map[place]string, len(read.Defects))
+	for _, defect := range read.Defects {
+		at := place{defect.Location.Row, defect.Location.Field, defect.Mutator}
+		if _, twice := found[at]; twice {
+			t.Fatalf("the manifest orders %s twice in row %d, column %s", at.mutator, at.row, at.field)
+		}
+		found[at] = fmt.Sprintf("%v %q", defect.Applied, defect.After)
+	}
+	return found
 }
 
 // A run that fails leaves nothing that looks like a dataset.

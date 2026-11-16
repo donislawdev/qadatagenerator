@@ -1,0 +1,30 @@
+# Polish names and towns with Unicode that careless code mishandles in about
+# three rows in ten: an emoji, a family emoji built from seven code points, an
+# invisible zero-width space, a Turkish dotless i, the same text in another
+# Unicode form, and a value that changes when it is normalised twice.
+#
+# The data is Polish because writing the same text in another form needs
+# letters with marks. Most of the answers depend on your own rules, and the
+# manifest marks them so. It says what to do with every value it changed, and
+# lists the damage it could not carry out, with the reason.
+#
+#   qadg generate unicode-test-data.yaml
+#
+# writes person.csv, expectation-manifest.json and run-note.json. The same seed
+# changes the same values on every machine.
+version: "0.1"
+seed: "unicode-test-data"
+locale: pl-PL
+entities:
+  person:
+    count: 100
+    fields:
+      first_name: { generator: first_name, max_length: 40 }
+      last_name:  { generator: last_name, max_length: 40 }
+      city:       { generator: city }
+policy:
+  layers: [UNI]
+  rows: 30%
+  per_row: exactly_one
+output:
+  format: csv

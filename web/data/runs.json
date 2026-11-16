@@ -36,6 +36,16 @@
       "printed": "       person: 100 rows, 3 columns\n1 table, 100 rows written\n26 defects ordered, 17 applied, manifest in expectation-manifest.json\n9 defects could not be applied, and the manifest carries the reason for each one\n  3 because the values in those rows did not suit them\n  6 because this build has no implementation of them yet\n"
     },
     {
+      "command": "qadg generate names-your-form-should-accept.yaml",
+      "exit": 0,
+      "printed": "       signup: 100 rows, 2 columns\n1 table, 100 rows written\n19 defects ordered, 12 applied, manifest in expectation-manifest.json\n7 defects could not be applied, and the manifest carries the reason for each one\n  7 because this build has no implementation of them yet\n"
+    },
+    {
+      "command": "qadg generate negative-test-data.yaml",
+      "exit": 0,
+      "printed": "       customer: 100 rows, 4 columns\n1 table, 100 rows written\n42 defects ordered, 16 applied, manifest in expectation-manifest.json\n26 defects could not be applied, and the manifest carries the reason for each one\n  1 because the dataset has no column of the kind they apply to\n  25 because this build has no implementation of them yet\n"
+    },
+    {
       "command": "qadg generate nip.yaml",
       "exit": 0,
       "printed": "       company: 100 rows, 1 column\n1 table, 100 rows written\n20 defects ordered, 5 applied, manifest in expectation-manifest.json\n15 defects could not be applied, and the manifest carries the reason for each one\n  3 because this run lacks something they need, and the manifest says what for each one\n  12 because this build has no implementation of them yet\n"
@@ -71,6 +81,11 @@
       "printed": "       company: 100 rows, 1 column\n1 table, 100 rows written\n21 defects ordered, 6 applied, manifest in expectation-manifest.json\n15 defects could not be applied, and the manifest carries the reason for each one\n  3 because this run lacks something they need, and the manifest says what for each one\n  12 because this build has no implementation of them yet\n"
     },
     {
+      "command": "qadg generate related-test-data.yaml",
+      "exit": 0,
+      "printed": "       customer: 20 rows, 3 columns\n       order: 23 rows, 2 columns\n       order_line: 55 rows, 2 columns\n3 tables, 98 rows written\n"
+    },
+    {
       "command": "qadg generate routing-number.yaml",
       "exit": 0,
       "printed": "       bank: 100 rows, 1 column\n1 table, 100 rows written\n19 defects ordered, 7 applied, manifest in expectation-manifest.json\n12 defects could not be applied, and the manifest carries the reason for each one\n  1 because the values in those rows did not suit them\n  11 because this build has no implementation of them yet\n"
@@ -89,6 +104,11 @@
       "command": "qadg generate test-numbers.yaml",
       "exit": 0,
       "printed": "       number: 100 rows, 7 columns\n1 table, 100 rows written\n"
+    },
+    {
+      "command": "qadg generate unicode-test-data.yaml",
+      "exit": 0,
+      "printed": "       person: 100 rows, 3 columns\n1 table, 100 rows written\n24 defects ordered, 22 applied, manifest in expectation-manifest.json\n2 defects could not be applied, and the manifest carries the reason for each one\n  2 because the values in those rows did not suit them\n"
     },
     {
       "command": "qadg generate vin.yaml",
@@ -144,6 +164,11 @@
       "command": "qadg quick ssn --count 5 --seed example",
       "exit": 0,
       "printed": "666-56-7339\n666-60-1218\n666-37-6059\n666-33-3465\n666-32-6960\n"
+    },
+    {
+      "command": "qadg quick vin --count 3 --seed reproducible",
+      "exit": 0,
+      "printed": "7K3TEYLP8D2071459\nW0S2J3PN37XD64266\nKTE8WLAN540A99409\n"
     },
     {
       "command": "qadg quick vin --count 5 --seed example",

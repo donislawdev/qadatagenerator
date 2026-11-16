@@ -1,0 +1,27 @@
+# Sign-ups with a real name careless validation refuses in about a fifth of the
+# rows: an apostrophe as in O'Brien, a letter with a mark as in José, a name in
+# Chinese, Japanese or Korean writing, or the surname Null.
+#
+# Each one is a name somebody has, and the manifest says your form should accept
+# every one. It also lists the damage this build could not carry out, with the
+# reason.
+#
+#   qadg generate names-your-form-should-accept.yaml
+#
+# writes signup.csv, expectation-manifest.json and run-note.json. The same seed
+# puts in the same names on every machine.
+version: "0.1"
+seed: "names-your-form-should-accept"
+locale: en-US
+entities:
+  signup:
+    count: 100
+    fields:
+      first_name: { generator: first_name, max_length: 40 }
+      last_name:  { generator: last_name, max_length: 40 }
+policy:
+  layers: [REV]
+  rows: 20%
+  per_row: exactly_one
+output:
+  format: csv

@@ -1,0 +1,37 @@
+{{- /*
+  One guide: its own words, with the parts of its recipe put in by the example
+  shortcode, and the sources its front matter names at the end.
+
+  A guide may say that this version does not yet carry out some group of
+  damage, and then names the group in notYet, as notYet: [L5]. The build stops
+  on the day the program carries out damage of that group, so the sentence
+  cannot outlive the fact, and on a code that names no group, so a misspelt one
+  cannot pass as kept.
+*/ -}}
+{{ define "main" }}
+{{- range $group := .Params.notYet }}
+  {{- if not (where hugo.Data.facts.window.groups "code" $group) }}
+    {{- errorf "%s in %s names %s in notYet, and no group of damage has that code" $.File.Path site.Language.Lang $group }}
+  {{- end }}
+  {{- $kinds := slice }}
+  {{- range where hugo.Data.facts.cli.damage "group" $group }}{{ $kinds = $kinds | append .id }}{{ end }}
+  {{- with $kinds }}
+    {{- errorf "%s in %s says this version does not yet damage in %s, and it now carries out %s. Rewrite what the page says about it, then take %s out of notYet" $.File.Path site.Language.Lang $group (delimit . ", ") $group }}
+  {{- end }}
+{{- end }}
+{{- $extra := slice }}
+{{- if .Params.sources }}{{ $extra = $extra | append (dict "id" "page-sources" "title" (T "page_sources")) }}{{ end }}
+<div class="container docs">
+  {{ partial "sidebar.html" . }}
+  <article class="prose">
+    {{ partial "breadcrumbs.html" . }}
+    <h1>{{ .Title }}</h1>
+    {{- with .Params.lead }}
+    <p class="lead">{{ . | markdownify }}</p>
+    {{- end }}
+    {{ .Content }}
+    {{ partial "page-sources.html" . }}
+  </article>
+  {{ partial "toc.html" (dict "page" . "extra" $extra) }}
+</div>
+{{ end }}

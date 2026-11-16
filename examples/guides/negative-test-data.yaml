@@ -1,0 +1,32 @@
+# Customers with one value changed in about two fifths of the rows: values your
+# application should refuse, and real names it should take.
+#
+# The names are required and have a longest length, and the card number carries
+# a check digit. The damage makes a name too long or empty, moves the check
+# digit of the card or swaps two of its digits, gives the SSN the area 000,
+# which is never issued, or puts in a name such as O'Brien or Null. The manifest
+# gives the answer for every value it changed, and lists the damage this build
+# could not carry out, with the reason.
+#
+#   qadg generate negative-test-data.yaml
+#
+# writes customer.csv, expectation-manifest.json and run-note.json. The same
+# seed changes the same values on every machine.
+version: "0.1"
+seed: "negative-test-data"
+locale: en-US
+entities:
+  customer:
+    count: 100
+    primary_key: [ssn]
+    fields:
+      first_name: { generator: first_name, required: true, max_length: 30 }
+      last_name:  { generator: last_name, required: true, max_length: 30 }
+      ssn:        { generator: ssn, unique: true }
+      card:       { generator: card }
+policy:
+  layers: [L2, L3, REV]
+  rows: 40%
+  per_row: exactly_one
+output:
+  format: csv

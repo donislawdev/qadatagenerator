@@ -1,0 +1,62 @@
+{
+  "files": [
+    {
+      "name": "customer.csv",
+      "kind": "table",
+      "header": [
+        "first_name",
+        "last_name",
+        "ssn",
+        "card"
+      ],
+      "rows": [
+        [
+          "Priscilla",
+          "Sheppard",
+          "666-57-2905",
+          "6011111111111117"
+        ],
+        [
+          "Anita",
+          "Blake",
+          "666-39-8171",
+          "378282246310005"
+        ],
+        [
+          "Lacey",
+          "Summers",
+          "666-75-0544",
+          "371449635398431"
+        ],
+        [
+          "Cesar",
+          "Snow",
+          "666-87-0458",
+          "378282246310005"
+        ],
+        [
+          "Barry",
+          "Avila",
+          "666-23-1409",
+          "6243030000000001"
+        ]
+      ],
+      "total": 100
+    },
+    {
+      "name": "expectation-manifest.json",
+      "kind": "manifest"
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    }
+  ],
+  "tables": [
+    {
+      "entity": "customer",
+      "rows": 100,
+      "columns": 4
+    }
+  ]
+}

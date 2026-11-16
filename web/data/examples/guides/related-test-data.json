@@ -1,0 +1,136 @@
+{
+  "files": [
+    {
+      "name": "customer.csv",
+      "kind": "table",
+      "header": [
+        "customer_id",
+        "first_name",
+        "last_name"
+      ],
+      "rows": [
+        [
+          "618603",
+          "Brad",
+          "Crane"
+        ],
+        [
+          "230298",
+          "Audrey",
+          "Rivas"
+        ],
+        [
+          "103610",
+          "Glenn",
+          "Simpson"
+        ],
+        [
+          "421182",
+          "Antonio",
+          "Fuentes"
+        ],
+        [
+          "473017",
+          "Wayne",
+          "Zuniga"
+        ]
+      ],
+      "total": 20
+    },
+    {
+      "name": "order.csv",
+      "kind": "table",
+      "header": [
+        "order_id",
+        "status",
+        "customer"
+      ],
+      "rows": [
+        [
+          "752199",
+          "new",
+          "230298"
+        ],
+        [
+          "531387",
+          "paid",
+          "230298"
+        ],
+        [
+          "20002",
+          "shipped",
+          "103610"
+        ],
+        [
+          "503116",
+          "shipped",
+          "103610"
+        ],
+        [
+          "207125",
+          "paid",
+          "421182"
+        ]
+      ],
+      "total": 23
+    },
+    {
+      "name": "order_line.csv",
+      "kind": "table",
+      "header": [
+        "isbn",
+        "quantity",
+        "order"
+      ],
+      "rows": [
+        [
+          "9786916675198",
+          "1",
+          "752199"
+        ],
+        [
+          "9786774232946",
+          "2",
+          "752199"
+        ],
+        [
+          "9786933110672",
+          "3",
+          "752199"
+        ],
+        [
+          "9786739081411",
+          "1",
+          "531387"
+        ],
+        [
+          "9786703366902",
+          "1",
+          "20002"
+        ]
+      ],
+      "total": 55
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    }
+  ],
+  "tables": [
+    {
+      "entity": "customer",
+      "rows": 20,
+      "columns": 3
+    },
+    {
+      "entity": "order",
+      "rows": 23,
+      "columns": 2
+    },
+    {
+      "entity": "order_line",
+      "rows": 55,
+      "columns": 2
+    }
+  ]
+}

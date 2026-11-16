@@ -16,7 +16,8 @@ or from files a test holds to it, and never writes by hand:
 | the six values of the first screen | `../.github/social-preview/says.txt`, mounted | `go test ./internal/gui/socialcard` |
 | the oldest Go a build from source takes | `../go.mod`, mounted | the module itself |
 | the pictures of the window, on the home page and on The window | `assets/window/`, drawn by the program from the data of the README, with the list of texts each one shows beside it | `go test ./internal/gui/screens` compares the texts everywhere and the pixels on windows/amd64 |
-| the ready-made recipes, offered for download and shown on the pages of Examples, and the recipes of `../examples/identifiers/` on the page of each identifier | `../examples/`, mounted | `go test ./internal/cli -run TestTheSiteShowsWhatTheProgramDoes` runs each one |
+| the ready-made recipes, offered for download and shown on the pages of Examples, and the recipes of `../examples/identifiers/` and `../examples/guides/` on the page of each identifier and each guide | `../examples/`, mounted | `go test ./internal/cli -run TestTheSiteShowsWhatTheProgramDoes` runs each one |
+| what a guide says this version does not yet damage | `notYet` in the guide's front matter, against `data/facts/cli.json` | the build stops on the day the program damages in a group a guide names there |
 | what each recipe printed, the first rows of the files it wrote, the tables with their rows, and its manifest | `data/runs.json`, `data/examples/`, `assets/example-runs/` | the same test, which writes them |
 | any other command a page shows, with what it printed | `{{< run "qadg ..." >}}` in the page, `data/runs.json` | the same test finds every one in `content/` and runs it |
 
@@ -53,6 +54,21 @@ its run and every value it damaged, and the `sources` of the page's front matter
 a recipe with no page, a recipe that damaged nothing, a page with no sources, and a page the table on
 the first page of Identifiers does not link to. A folder goes one level deep, and two recipes may not
 share a file name, because a reader saves a recipe under its own name.
+
+A guide, `content/<language>/guides/<name>.md`, may have `../examples/guides/<name>.yaml`, and puts a
+part of it where its words want it with `{{< example "recipe" >}}`. The parts are `downloads`,
+`recipe`, `run`, `writes` (the first rows of every file) and `damage` (every value it damaged), the
+same pieces the pages of Examples show, and the guide writes the heading above each. A guide that says
+this version does not yet damage something names the group in `notYet`, as `notYet: [L5]`, and the
+build stops once the program does damage in it, so the sentence has to be rewritten. The build also
+stops on a recipe with no guide, a guide the first page of Guides does not link to, a part it does
+not know and the damage of a recipe that orders none. Sources in the front matter are listed at the end
+of a guide, as on the page of an identifier.
+
+In the list of what a recipe damaged, a value written in another Unicode form shows each combining
+mark as its escape, because drawn on its letter it looks like no change. Only that damage is spelt
+out: in many scripts a mark is an ordinary part of a word. A mark `layouts/_partials/marks-spelled.html`
+does not list stops the build.
 
 A change to the window, or to what the program produces for the README, fails the test of the
 pictures until they are drawn again, on Windows or Linux on amd64:

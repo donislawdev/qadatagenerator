@@ -1,0 +1,50 @@
+{
+  "files": [
+    {
+      "name": "expectation-manifest.json",
+      "kind": "manifest"
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    },
+    {
+      "name": "signup.csv",
+      "kind": "table",
+      "header": [
+        "first_name",
+        "last_name"
+      ],
+      "rows": [
+        [
+          "Seth",
+          "Clark"
+        ],
+        [
+          "Jonathon",
+          "Evans"
+        ],
+        [
+          "Linda",
+          "D'Angelo"
+        ],
+        [
+          "Richard",
+          "Gates"
+        ],
+        [
+          "Pamela",
+          "Chaney"
+        ]
+      ],
+      "total": 100
+    }
+  ],
+  "tables": [
+    {
+      "entity": "signup",
+      "rows": 100,
+      "columns": 2
+    }
+  ]
+}

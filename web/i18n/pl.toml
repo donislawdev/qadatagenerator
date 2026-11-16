@@ -4,15 +4,14 @@
 #
 # The English file of words this was translated from, by its git blob id.
 # .github/scripts/translations.py names this file when en.toml has changed.
-# translatedFrom: bcf41ca8893d8f9222c93d6a5c554673f95b0789
+# translatedFrom: 03b69e547eaf6840024bb27e419e7deca0f62621
 
 skip_to_content = "Przejdź do treści"
 nav_label = "Menu główne"
 nav_docs = "Dokumentacja"
-nav_recipes = "Przepisy"
 nav_examples = "Przykłady"
 nav_identifiers = "Identyfikatory"
-nav_damage = "Co psuje"
+nav_guides = "Przewodniki"
 nav_download = "Instalacja"
 menu = "Menu"
 language = "Język"
@@ -90,9 +89,11 @@ example_note_file = "Seed, locale i wersje, z którymi ruszył przebieg, oraz ka
 example_damage = "Co zepsuł"
 example_where = "{{ .Entity }} {{ .Row }}, kolumna {{ .Field }}"
 
-# The part of an identifier's page that its recipe makes, and the end of it.
+# The part of an identifier's page that its recipe makes.
 identifier_broken = "Zepsute do testów"
-identifier_sources = "Źródła"
+
+# The last part of a page that names what it rests on.
+page_sources = "Źródła"
 
 # Words that change with a number. Count picks the form, of which Polish has
 # four: one, few, many and other. The sentences about defects put their other

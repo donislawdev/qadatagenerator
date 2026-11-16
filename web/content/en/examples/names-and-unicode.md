@@ -1,6 +1,6 @@
 ---
 title: Names and Unicode
-seoTitle: "Unicode test data: emoji, CJK and names like O'Brien"
+seoTitle: "A recipe for names and Unicode that careless code breaks"
 description: "A recipe that puts emoji, zero-width spaces, a Turkish dotless i, CJK names and names like O'Brien or Null into a table, with the right answer for each."
 lead: "Real names a strict check refuses, and Unicode that careless code mangles, in about a fifth of the rows, each with what your application should do."
 weight: 7

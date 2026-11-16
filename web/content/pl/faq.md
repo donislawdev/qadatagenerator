@@ -1,5 +1,5 @@
 ---
-translatedFrom: 5d3b932d36c6d47acf3ad37b3c3257fafbff1cde
+translatedFrom: ee7d464b2184b2881c996457314bda0497b8ebc6
 title: Pytania
 seoTitle: "QA Data Generator FAQ: dane testowe, seed, licencja"
 description: "Odpowiedzi o QA Data Generator: co robi, czy można go używać w pracy za darmo, czy potrzebuje internetu i dlaczego na innej maszynie daje te same dane."
@@ -23,7 +23,7 @@ faq:
   - question: Dlaczego wygenerowane numery SSN zaczynają się od 666?
     answer: "Tego obszaru nigdy się nie przydziela, więc wygenerowany SSN nie może należeć do nikogo. Aplikacja, która sprawdza obszar, odrzuci je, także w poprawnych wierszach."
   - question: Czy numery kart są prawdziwe?
-    answer: "Nie. Numery kart to wyłącznie opublikowane numery testowe, które przechodzą walidację i nie należą do żadnej prawdziwej karty."
+    answer: "To numery testowe publikowane przez operatorów płatności, a nie numery wymyślone przez program. Żaden z operatorów nie obiecuje, że żaden bank nie wydał tego samego numeru prawdziwej karcie, więc trzymaj je w systemach testowych."
   - question: W jakich formatach zapisuje wyniki?
     answer: "Dane w CSV i JSON. Manifest w JSON, a do tego może go zapisać jako tabelę Examples w Gherkinie, jako CSV albo jako Markdown."
   - question: Potrzebujesz plików testowych, a nie rekordów?

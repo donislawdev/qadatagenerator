@@ -1,0 +1,35 @@
+{{- /*
+  {{< example "damage" >}} shows one part of the page's own recipe where the
+  words of the page want it. The recipe is examples/<section>/<page>.yaml, so
+  content/<language>/guides/unicode-test-data.md shows
+  examples/guides/unicode-test-data.yaml. The parts:
+
+    downloads  the buttons that download the recipe and its manifest
+    recipe     the recipe itself
+    run        the command that runs it and what the program printed
+    writes     the first rows of every file it writes
+    damage     every value it damaged, with what the application should do
+
+  The page writes the heading above a part, so its table of contents lists it.
+  A part this does not know, and the damage of a recipe that orders none, stop
+  the build.
+*/ -}}
+{{- $part := .Get 0 }}
+{{- $example := partial "example.html" .Page }}
+{{- if eq $part "downloads" }}
+{{ partial "example-downloads.html" $example }}
+{{- else if eq $part "recipe" }}
+{{ partial "example-recipe.html" $example }}
+{{- else if eq $part "run" }}
+{{ partial "example-run.html" $example }}
+{{- else if eq $part "writes" }}
+{{ partial "example-writes.html" $example }}
+{{- else if eq $part "damage" }}
+  {{- with $example.manifest }}
+{{ partial "example-damage.html" (dict "manifest" .) }}
+  {{- else }}
+    {{- errorf "%s in %s shows the damage of examples/%s.yaml, which orders none" $.Page.File.Path site.Language.Lang $example.name }}
+  {{- end }}
+{{- else }}
+  {{- errorf "%s in %s asks for the part %q of its recipe, and the parts are downloads, recipe, run, writes and damage" .Page.File.Path site.Language.Lang $part }}
+{{- end }}

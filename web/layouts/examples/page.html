@@ -26,40 +26,13 @@
     {{ .Content }}
 
     <h2 id="example-recipe">{{ T "example_recipe" }}</h2>
-    {{ partial "code-panel.html" (dict "caption" $example.file "code" $example.recipe.Content) }}
+    {{ partial "example-recipe.html" $example }}
 
     <h2 id="example-run">{{ T "example_run" }}</h2>
-    <p>{{ T "example_run_where" }}</p>
-    {{ partial "run.html" (dict "command" $example.command) }}
+    {{ partial "example-run.html" $example }}
 
     <h2 id="example-writes">{{ T "example_writes" }}</h2>
-    {{- /* The data first, then what was said about it. */}}
-    {{- $files := slice }}
-    {{- range slice "table" "json" "manifest" "note" }}{{ $files = $files | append (where $example.made.files "kind" .) }}{{ end }}
-    {{- if ne (len $files) (len $example.made.files) }}
-      {{- errorf "examples/%s writes a file of a kind this page has no way to show" $example.file }}
-    {{- end }}
-    {{- range $files }}
-    <h3><code>{{ .name }}</code></h3>
-    {{- if eq .kind "table" }}
-    <p>{{ T (cond (eq (len .rows) (int .total)) "example_all_rows" "example_first_rows") (dict "Count" (int .total) "Shown" (len .rows) "Total" (lang.FormatNumber 0 .total)) }}</p>
-    <div class="table-wrap"><table class="example-rows">
-      <thead><tr>{{ range .header }}<th>{{ . }}</th>{{ end }}</tr></thead>
-      <tbody>
-        {{- range .rows }}
-        <tr>{{ range . }}<td>{{ partial "visible.html" . }}</td>{{ end }}</tr>
-        {{- end }}
-      </tbody>
-    </table></div>
-    {{- else if eq .kind "json" }}
-    <p>{{ T (cond (eq (len .lines) (int .total)) "example_all_lines" "example_first_lines") (dict "Count" (int .total) "Shown" (len .lines) "Total" (lang.FormatNumber 0 .total)) }}</p>
-    {{ partial "code-panel.html" (dict "caption" .name "code" (delimit .lines "\n")) }}
-    {{- else if eq .kind "manifest" }}
-    <p>{{ T "example_manifest_file" }}</p>
-    {{- else }}
-    <p>{{ T "example_note_file" }}</p>
-    {{- end }}
-    {{- end }}
+    {{ partial "example-writes.html" $example }}
 
     {{- with $example.manifest }}
     <h2 id="example-damage">{{ T "example_damage" }}</h2>

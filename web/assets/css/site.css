@@ -356,7 +356,12 @@ img {
   border: 0;
 }
 
-@media (max-width: 52rem) {
+/* Below the width at which the documentation gets its wide layout the header
+   keeps only the brand and the menu. Measured on 2026-11-16, the English links
+   need 408 px and the Polish ones 558, which together with the brand and the
+   languages squeezed the Polish header up to 952 px, so the links leave where
+   the rest of the site changes its layout, with room for longer words. */
+@media not all and (min-width: 64rem) {
   .site-header .nav,
   .site-header > .container > .languages {
     display: none;

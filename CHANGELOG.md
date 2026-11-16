@@ -583,6 +583,10 @@ repository once they are released.
   numbers, NIP, REGON and Polish IBANs, each making a hundred values with one
   broken value asked for in about a fifth of the rows, and a manifest that says
   what your application should do with each broken one.
+- **Four more recipes in examples/guides.** Values to refuse and real names to
+  accept in one table, names that careless validation refuses, Polish names
+  and towns with the six kinds of Unicode damage, and customers, orders and
+  order lines in three CSV files whose keys match. Each runs as it is.
 - **The program has its own icon: a wooden spoon of red lentils.**
   It shows on the window and, on Windows, in File Explorer for both
   qadg.exe and qadg-gui.exe, whose properties now also say what they are,

@@ -1,7 +1,7 @@
 ---
-translatedFrom: 90c9af03e65ddfeb27e167a389f9d070c9c6aec5
+translatedFrom: 6830d4220c6a6cf0252e506cdd6cd986a6885fc5
 title: Sklep w trzech tabelach
-seoTitle: "Powiązane dane testowe: klienci i zamówienia w JSON"
+seoTitle: "Przepis na sklep w trzech powiązanych tabelach, w JSON"
 description: "Przepis na sklep w trzech powiązanych tabelach, klienci, zamówienia i pozycje zamówień, w jednym pliku JSON, z kluczami, listami wartości i pustymi polami."
 lead: "Pięćdziesięciu klientów, ich zamówienia i pozycje każdego zamówienia. O liczbie wierszy decydują relacje, a każde dziecko niesie klucz rodzica."
 weight: 5

@@ -4,10 +4,9 @@
 skip_to_content = "Skip to content"
 nav_label = "Main"
 nav_docs = "Docs"
-nav_recipes = "Recipes"
 nav_examples = "Examples"
 nav_identifiers = "Identifiers"
-nav_damage = "What it breaks"
+nav_guides = "Guides"
 nav_download = "Get it"
 menu = "Menu"
 language = "Language"
@@ -85,9 +84,11 @@ example_note_file = "The seed, the locale and the versions behind the run, and e
 example_damage = "What it damaged"
 example_where = "{{ .Entity }} {{ .Row }}, column {{ .Field }}"
 
-# The part of an identifier's page that its recipe makes, and the end of it.
+# The part of an identifier's page that its recipe makes.
 identifier_broken = "Broken ones for your tests"
-identifier_sources = "Sources"
+
+# The last part of a page that names what it rests on.
+page_sources = "Sources"
 
 # Words that change with a number. Count picks the form, and the other values
 # are put in where the words name them.

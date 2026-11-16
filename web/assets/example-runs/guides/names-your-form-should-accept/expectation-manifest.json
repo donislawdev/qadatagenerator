@@ -1,0 +1,40 @@
+{
+  "spec_version": "0.2",
+  "defects": [
+    {"id":"signup-3-REV.name.apostrophe","location":{"entity":"signup","row":3,"field":"last_name"},"mutator":"REV.name.apostrophe","layer":"REV","applied":true,"value_before":"Hayes","value_after":"D'Angelo","expectation":"acceptance","confidence":"hard","rationale":"Supplies a surname containing an apostrophe."},
+    {"id":"signup-7-REV.name.cjk","location":{"entity":"signup","row":7,"field":"first_name"},"mutator":"REV.name.cjk","layer":"REV","applied":true,"value_before":"Mariah","value_after":"伟明","expectation":"acceptance","confidence":"hard","rationale":"Supplies a name written in Chinese, Japanese or Korean characters."},
+    {"id":"signup-14-REV.name.diacritics","location":{"entity":"signup","row":14,"field":"last_name"},"mutator":"REV.name.diacritics","layer":"REV","applied":true,"value_before":"Conley","value_after":"Wójcik","expectation":"acceptance","confidence":"hard","rationale":"Supplies a name with diacritical marks."},
+    {"id":"signup-17-REV.name.null_surname","location":{"entity":"signup","row":17,"field":"last_name"},"mutator":"REV.name.null_surname","layer":"REV","applied":true,"value_before":"Faulkner","value_after":"Null","expectation":"acceptance","confidence":"hard","rationale":"Supplies the surname Null, which is a real surname."},
+    {"id":"signup-26-REV.amount.negative_legal","location":{"entity":"signup","row":26,"field":"first_name"},"mutator":"REV.amount.negative_legal","layer":"REV","applied":false,"expectation":"acceptance","confidence":"soft","rationale":"Supplies a negative amount that is legal in its domain, such as a refund, a correction or a market price that can fall below zero.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"signup-28-REV.email.plus_addressing","location":{"entity":"signup","row":28,"field":"first_name"},"mutator":"REV.email.plus_addressing","layer":"REV","applied":false,"expectation":"acceptance","confidence":"hard","rationale":"Supplies an address with a plus tag in the local part.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"signup-32-REV.identifier.reserved_range","location":{"entity":"signup","row":32,"field":"first_name"},"mutator":"REV.identifier.reserved_range","layer":"REV","applied":false,"expectation":"acceptance","confidence":"soft","rationale":"Supplies a correct identifier taken from a block the issuing authority never assigns, which is where this tool generates on purpose.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"signup-34-REV.name.apostrophe","location":{"entity":"signup","row":34,"field":"last_name"},"mutator":"REV.name.apostrophe","layer":"REV","applied":true,"value_before":"Mcclain","value_after":"D'Arcy","expectation":"acceptance","confidence":"hard","rationale":"Supplies a surname containing an apostrophe."},
+    {"id":"signup-45-REV.name.cjk","location":{"entity":"signup","row":45,"field":"first_name"},"mutator":"REV.name.cjk","layer":"REV","applied":true,"value_before":"Gene","value_after":"민준","expectation":"acceptance","confidence":"hard","rationale":"Supplies a name written in Chinese, Japanese or Korean characters."},
+    {"id":"signup-58-REV.name.diacritics","location":{"entity":"signup","row":58,"field":"last_name"},"mutator":"REV.name.diacritics","layer":"REV","applied":true,"value_before":"Cortez","value_after":"Gonçalves","expectation":"acceptance","confidence":"hard","rationale":"Supplies a name with diacritical marks."},
+    {"id":"signup-62-REV.name.null_surname","location":{"entity":"signup","row":62,"field":"last_name"},"mutator":"REV.name.null_surname","layer":"REV","applied":true,"value_before":"Cantrell","value_after":"Null","expectation":"acceptance","confidence":"hard","rationale":"Supplies the surname Null, which is a real surname."},
+    {"id":"signup-69-REV.amount.negative_legal","location":{"entity":"signup","row":69,"field":"first_name"},"mutator":"REV.amount.negative_legal","layer":"REV","applied":false,"expectation":"acceptance","confidence":"soft","rationale":"Supplies a negative amount that is legal in its domain, such as a refund, a correction or a market price that can fall below zero.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"signup-73-REV.email.plus_addressing","location":{"entity":"signup","row":73,"field":"first_name"},"mutator":"REV.email.plus_addressing","layer":"REV","applied":false,"expectation":"acceptance","confidence":"hard","rationale":"Supplies an address with a plus tag in the local part.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"signup-85-REV.identifier.reserved_range","location":{"entity":"signup","row":85,"field":"first_name"},"mutator":"REV.identifier.reserved_range","layer":"REV","applied":false,"expectation":"acceptance","confidence":"soft","rationale":"Supplies a correct identifier taken from a block the issuing authority never assigns, which is where this tool generates on purpose.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"signup-90-REV.name.apostrophe","location":{"entity":"signup","row":90,"field":"last_name"},"mutator":"REV.name.apostrophe","layer":"REV","applied":true,"value_before":"Ewing","value_after":"O'Brien","expectation":"acceptance","confidence":"hard","rationale":"Supplies a surname containing an apostrophe."},
+    {"id":"signup-93-REV.name.cjk","location":{"entity":"signup","row":93,"field":"first_name"},"mutator":"REV.name.cjk","layer":"REV","applied":true,"value_before":"Sergio","value_after":"민준","expectation":"acceptance","confidence":"hard","rationale":"Supplies a name written in Chinese, Japanese or Korean characters."},
+    {"id":"signup-94-REV.name.diacritics","location":{"entity":"signup","row":94,"field":"first_name"},"mutator":"REV.name.diacritics","layer":"REV","applied":true,"value_before":"Joe","value_after":"Łukasz","expectation":"acceptance","confidence":"hard","rationale":"Supplies a name with diacritical marks."},
+    {"id":"signup-95-REV.name.null_surname","location":{"entity":"signup","row":95,"field":"last_name"},"mutator":"REV.name.null_surname","layer":"REV","applied":true,"value_before":"Castillo","value_after":"Null","expectation":"acceptance","confidence":"hard","rationale":"Supplies the surname Null, which is a real surname."},
+    {"id":"signup-98-REV.amount.negative_legal","location":{"entity":"signup","row":98,"field":"first_name"},"mutator":"REV.amount.negative_legal","layer":"REV","applied":false,"expectation":"acceptance","confidence":"soft","rationale":"Supplies a negative amount that is legal in its domain, such as a refund, a correction or a market price that can fall below zero.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"}
+  ],
+  "run": {
+    "generated_at": "2026-11-16T18:24:08Z",
+    "seed": "names-your-form-should-accept",
+    "locale": "en-US",
+    "catalog_version": "0.1",
+    "rows_total": 100,
+    "entities": [
+      {
+        "entity": "signup",
+        "rows_total": 100
+      }
+    ],
+    "rows_mutated": 12,
+    "defects_requested": 19,
+    "defects_applied": 12
+  }
+}

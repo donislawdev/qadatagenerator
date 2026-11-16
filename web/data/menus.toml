@@ -10,10 +10,6 @@ key = "nav_docs"
 page = "/docs"
 
 [[main]]
-key = "nav_recipes"
-page = "/docs/recipes"
-
-[[main]]
 key = "nav_examples"
 page = "/examples"
 
@@ -22,8 +18,8 @@ key = "nav_identifiers"
 page = "/identifiers"
 
 [[main]]
-key = "nav_damage"
-page = "/docs/damage"
+key = "nav_guides"
+page = "/guides"
 
 [[main]]
 key = "nav_download"
@@ -45,7 +41,7 @@ pages = ["/docs/damage", "/docs/manifest", "/docs/damage-a-file", "/docs/verify"
 
 [[sidebar]]
 key = "side_use"
-pages = ["/docs/window", "/docs/ci"]
+pages = ["/guides", "/docs/window", "/docs/ci"]
 
 [[sidebar]]
 key = "side_reference"
@@ -61,7 +57,7 @@ pages = ["/download", "/docs/getting-started", "/security", "/faq"]
 
 [[footer]]
 key = "footer_docs"
-pages = ["/docs/recipes", "/examples", "/docs/generators", "/identifiers", "/docs/damage", "/docs/manifest"]
+pages = ["/docs/recipes", "/examples", "/docs/generators", "/identifiers", "/guides", "/docs/damage", "/docs/manifest"]
 
 [[footer]]
 key = "footer_cli"

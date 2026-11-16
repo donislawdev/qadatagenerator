@@ -1,0 +1,56 @@
+{
+  "files": [
+    {
+      "name": "expectation-manifest.json",
+      "kind": "manifest"
+    },
+    {
+      "name": "person.csv",
+      "kind": "table",
+      "header": [
+        "first_name",
+        "last_name",
+        "city"
+      ],
+      "rows": [
+        [
+          "Tobiasz",
+          "Wac",
+          "Grudziądz"
+        ],
+        [
+          "Alan",
+          "Supeł",
+          "Lębork"
+        ],
+        [
+          "Adrian",
+          "Hadaś",
+          "Starachowice"
+        ],
+        [
+          "Anita",
+          "Tasarz",
+          "Ostrołęka"
+        ],
+        [
+          "Marcelina",
+          "Jaszczur",
+          "Białogard"
+        ]
+      ],
+      "total": 100
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    }
+  ],
+  "tables": [
+    {
+      "entity": "person",
+      "rows": 100,
+      "columns": 3
+    }
+  ]
+}

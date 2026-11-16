@@ -1,7 +1,7 @@
 ---
-translatedFrom: 41f0a51f0b3a19b69bcd7aa4cf8f8ba796371809
+translatedFrom: f0d50c29693dfa0d15d07d527ae7c56238401672
 title: Imiona i Unicode
-seoTitle: "Dane testowe Unicode: emoji, CJK i nazwiska jak O'Brien"
+seoTitle: "Przepis na imiona i Unicode, które psują nieuważny kod"
 description: "Przepis, który wstawia do tabeli emoji, spacje zerowej szerokości, tureckie ı, imiona w znakach CJK i nazwiska jak O'Brien albo Null, z odpowiedzią przy każdym."
 lead: "Prawdziwe imiona i nazwiska, które odrzuca zbyt surowe sprawdzenie, i Unicode, który psuje nieuważny kod, w mniej więcej co piątym wierszu, każde z tym, co ma zrobić twoja aplikacja."
 weight: 7

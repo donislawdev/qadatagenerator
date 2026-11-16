@@ -1,0 +1,32 @@
+{{- /*
+  The list of guides, which the page's own words carry. Every recipe of
+  examples/guides belongs to a guide of the same name in the language being
+  built, and every guide needs a link from this page, so neither a language
+  nor the list can leave one out.
+*/ -}}
+{{ define "main" }}
+{{- range resources.Match "examples/guides/*.yaml" }}
+  {{- $name := path.BaseName .Name }}
+  {{- if not (where $.Pages "File.ContentBaseName" $name) }}
+    {{- errorf "examples/guides/%s.yaml has no guide in %s. Add content/%s/guides/%s.md" $name site.Language.Lang site.Language.Lang $name }}
+  {{- end }}
+{{- end }}
+{{- range .Pages }}
+  {{- if not (strings.Contains $.Content (printf "href=%q" .RelPermalink)) }}
+    {{- errorf "%s in %s does not link to %s, and it lists every guide" $.File.Path site.Language.Lang .RelPermalink }}
+  {{- end }}
+{{- end }}
+<div class="container docs">
+  {{ partial "sidebar.html" . }}
+  <article class="prose">
+    {{ partial "breadcrumbs.html" . }}
+    <h1>{{ .Title }}</h1>
+    {{- with .Params.lead }}
+    <p class="lead">{{ . | markdownify }}</p>
+    {{- end }}
+    {{ .Content }}
+    {{ partial "pager.html" . }}
+  </article>
+  {{ partial "toc.html" (dict "page" . "extra" slice) }}
+</div>
+{{ end }}

@@ -1,0 +1,4 @@
+{{- /* Where to run a recipe, and what the program printed when it ran it.
+       Takes: the map example.html returns. */ -}}
+<p>{{ T "example_run_where" }}</p>
+{{ partial "run.html" (dict "command" .command) }}

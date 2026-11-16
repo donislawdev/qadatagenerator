@@ -22,7 +22,7 @@ faq:
   - question: Why do generated SSNs start with 666?
     answer: "That area is never issued, so a generated SSN cannot be anybody's. An application that checks the area will refuse them, valid rows included."
   - question: Are the card numbers real?
-    answer: "No. Card numbers are only the published test numbers, which pass validation and belong to no real card."
+    answer: "They are the test numbers payment providers publish, not numbers the program makes up. None of the providers promises that no bank has issued the same number to a real card, so keep them in test systems."
   - question: Which output formats does it write?
     answer: "CSV and JSON for the data. The manifest is JSON, and can also be written as a Gherkin Examples table, as CSV or as Markdown."
   - question: Need test files rather than test records?

@@ -1,6 +1,6 @@
 ---
 title: A shop in three tables
-seoTitle: "Related test data: customers, orders, lines in JSON"
+seoTitle: "A recipe for a shop in three related tables, in JSON"
 description: "A recipe for a shop in three related tables, customers, orders and order lines, in one JSON file, with keys that join, lists of values and empty fields."
 lead: "Fifty customers, their orders and the lines of each order. The relations decide how many rows there are, and every child carries the key of its parent."
 weight: 5
