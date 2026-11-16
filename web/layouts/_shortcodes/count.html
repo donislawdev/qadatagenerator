@@ -1,0 +1,18 @@
+{{- /*
+  How many of something the program has, said with its noun in the language
+  being built: count "damage" gives the kinds of damage this version carries
+  out, "generators" its generators, and "locales" its data locales followed by
+  their names. The number is the length of a list in data/facts/cli.json, which
+  a test writes from the program, so a page comparing the program with another
+  tool cannot keep an old number. Any other name stops the build.
+*/ -}}
+{{- $what := .Get 0 }}
+{{- $words := dict "damage" "count_damage" "generators" "count_generators" "locales" "count_locales" }}
+{{- with index $words $what }}
+  {{- $list := index hugo.Data.facts.cli $what }}
+  {{- $names := "" }}
+  {{- if eq $what "locales" }}{{ $names = delimit $list ", " }}{{ end }}
+  {{- T . (dict "Count" (len $list) "List" $names) }}
+{{- else }}
+  {{- errorf "%s in %s asks for the count of %q, and the counts are damage, generators and locales" .Page.File.Path site.Language.Lang $what }}
+{{- end -}}

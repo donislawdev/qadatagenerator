@@ -1,0 +1,8 @@
+{{- /*
+  The entry the table of contents gets for the sources page-sources.html puts
+  at the end of a page, and no entry for a page whose front matter names none,
+  so the contents never lead to a heading that is not there.
+*/ -}}
+{{- $entries := slice }}
+{{- if .Params.sources }}{{ $entries = $entries | append (dict "id" "page-sources" "title" (T "page_sources")) }}{{ end }}
+{{- return $entries }}

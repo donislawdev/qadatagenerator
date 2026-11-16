@@ -4,7 +4,7 @@
 #
 # The English file of words this was translated from, by its git blob id.
 # .github/scripts/translations.py names this file when en.toml has changed.
-# translatedFrom: 03b69e547eaf6840024bb27e419e7deca0f62621
+# translatedFrom: f30bfef9e155b7106b332bed8c05d5c662612d2c
 
 skip_to_content = "Przejdź do treści"
 nav_label = "Menu główne"
@@ -159,3 +159,24 @@ one = "Przepis niżej robi 1 wartość i zamawia uszkodzenie w {{ .Rows }} wiers
 few = "Przepis niżej robi {{ .Shown }} wartości i zamawia uszkodzenie w {{ .Rows }} wierszy. Pobierz go i uruchom bez zmian, a potem zmień liczbę albo udział pod swoje testy."
 many = "Przepis niżej robi {{ .Shown }} wartości i zamawia uszkodzenie w {{ .Rows }} wierszy. Pobierz go i uruchom bez zmian, a potem zmień liczbę albo udział pod swoje testy."
 other = "Przepis niżej robi {{ .Shown }} wartości i zamawia uszkodzenie w {{ .Rows }} wierszy. Pobierz go i uruchom bez zmian, a potem zmień liczbę albo udział pod swoje testy."
+
+# The count shortcode: how many of something this version of the program has,
+# taken from the facts its tests write. It stands inside a sentence, so the
+# noun takes all four forms. List names the locales.
+[count_damage]
+one = "1 rodzaj uszkodzenia"
+few = "{{ .Count }} rodzaje uszkodzeń"
+many = "{{ .Count }} rodzajów uszkodzeń"
+other = "{{ .Count }} rodzaju uszkodzeń"
+
+[count_generators]
+one = "1 generator"
+few = "{{ .Count }} generatory"
+many = "{{ .Count }} generatorów"
+other = "{{ .Count }} generatora"
+
+[count_locales]
+one = "1 locale: {{ .List }}"
+few = "{{ .Count }} locale: {{ .List }}"
+many = "{{ .Count }} locale: {{ .List }}"
+other = "{{ .Count }} locale: {{ .List }}"

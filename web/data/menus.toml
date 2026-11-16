@@ -29,7 +29,7 @@ page = "/download"
 # page follows it too.
 [[sidebar]]
 key = "side_start"
-pages = ["/docs", "/docs/getting-started", "/download"]
+pages = ["/docs", "/docs/getting-started", "/download", "/compare"]
 
 [[sidebar]]
 key = "side_make"
@@ -53,7 +53,7 @@ pages = ["/security", "/faq"]
 
 [[footer]]
 key = "footer_product"
-pages = ["/download", "/docs/getting-started", "/security", "/faq"]
+pages = ["/download", "/docs/getting-started", "/security", "/faq", "/compare"]
 
 [[footer]]
 key = "footer_docs"

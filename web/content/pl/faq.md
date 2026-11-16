@@ -1,5 +1,5 @@
 ---
-translatedFrom: ee7d464b2184b2881c996457314bda0497b8ebc6
+translatedFrom: 7c626d61f0033d07ece116f443f74abb1225ecc3
 title: Pytania
 seoTitle: "QA Data Generator FAQ: dane testowe, seed, licencja"
 description: "Odpowiedzi o QA Data Generator: co robi, czy można go używać w pracy za darmo, czy potrzebuje internetu i dlaczego na innej maszynie daje te same dane."
@@ -9,7 +9,7 @@ faq:
   - question: Czym jest QA Data Generator?
     answer: "Generatorem danych testowych dla testerów i programistów, z wierszem poleceń i oknem na pulpicie. Tworzy całe zestawy danych z krótkiego przepisu w YAML, celowo je psuje i zapisuje manifest, który mówi, co twoja aplikacja powinna zrobić z każdą popsutą wartością."
   - question: Czym różni się od biblioteki do losowych danych testowych?
-    answer: "Taka biblioteka daje ci wartości. QA Data Generator daje też wartości, które powinny zostać odrzucone, takie jak numer karty z cyfrą kontrolną przesuniętą o jeden, oraz poprawne wartości, które niestaranna walidacja odrzuca, takie jak O'Brien, a do każdej właściwą odpowiedź w pliku, który czyta twój test. [Co psuje](/docs/damage/) wymienia każdy rodzaj uszkodzenia."
+    answer: "Taka biblioteka daje ci wartości. QA Data Generator daje też wartości, które powinny zostać odrzucone, takie jak numer karty z cyfrą kontrolną przesuniętą o jeden, oraz poprawne wartości, które niestaranna walidacja odrzuca, takie jak O'Brien, a do każdej właściwą odpowiedź w pliku, który czyta twój test. [Co psuje](/docs/damage/) wymienia każdy rodzaj uszkodzenia, a [QA Data Generator i inne narzędzia](/compare/) stawia go obok Fakera i Mockaroo."
   - question: Czy jest bezpłatny? Czy mogę go używać w pracy?
     answer: "Tak. Kod jest na licencji GPL-3.0. Dane, pliki i manifesty, które wygenerujesz, należą do ciebie: licencja ich nie obejmuje i możesz ich używać w produktach o zamkniętym kodzie i w komercyjnych zestawach testów."
   - question: Czy potrzebuje internetu?

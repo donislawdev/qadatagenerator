@@ -19,8 +19,7 @@
     {{- errorf "%s in %s says this version does not yet damage in %s, and it now carries out %s. Rewrite what the page says about it, then take %s out of notYet" $.File.Path site.Language.Lang $group (delimit . ", ") $group }}
   {{- end }}
 {{- end }}
-{{- $extra := slice }}
-{{- if .Params.sources }}{{ $extra = $extra | append (dict "id" "page-sources" "title" (T "page_sources")) }}{{ end }}
+{{- $extra := partial "page-sources-toc.html" . }}
 <div class="container docs">
   {{ partial "sidebar.html" . }}
   <article class="prose">

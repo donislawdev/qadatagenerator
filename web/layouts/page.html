@@ -1,4 +1,8 @@
-{{- /* A page of the documentation: the menu, the page, and what is on it. */ -}}
+{{- /*
+  A page of the documentation: the menu, the page, and what is on it. A page
+  that names sources in its front matter, as the comparisons do, lists them at
+  the end.
+*/ -}}
 {{ define "main" }}
 <div class="container docs">
   {{ partial "sidebar.html" . }}
@@ -9,8 +13,9 @@
     <p class="lead">{{ . | markdownify }}</p>
     {{- end }}
     {{ .Content }}
+    {{ partial "page-sources.html" . }}
     {{ partial "pager.html" . }}
   </article>
-  {{ partial "toc.html" (dict "page" . "extra" slice) }}
+  {{ partial "toc.html" (dict "page" . "extra" (partial "page-sources-toc.html" .)) }}
 </div>
 {{ end }}

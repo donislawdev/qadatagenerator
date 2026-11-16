@@ -8,7 +8,7 @@ faq:
   - question: What is QA Data Generator?
     answer: "A test data generator for QA engineers and developers, with a command line and a desktop window. It makes whole datasets from a short YAML recipe, breaks them on purpose, and writes a manifest saying what your application should do with every value it damaged."
   - question: How is it different from a fake data library?
-    answer: "A fake data library gives you values. QA Data Generator also gives you values that should fail, such as a card number whose check digit is off by one, and valid values careless validation refuses, such as O'Brien, with the right answer for each in a file your test reads. [What it breaks](/docs/damage/) lists every kind of damage."
+    answer: "A fake data library gives you values. QA Data Generator also gives you values that should fail, such as a card number whose check digit is off by one, and valid values careless validation refuses, such as O'Brien, with the right answer for each in a file your test reads. [What it breaks](/docs/damage/) lists every kind of damage, and [QA Data Generator and other tools](/compare/) sets it beside Faker and Mockaroo."
   - question: Is it free? Can I use it at work?
     answer: "Yes. The code is GPL-3.0. Data, files and manifests you generate are yours: they are not covered by the licence, and you can use them in closed source products and commercial test suites."
   - question: Does it need the internet?

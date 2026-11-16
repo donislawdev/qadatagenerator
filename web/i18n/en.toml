@@ -133,3 +133,17 @@ other = "The recipe ordered {{ .Count }} defects, and this build applied the {{ 
 [identifier_broken_lead]
 one = "The recipe below makes 1 value and asks for damage in {{ .Rows }} of the rows. Download it and run it as it is, then change the count or the share to fit your tests."
 other = "The recipe below makes {{ .Shown }} values and asks for damage in {{ .Rows }} of the rows. Download it and run it as it is, then change the count or the share to fit your tests."
+
+# The count shortcode: how many of something this version of the program has,
+# taken from the facts its tests write. List names the locales.
+[count_damage]
+one = "1 kind of damage"
+other = "{{ .Count }} kinds of damage"
+
+[count_generators]
+one = "1 generator"
+other = "{{ .Count }} generators"
+
+[count_locales]
+one = "1 locale: {{ .List }}"
+other = "{{ .Count }} locales: {{ .List }}"

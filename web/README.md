@@ -18,6 +18,7 @@ or from files a test holds to it, and never writes by hand:
 | the pictures of the window, on the home page and on The window | `assets/window/`, drawn by the program from the data of the README, with the list of texts each one shows beside it | `go test ./internal/gui/screens` compares the texts everywhere and the pixels on windows/amd64 |
 | the ready-made recipes, offered for download and shown on the pages of Examples, and the recipes of `../examples/identifiers/` and `../examples/guides/` on the page of each identifier and each guide | `../examples/`, mounted | `go test ./internal/cli -run TestTheSiteShowsWhatTheProgramDoes` runs each one |
 | what a guide says this version does not yet damage | `notYet` in the guide's front matter, against `data/facts/cli.json` | the build stops on the day the program damages in a group a guide names there |
+| how many kinds of damage, generators and locales a sentence names | `{{< count "damage" >}}`, `"generators"` or `"locales"`, counted in `data/facts/cli.json` | the facts test above, and a name the shortcode does not know stops the build |
 | what each recipe printed, the first rows of the files it wrote, the tables with their rows, and its manifest | `data/runs.json`, `data/examples/`, `assets/example-runs/` | the same test, which writes them |
 | any other command a page shows, with what it printed | `{{< run "qadg ..." >}}` in the page, `data/runs.json` | the same test finds every one in `content/` and runs it |
 
@@ -63,7 +64,14 @@ this version does not yet damage something names the group in `notYet`, as `notY
 build stops once the program does damage in it, so the sentence has to be rewritten. The build also
 stops on a recipe with no guide, a guide the first page of Guides does not link to, a part it does
 not know and the damage of a recipe that orders none. Sources in the front matter are listed at the end
-of a guide, as on the page of an identifier.
+of a guide, as on the page of an identifier and on any other page that names them.
+
+The pages of Compared, `content/<language>/compare/<name>.md`, set the program beside another tool.
+Every fact about that tool names its source and the day it was read, in the `sources` of the page,
+and a page says nothing is missing from the other tool unless a list it read says so, naming the
+list. Those facts go out of date with no change here, so read each page against its sources again
+before a release. What the program has comes from the facts above, through `count` where a sentence
+needs a number.
 
 In the list of what a recipe damaged, a value written in another Unicode form shows each combining
 mark as its escape, because drawn on its letter it looks like no change. Only that damage is spelt
