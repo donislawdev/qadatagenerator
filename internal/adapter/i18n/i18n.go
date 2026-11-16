@@ -39,6 +39,14 @@ type Key string
 const (
 	WindowTitle Key = "window.title"
 
+	// What the window says when the system made no window for it, in a dialog
+	// of the system when nobody hears the error channel (B-413). The reason
+	// between the two is the system's own words, so it has a heading here and
+	// no text of its own.
+	WindowNotOpened       Key = "window.not-opened.body"
+	WindowNotOpenedReason Key = "window.not-opened.reason"
+	WindowNotOpenedDo     Key = "window.not-opened.do"
+
 	// The words the toolkit draws itself: the dialog a file is chosen in, the
 	// menu a text field opens under the right button, the dialog an error is
 	// shown in, and the words a chooser holds before anything is chosen.
@@ -624,7 +632,8 @@ var windowKeys = []Key{
 	ToolkitCreateFolder, ToolkitName, ToolkitParent, ToolkitShowHiddenFiles, ToolkitEnterFilename,
 	ToolkitOK, ToolkitError, ToolkitYes, ToolkitNo, ToolkitCut, ToolkitCopy, ToolkitPaste,
 	ToolkitSelectAll, ToolkitUndo, ToolkitRedo, ToolkitQuit, ToolkitSelectOne,
-	WindowTitle, ScreenAbout, ScreenManifest, ScreenTake, ScreenRecipe, ScreenQuick,
+	WindowTitle, WindowNotOpened, WindowNotOpenedReason, WindowNotOpenedDo,
+	ScreenAbout, ScreenManifest, ScreenTake, ScreenRecipe, ScreenQuick,
 	SidebarGroupMake, SidebarGroupCheck, SidebarOffline,
 	SidebarLinkProject, SidebarLinkSupport, SidebarLinkRefusedTitle, SidebarLinkRefusedBody,
 	SidebarLinkRefusedReason,

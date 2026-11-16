@@ -39,6 +39,10 @@ on:
       - internal/gui/background/background.go
       - internal/adapter/provider/corpus/corpus.go
       - internal/adapter/values/fitted.go
+      # Compiled on Windows only, so the job below on Ubuntu does not see it.
+      # It is listed because the audit closes this list against the register,
+      # and the run that reads it is go test -race in tools/brama.py on Windows.
+      - cmd/qadg-gui/console_windows.go
       - internal/guard/concurrency.go
       - go.mod
       - go.sum

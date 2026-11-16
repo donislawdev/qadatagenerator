@@ -11,6 +11,15 @@
 
 window.title: QA Data Generator
 
+# When the system made no window. These three paragraphs go into one message,
+# with the system's own words for why below the heading in the middle, and on
+# Windows into a dialog of the system when the window was started without a
+# terminal. Somebody who double clicked the program reads them before they have
+# seen anything else of it.
+window.not-opened.body: "The window could not open on this computer. It needs a graphics driver that supports OpenGL."
+window.not-opened.reason: "What the system reported:"
+window.not-opened.do: "Install or update the graphics driver, or turn on 3D acceleration if this is a virtual machine. The command line tool, qadg, does the same work without a window."
+
 # The words the toolkit draws itself, handed to it at start so that it speaks
 # the language of this window rather than the language of the desktop. The
 # toolkit joins the first pair into the title of its file dialog ("Open" and

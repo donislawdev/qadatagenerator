@@ -24,10 +24,11 @@ package main
 // TestTheWindowStartsWithoutAConsole reads the header of a binary it builds
 // rather than this line.
 //
-// AttachConsole and FreeConsole are called through cgo rather than through Go
-// because the network guard refuses the syscall package in our own files
-// (internal/guard/rules.go), and these are the only two calls into Windows this
-// binary makes itself.
+// The calls into Windows below go through cgo rather than through Go because
+// the network guard refuses the syscall package in our own files
+// (internal/guard/rules.go). They are the only calls into Windows this binary
+// makes itself: attaching to and letting go of a console, asking whether the
+// desktop can be seen, and showing a dialog.
 
 /*
 #cgo LDFLAGS: -Wl,--subsystem,windows
@@ -38,11 +39,16 @@ import "C"
 import (
 	"log"
 	"os"
+	"runtime"
+	"unicode/utf16"
+	"unsafe"
 )
 
 // speakThroughParentConsole points the standard streams this process is
 // missing at the console of the program that started it, and returns what
-// lets that console go again.
+// lets that console go again together with whether the error channel now leads
+// anywhere. It does not after a double click, and failure.go then puts what
+// the window has to say in a dialog instead.
 //
 // # What a GUI program loses, and what this gives back
 //
@@ -81,18 +87,18 @@ import (
 // therefore ends this process at once rather than through the watch for
 // signals. That is the short moment before the window opens, when there is
 // nothing to save yet.
-func speakThroughParentConsole() (release func()) {
+func speakThroughParentConsole() (release func(), heard bool) {
 	outMissing, errMissing := missing(os.Stdout), missing(os.Stderr)
 	if !outMissing && !errMissing {
-		return func() {}
+		return func() {}, true
 	}
 	if C.AttachConsole(C.ATTACH_PARENT_PROCESS) == 0 {
-		return func() {}
+		return func() {}, !errMissing
 	}
 	console, err := os.OpenFile("CONOUT$", os.O_RDWR, 0)
 	if err != nil {
 		C.FreeConsole()
-		return func() {}
+		return func() {}, !errMissing
 	}
 	stdout, stderr, logged := os.Stdout, os.Stderr, log.Writer()
 	if outMissing {
@@ -109,7 +115,68 @@ func speakThroughParentConsole() (release func()) {
 		log.SetOutput(logged)
 		_ = console.Close()
 		C.FreeConsole()
+	}, true
+}
+
+// showInDialog puts a message in the dialog Windows draws for any program, with
+// the error icon and one OK button, and returns once somebody presses it.
+//
+// # Why on a thread of its own
+//
+// A dialog like this keeps every window of the thread that shows it answering
+// while it waits. After a panic the toolkit's window still exists on the main
+// thread, and answering would call back into a toolkit that has just failed.
+// Shown from another thread, that window simply stops answering behind the
+// dialog, which is the truth about it.
+//
+// # Why not where nobody can see it
+//
+// A dialog on a desktop nobody sees waits for ever. Measured on 2026-11-16 on
+// Windows Server 2025: the window started as a scheduled task of SYSTEM, in
+// session 0 with no standard streams, was still waiting 40 seconds later,
+// which is the process with nothing on the screen this dialog exists to
+// replace. So it is shown only on a window station a person can see, and the
+// message stays on the error channel and in the exit code either way.
+func showInDialog(title, message string) {
+	if !desktopCanBeSeen() {
+		return
 	}
+	caption, text := wide(title), wide(message)
+	done := make(chan struct{})
+	go func() {
+		// Never unlocked, so the thread ends with this goroutine and takes
+		// nothing the dialog left on it to another one.
+		runtime.LockOSThread()
+		C.MessageBoxW(nil, (*C.WCHAR)(unsafe.Pointer(&text[0])),
+			(*C.WCHAR)(unsafe.Pointer(&caption[0])), C.MB_OK|C.MB_ICONERROR|C.MB_SETFOREGROUND)
+		close(done)
+	}()
+	<-done
+}
+
+// desktopCanBeSeen reports whether the window station of this process is one
+// a person can see, which is what WSF_VISIBLE means on it. The station of a
+// signed in person has it, the one services and tasks of SYSTEM run in does
+// not. When Windows does not answer, the answer is yes, because a dialog
+// shown in vain costs less than a failure said to nobody.
+func desktopCanBeSeen() bool {
+	station := C.GetProcessWindowStation()
+	if station == nil {
+		return true
+	}
+	var flags C.USEROBJECTFLAGS
+	if C.GetUserObjectInformationW(C.HANDLE(unsafe.Pointer(station)), C.UOI_FLAGS,
+		C.PVOID(unsafe.Pointer(&flags)), C.DWORD(unsafe.Sizeof(flags)), nil) == 0 {
+		return true
+	}
+	return flags.dwFlags&C.WSF_VISIBLE != 0
+}
+
+// wide is text the way the wide functions of Windows read it: UTF-16 ending
+// in a zero. A zero inside the text ends it early there, which loses the rest
+// of a message and nothing else.
+func wide(text string) []uint16 {
+	return append(utf16.Encode([]rune(text)), 0)
 }
 
 // missing reports whether a standard stream leads nowhere: no handle at all, or

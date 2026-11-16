@@ -106,6 +106,17 @@ import (
 // for a key is a pure function of the list and the limit, so no output can
 // depend on which goroutine asked first.
 //
+// # Why the fifth entry is here
+//
+// It starts one goroutine on a thread of its own and waits for it to end. That
+// thread shows the dialog Windows draws when the window stops and nobody hears
+// its error channel (B-413). A dialog like that keeps every window of its
+// thread answering while it waits, and after a panic the toolkit's window still
+// lives on the main thread, so a dialog shown there would call back into a
+// toolkit that has just failed. It shares nothing but the two texts of the
+// dialog, written before the goroutine starts and never again, and no output of
+// the product passes through it.
+//
 // # Why a guard rather than a rule in a document
 //
 // The architecture already says the result is assembled by row number and
@@ -127,6 +138,7 @@ var ConcurrencyAllowed = map[string]bool{
 	"internal/gui/background/background.go":      true,
 	"internal/adapter/provider/corpus/corpus.go": true,
 	"internal/adapter/values/fitted.go":          true,
+	"cmd/qadg-gui/console_windows.go":            true,
 }
 
 // concurrencyPackages are imports whose whole purpose is coordinating work

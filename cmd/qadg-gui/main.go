@@ -51,16 +51,16 @@ import (
 func main() {
 	// On Windows this window is a GUI program and starts without a console, so
 	// what it says before it opens goes through the console of whatever started
-	// it, if anything did. console_windows.go says why and when it lets go.
-	release := speakThroughParentConsole()
+	// it, if anything did. console_windows.go says why and when it lets go,
+	// and failure.go what happens when nothing did and the window cannot go on.
+	release, heard := speakThroughParentConsole()
 	defer lastCatch()
 
 	// Asked before anything of the toolkit exists, so a refusal opens no
 	// window at all rather than one that closes again.
 	asked, err := arguments(os.Args[1:], os.Stdout)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(wrongInvocation)
+		stop(heard, err.Error(), wrongInvocation)
 	}
 	if asked.help {
 		return
@@ -84,9 +84,15 @@ func main() {
 	if err := fynetheme.Speak(text); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	}
+	// Kept from here until the window is shown, because the system can say no
+	// in either step (failure.go, listening).
+	toolkit := listen()
 	window := application.NewWindow(text.T(i18n.WindowTitle))
 
-	frame := frameFor(asked, text, window, application)
+	frame, err := frameFor(asked, text, window, application)
+	if err != nil {
+		stop(heard, err.Error(), failed)
+	}
 
 	// Dropping is a property of the window rather than of a control, so the
 	// frame is what receives it and hands it to whichever screen is open.
@@ -105,7 +111,8 @@ func main() {
 	// case it stopped some other way.
 	stopTidying := background.TidyWhenLeftAlone(window.Canvas())
 	window.SetOnClosed(stopTidying)
-	window.ShowAndRun()
+	showOrStop(window, toolkit, text, heard)
+	application.Run()
 	stopTidying()
 }
 
@@ -120,17 +127,16 @@ func main() {
 //
 // What it buys is the two things a crash owes somebody. A line on the error
 // channel saying what happened, in the words the command line uses for the
-// same event, instead of a stack trace. And an exit code of 1 rather than
-// Go's own 2, which is the number this tool gives a wrong invocation, so
-// whatever started this window is not told it typed something wrong.
+// same event, instead of a stack trace, and the same words in a dialog when
+// nobody hears that channel. And an exit code of 1 rather than Go's own 2,
+// which is the number this tool gives a wrong invocation, so whatever started
+// this window is not told it typed something wrong.
 func lastCatch() {
 	if recovered := recover(); recovered != nil {
 		// The console was let go when the window opened, so it is asked for
 		// again. Nothing lets go of it this time, because the process ends.
-		_ = speakThroughParentConsole()
-		fmt.Fprintln(os.Stderr, fault.FromPanic(recovered))
-		fmt.Fprintln(os.Stderr, fault.CrashedDo)
-		os.Exit(1)
+		_, heard := speakThroughParentConsole()
+		stop(heard, fmt.Sprint(fault.FromPanic(recovered))+"\n"+fault.CrashedDo, failed)
 	}
 }
 
@@ -142,11 +148,11 @@ func lastCatch() {
 // of controls that does no work. The catalogue carries no links to pages
 // outside this program either: it is a view of controls, and the control those
 // links are drawn as is already on its page of buttons.
-func frameFor(asked launch, text i18n.Catalogue, window fyne.Window, application fyne.App) *shell.Shell {
+func frameFor(asked launch, text i18n.Catalogue, window fyne.Window, application fyne.App) (*shell.Shell, error) {
 	if asked.catalogue {
 		// The samples and the brand come from the package the stored pictures
 		// take them from, so the window and the pictures of it say the same.
-		return catalogue.Frame(text, screens.Brand(text), screens.CatalogueSamples())
+		return catalogue.Frame(text, screens.Brand(text), screens.CatalogueSamples()), nil
 	}
 	return assemble(text, window, application.Clipboard(), application)
 }
@@ -225,7 +231,7 @@ func saveReport(window fyne.Window) about.Saver {
 // reaching for them, which is what lets each of them be built in a test with no
 // disk and no goroutine.
 func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipboard,
-	desktop outward.Desktop) *shell.Shell {
+	desktop outward.Desktop) (*shell.Shell, error) {
 	// 🔴 One place of work for the whole window, handed to every screen as
 	// the same value. Until 2026-10-27 each screen was given a literal of its
 	// own, and the one for the recipe screen was written without the watch
@@ -241,11 +247,10 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 	// The catalog of damage is data compiled into this binary, so a failure to
 	// read it means the binary itself is not what it was built as. There is
 	// nothing a person could do about it from inside a window and nothing this
-	// window could honestly show, so it says so and stops.
+	// window could honestly show, so main says so and stops.
 	described, err := catalogyaml.Load()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "this build cannot read its own catalog of damage:", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("this build cannot read its own catalog of damage: %w", err)
 	}
 	damage := takeview.New(text, window, described, take.Open, work, clipboard)
 	// The recipe screen uses two of the places of work. A recipe is allowed to
@@ -267,7 +272,7 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 	// dialog with its address, so a button that did nothing is never silent.
 	refused := func(title, message string) { dialog.ShowInformation(title, message, window) }
 	return shell.New(sidebar(text, window, value, damage, editor, browser),
-		screens.WindowBrand(text, desktop, work.Read, refused))
+		screens.WindowBrand(text, desktop, work.Read, refused)), nil
 }
 
 // placesOfWork is where every screen sends what must not happen on the thread

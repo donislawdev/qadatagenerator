@@ -104,6 +104,17 @@ repository once they are released.
   a window. A script that needs the exit code, 2 for a wrong flag, gets it by
   waiting, for example with Start-Process -Wait. In PowerShell 7, qadg-gui -h
   > file leaves the file empty, and a pipe such as qadg-gui -h | more works.
+- **A window that cannot open now says so and ends, instead of running with
+  nothing on the screen.** On Windows without a graphics driver that supports
+  OpenGL, for example in a virtual machine without 3D acceleration, qadg-gui
+  used to keep running with no window until it was ended in Task Manager. It
+  now ends with exit code 1 and says that the window could not open, what the
+  system reported and what to do instead. On Linux with no display it used to
+  report an internal defect, which was not true, and now says the same as on
+  Windows. On Windows, when the window was started without a terminal, by a
+  double click or from a shortcut, the message appears in a dialog. The same
+  dialog now shows a flag the window does not know and an unexpected stop of
+  the program, which used to end without a word.
 - **Producing many values on Quick value is faster and no longer leaves memory
   behind.** Each press of Generate with a thousand values used to keep the
   window busy for about 30 ms and leave about 3.5 MB behind for a minute. It
