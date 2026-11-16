@@ -49,6 +49,10 @@ import (
 )
 
 func main() {
+	// On Windows this window is a GUI program and starts without a console, so
+	// what it says before it opens goes through the console of whatever started
+	// it, if anything did. console_windows.go says why and when it lets go.
+	release := speakThroughParentConsole()
 	defer lastCatch()
 
 	// Asked before anything of the toolkit exists, so a refusal opens no
@@ -63,6 +67,9 @@ func main() {
 	}
 
 	application := app.New()
+	// Nothing else in this program sets this, and a second setter would
+	// replace this one and keep the console attached for good.
+	application.Lifecycle().SetOnStarted(release)
 	// The picture on the window, in the window switcher and on the taskbar
 	// button while the window is open. File Explorer reads another copy of the
 	// same drawing out of the .exe, and internal/gui/appicon says why there
@@ -118,6 +125,9 @@ func main() {
 // whatever started this window is not told it typed something wrong.
 func lastCatch() {
 	if recovered := recover(); recovered != nil {
+		// The console was let go when the window opened, so it is asked for
+		// again. Nothing lets go of it this time, because the process ends.
+		_ = speakThroughParentConsole()
 		fmt.Fprintln(os.Stderr, fault.FromPanic(recovered))
 		fmt.Fprintln(os.Stderr, fault.CrashedDo)
 		os.Exit(1)

@@ -97,6 +97,13 @@ repository once they are released.
 
 ### Fixed
 
+- **On Windows the window opens without a console window beside it.** A
+  double click on qadg-gui.exe used to open a black console window as well.
+  Started from a terminal, qadg-gui -h and a flag it does not know still answer
+  in that terminal, below the next prompt, because a terminal does not wait for
+  a window. A script that needs the exit code, 2 for a wrong flag, gets it by
+  waiting, for example with Start-Process -Wait. In PowerShell 7, qadg-gui -h
+  > file leaves the file empty, and a pipe such as qadg-gui -h | more works.
 - **Producing many values on Quick value is faster and no longer leaves memory
   behind.** Each press of Generate with a thousand values used to keep the
   window busy for about 30 ms and leave about 3.5 MB behind for a minute. It
