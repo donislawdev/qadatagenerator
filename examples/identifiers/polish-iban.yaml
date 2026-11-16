@@ -1,0 +1,26 @@
+# Polish IBANs for testing, with one broken value asked for in about a fifth of
+# the rows.
+#
+# An IBAN can match a real account, so keep the file in test systems. The
+# damage changes a digit or swaps two, and the manifest says your application
+# should reject each one. It also lists the damage this build could not carry
+# out, with the reason.
+#
+#   qadg generate polish-iban.yaml
+#
+# writes account.csv, expectation-manifest.json and run-note.json. The same seed
+# breaks the same values on every machine.
+version: "0.1"
+seed: "polish-iban"
+locale: pl-PL
+entities:
+  account:
+    count: 100
+    fields:
+      iban: { generator: iban }
+policy:
+  layers: [L3]
+  rows: 20%
+  per_row: exactly_one
+output:
+  format: csv

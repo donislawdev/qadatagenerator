@@ -1,0 +1,35 @@
+{
+  "spec_version": "0.2",
+  "defects": [
+    {"id":"person-4-L3.range.unassigned","location":{"entity":"person","row":4,"field":"ssn"},"mutator":"L3.range.unassigned","layer":"L3","applied":true,"value_before":"666-25-6687","value_after":"000-25-6687","expectation":"rejection","confidence":"soft","rationale":"Uses an identifier from a range the issuing authority does not assign."},
+    {"id":"person-6-L3.sentinel.placeholder_value","location":{"entity":"person","row":6,"field":"ssn"},"mutator":"L3.sentinel.placeholder_value","layer":"L3","applied":false,"expectation":"warning","confidence":"soft","rationale":"Replaces a real value with a placeholder that passes every format check and carries no meaning.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"person-9-L3.checksum.off_by_one","location":{"entity":"person","row":9,"field":"ssn"},"mutator":"L3.checksum.off_by_one","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Changes one digit so the format stays valid and the check digit no longer matches.","failure_reason":"this damage needs an identifier with a check digit (such as a PESEL), which this run does not have","failure_kind":"run_lacks_capability"},
+    {"id":"person-11-L3.checksum.transposed_digits","location":{"entity":"person","row":11,"field":"ssn"},"mutator":"L3.checksum.transposed_digits","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Swaps two adjacent digits, which is the most common human typing mistake.","failure_reason":"this damage needs an identifier with a check digit (such as a PESEL), which this run does not have","failure_kind":"run_lacks_capability"},
+    {"id":"person-15-L3.currency.wrong_scale","location":{"entity":"person","row":15,"field":"ssn"},"mutator":"L3.currency.wrong_scale","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Writes an amount with more or fewer decimal places than the currency has.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"person-17-L3.date.future_birthdate","location":{"entity":"person","row":17,"field":"ssn"},"mutator":"L3.date.future_birthdate","layer":"L3","applied":false,"expectation":"rejection","confidence":"soft","rationale":"Sets a birth date in the future.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"person-25-L3.national_id.impossible_date","location":{"entity":"person","row":25,"field":"ssn"},"mutator":"L3.national_id.impossible_date","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Builds a national identifier that encodes a date which does not exist.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"person-46-L3.range.unassigned","location":{"entity":"person","row":46,"field":"ssn"},"mutator":"L3.range.unassigned","layer":"L3","applied":true,"value_before":"666-49-1905","value_after":"000-49-1905","expectation":"rejection","confidence":"soft","rationale":"Uses an identifier from a range the issuing authority does not assign."},
+    {"id":"person-49-L3.sentinel.placeholder_value","location":{"entity":"person","row":49,"field":"ssn"},"mutator":"L3.sentinel.placeholder_value","layer":"L3","applied":false,"expectation":"warning","confidence":"soft","rationale":"Replaces a real value with a placeholder that passes every format check and carries no meaning.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"person-61-L3.checksum.off_by_one","location":{"entity":"person","row":61,"field":"ssn"},"mutator":"L3.checksum.off_by_one","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Changes one digit so the format stays valid and the check digit no longer matches.","failure_reason":"this damage needs an identifier with a check digit (such as a PESEL), which this run does not have","failure_kind":"run_lacks_capability"},
+    {"id":"person-71-L3.checksum.transposed_digits","location":{"entity":"person","row":71,"field":"ssn"},"mutator":"L3.checksum.transposed_digits","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Swaps two adjacent digits, which is the most common human typing mistake.","failure_reason":"this damage needs an identifier with a check digit (such as a PESEL), which this run does not have","failure_kind":"run_lacks_capability"},
+    {"id":"person-79-L3.currency.wrong_scale","location":{"entity":"person","row":79,"field":"ssn"},"mutator":"L3.currency.wrong_scale","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Writes an amount with more or fewer decimal places than the currency has.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"person-82-L3.date.future_birthdate","location":{"entity":"person","row":82,"field":"ssn"},"mutator":"L3.date.future_birthdate","layer":"L3","applied":false,"expectation":"rejection","confidence":"soft","rationale":"Sets a birth date in the future.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"person-93-L3.national_id.impossible_date","location":{"entity":"person","row":93,"field":"ssn"},"mutator":"L3.national_id.impossible_date","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Builds a national identifier that encodes a date which does not exist.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"}
+  ],
+  "run": {
+    "generated_at": "2026-11-16T17:31:13Z",
+    "seed": "ssn",
+    "locale": "en-US",
+    "catalog_version": "0.1",
+    "rows_total": 100,
+    "entities": [
+      {
+        "entity": "person",
+        "rows_total": 100
+      }
+    ],
+    "rows_mutated": 2,
+    "defects_requested": 14,
+    "defects_applied": 2
+  }
+}

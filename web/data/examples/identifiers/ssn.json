@@ -1,0 +1,44 @@
+{
+  "files": [
+    {
+      "name": "expectation-manifest.json",
+      "kind": "manifest"
+    },
+    {
+      "name": "person.csv",
+      "kind": "table",
+      "header": [
+        "ssn"
+      ],
+      "rows": [
+        [
+          "666-52-3918"
+        ],
+        [
+          "666-37-4743"
+        ],
+        [
+          "666-02-1617"
+        ],
+        [
+          "000-25-6687"
+        ],
+        [
+          "666-56-7226"
+        ]
+      ],
+      "total": 100
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    }
+  ],
+  "tables": [
+    {
+      "entity": "person",
+      "rows": 100,
+      "columns": 1
+    }
+  ]
+}

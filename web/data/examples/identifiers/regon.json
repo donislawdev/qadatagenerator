@@ -1,0 +1,44 @@
+{
+  "files": [
+    {
+      "name": "company.csv",
+      "kind": "table",
+      "header": [
+        "regon"
+      ],
+      "rows": [
+        [
+          "562724910"
+        ],
+        [
+          "575840507"
+        ],
+        [
+          "055930093"
+        ],
+        [
+          "300450923"
+        ],
+        [
+          "381666040"
+        ]
+      ],
+      "total": 100
+    },
+    {
+      "name": "expectation-manifest.json",
+      "kind": "manifest"
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    }
+  ],
+  "tables": [
+    {
+      "entity": "company",
+      "rows": 100,
+      "columns": 1
+    }
+  ]
+}

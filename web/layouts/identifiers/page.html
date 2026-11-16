@@ -1,0 +1,60 @@
+{{- /*
+  The page of one identifier. First the page's own words: what the number is,
+  how its check digit works, valid ones for a test and what to do with a broken
+  one. Then the part read from examples/identifiers/<name>.yaml and from what
+  TestTheSiteShowsWhatTheProgramDoes saw it make: the recipe to download, its
+  run, and every value it damaged. Last, the sources the front matter names.
+  A recipe that damaged nothing, and a page with no sources, stop the build,
+  because the page promises both.
+*/ -}}
+{{ define "main" }}
+{{- $example := partial "example.html" . }}
+{{- with $example.manifest }}
+  {{- if not (where (. | transform.Unmarshal).defects "applied" true) }}
+    {{- errorf "examples/%s.yaml damaged nothing, and %s shows broken ones. Raise rows in its policy, then run\n  go test ./internal/cli -run TestTheSiteShowsWhatTheProgramDoes -update" $example.name $.File.Path }}
+  {{- end }}
+{{- else }}
+  {{- errorf "examples/%s.yaml orders no damage, and %s shows broken ones" $example.name .File.Path }}
+{{- end }}
+{{- if not .Params.sources }}
+  {{- errorf "%s in %s names no sources, and the page of an identifier ends with them" .File.Path site.Language.Lang }}
+{{- end }}
+{{- $rows := (index $example.made.tables 0).rows }}
+{{- $extra := slice
+  (dict "id" "identifier-broken" "title" (T "identifier_broken"))
+  (dict "id" "identifier-sources" "title" (T "identifier_sources"))
+}}
+<div class="container docs">
+  {{ partial "sidebar.html" . }}
+  <article class="prose">
+    {{ partial "breadcrumbs.html" . }}
+    <h1>{{ .Title }}</h1>
+    {{- with .Params.lead }}
+    <p class="lead">{{ . | markdownify }}</p>
+    {{- end }}
+    {{ .Content }}
+
+    <h2 id="identifier-broken">{{ T "identifier_broken" }}</h2>
+    <p>{{ T "identifier_broken_lead" (dict "Count" $rows "Shown" (lang.FormatNumber 0 $rows) "Rows" $example.data.policy.rows) }}</p>
+    {{ partial "example-downloads.html" $example }}
+
+    <h3>{{ T "example_recipe" }}</h3>
+    {{ partial "code-panel.html" (dict "caption" $example.file "code" $example.recipe.Content) }}
+
+    <h3>{{ T "example_run" }}</h3>
+    <p>{{ T "example_run_where" }}</p>
+    {{ partial "run.html" (dict "command" $example.command) }}
+
+    <h3>{{ T "example_damage" }}</h3>
+    {{ partial "example-damage.html" (dict "manifest" $example.manifest) }}
+
+    <h2 id="identifier-sources">{{ T "identifier_sources" }}</h2>
+    <ul>
+      {{- range .Params.sources }}
+      <li>{{ . | markdownify }}</li>
+      {{- end }}
+    </ul>
+  </article>
+  {{ partial "toc.html" (dict "page" . "extra" $extra) }}
+</div>
+{{ end }}

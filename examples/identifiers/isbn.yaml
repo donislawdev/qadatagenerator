@@ -1,0 +1,26 @@
+# ISBNs for testing, with one broken value asked for in about a fifth of the
+# rows.
+#
+# Every ISBN starts with 978-67, 978-68 or 978-69, a block no registration group
+# held when it was last checked. The damage changes a digit or swaps two, and
+# the manifest says your application should reject each one. It also lists the
+# damage this build could not carry out, with the reason.
+#
+#   qadg generate isbn.yaml
+#
+# writes book.csv, expectation-manifest.json and run-note.json. The same seed
+# breaks the same values on every machine.
+version: "0.1"
+seed: "isbn"
+locale: en-US
+entities:
+  book:
+    count: 100
+    fields:
+      isbn: { generator: isbn }
+policy:
+  layers: [L3]
+  rows: 20%
+  per_row: exactly_one
+output:
+  format: csv

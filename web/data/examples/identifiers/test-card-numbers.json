@@ -1,0 +1,44 @@
+{
+  "files": [
+    {
+      "name": "expectation-manifest.json",
+      "kind": "manifest"
+    },
+    {
+      "name": "payment.csv",
+      "kind": "table",
+      "header": [
+        "card"
+      ],
+      "rows": [
+        [
+          "6011111111111117"
+        ],
+        [
+          "3530111333300000"
+        ],
+        [
+          "5555555555554444"
+        ],
+        [
+          "371449635398431"
+        ],
+        [
+          "5330111333300000"
+        ]
+      ],
+      "total": 100
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    }
+  ],
+  "tables": [
+    {
+      "entity": "payment",
+      "rows": 100,
+      "columns": 1
+    }
+  ]
+}

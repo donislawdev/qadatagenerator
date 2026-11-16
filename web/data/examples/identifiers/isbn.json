@@ -1,0 +1,44 @@
+{
+  "files": [
+    {
+      "name": "book.csv",
+      "kind": "table",
+      "header": [
+        "isbn"
+      ],
+      "rows": [
+        [
+          "9786713923034"
+        ],
+        [
+          "9786982701159"
+        ],
+        [
+          "9786948179015"
+        ],
+        [
+          "9786776046961"
+        ],
+        [
+          "9786905125772"
+        ]
+      ],
+      "total": 100
+    },
+    {
+      "name": "expectation-manifest.json",
+      "kind": "manifest"
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    }
+  ],
+  "tables": [
+    {
+      "entity": "book",
+      "rows": 100,
+      "columns": 1
+    }
+  ]
+}

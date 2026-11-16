@@ -1,0 +1,44 @@
+{
+  "files": [
+    {
+      "name": "account.csv",
+      "kind": "table",
+      "header": [
+        "iban"
+      ],
+      "rows": [
+        [
+          "PL24178290090217698655909863"
+        ],
+        [
+          "PL08108301417218595908389375"
+        ],
+        [
+          "PL33107676367159078493249322"
+        ],
+        [
+          "PL16365286863288497425637303"
+        ],
+        [
+          "PL34152188301282152403446643"
+        ]
+      ],
+      "total": 100
+    },
+    {
+      "name": "expectation-manifest.json",
+      "kind": "manifest"
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    }
+  ],
+  "tables": [
+    {
+      "entity": "account",
+      "rows": 100,
+      "columns": 1
+    }
+  ]
+}

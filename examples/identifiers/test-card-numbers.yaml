@@ -1,0 +1,26 @@
+# Card numbers for a payment form, with one broken value asked for in about a
+# fifth of the rows.
+#
+# Every card number is one of the test numbers payment providers publish, never
+# a number that only passes the check digit. The damage changes a digit or swaps
+# two, and the manifest says your form should reject each one. It also lists the
+# damage this build could not carry out, with the reason.
+#
+#   qadg generate test-card-numbers.yaml
+#
+# writes payment.csv, expectation-manifest.json and run-note.json. The same
+# seed breaks the same values on every machine.
+version: "0.1"
+seed: "test-card-numbers"
+locale: en-US
+entities:
+  payment:
+    count: 100
+    fields:
+      card: { generator: card }
+policy:
+  layers: [L3]
+  rows: 20%
+  per_row: exactly_one
+output:
+  format: csv

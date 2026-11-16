@@ -1,0 +1,44 @@
+{
+  "files": [
+    {
+      "name": "expectation-manifest.json",
+      "kind": "manifest"
+    },
+    {
+      "name": "product.csv",
+      "kind": "table",
+      "header": [
+        "ean"
+      ],
+      "rows": [
+        [
+          "9522526972155"
+        ],
+        [
+          "9523277062577"
+        ],
+        [
+          "9527806769159"
+        ],
+        [
+          "9526481750711"
+        ],
+        [
+          "9526895988465"
+        ]
+      ],
+      "total": 100
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    }
+  ],
+  "tables": [
+    {
+      "entity": "product",
+      "rows": 100,
+      "columns": 1
+    }
+  ]
+}

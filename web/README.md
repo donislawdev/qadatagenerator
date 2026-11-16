@@ -16,7 +16,7 @@ or from files a test holds to it, and never writes by hand:
 | the six values of the first screen | `../.github/social-preview/says.txt`, mounted | `go test ./internal/gui/socialcard` |
 | the oldest Go a build from source takes | `../go.mod`, mounted | the module itself |
 | the pictures of the window, on the home page and on The window | `assets/window/`, drawn by the program from the data of the README, with the list of texts each one shows beside it | `go test ./internal/gui/screens` compares the texts everywhere and the pixels on windows/amd64 |
-| the ready-made recipes, offered for download and shown on the pages of Examples | `../examples/`, mounted | `go test ./internal/cli -run TestTheSiteShowsWhatTheProgramDoes` runs each one |
+| the ready-made recipes, offered for download and shown on the pages of Examples, and the recipes of `../examples/identifiers/` on the page of each identifier | `../examples/`, mounted | `go test ./internal/cli -run TestTheSiteShowsWhatTheProgramDoes` runs each one |
 | what each recipe printed, the first rows of the files it wrote, the tables with their rows, and its manifest | `data/runs.json`, `data/examples/`, `assets/example-runs/` | the same test, which writes them |
 | any other command a page shows, with what it printed | `{{< run "qadg ..." >}}` in the page, `data/runs.json` | the same test finds every one in `content/` and runs it |
 
@@ -44,6 +44,15 @@ recipe, or a recipe the test has not run. The page holds only the sentences. The
 downloads, the recipe, its run, the first rows of what it writes and each value it damaged come from
 the recipe and from what the test saw it make, and the list of examples puts each one among the data
 to take or the data with damage by whether its recipe has a `policy`.
+
+A page of another part of the site can have its own recipe in a folder of `../examples/` named after
+that part. Each page of Identifiers, `content/<language>/identifiers/<name>.md`, has
+`../examples/identifiers/<name>.yaml`. The page holds what the number is, how its check digit works,
+a `run` of `qadg quick` and what to do with a broken one. Below that the template shows the recipe,
+its run and every value it damaged, and the `sources` of the page's front matter. The build stops on
+a recipe with no page, a recipe that damaged nothing, a page with no sources, and a page the table on
+the first page of Identifiers does not link to. A folder goes one level deep, and two recipes may not
+share a file name, because a reader saves a recipe under its own name.
 
 A change to the window, or to what the program produces for the README, fails the test of the
 pictures until they are drawn again, on Windows or Linux on amd64:

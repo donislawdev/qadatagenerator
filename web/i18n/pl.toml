@@ -4,13 +4,14 @@
 #
 # The English file of words this was translated from, by its git blob id.
 # .github/scripts/translations.py names this file when en.toml has changed.
-# translatedFrom: a1790ef6392dffe8c63872bbbf5dd2476190e875
+# translatedFrom: bcf41ca8893d8f9222c93d6a5c554673f95b0789
 
 skip_to_content = "Przejdź do treści"
 nav_label = "Menu główne"
 nav_docs = "Dokumentacja"
 nav_recipes = "Przepisy"
 nav_examples = "Przykłady"
+nav_identifiers = "Identyfikatory"
 nav_damage = "Co psuje"
 nav_download = "Instalacja"
 menu = "Menu"
@@ -89,6 +90,10 @@ example_note_file = "Seed, locale i wersje, z którymi ruszył przebieg, oraz ka
 example_damage = "Co zepsuł"
 example_where = "{{ .Entity }} {{ .Row }}, kolumna {{ .Field }}"
 
+# The part of an identifier's page that its recipe makes, and the end of it.
+identifier_broken = "Zepsute do testów"
+identifier_sources = "Źródła"
+
 # Words that change with a number. Count picks the form, of which Polish has
 # four: one, few, many and other. The sentences about defects put their other
 # numbers after a colon, so that no word has to agree with a number other than
@@ -142,6 +147,14 @@ many = "Zamówione uszkodzenia: {{ .Count }}. Ta wersja nie umiała zastosować 
 other = "Zamówione uszkodzenia: {{ .Count }}. Ta wersja nie umiała zastosować żadnego, a manifest mówi przy każdym dlaczego."
 
 [example_damage_some]
-few = "Zamówione uszkodzenia: {{ .Count }}. Zastosowane przez tę wersję: {{ .Applied }}, w tabeli niżej. Niezastosowane: {{ .Refused }}, każde jest w manifeście z powodem, a przebieg wyżej liczy je według powodu."
-many = "Zamówione uszkodzenia: {{ .Count }}. Zastosowane przez tę wersję: {{ .Applied }}, w tabeli niżej. Niezastosowane: {{ .Refused }}, każde jest w manifeście z powodem, a przebieg wyżej liczy je według powodu."
-other = "Zamówione uszkodzenia: {{ .Count }}. Zastosowane przez tę wersję: {{ .Applied }}, w tabeli niżej. Niezastosowane: {{ .Refused }}, każde jest w manifeście z powodem, a przebieg wyżej liczy je według powodu."
+few = "Zamówione uszkodzenia: {{ .Count }}. Zastosowane przez tę wersję: {{ .Applied }}, opisane niżej. Niezastosowane: {{ .Refused }}, każde jest w manifeście z powodem, a przebieg wyżej liczy je według powodu."
+many = "Zamówione uszkodzenia: {{ .Count }}. Zastosowane przez tę wersję: {{ .Applied }}, opisane niżej. Niezastosowane: {{ .Refused }}, każde jest w manifeście z powodem, a przebieg wyżej liczy je według powodu."
+other = "Zamówione uszkodzenia: {{ .Count }}. Zastosowane przez tę wersję: {{ .Applied }}, opisane niżej. Niezastosowane: {{ .Refused }}, każde jest w manifeście z powodem, a przebieg wyżej liczy je według powodu."
+
+# Count is how many values the recipe of an identifier's page makes, and Rows
+# the share of rows its policy asks to damage, as the recipe writes it.
+[identifier_broken_lead]
+one = "Przepis niżej robi 1 wartość i zamawia uszkodzenie w {{ .Rows }} wierszy. Pobierz go i uruchom bez zmian, a potem zmień liczbę albo udział pod swoje testy."
+few = "Przepis niżej robi {{ .Shown }} wartości i zamawia uszkodzenie w {{ .Rows }} wierszy. Pobierz go i uruchom bez zmian, a potem zmień liczbę albo udział pod swoje testy."
+many = "Przepis niżej robi {{ .Shown }} wartości i zamawia uszkodzenie w {{ .Rows }} wierszy. Pobierz go i uruchom bez zmian, a potem zmień liczbę albo udział pod swoje testy."
+other = "Przepis niżej robi {{ .Shown }} wartości i zamawia uszkodzenie w {{ .Rows }} wierszy. Pobierz go i uruchom bez zmian, a potem zmień liczbę albo udział pod swoje testy."

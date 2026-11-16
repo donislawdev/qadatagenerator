@@ -22,12 +22,7 @@
     <p class="lead">{{ . | markdownify }}</p>
     {{- end }}
     <p>{{ partial "example-facts.html" $example }}</p>
-    <div class="actions downloads">
-      <a class="button primary" href="{{ $example.recipe.RelPermalink }}" download>{{ T "example_download_recipe" }}</a>
-      {{- with $example.manifest }}
-      <a class="button" href="{{ .RelPermalink }}" download>{{ T "example_download_manifest" }}</a>
-      {{- end }}
-    </div>
+    {{ partial "example-downloads.html" $example }}
     {{ .Content }}
 
     <h2 id="example-recipe">{{ T "example_recipe" }}</h2>
@@ -67,35 +62,8 @@
     {{- end }}
 
     {{- with $example.manifest }}
-    {{- $defects := (. | transform.Unmarshal).defects }}
-    {{- $applied := where $defects "applied" true }}
     <h2 id="example-damage">{{ T "example_damage" }}</h2>
-    {{- $counts := dict "Count" (len $defects) "Applied" (len $applied) "Refused" (sub (len $defects) (len $applied)) }}
-    {{- if not $applied }}
-    <p>{{ T "example_damage_none" $counts }}</p>
-    {{- else if eq (len $applied) (len $defects) }}
-    <p>{{ T "example_damage_all" $counts }}</p>
-    {{- else }}
-    <p>{{ T "example_damage_some" $counts }}</p>
-    {{- end }}
-    {{- /* A list rather than a table, as on the page of damage: six columns
-           with an identifier in one of them pushed the answer out of sight. */}}
-    {{- with $applied }}
-    <div class="damage-kinds">
-      {{- range . }}
-      <div class="damage-kind">
-        <div class="kind-head"><code>{{ .mutator }}</code>{{ partial "answer.html" (dict "expectation" .expectation "confidence" .confidence) }}</div>
-        <p>{{ T "example_where" (dict "Entity" .location.entity "Row" .location.row "Field" .location.field) }}</p>
-        <p class="kind-example">
-          {{- range $at, $value := slice .value_before .value_after }}
-          {{- if $at }} <span class="arrow">→</span> {{ end }}
-          {{- with partial "visible.html" $value }}<code>{{ . }}</code>{{ else }}<span class="empty">{{ T "defects_empty" }}</span>{{ end }}
-          {{- end -}}
-        </p>
-      </div>
-      {{- end }}
-    </div>
-    {{- end }}
+    {{ partial "example-damage.html" (dict "manifest" .) }}
     {{- end }}
   </article>
   {{ partial "toc.html" (dict "page" . "extra" $extra) }}

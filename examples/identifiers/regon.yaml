@@ -1,0 +1,26 @@
+# Polish REGON numbers for testing, with one broken value asked for in about a
+# fifth of the rows.
+#
+# A REGON can match a real one, so keep the file in test systems. The damage
+# changes a digit or swaps two, and the manifest says your application should
+# reject each one. It also lists the damage this build could not carry out, with
+# the reason.
+#
+#   qadg generate regon.yaml
+#
+# writes company.csv, expectation-manifest.json and run-note.json. The same seed
+# breaks the same values on every machine.
+version: "0.1"
+seed: "regon"
+locale: pl-PL
+entities:
+  company:
+    count: 100
+    fields:
+      regon: { generator: regon }
+policy:
+  layers: [L3]
+  rows: 20%
+  per_row: exactly_one
+output:
+  format: csv

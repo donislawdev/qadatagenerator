@@ -1,5 +1,5 @@
 ---
-translatedFrom: c39631096be2b722aa72205222fedaf8097ece68
+translatedFrom: 5bc3b5b6cbd7c6e665aaa241f093e0cefa114ce4
 title: Każda wartość jest zmyślona
 seoTitle: "Każda wartość jest zmyślona: prywatność i bezpieczeństwo"
 description: "Każda wartość z QA Data Generator jest zmyślona. Żadnych prawdziwych osób, połączeń z siecią ani telemetrii. Co to znaczy dla SSN, numerów kart i twoich plików."
@@ -11,7 +11,7 @@ lead: "Dane testowe muszą wyglądać prawdziwie, żeby czegokolwiek dowieść, 
 Imiona, nazwiska, adresy, identyfikatory, numery kart i rachunków: żadne z nich nie opisuje prawdziwej osoby, firmy ani instytucji, a do ich zbudowania nie użyto żadnego rejestru prawdziwych osób. Gdy wartość wygląda prawdziwie, to zasługa arytmetyki, bo test, który widzi tylko wyraźnie fałszywe dane, nie mówi nic o dniu, w którym przyjdą prawdziwe. Jeśli rozpoznajesz którąś z wartości, to przypadek.
 
 - **Numery SSN zaczynają się od 666.** Tego obszaru nigdy się nie przydziela, więc wygenerowany SSN nie może należeć do nikogo. Aplikacja, która sprawdza obszar, odrzuci je, także w poprawnych wierszach.
-- **Numery kart to wyłącznie opublikowane numery testowe.** Żaden z nich nie jest numerem prawdziwej karty.
+- **Numery kart to wyłącznie numery testowe publikowane przez operatorów płatności.** Program nigdy nie wymyśla numeru, który tylko przechodzi cyfrę kontrolną. Żaden z operatorów nie obiecuje, że żaden bank nie wydał tego samego numeru prawdziwej karcie, więc trzymaj je w systemach testowych jak resztę.
 - **Niektóre systemy numeracji nie mają puli wydzielonej do testów.** Wartość z takiego systemu może pokryć się z numerem, który naprawdę wydano, i okno mówi to przy niej. [SECURITY.md](https://github.com/donislawdev/qadatagenerator/blob/main/SECURITY.md) wymienia, które systemy mają taką pulę, a które nie.
 
 Wygenerowany zestaw danych jest bezpieczny w środowisku testowym i nie wolno go przedstawiać jako danych kogokolwiek. Oznaczaj go jako syntetyczny wszędzie, dokąd trafi. `qadg --license` wypisuje to samo zastrzeżenie, bo strona internetowa nie podróżuje razem z plikiem danych.

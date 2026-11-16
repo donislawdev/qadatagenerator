@@ -578,6 +578,11 @@ repository once they are released.
   and three that order damage for your application to catch: wrong check
   digits, the rules of a sign-up form, and names and Unicode. The comment at
   the top of each says what it makes and which files it writes.
+- **A recipe for each identifier in examples/identifiers.** Eleven recipes,
+  one for card numbers, VIN, SSN, PESEL, ISBN, EAN-13, IMEI, ABA routing
+  numbers, NIP, REGON and Polish IBANs, each making a hundred values with one
+  broken value asked for in about a fifth of the rows, and a manifest that says
+  what your application should do with each broken one.
 - **The program has its own icon: a wooden spoon of red lentils.**
   It shows on the window and, on Windows, in File Explorer for both
   qadg.exe and qadg-gui.exe, whose properties now also say what they are,

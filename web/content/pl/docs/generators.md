@@ -1,5 +1,5 @@
 ---
-translatedFrom: fd9421d0b58ecff97d3bbbc3618ec3cf67650343
+translatedFrom: 7805952065891787f765292e19658e723acc0355
 title: Generatory
 seoTitle: "Generatory: PESEL, NIP, REGON, IBAN, VIN, ISBN i inne"
 description: "Czym QA Data Generator wypełnia kolumny: PESEL, NIP, REGON, IBAN, imiona i miejsca, testowe numery kart, ISBN, EAN, IMEI, VIN, SSN i numery ABA."
@@ -15,12 +15,12 @@ lead: "Generator wypełnia kolumnę. Przepis wskazuje go kluczem `generator:`, a
 ## Wartości, które zgadzają się ze sobą
 
 - **Ludzie.** Imiona i nazwiska mogą iść za kolumną płci dzięki `first_name matches: [gender]`.
-- **Miejsca.** Miasto, jego region i kod pocztowy pasują do siebie. W `en-US` region to stan, a kod pocztowy to kod ZIP.
+- **Miejsca.** W `en-US` miasto, jego stan i kod ZIP pasują do siebie. W `pl-PL` miejscowość i województwo są losowane osobno, a kodów pocztowych jeszcze nie ma.
 - **PESEL.** Numer PESEL niesie tę samą datę urodzenia i płeć co kolumny obok niego.
 
 ## Cyfry kontrolne i numery testowe
 
-Każdy identyfikator ma poprawną cyfrę kontrolną. Numery kart to wyłącznie opublikowane numery testowe, nigdy numer prawdziwej karty. Numery SSN zaczynają się od 666, czyli od obszaru, którego nigdy się nie przydziela, więc wygenerowany SSN nie może należeć do nikogo. Aplikacja, która sprawdza obszar, odrzuci je, także w poprawnych wierszach.
+Każdy identyfikator, który ma cyfrę kontrolną, ma ją poprawną. Numery kart to wyłącznie numery testowe publikowane przez operatorów płatności, nigdy numer wymyślony tak, żeby przeszedł cyfrę kontrolną. Numery SSN zaczynają się od 666, czyli od obszaru, którego nigdy się nie przydziela, więc wygenerowany SSN nie może należeć do nikogo. Aplikacja, która sprawdza obszar, odrzuci je, także w poprawnych wierszach. [Identyfikatory](/identifiers/) opisują każdą cyfrę kontrolną i to, które numery mogą pokryć się z prawdziwymi.
 
 ## Listy słów
 

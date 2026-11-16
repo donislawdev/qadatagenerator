@@ -1,0 +1,26 @@
+# IMEIs for testing, with one broken value asked for in about a fifth of the
+# rows.
+#
+# Every IMEI starts with 00, the block for test equipment, which may not be
+# sold. The damage changes a digit or swaps two, and the manifest says your
+# application should reject each one. It also lists the damage this build could
+# not carry out, with the reason.
+#
+#   qadg generate imei.yaml
+#
+# writes device.csv, expectation-manifest.json and run-note.json. The same seed
+# breaks the same values on every machine.
+version: "0.1"
+seed: "imei"
+locale: en-US
+entities:
+  device:
+    count: 100
+    fields:
+      imei: { generator: imei }
+policy:
+  layers: [L3]
+  rows: 20%
+  per_row: exactly_one
+output:
+  format: csv

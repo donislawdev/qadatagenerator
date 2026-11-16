@@ -1,0 +1,44 @@
+{
+  "files": [
+    {
+      "name": "expectation-manifest.json",
+      "kind": "manifest"
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    },
+    {
+      "name": "vehicle.csv",
+      "kind": "table",
+      "header": [
+        "vin"
+      ],
+      "rows": [
+        [
+          "T8LMRNJY8K6T97148"
+        ],
+        [
+          "HEK43FFS9KNV45503"
+        ],
+        [
+          "G5BTG3U9XDHE24021"
+        ],
+        [
+          "3881AXDP5W8W68244"
+        ],
+        [
+          "JL13KF8S665927982"
+        ]
+      ],
+      "total": 100
+    }
+  ],
+  "tables": [
+    {
+      "entity": "vehicle",
+      "rows": 100,
+      "columns": 1
+    }
+  ]
+}

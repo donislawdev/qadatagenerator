@@ -1,0 +1,56 @@
+{
+  "files": [
+    {
+      "name": "expectation-manifest.json",
+      "kind": "manifest"
+    },
+    {
+      "name": "person.csv",
+      "kind": "table",
+      "header": [
+        "gender",
+        "birth_date",
+        "pesel"
+      ],
+      "rows": [
+        [
+          "mężczyzna",
+          "1959-02-22",
+          "59022266037"
+        ],
+        [
+          "mężczyzna",
+          "1940-04-13",
+          "40041394452"
+        ],
+        [
+          "kobieta",
+          "1941-10-09",
+          "41100999906"
+        ],
+        [
+          "mężczyzna",
+          "1990-05-10",
+          "90051014477"
+        ],
+        [
+          "kobieta",
+          "1941-09-24",
+          "41092421746"
+        ]
+      ],
+      "total": 100
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    }
+  ],
+  "tables": [
+    {
+      "entity": "person",
+      "rows": 100,
+      "columns": 3
+    }
+  ]
+}

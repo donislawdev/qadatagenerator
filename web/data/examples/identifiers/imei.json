@@ -1,0 +1,44 @@
+{
+  "files": [
+    {
+      "name": "device.csv",
+      "kind": "table",
+      "header": [
+        "imei"
+      ],
+      "rows": [
+        [
+          "000335670065929"
+        ],
+        [
+          "009377758954195"
+        ],
+        [
+          "008531363153319"
+        ],
+        [
+          "006887752496517"
+        ],
+        [
+          "007434371108071"
+        ]
+      ],
+      "total": 100
+    },
+    {
+      "name": "expectation-manifest.json",
+      "kind": "manifest"
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    }
+  ],
+  "tables": [
+    {
+      "entity": "device",
+      "rows": 100,
+      "columns": 1
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "files": [
+    {
+      "name": "bank.csv",
+      "kind": "table",
+      "header": [
+        "routing_number"
+      ],
+      "rows": [
+        [
+          "060108942"
+        ],
+        [
+          "033594499"
+        ],
+        [
+          "064971764"
+        ],
+        [
+          "016562998"
+        ],
+        [
+          "037460529"
+        ]
+      ],
+      "total": 100
+    },
+    {
+      "name": "expectation-manifest.json",
+      "kind": "manifest"
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    }
+  ],
+  "tables": [
+    {
+      "entity": "bank",
+      "rows": 100,
+      "columns": 1
+    }
+  ]
+}

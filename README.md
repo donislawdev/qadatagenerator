@@ -364,7 +364,8 @@ once, and the Recipe screen checks it as you type.
 | `output` | top | `format` (`csv` or `json`), `dir`, `file_per_entity` and the CSV `delimiter` |
 
 The [examples](examples/) folder holds ready-made recipes, from one table of people to a shop in three
-related tables and data with damage to catch. Each one runs as it is.
+related tables and data with damage to catch. Its [identifiers](examples/identifiers/) folder has one
+for each kind of identifier, with some of the values broken. Each one runs as it is.
 
 ---
 

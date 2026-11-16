@@ -1,0 +1,31 @@
+# PESEL numbers for testing, with one broken value asked for in about a fifth
+# of the rows.
+#
+# Every PESEL agrees with the birth date and the gender beside it. A PESEL can
+# belong to a real person, so keep the file in test systems. The damage breaks
+# the check digit, or leaves a correct PESEL that disagrees with the birth date
+# or the gender, and the manifest says your application should reject each one.
+# It also lists the damage this build could not carry out, with the reason.
+#
+#   qadg generate pesel.yaml
+#
+# writes person.csv, expectation-manifest.json and run-note.json. The same seed
+# breaks the same values on every machine.
+version: "0.1"
+seed: "pesel"
+locale: pl-PL
+entities:
+  person:
+    count: 100
+    fields:
+      gender:     { generator: gender }
+      birth_date: { generator: birth_date }
+      pesel:      { generator: pesel }
+    consistency:
+      - pesel matches: [birth_date, gender]
+policy:
+  layers: [L3, L4]
+  rows: 20%
+  per_row: exactly_one
+output:
+  format: csv

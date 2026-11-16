@@ -1,0 +1,44 @@
+{
+  "files": [
+    {
+      "name": "company.csv",
+      "kind": "table",
+      "header": [
+        "nip"
+      ],
+      "rows": [
+        [
+          "3970694513"
+        ],
+        [
+          "9573657831"
+        ],
+        [
+          "1831019071"
+        ],
+        [
+          "4358732314"
+        ],
+        [
+          "3699423861"
+        ]
+      ],
+      "total": 100
+    },
+    {
+      "name": "expectation-manifest.json",
+      "kind": "manifest"
+    },
+    {
+      "name": "run-note.json",
+      "kind": "note"
+    }
+  ],
+  "tables": [
+    {
+      "entity": "company",
+      "rows": 100,
+      "columns": 1
+    }
+  ]
+}

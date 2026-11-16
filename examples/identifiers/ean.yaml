@@ -1,0 +1,26 @@
+# EAN-13 numbers for testing, with one broken value asked for in about a fifth
+# of the rows.
+#
+# Every EAN starts with 952, which GS1 sets aside for examples. The damage
+# changes a digit or swaps two, and the manifest says your application should
+# reject each one. It also lists the damage this build could not carry out, with
+# the reason.
+#
+#   qadg generate ean.yaml
+#
+# writes product.csv, expectation-manifest.json and run-note.json. The same seed
+# breaks the same values on every machine.
+version: "0.1"
+seed: "ean"
+locale: en-US
+entities:
+  product:
+    count: 100
+    fields:
+      ean: { generator: ean }
+policy:
+  layers: [L3]
+  rows: 20%
+  per_row: exactly_one
+output:
+  format: csv

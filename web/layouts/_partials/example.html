@@ -1,17 +1,21 @@
 {{- /*
-  One ready-made recipe of examples/, found by the file name of its page:
-  content/<language>/examples/people-us.md is examples/people-us.yaml. Returns
-  the recipe and the manifest published for download, the recipe as data, the
-  command its page shows, and what TestTheSiteShowsWhatTheProgramDoes saw it
-  write. A page with no recipe, or a recipe the test never ran, stops the build.
-  Takes: the page.
+  One recipe of examples/, found by the file name of its page:
+  content/<language>/examples/people-us.md is examples/people-us.yaml, and a
+  page of another part of the site has its recipe in a folder named after that
+  part, so content/<language>/identifiers/vin.md is examples/identifiers/vin.yaml.
+  Returns the recipe and the manifest published for download, the recipe as
+  data, the command its page shows, and what TestTheSiteShowsWhatTheProgramDoes
+  saw it write. A page with no recipe, or a recipe the test never ran, stops the
+  build. Takes: the page.
 */ -}}
-{{- $name := .File.ContentBaseName }}
+{{- $base := .File.ContentBaseName }}
+{{- $name := $base }}
+{{- if ne .Section "examples" }}{{ $name = printf "%s/%s" .Section $base }}{{ end }}
 {{- $recipe := resources.Get (printf "examples/%s.yaml" $name) }}
 {{- if not $recipe }}
   {{- errorf "%s in %s is the page of examples/%s.yaml, which is not there" .File.Path site.Language.Lang $name }}
 {{- end }}
-{{- $made := index hugo.Data.examples $name }}
+{{- $made := index hugo.Data.examples (split $name "/") }}
 {{- if not $made }}
   {{- errorf "data/examples has nothing for examples/%s.yaml, which %s in %s shows. Run\n  go test ./internal/cli -run TestTheSiteShowsWhatTheProgramDoes -update" $name .File.Path site.Language.Lang }}
 {{- end }}
@@ -23,8 +27,8 @@
        guesses the format, and took a recipe that opens with comments for CSV. */}}
 {{- return dict
   "name" $name
-  "file" (printf "%s.yaml" $name)
-  "command" (printf "qadg generate %s.yaml" $name)
+  "file" (printf "%s.yaml" $base)
+  "command" (printf "qadg generate %s.yaml" $base)
   "recipe" ($recipe | resources.Copy (printf "examples/%s.yaml" $name))
   "data" ($recipe | transform.Unmarshal)
   "made" $made

@@ -1,0 +1,27 @@
+# Social security numbers for testing, with one broken value asked for in about
+# a fifth of the rows.
+#
+# Every SSN starts with 666, an area that is never issued, so none of them is
+# anybody's. An SSN has no check digit, so the damage moves a number into area
+# 000, group 00 or serial 0000, and the manifest says your application should
+# reject each one. It also lists the damage this build could not carry out, with
+# the reason.
+#
+#   qadg generate ssn.yaml
+#
+# writes person.csv, expectation-manifest.json and run-note.json. The same seed
+# breaks the same values on every machine.
+version: "0.1"
+seed: "ssn"
+locale: en-US
+entities:
+  person:
+    count: 100
+    fields:
+      ssn: { generator: ssn }
+policy:
+  layers: [L3]
+  rows: 20%
+  per_row: exactly_one
+output:
+  format: csv

@@ -1,0 +1,35 @@
+{{- /*
+  What a recipe's run damaged, read from its manifest: how many defects it
+  ordered and applied, then every applied one with where it is, the value before
+  and after, and what the application should do with it. A defect the build
+  could not apply is counted and left to the manifest. Takes: manifest (the
+  resource). Returns nothing, it renders.
+*/ -}}
+{{- $defects := (.manifest | transform.Unmarshal).defects }}
+{{- $applied := where $defects "applied" true }}
+{{- $counts := dict "Count" (len $defects) "Applied" (len $applied) "Refused" (sub (len $defects) (len $applied)) }}
+{{- if not $applied }}
+<p>{{ T "example_damage_none" $counts }}</p>
+{{- else if eq (len $applied) (len $defects) }}
+<p>{{ T "example_damage_all" $counts }}</p>
+{{- else }}
+<p>{{ T "example_damage_some" $counts }}</p>
+{{- end }}
+{{- /* A list rather than a table, as on the page of damage: six columns
+       with an identifier in one of them pushed the answer out of sight. */}}
+{{- with $applied }}
+<div class="damage-kinds">
+  {{- range . }}
+  <div class="damage-kind">
+    <div class="kind-head"><code>{{ .mutator }}</code>{{ partial "answer.html" (dict "expectation" .expectation "confidence" .confidence) }}</div>
+    <p>{{ T "example_where" (dict "Entity" .location.entity "Row" .location.row "Field" .location.field) }}</p>
+    <p class="kind-example">
+      {{- range $at, $value := slice .value_before .value_after }}
+      {{- if $at }} <span class="arrow">→</span> {{ end }}
+      {{- with partial "visible.html" $value }}<code>{{ . }}</code>{{ else }}<span class="empty">{{ T "defects_empty" }}</span>{{ end }}
+      {{- end -}}
+    </p>
+  </div>
+  {{- end }}
+</div>
+{{- end }}

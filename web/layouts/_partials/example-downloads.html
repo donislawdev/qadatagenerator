@@ -1,0 +1,8 @@
+{{- /* The buttons that download a recipe, and its manifest when it has one.
+       Takes: the map example.html returns. */ -}}
+<div class="actions downloads">
+  <a class="button primary" href="{{ .recipe.RelPermalink }}" download>{{ T "example_download_recipe" }}</a>
+  {{- with .manifest }}
+  <a class="button" href="{{ .RelPermalink }}" download>{{ T "example_download_manifest" }}</a>
+  {{- end }}
+</div>

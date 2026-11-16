@@ -6,6 +6,7 @@ nav_label = "Main"
 nav_docs = "Docs"
 nav_recipes = "Recipes"
 nav_examples = "Examples"
+nav_identifiers = "Identifiers"
 nav_damage = "What it breaks"
 nav_download = "Get it"
 menu = "Menu"
@@ -84,6 +85,10 @@ example_note_file = "The seed, the locale and the versions behind the run, and e
 example_damage = "What it damaged"
 example_where = "{{ .Entity }} {{ .Row }}, column {{ .Field }}"
 
+# The part of an identifier's page that its recipe makes, and the end of it.
+identifier_broken = "Broken ones for your tests"
+identifier_sources = "Sources"
+
 # Words that change with a number. Count picks the form, and the other values
 # are put in where the words name them.
 [example_tables]
@@ -121,3 +126,9 @@ other = "The recipe ordered {{ .Count }} defects, and this build could not apply
 # Some applied and some not, so always two defects or more.
 [example_damage_some]
 other = "The recipe ordered {{ .Count }} defects, and this build applied the {{ .Applied }} below. The other {{ .Refused }} are in the manifest as not applied, each with its reason, and the run above counts them by reason."
+
+# Count is how many values the recipe of an identifier's page makes, and Rows
+# the share of rows its policy asks to damage, as the recipe writes it.
+[identifier_broken_lead]
+one = "The recipe below makes 1 value and asks for damage in {{ .Rows }} of the rows. Download it and run it as it is, then change the count or the share to fit your tests."
+other = "The recipe below makes {{ .Shown }} values and asks for damage in {{ .Rows }} of the rows. Download it and run it as it is, then change the count or the share to fit your tests."

@@ -14,12 +14,12 @@ lead: "A generator fills a column. A recipe names one with `generator:`, and `qa
 ## Values that agree with each other
 
 - **People.** First and last names can follow the gender column with `first_name matches: [gender]`.
-- **Places.** A city, its region and its postal code belong together. In `en-US` a region is a state and a postal code is a ZIP code.
+- **Places.** In `en-US` a city, its state and its ZIP code belong together. In `pl-PL` a town and a voivodeship are drawn apart, and there are no postal codes yet.
 - **Polish national ID numbers.** A PESEL carries the same birth date and gender as the columns beside it.
 
 ## Check digits and test numbers
 
-Every identifier comes with a correct check digit. Card numbers are only the published test numbers, never a number of a real card. Social security numbers start with 666, an area that is never issued, so a generated SSN cannot be anybody's. An application that checks the area will refuse them, valid rows included.
+Every identifier that has a check digit comes with a correct one. Card numbers are only the test numbers payment providers publish, never a number made up to pass the check digit. Social security numbers start with 666, an area that is never issued, so a generated SSN cannot be anybody's. An application that checks the area will refuse them, valid rows included. [Identifiers](/identifiers/) explains every check digit, and which numbers can match real ones.
 
 ## Word lists
 

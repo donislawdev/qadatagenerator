@@ -1,0 +1,38 @@
+{
+  "spec_version": "0.2",
+  "defects": [
+    {"id":"vehicle-7-L3.checksum.off_by_one","location":{"entity":"vehicle","row":7,"field":"vin"},"mutator":"L3.checksum.off_by_one","layer":"L3","applied":true,"value_before":"FUJ68S024PTY67056","value_after":"FUJ68S024PTY67057","expectation":"rejection","confidence":"hard","rationale":"Changes one digit so the format stays valid and the check digit no longer matches."},
+    {"id":"vehicle-9-L3.checksum.transposed_digits","location":{"entity":"vehicle","row":9,"field":"vin"},"mutator":"L3.checksum.transposed_digits","layer":"L3","applied":true,"value_before":"BUEEWK2P599885839","value_after":"BUEEWK2P599885389","expectation":"rejection","confidence":"hard","rationale":"Swaps two adjacent digits, which is the most common human typing mistake."},
+    {"id":"vehicle-16-L3.currency.wrong_scale","location":{"entity":"vehicle","row":16,"field":"vin"},"mutator":"L3.currency.wrong_scale","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Writes an amount with more or fewer decimal places than the currency has.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"vehicle-19-L3.date.future_birthdate","location":{"entity":"vehicle","row":19,"field":"vin"},"mutator":"L3.date.future_birthdate","layer":"L3","applied":false,"expectation":"rejection","confidence":"soft","rationale":"Sets a birth date in the future.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"vehicle-23-L3.national_id.impossible_date","location":{"entity":"vehicle","row":23,"field":"vin"},"mutator":"L3.national_id.impossible_date","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Builds a national identifier that encodes a date which does not exist.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"vehicle-24-L3.range.unassigned","location":{"entity":"vehicle","row":24,"field":"vin"},"mutator":"L3.range.unassigned","layer":"L3","applied":false,"expectation":"rejection","confidence":"soft","rationale":"Uses an identifier from a range the issuing authority does not assign.","failure_reason":"this damage needs an identifier with a block nobody is assigned (such as an ABA routing number), which this run does not have","failure_kind":"run_lacks_capability"},
+    {"id":"vehicle-30-L3.sentinel.placeholder_value","location":{"entity":"vehicle","row":30,"field":"vin"},"mutator":"L3.sentinel.placeholder_value","layer":"L3","applied":false,"expectation":"warning","confidence":"soft","rationale":"Replaces a real value with a placeholder that passes every format check and carries no meaning.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"vehicle-43-L3.checksum.off_by_one","location":{"entity":"vehicle","row":43,"field":"vin"},"mutator":"L3.checksum.off_by_one","layer":"L3","applied":true,"value_before":"Z4ZE1AF17DEL76727","value_after":"Z4ZE1AF17DEL76728","expectation":"rejection","confidence":"hard","rationale":"Changes one digit so the format stays valid and the check digit no longer matches."},
+    {"id":"vehicle-48-L3.checksum.transposed_digits","location":{"entity":"vehicle","row":48,"field":"vin"},"mutator":"L3.checksum.transposed_digits","layer":"L3","applied":true,"value_before":"MWL2FBAA0CKU91295","value_after":"MWL2FBAA0CKU91259","expectation":"rejection","confidence":"hard","rationale":"Swaps two adjacent digits, which is the most common human typing mistake."},
+    {"id":"vehicle-49-L3.currency.wrong_scale","location":{"entity":"vehicle","row":49,"field":"vin"},"mutator":"L3.currency.wrong_scale","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Writes an amount with more or fewer decimal places than the currency has.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"vehicle-51-L3.date.future_birthdate","location":{"entity":"vehicle","row":51,"field":"vin"},"mutator":"L3.date.future_birthdate","layer":"L3","applied":false,"expectation":"rejection","confidence":"soft","rationale":"Sets a birth date in the future.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"vehicle-77-L3.national_id.impossible_date","location":{"entity":"vehicle","row":77,"field":"vin"},"mutator":"L3.national_id.impossible_date","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Builds a national identifier that encodes a date which does not exist.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"vehicle-78-L3.range.unassigned","location":{"entity":"vehicle","row":78,"field":"vin"},"mutator":"L3.range.unassigned","layer":"L3","applied":false,"expectation":"rejection","confidence":"soft","rationale":"Uses an identifier from a range the issuing authority does not assign.","failure_reason":"this damage needs an identifier with a block nobody is assigned (such as an ABA routing number), which this run does not have","failure_kind":"run_lacks_capability"},
+    {"id":"vehicle-80-L3.sentinel.placeholder_value","location":{"entity":"vehicle","row":80,"field":"vin"},"mutator":"L3.sentinel.placeholder_value","layer":"L3","applied":false,"expectation":"warning","confidence":"soft","rationale":"Replaces a real value with a placeholder that passes every format check and carries no meaning.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"vehicle-89-L3.checksum.off_by_one","location":{"entity":"vehicle","row":89,"field":"vin"},"mutator":"L3.checksum.off_by_one","layer":"L3","applied":true,"value_before":"HBGUKEX8288F04836","value_after":"HBGUKEX8288F04837","expectation":"rejection","confidence":"hard","rationale":"Changes one digit so the format stays valid and the check digit no longer matches."},
+    {"id":"vehicle-93-L3.checksum.transposed_digits","location":{"entity":"vehicle","row":93,"field":"vin"},"mutator":"L3.checksum.transposed_digits","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Swaps two adjacent digits, which is the most common human typing mistake.","failure_reason":"swapping the digits at positions 8 and 9 leaves a value vin still accepts, so a test given this row would find nothing to reject","failure_kind":"declined_by_mutator"},
+    {"id":"vehicle-97-L3.currency.wrong_scale","location":{"entity":"vehicle","row":97,"field":"vin"},"mutator":"L3.currency.wrong_scale","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Writes an amount with more or fewer decimal places than the currency has.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"}
+  ],
+  "run": {
+    "generated_at": "2026-11-16T17:31:13Z",
+    "seed": "vin",
+    "locale": "en-US",
+    "catalog_version": "0.1",
+    "rows_total": 100,
+    "entities": [
+      {
+        "entity": "vehicle",
+        "rows_total": 100
+      }
+    ],
+    "rows_mutated": 5,
+    "defects_requested": 17,
+    "defects_applied": 5
+  }
+}

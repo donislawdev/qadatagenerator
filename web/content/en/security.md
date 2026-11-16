@@ -10,7 +10,7 @@ lead: "Test data has to look real to prove anything, and it must never be anybod
 Names, addresses, identifiers, card and account numbers: none of them describe a real person, company or institution, and no register of real people was used to build them. Where a value looks real, that is arithmetic, because a test that only ever sees obviously fake data proves nothing about the day real data arrives. If you recognise one, it is a coincidence.
 
 - **Social security numbers start with 666.** That area is never issued, so a generated SSN cannot be anybody's. An application that checks the area will refuse them, valid rows included.
-- **Card numbers are only the published test numbers.** None of them is the number of a real card.
+- **Card numbers are only the test numbers payment providers publish.** The program never makes up a number that merely passes the check digit. None of the providers promises that no bank has issued the same number to a real card, so keep them in test systems like the rest.
 - **Some numbering schemes have no block set aside for testing.** A value of such a scheme may match one that was really issued, and the window says so beside it. [SECURITY.md](https://github.com/donislawdev/qadatagenerator/blob/main/SECURITY.md) lists which schemes have such a block and which have none.
 
 A generated dataset is safe in a test environment and is not safe to present as a record of anybody. Mark it as synthetic wherever it travels. `qadg --license` prints the same notice, because a web page does not travel with a file of data.

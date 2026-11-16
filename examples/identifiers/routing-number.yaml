@@ -1,0 +1,27 @@
+# ABA routing numbers for testing, with one broken value asked for in about a
+# fifth of the rows.
+#
+# A routing number can match a real bank's, so keep the file in test systems.
+# The damage changes a digit, swaps two, or moves a number into a series
+# reserved for future use, and the manifest says your application should reject
+# each one. It also lists the damage this build could not carry out, with the
+# reason.
+#
+#   qadg generate routing-number.yaml
+#
+# writes bank.csv, expectation-manifest.json and run-note.json. The same seed
+# breaks the same values on every machine.
+version: "0.1"
+seed: "routing-number"
+locale: en-US
+entities:
+  bank:
+    count: 100
+    fields:
+      routing_number: { generator: aba }
+policy:
+  layers: [L3]
+  rows: 20%
+  per_row: exactly_one
+output:
+  format: csv

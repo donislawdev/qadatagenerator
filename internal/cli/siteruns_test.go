@@ -27,6 +27,10 @@ import (
 //	web/assets/example-runs/NAME/      the manifest of an example that orders
 //	                                   damage, offered for download
 //
+// A folder of examples/ holds the recipes another part of the site shows, one
+// to a page, such as examples/identifiers for the page of each identifier. NAME
+// is then the folder and the name, identifiers/vin.
+//
 // Every command runs in an empty directory that holds the examples, the way
 // somebody runs one they downloaded. Every example is run with generate, which
 // its page shows. The site stops its build on a command or an example this
@@ -87,8 +91,32 @@ func TestTheSiteRunsCheckGoesRedWhereTheSiteIsWrong(t *testing.T) {
 			commands, problems)
 	}
 
-	if _, problems := exampleNames(t.TempDir()); len(problems) != 1 {
-		t.Errorf("a directory with no example gave %d problems rather than one", len(problems))
+	for _, c := range []struct {
+		name     string
+		files    []string
+		names    []string
+		problems int
+	}{
+		{"no example", nil, nil, 1},
+		{"examples at the top and in a folder", []string{"a.yaml", "g/b.yaml"}, []string{"a", "g/b"}, 0},
+		{"one file name twice", []string{"a.yaml", "g/a.yaml"}, []string{"a", "g/a"}, 1},
+		{"a folder in a folder", []string{"a.yaml", "g/h/b.yaml"}, []string{"a"}, 1},
+	} {
+		dir := t.TempDir()
+		for _, file := range c.files {
+			written := filepath.Join(dir, filepath.FromSlash(file))
+			if err := os.MkdirAll(filepath.Dir(written), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(written, []byte("version: \"0.1\"\n"), 0o644); err != nil {
+				t.Fatal(err)
+			}
+		}
+		names, problems := exampleNames(dir)
+		if !slices.Equal(names, c.names) || len(problems) != c.problems {
+			t.Errorf("%s: gave the examples %q and %d problems %q, and should give %q and %d",
+				c.name, names, len(problems), problems, c.names, c.problems)
+		}
 	}
 
 	manifest := "{\n  \"run\": {\n    \"generated_at\": \"2026-11-14T00:00:00Z\",\n    \"seed\": \"s\"\n  }\n}\n"
@@ -181,26 +209,62 @@ type siteExampleFile struct {
 
 func inRepository(root, name string) string { return filepath.Join(root, filepath.FromSlash(name)) }
 
-func exampleCommand(name string) string { return "qadg generate " + name + ".yaml" }
+// exampleFile is the name a recipe is saved and run under, which is the same
+// for one at the top of examples/ and one in a folder.
+func exampleFile(name string) string { return path.Base(name) + ".yaml" }
 
-// exampleNames lists the recipes in dir by name, without .yaml.
+func exampleCommand(name string) string { return "qadg generate " + exampleFile(name) }
+
+// exampleNames lists the recipes in dir by name, without .yaml: one at the top
+// by its file name, and one in a folder as folder/name. Folders go one level
+// deep. Two recipes may not share a file name, because a reader saves a recipe
+// under its own name and runs it there.
 func exampleNames(dir string) ([]string, []string) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, []string{fmt.Sprintf("cannot read %s: %v", examplesDir, err)}
 	}
 	var names, problems []string
-	for _, entry := range entries {
+	add := func(folder string, entry fs.DirEntry) {
+		shown := path.Join(examplesDir, folder, entry.Name())
 		name, isRecipe := strings.CutSuffix(entry.Name(), ".yaml")
 		switch {
 		case entry.IsDir() || !isRecipe:
-			problems = append(problems, fmt.Sprintf("%s/%s is not a recipe, and %s holds recipes alone", examplesDir, entry.Name(), examplesDir))
+			problems = append(problems, fmt.Sprintf("%s is not a recipe, and %s holds recipes and one level of folders of them alone",
+				shown, examplesDir))
 		case !exampleName.MatchString(name):
+			problems = append(problems, fmt.Sprintf("%s is named for an address, so its name is lower case letters and digits with single hyphens",
+				shown))
+		default:
+			names = append(names, path.Join(folder, name))
+		}
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			add("", entry)
+			continue
+		}
+		if !exampleName.MatchString(entry.Name()) {
 			problems = append(problems, fmt.Sprintf("%s/%s is named for an address, so its name is lower case letters and digits with single hyphens",
 				examplesDir, entry.Name()))
-		default:
-			names = append(names, name)
+			continue
 		}
+		inner, err := os.ReadDir(filepath.Join(dir, entry.Name()))
+		if err != nil {
+			problems = append(problems, fmt.Sprintf("cannot read %s/%s: %v", examplesDir, entry.Name(), err))
+			continue
+		}
+		for _, file := range inner {
+			add(entry.Name(), file)
+		}
+	}
+	byFile := map[string]string{}
+	for _, name := range names {
+		if other, twice := byFile[exampleFile(name)]; twice {
+			problems = append(problems, fmt.Sprintf("%s/%s.yaml and %s/%s.yaml are both saved as %s, so one would overwrite the other",
+				examplesDir, other, examplesDir, name, exampleFile(name)))
+		}
+		byFile[exampleFile(name)] = name
 	}
 	if len(names) == 0 {
 		problems = append(problems, fmt.Sprintf("%s holds no recipe, and the site has a page for every one", examplesDir))
@@ -269,7 +333,7 @@ func showRuns(t *testing.T, root string, examples, commands []string) (map[strin
 			if err != nil {
 				t.Fatalf("cannot read the example %s: %v", name, err)
 			}
-			if err := os.WriteFile(filepath.Join(dir, name+".yaml"), data, 0o644); err != nil {
+			if err := os.WriteFile(filepath.Join(dir, exampleFile(name)), data, 0o644); err != nil {
 				t.Fatalf("cannot copy the example %s: %v", name, err)
 			}
 		}
@@ -316,7 +380,7 @@ func exampleMade(dir, name string, examples []string, shown map[string][]byte) (
 			return err
 		}
 		written := filepath.ToSlash(relative)
-		if recipe, isYAML := strings.CutSuffix(written, ".yaml"); isYAML && slices.Contains(examples, recipe) {
+		if slices.ContainsFunc(examples, func(example string) bool { return exampleFile(example) == written }) {
 			return nil
 		}
 		data, err := os.ReadFile(file)

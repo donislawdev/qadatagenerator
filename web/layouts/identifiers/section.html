@@ -1,0 +1,32 @@
+{{- /*
+  The page of every identifier, whose own words carry the table of them. Every
+  recipe of examples/identifiers needs a page in the language being built, and
+  every page of the section needs a link from this one, so neither the language
+  nor the table can leave a number out.
+*/ -}}
+{{ define "main" }}
+{{- range resources.Match "examples/identifiers/*.yaml" }}
+  {{- $name := path.BaseName .Name }}
+  {{- if not (where $.Pages "File.ContentBaseName" $name) }}
+    {{- errorf "examples/identifiers/%s.yaml has no page in %s. Add content/%s/identifiers/%s.md" $name site.Language.Lang site.Language.Lang $name }}
+  {{- end }}
+{{- end }}
+{{- range .Pages }}
+  {{- if not (strings.Contains $.Content (printf "href=%q" .RelPermalink)) }}
+    {{- errorf "%s in %s does not link to %s, and its table names every identifier" $.File.Path site.Language.Lang .RelPermalink }}
+  {{- end }}
+{{- end }}
+<div class="container docs">
+  {{ partial "sidebar.html" . }}
+  <article class="prose">
+    {{ partial "breadcrumbs.html" . }}
+    <h1>{{ .Title }}</h1>
+    {{- with .Params.lead }}
+    <p class="lead">{{ . | markdownify }}</p>
+    {{- end }}
+    {{ .Content }}
+    {{ partial "pager.html" . }}
+  </article>
+  {{ partial "toc.html" (dict "page" . "extra" slice) }}
+</div>
+{{ end }}

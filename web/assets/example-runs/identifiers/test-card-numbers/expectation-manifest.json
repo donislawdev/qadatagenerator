@@ -1,0 +1,39 @@
+{
+  "spec_version": "0.2",
+  "defects": [
+    {"id":"payment-5-L3.checksum.transposed_digits","location":{"entity":"payment","row":5,"field":"card"},"mutator":"L3.checksum.transposed_digits","layer":"L3","applied":true,"value_before":"3530111333300000","value_after":"5330111333300000","expectation":"rejection","confidence":"hard","rationale":"Swaps two adjacent digits, which is the most common human typing mistake."},
+    {"id":"payment-14-L3.currency.wrong_scale","location":{"entity":"payment","row":14,"field":"card"},"mutator":"L3.currency.wrong_scale","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Writes an amount with more or fewer decimal places than the currency has.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"payment-15-L3.date.future_birthdate","location":{"entity":"payment","row":15,"field":"card"},"mutator":"L3.date.future_birthdate","layer":"L3","applied":false,"expectation":"rejection","confidence":"soft","rationale":"Sets a birth date in the future.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"payment-23-L3.national_id.impossible_date","location":{"entity":"payment","row":23,"field":"card"},"mutator":"L3.national_id.impossible_date","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Builds a national identifier that encodes a date which does not exist.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"payment-26-L3.range.unassigned","location":{"entity":"payment","row":26,"field":"card"},"mutator":"L3.range.unassigned","layer":"L3","applied":false,"expectation":"rejection","confidence":"soft","rationale":"Uses an identifier from a range the issuing authority does not assign.","failure_reason":"this damage needs an identifier with a block nobody is assigned (such as an ABA routing number), which this run does not have","failure_kind":"run_lacks_capability"},
+    {"id":"payment-31-L3.sentinel.placeholder_value","location":{"entity":"payment","row":31,"field":"card"},"mutator":"L3.sentinel.placeholder_value","layer":"L3","applied":false,"expectation":"warning","confidence":"soft","rationale":"Replaces a real value with a placeholder that passes every format check and carries no meaning.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"payment-40-L3.checksum.off_by_one","location":{"entity":"payment","row":40,"field":"card"},"mutator":"L3.checksum.off_by_one","layer":"L3","applied":true,"value_before":"4242424242424242","value_after":"4242424242424243","expectation":"rejection","confidence":"hard","rationale":"Changes one digit so the format stays valid and the check digit no longer matches."},
+    {"id":"payment-42-L3.checksum.transposed_digits","location":{"entity":"payment","row":42,"field":"card"},"mutator":"L3.checksum.transposed_digits","layer":"L3","applied":true,"value_before":"4242424242424242","value_after":"4242442242424242","expectation":"rejection","confidence":"hard","rationale":"Swaps two adjacent digits, which is the most common human typing mistake."},
+    {"id":"payment-48-L3.currency.wrong_scale","location":{"entity":"payment","row":48,"field":"card"},"mutator":"L3.currency.wrong_scale","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Writes an amount with more or fewer decimal places than the currency has.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"payment-51-L3.date.future_birthdate","location":{"entity":"payment","row":51,"field":"card"},"mutator":"L3.date.future_birthdate","layer":"L3","applied":false,"expectation":"rejection","confidence":"soft","rationale":"Sets a birth date in the future.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"payment-57-L3.national_id.impossible_date","location":{"entity":"payment","row":57,"field":"card"},"mutator":"L3.national_id.impossible_date","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Builds a national identifier that encodes a date which does not exist.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"payment-64-L3.range.unassigned","location":{"entity":"payment","row":64,"field":"card"},"mutator":"L3.range.unassigned","layer":"L3","applied":false,"expectation":"rejection","confidence":"soft","rationale":"Uses an identifier from a range the issuing authority does not assign.","failure_reason":"this damage needs an identifier with a block nobody is assigned (such as an ABA routing number), which this run does not have","failure_kind":"run_lacks_capability"},
+    {"id":"payment-72-L3.sentinel.placeholder_value","location":{"entity":"payment","row":72,"field":"card"},"mutator":"L3.sentinel.placeholder_value","layer":"L3","applied":false,"expectation":"warning","confidence":"soft","rationale":"Replaces a real value with a placeholder that passes every format check and carries no meaning.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"payment-73-L3.checksum.off_by_one","location":{"entity":"payment","row":73,"field":"card"},"mutator":"L3.checksum.off_by_one","layer":"L3","applied":true,"value_before":"3530111333300000","value_after":"3530111333300001","expectation":"rejection","confidence":"hard","rationale":"Changes one digit so the format stays valid and the check digit no longer matches."},
+    {"id":"payment-77-L3.checksum.transposed_digits","location":{"entity":"payment","row":77,"field":"card"},"mutator":"L3.checksum.transposed_digits","layer":"L3","applied":true,"value_before":"6243030000000001","value_after":"6243300000000001","expectation":"rejection","confidence":"hard","rationale":"Swaps two adjacent digits, which is the most common human typing mistake."},
+    {"id":"payment-80-L3.currency.wrong_scale","location":{"entity":"payment","row":80,"field":"card"},"mutator":"L3.currency.wrong_scale","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Writes an amount with more or fewer decimal places than the currency has.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"payment-94-L3.date.future_birthdate","location":{"entity":"payment","row":94,"field":"card"},"mutator":"L3.date.future_birthdate","layer":"L3","applied":false,"expectation":"rejection","confidence":"soft","rationale":"Sets a birth date in the future.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"},
+    {"id":"payment-96-L3.national_id.impossible_date","location":{"entity":"payment","row":96,"field":"card"},"mutator":"L3.national_id.impossible_date","layer":"L3","applied":false,"expectation":"rejection","confidence":"hard","rationale":"Builds a national identifier that encodes a date which does not exist.","failure_reason":"this build carries no implementation of this damage, only its description","failure_kind":"unimplemented"}
+  ],
+  "run": {
+    "generated_at": "2026-11-16T17:31:13Z",
+    "seed": "test-card-numbers",
+    "locale": "en-US",
+    "catalog_version": "0.1",
+    "rows_total": 100,
+    "entities": [
+      {
+        "entity": "payment",
+        "rows_total": 100
+      }
+    ],
+    "rows_mutated": 5,
+    "defects_requested": 18,
+    "defects_applied": 5
+  }
+}
