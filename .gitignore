@@ -52,6 +52,9 @@ CHANGELOG-DEV.md
 /qadg.exe
 /qadg-gui
 /qadg-gui.exe
+# The software renderer .github/scripts/fetch_software_renderer.sh puts beside
+# a window built at the root. It is downloaded, never committed.
+/opengl/
 /bin/
 /dist/
 /build/

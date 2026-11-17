@@ -1,5 +1,5 @@
 ---
-translatedFrom: fa20d989b6e3db41795fec27e5c37634428bb42e
+translatedFrom: 546b018c1819b5a71dd3a7f694eba19e7dd456ed
 title: Instalacja QA Data Generator
 linkTitle: Instalacja
 description: "Zbuduj QA Data Generator ze źródeł na Windows, macOS albo Linuksie: jedno polecenie dla wiersza poleceń, drugie dla okna, i czego każde potrzebuje."
@@ -28,6 +28,14 @@ Pierwsze `go build` tworzy `qadg`, czyli wiersz poleceń, i nie potrzebuje nicze
 ## Czego okno potrzebuje wcześniej
 
 {{< readme-table heading="Build it from source" >}}
+
+## Gdy okno nie może się otworzyć na Windows
+
+Na komputerze z Windows, który nie daje oknu OpenGL, na przykład w maszynie wirtualnej bez akceleracji 3D, w sesji pulpitu zdalnego albo na serwerze, okno może rysować procesorem zamiast karty graficznej. Potrzebuje do tego Mesy, renderera programowego, w folderze `opengl` obok `qadg-gui.exe`. To polecenie, uruchomione w Git Bash z katalogu głównego repozytorium po zbudowaniu okna, kładzie ją tam:
+
+{{< readme heading="When the window cannot open on Windows" kind="run" >}}
+
+Pobiera około 70 MB, odrzuca pobrany plik, jeśli jego suma kontrolna nie jest przypiętą, i kładzie obok obu plików licencje tego, co z niego wziął. Gdy sterownik grafiki potem odmówi, okno otworzy się rysowane programowo, a `qadg-gui -software-gl` rysuje programowo na każdym komputerze.
 
 ## Dalej
 

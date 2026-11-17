@@ -1,0 +1,66 @@
+# The software renderer the window on Windows loads from a folder beside it
+# when the graphics driver gives it no OpenGL. It is downloaded by
+# .github/scripts/fetch_software_renderer.sh, by the version and the sums in
+# .github/mesa-dist-win, and nothing else downloads it. This runs that script
+# on the Windows runner, where it unpacks with 7z, and asks it to refuse an
+# archive whose sum is not the pinned one before it unpacks anything.
+#
+# It runs when one of those files changes and on request, not on every push,
+# because each run downloads the archive of about 70 MB twice. What the pin,
+# the notices and the window's code say about the files is held together by
+# TestTheRendererBesideTheWindowIsTheOneItsNoticesDescribe in internal/guard,
+# which runs in ci.yml on every push.
+name: renderer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/mesa-dist-win
+      - .github/opengl/**
+      - .github/scripts/fetch_software_renderer.sh
+      - .github/workflows/renderer.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: renderer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fetch:
+    name: the software renderer is fetched by its pin
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: fetch it
+        run: |
+          mkdir "$RUNNER_TEMP/window"
+          bash .github/scripts/fetch_software_renderer.sh "$RUNNER_TEMP/window"
+          ls -l "$RUNNER_TEMP/window/opengl"
+
+      - name: an archive with another sum is refused before it is unpacked
+        # The same script and notices, beside a pin that differs in the sum of
+        # the archive alone, so the refusal can only come from that sum.
+        run: |
+          other="$RUNNER_TEMP/other"
+          mkdir -p "$other/.github/scripts" "$other/out"
+          cp .github/scripts/fetch_software_renderer.sh "$other/.github/scripts/"
+          cp -r .github/opengl "$other/.github/"
+          grep -v '^sha256=' .github/mesa-dist-win > "$other/.github/mesa-dist-win"
+          printf 'sha256=%064d\n' 0 >> "$other/.github/mesa-dist-win"
+          cd "$other"
+          if bash .github/scripts/fetch_software_renderer.sh out 2> refusal.txt
+          then
+            echo "an archive with another sum was taken" >&2
+            exit 1
+          fi
+          cat refusal.txt
+          grep -q 'so it was not unpacked' refusal.txt
+          test -z "$(ls -A out)"

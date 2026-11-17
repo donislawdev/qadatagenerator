@@ -319,6 +319,25 @@ type Component struct {
 // the size of the Unicode tables. Neither package it brings imports anything
 // that reaches files, the network or the system. They import io only to wrap a
 // reader or a writer the caller hands them.
+//
+// # github.com/go-gl/gl is built from a copy with one change
+//
+// The window takes it from third_party/go-gl-gl, through the replace directive
+// in go.mod, rather than from the published module. The published one makes
+// the window import opengl32.dll when it starts, and then the software
+// renderer the window can start again with is never the one it draws with.
+// The copy is the published module at the version below with the change
+// third_party/go-gl-gl/PATCH.md describes, it carries the module's own LICENSE,
+// and a guard in internal/guard holds it to those bytes. So the line below
+// names the version the copy was taken from and the terms it is under, which
+// are the published module's.
+//
+// # What lies beside the window rather than inside it
+//
+// On Windows the window can load Mesa from a folder named opengl beside it,
+// when the graphics driver gives it no OpenGL. Those files are inside no
+// binary, so they are on none of these lists. Their version, sums and licences
+// are in .github/opengl/NOTICES.md, which travels in that folder with them.
 var ThirdParty = []Component{
 	{
 		Module:  "fyne.io/fyne/v2",

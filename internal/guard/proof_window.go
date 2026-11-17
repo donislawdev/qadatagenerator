@@ -168,6 +168,13 @@ var windowGuards = []Guard{
 	{"nothing but the carried binding hides in third_party, which the guards skip", "TestThirdPartyHoldsOnlyTheCarriedBinding", "internal/guard", ByProbe},
 	{"a second directory in third_party or a second replacement in go.mod is named", "TestTheThirdPartyCheckSeesWhatElseIsThere", "internal/guard", ByProbe},
 
+	// The software renderer beside the window (B-414). The check of the real
+	// notices is asked first about them with another version and has to refuse
+	// it, and the canary beside it plants every drift of the pin, the notices,
+	// the folder that travels with the files and the window's names.
+	{"the software renderer the script puts beside the window is the one its notices, its licences and the window name", "TestTheRendererBesideTheWindowIsTheOneItsNoticesDescribe", "internal/guard", ByProbe},
+	{"a pin, notices, a folder of licences or names of the window drifting apart is named", "TestTheRendererCheckNamesEveryWayItDrifts", "internal/guard", ByProbe},
+
 	// The one process the product starts, the window starting itself again with
 	// the software renderer. The scan of the real tree uses the function the
 	// canary beside it plants fourteen starts on, and with no allowance it has to

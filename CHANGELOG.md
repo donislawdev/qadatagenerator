@@ -600,7 +600,10 @@ repository once they are released.
   flag -software-gl asks for the software renderer directly. When the folder
   or one of its files is not there, the message that the window could not
   open names the file it looked for, and the window ends with exit code 1 as
-  before. Mesa is not part of this repository.
+  before. Mesa is not part of this repository. When you build the window
+  yourself, `bash .github/scripts/fetch_software_renderer.sh .` downloads Mesa
+  26.2.5, refuses it unless its checksum is the pinned one, and puts the two
+  files in that folder together with their licences. The README says how.
 - **Ready-made recipes in the examples folder.** Eight recipes that run as they
   are with `qadg generate`: people in the US and in Poland, a table of test
   numbers, Polish companies, a shop in three related tables written as JSON,

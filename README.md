@@ -305,6 +305,29 @@ The first line builds `qadg`, the command line, and needs nothing but Go. The se
 
 ---
 
+## When the window cannot open on Windows
+
+On a Windows computer that gives the window no OpenGL, such as a virtual machine without 3D
+acceleration, a remote desktop session or a server, `qadg-gui` can draw with the processor instead
+of the graphics card. For that it needs Mesa, a software renderer, in a folder named `opengl` beside
+`qadg-gui.exe`. After `go build ./cmd/qadg-gui`, run this in Git Bash from the root of the
+repository:
+
+```
+bash .github/scripts/fetch_software_renderer.sh .
+```
+
+It downloads Mesa 26.2.5 from the releases of pal1000/mesa-dist-win, about 70 MB, and refuses it
+unless its checksum is the one written in `.github/mesa-dist-win`. Then it puts two files of it and
+their licences in `opengl`. It unpacks with 7-Zip when that is installed, and otherwise with the
+`tar` that comes with Windows 10 and later.
+
+From then on, when the graphics driver refuses, the window opens drawn in software instead of
+saying it cannot open, and its About screen says so. `qadg-gui -software-gl` draws in software on
+any computer. Where the driver works, the folder is never used.
+
+---
+
 ## What it generates
 
 <!-- readme-check: generators -->
