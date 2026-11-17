@@ -597,9 +597,12 @@ repository once they are released.
   `%APPDATA%\fyne\dev.donislaw.qadg`), which the About screen shows under
   Kept on this computer, and nothing is sent anywhere. Forget on the same
   screen clears both, and the window then opens at its first size. The
-  command line keeps nothing between runs. Known limit: a size kept on a
-  larger screen than the one the window opens on shows the window cut off
-  at the top and on the right.
+  command line keeps nothing between runs.
+- **The window opens in the middle of the main screen, and never larger
+  than the screen.** A size kept on a larger monitor is made smaller so the
+  whole window, title bar included, stays clear of the taskbar. A window
+  closed maximised comes back a little shorter, by the height of the
+  taskbar, with all of it on the screen.
 - **On Windows the window opens without a graphics driver that supports
   OpenGL, drawn by a software renderer.** When the first attempt gives no
   window, for example in a virtual machine without 3D acceleration, qadg-gui

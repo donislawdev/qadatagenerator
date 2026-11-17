@@ -112,7 +112,8 @@ func main() {
 	// green, because the tests read the content rather than how much of it a
 	// person can see. The size is the one the window was closed at, when one
 	// was kept (kept.go).
-	window.Resize(openingSize(remembered))
+	opening := openingSize(remembered)
+	window.Resize(opening)
 	// What the window no longer uses goes back once it is left alone, and
 	// internal/gui/background/tidy.go says when and why. Stopped as the window
 	// closes, while the toolkit still runs, and again once it has stopped, in
@@ -130,6 +131,9 @@ func main() {
 		stopTidying()
 	})
 	showOrStop(window, toolkit, heard, secondAttemptFor(asked, text, os.Stderr), drawing)
+	// Once the window stands, because only then is the scale it is drawn at
+	// known (screen.go).
+	fitToScreen(window, opening)
 	application.Run()
 	stopTidying()
 }

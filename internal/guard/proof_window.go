@@ -214,4 +214,6 @@ var windowGuards = []Guard{
 	{"after Forget, closing the window writes nothing", "TestAfterForgetClosingWritesNothing", "internal/gui/kept", ByProbe},
 	{"a size with a nought in it is neither written nor used", "TestASizeWithANoughtIsNeitherWrittenNorUsed", "internal/gui/kept", ByProbe},
 	{"the About screen says what the window keeps and Forget forgets it", "TestTheScreenSaysWhatTheWindowKeepsAndForgetsIt", "internal/gui/about", ByProbe},
+	{"a size larger than the room on the screen is cut to what a centred window has", "TestASizeLargerThanTheScreenIsCutToWhatStaysClearOfTheTaskbar", "internal/gui/kept", ByProbe},
+	{"a size within the room on the screen is left as it is", "TestASizeThatFitsTheScreenIsLeftAsItIs", "internal/gui/kept", ByProbe},
 }
