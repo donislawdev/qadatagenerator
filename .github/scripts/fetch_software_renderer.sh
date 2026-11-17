@@ -103,7 +103,6 @@ for tool in 7z 7zz bsdtar tar "${SYSTEMROOT:+$SYSTEMROOT/System32/tar.exe}"; do
   [ -z "$unpack" ] || break
 done
 [ -n "$unpack" ] || die "neither 7z nor bsdtar is installed, and the archive is a 7z"
-echo "unpacking with ${unpack}"
 
 dest="$into/opengl"
 if [ -e "$dest" ]; then
@@ -122,6 +121,7 @@ curl --silent --show-error --fail --location --retry 3 --output "$fetched/$archi
 (cd "$fetched" && echo "${sha256}  ${archive}" | sha256sum -c - >/dev/null) ||
   die "$archive does not have the SHA-256 $pin names, so it was not unpacked"
 echo "${archive}: the sum is the pinned one"
+echo "unpacking with ${unpack}"
 
 # Unpacked and checked in the same hidden directory, and moved into place only
 # when every file has passed, so a refusal half way leaves no opengl folder that

@@ -47,7 +47,9 @@ jobs:
 
       - name: an archive with another sum is refused before it is unpacked
         # The same script and notices, beside a pin that differs in the sum of
-        # the archive alone, so the refusal can only come from that sum.
+        # the archive alone, so the refusal can only come from that sum. The
+        # script names its unpacker only after the sum has passed, so that line
+        # in the output would mean it went on to unpack what it refused.
         run: |
           other="$RUNNER_TEMP/other"
           mkdir -p "$other/.github/scripts" "$other/out"
@@ -56,11 +58,16 @@ jobs:
           grep -v '^sha256=' .github/mesa-dist-win > "$other/.github/mesa-dist-win"
           printf 'sha256=%064d\n' 0 >> "$other/.github/mesa-dist-win"
           cd "$other"
-          if bash .github/scripts/fetch_software_renderer.sh out 2> refusal.txt
+          if bash .github/scripts/fetch_software_renderer.sh out > refusal.txt 2>&1
           then
             echo "an archive with another sum was taken" >&2
             exit 1
           fi
           cat refusal.txt
           grep -q 'so it was not unpacked' refusal.txt
+          if grep -q '^unpacking with' refusal.txt
+          then
+            echo "the archive was unpacked although its sum was refused" >&2
+            exit 1
+          fi
           test -z "$(ls -A out)"
