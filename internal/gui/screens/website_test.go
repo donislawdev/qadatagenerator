@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/png"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -90,7 +91,7 @@ func TestTheWebsiteShowsTheWindowAsItIs(t *testing.T) {
 				return
 			}
 			if found := stale(readSays(t, stored+".txt"), says); len(found) > 0 {
-				t.Errorf("the picture on the website no longer shows what the window shows:\n  %s\n"+
+				t.Errorf(behindTheWindow+":\n  %s\n"+
 					"Draw it again with\n  %s\nthen look at it and commit it with its list of texts",
 					strings.Join(found, "\n  "), redrawWebsite)
 			}
@@ -353,6 +354,9 @@ func answeredFor(t *testing.T, printed string, rows int, path string) response.R
 // photograph draws one state at the size the stored trees are taken at and
 // twice its density, and lists every text it shows.
 func photograph(data Data, state State) (image.Image, []string) {
+	if os.Getenv(staleClockAsked) == "" {
+		setToolkitClock()
+	}
 	window := test.NewWindow(Assemble(i18n.English, data, state))
 	defer window.Close()
 	window.Canvas().(software.WindowlessCanvas).SetScale(websiteScale)
@@ -364,6 +368,84 @@ func photograph(data Data, state State) (image.Image, []string) {
 	window.Resize(fyne.NewSize(size.Width-1, size.Height))
 	window.Resize(size)
 	return window.Canvas().Capture(), textsOf(test.RenderToMarkup(window.Canvas()))
+}
+
+// setToolkitClock moves the clock the toolkit dates what it keeps by to now.
+//
+// # 🔴 Why a picture needs it
+//
+// The toolkit keeps the renderer of a widget for a minute after it was last
+// used and throws it away when it cleans its caches. It dates "used" by a clock
+// it reads only when it cleans, which a real window does every frame. A window
+// with no screen cleans only in Capture. So a test process that runs for more
+// than a minute before its first picture builds every widget of that picture
+// with a date already a minute old, and Capture, which cleans before it paints,
+// throws all of them away and paints new ones nobody laid out. A wrapping label
+// that was never laid out has no width and draws its sentence on one line.
+// Read on 2026-11-17 in fyne v2.8.2, internal/cache/base.go,
+// driver/software/canvas.go:91 and widget/label.go:99. It first showed under
+// -race on a slower runner, where this test began 97 seconds after the package.
+//
+// Capturing a blank surface is how a test can make the toolkit read its clock,
+// so every widget the picture then builds is dated now and stays for the minute
+// the picture takes a few seconds of.
+func setToolkitClock() {
+	software.NewCanvas().Capture()
+}
+
+// staleClockAsked is set in the environment of a run of this test binary that
+// takes its pictures without setting the toolkit's clock first, which is how the
+// check below shows that its run would notice the fault.
+const staleClockAsked = "QADG_PICTURE_WITH_A_STALE_CLOCK"
+
+// behindTheWindow opens the finding of a picture whose texts the window no
+// longer shows.
+const behindTheWindow = "the picture on the website no longer shows what the window shows"
+
+// 🔴 A picture of the window is the same however long the package ran before it
+// was taken.
+//
+// The fault this holds shut is described at setToolkitClock. Waiting for it would
+// take a minute of tests before the picture, so the test binary runs the first
+// picture again with the toolkit told to keep what it builds for a millisecond,
+// which it reads from FYNE_CACHE when it starts. Twice: as the pictures are
+// taken, which must pass, and without the clock set first, which must fail the
+// way it failed on the runner. Without the second run the first would pass
+// whatever the pictures do, for example once the toolkit stops reading
+// FYNE_CACHE.
+//
+// The first run passes with a millisecond because the toolkit cleans at most
+// once in ten seconds (internal/cache/base.go, Clean), and from setting the
+// clock to the capture the first picture took under four of them with the race
+// detector in a container on 2026-11-17. A picture that one day takes ten
+// seconds turns this red here before it turns the pictures red elsewhere.
+func TestAPictureIsTheSameHoweverLongThePackageRanBeforeIt(t *testing.T) {
+	if *update {
+		t.Skip("drawing the pictures again is not a check of them")
+	}
+	if output, err := pictureAgain(false); err != nil {
+		t.Errorf("a picture taken a millisecond after the toolkit started keeping what it builds no "+
+			"longer shows the window:\n%s", output)
+	}
+	if output, err := pictureAgain(true); err == nil || !strings.Contains(output, behindTheWindow) {
+		t.Errorf("a picture taken without setting the toolkit's clock first did not fail the way it "+
+			"failed on the runner, so the run above would pass whatever the pictures do:\n%s", output)
+	}
+}
+
+// pictureAgain takes the first picture of the website in a new run of this test
+// binary, whose toolkit keeps what it builds for a millisecond, with or without
+// the clock set first.
+func pictureAgain(stale bool) (string, error) {
+	asked := ""
+	if stale {
+		asked = "yes"
+	}
+	again := exec.Command(os.Args[0], "-test.count=1",
+		"-test.run=^TestTheWebsiteShowsTheWindowAsItIs$/^"+Website("")[0].Name+"$")
+	again.Env = append(os.Environ(), "FYNE_CACHE=1ms", staleClockAsked+"="+asked)
+	output, err := again.CombinedOutput()
+	return string(output), err
 }
 
 // textOpens finds every text element of a stored tree and what it says.
