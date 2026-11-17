@@ -49,7 +49,6 @@ func TestCScannerSeesAFileNobodyAllowedAndANameBeyondItsEntry(t *testing.T) {
 	writeGo(t, filepath.Join(dir, "reaching.go"), `package sample
 
 /*
-#cgo LDFLAGS: -lws2_32
 #include <winsock2.h>
 */
 import "C"
@@ -75,9 +74,10 @@ func dial() { C.socket(2, 1, 0) }
 	}
 }
 
-// C written above the import is a function with any name doing anything, so
-// only build lines and system headers may stand there. The allowed preamble is
-// asked too, written both ways cgo reads, or the check could refuse every one.
+// C written above the import is a function with any name doing anything, and a
+// flag can change what an allowed name means, so only system headers and the
+// linker flags in CgoLinkerFlags may stand there. The allowed preamble is asked
+// too, written both ways cgo reads, or the check could refuse every one.
 func TestCScannerSeesCWrittenAboveTheImport(t *testing.T) {
 	const single, grouped = "import \"C\"", "import (\n\t\"C\"\n)"
 	cases := []struct {
@@ -93,6 +93,11 @@ func TestCScannerSeesCWrittenAboveTheImport(t *testing.T) {
 		{"a header of our own", "/*\n#include \"ours.h\"\n*/", single, `#include \"ours.h\"`},
 		{"a macro renaming an allowed call", "// #define FreeConsole socket", single, "#define FreeConsole socket"},
 		{"a directive the comment text leaves out", "//line hidden.go:1\n// #include <windows.h>", single, "line hidden.go:1"},
+		{"the allowed flag for one system", "// #cgo windows LDFLAGS: -Wl,--subsystem,windows", single, ""},
+		{"a compiler flag renaming an allowed call", "// #cgo CFLAGS: -DFreeConsole=socket", single, "#cgo CFLAGS: -DFreeConsole=socket"},
+		{"the same flag after a tab", "/*\n#cgo\tCPPFLAGS: -DFreeConsole=socket\n*/", single, `#cgo\tCPPFLAGS`},
+		{"a linker flag nobody named", "// #cgo LDFLAGS: -Wl,--subsystem,windows -lws2_32", single, "passes -lws2_32 to the linker"},
+		{"a library found by pkg-config", "// #cgo pkg-config: ws2", single, "#cgo pkg-config: ws2"},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

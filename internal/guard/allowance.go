@@ -11,9 +11,9 @@ import (
 
 // namedGate is a package the product may import only in the files a list
 // names, and from which each of those files may take only the names its entry
-// lists. syscall and C are both gated this way, because each can do whatever the
-// operating system can, and a whole file allowed either would be a door nobody
-// remembers is open a year from now.
+// lists. syscall, C and unsafe are gated this way, because each can do whatever
+// the operating system can, and a whole file allowed any of them would be a door
+// nobody remembers is open a year from now.
 type namedGate struct {
 	// importPath is the package being controlled.
 	importPath string

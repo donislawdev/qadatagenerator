@@ -78,10 +78,22 @@ func importedAs(parsed *ast.File, path string) (string, error) {
 
 // eachProductFile hands every Go source file under where, tests left out, to
 // visit with its path on disk and its name relative to root.
+func eachProductFile(root, where string, visit func(path, name string) error) error {
+	return eachProductEntry(root, where, func(path, name string) error {
+		if !strings.HasSuffix(name, ".go") || strings.HasSuffix(name, "_test.go") {
+			return nil
+		}
+		return visit(path, name)
+	})
+}
+
+// eachProductEntry hands every file under where, in the directories the guards
+// read, to visit with its path on disk and its name relative to root. Go
+// source and everything beside it alike.
 //
 // A tree that is not there is an error rather than nothing found, because a
 // guard reading an empty directory reports a clean window.
-func eachProductFile(root, where string, visit func(path, name string) error) error {
+func eachProductEntry(root, where string, visit func(path, name string) error) error {
 	dir := filepath.Join(root, filepath.FromSlash(where))
 	if _, err := os.Stat(dir); err != nil {
 		return fmt.Errorf("%s is not there, so this guard would check nothing there: %w", where, err)
@@ -95,9 +107,6 @@ func eachProductFile(root, where string, visit func(path, name string) error) er
 			if path != dir && (skippedDirs[name] || strings.HasPrefix(name, ".") || strings.HasPrefix(name, "_")) {
 				return filepath.SkipDir
 			}
-			return nil
-		}
-		if !strings.HasSuffix(entry.Name(), ".go") || strings.HasSuffix(entry.Name(), "_test.go") {
 			return nil
 		}
 		relative, err := filepath.Rel(root, path)

@@ -23,12 +23,14 @@ var networkAllowed = map[string]bool{
 //
 // C is here for the same reason as syscall and is the wider door of the two:
 // a file importing it can call any function of the system's C library and
-// write one of its own above the import.
+// write one of its own above the import. unsafe is here because it can call a
+// function at any address, and it is what go:linkname needs.
 var reachesOut = map[string]bool{
-	"os/exec":  true,
-	"syscall":  true,
-	"plugin":   true,
-	cgoPackage: true,
+	"os/exec":     true,
+	"syscall":     true,
+	"plugin":      true,
+	cgoPackage:    true,
+	unsafePackage: true,
 }
 
 // systemCalls is the module that carries the calls into each operating system
@@ -99,7 +101,8 @@ func OpensTheWorld(importPath string) bool {
 // identifiers, so this half is deliberately not the whole check: SyscallUse
 // answers whether the file took only what it may. Neither is enough alone, and
 // splitting them this way is what keeps this function answering one question.
-// C has the same pair, CgoAllowed and CgoUse.
+// C has the same pair, CgoAllowed and CgoUse, and so has unsafe, UnsafeAllowed
+// and UnsafeUse.
 func Network(pkgs []Package) []string {
 	var findings []string
 	for _, pkg := range pkgs {
@@ -113,6 +116,9 @@ func Network(pkgs []Package) []string {
 				continue
 			}
 			if importPath == cgoPackage && packageMayCallC(pkg.Path) {
+				continue
+			}
+			if importPath == unsafePackage && packageMayUseUnsafe(pkg.Path) {
 				continue
 			}
 			if OpensTheWorld(importPath) {

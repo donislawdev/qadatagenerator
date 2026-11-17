@@ -22,18 +22,15 @@ import (
 //
 // # What may stand in the comment above import "C"
 //
-// Only build lines (#cgo) and system headers (#include <...>). C written there
-// would be a function with an innocent name doing anything, and the list below
-// would then name what is called rather than what runs. A header of our own
-// is refused for the same reason.
+// Only system headers (#include <...>) and #cgo lines passing the linker the
+// flags in CgoLinkerFlags. C written there would be a function with an innocent
+// name doing anything, and the list below would then name what is called rather
+// than what runs. A header of our own is refused for the same reason. C files
+// beside the Go ones are refused by BesideGo.
 //
 // # What it does not do
 //
-// It reads Go files. C, C++ and assembly files beside them, which the Go tool
-// compiles into the package with no import at all, and object files such as
-// the rsrc_windows_amd64.syso of each binary are not read. A #cgo line can pass
-// a flag that changes what a name means, and that is left to whoever reads the
-// line. A name reached through a function value is invisible, as it is to the
+// A name reached through a function value is invisible, as it is to the
 // syscall guard.
 var CgoAllowed = map[string][]string{
 	// Borrowing the console of the program that started the window and letting
@@ -45,6 +42,21 @@ var CgoAllowed = map[string][]string{
 		"ATTACH_PARENT_PROCESS", "MB_ICONERROR", "MB_OK", "MB_SETFOREGROUND", "UOI_FLAGS", "WSF_VISIBLE",
 		"DWORD", "HANDLE", "PVOID", "USEROBJECTFLAGS", "WCHAR",
 	},
+}
+
+// CgoLinkerFlags are the only flags a #cgo line may pass, and only to the
+// linker.
+//
+// A flag for the C compiler can change what an allowed name means. -D can make
+// it stand for another function and -include can bring in a header of our own,
+// and the go command lets both through, because its list of allowed flags
+// (cmd/go/internal/work/security.go) protects the machine that builds, not what
+// the program calls. A linker flag can join a library or let a definition
+// replace another, so each one is named here.
+var CgoLinkerFlags = map[string]bool{
+	// Makes the window a GUI program on Windows, so no console opens beside
+	// it (DEC-315).
+	"-Wl,--subsystem,windows": true,
 }
 
 // cgoPackage is the import being controlled. It is not a package but the
@@ -68,7 +80,7 @@ func CgoUse(root string, allowed map[string][]string) ([]string, error) {
 }
 
 // cWrittenHere reports every line of the comment above import "C" that is
-// neither a #cgo line nor a system header.
+// neither a system header nor a #cgo line passing only CgoLinkerFlags.
 //
 // The comment is read the way cgo reads it, its markers taken off and nothing
 // else, because the directives the standard comment text leaves out are lines
@@ -96,7 +108,11 @@ func cWrittenHere(parsed *ast.File, name string) []string {
 			}
 			for _, line := range strings.Split(asCgoReadsIt(doc), "\n") {
 				line = strings.TrimSpace(line)
-				if line == "" || strings.HasPrefix(line, "#cgo ") || systemHeader(line) {
+				if line == "" || systemHeader(line) {
+					continue
+				}
+				if cgoLine(line) {
+					findings = append(findings, flagsBeyond(line, name)...)
 					continue
 				}
 				findings = append(findings, fmt.Sprintf("%s writes %q above import \"C\", and only #cgo lines "+
@@ -124,6 +140,36 @@ func asCgoReadsIt(doc *ast.CommentGroup) string {
 		text.WriteString(strings.TrimSuffix(strings.TrimPrefix(body, "/*"), "*/"))
 	}
 	return text.String()
+}
+
+// cgoLine reports whether the go command reads a line as a #cgo line, by its
+// rule in go/build (saveCgo): #cgo followed by a space or a tab.
+func cgoLine(line string) bool {
+	return len(line) >= 5 && line[:4] == "#cgo" && (line[4] == ' ' || line[4] == '\t')
+}
+
+// flagsBeyond reports what a #cgo line does beyond passing the linker the
+// flags in CgoLinkerFlags.
+//
+// The line is split as go/build splits it: what stands before the colon ends
+// with the setting, and anything before the setting only says on which systems
+// it applies. A flag is compared whole, so one in quotes or holding ${SRCDIR}
+// is refused rather than read the way the go command would read it.
+func flagsBeyond(line, name string) []string {
+	settings, flags, hasColon := strings.Cut(strings.TrimSpace(line[len("#cgo"):]), ":")
+	words := strings.Fields(settings)
+	if !hasColon || len(words) == 0 || words[len(words)-1] != "LDFLAGS" {
+		return []string{fmt.Sprintf("%s writes %q above import \"C\", and a #cgo line may set only LDFLAGS",
+			name, line)}
+	}
+	var findings []string
+	for _, flag := range strings.Fields(flags) {
+		if !CgoLinkerFlags[flag] {
+			findings = append(findings, fmt.Sprintf("%s passes %s to the linker in a #cgo line, and only the "+
+				"flags in guard.CgoLinkerFlags may be passed", name, flag))
+		}
+	}
+	return findings
 }
 
 // systemHeader reports whether a line includes a header from the system's

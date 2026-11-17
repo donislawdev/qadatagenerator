@@ -28,9 +28,11 @@ package main
 // letting go of a console, asking whether the desktop can be seen, and showing
 // a dialog. C can reach whatever the system can, so the network guard refuses
 // it in our own files except here, and every name this file takes from C is
-// listed in guard.CgoAllowed (internal/guard/cgo.go). A new call means a new
-// name there, and only #cgo lines and system headers may stand in the comment
-// below. The one other call into Windows this binary makes itself is loading
+// listed in guard.CgoAllowed (internal/guard/cgo.go), as is every name it takes
+// from unsafe in guard.UnsafeAllowed. A new call means a new name there. Only
+// system headers and #cgo lines passing the linker flags in
+// guard.CgoLinkerFlags may stand in the comment below. The one other call into
+// Windows this binary makes itself is loading
 // the software renderer, and software_windows.go says why that one goes
 // through syscall.
 

@@ -106,8 +106,21 @@ var toolGuards = []Guard{
 	{"C is called only in the one file, and only for the names it lists", "TestTheProductCallsCOnlyWhereItIsAllowed", "internal/guard", ByMutation},
 	{"the scan for C actually reached the product", "TestTheCScanReachesTheProduct", "internal/guard", ByProbe},
 	{"a file calling C with no allowance, and a name beyond its entry, are seen", "TestCScannerSeesAFileNobodyAllowedAndANameBeyondItsEntry", "internal/guard", ByProbe},
-	{"C written above the import is seen, and build lines with system headers are not", "TestCScannerSeesCWrittenAboveTheImport", "internal/guard", ByProbe},
+	{"C and flags written above the import are seen, and the named linker flag with system headers is not", "TestCScannerSeesCWrittenAboveTheImport", "internal/guard", ByProbe},
 	{"the exception for C covers one package in the network rule and no more", "TestTheNetworkRuleStillRefusesCOutsideTheAllowedPackage", "internal/guard", ByProbe},
+
+	// --- what reaches the system with no import to show for it (DEC-322) ----
+	//
+	// The go command compiles assembly and C beside the Go files and links any
+	// .syso, the compiler obeys go:linkname, and unsafe can call any address.
+	// None of it is an import the rules above read, so each is read here.
+	{"the go command compiles nothing of ours beside Go but resources", "TestTheProductCompilesNothingBesideGoButResources", "internal/guard", ByProbe},
+	{"a file the go command compiles beside Go is seen, and a .syso beyond resources too", "TestTheScanBesideGoSeesWhatTheGoCommandCompiles", "internal/guard", ByProbe},
+	{"only the compiler directives on the list stand in our files", "TestTheProductWritesOnlyTheCompilerDirectivesItMay", "internal/guard", ByProbe},
+	{"a directive is seen wherever it stands, and what only looks like one is not", "TestTheDirectiveScanSeesWhatTheCompilerReads", "internal/guard", ByProbe},
+	{"unsafe is imported in the one file only, for the names it lists", "TestTheProductImportsUnsafeOnlyWhereItIsAllowed", "internal/guard", ByProbe},
+	{"a blank import of unsafe and a name beyond the entry are seen", "TestUnsafeScannerSeesABlankImportAndANameBeyondTheEntry", "internal/guard", ByProbe},
+	{"the exception for unsafe covers one package in the network rule and no more", "TestTheNetworkRuleStillRefusesUnsafeOutsideTheAllowedPackage", "internal/guard", ByProbe},
 
 	// --- two runs into one directory ----------------------------------------
 	//

@@ -51,13 +51,15 @@ func TestTheNetworkGuardDoesNotFireOnNamesThatMerelyLookAlike(t *testing.T) {
 }
 
 // Every package that calls the operating system the way syscall does is
-// refused, C and the module golang.org/x/sys included, together with a package
-// that module may add later. Its cpu package only reads what the processor can
-// do, and a name that merely starts the same way is not the module.
+// refused, C, unsafe and the module golang.org/x/sys included, together with a
+// package that module may add later. Its cpu package only reads what the
+// processor can do, and a name that merely starts the same way is not the
+// module.
 func TestTheNetworkGuardRefusesEveryWayOfCallingTheSystem(t *testing.T) {
 	for _, importPath := range []string{
 		"syscall",
 		"C",
+		"unsafe",
 		"golang.org/x/sys/windows",
 		"golang.org/x/sys/unix",
 		"golang.org/x/sys/plan9",
