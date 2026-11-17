@@ -42,7 +42,6 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/gui/screens"
 	"github.com/donislawdev/qadatagenerator/internal/gui/shell"
 	"github.com/donislawdev/qadatagenerator/internal/gui/takeview"
-	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/license"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 	"github.com/donislawdev/qadatagenerator/internal/version"
@@ -72,7 +71,10 @@ func main() {
 	// find it already loaded (software.go).
 	drawing := rendererFor(asked, text, os.Stderr, loadRendererBeside)
 
-	application := app.New()
+	application := app.NewWithID(appID)
+	// What the window keeps between runs, read before anything is laid out
+	// because the size the window opens at comes from it (kept.go).
+	remembered := keptBy(application)
 	// Nothing else in this program sets this, and a second setter would
 	// replace this one and keep the console attached for good.
 	application.Lifecycle().SetOnStarted(release)
@@ -94,7 +96,7 @@ func main() {
 	toolkit := listen()
 	window := application.NewWindow(text.T(i18n.WindowTitle))
 
-	frame, err := frameFor(asked, text, window, application, drawing)
+	frame, err := frameFor(asked, text, window, application, drawing, remembered)
 	if err != nil {
 		stop(heard, err.Error(), failed)
 	}
@@ -108,14 +110,25 @@ func main() {
 	// a scrolling container demands almost nothing. Running the first build
 	// showed one heading in a window 128 pixels tall while every test was
 	// green, because the tests read the content rather than how much of it a
-	// person can see.
-	window.Resize(fyne.NewSize(palette.StartWidth, palette.StartHeight))
+	// person can see. The size is the one the window was closed at, when one
+	// was kept (kept.go).
+	window.Resize(openingSize(remembered))
 	// What the window no longer uses goes back once it is left alone, and
 	// internal/gui/background/tidy.go says when and why. Stopped as the window
 	// closes, while the toolkit still runs, and again once it has stopped, in
 	// case it stopped some other way.
 	stopTidying := background.TidyWhenLeftAlone(window.Canvas())
-	window.SetOnClosed(stopTidying)
+	window.SetOnClosed(func() {
+		// The size is written down as the window goes rather than as it is
+		// resized. It is the canvas, the content area, which is what Resize
+		// is given, so what is written and what is asked for next time are
+		// one measurement. Not for the catalogue of controls: it is a view a
+		// developer drags tall to read, and its size is not the window's.
+		if !asked.catalogue {
+			remembered.RememberSize(window.Canvas().Size())
+		}
+		stopTidying()
+	})
 	showOrStop(window, toolkit, heard, secondAttemptFor(asked, text, os.Stderr), drawing)
 	application.Run()
 	stopTidying()
@@ -154,13 +167,13 @@ func lastCatch() {
 // outside this program either: it is a view of controls, and the control those
 // links are drawn as is already on its page of buttons.
 func frameFor(asked launch, text i18n.Catalogue, window fyne.Window, application fyne.App,
-	drawing renderer) (*shell.Shell, error) {
+	drawing renderer, remembered about.Kept) (*shell.Shell, error) {
 	if asked.catalogue {
 		// The samples and the brand come from the package the stored pictures
 		// take them from, so the window and the pictures of it say the same.
 		return catalogue.Frame(text, screens.Brand(text), screens.CatalogueSamples()), nil
 	}
-	return assemble(text, window, application.Clipboard(), application, drawing.software())
+	return assemble(text, window, application.Clipboard(), application, drawing.software(), remembered)
 }
 
 // revealOnShortcut opens the quick screen on Ctrl+K.
@@ -238,9 +251,10 @@ func saveReport(window fyne.Window) about.Saver {
 // disk and no goroutine.
 //
 // software says whether the window draws with the software renderer, which the
-// About screen tells a person who wonders why it is slow.
+// About screen tells a person who wonders why it is slow, and remembered is
+// what the window keeps between runs, which that screen offers to forget.
 func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipboard,
-	desktop outward.Desktop, software bool) (*shell.Shell, error) {
+	desktop outward.Desktop, software bool, remembered about.Kept) (*shell.Shell, error) {
 	// 🔴 One place of work for the whole window, handed to every screen as
 	// the same value. Until 2026-10-27 each screen was given a literal of its
 	// own, and the one for the recipe screen was written without the watch
@@ -280,7 +294,7 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 	// the thread that draws, and a page the system did not open is said in a
 	// dialog with its address, so a button that did nothing is never silent.
 	refused := func(title, message string) { dialog.ShowInformation(title, message, window) }
-	return shell.New(sidebar(text, window, value, damage, editor, browser, software),
+	return shell.New(sidebar(text, window, value, damage, editor, browser, software, remembered),
 		screens.WindowBrand(text, desktop, work.Read, refused)), nil
 }
 
@@ -308,7 +322,7 @@ func placesOfWork(window background.Window) background.Work {
 // a function. assemble decides which reader and which place of work each
 // screen gets, and this decides where each one stands.
 func sidebar(text i18n.Catalogue, window fyne.Window, value *quickview.View, damage *takeview.View,
-	editor *recipeview.View, browser *manifestview.View, software bool) []shell.Screen {
+	editor *recipeview.View, browser *manifestview.View, software bool, remembered about.Kept) []shell.Screen {
 	// # Why this order, which changed on 2026-09-08
 	//
 	// The editor was first until then, and the reason was recorded here: it was
@@ -356,6 +370,6 @@ func sidebar(text i18n.Catalogue, window fyne.Window, value *quickview.View, dam
 			Content: browser.Content()},
 		{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,
 			Content: about.Content(text, license.Current(), version.Current(), software,
-				saveReport(window), assets.Notice)},
+				saveReport(window), assets.Notice, remembered)},
 	}
 }

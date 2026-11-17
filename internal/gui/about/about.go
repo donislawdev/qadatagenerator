@@ -88,15 +88,18 @@ type Notices func(name string) (string, bool)
 // software says whether this window draws with the software renderer rather
 // than the graphics driver (B-414). A person who wonders why the window is slow
 // looks here, next to the version they would put in a report.
+//
+// kept is what the window keeps on this computer, or nil where there is no
+// window keeping anything (see Kept).
 func Content(text i18n.Catalogue, report license.Report, versions version.Set, software bool,
-	save Saver, notices Notices) fyne.CanvasObject {
+	save Saver, notices Notices, kept Kept) fyne.CanvasObject {
 	top := band(text, report, save, notices)
 	// The scrolling area is the keyboard's rather than the toolkit's own, which
-	// answers to the wheel and to nothing else. The page holds no control, so
-	// without that the only way through it is a mouse: measured on 2026-08-24 at
-	// 3169 pixels of content in a window showing 836 of them, with every key
-	// leaving the offset at zero (DEC-187).
-	page := parts.NewKeyScroll(sections(text, report, versions, software)).Framed()
+	// answers to the wheel and to nothing else. The page is text apart from one
+	// button, so without that the only way through most of it is a mouse:
+	// measured on 2026-08-24 at 3169 pixels of content in a window showing 836
+	// of them, with every key leaving the offset at zero (DEC-187).
+	page := parts.NewKeyScroll(sections(text, report, versions, software, kept)).Framed()
 	return container.New(layout.NewBorderLayout(top, nil, nil, nil), top, page)
 }
 
@@ -122,8 +125,10 @@ func band(text i18n.Catalogue, report license.Report, save Saver, notices Notice
 //
 // A label rather than text of the canvas, because a sentence as canvas text is
 // drawn on one line whatever the width, and so decides how narrow the window
-// may be. Placed in a column, where the width is the column's.
-func quiet(words string) fyne.CanvasObject {
+// may be. Placed in a column, where the width is the column's. The label itself
+// comes back rather than a canvas object, because the line under Forget changes
+// its words once the button is pressed.
+func quiet(words string) *widget.Label {
 	label := widget.NewLabel(words)
 	label.Wrapping = fyne.TextWrapWord
 	label.Importance = widget.LowImportance

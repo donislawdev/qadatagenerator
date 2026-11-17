@@ -178,6 +178,19 @@ const (
 	// AboutNoticesHeader is the first line of that file, so a file found on
 	// a disk a year later still says what it belongs to.
 	AboutNoticesHeader Key = "about.notices.header"
+
+	// What the window keeps on this computer between runs, where, and the
+	// button that forgets it (DEC-325). On this screen because it is the
+	// one a person opens to ask what this program does with their machine.
+	AboutHeadingKept Key = "about.heading.kept"
+	AboutKeptWhat    Key = "about.kept.what"
+	AboutKeptIn      Key = "about.kept.in"
+	AboutForget      Key = "about.forget"
+	// AboutForgetWhat stands under the button before it is pressed, and
+	// AboutForgotten replaces it after, so the line never disappears and
+	// the screen does not move under the pointer.
+	AboutForgetWhat Key = "about.forget.what"
+	AboutForgotten  Key = "about.forgotten"
 )
 
 // The keys of the manifest browser.
@@ -682,6 +695,7 @@ var windowKeys = []Key{
 	AboutCountSource, AboutCountSources, AboutCountAsset, AboutCountAssets,
 	AboutEmptyComponents, AboutEmptyData,
 	AboutHeadingEmbedded, AboutEmptyEmbedded, AboutSaveNotices, AboutNoticesHeader,
+	AboutHeadingKept, AboutKeptWhat, AboutKeptIn, AboutForget, AboutForgetWhat, AboutForgotten,
 
 	ManifestOpen, ManifestOpenResponse, ManifestEmpty, ManifestUnreadable,
 	ManifestReading,

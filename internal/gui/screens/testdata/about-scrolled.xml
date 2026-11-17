@@ -299,8 +299,8 @@
 						</container>
 						<container pos="0,106" size="1122x737">
 							<widget size="1122x737" type="*parts.KeyScroll">
-								<container pos="0,-1289" size="1122x2027">
-									<container pos="32,24" size="1058x1979">
+								<container pos="0,-1411" size="1122x2226">
+									<container pos="32,24" size="1058x2178">
 										<container size="1058x161">
 											<rectangle fillColor="menuBackground" radius="10" size="1058x161"/>
 											<container size="1058x161">
@@ -417,7 +417,70 @@
 												</container>
 											</container>
 										</container>
-										<container pos="0,318" size="1058x236">
+										<container pos="0,318" size="1058x174">
+											<container size="1058x18">
+												<spacer pos="143,0" size="914x18"/>
+												<container size="143x18">
+													<spacer size="143x0"/>
+													<text bold size="143x18" textSize="14">Kept on this computer</text>
+													<spacer pos="0,18" size="143x0"/>
+												</container>
+												<spacer pos="1058,0" size="0x18"/>
+											</container>
+											<container pos="0,30" size="1058x144">
+												<widget size="1058x24" type="*widget.Label">
+													<widget size="1058x24" type="*widget.RichText">
+														<text pos="4,4" size="1039x16">This window remembers its size when you close it and the folder its file chooser was last in, so it opens the same way next time. Nothing else is kept, and nothing is sent anywhere.</text>
+													</widget>
+												</widget>
+												<container pos="0,36" size="1058x24">
+													<container size="60x24">
+														<text color="disabled" pos="4,4" size="40x16">Kept in</text>
+													</container>
+													<container pos="60,0" size="997x24">
+														<spacer size="997x4"/>
+														<text bold pos="0,4" size="997x16">C:\Users\you\AppData\Roaming\fyne\dev.donislaw.qadg</text>
+														<spacer pos="0,20" size="997x4"/>
+													</container>
+												</container>
+												<container pos="0,73" size="1058x34">
+													<widget size="92x34" type="*parts.Button">
+														<container size="92x34">
+															<container size="92x34">
+																<rectangle size="92x34"/>
+																<container size="92x34">
+																	<container size="92x34">
+																		<rectangle pos="1,1" radius="6" size="90x32" strokeColor="inputBorder" strokeWidth="2"/>
+																	</container>
+																	<container size="92x34">
+																		<container pos="16,4" size="60x26">
+																			<container pos="0,4" size="60x16">
+																				<container size="15x16">
+																					<spacer size="15x0"/>
+																					<image fillMode="contain" rsc="refresh-cw-72abff-15.svg" size="15x15"/>
+																					<spacer pos="0,15" size="15x0"/>
+																				</container>
+																				<container pos="23,0" size="37x16">
+																					<spacer size="37x0"/>
+																					<text size="37x16">Forget</text>
+																					<spacer pos="0,16" size="37x0"/>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</widget>
+												</container>
+												<widget pos="0,119" size="1058x24" type="*widget.Label">
+													<widget size="1058x24" type="*widget.RichText">
+														<text color="disabled" pos="4,4" size="649x16">Forget clears both. The window then opens at its first size, and the file chooser no longer starts in the last folder.</text>
+													</widget>
+												</widget>
+											</container>
+										</container>
+										<container pos="0,517" size="1058x236">
 											<container size="1058x18">
 												<spacer pos="98,0" size="861x18"/>
 												<container size="98x18">
@@ -518,7 +581,7 @@
 												</container>
 											</container>
 										</container>
-										<container pos="0,579" size="1058x170">
+										<container pos="0,778" size="1058x170">
 											<container size="1058x18">
 												<spacer pos="101,0" size="915x18"/>
 												<container size="101x18">
@@ -608,7 +671,7 @@
 												</container>
 											</container>
 										</container>
-										<container pos="0,773" size="1058x1205">
+										<container pos="0,972" size="1058x1205">
 											<container size="1058x18">
 												<spacer pos="155,0" size="844x18"/>
 												<container size="155x18">
@@ -1397,9 +1460,12 @@
 								<widget size="1122x0" type="*widget.Shadow">
 									<linearGradient size="1122x8"/>
 								</widget>
+								<widget pos="0,737" size="1122x0" type="*widget.Shadow">
+									<linearGradient pos="0,-8" size="1122x8"/>
+								</widget>
 								<widget pos="1116,0" size="6x737" type="*widget.scrollBarArea">
-									<widget pos="3,469" size="3x268" type="*widget.scrollBar">
-										<rectangle fillColor="scrollbar" radius="3" size="3x268"/>
+									<widget pos="3,467" size="3x244" type="*widget.scrollBar">
+										<rectangle fillColor="scrollbar" radius="3" size="3x244"/>
 									</widget>
 								</widget>
 							</widget>

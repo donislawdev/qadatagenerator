@@ -21,19 +21,29 @@ import (
 // Two sources of reference data and two embedded assets say something at a
 // glance, and thirty six modules are an appendix. Put first, the modules pushed
 // both of the short lists three screens down, where nobody scrolled to them.
-func sections(text i18n.Catalogue, report license.Report, versions version.Set, software bool) fyne.CanvasObject {
+//
+// What the window keeps stands right under what this build means for the
+// person's data, because both answer what this program does on their machine.
+func sections(text i18n.Catalogue, report license.Report, versions version.Set, software bool,
+	kept Kept) fyne.CanvasObject {
+	shown := []fyne.CanvasObject{
+		buildCard(text, report, versions, software),
+		section(text.T(i18n.AboutHeadingNotices), "", noticeLines(report)),
+	}
+	if kept != nil {
+		shown = append(shown, keptSection(text, kept))
+	}
+	shown = append(shown,
+		section(text.T(i18n.AboutHeadingData), dataCount(text, report), dataList(text, report)),
+		section(text.T(i18n.AboutHeadingEmbedded),
+			howMany(text, len(report.Embedded), i18n.AboutCountAsset, i18n.AboutCountAssets),
+			embeddedList(text, report)),
+		section(text.T(i18n.AboutHeadingComponents),
+			howMany(text, len(report.Components), i18n.AboutCountModule, i18n.AboutCountModules),
+			componentList(text, report)))
 	return paint.Pad(palette.NameStepSection, palette.NameStepSection,
 		palette.NameStepMajor, palette.NameStepMajor,
-		paint.Column(palette.NameStepSection,
-			buildCard(text, report, versions, software),
-			section(text.T(i18n.AboutHeadingNotices), "", noticeLines(report)),
-			section(text.T(i18n.AboutHeadingData), dataCount(text, report), dataList(text, report)),
-			section(text.T(i18n.AboutHeadingEmbedded),
-				howMany(text, len(report.Embedded), i18n.AboutCountAsset, i18n.AboutCountAssets),
-				embeddedList(text, report)),
-			section(text.T(i18n.AboutHeadingComponents),
-				howMany(text, len(report.Components), i18n.AboutCountModule, i18n.AboutCountModules),
-				componentList(text, report))))
+		paint.Column(palette.NameStepSection, shown...))
 }
 
 // howMany is the count at the end of a heading, or nothing for an empty list,

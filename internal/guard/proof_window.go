@@ -210,4 +210,8 @@ var windowGuards = []Guard{
 	{"a window that could not open says what became of the software renderer", "TestTheRefusalSaysWhatBecameOfTheRenderer", "cmd/qadg-gui", ByProbe},
 	{"the window does not import opengl32.dll when it starts, so the renderer beside it can take that name", "TestTheWindowDoesNotImportOpenGLWhenItStarts", "cmd/qadg-gui", ByProbe},
 	{"the About screen says when the window is drawn by the software renderer", "TestTheScreenSaysWhenTheWindowDrawsInSoftware", "internal/gui/about", ByProbe},
+	{"Forget leaves nothing the window or its file chooser wrote", "TestForgetLeavesNothingTheFileChooserWrote", "internal/gui/kept", ByProbe},
+	{"after Forget, closing the window writes nothing", "TestAfterForgetClosingWritesNothing", "internal/gui/kept", ByProbe},
+	{"a size with a nought in it is neither written nor used", "TestASizeWithANoughtIsNeitherWrittenNorUsed", "internal/gui/kept", ByProbe},
+	{"the About screen says what the window keeps and Forget forgets it", "TestTheScreenSaysWhatTheWindowKeepsAndForgetsIt", "internal/gui/about", ByProbe},
 }

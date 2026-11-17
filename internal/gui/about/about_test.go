@@ -76,7 +76,7 @@ func texts(object fyne.CanvasObject) []string {
 // always said it would pass the first half alone.
 func TestTheScreenSaysWhenTheWindowDrawsInSoftware(t *testing.T) {
 	sentence := i18n.English.T(i18n.WindowSoftwareDrawing)
-	if !has(texts(Content(i18n.English, license.Current(), version.Current(), true, nil, assets.Notice)), sentence) {
+	if !has(texts(Content(i18n.English, license.Current(), version.Current(), true, nil, assets.Notice, nil)), sentence) {
 		t.Errorf("a window drawn by the software renderer does not say so on the About screen: %q", sentence)
 	}
 	if has(screen(t), sentence) {
@@ -86,7 +86,7 @@ func TestTheScreenSaysWhenTheWindowDrawsInSoftware(t *testing.T) {
 
 func screen(t *testing.T) []string {
 	t.Helper()
-	return texts(Content(i18n.English, license.Current(), version.Current(), false, nil, assets.Notice))
+	return texts(Content(i18n.English, license.Current(), version.Current(), false, nil, assets.Notice, nil))
 }
 
 func has(all []string, want string) bool {
@@ -243,7 +243,7 @@ func TestNoLabelRendersAsItsOwnKey(t *testing.T) {
 // is the one that would show a head over nothing.
 func TestAnEmptyRegisterIsStatedRatherThanLeftBlank(t *testing.T) {
 	empty := license.Report{}
-	all := texts(Content(i18n.English, empty, version.Current(), false, nil, assets.Notice))
+	all := texts(Content(i18n.English, empty, version.Current(), false, nil, assets.Notice, nil))
 	for _, key := range []i18n.Key{i18n.AboutEmptyComponents, i18n.AboutEmptyData, i18n.AboutEmptyEmbedded} {
 		if !has(all, i18n.English.T(key)) {
 			t.Errorf("a build with an empty register shows nothing where %q belongs", i18n.English.T(key))
@@ -290,7 +290,7 @@ func buttons(object fyne.CanvasObject) []*parts.Button {
 func TestTheScreenOffersTheReportInTheFormAMachineReads(t *testing.T) {
 	var written []byte
 	screen := Content(i18n.English, license.Current(), version.Current(), false,
-		func(contents []byte) { written = contents }, assets.Notice)
+		func(contents []byte) { written = contents }, assets.Notice, nil)
 
 	var save *parts.Button
 	for _, button := range buttons(screen) {
@@ -321,7 +321,7 @@ func TestTheScreenOffersTheReportInTheFormAMachineReads(t *testing.T) {
 // A control that does nothing is a promise, and this one is handed nothing to
 // do whenever the screen is being rendered rather than shown.
 func TestWithNoWayToWriteTheControlIsNotPressable(t *testing.T) {
-	for _, button := range buttons(Content(i18n.English, license.Current(), version.Current(), false, nil, assets.Notice)) {
+	for _, button := range buttons(Content(i18n.English, license.Current(), version.Current(), false, nil, assets.Notice, nil)) {
 		if button.Text == i18n.English.T(i18n.AboutSaveJSON) && !button.Disabled() {
 			t.Error("the control offering the report can be pressed on a screen with no way to " +
 				"write, so pressing it does nothing and says nothing")
@@ -344,7 +344,7 @@ func TestWithNoWayToWriteTheControlIsNotPressable(t *testing.T) {
 func TestTheScreenWritesTheNoticesOfWhatItEmbeds(t *testing.T) {
 	var written []byte
 	screen := Content(i18n.English, license.Current(), version.Current(), false,
-		func(contents []byte) { written = contents }, assets.Notice)
+		func(contents []byte) { written = contents }, assets.Notice, nil)
 
 	var save *parts.Button
 	for _, button := range buttons(screen) {
@@ -383,7 +383,7 @@ func TestTheScreenWritesTheNoticesOfWhatItEmbeds(t *testing.T) {
 // With nothing to write the control says so by being unable to be pressed,
 // which is the rule already stated for the report beside it.
 func TestWithNoWayToWriteTheNoticeControlIsNotPressable(t *testing.T) {
-	for _, button := range buttons(Content(i18n.English, license.Current(), version.Current(), false, nil, assets.Notice)) {
+	for _, button := range buttons(Content(i18n.English, license.Current(), version.Current(), false, nil, assets.Notice, nil)) {
 		if button.Text == i18n.English.T(i18n.AboutSaveNotices) && !button.Disabled() {
 			t.Error("the control offering the licence notices can be pressed on a screen with " +
 				"no way to write, so pressing it does nothing and says nothing")

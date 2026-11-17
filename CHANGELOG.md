@@ -590,6 +590,16 @@ repository once they are released.
 
 ### Added
 
+- **The window remembers its size and the folder its file chooser was last
+  in.** It opens next time at the size it was closed at, and the file chooser
+  starts in the last folder. Both are kept on your computer in the settings
+  folder of the window (on Windows
+  `%APPDATA%\fyne\dev.donislaw.qadg`), which the About screen shows under
+  Kept on this computer, and nothing is sent anywhere. Forget on the same
+  screen clears both, and the window then opens at its first size. The
+  command line keeps nothing between runs. Known limit: a size kept on a
+  larger screen than the one the window opens on shows the window cut off
+  at the top and on the right.
 - **On Windows the window opens without a graphics driver that supports
   OpenGL, drawn by a software renderer.** When the first attempt gives no
   window, for example in a virtual machine without 3D acceleration, qadg-gui

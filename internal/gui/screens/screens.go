@@ -373,10 +373,22 @@ func screenColumn(text i18n.Catalogue, quickScreen *quickview.View, takeScreen *
 	// counted on a picture of this screen was two short of the window. Nothing
 	// is written by pressing them here, which is why a picture may have them.
 	// That they really write is held by the screen's own package.
+	// The same holds for what the window keeps: a stand in that forgets nothing
+	// and names the folder the window would show on Windows, so the picture
+	// has the section and the button the window has.
 	column[screenAbout] = shell.Screen{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,
-		Content: about.Content(text, license.Current(), version.Current(), false, func([]byte) {}, assets.Notice)}
+		Content: about.Content(text, license.Current(), version.Current(), false, func([]byte) {}, assets.Notice,
+			pictureKept{})}
 	return column
 }
+
+// pictureKept is what the window keeps, for a picture of the About screen.
+// Pressing Forget on a picture forgets nothing, because a picture keeps
+// nothing. The folder is data rather than interface text, so it is not a key.
+type pictureKept struct{}
+
+func (pictureKept) Folder() string { return `C:\Users\you\AppData\Roaming\fyne\dev.donislaw.qadg` }
+func (pictureKept) Forget()        {}
 
 // settleScreens puts every screen into the state asked for, through the calls
 // a person makes, before the frame opens the one the state names.
