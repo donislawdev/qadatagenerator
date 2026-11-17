@@ -103,6 +103,7 @@ for tool in 7z 7zz bsdtar tar "${SYSTEMROOT:+$SYSTEMROOT/System32/tar.exe}"; do
   [ -z "$unpack" ] || break
 done
 [ -n "$unpack" ] || die "neither 7z nor bsdtar is installed, and the archive is a 7z"
+echo "unpacking with ${unpack}"
 
 dest="$into/opengl"
 if [ -e "$dest" ]; then

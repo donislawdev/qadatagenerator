@@ -2,8 +2,8 @@
 # when the graphics driver gives it no OpenGL. It is downloaded by
 # .github/scripts/fetch_software_renderer.sh, by the version and the sums in
 # .github/mesa-dist-win, and nothing else downloads it. This runs that script
-# on the Windows runner, where it unpacks with 7z, and asks it to refuse an
-# archive whose sum is not the pinned one before it unpacks anything.
+# on the Windows runner, which prints the tool it unpacks with, and asks it to
+# refuse an archive whose sum is not the pinned one before it unpacks anything.
 #
 # It runs when one of those files changes and on request, not on every push,
 # because each run downloads the archive of about 70 MB twice. What the pin,
