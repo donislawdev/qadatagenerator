@@ -154,6 +154,10 @@ var windowGuards = []Guard{
 	// the same screen from another seed.
 	{"every picture of the window on the website is the window as this build draws it", "TestTheWebsiteShowsTheWindowAsItIs", "internal/gui/screens", ByProbe},
 	{"the picture of Quick value starts with the values the README prints, as its caption says", "TestTheQuickPictureStartsWithTheValuesTheReadmePrints", "internal/gui/screens", ByProbe},
+	{"a picture of a window showing values from another seed is told apart, in its texts and in its pixels", "TestAPictureOfAnotherWindowIsNoticed", "internal/gui/screens", ByProbe},
+	// B-416. The run of the test binary without the clock set first is the
+	// canary, and it has to fail with the finding the runner printed.
+	{"a picture of the window is the same however long the tests before it ran", "TestAPictureIsTheSameHoweverLongThePackageRanBeforeIt", "internal/gui/screens", ByProbe},
 
 	// The OpenGL binding the window carries in third_party (B-414). The copy is
 	// compared with the published module by the same function the canary beside
@@ -173,4 +177,30 @@ var windowGuards = []Guard{
 	{"the scan for started processes reached the product", "TestTheSpawnScanReachesTheProduct", "internal/guard", ByProbe},
 	{"an allowance to start a process for a file that starts none is reported rather than left open", "TestASpawnAllowanceForAFileThatStartsNothingIsStale", "internal/guard", ByProbe},
 	{"the exception for os/exec covers one package in the network rule and no more", "TestTheNetworkRuleStillRefusesExecOutsideTheAllowedPackage", "internal/guard", ByProbe},
+
+	// Guards of rows of docs/20 outside this package, registered on 2026-11-17
+	// (B-396) with the proof each carries in itself: a fault it plants and has to
+	// report, or both answers of its check asked for in one test. Rule 28 of the
+	// project makes that the default and a mutation the exception.
+	{"the ready-made recipes and every command a page of the website names run, and the site shows what they printed and wrote", "TestTheSiteShowsWhatTheProgramDoes", "internal/cli", ByProbe},
+	{"a command written wrong on a page, a recipe out of place and a shown file that changed in more than the time of its run are named", "TestTheSiteRunsCheckGoesRedWhereTheSiteIsWrong", "internal/cli", ByProbe},
+	{"a larger count adds rows at the end and leaves the first ones and their damage as they were", "TestALargerCountLeavesTheFirstRowsAndTheirDamage", "internal/produce", ByProbe},
+	{"a text control never shows the toolkit's own ground or edge, in any state it goes through", "TestATextControlNeverShowsTheGroundOrEdgeOfTheToolkit", "internal/gui/parts", ByProbe},
+	{"the toolkit's shadow is painted nowhere in the window", "TestTheShadowOfTheToolkitIsPaintedNowhere", "internal/gui/fynetheme", ByProbe},
+	{"the check of where a row stands calls a row missing, one showing another value, one left out and one out of view wrong", "TestTheCheckOfARowsPlaceCatchesWhatItIsFor", "internal/gui/parts", ByProbe},
+	{"a row moved to another value forgets the pointer and lights up again when the pointer moves on it", "TestARowMovedToAnotherValueForgetsThePointer", "internal/gui/parts", ByProbe},
+	{"a row given another value stops saying it copied the one before and draws the new one", "TestARowGivenAnotherValueDropsTheWordOfTheOneBefore", "internal/gui/parts", ByProbe},
+	{"the window starts on Windows without a console window, and the command line stays a console program", "TestTheWindowStartsWithoutAConsole", "cmd/qadg-gui", ByProbe},
+	{"a stream counts as missing only when it leads nowhere, so a redirected answer stays where it was sent", "TestAStreamIsMissingOnlyWhenItLeadsNowhere", "cmd/qadg-gui", ByProbe},
+	{"a window with no native handle counts as not opened on every desktop system, and one nobody can read counts as opened", "TestAWindowWithoutANativeHandleDidNotOpen", "cmd/qadg-gui", ByProbe},
+	{"a failure goes to a dialog only when nobody reads the channel it is written to", "TestAFailureGoesToADialogOnlyWhenNobodyHearsTheChannel", "cmd/qadg-gui", ByProbe},
+	{"the reason the toolkit logs for a window it could not make reaches the message", "TestTheToolkitStillNamesTheCause", "cmd/qadg-gui", ByProbe},
+	{"a window that did not open is read from the window and not from the words, and a panic with a window standing stays a defect", "TestOpensReadsTheWindowAndNotTheWords", "cmd/qadg-gui", ByProbe},
+	{"nothing runs the loop of the window without asking first whether the system made the window", "TestTheWindowIsShownApartFromItsLoop", "cmd/qadg-gui", ByProbe},
+	{"the window starts itself again with the software renderer only on Windows, only from a first process and only with the renderer beside it", "TestTheSecondStartIsTakenOnlyWhereItCanHelp", "cmd/qadg-gui", ByProbe},
+	{"the software renderer is told to draw with llvmpipe before it loads", "TestTheDriverIsNamedBeforeTheRendererLoads", "cmd/qadg-gui", ByProbe},
+	{"the software renderer is looked for in the opengl folder beside the program", "TestTheRendererIsLookedForBesideTheProgram", "cmd/qadg-gui", ByProbe},
+	{"a window that could not open says what became of the software renderer", "TestTheRefusalSaysWhatBecameOfTheRenderer", "cmd/qadg-gui", ByProbe},
+	{"the window does not import opengl32.dll when it starts, so the renderer beside it can take that name", "TestTheWindowDoesNotImportOpenGLWhenItStarts", "cmd/qadg-gui", ByProbe},
+	{"the About screen says when the window is drawn by the software renderer", "TestTheScreenSaysWhenTheWindowDrawsInSoftware", "internal/gui/about", ByProbe},
 }

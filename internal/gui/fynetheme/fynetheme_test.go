@@ -60,7 +60,14 @@ func TestEveryColourAnsweredHereComesFromTheMeasuredPalette(t *testing.T) {
 // the owner chose on 2026-11-12 together with no theme of a control's own
 // (B-370). Each name the window paints with nothing says what disappears, and
 // none is also given a colour, which would leave one of the two answers dead.
+//
+// The canary is a name the window does paint, the colour of its text. Read the
+// same way, it has to come back painted, or every check below would pass on a
+// reading that sees nothing.
 func TestTheShadowOfTheToolkitIsPaintedNowhere(t *testing.T) {
+	if _, _, _, alpha := (Visual{}).Color(toolkit.ColorNameForeground, toolkit.VariantDark).RGBA(); alpha == 0 {
+		t.Fatal("the colour of the text reads as painted with nothing, so this reading cannot tell the two apart")
+	}
 	if _, _, _, alpha := (Visual{}).Color(toolkit.ColorNameShadow, toolkit.VariantDark).RGBA(); alpha != 0 {
 		t.Error("the toolkit's shadow is painted, so it comes back along every list that scrolls, " +
 			"on the recipe editor and at the end of a field holding more than it shows")

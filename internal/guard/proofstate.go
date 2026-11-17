@@ -26,9 +26,13 @@ const (
 	// protected behaviour, and the named test goes red when it runs. This is
 	// the strongest of the three.
 	ByMutation ProofState = "mutation"
-	// ByProbe means there is no product code under the guard to break. It
-	// reads the tree, compares two lists or checks a document, so the fault
-	// is planted in a fixture inside the test itself.
+	// ByProbe means the test shows in itself that it can go red. It runs its
+	// check on a fault planted inside the test and requires the check to
+	// report it, or it asks the check for both of its answers. This is the
+	// default, over product code as well. A mutation is kept for a check that
+	// reads the real tree and could pass while reading nothing, and for one
+	// that keeps a promise about the user's data, network, secrets or
+	// permissions.
 	ByProbe ProofState = "probe"
 	// Unproven means nobody has shown this one can fail. Said out loud so
 	// that it does not read like the other two. This list may only shrink.
