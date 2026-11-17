@@ -86,6 +86,11 @@ func Network(pkgs []Package) []string {
 			if importPath == syscallPackage && packageMayNameSyscall(pkg.Path) {
 				continue
 			}
+			// The same split for starting a process: SpawnUse answers what the
+			// allowed file starts, and this answers that no other package may.
+			if importPath == execPackage && packageMaySpawn(pkg.Path) {
+				continue
+			}
 			if OpensTheWorld(importPath) {
 				findings = append(findings, pkg.Path+" imports "+importPath+", which can reach outside this machine")
 			}

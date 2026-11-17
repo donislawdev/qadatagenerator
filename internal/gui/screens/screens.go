@@ -374,7 +374,7 @@ func screenColumn(text i18n.Catalogue, quickScreen *quickview.View, takeScreen *
 	// is written by pressing them here, which is why a picture may have them.
 	// That they really write is held by the screen's own package.
 	column[screenAbout] = shell.Screen{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,
-		Content: about.Content(text, license.Current(), version.Current(), func([]byte) {}, assets.Notice)}
+		Content: about.Content(text, license.Current(), version.Current(), false, func([]byte) {}, assets.Notice)}
 	return column
 }
 

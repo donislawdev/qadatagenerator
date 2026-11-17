@@ -59,13 +59,24 @@ func aloud(heard bool, channel io.Writer, dialog func(title, message string), ti
 	}
 }
 
-// showOrStop shows the window and stops the process, saying why, when the
-// toolkit made no native window for it. A panic that came out of Show while a
-// window stands is a defect of this program and goes on to lastCatch.
-func showOrStop(window fyne.Window, toolkit listening, text i18n.Catalogue, heard bool) {
+// showOrStop shows the window, and when the toolkit made no native window for
+// it, tries again in a second process with the software renderer where one
+// comes with the window (software.go). This process then ends with the second
+// one's exit code, and only when there was no second start does it stop and
+// say why itself. A panic that came out of Show while a window stands is a
+// defect of this program and goes on to lastCatch.
+//
+// One message in all: a second process that cannot open either says so
+// itself, in its own dialog when nobody hears it, and this one only hands its
+// code on.
+func showOrStop(window fyne.Window, toolkit listening, heard bool, again secondAttempt, drawing renderer) {
 	opened, causes, defect := opens(window, toolkit)
 	if !opened {
-		stop(heard, notOpened(text, causes), failed)
+		code, why := again.try()
+		if why == nil {
+			os.Exit(code)
+		}
+		stop(heard, notOpened(again.text, causes, rendererSentence(again.text, why, drawing.loaded)), failed)
 	}
 	if defect != nil {
 		panic(defect)
@@ -142,11 +153,15 @@ func windowOpened(window fyne.Window) bool {
 
 // notOpened is what the window says when the toolkit made no native window
 // for it: what happened and what it needs, the system's own words for why when
-// the toolkit logged any, and what to do instead.
-func notOpened(text i18n.Catalogue, causes []string) string {
+// the toolkit logged any, what became of the software renderer when there is
+// something to say about it, and what to do instead.
+func notOpened(text i18n.Catalogue, causes []string, renderer string) string {
 	parts := []string{text.T(i18n.WindowNotOpened)}
 	if len(causes) > 0 {
 		parts = append(parts, text.T(i18n.WindowNotOpenedReason)+"\n"+strings.Join(causes, "\n"))
+	}
+	if renderer != "" {
+		parts = append(parts, renderer)
 	}
 	parts = append(parts, text.T(i18n.WindowNotOpenedDo))
 	return strings.Join(parts, "\n\n")

@@ -163,4 +163,14 @@ var windowGuards = []Guard{
 	{"a carried module drifting from the published one is named, however it drifts", "TestTheCopyCheckNamesEveryWayACopyDrifts", "internal/guard", ByProbe},
 	{"nothing but the carried binding hides in third_party, which the guards skip", "TestThirdPartyHoldsOnlyTheCarriedBinding", "internal/guard", ByProbe},
 	{"a second directory in third_party or a second replacement in go.mod is named", "TestTheThirdPartyCheckSeesWhatElseIsThere", "internal/guard", ByProbe},
+
+	// The one process the product starts, the window starting itself again with
+	// the software renderer. The scan of the real tree uses the function the
+	// canary beside it plants fourteen starts on, and with no allowance it has to
+	// name the window's start, which proves it reaches the product.
+	{"the product starts no process but the window starting itself again", "TestTheProductStartsOnlyWhatSpawnAllowedNames", "internal/guard", ByProbe},
+	{"another program, a second start, another name from os/exec or os.StartProcess is named", "TestTheSpawnScanNamesEveryOtherStart", "internal/guard", ByProbe},
+	{"the scan for started processes reached the product", "TestTheSpawnScanReachesTheProduct", "internal/guard", ByProbe},
+	{"an allowance to start a process for a file that starts none is reported rather than left open", "TestASpawnAllowanceForAFileThatStartsNothingIsStale", "internal/guard", ByProbe},
+	{"the exception for os/exec covers one package in the network rule and no more", "TestTheNetworkRuleStillRefusesExecOutsideTheAllowedPackage", "internal/guard", ByProbe},
 }

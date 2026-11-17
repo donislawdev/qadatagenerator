@@ -47,6 +47,19 @@ const (
 	WindowNotOpenedReason Key = "window.not-opened.reason"
 	WindowNotOpenedDo     Key = "window.not-opened.do"
 
+	// What the window says about the software renderer it starts again with
+	// on Windows when the first attempt gave no window (B-414): before it
+	// starts again, while it draws with it, here and on the About screen, and
+	// what became of it when the window still cannot open.
+	WindowSoftwareAgain       Key = "window.software.again"
+	WindowSoftwareDrawing     Key = "window.software.drawing"
+	WindowSoftwareNotShipped  Key = "window.software.not-shipped"
+	WindowSoftwareNotLoaded   Key = "window.software.not-loaded"
+	WindowSoftwareNotBeside   Key = "window.software.not-beside"
+	WindowSoftwareNotReadable Key = "window.software.not-readable"
+	WindowSoftwareStartFailed Key = "window.software.start-failed"
+	WindowSoftwareDidNotHelp  Key = "window.software.did-not-help"
+
 	// The words the toolkit draws itself: the dialog a file is chosen in, the
 	// menu a text field opens under the right button, the dialog an error is
 	// shown in, and the words a chooser holds before anything is chosen.
@@ -633,6 +646,8 @@ var windowKeys = []Key{
 	ToolkitOK, ToolkitError, ToolkitYes, ToolkitNo, ToolkitCut, ToolkitCopy, ToolkitPaste,
 	ToolkitSelectAll, ToolkitUndo, ToolkitRedo, ToolkitQuit, ToolkitSelectOne,
 	WindowTitle, WindowNotOpened, WindowNotOpenedReason, WindowNotOpenedDo,
+	WindowSoftwareAgain, WindowSoftwareDrawing, WindowSoftwareNotShipped, WindowSoftwareNotLoaded,
+	WindowSoftwareNotBeside, WindowSoftwareNotReadable, WindowSoftwareStartFailed, WindowSoftwareDidNotHelp,
 	ScreenAbout, ScreenManifest, ScreenTake, ScreenRecipe, ScreenQuick,
 	SidebarGroupMake, SidebarGroupCheck, SidebarOffline,
 	SidebarLinkProject, SidebarLinkSupport, SidebarLinkRefusedTitle, SidebarLinkRefusedBody,

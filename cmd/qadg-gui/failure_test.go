@@ -264,16 +264,17 @@ func callsNamed(t *testing.T, name string, source []byte, called string) bool {
 
 // TestTheMessageCarriesTheReasonOnlyWhenThereIsOne holds the shape of what a
 // window that did not open says: what happened, then the system's words under
-// their heading when the toolkit logged any, then what to do.
+// their heading when the toolkit logged any, then what became of the software
+// renderer when there is something to say, then what to do.
 func TestTheMessageCarriesTheReasonOnlyWhenThereIsOne(t *testing.T) {
 	text := i18n.English
 	body, heading, do := text.T(i18n.WindowNotOpened), text.T(i18n.WindowNotOpenedReason), text.T(i18n.WindowNotOpenedDo)
 
-	with := notOpened(text, []string{"first", "second"})
-	if want := body + "\n\n" + heading + "\nfirst\nsecond\n\n" + do; with != want {
-		t.Errorf("with two reasons the message is\n%q\nand should be\n%q", with, want)
+	with := notOpened(text, []string{"first", "second"}, "renderer")
+	if want := body + "\n\n" + heading + "\nfirst\nsecond\n\nrenderer\n\n" + do; with != want {
+		t.Errorf("with two reasons and the renderer the message is\n%q\nand should be\n%q", with, want)
 	}
-	without := notOpened(text, nil)
+	without := notOpened(text, nil, "")
 	if want := body + "\n\n" + do; without != want {
 		t.Errorf("with no reason the message is\n%q\nand should be\n%q", without, want)
 	}

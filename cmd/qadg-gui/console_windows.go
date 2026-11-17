@@ -26,9 +26,10 @@ package main
 //
 // The calls into Windows below go through cgo rather than through Go because
 // the network guard refuses the syscall package in our own files
-// (internal/guard/rules.go). They are the only calls into Windows this binary
-// makes itself: attaching to and letting go of a console, asking whether the
-// desktop can be seen, and showing a dialog.
+// (internal/guard/rules.go). They are attaching to and letting go of a console,
+// asking whether the desktop can be seen, and showing a dialog. The one other
+// call into Windows this binary makes itself is loading the software renderer,
+// and software_windows.go says why that one goes through syscall.
 
 /*
 #cgo LDFLAGS: -Wl,--subsystem,windows

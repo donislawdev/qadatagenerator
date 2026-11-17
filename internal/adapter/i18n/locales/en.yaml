@@ -20,6 +20,23 @@ window.not-opened.body: "The window could not open on this computer. It needs a 
 window.not-opened.reason: "What the system reported:"
 window.not-opened.do: "Install or update the graphics driver, or turn on 3D acceleration if this is a virtual machine. The command line tool, qadg, does the same work without a window."
 
+# The software renderer, Mesa, which the window loads from a folder named
+# opengl beside it on Windows when the first attempt to open gave no window.
+# The first line is said before the window starts again, and it is a note
+# rather than a diagnosis, because the window knows only that it got no window.
+# The drawing line goes to the error channel and onto the About screen, under
+# the versions. The rest join the message above when the window still cannot
+# open, and say what became of the renderer. %s is a path or the system's own
+# words, which end without a full stop here because the sentence has its own.
+window.software.again: "The window did not open on the first attempt. Starting it again with the software renderer from the opengl folder beside the program."
+window.software.drawing: "This window is drawn by the software renderer from the opengl folder beside the program, not by the graphics driver. Everything works, and drawing is slower."
+window.software.not-shipped: "No software renderer comes with the window on this system, so -software-gl changes nothing here."
+window.software.not-loaded: "The software renderer from the opengl folder beside the program could not be loaded: %s."
+window.software.not-beside: "The software renderer was not tried, because %s is not there. The window looks for libgallium_wgl.dll and opengl32.dll from Mesa in a folder named opengl beside qadg-gui.exe."
+window.software.not-readable: "The software renderer was not tried, because a file of it beside the program could not be read: %s. Check who may read the opengl folder beside qadg-gui.exe."
+window.software.start-failed: "The software renderer was not tried, because starting the window again did not work: %s."
+window.software.did-not-help: "The software renderer from the opengl folder beside the program was loaded, and the window still could not open with it."
+
 # The words the toolkit draws itself, handed to it at start so that it speaks
 # the language of this window rather than the language of the desktop. The
 # toolkit joins the first pair into the title of its file dialog ("Open" and

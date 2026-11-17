@@ -66,6 +66,12 @@ func main() {
 		return
 	}
 
+	text := i18n.English
+	// The software renderer, when the launch asks for it, before anything of
+	// the toolkit exists, because the toolkit's first request for OpenGL has to
+	// find it already loaded (software.go).
+	drawing := rendererFor(asked, text, os.Stderr, loadRendererBeside)
+
 	application := app.New()
 	// Nothing else in this program sets this, and a second setter would
 	// replace this one and keep the console attached for good.
@@ -77,7 +83,6 @@ func main() {
 	application.SetIcon(fyne.NewStaticResource(appicon.Name, appicon.SVG))
 	application.Settings().SetTheme(fynetheme.Current())
 
-	text := i18n.English
 	// The toolkit's own words, in the language of this window rather than of
 	// the desktop (B-290). A refusal leaves them in the desktop's language,
 	// which is worth a line on the error channel and not worth no window.
@@ -89,7 +94,7 @@ func main() {
 	toolkit := listen()
 	window := application.NewWindow(text.T(i18n.WindowTitle))
 
-	frame, err := frameFor(asked, text, window, application)
+	frame, err := frameFor(asked, text, window, application, drawing)
 	if err != nil {
 		stop(heard, err.Error(), failed)
 	}
@@ -111,7 +116,7 @@ func main() {
 	// case it stopped some other way.
 	stopTidying := background.TidyWhenLeftAlone(window.Canvas())
 	window.SetOnClosed(stopTidying)
-	showOrStop(window, toolkit, text, heard)
+	showOrStop(window, toolkit, heard, secondAttemptFor(asked, text, os.Stderr), drawing)
 	application.Run()
 	stopTidying()
 }
@@ -148,13 +153,14 @@ func lastCatch() {
 // of controls that does no work. The catalogue carries no links to pages
 // outside this program either: it is a view of controls, and the control those
 // links are drawn as is already on its page of buttons.
-func frameFor(asked launch, text i18n.Catalogue, window fyne.Window, application fyne.App) (*shell.Shell, error) {
+func frameFor(asked launch, text i18n.Catalogue, window fyne.Window, application fyne.App,
+	drawing renderer) (*shell.Shell, error) {
 	if asked.catalogue {
 		// The samples and the brand come from the package the stored pictures
 		// take them from, so the window and the pictures of it say the same.
 		return catalogue.Frame(text, screens.Brand(text), screens.CatalogueSamples()), nil
 	}
-	return assemble(text, window, application.Clipboard(), application)
+	return assemble(text, window, application.Clipboard(), application, drawing.software())
 }
 
 // revealOnShortcut opens the quick screen on Ctrl+K.
@@ -230,8 +236,11 @@ func saveReport(window fyne.Window) about.Saver {
 // Every screen is handed its readers and its places of work here rather than
 // reaching for them, which is what lets each of them be built in a test with no
 // disk and no goroutine.
+//
+// software says whether the window draws with the software renderer, which the
+// About screen tells a person who wonders why it is slow.
 func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipboard,
-	desktop outward.Desktop) (*shell.Shell, error) {
+	desktop outward.Desktop, software bool) (*shell.Shell, error) {
 	// 🔴 One place of work for the whole window, handed to every screen as
 	// the same value. Until 2026-10-27 each screen was given a literal of its
 	// own, and the one for the recipe screen was written without the watch
@@ -271,7 +280,7 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 	// the thread that draws, and a page the system did not open is said in a
 	// dialog with its address, so a button that did nothing is never silent.
 	refused := func(title, message string) { dialog.ShowInformation(title, message, window) }
-	return shell.New(sidebar(text, window, value, damage, editor, browser),
+	return shell.New(sidebar(text, window, value, damage, editor, browser, software),
 		screens.WindowBrand(text, desktop, work.Read, refused)), nil
 }
 
@@ -299,7 +308,7 @@ func placesOfWork(window background.Window) background.Work {
 // a function. assemble decides which reader and which place of work each
 // screen gets, and this decides where each one stands.
 func sidebar(text i18n.Catalogue, window fyne.Window, value *quickview.View, damage *takeview.View,
-	editor *recipeview.View, browser *manifestview.View) []shell.Screen {
+	editor *recipeview.View, browser *manifestview.View, software bool) []shell.Screen {
 	// # Why this order, which changed on 2026-09-08
 	//
 	// The editor was first until then, and the reason was recorded here: it was
@@ -346,7 +355,7 @@ func sidebar(text i18n.Catalogue, window fyne.Window, value *quickview.View, dam
 		{Name: text.T(i18n.ScreenManifest), Group: checking, Icon: paint.IconChecklist,
 			Content: browser.Content()},
 		{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,
-			Content: about.Content(text, license.Current(), version.Current(),
+			Content: about.Content(text, license.Current(), version.Current(), software,
 				saveReport(window), assets.Notice)},
 	}
 }

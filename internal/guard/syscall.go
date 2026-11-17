@@ -58,6 +58,12 @@ var SyscallAllowed = map[string][]string{
 	"internal/cli/signals.go": {"SIGTERM"},
 	// The same, for a run started from the window.
 	"internal/gui/background/background.go": {"SIGTERM"},
+	// Loading the software renderer from the opengl folder beside the window,
+	// by the absolute path the window works out itself, on Windows when the
+	// graphics driver gave no window (B-414, DEC-317). LoadDLL loads one file
+	// and reads the system's reason in the same call when it fails, which a
+	// call through cgo could not promise.
+	"cmd/qadg-gui/software_windows.go": {"LoadDLL"},
 }
 
 // syscallPackage is the import being controlled.

@@ -18,16 +18,23 @@ type launch struct {
 	// catalogue opens the catalogue of controls instead of the window
 	// proper (DEC-253).
 	catalogue bool
+	// softwareGL draws the window with the software renderer beside the
+	// program instead of the graphics driver (B-414). software.go says when
+	// the window asks for it itself.
+	softwareGL bool
 	// help is a request for the list of flags, which is written out and
 	// answered with no window.
 	help bool
+	// given is the command line as it came, which a second start hands on
+	// unchanged, so the second process is asked for what the first one was.
+	given []string
 }
 
 // arguments reads the command line of the window.
 //
 // # 🔴 Why a flag it does not know is refused rather than ignored (DEC-253, 7)
 //
-// The window has one flag, and the likeliest way to get it wrong is a
+// The window has few flags, and the likeliest way to get one wrong is a
 // spelling: -catalog for -catalogue. Ignored, that opens the window proper
 // without a word, and a person who asked for the catalogue looks at the
 // screens and concludes the flag does nothing. Refused, it says what went
@@ -51,7 +58,7 @@ type launch struct {
 // argument was last reported. That is B-316, before the first build for macOS
 // goes to anybody.
 func arguments(args []string, out io.Writer) (launch, error) {
-	var asked launch
+	asked := launch{given: append([]string{}, args...)}
 	flags := flag.NewFlagSet("qadg-gui", flag.ContinueOnError)
 	// The toolkit of flags writes its own complaint and its own usage when a
 	// parse fails. Both are replaced by the refusal below, which says the four
@@ -59,6 +66,9 @@ func arguments(args []string, out io.Writer) (launch, error) {
 	flags.SetOutput(io.Discard)
 	flags.BoolVar(&asked.catalogue, "catalogue", false,
 		"open the catalogue of controls, every control of the window in every state, instead of the window")
+	flags.BoolVar(&asked.softwareGL, softwareFlag, false,
+		"draw the window with the software renderer from the opengl folder beside the program instead of the "+
+			"graphics driver, as a computer without an OpenGL driver gets it (Windows only)")
 	err := flags.Parse(args)
 	switch {
 	case errors.Is(err, flag.ErrHelp):

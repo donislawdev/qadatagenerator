@@ -84,7 +84,11 @@ type Notices func(name string) (string, bool)
 //
 // The objects are handed to the layout in reading order, which is the order
 // the keyboard walks them: the two buttons in the band, then the page.
-func Content(text i18n.Catalogue, report license.Report, versions version.Set,
+//
+// software says whether this window draws with the software renderer rather
+// than the graphics driver (B-414). A person who wonders why the window is slow
+// looks here, next to the version they would put in a report.
+func Content(text i18n.Catalogue, report license.Report, versions version.Set, software bool,
 	save Saver, notices Notices) fyne.CanvasObject {
 	top := band(text, report, save, notices)
 	// The scrolling area is the keyboard's rather than the toolkit's own, which
@@ -92,7 +96,7 @@ func Content(text i18n.Catalogue, report license.Report, versions version.Set,
 	// without that the only way through it is a mouse: measured on 2026-08-24 at
 	// 3169 pixels of content in a window showing 836 of them, with every key
 	// leaving the offset at zero (DEC-187).
-	page := parts.NewKeyScroll(sections(text, report, versions)).Framed()
+	page := parts.NewKeyScroll(sections(text, report, versions, software)).Framed()
 	return container.New(layout.NewBorderLayout(top, nil, nil, nil), top, page)
 }
 

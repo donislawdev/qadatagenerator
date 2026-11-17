@@ -590,6 +590,17 @@ repository once they are released.
 
 ### Added
 
+- **On Windows the window opens without a graphics driver that supports
+  OpenGL, drawn by a software renderer.** When the first attempt gives no
+  window, for example in a virtual machine without 3D acceleration, qadg-gui
+  starts itself again and draws with Mesa, from libgallium_wgl.dll and
+  opengl32.dll in a folder named opengl beside qadg-gui.exe. The About screen
+  then says so under the versions. Everything works, and drawing is slower
+  than with a driver. Where the driver gives a window nothing changes. The new
+  flag -software-gl asks for the software renderer directly. When the folder
+  or one of its files is not there, the message that the window could not
+  open names the file it looked for, and the window ends with exit code 1 as
+  before. Mesa is not part of this repository.
 - **Ready-made recipes in the examples folder.** Eight recipes that run as they
   are with `qadg generate`: people in the US and in Poland, a table of test
   numbers, Polish companies, a shop in three related tables written as JSON,

@@ -21,11 +21,11 @@ import (
 // Two sources of reference data and two embedded assets say something at a
 // glance, and thirty six modules are an appendix. Put first, the modules pushed
 // both of the short lists three screens down, where nobody scrolled to them.
-func sections(text i18n.Catalogue, report license.Report, versions version.Set) fyne.CanvasObject {
+func sections(text i18n.Catalogue, report license.Report, versions version.Set, software bool) fyne.CanvasObject {
 	return paint.Pad(palette.NameStepSection, palette.NameStepSection,
 		palette.NameStepMajor, palette.NameStepMajor,
 		paint.Column(palette.NameStepSection,
-			buildCard(text, report, versions),
+			buildCard(text, report, versions, software),
 			section(text.T(i18n.AboutHeadingNotices), "", noticeLines(report)),
 			section(text.T(i18n.AboutHeadingData), dataCount(text, report), dataList(text, report)),
 			section(text.T(i18n.AboutHeadingEmbedded),
@@ -68,15 +68,25 @@ func section(heading, count string, body fyne.CanvasObject) fyne.CanvasObject {
 //
 // The number of columns is how many halves there are, which reads as what it
 // is and is not a number written into the view.
-func buildCard(text i18n.Catalogue, report license.Report, versions version.Set) fyne.CanvasObject {
-	versionHalf := paint.Column(palette.NameStepTight,
+//
+// When the window draws with the software renderer, the version half says so
+// under the versions, in the same quiet sentence the licence half uses for its
+// scope. It is a fact about this build running here, which is what the card
+// is for, and without it a slow window reads as a slow program.
+func buildCard(text i18n.Catalogue, report license.Report, versions version.Set, software bool) fyne.CanvasObject {
+	versionParts := []fyne.CanvasObject{
 		paint.Caption(text.T(i18n.AboutHeadingVersions)),
 		form([]pair{
 			{text.T(i18n.AboutVersionTool), versions.Tool},
 			{text.T(i18n.AboutVersionCatalog), versions.Catalog},
 			{text.T(i18n.AboutVersionManifest), versions.Manifest},
 			{text.T(i18n.AboutVersionRecipe), versions.Recipe},
-		}))
+		}),
+	}
+	if software {
+		versionParts = append(versionParts, quiet(text.T(i18n.WindowSoftwareDrawing)))
+	}
+	versionHalf := paint.Column(palette.NameStepTight, versionParts...)
 	licenseHalf := []fyne.CanvasObject{
 		paint.Caption(text.T(i18n.AboutHeadingLicenses)),
 		form([]pair{
