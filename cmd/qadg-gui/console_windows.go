@@ -24,12 +24,15 @@ package main
 // TestTheWindowStartsWithoutAConsole reads the header of a binary it builds
 // rather than this line.
 //
-// The calls into Windows below go through cgo rather than through Go because
-// the network guard refuses the syscall package in our own files
-// (internal/guard/rules.go). They are attaching to and letting go of a console,
-// asking whether the desktop can be seen, and showing a dialog. The one other
-// call into Windows this binary makes itself is loading the software renderer,
-// and software_windows.go says why that one goes through syscall.
+// The calls into Windows below go through cgo. They are attaching to and
+// letting go of a console, asking whether the desktop can be seen, and showing
+// a dialog. C can reach whatever the system can, so the network guard refuses
+// it in our own files except here, and every name this file takes from C is
+// listed in guard.CgoAllowed (internal/guard/cgo.go). A new call means a new
+// name there, and only #cgo lines and system headers may stand in the comment
+// below. The one other call into Windows this binary makes itself is loading
+// the software renderer, and software_windows.go says why that one goes
+// through syscall.
 
 /*
 #cgo LDFLAGS: -Wl,--subsystem,windows

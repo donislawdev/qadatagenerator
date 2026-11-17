@@ -5,7 +5,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"path"
 	"sort"
 	"strings"
 )
@@ -59,14 +58,9 @@ type Spawn struct {
 const execPackage = "os/exec"
 
 // packageMaySpawn reports whether a package holds a file allowed to start a
-// process, derived from SpawnAllowed for the same reason as the syscall one.
+// process.
 func packageMaySpawn(pkg string) bool {
-	for file := range SpawnAllowed {
-		if path.Dir(file) == pkg {
-			return true
-		}
-	}
-	return false
+	return holdsAnAllowedFile(SpawnAllowed, pkg)
 }
 
 // SpawnUse reports every way the product starts a process outside what

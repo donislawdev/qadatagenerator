@@ -130,10 +130,15 @@ jobs:
       # one and the job would be switched off within a week. The two lists
       # differ because they answer two different questions, and a guard nobody
       # can keep green is worth less than no guard at all.
+      #
+      # golang.org/x/sys is on it, all but its cpu package, for the reason the
+      # guard refuses it in our own files: it calls each system the way syscall
+      # does. Unlike syscall it is not in this graph. Measured 2026-11-17 with
+      # this job's settings for linux, darwin, windows and freebsd.
       - name: no network package anywhere in the build graph
         shell: bash
         run: |
-          found=$(go list -deps ./cmd/qadg | grep -E '(^|/)net($|/)|^os/exec$|^plugin$' || true)
+          found=$(go list -deps ./cmd/qadg | grep -E '(^|/)net($|/)|^os/exec$|^plugin$|^golang\.org/x/sys(/|$)' | grep -vx 'golang.org/x/sys/cpu' || true)
           if [ -n "$found" ]
           then
             echo "the shipped binary reaches packages that can leave this machine:"

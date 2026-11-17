@@ -93,6 +93,21 @@ var toolGuards = []Guard{
 	{"an allowance for a file that stopped using it is reported rather than left open", "TestSyscallAllowanceNeverNamesAFileThatDoesNotUseIt", "internal/guard", ByProbe},
 	{"a test may reach the system where the product may not", "TestSyscallScannerIgnoresTests", "internal/guard", ByProbe},
 	{"the scan actually reached the product", "TestTheSyscallScanReachesTheProduct", "internal/guard", ByProbe},
+	{"a name taken from syscall under another name of the package is still seen", "TestSyscallScannerFollowsThePackageUnderAnotherName", "internal/guard", ByProbe},
+
+	// --- C and the module of system calls, the same door wider (DEC-321) ------
+	//
+	// A file importing C can call any C function and write one above the
+	// import, and golang.org/x/sys does for every system what syscall does. The
+	// window calls Windows through C in one file, so that file is an allowance
+	// of names like the syscall ones, and its comment above the import may hold
+	// only build lines and system headers.
+	{"every way of calling the system is refused, and a look-alike is not", "TestTheNetworkGuardRefusesEveryWayOfCallingTheSystem", "internal/guard", ByProbe},
+	{"C is called only in the one file, and only for the names it lists", "TestTheProductCallsCOnlyWhereItIsAllowed", "internal/guard", ByMutation},
+	{"the scan for C actually reached the product", "TestTheCScanReachesTheProduct", "internal/guard", ByProbe},
+	{"a file calling C with no allowance, and a name beyond its entry, are seen", "TestCScannerSeesAFileNobodyAllowedAndANameBeyondItsEntry", "internal/guard", ByProbe},
+	{"C written above the import is seen, and build lines with system headers are not", "TestCScannerSeesCWrittenAboveTheImport", "internal/guard", ByProbe},
+	{"the exception for C covers one package in the network rule and no more", "TestTheNetworkRuleStillRefusesCOutsideTheAllowedPackage", "internal/guard", ByProbe},
 
 	// --- two runs into one directory ----------------------------------------
 	//

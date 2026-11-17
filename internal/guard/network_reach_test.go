@@ -50,6 +50,33 @@ func TestTheNetworkGuardDoesNotFireOnNamesThatMerelyLookAlike(t *testing.T) {
 	}
 }
 
+// Every package that calls the operating system the way syscall does is
+// refused, C and the module golang.org/x/sys included, together with a package
+// that module may add later. Its cpu package only reads what the processor can
+// do, and a name that merely starts the same way is not the module.
+func TestTheNetworkGuardRefusesEveryWayOfCallingTheSystem(t *testing.T) {
+	for _, importPath := range []string{
+		"syscall",
+		"C",
+		"golang.org/x/sys/windows",
+		"golang.org/x/sys/unix",
+		"golang.org/x/sys/plan9",
+		"golang.org/x/sys/execabs",
+		"golang.org/x/sys/windows/registry",
+		"golang.org/x/sys/windows/svc/mgr",
+		"golang.org/x/sys/added/later",
+	} {
+		if !OpensTheWorld(importPath) {
+			t.Errorf("%s calls the system the way syscall does and was allowed", importPath)
+		}
+	}
+	for _, importPath := range []string{"golang.org/x/sys/cpu", "golang.org/x/system", "github.com/somebody/x/sys/table"} {
+		if OpensTheWorld(importPath) {
+			t.Errorf("%s calls nothing and was refused", importPath)
+		}
+	}
+}
+
 // The scanner has to report the package outside the standard library as well,
 // not only answer about it.
 func TestNetworkReportsADependencyThatReachesOutside(t *testing.T) {

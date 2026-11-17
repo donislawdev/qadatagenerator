@@ -20,10 +20,27 @@ var networkAllowed = map[string]bool{
 // answers about what our own files import and not about what the graph
 // contains. Those are two different questions and the second one is asked in
 // CI, where a shell can run go list.
+//
+// C is here for the same reason as syscall and is the wider door of the two:
+// a file importing it can call any function of the system's C library and
+// write one of its own above the import.
 var reachesOut = map[string]bool{
-	"os/exec": true,
-	"syscall": true,
-	"plugin":  true,
+	"os/exec":  true,
+	"syscall":  true,
+	"plugin":   true,
+	cgoPackage: true,
+}
+
+// systemCalls is the module that carries the calls into each operating system
+// outside the standard library. Its packages for each system can do what
+// syscall can, sockets included, execabs wraps os/exec, and the Windows half
+// reaches the registry and the service manager. So the module is refused as a
+// whole, and a package added to it later is refused before anybody has read
+// it. The one exception only asks the processor what it can do.
+const systemCalls = "golang.org/x/sys"
+
+var systemCallsThatStayHere = map[string]bool{
+	systemCalls + "/cpu": true,
 }
 
 // OpensTheWorld reports whether an import can reach outside this machine or
@@ -51,6 +68,9 @@ func OpensTheWorld(importPath string) bool {
 	if reachesOut[importPath] {
 		return true
 	}
+	if (importPath == systemCalls || strings.HasPrefix(importPath, systemCalls+"/")) && !systemCallsThatStayHere[importPath] {
+		return true
+	}
 	for _, segment := range strings.Split(importPath, "/") {
 		if segment == "net" {
 			return true
@@ -72,13 +92,14 @@ func OpensTheWorld(importPath string) bool {
 // including everything the modules pull in. Two mechanisms because they need
 // two different tools, and naming the split here is what stops the next reader
 // from believing this function answers the whole question.
-// # The one exception, and where the rest of it lives
+// # The exceptions, and where the rest of each lives
 //
 // A package holding a file named in guard.SyscallAllowed may import syscall.
 // That is coarser than the allowance itself, which is a file and a list of
 // identifiers, so this half is deliberately not the whole check: SyscallUse
 // answers whether the file took only what it may. Neither is enough alone, and
 // splitting them this way is what keeps this function answering one question.
+// C has the same pair, CgoAllowed and CgoUse.
 func Network(pkgs []Package) []string {
 	var findings []string
 	for _, pkg := range pkgs {
@@ -89,6 +110,9 @@ func Network(pkgs []Package) []string {
 			// The same split for starting a process: SpawnUse answers what the
 			// allowed file starts, and this answers that no other package may.
 			if importPath == execPackage && packageMaySpawn(pkg.Path) {
+				continue
+			}
+			if importPath == cgoPackage && packageMayCallC(pkg.Path) {
 				continue
 			}
 			if OpensTheWorld(importPath) {

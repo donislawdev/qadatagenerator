@@ -90,6 +90,25 @@ func open() (int, error) { return syscall.Socket(1, 2, 3) }
 	}
 }
 
+// The scanner follows the name the file gives the package, or an allowed file
+// could import syscall under another name and take anything from it unseen.
+func TestSyscallScannerFollowsThePackageUnderAnotherName(t *testing.T) {
+	dir := t.TempDir()
+	writeGo(t, filepath.Join(dir, "reaching.go"), `package sample
+
+import system "syscall"
+
+var stop = system.SIGTERM
+
+func open() (int, error) { return system.Socket(1, 2, 3) }
+`)
+
+	findings := scanSyscalls(t, dir, map[string][]string{"reaching.go": {"SIGTERM"}})
+	if len(findings) != 1 || !strings.Contains(findings[0], "system.Socket") {
+		t.Fatalf("a name taken under another name of the package was not reported: %v", findings)
+	}
+}
+
 // An allowance for a file that stopped naming syscall is a door left open with
 // nobody looking at it, so the list has to close from that side too.
 func TestSyscallAllowanceNeverNamesAFileThatDoesNotUseIt(t *testing.T) {
