@@ -47,3 +47,12 @@ require (
 	golang.org/x/net v0.61.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 )
+
+// The OpenGL binding the window's toolkit uses, at the version required above,
+// with one change that keeps opengl32.dll out of the window's import table on
+// Windows. Without it the window could never draw with the software renderer
+// it starts again with on a computer whose graphics driver gives no window.
+// third_party/go-gl-gl/PATCH.md says what changed and why, and a guard holds
+// the copy to the published version plus exactly that change. The command
+// line binary does not link it.
+replace github.com/go-gl/gl => ./third_party/go-gl-gl

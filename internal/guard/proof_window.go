@@ -154,4 +154,13 @@ var windowGuards = []Guard{
 	// the same screen from another seed.
 	{"every picture of the window on the website is the window as this build draws it", "TestTheWebsiteShowsTheWindowAsItIs", "internal/gui/screens", ByProbe},
 	{"the picture of Quick value starts with the values the README prints, as its caption says", "TestTheQuickPictureStartsWithTheValuesTheReadmePrints", "internal/gui/screens", ByProbe},
+
+	// The OpenGL binding the window carries in third_party (B-414). The copy is
+	// compared with the published module by the same function the canary beside
+	// it plants seven drifts on, and the sum of the published module has to be
+	// the one go.sum once recorded, which a wrong hash cannot produce.
+	{"the window's OpenGL binding is the published module plus the one change that keeps opengl32.dll out of its imports", "TestTheOpenGLBindingIsThePublishedOnePlusOneChange", "internal/guard", ByProbe},
+	{"a carried module drifting from the published one is named, however it drifts", "TestTheCopyCheckNamesEveryWayACopyDrifts", "internal/guard", ByProbe},
+	{"nothing but the carried binding hides in third_party, which the guards skip", "TestThirdPartyHoldsOnlyTheCarriedBinding", "internal/guard", ByProbe},
+	{"a second directory in third_party or a second replacement in go.mod is named", "TestTheThirdPartyCheckSeesWhatElseIsThere", "internal/guard", ByProbe},
 }

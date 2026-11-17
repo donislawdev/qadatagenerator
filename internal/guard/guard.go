@@ -33,17 +33,26 @@ type Package struct {
 	TestImports []string
 }
 
-// skipped directories hold no product source. Three of them are outside the
-// repository altogether and one holds bytes that are deliberately not valid
-// anything.
+// skipped directories hold no product source of ours. Three of them are
+// outside the repository altogether and one holds bytes that are deliberately
+// not valid anything.
+//
+// third_party holds somebody else's module, carried as published with one
+// change, and is a module of its own, so the go command does not count it as
+// part of this one either. The guards here are rules for code this project
+// writes, and a generated binding of thousands of functions fails half of them
+// by design. What may sit in that directory, and how far it may differ from
+// what was published, is asked by TestTheOpenGLBindingIsThePublishedOnePlusOneChange,
+// so nothing of ours can hide there.
 var skippedDirs = map[string]bool{
-	".git":     true,
-	".claude":  true,
-	"docs":     true,
-	"tools":    true,
-	"spec":     true,
-	"testdata": true,
-	"vendor":   true,
+	".git":        true,
+	".claude":     true,
+	"docs":        true,
+	"tools":       true,
+	"spec":        true,
+	"testdata":    true,
+	"vendor":      true,
+	"third_party": true,
 }
 
 // importedAs is the name a file calls an imported package by: its last path

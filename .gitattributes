@@ -27,6 +27,11 @@
 **/testdata/** -text
 *.golden -text
 
+# The module carried in third_party is held byte for byte to what its author
+# published, and a guard compares the two. Normalising its line endings would
+# be a change to somebody else's file that no patch describes.
+third_party/** -text
+
 # ---------------------------------------------------------------------------
 # Generated and vendored content, kept out of language statistics
 # ---------------------------------------------------------------------------
