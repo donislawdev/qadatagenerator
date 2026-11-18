@@ -1,0 +1,164 @@
+package main
+
+import (
+	"fmt"
+	"slices"
+	"strings"
+)
+
+// A program is one binary a release ships, with the notices that answer for
+// it. The command line answers with THIRD-PARTY-NOTICES.md, which its --license
+// prints, and the window with THIRD-PARTY-NOTICES-GUI.md, which its About
+// screen saves, because it links what the command line does not (DEC-327).
+// Each build is held to the notices of its own program, and one document
+// describes both.
+type program struct {
+	path  string // the main package, as the compiler records it
+	name  string // the package's name in the document
+	file  string // the notices, for messages
+	said  string // how a message names those notices
+	notes func(tree) string
+}
+
+var programs = []program{
+	{path: programPath, name: "qadg", file: "THIRD-PARTY-NOTICES.md", said: "the notices",
+		notes: func(t tree) string { return t.notices }},
+	{path: windowPath, name: "qadg-gui", file: "THIRD-PARTY-NOTICES-GUI.md", said: "the window's notices",
+		notes: func(t tree) string { return t.windowNotices }},
+}
+
+// programNamed is the program built from a main package. readBuild refuses
+// any other package first, so every build has one.
+func programNamed(path string) program {
+	for _, p := range programs {
+		if p.path == path {
+			return p
+		}
+	}
+	panic("sbom: no program is built from " + path)
+}
+
+// A work is a section of the notices named after no module: somebody else's
+// work that this repository keeps in its own tree and compiles in, that the C
+// compiler links into one build of its own, or that travels beside a binary in
+// its archive. No build records any of them, so none can be checked against a
+// build. What holds them to what ships is the notices guard in internal/guard,
+// for the compiler's code the linker's map that every build of the window reads
+// (DEC-327), and for the software renderer the guard that holds its notices to
+// the pin it is fetched by. What this table adds is where each one goes.
+type work struct {
+	programs []string // the main packages of the programs that carry it
+	beside   string   // the one target it travels beside, or ""
+	in       string   // the one target it is compiled into, or "" when it is in every build or beside one
+	renderer bool     // its notices are the software renderer's, read from -renderer, not a program's
+	none     bool     // it has no copyright at all, which the document says rather than asserting nothing
+	about    string   // what the document says of it
+}
+
+func (w work) of(program string) bool {
+	return slices.Contains(w.programs, program)
+}
+
+// rendererHeading is the work the software renderer's notices describe, and
+// the name its opening sentence gives it.
+const rendererHeading = "Mesa 3D"
+
+// works are those sections, by heading. A heading the notices of a program use
+// and this table does not name for that program is refused, and so is an entry
+// here that the notices of one of its programs never use, a work added on one
+// side only.
+var works = map[string]work{
+	"joke2k/faker": {programs: []string{programPath, windowPath},
+		about: "Lists of names and places read from Faker, compiled into the program from " +
+			"internal/adapter/provider/corpus of this repository."},
+	"U.S. Census Bureau": {programs: []string{programPath, windowPath}, none: true,
+		about: "The list of ZIP Code Tabulation Areas and the places they lie in, compiled into the program from " +
+			"internal/adapter/provider/corpus of this repository. A work of the United States Government, which has no copyright."},
+	"IBM/plex": {programs: []string{windowPath},
+		about: "A typeface, compiled into qadg-gui from internal/gui/assets of this repository."},
+	"lucide-icons/lucide": {programs: []string{windowPath},
+		about: "Icons, compiled into qadg-gui from internal/gui/assets of this repository."},
+	"MinGW-w64 runtime": {programs: []string{windowPath}, in: "windows/amd64",
+		about: "The runtime the MinGW-w64 C compiler links into every Windows program it builds, statically linked into " +
+			"qadg-gui for windows/amd64 and into no other build. The files of it each build links are held to " +
+			".github/window-toolchain, read from the linker's map."},
+	"GNU C Library": {programs: []string{windowPath}, in: "linux/amd64",
+		about: "The start files of the GNU C Library (crt1.o, crti.o, crtn.o), statically linked into qadg-gui for " +
+			"linux/amd64 and into no other build. The rest of the library is loaded from the system at run time and is " +
+			"not in the binary."},
+	rendererHeading: {programs: []string{windowPath}, beside: "windows/amd64", renderer: true,
+		about: "Not part of any binary: files that travel beside qadg-gui in its archive for windows/amd64, in a folder " +
+			"called opengl, which it loads to draw when the graphics driver offers no OpenGL."},
+}
+
+// parseTree reads the notices of every program and holds them to each other:
+// a text without an SPDX identifier is the same text in every file that quotes
+// it, every work is in the notices of each of its programs, and every unlisted
+// text licences.go knows is quoted somewhere.
+//
+// Both files are read whatever builds are given. They are compiled into this
+// command from the same tree, and a file this cannot read is a file a person
+// reads differently from the document published beside it.
+func parseTree(t tree) (map[string]notices, error) {
+	read := map[string]notices{}
+	texts := map[string]string{} // LicenseRef identifier to its text
+	for _, p := range programs {
+		n, err := parseNotices(p.notes(t))
+		if err != nil {
+			return nil, fmt.Errorf("%s cannot describe a build: %w", p.file, err)
+		}
+		for heading := range n.works {
+			w := works[heading]
+			if w.renderer {
+				return nil, fmt.Errorf("%s has the section %q, whose notices are the software renderer's own and are read from -renderer",
+					p.file, heading)
+			}
+			if !w.of(p.path) {
+				return nil, fmt.Errorf("%s has the section %q, which is a work of %s", p.file, heading, namesOf(w.programs))
+			}
+		}
+		for _, e := range n.extracted {
+			if earlier, ok := texts[e.id]; ok && earlier != e.text {
+				return nil, fmt.Errorf("%s quotes another text for %s than the notices read before it", p.file, e.id)
+			}
+			texts[e.id] = e.text
+		}
+		read[p.path] = n
+	}
+	for _, heading := range sortedKeys(works) {
+		w := works[heading]
+		if w.renderer {
+			continue
+		}
+		for _, owner := range w.programs {
+			if _, ok := read[owner].works[heading]; !ok {
+				return nil, fmt.Errorf("programs.go names the work %q for %s, and %s has no section for it",
+					heading, programNamed(owner).name, programNamed(owner).file)
+			}
+		}
+	}
+	for _, u := range unlisted {
+		if _, ok := texts[u.id]; !ok {
+			return nil, fmt.Errorf("%s is in the list of unlisted texts and no section names it, so remove it from licences.go", u.id)
+		}
+	}
+	return read, nil
+}
+
+// namesOf is the programs' names, for a message.
+func namesOf(paths []string) string {
+	names := make([]string, 0, len(paths))
+	for _, path := range paths {
+		names = append(names, programNamed(path).name)
+	}
+	return strings.Join(names, " and ")
+}
+
+// fileList is what the document says of the files a work beside a binary is.
+func fileList(files []listedFile) string {
+	parts := make([]string, 0, len(files))
+	for _, f := range files {
+		parts = append(parts, fmt.Sprintf("%s (%s bytes, SHA-256 %s)", f.path, f.size, f.sha256))
+	}
+	return strings.Join(parts, " and ")
+}

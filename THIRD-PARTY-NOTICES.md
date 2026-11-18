@@ -278,11 +278,21 @@ Source: <https://github.com/joke2k/faker>
 
 ## U.S. Census Bureau
 
-Version `2020 vintage`. Public domain. The list of ZIP Code Tabulation Areas and
-the places they lie in, for `en-US`, was built from the 2020 ZCTA to Place
-relationship file and the 2020 Places gazetteer of the United States Census
-Bureau. A work of the United States Government has no copyright, under 17
-U.S.C. 105, so there is no licence to reproduce. The source is named here so
-that nobody has to wonder where the list came from.
+Version `2020 vintage`. LicenseRef-US-Government-Work. The list of ZIP Code
+Tabulation Areas and the places they lie in, for `en-US`, was built from the
+2020 ZCTA to Place relationship file and the 2020 Places gazetteer of the
+United States Census Bureau. A work of the United States Government has no
+copyright, so there is no licence to reproduce. The SPDX License List has no
+identifier for that, so it is `LicenseRef-US-Government-Work` here, and the
+text it stands for is the law that says so, 17 U.S.C. 105(a):
+
+```
+Copyright protection under this title is not available for any work of the
+United States Government, but the United States Government is not precluded
+from receiving and holding copyrights transferred to it by assignment,
+bequest, or otherwise.
+```
+
+The source is named here so that nobody has to wonder where the list came from.
 
 Source: <https://www.census.gov/geographies/reference-files/time-series/geo/relationship-files.html>

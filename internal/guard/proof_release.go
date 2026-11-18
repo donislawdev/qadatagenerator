@@ -35,6 +35,24 @@ var releaseGuards = []Guard{
 	{"the compiler's own code in the window is the code its notices answer for, and a build reads the linker's map", "TestTheCompilersOwnCodeInTheWindowIsTheCodeItsNoticesAnswerFor", "internal/guard", ByProbe},
 	{"the toolchain check sees a library nobody read, a gap in the pin, a section at another version and a build that skips the reader", "TestTheToolchainGuardCanFail", "internal/guard", ByProbe},
 
+	// The bill of materials (DEC-328). Each test below runs the command's
+	// checks on faults planted in fixtures. The tests that read the real
+	// notices and the real .github/opengl run the same parser, and on
+	// 2026-11-18 a section back at "Public domain." in the window's copy, NCSA
+	// taken out of the renderer's sentence and the icons taken out of the
+	// table of works were each caught once by hand. The document they render
+	// is held to two golden files that pyspdxtools from spdx-tools 0.8.5
+	// accepted that day, and the same validator rejected four documents
+	// broken on purpose.
+	{"the bill of materials refuses a build that links a module, a version or a toolchain the notices of its program do not name", "TestEveryDisagreementIsReported", "cmd/sbom", ByProbe},
+	{"the bill of materials refuses notices it cannot read whole: an identifier nobody read on the SPDX lists, a text without its words, a work in the wrong place", "TestNoticesThatCannotDescribeABuildAreRefused", "cmd/sbom", ByProbe},
+	{"the software renderer is described with the build of the window it travels beside, and with no other", "TestTheRendererGoesWithTheBuildItTravelsBeside", "cmd/sbom", ByProbe},
+	// The three that read the real tree first ask their check about the tree
+	// with one fault planted in it, and then about the tree as it is.
+	{"the notices this tree ships can describe a build, with every text without an SPDX identifier and every work where the table says", "TestTheNoticesInThisTreeDescribeABuild", "cmd/sbom", ByProbe},
+	{"the software renderer's notices this tree keeps are read whole, NCSA among their licences", "TestTheRenderersNoticesInThisTreeAreRead", "cmd/sbom", ByProbe},
+	{"builds that link what the shipped notices name are described, and the same builds with the toolkit at another version are refused", "TestTheShippedNoticesDescribeABuildThatLinksWhatTheyName", "cmd/sbom", ByProbe},
+
 	// The owner's decision of 2026-11-18 that --license ends with those
 	// notices. Both tests ask their check for a planted fault first, and on
 	// the same day a report without the notices and a copy with one changed

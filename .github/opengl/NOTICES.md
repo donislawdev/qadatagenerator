@@ -1,6 +1,6 @@
 # The software renderer in this folder
 
-Mesa 3D, version `26.2.5`. MIT AND Apache-2.0 WITH LLVM-exception AND BSL-1.0 AND BSD-3-Clause.
+Mesa 3D, version `26.2.5`. MIT AND Apache-2.0 WITH LLVM-exception AND NCSA AND BSL-1.0 AND BSD-3-Clause.
 
 OpenGL drawn by the processor instead of a graphics card, for the window of QA
 Data Generator on Windows. It is not part of `qadg-gui.exe`. It is two files in
@@ -46,5 +46,5 @@ and no other.
 |---|---|---|
 | `LICENSE-Mesa.txt` | the notices of the core library, of each driver compiled in, and of the shader texts kept in the file | MIT, BSD-3-Clause |
 | `LICENSE-BSL-1.0.txt` | the licence of the C11 threads library, which Mesa compiles on Windows in place of `<threads.h>`, as Mesa keeps it in `licenses/BSL-1.0` | BSL-1.0 |
-| `LICENSE-LLVM.txt` | `llvm/LICENSE.TXT` at the tag `llvmorg-23.1.4`, whole. LLVM is what turns shaders into machine code | Apache-2.0 WITH LLVM-exception |
+| `LICENSE-LLVM.txt` | `llvm/LICENSE.TXT` at the tag `llvmorg-23.1.4`, whole. LLVM is what turns shaders into machine code. The text ends with LLVM's older licence, which LLVM says still covers a small part of its code alone | Apache-2.0 WITH LLVM-exception, NCSA |
 | `LICENSE-DirectX-Headers.txt` | `LICENSE` of the Direct3D 12 headers at the tag `v1.619.5`, whole | MIT |
