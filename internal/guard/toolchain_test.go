@@ -19,10 +19,11 @@ import (
 //
 // Three places describe that code, and each is read by something else: the pin,
 // which window_toolchain.sh holds a build of the window to by the linker's own
-// map, the notices, which a person reads, and ci.yml, whose test job builds the
-// window with that map and runs the reader on all three systems. A library
-// added to the pin alone would ship code whose licence nobody read, and a
-// reader no build runs would hold nothing to anything.
+// map, the notices, which a person reads, and the two builds of the window that
+// ask for that map and run the reader on it: the test job of ci.yml on every
+// push, and build_window.sh on the build a release ships. A library added to
+// the pin alone would ship code whose licence nobody read, and a reader no
+// build runs would hold nothing to anything.
 //
 // Adapted on 2026-11-18 from the same guard in Cert Doctor, a project of the
 // same owner under the same licence.
@@ -225,14 +226,21 @@ func checkToolchainNotices(pin pinnedToolchain, sections map[string]string) []st
 	return problems
 }
 
-// checkToolchainWiring holds the build to the pin: the build of the window asks
-// the linker for its map on both linkers and runs the reader on it, the reader
-// reads the pin, and no other file under .github copies the list.
-func checkToolchainWiring(builder, reader string, pin pinnedToolchain, others map[string]string) []string {
+// windowBuilders are the files that build the window and read its map: the
+// test job of ci.yml, and the build a release ships.
+var windowBuilders = []string{windowBuilder, windowScript}
+
+// checkToolchainWiring holds the builds to the pin: each build of the window
+// asks the linker for its map on both linkers and runs the reader on it, the
+// reader reads the pin, and no other file under .github copies the list.
+// builders holds each file of windowBuilders by its path.
+func checkToolchainWiring(builders map[string]string, reader string, pin pinnedToolchain, others map[string]string) []string {
 	var problems []string
-	for _, want := range []string{"bash " + toolchainReader + " ", "-extldflags=-Wl,-Map=", "-extldflags=-Wl,-map,"} {
-		if !strings.Contains(builder, want) {
-			problems = append(problems, fmt.Sprintf("%s: does not carry %q, so the linker's map of the window is not read the way the pin needs", windowBuilder, want))
+	for _, rel := range windowBuilders {
+		for _, want := range []string{"bash " + toolchainReader + " ", "-extldflags=-Wl,-Map=", "-extldflags=-Wl,-map,"} {
+			if !strings.Contains(builders[rel], want) {
+				problems = append(problems, fmt.Sprintf("%s: does not carry %q, so the linker's map of the window is not read the way the pin needs", rel, want))
+			}
 		}
 	}
 	if !strings.Contains(reader, `pin="`+toolchainPin+`"`) {
@@ -291,8 +299,12 @@ func TestTheCompilersOwnCodeInTheWindowIsTheCodeItsNoticesAnswerFor(t *testing.T
 	requireNone(t, parse, "the notices file")
 	requireNone(t, checkToolchainNotices(pin, sections), "the notices of the C compiler's own code")
 
-	requireNone(t, checkToolchainWiring(readRepoFile(t, root, windowBuilder), readRepoFile(t, root, toolchainReader), pin, githubFiles(t, root)),
-		"the build that reads the linker's map")
+	builders := map[string]string{}
+	for _, rel := range windowBuilders {
+		builders[rel] = readRepoFile(t, root, rel)
+	}
+	requireNone(t, checkToolchainWiring(builders, readRepoFile(t, root, toolchainReader), pin, githubFiles(t, root)),
+		"the builds that read the linker's map")
 }
 
 // TestTheToolchainGuardCanFail is the canary, one planted gap per question.
@@ -329,10 +341,14 @@ func TestTheToolchainGuardCanFail(t *testing.T) {
 	requireFinding(t, checkToolchainNotices(noGlibc, sections), `has the section "## GNU C Library"`)
 
 	builder := "bash " + toolchainReader + " \"$target\"\n-extldflags=-Wl,-Map=\n-extldflags=-Wl,-map,\n"
+	both := func(ci, release string) map[string]string {
+		return map[string]string{windowBuilders[0]: ci, windowBuilders[1]: release}
+	}
 	reader := `pin="` + toolchainPin + `"`
-	requireNone(t, checkToolchainWiring(builder, reader, pin, map[string]string{"x.yml": "go build"}), "a build that reads the pin")
-	requireFinding(t, checkToolchainWiring("go build\n", reader, pin, nil), "does not carry \"bash .github/scripts/window_toolchain.sh \"")
-	requireFinding(t, checkToolchainWiring(strings.Replace(builder, "-map,", "-Map,", 1), reader, pin, nil), `"-extldflags=-Wl,-map,"`)
-	requireFinding(t, checkToolchainWiring(builder, `pin=".github/other"`, pin, nil), "holds the build to a list of its own")
-	requireFinding(t, checkToolchainWiring(builder, reader, pin, map[string]string{"x.yml": "allowed: libgcc.a"}), "names libgcc.a, a second copy")
+	requireNone(t, checkToolchainWiring(both(builder, builder), reader, pin, map[string]string{"x.yml": "go build"}), "builds that read the pin")
+	requireFinding(t, checkToolchainWiring(both("go build\n", builder), reader, pin, nil), "does not carry \"bash .github/scripts/window_toolchain.sh \"")
+	requireFinding(t, checkToolchainWiring(both(builder, "go build\n"), reader, pin, nil), windowBuilders[1]+": does not carry")
+	requireFinding(t, checkToolchainWiring(both(strings.Replace(builder, "-map,", "-Map,", 1), builder), reader, pin, nil), `"-extldflags=-Wl,-map,"`)
+	requireFinding(t, checkToolchainWiring(both(builder, builder), `pin=".github/other"`, pin, nil), "holds the build to a list of its own")
+	requireFinding(t, checkToolchainWiring(both(builder, builder), reader, pin, map[string]string{"x.yml": "allowed: libgcc.a"}), "names libgcc.a, a second copy")
 }

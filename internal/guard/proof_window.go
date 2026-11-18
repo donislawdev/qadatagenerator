@@ -130,6 +130,10 @@ var windowGuards = []Guard{
 	{"a resource still carrying another version is told apart", "TestAnExecutableWithAnOlderVersionIsNoticed", "internal/guard", ByProbe},
 	{"the window wears the program's icon rather than the toolkit's logo", "TestTheWindowIsHandedTheProgramIcon", "internal/guard", ByProbe},
 	{"the icon file both executables carry is the drawing at every size Windows asks for", "TestTheIconFileIsDrawnFromTheDrawings", "internal/gui/appicon", ByProbe},
+	// The icon of the bundle on macOS (DEC-329), held the same way, with the
+	// same comparison the canary above proves, and a reader that refuses a
+	// file that is not one (TestAMacIconFileThatIsNotOneIsRefused).
+	{"the icon the bundle on macOS carries is the drawing on its plate at every size the file holds", "TestTheMacIconFileIsDrawnFromTheDrawings", "internal/gui/appicon", ByProbe},
 	{"both executables carry the icon file as it is now", "TestBothExecutablesCarryTheIconFile", "internal/gui/appicon", ByProbe},
 	{"both drawings of the icon draw something the rasteriser could read", "TestBothDrawingsDrawASpoonRatherThanNothing", "internal/gui/appicon", ByProbe},
 	{"the picture GitHub shows says what this build does and looks the way it is drawn", "TestTheSocialPreviewSaysWhatTheProgramDoes", "internal/gui/socialcard", ByProbe},

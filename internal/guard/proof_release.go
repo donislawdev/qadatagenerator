@@ -65,4 +65,20 @@ var releaseGuards = []Guard{
 	// report built without the notices failed both once by hand.
 	{"the About screen saves the window's notices, whole, with a section for every embedded asset", "TestTheScreenWritesTheNoticesOfWhatItEmbeds", "internal/gui/about", ByProbe},
 	{"the report the About screen saves carries the window's notices", "TestTheScreenOffersTheReportInTheFormAMachineReads", "internal/gui/about", ByProbe},
+
+	// The release workflow and its scripts (DEC-329). Every test below plants
+	// one fault in a copy of the real files first, and stops when the text it
+	// plants in is no longer there, so a check that reads nothing or a file
+	// that moved away from what it reads fails rather than passes. On
+	// 2026-11-18 the call of the map's reader taken out of build_window.sh
+	// was caught once by hand in the real tree. What the scripts DO is asked
+	// of them by running them, on the three systems, and on the runners by
+	// the workflow itself on every push that changes them.
+	{"the release builds and packs the targets the notices are checked for, and the window job builds the window's", "TestTheReleaseBuildsTheTargetsTheNoticesAreCheckedFor", "internal/guard", ByProbe},
+	{"the windows the window job builds reach the archives, and the renderer's notices in them are the ones the bill of materials reads", "TestTheWindowsAndTheirRendererReachTheArchives", "internal/guard", ByProbe},
+	{"every workflow that can write names each action by a commit with its release beside it", "TestEveryWorkflowThatCanWritePinsItsActionsToACommit", "internal/guard", ByProbe},
+	{"a script a workflow or a release script runs is handed to its interpreter and is in the tree", "TestAScriptAWorkflowRunsIsHandedToItsInterpreter", "internal/guard", ByProbe},
+	{"the release opens an empty draft behind the tag and its three checks, with a note that says how to check a download", "TestTheReleaseWorkflowOpensADraftAndPublishesNothing", "internal/guard", ByProbe},
+	{"the bill of materials is read by SPDX's own validator, installed from files pinned by their bytes", "TestTheBillOfMaterialsIsReadBySPDXsOwnValidator", "internal/guard", ByProbe},
+	{"the bundle on macOS names the author the Windows resources name, and its icon is in the tree", "TestTheMacBundleSaysWhatTheWindowsResourcesSay", "internal/guard", ByProbe},
 }

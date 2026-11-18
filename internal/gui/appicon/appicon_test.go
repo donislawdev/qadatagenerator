@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	imagedraw "image/draw"
 	"image/png"
+	"math"
 	"os"
 	"path/filepath"
 	"sort"
@@ -20,9 +22,10 @@ import (
 	"fyne.io/fyne/v2/test"
 
 	"github.com/donislawdev/qadatagenerator/internal/gui/appicon"
+	"github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
-var update = flag.Bool("update", false, "write lentils.ico again from the two drawings")
+var update = flag.Bool("update", false, "write lentils.ico and lentils.icns again from the two drawings")
 
 const (
 	iconFile  = "lentils.ico"
@@ -111,6 +114,87 @@ func TestTheIconFileIsDrawnFromTheDrawings(t *testing.T) {
 		if !held[size] {
 			t.Errorf("%s holds no %d px picture, so Windows scales one of the others to that size itself",
 				iconFile, size)
+		}
+	}
+}
+
+// What this defends. The icon the Dock and the Finder show for the window's
+// bundle on macOS is the same spoon on its plate, at every size the file holds,
+// rather than an older drawing or a blank page.
+//
+// With -update it writes lentils.icns as well, and the release packs it into
+// the bundle as it is (.github/scripts/make_app_bundle.sh). The comparison is
+// the one the icon file for Windows gets, with the same allowance.
+func TestTheMacIconFileIsDrawnFromTheDrawings(t *testing.T) {
+	drawn := macPictures(t)
+
+	if *update {
+		if err := os.WriteFile(macIconFile, encodeMacIcon(t, drawn), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("wrote %s", macIconFile)
+		return
+	}
+
+	raw, err := os.ReadFile(macIconFile)
+	if err != nil {
+		t.Fatalf("%v\nWrite it with: go test ./internal/gui/appicon -run %s -update", err, t.Name())
+	}
+	chunks, err := readMacIcon(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	held := map[string]bool{}
+	for _, chunk := range chunks {
+		size, known := macTypeSize(chunk.name)
+		switch {
+		case !known:
+			t.Errorf("%s holds a %q picture, a type this icon is not drawn for", macIconFile, chunk.name)
+			continue
+		case held[chunk.name]:
+			t.Errorf("%s holds the %q picture twice", macIconFile, chunk.name)
+			continue
+		}
+		held[chunk.name] = true
+		got, err := png.Decode(bytes.NewReader(chunk.payload))
+		if err != nil {
+			t.Errorf("the %q picture in %s is not a PNG: %v", chunk.name, macIconFile, err)
+			continue
+		}
+		if got.Bounds().Dx() != size || got.Bounds().Dy() != size {
+			t.Errorf("the %q picture in %s is %v, and macOS reads that type as %d px", chunk.name, macIconFile, got.Bounds().Size(), size)
+			continue
+		}
+		count := differing(drawn[size], got)
+		t.Logf("%s %3d px: %d pixels differ by more than a few levels", chunk.name, size, count)
+		if allowed := tolerance(size); count > allowed {
+			t.Errorf("the %q picture in %s differs from the drawing on its plate in %d pixels, more than the %d "+
+				"allowed, so it is older than the drawing or the plate. Write it again with -update", chunk.name, macIconFile, count, allowed)
+		}
+	}
+	for _, each := range macTypes {
+		if !held[each.name] {
+			t.Errorf("%s holds no %q picture, so macOS scales another one to %d px itself", macIconFile, each.name, each.size)
+		}
+	}
+}
+
+// The reader above refuses a file that is not an icon file for macOS, rather
+// than reading whatever it finds as no pictures at all.
+func TestAMacIconFileThatIsNotOneIsRefused(t *testing.T) {
+	good := []byte("icns\x00\x00\x00\x10ic07\x00\x00\x00\x08")
+	if _, err := readMacIcon(good); err != nil {
+		t.Fatalf("a well formed file with one empty picture is refused: %v", err)
+	}
+	for name, raw := range map[string][]byte{
+		"another magic":               []byte("icnx\x00\x00\x00\x08"),
+		"a length past the end":       []byte("icns\x00\x00\x00\x20ic07\x00\x00\x00\x08"),
+		"a chunk past the end":        []byte("icns\x00\x00\x00\x10ic07\x00\x00\x00\x40"),
+		"a chunk shorter than itself": []byte("icns\x00\x00\x00\x10ic07\x00\x00\x00\x04"),
+		"too short for a header":      []byte("icns"),
+	} {
+		if _, err := readMacIcon(raw); err == nil {
+			t.Errorf("%s is read as an icon file", name)
 		}
 	}
 }
@@ -420,6 +504,158 @@ func readIcon(raw []byte) ([]entry, error) {
 		entries = append(entries, entry{size: size, payload: raw[offset : offset+length]})
 	}
 	return entries, nil
+}
+
+// macIconFile is the icon the window's bundle carries on macOS.
+const macIconFile = "lentils.icns"
+
+// The plate the icon stands on in the Dock, where every icon is a rounded
+// square of one size and a shape on a clear ground reads as smaller and
+// foreign. The owner chose it on 2026-11-18, after the icon of Testing Files
+// Generator, and its geometry is that icon's: a plate the size of the picture,
+// a corner of 22 per cent of the side, the spoon at 82 per cent of the side in
+// the middle. Apple's page on app icons, read the same day, gives no measures
+// for an icon of this kind. The colour is the ground the palette sets apart
+// from the window. Windows and Linux keep the spoon on a clear ground.
+const (
+	plateShade  = "neutral.2"
+	plateCorner = 0.22
+	plateInset  = 0.82
+
+	// plateSupersample is how many times larger the plate is drawn before it
+	// is reduced to drawnAt, so its corners come out smooth.
+	plateSupersample = 4
+)
+
+// macTypes are the pictures lentils.icns holds, by the name macOS reads each
+// one under. Apple's names, as iconutil writes them: macOS asks for a size in
+// points and a scale, so a 32 px picture answers both for 16 points on a Retina
+// screen (ic11) and for 32 points on any other (icp5), and is in the file
+// twice.
+//
+// Nothing above 256 px. The drawing is correct at 256 px and below and nowhere
+// else (see the package comment), so a 512 px picture would be the 256 px one
+// enlarged, which macOS does itself when it needs one.
+var macTypes = []struct {
+	name string
+	size int
+}{
+	{"icp4", 16}, {"ic11", 32}, {"icp5", 32}, {"ic12", 64},
+	{"ic07", 128}, {"ic13", 256}, {"ic08", 256},
+}
+
+func macTypeSize(name string) (int, bool) {
+	for _, each := range macTypes {
+		if each.name == name {
+			return each.size, true
+		}
+	}
+	return 0, false
+}
+
+// macPictures draws every size lentils.icns holds, each from the drawing meant
+// for it, on the plate.
+func macPictures(t *testing.T) map[int]image.Image {
+	t.Helper()
+	small, err := os.ReadFile(smallFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	master, little := onPlate(t, draw(t, appicon.SVG)), onPlate(t, draw(t, small))
+	drawn := map[int]image.Image{}
+	for _, each := range macTypes {
+		from := master
+		if each.size <= smallUpTo {
+			from = little
+		}
+		drawn[each.size] = reduce(from, each.size)
+	}
+	return drawn
+}
+
+// onPlate puts a drawing made at drawnAt on the plate, at drawnAt. The drawing
+// is reduced rather than drawn smaller, for the reason the package comment
+// gives about lines below the size a drawing is made at.
+func onPlate(t *testing.T, spoon image.Image) image.Image {
+	t.Helper()
+	shade, ok := theme.ShadeOf(plateShade)
+	if !ok {
+		t.Fatalf("the palette has no %s for the plate", plateShade)
+	}
+	side := float64(drawnAt * plateSupersample)
+	radius := plateCorner * side
+	big := image.NewNRGBA(image.Rect(0, 0, int(side), int(side)))
+	for y := 0; y < int(side); y++ {
+		for x := 0; x < int(side); x++ {
+			px, py := float64(x)+0.5, float64(y)+0.5
+			cx, cy := math.Min(math.Max(px, radius), side-radius), math.Min(math.Max(py, radius), side-radius)
+			if (px-cx)*(px-cx)+(py-cy)*(py-cy) <= radius*radius {
+				big.SetNRGBA(x, y, shade.NRGBA())
+			}
+		}
+	}
+	out := image.NewNRGBA(image.Rect(0, 0, drawnAt, drawnAt))
+	imagedraw.Draw(out, out.Bounds(), reduce(big, drawnAt), image.Point{}, imagedraw.Src)
+	inner := int(math.Round(plateInset * drawnAt))
+	at := (drawnAt - inner) / 2
+	imagedraw.Draw(out, image.Rect(at, at, at+inner, at+inner), reduce(spoon, inner), image.Point{}, imagedraw.Over)
+	return out
+}
+
+type macChunk struct {
+	name    string
+	payload []byte
+}
+
+// encodeMacIcon writes an icon file for macOS: the four letters icns and the
+// length of the whole file, then each picture as its type, its length with the
+// eight bytes of its own header counted in, and a PNG, the form iconutil
+// writes. No table of contents: it is optional, and a summary of the file kept
+// inside the file is a second copy of it.
+func encodeMacIcon(t *testing.T, drawn map[int]image.Image) []byte {
+	t.Helper()
+	var body bytes.Buffer
+	for _, each := range macTypes {
+		var picture bytes.Buffer
+		if err := png.Encode(&picture, drawn[each.size]); err != nil {
+			t.Fatal(err)
+		}
+		body.WriteString(each.name)
+		if err := binary.Write(&body, binary.BigEndian, uint32(picture.Len()+8)); err != nil {
+			t.Fatal(err)
+		}
+		body.Write(picture.Bytes())
+	}
+	out := bytes.NewBufferString("icns")
+	if err := binary.Write(out, binary.BigEndian, uint32(body.Len()+8)); err != nil {
+		t.Fatal(err)
+	}
+	out.Write(body.Bytes())
+	return out.Bytes()
+}
+
+// readMacIcon reads the pictures of an icon file for macOS.
+func readMacIcon(raw []byte) ([]macChunk, error) {
+	const header = 8
+	if len(raw) < header || string(raw[:4]) != "icns" {
+		return nil, errors.New("not an icon file for macOS: it does not start with icns")
+	}
+	if total := int(binary.BigEndian.Uint32(raw[4:])); total != len(raw) {
+		return nil, fmt.Errorf("the file says it is %d bytes and is %d", total, len(raw))
+	}
+	var chunks []macChunk
+	for at := header; at < len(raw); {
+		if at+header > len(raw) {
+			return nil, fmt.Errorf("a picture at byte %d is cut off before its header ends", at)
+		}
+		length := int(binary.BigEndian.Uint32(raw[at+4:]))
+		if length < header || at+length > len(raw) {
+			return nil, fmt.Errorf("the picture %q at byte %d says it is %d bytes long", raw[at:at+4], at, length)
+		}
+		chunks = append(chunks, macChunk{name: string(raw[at : at+4]), payload: raw[at+header : at+length]})
+		at += length
+	}
+	return chunks, nil
 }
 
 // missingFrom lists, smallest first, the sizes whose picture is not inside a
