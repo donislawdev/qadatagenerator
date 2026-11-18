@@ -236,7 +236,7 @@
 							<container pos="32,16" size="1058x74">
 								<widget size="1058x24" type="*widget.Label">
 									<widget size="1058x24" type="*widget.RichText">
-										<text color="disabled" pos="4,4" size="604x16">Which build this is and the terms it comes under. qadg --version and qadg --license print the same facts.</text>
+										<text color="disabled" pos="4,4" size="738x16">Which build this is and the terms of everything inside it. qadg --version and qadg --license print the same for the command line.</text>
 									</widget>
 								</widget>
 								<container pos="0,40" size="1058x34">
@@ -268,26 +268,26 @@
 											</container>
 										</container>
 									</widget>
-									<widget pos="252,0" size="234x34" type="*parts.Button">
-										<container size="234x34">
-											<container size="234x34">
-												<rectangle size="234x34"/>
-												<container size="234x34">
-													<container size="234x34">
-														<rectangle pos="1,1" radius="6" size="232x32" strokeColor="inputBorder" strokeWidth="2"/>
+									<widget pos="252,0" size="221x34" type="*parts.Button">
+										<container size="221x34">
+											<container size="221x34">
+												<rectangle size="221x34"/>
+												<container size="221x34">
+													<container size="221x34">
+														<rectangle pos="1,1" radius="6" size="219x32" strokeColor="inputBorder" strokeWidth="2"/>
 													</container>
-													<container size="234x34">
-														<container pos="16,4" size="202x26">
-															<container pos="0,4" size="202x16">
+													<container size="221x34">
+														<container pos="16,4" size="189x26">
+															<container pos="0,4" size="189x16">
 																<container size="15x16">
 																	<spacer size="15x0"/>
 																	<image fillMode="contain" rsc="shield-check-72abff-15.svg" size="15x15"/>
 																	<spacer pos="0,15" size="15x0"/>
 																</container>
-																<container pos="23,0" size="179x16">
-																	<spacer size="179x0"/>
-																	<text size="179x16">Save the font and icon licenses</text>
-																	<spacer pos="0,16" size="179x0"/>
+																<container pos="23,0" size="166x16">
+																	<spacer size="166x0"/>
+																	<text size="166x16">Save the third-party licenses</text>
+																	<spacer pos="0,16" size="166x0"/>
 																</container>
 															</container>
 														</container>

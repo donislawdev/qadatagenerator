@@ -48,18 +48,20 @@ var icons embed.FS
 
 // notices are the licence texts of everything else in this package.
 //
-// 🔴 Why this directive exists at all, and it is a defect rather than a
-// feature. The two directives above name .ttf and .svg, and the licence files
-// sitting beside those match neither, so until 2026-09-08 the notices were in
-// the repository and NOT in the binary. Distributing the source was fine,
-// because the files are there to read. Distributing the binary without them is
-// the one thing both the Open Font License and ISC forbid, and it is what a
-// release would have done.
+// # 🔴 What carries them into the binary, and it is not this directive
 //
-// It could not be seen by reading either directive: each one is correct about
-// the files it names, and nothing names the files it leaves out. What sees it
-// is the pair of tests beside this file, which close the set of notices here
-// against the register in internal/license in both directions.
+// An embedded file that no reachable code reads is left out of a binary by
+// the linker, measured on 2026-09-08. Since DEC-327 the window reads neither
+// of these. Their texts reach whoever received the window inside its third
+// party notices, license.WindowNotices, which the About screen saves and which
+// quote both in full under the projects license.Embedded names, held so by the
+// notices guard in internal/guard.
+//
+// What this directive is for is the pair of tests beside this file, which
+// close the set of licence files here against the register in internal/license
+// in both directions. The two directives above name .ttf and .svg, and the
+// licence files beside those match neither, so until 2026-09-08 nothing named
+// them at all, and it could not be seen by reading either directive.
 //
 // A pattern rather than two names on purpose. Named individually, a third
 // asset arriving with its own notice would embed nothing and say nothing. With
@@ -161,8 +163,8 @@ func IconNames() []string {
 //
 // Their names are constants in this file, so a miss there is our own typo. A
 // notice name arrives from the register in internal/license, which describes
-// what a build ships, and a screen may be rendered against a register that
-// belongs to another build entirely. "This one is not here" is a legitimate
+// what a build ships, and a test may hold a register that belongs to another
+// build entirely. "This one is not here" is a legitimate
 // answer to that question rather than a fault, and a panic would turn the
 // legitimate case into a crash.
 //

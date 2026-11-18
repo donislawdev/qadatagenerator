@@ -601,6 +601,16 @@ repository once they are released.
   before stays where it was, and the notices follow it, so a copy of `qadg`
   that travels without its archive still carries them. `qadg --license --json`
   carries the same text in a new field, `third_party_notices`.
+- **The window has notices of its own, in `THIRD-PARTY-NOTICES-GUI.md`, and
+  the About screen saves them.** The window contains much more work by other
+  people than the command line: the Fyne toolkit and the modules it brings,
+  the GLFW library in C that opens the window, the fonts and icons, and the
+  same lists of names and places. Save the third-party licenses on the About
+  screen writes the whole file. It replaces the button that saved only the
+  licences of the fonts and icons, which are in the new file too. The report
+  that Save the license report as JSON writes now carries the same text in
+  `third_party_notices`. The file does not list yet the code that the C
+  compiler adds to the window of its own.
 - **The window remembers its size and the folder its file chooser was last
   in.** It opens next time at the size it was closed at, and the file chooser
   starts in the last folder. Both are kept on your computer in the settings

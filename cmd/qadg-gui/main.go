@@ -30,7 +30,6 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/about"
 	"github.com/donislawdev/qadatagenerator/internal/gui/appicon"
-	"github.com/donislawdev/qadatagenerator/internal/gui/assets"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/catalogue"
 	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
@@ -42,7 +41,6 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/gui/screens"
 	"github.com/donislawdev/qadatagenerator/internal/gui/shell"
 	"github.com/donislawdev/qadatagenerator/internal/gui/takeview"
-	"github.com/donislawdev/qadatagenerator/internal/license"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 	"github.com/donislawdev/qadatagenerator/internal/version"
 )
@@ -373,7 +371,7 @@ func sidebar(text i18n.Catalogue, window fyne.Window, value *quickview.View, dam
 		{Name: text.T(i18n.ScreenManifest), Group: checking, Icon: paint.IconChecklist,
 			Content: browser.Content()},
 		{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,
-			Content: about.Content(text, license.Current(), version.Current(), software,
-				saveReport(window), assets.Notice, remembered)},
+			Content: about.Content(text, about.Report(), version.Current(), software,
+				saveReport(window), remembered)},
 	}
 }

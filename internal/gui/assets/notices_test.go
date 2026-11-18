@@ -40,8 +40,8 @@ func TestEveryDescribedAssetShipsItsNotice(t *testing.T) {
 			continue
 		}
 		if !embedded[asset.Notice] {
-			t.Errorf("%s names the notice %q, which is not embedded: "+
-				"the binary would ship the asset without its terms",
+			t.Errorf("%s names the notice %q, which is not in this package: "+
+				"the register names terms nobody can read beside the asset",
 				asset.Asset, asset.Notice)
 		}
 	}
@@ -54,8 +54,8 @@ func TestEveryShippedNoticeIsDescribed(t *testing.T) {
 	}
 	for _, name := range assets.NoticeNames() {
 		if !described[name] {
-			t.Errorf("the notice %q is embedded and nothing in the register "+
-				"names it, so --license does not report what this build carries", name)
+			t.Errorf("the notice %q is in this package and nothing in the register "+
+				"names it, so --license and the About screen do not report what the window carries", name)
 		}
 	}
 }

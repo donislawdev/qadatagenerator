@@ -167,17 +167,15 @@ const (
 	// values and were named nowhere until 2026-09-08.
 	AboutHeadingEmbedded Key = "about.heading.embedded"
 	AboutEmptyEmbedded   Key = "about.empty.embedded"
-	// AboutSaveNotices offers the licence texts of those as a file.
+	// AboutSaveNotices offers the third party notices of the window as a
+	// file, the licences of everything inside it, these among them.
 	//
 	// A button rather than the text on the screen, and the reason is what
 	// the terms actually ask for: the notice has to travel with the binary
-	// and be available to whoever received it. Several kilobytes of licence
+	// and be available to whoever received it. Thousands of lines of licence
 	// laid into a column would bury the four facts above it, and a person
 	// who wants the text wants it as a file they can keep.
 	AboutSaveNotices Key = "about.save.notices"
-	// AboutNoticesHeader is the first line of that file, so a file found on
-	// a disk a year later still says what it belongs to.
-	AboutNoticesHeader Key = "about.notices.header"
 
 	// What the window keeps on this computer between runs, where, and the
 	// button that forgets it (DEC-325). On this screen because it is the
@@ -694,7 +692,7 @@ var windowKeys = []Key{
 	AboutCountModule, AboutCountModules, AboutCountList, AboutCountLists,
 	AboutCountSource, AboutCountSources, AboutCountAsset, AboutCountAssets,
 	AboutEmptyComponents, AboutEmptyData,
-	AboutHeadingEmbedded, AboutEmptyEmbedded, AboutSaveNotices, AboutNoticesHeader,
+	AboutHeadingEmbedded, AboutEmptyEmbedded, AboutSaveNotices,
 	AboutHeadingKept, AboutKeptWhat, AboutKeptIn, AboutForget, AboutForgetWhat, AboutForgotten,
 
 	ManifestOpen, ManifestOpenResponse, ManifestEmpty, ManifestUnreadable,

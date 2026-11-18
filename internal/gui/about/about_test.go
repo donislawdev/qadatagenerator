@@ -3,6 +3,7 @@ package about
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -15,7 +16,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
-	"github.com/donislawdev/qadatagenerator/internal/gui/assets"
 	"github.com/donislawdev/qadatagenerator/internal/gui/fynetheme"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/license"
@@ -76,7 +76,7 @@ func texts(object fyne.CanvasObject) []string {
 // always said it would pass the first half alone.
 func TestTheScreenSaysWhenTheWindowDrawsInSoftware(t *testing.T) {
 	sentence := i18n.English.T(i18n.WindowSoftwareDrawing)
-	if !has(texts(Content(i18n.English, license.Current(), version.Current(), true, nil, assets.Notice, nil)), sentence) {
+	if !has(texts(Content(i18n.English, license.Current(), version.Current(), true, nil, nil)), sentence) {
 		t.Errorf("a window drawn by the software renderer does not say so on the About screen: %q", sentence)
 	}
 	if has(screen(t), sentence) {
@@ -86,7 +86,7 @@ func TestTheScreenSaysWhenTheWindowDrawsInSoftware(t *testing.T) {
 
 func screen(t *testing.T) []string {
 	t.Helper()
-	return texts(Content(i18n.English, license.Current(), version.Current(), false, nil, assets.Notice, nil))
+	return texts(Content(i18n.English, license.Current(), version.Current(), false, nil, nil))
 }
 
 func has(all []string, want string) bool {
@@ -243,7 +243,7 @@ func TestNoLabelRendersAsItsOwnKey(t *testing.T) {
 // is the one that would show a head over nothing.
 func TestAnEmptyRegisterIsStatedRatherThanLeftBlank(t *testing.T) {
 	empty := license.Report{}
-	all := texts(Content(i18n.English, empty, version.Current(), false, nil, assets.Notice, nil))
+	all := texts(Content(i18n.English, empty, version.Current(), false, nil, nil))
 	for _, key := range []i18n.Key{i18n.AboutEmptyComponents, i18n.AboutEmptyData, i18n.AboutEmptyEmbedded} {
 		if !has(all, i18n.English.T(key)) {
 			t.Errorf("a build with an empty register shows nothing where %q belongs", i18n.English.T(key))
@@ -289,8 +289,8 @@ func buttons(object fyne.CanvasObject) []*parts.Button {
 // this and hand a scanner nothing.
 func TestTheScreenOffersTheReportInTheFormAMachineReads(t *testing.T) {
 	var written []byte
-	screen := Content(i18n.English, license.Current(), version.Current(), false,
-		func(contents []byte) { written = contents }, assets.Notice, nil)
+	screen := Content(i18n.English, Report(), version.Current(), false,
+		func(contents []byte) { written = contents }, nil)
 
 	var save *parts.Button
 	for _, button := range buttons(screen) {
@@ -314,6 +314,30 @@ func TestTheScreenOffersTheReportInTheFormAMachineReads(t *testing.T) {
 			"describes something other than what produced it",
 			read.Tool, read.Code.License, license.Current().Tool, license.Current().Code.License)
 	}
+	// The command line's report carries its notices in this field, and the
+	// window's carries the window's. Without them the file a compliance
+	// department reads would say less than the one the command line writes.
+	// The check is asked for both of its answers first.
+	if why := reportNoticesProblem(license.Report{ThirdPartyNotices: "notices"}, "notices"); why != "" {
+		t.Fatalf("a report carrying the notices was refused: %s", why)
+	}
+	if reportNoticesProblem(license.Report{}, "notices") == "" {
+		t.Fatal("a report carrying no notices passed for one that carries them")
+	}
+	if why := reportNoticesProblem(read, license.WindowNotices); why != "" {
+		t.Error(why)
+	}
+}
+
+// reportNoticesProblem says why a report does not carry the window's notices,
+// or nothing when it carries them whole.
+func reportNoticesProblem(read license.Report, notices string) string {
+	if notices != "" && read.ThirdPartyNotices == notices {
+		return ""
+	}
+	return fmt.Sprintf("the report this screen writes carries %d characters of notices and the window's "+
+		"notices are %d, so the machine readable form leaves out what the window carries",
+		len(read.ThirdPartyNotices), len(notices))
 }
 
 // A screen with no way to write says so by being unable to be pressed.
@@ -321,7 +345,7 @@ func TestTheScreenOffersTheReportInTheFormAMachineReads(t *testing.T) {
 // A control that does nothing is a promise, and this one is handed nothing to
 // do whenever the screen is being rendered rather than shown.
 func TestWithNoWayToWriteTheControlIsNotPressable(t *testing.T) {
-	for _, button := range buttons(Content(i18n.English, license.Current(), version.Current(), false, nil, assets.Notice, nil)) {
+	for _, button := range buttons(Content(i18n.English, license.Current(), version.Current(), false, nil, nil)) {
 		if button.Text == i18n.English.T(i18n.AboutSaveJSON) && !button.Disabled() {
 			t.Error("the control offering the report can be pressed on a screen with no way to " +
 				"write, so pressing it does nothing and says nothing")
@@ -341,10 +365,29 @@ func TestWithNoWayToWriteTheControlIsNotPressable(t *testing.T) {
 // green as well. What makes this one hold the rule is that it presses the
 // control and reads what came out, which is the same code path the built binary
 // links.
+//
+// What has to come out is the whole of the window's notices, and under them a
+// section for the project of every typeface and icon set the register names.
+// That the licence text stands in full in that section is held by the guard in
+// internal/guard, which reads the same file.
 func TestTheScreenWritesTheNoticesOfWhatItEmbeds(t *testing.T) {
+	// The check is asked first about a file that is right and two that are
+	// not, so that a check that always agrees cannot pass for it.
+	planted := "# Notices\n\n## someone/face\n\nSome terms.\n"
+	face := []license.Asset{{Asset: "A face", Project: "someone/face"}}
+	if problems := noticesFileProblems([]byte(planted), planted, face); problems != nil {
+		t.Fatalf("a file equal to the notices, with a section for the asset, was refused: %v", problems)
+	}
+	if noticesFileProblems(nil, planted, face) == nil {
+		t.Fatal("an empty file passed for the notices")
+	}
+	if noticesFileProblems([]byte("# Notices\n"), "# Notices\n", face) == nil {
+		t.Fatal("notices with no section for an embedded asset passed")
+	}
+
 	var written []byte
-	screen := Content(i18n.English, license.Current(), version.Current(), false,
-		func(contents []byte) { written = contents }, assets.Notice, nil)
+	screen := Content(i18n.English, Report(), version.Current(), false,
+		func(contents []byte) { written = contents }, nil)
 
 	var save *parts.Button
 	for _, button := range buttons(screen) {
@@ -363,30 +406,53 @@ func TestTheScreenWritesTheNoticesOfWhatItEmbeds(t *testing.T) {
 		t.Fatal("the register names no embedded asset, so this test proves nothing about a " +
 			"build that carries a typeface and an icon set")
 	}
-	for _, asset := range license.Embedded {
-		body, carried := assets.Notice(asset.Notice)
-		if !carried {
-			t.Errorf("this build does not carry the notice %q that the register names", asset.Notice)
-			continue
-		}
-		if !bytes.Contains(written, []byte(body)) {
-			t.Errorf("the file this screen writes does not contain the licence text of %s, "+
-				"so the notice does not reach whoever received the binary", asset.Asset)
-		}
-		if !bytes.Contains(written, []byte(asset.Asset)) {
-			t.Errorf("the file this screen writes does not name %s above its licence text, "+
-				"so a reader cannot tell which notice covers which files", asset.Asset)
-		}
+	for _, problem := range noticesFileProblems(written, license.WindowNotices, license.Embedded) {
+		t.Error(problem)
 	}
 }
 
-// With nothing to write the control says so by being unable to be pressed,
-// which is the rule already stated for the report beside it.
+// noticesFileProblems says what is wrong with the file the notice button
+// wrote: not the window's notices, or no section in them for the project of an
+// embedded asset.
+func noticesFileProblems(written []byte, notices string, assets []license.Asset) []string {
+	if notices == "" || string(written) != notices {
+		return []string{fmt.Sprintf("the file this screen writes is %d bytes and the window's notices "+
+			"are %d, so what reaches whoever received the binary is not THIRD-PARTY-NOTICES-GUI.md",
+			len(written), len(notices))}
+	}
+	var problems []string
+	for _, asset := range assets {
+		if !bytes.Contains(written, []byte("\n## "+asset.Project+"\n")) {
+			problems = append(problems, fmt.Sprintf("the file this screen writes has no section for %s, "+
+				"the project of %s, so a reader cannot find the terms of the files it covers", asset.Project, asset.Asset))
+		}
+	}
+	return problems
+}
+
+// With nothing to write, or nowhere to write it, the control says so by being
+// unable to be pressed, which is the rule already stated for the report beside
+// it. The report the register alone gives carries no notices, which is what a
+// screen rendered against another build may be handed.
 func TestWithNoWayToWriteTheNoticeControlIsNotPressable(t *testing.T) {
-	for _, button := range buttons(Content(i18n.English, license.Current(), version.Current(), false, nil, assets.Notice, nil)) {
-		if button.Text == i18n.English.T(i18n.AboutSaveNotices) && !button.Disabled() {
-			t.Error("the control offering the licence notices can be pressed on a screen with " +
-				"no way to write, so pressing it does nothing and says nothing")
+	cases := map[string]fyne.CanvasObject{
+		"no way to write":    Content(i18n.English, Report(), version.Current(), false, nil, nil),
+		"no notices to save": Content(i18n.English, license.Current(), version.Current(), false, func([]byte) {}, nil),
+	}
+	for name, screen := range cases {
+		found := false
+		for _, button := range buttons(screen) {
+			if button.Text != i18n.English.T(i18n.AboutSaveNotices) {
+				continue
+			}
+			found = true
+			if !button.Disabled() {
+				t.Errorf("%s: the control offering the notices can be pressed, so pressing it does "+
+					"nothing and says nothing", name)
+			}
+		}
+		if !found {
+			t.Errorf("%s: no control offers the notices, so this test checked nothing", name)
 		}
 	}
 }

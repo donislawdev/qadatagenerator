@@ -28,7 +28,6 @@ package about
 
 import (
 	"encoding/json"
-	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -50,30 +49,22 @@ import (
 // picture that wrote a file would leave one behind.
 type Saver func(contents []byte)
 
-// Notices hands over the licence text of one embedded asset, and says whether
-// this build carries it at all.
+// Report is the licence report of this window: the register every build
+// shares, and the notices of what the window itself links and carries, which
+// the command line's report carries for the command line (DEC-327).
 //
-// # Why the text arrives through a port rather than being read here
+// # 🔴 Why the notices are read here, which is the whole point
 //
-// The same reason the report does. This screen is rendered in tests against a
-// build that carries something else entirely, and a register naming a notice
-// that this binary does not embed is a legitimate state there rather than a
-// fault. Reaching into the asset package would make that state a panic.
-//
-// # 🔴 Why anything reads these bytes at all, which is the whole point
-//
-// Measured on 2026-09-08 on the built binaries, after the embed directive was
-// added and the tests beside it went green: the notices were STILL not in
-// qadg-gui.exe. A go:embed variable that no reachable code reads is pruned by
-// the linker, so the directive alone ships nothing. The tests passed because a
-// test binary reads them, and a test binary is not the artefact anybody
-// receives.
-//
-// One reachable read is enough for the whole set, which was measured the same
-// way: with a single notice read, both appear in the binary. So this port is
-// not a convenience on top of the fix. It IS the fix, and the register and the
-// printed section are what describe it.
-type Notices func(name string) (string, bool)
+// Measured on 2026-09-08 on the built binaries: an embedded text that no
+// reachable code reads is pruned by the linker, so an embed directive alone
+// ships nothing, and the tests beside it stay green because a test binary
+// reads it. The window reaches this function, and through it the notices,
+// which is what puts them into qadg-gui.
+func Report() license.Report {
+	report := license.Current()
+	report.ThirdPartyNotices = license.WindowNotices
+	return report
+}
 
 // Content is the whole screen, built from what this build carries.
 //
@@ -92,8 +83,8 @@ type Notices func(name string) (string, bool)
 // kept is what the window keeps on this computer, or nil where there is no
 // window keeping anything (see Kept).
 func Content(text i18n.Catalogue, report license.Report, versions version.Set, software bool,
-	save Saver, notices Notices, kept Kept) fyne.CanvasObject {
-	top := band(text, report, save, notices)
+	save Saver, kept Kept) fyne.CanvasObject {
+	top := band(text, report, save)
 	// The scrolling area is the keyboard's rather than the toolkit's own, which
 	// answers to the wheel and to nothing else. The page is text apart from one
 	// button, so without that the only way through most of it is a mouse:
@@ -109,16 +100,15 @@ func Content(text i18n.Catalogue, report license.Report, versions version.Set, s
 //
 // The band does not scroll. The report is for a compliance department (DEC-30),
 // and its button standing beside the sections it describes would have put the
-// second one, the notices of the fonts, under the fold. Both are quiet: this
-// screen is read rather than acted on, so nothing on it is the one action it is
-// for (DEC-250).
-func band(text i18n.Catalogue, report license.Report, save Saver, notices Notices) fyne.CanvasObject {
+// second one, the notices, under the fold. Both are quiet: this screen is read
+// rather than acted on, so nothing on it is the one action it is for (DEC-250).
+func band(text i18n.Catalogue, report license.Report, save Saver) fyne.CanvasObject {
 	return paint.Band(paint.BandBelow, palette.NameStepGroup, palette.NameStepMajor,
 		paint.Column(palette.NameStepGroup,
 			quiet(text.T(i18n.PurposeAbout)),
 			paint.Row(palette.NameStepRelated,
 				saveButton(text, report, save).OnScreen(),
-				noticeButton(text, report, save, notices).OnScreen())))
+				noticeButton(text, report, save).OnScreen())))
 }
 
 // quiet is a sentence in the second ink that wraps to the width it is given.
@@ -170,71 +160,33 @@ func saveButton(text i18n.Catalogue, report license.Report, save Saver) *parts.B
 	return button
 }
 
-// noticeButton offers the licence texts of the embedded assets as one file.
+// noticeButton offers the third party notices of the window as one file, the
+// same text as THIRD-PARTY-NOTICES-GUI.md beside it in the archive. It is the
+// path to them a person has who received the binary alone, the one
+// `qadg --license` is for the command line.
 //
 // # Why a file rather than the text on this screen
 //
-// The Open Font License and ISC both ask the same thing, that the notice is
-// kept with what it covers and reaches whoever received it. Several kilobytes
-// of licence laid into this column would satisfy that and bury everything else
-// on the screen, and somebody who wants the text wants to keep it rather than
-// scroll it. It is the same argument that put the machine readable report
-// behind a button beside this one.
+// The licences inside the window, the Open Font License, ISC, MIT and BSD among
+// them, ask the same thing, that the notice is kept with what it covers and
+// reaches whoever received it. Thousands of lines of licence laid into this
+// column would satisfy that and bury everything else on the screen, and
+// somebody who wants the text wants to keep it rather than scroll it. It is the
+// same argument that put the machine readable report behind a button beside
+// this one.
 //
 // # Why it is disabled rather than hidden when there is nothing to write
 //
 // A control that is not there says nothing about why. A control that cannot be
-// pressed says the build carries no notices, which is a fact worth showing, and
-// it loses its edge as every disabled control here does.
-func noticeButton(text i18n.Catalogue, report license.Report, save Saver,
-	notices Notices) *parts.Button {
-	document := noticeDocument(text, report, notices)
+// pressed says the report carries no notices, which is a fact worth showing,
+// and it loses its edge as every disabled control here does.
+func noticeButton(text i18n.Catalogue, report license.Report, save Saver) *parts.Button {
 	button := parts.NewButton(text.T(i18n.AboutSaveNotices), func() {
-		save([]byte(document))
+		save([]byte(report.ThirdPartyNotices))
 	})
 	button.ShowIcon(paint.IconShield)
-	if save == nil || document == "" {
+	if save == nil || report.ThirdPartyNotices == "" {
 		button.Disable()
 	}
 	return button
 }
-
-// noticeDocument is every notice this build carries, under the facts about the
-// asset it covers.
-//
-// An asset the register names and this build does not carry is left out rather
-// than written as a heading with nothing under it. A heading over an absent
-// licence reads as a licence somebody deleted, and the register is closed
-// against the embedded set by a test, so in this build the case cannot arise.
-func noticeDocument(text i18n.Catalogue, report license.Report, notices Notices) string {
-	if notices == nil {
-		return ""
-	}
-	var out strings.Builder
-	for _, asset := range report.Embedded {
-		body, carried := notices(asset.Notice)
-		if !carried {
-			continue
-		}
-		if out.Len() == 0 {
-			out.WriteString(text.T(i18n.AboutNoticesHeader) + "\n")
-		}
-		out.WriteString("\n" + noticeRule + "\n")
-		out.WriteString(asset.Asset + " " + asset.Version + "\n")
-		out.WriteString(asset.License + "  " + asset.Source + "\n")
-		out.WriteString(noticeRule + "\n\n")
-		out.WriteString(body)
-		if !strings.HasSuffix(body, "\n") {
-			out.WriteString("\n")
-		}
-	}
-	return out.String()
-}
-
-// noticeRule separates one notice from the next in that file.
-//
-// A row of characters rather than a blank line, because a licence text is
-// itself full of blank lines and a reader scrolling one has to be able to see
-// where the next begins. It is not interface text and is not translated: it
-// carries no words.
-const noticeRule = "----------------------------------------------------------------"

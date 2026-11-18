@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
-	"github.com/donislawdev/qadatagenerator/internal/gui/assets"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/license"
 	"github.com/donislawdev/qadatagenerator/internal/version"
@@ -20,7 +19,7 @@ func (k *keeping) Forget()        { k.forgot++ }
 // forgetButton is the button on the screen that forgets, or nil.
 func forgetButton(t *testing.T, kept Kept) (*parts.Button, []string) {
 	t.Helper()
-	screen := Content(i18n.English, license.Current(), version.Current(), false, nil, assets.Notice, kept)
+	screen := Content(i18n.English, license.Current(), version.Current(), false, nil, kept)
 	for _, button := range buttons(screen) {
 		if button.Text == i18n.English.T(i18n.AboutForget) {
 			return button, texts(screen)
@@ -65,7 +64,7 @@ func TestTheScreenSaysWhatTheWindowKeepsAndForgetsIt(t *testing.T) {
 // The line under Forget changes its words rather than going away, so the
 // screen does not move under the pointer and says what the press did.
 func TestTheLineUnderForgetSaysItForgot(t *testing.T) {
-	screen := Content(i18n.English, license.Current(), version.Current(), false, nil, assets.Notice, &keeping{})
+	screen := Content(i18n.English, license.Current(), version.Current(), false, nil, &keeping{})
 	pressed := 0
 	for _, button := range buttons(screen) {
 		if button.Text == i18n.English.T(i18n.AboutForget) {

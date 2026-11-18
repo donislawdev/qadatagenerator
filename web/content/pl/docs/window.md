@@ -40,4 +40,4 @@ Manifest tamtego przebiegu obok tego, co aplikacja zrobiła z każdym wierszem. 
 
 ## About
 
-Licencja programu i wszystkiego, co zawiera, tak jak wypisuje ją `qadg --license`.
+Wersja programu i jego licencja, tak jak wypisują je `qadg --version` i `qadg --license`. Przycisk Save the third-party licenses zapisuje do pliku licencje cudzego kodu, fontów i ikon, które są w oknie, czyli tę część, którą `qadg --license` wypisuje dla wiersza poleceń.

@@ -37,7 +37,6 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/response"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/about"
-	"github.com/donislawdev/qadatagenerator/internal/gui/assets"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/catalogue"
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
@@ -47,7 +46,6 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/gui/recipeview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/shell"
 	"github.com/donislawdev/qadatagenerator/internal/gui/takeview"
-	"github.com/donislawdev/qadatagenerator/internal/license"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 	"github.com/donislawdev/qadatagenerator/internal/version"
 )
@@ -377,8 +375,7 @@ func screenColumn(text i18n.Catalogue, quickScreen *quickview.View, takeScreen *
 	// and names the folder the window would show on Windows, so the picture
 	// has the section and the button the window has.
 	column[screenAbout] = shell.Screen{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,
-		Content: about.Content(text, license.Current(), version.Current(), false, func([]byte) {}, assets.Notice,
-			pictureKept{})}
+		Content: about.Content(text, about.Report(), version.Current(), false, func([]byte) {}, pictureKept{})}
 	return column
 }
 

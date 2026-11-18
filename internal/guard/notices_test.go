@@ -42,9 +42,18 @@ type noticedProgram struct {
 
 // noticedPrograms are the binaries and their notices. The command line answers
 // with THIRD-PARTY-NOTICES.md, which its release archive carries beside LICENSE
-// (DEC-324 point 5, DEC-327).
+// (DEC-324 point 5, DEC-327). The window answers with a file of its own,
+// because it links the toolkit and what that brings, a C library among it, and
+// the command line links two of those modules and none of the rest.
 var noticedPrograms = []noticedProgram{
 	{pkg: "./cmd/qadg", notices: "THIRD-PARTY-NOTICES.md", targets: releaseTargets},
+	{pkg: "./cmd/qadg-gui", notices: "THIRD-PARTY-NOTICES-GUI.md", targets: windowTargets, cgo: true,
+		landmarks: [][2]string{
+			{"github.com/go-gl/glfw/v3.4/glfw", "glfw/src/win32_init.c"}, // only an #include reaches it
+			{"github.com/go-gl/glfw/v3.4/glfw", "glfw/LICENSE.md"},       // only from beside the files an #include reaches
+			{"fyne.io/fyne/v2", "theme/font/LICENSE_Inter.txt"},          // only from beside the fonts go:embed takes in
+			{"github.com/go-gl/gl", "LICENSE"},                           // only through the replace in go.mod, in this tree
+		}},
 }
 
 // stdHeading is the one section every notices file has that is not named after
@@ -66,6 +75,15 @@ var releaseTargets = [][2]string{
 	{"darwin", "arm64"},
 }
 
+// windowTargets are the three builds DEC-324 point 1 ships the window for. It
+// needs a C compiler for each, so it is not built for every target the command
+// line is.
+var windowTargets = [][2]string{
+	{"windows", "amd64"},
+	{"linux", "amd64"},
+	{"darwin", "arm64"},
+}
+
 // carriedWorks are works of somebody else's that this module keeps in its own
 // tree, each with the heading its notice stands under. A package of this
 // module is ours and asks for no notice, so its licence files are looked for
@@ -74,7 +92,15 @@ var releaseTargets = [][2]string{
 // somebody's terms with nowhere to stand.
 var carriedWorks = map[string]string{
 	"internal/adapter/provider/corpus/LICENSE-faker-MIT.txt": "joke2k/faker",
+	"internal/gui/assets/fonts/LICENSE-IBM-Plex-OFL.txt":     "IBM/plex",
+	"internal/gui/assets/icons/LICENSE-lucide-ISC.txt":       "lucide-icons/lucide",
 }
+
+// assetPackage is the package that embeds the typefaces and icons
+// license.Embedded describes. A program that links it carries them, so its
+// notices name the project of each with the version the register states, and
+// the heading a carried licence file stands under is that project.
+const assetPackage = "github.com/donislawdev/qadatagenerator/internal/gui/assets"
 
 // dataPackage is the package that embeds the reference lists license.Data
 // describes. A program that links it carries every one of those lists, so its
@@ -236,6 +262,9 @@ func TestTheNoticesCoverWhatTheBinaryLinks(t *testing.T) {
 	if !reached[dataPackage] {
 		t.Errorf("no program links %s, so the reference lists are asked for nowhere and the name of that package here is out of date", dataPackage)
 	}
+	if !reached[assetPackage] {
+		t.Errorf("no program links %s, so the typefaces and icons are asked for nowhere and the name of that package here is out of date", assetPackage)
+	}
 }
 
 // TestTheNoticesGuardCanFail is the canary, one planted gap per question. A
@@ -295,6 +324,15 @@ func TestTheNoticesGuardCanFail(t *testing.T) {
 	}
 	_, strays := carriedHeading(file, "internal/planted/LICENSE")
 	requireFinding(t, strays, "carriedWorks names no heading for")
+
+	face := []license.Asset{{Asset: "A face", Project: "someone/face", Version: "1.0", Notice: "LICENSE-face.txt"}}
+	if headings, problems := embeddedHeadings(face, map[string]string{"x/LICENSE-face.txt": "someone/face"}); headings["someone/face"] != "1.0" || problems != nil {
+		t.Errorf("an asset whose notice stands under its project gave %v and %v, want version 1.0 and no finding", headings, problems)
+	}
+	_, elsewhere := embeddedHeadings(face, map[string]string{"x/LICENSE-face.txt": "somebody else"})
+	requireFinding(t, elsewhere, "rather than under someone/face alone")
+	_, nowhere := embeddedHeadings(face, map[string]string{})
+	requireFinding(t, nowhere, "names the notice LICENSE-face.txt")
 
 	_, dup := noticeSections(file, "## a\n\n## a\n")
 	requireFinding(t, dup, "two sections named a")
@@ -546,6 +584,14 @@ func gatherLinked(t *testing.T, root, goroot string, program noticedProgram, rea
 		reached[dataPackage] = true
 		code.requireDataProjects(t)
 	}
+	if imported[assetPackage] {
+		reached[assetPackage] = true
+		headings, problems := embeddedHeadings(license.Embedded, carriedWorks)
+		requireNone(t, problems, "the register of embedded assets against the carried works")
+		for heading, version := range headings {
+			code.headings[heading] = version
+		}
+	}
 	for _, mark := range program.landmarks {
 		dir, linked := code.dirs[mark[0]]
 		path := filepath.Join(dir, filepath.FromSlash(mark[1]))
@@ -571,6 +617,31 @@ func (code *linkedCode) requireDataProjects(t *testing.T) {
 		}
 		code.headings[source.Project] = source.Version
 	}
+}
+
+// embeddedHeadings answers with the section every embedded asset has to stand
+// under, its project, with the version the register states. The carried work
+// whose licence file is the asset's notice has to name the same project, or
+// the licence would be asked for under one heading and the version under
+// another.
+func embeddedHeadings(assets []license.Asset, carried map[string]string) (map[string]string, []string) {
+	headings := map[string]string{}
+	var problems []string
+	for _, asset := range assets {
+		headings[asset.Project] = asset.Version
+		var named []string
+		for rel, heading := range carried {
+			if filepath.Base(filepath.FromSlash(rel)) == asset.Notice {
+				named = append(named, heading)
+			}
+		}
+		if len(named) != 1 || named[0] != asset.Project {
+			problems = append(problems, fmt.Sprintf("%s names the notice %s, and the carried works put that file under %v rather than under %s alone",
+				asset.Asset, asset.Notice, named, asset.Project))
+		}
+	}
+	sort.Strings(problems)
+	return headings, problems
 }
 
 // gatherSources reads the packages of every target into code, and answers with

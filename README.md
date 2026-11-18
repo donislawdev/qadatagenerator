@@ -507,3 +507,10 @@ The command line also contains work by other people: the Go runtime and standard
 modules, and lists of names and places. Their licence texts and copyright notices are in
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md), and `qadg --license` prints the same text at the
 end of its report. A check in the source keeps that file equal to what each build of `qadg` links.
+
+The window contains much more: the Fyne toolkit and the modules it brings, the GLFW library in C,
+the IBM Plex typefaces, the Lucide icons and the same lists. Their notices are in
+[THIRD-PARTY-NOTICES-GUI.md](THIRD-PARTY-NOTICES-GUI.md), and the button Save the third-party
+licenses on the About screen writes the same text to a file. The same check keeps that file equal to
+what each build of the window links, apart from the code the C compiler adds of its own, which that
+file does not list yet.

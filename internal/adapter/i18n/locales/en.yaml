@@ -192,8 +192,7 @@ about.count.assets: assets
 about.empty.components: This build links no third party module.
 about.empty.data: This build carries no reference data.
 about.empty.embedded: This build embeds no typeface or icon set.
-about.save.notices: Save the font and icon licenses
-about.notices.header: License notices for the fonts and icons built into this program. Each notice below covers the files named above it, and the terms of each require this text to be kept with the program.
+about.save.notices: Save the third-party licenses
 about.heading.kept: Kept on this computer
 about.kept.what: This window remembers its size when you close it and the folder its file chooser was last in, so it opens the same way next time. Nothing else is kept, and nothing is sent anywhere.
 about.kept.in: Kept in
@@ -575,7 +574,7 @@ purpose.recipe: A recipe is a file you keep beside your tests. The same recipe a
 about.save.json: Save the license report as JSON
 
 purpose.manifest: A manifest says what to expect from every record a run damaged. Add the answer your application gave, and this screen says where the two disagree.
-purpose.about: Which build this is and the terms it comes under. qadg --version and qadg --license print the same facts.
+purpose.about: Which build this is and the terms of everything inside it. qadg --version and qadg --license print the same for the command line.
 
 # The Quick value screen. One value, no recipe, nothing written.
 quick.nothing-written: Make test values to copy into a form or a test. Nothing on this screen is written to a file.

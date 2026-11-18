@@ -32,8 +32,9 @@ List, and they are named `LicenseRef-Sun-fdlibm-2004` and `LicenseRef-Cephes`
 here.
 
 `go.mod` names more modules than these. The others are linked only into the
-window, `qadg-gui`, or are named by a dependency's own `go.mod` for its tests
-and tools. None of them is in `qadg`.
+window, `qadg-gui`, whose notices are in
+[THIRD-PARTY-NOTICES-GUI.md](THIRD-PARTY-NOTICES-GUI.md), or are named by a
+dependency's own `go.mod` for its tests and tools. None of them is in `qadg`.
 
 ---
 

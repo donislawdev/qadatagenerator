@@ -39,4 +39,4 @@ The manifest of that run beside what an application did with every row. Row 135 
 
 ## About
 
-The licence of the program and of everything inside it, as `qadg --license` prints it.
+The version of the program and its licence, as `qadg --version` and `qadg --license` print them. Save the third-party licenses writes to a file the licences of the code, fonts and icons by other people inside the window, the part `qadg --license` prints for the command line.

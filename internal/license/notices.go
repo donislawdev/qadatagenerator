@@ -27,3 +27,18 @@ import _ "embed"
 //
 //go:embed THIRD-PARTY-NOTICES.md
 var CommandLineNotices string
+
+// WindowNotices is the text of THIRD-PARTY-NOTICES-GUI.md: the licences and
+// copyright notices of the work by other people that the window links and
+// carries, the toolkit, the C library that opens the window, the typefaces and
+// the icons among it (DEC-327). The About screen saves it to a file, and the
+// report the window saves carries it as third_party_notices.
+//
+// It is embedded from a copy for the reason given above, and the same test
+// holds it to its file in the root. Only the window names it, and a variable
+// no reachable code reads is left out of a binary by the linker, so the
+// command line does not carry it, as the window does not carry the notices of
+// the command line.
+//
+//go:embed THIRD-PARTY-NOTICES-GUI.md
+var WindowNotices string
