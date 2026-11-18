@@ -70,8 +70,9 @@ var noticedPrograms = []noticedProgram{
 const stdHeading = "Go standard library and runtime"
 
 // releaseTargets are the five builds DEC-324 point 1 ships the command line
-// for. No release job builds them yet, so this list is that decision until one
-// does, and that job is then held to it.
+// for. .github/scripts/build_release.sh builds its own list, and
+// TestTheReleaseBuildsTheTargetsTheNoticesAreCheckedFor holds that list, and
+// the window job's matrix, to this one and to windowTargets.
 //
 // All five are asked, not one, because what is linked depends on the target.
 // A file the runtime builds for amd64 alone carries a notice the arm64 builds
