@@ -1,0 +1,36 @@
+# The certificates a release is signed with, pinned by the SHA-256 of their DER
+# bytes, and the day each one stops being able to sign.
+#
+# One line per certificate: a name, the digest, the expiry date. Blank lines and
+# lines starting with # are ignored. Read by .github/scripts/sign_release.py,
+# which refuses to sign with any other certificate and refuses a file that any
+# other certificate signed. This file is the one written copy of each digest, so
+# the script and anything that later checks a published release cannot drift
+# apart.
+#
+# A digest rather than a name. A second code signing certificate on the same
+# machine, a renewal or one made for testing, signs just as willingly, and the
+# release page looks the same either way. A renewal is a DIFFERENT certificate,
+# so its line here moves with it.
+#
+# Nothing about either certificate's subject is written here. Both carry the
+# maintainer's name and both become public with the first signed release, which
+# is a thing to say once rather than spread through a repository.
+#
+# windows-code-signing: issued by Certum Code Signing 2021 CA. The key is on a
+# cryptographic card, which is why signing is a step a person runs on their own
+# machine rather than a job on a runner. The same card signs the maintainer's
+# other projects. The digest and the date were read from the Windows certificate
+# store with the card's certificate in it on 2026-11-18.
+#
+# apple-developer-id: a Developer ID Application certificate issued by Apple's
+# Developer ID Certification Authority, in a keychain on the maintainer's Mac.
+# It sits in two keychains there, so the name "Developer ID Application" names
+# two entries, and the digest is what makes the choice unambiguous. Read from
+# that Mac on 2026-11-18.
+#
+# A signature outlives its certificate, because every one made for a release
+# carries a timestamp. Nothing new can be signed after the date.
+
+windows-code-signing 47b79ad3cfa53ef846cad03a59148f8c981d0b1196891e48b8c8d7982b10c148 2027-08-19
+apple-developer-id   c656a279aba94f535d6fcf9aff1ce05cd51295aea52295677ae5e1f1d7d77794 2029-10-27

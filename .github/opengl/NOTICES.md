@@ -22,8 +22,12 @@ They are `x64/libgallium_wgl.dll` and `x64/opengl32.dll` out of
 `mesa3d-26.2.5-release-msvc.7z`, SHA-256 `997123ef4ce8896204ab912d5b54f19372c487ff9835bcefafa2fca23b8953c2`, which
 pal1000/mesa-dist-win builds from the source of Mesa and publishes at
 <https://github.com/pal1000/mesa-dist-win/releases/tag/26.2.5>. The sizes and
-sums above are those of the files as that archive holds them, so the files
-here can be compared with that archive without trusting anybody in between.
+sums above are those of the files as that archive holds them. A release of QA
+Data Generator signs both files. Signing adds the signature to the end of a
+file and records it in two fields of the file's header, so a signed file is
+longer and has another SHA-256. The script that signs a release checks that
+each signed file, without the signature and with those two fields as they
+were, is the file of that archive to the byte, and stops otherwise.
 
 In the repository of QA Data Generator this folder is `.github/opengl`, with
 the notices and without the two files. `.github/scripts/fetch_software_renderer.sh`

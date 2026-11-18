@@ -81,4 +81,16 @@ var releaseGuards = []Guard{
 	{"the release opens an empty draft behind the tag and its three checks, with a note that says how to check a download", "TestTheReleaseWorkflowOpensADraftAndPublishesNothing", "internal/guard", ByProbe},
 	{"the bill of materials is read by SPDX's own validator, installed from files pinned by their bytes", "TestTheBillOfMaterialsIsReadBySPDXsOwnValidator", "internal/guard", ByProbe},
 	{"the bundle on macOS names the author the Windows resources name, and its icon is in the tree", "TestTheMacBundleSaysWhatTheWindowsResourcesSay", "internal/guard", ByProbe},
+
+	// The signing of a release (DEC-330). The same shape: each test plants
+	// one fault in a copy of the real files first and stops when the text it
+	// plants in is gone. What the signing script DOES is asked of it by
+	// running it: on 2026-11-18 its checks of a signed file ran on the two
+	// libraries of the software renderer as the same card signed them for
+	// another project's release, and refused six faults planted in them, and
+	// the Mac's script refused its own wrong inputs on the Mac.
+	{"each certificate a release is signed with is pinned once, by a digest with a date, and the signing script reads that copy", "TestThePinnedCertificatesAreDigestsWithADate", "internal/guard", ByProbe},
+	{"the signing script signs the archives the release builds, reads the renderer's files from their pin and names this repository", "TestTheSigningScriptSignsTheArchivesTheReleaseBuilds", "internal/guard", ByProbe},
+	{"the note, the attestation workflow and the bill of materials name one SPDX version", "TestEveryFileNamesThePredicateTheDocumentIs", "internal/guard", ByProbe},
+	{"nothing after the build publishes a release, and both steps that add files ask whether it is still a draft", "TestTheSigningLeavesTheReleaseADraft", "internal/guard", ByProbe},
 }

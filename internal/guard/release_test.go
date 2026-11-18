@@ -462,7 +462,10 @@ func TestTheReleaseWorkflowOpensADraftAndPublishesNothing(t *testing.T) {
 	// eight spaces in.
 	broken := planted(t, releaseWorkflow, workflow, "\n    "+tagFence+"\n", "\n")
 	requireFinding(t, checkReleaseFences(broken, notes, repository), "job publish can write and is not fenced behind a tag")
-	requireFinding(t, checkReleaseFences(workflow, "", repository), "never mentions gh attestation verify")
+	silent := checkReleaseFences(workflow, "", repository)
+	requireFinding(t, silent, "never mentions gh attestation verify")
+	requireFinding(t, silent, "never mentions --predicate-type "+spdxPredicate)
+	requireFinding(t, silent, "never mentions verify-SHA256SUMS.txt")
 
 	requireNone(t, checkReleaseFences(workflow, notes, repository), "the release fences")
 }
@@ -503,7 +506,11 @@ func checkReleaseFences(workflow, notes, repository string) []string {
 			at(releaseWorkflow, promise)
 		}
 	}
-	for _, promised := range []string{"gh attestation verify", "-R " + repository} {
+	// What a person landing on the release page has to be told: the command
+	// that checks a download for this repository, the statement type the
+	// statement over the signed files really carries, and the checksum file
+	// the signing script writes.
+	for _, promised := range []string{"gh attestation verify", "-R " + repository, "--predicate-type " + spdxPredicate, "verify-SHA256SUMS.txt"} {
 		if !strings.Contains(notes, promised) {
 			at(draftNotes, "never mentions "+promised)
 		}

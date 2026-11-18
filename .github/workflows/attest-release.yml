@@ -1,0 +1,176 @@
+# The second step of a release, after a person has signed it.
+#
+# release.yml cannot sign. The Windows key is on a card that cannot be exported
+# and the Apple key is in a keychain on a Mac, so .github/scripts/sign_release.py
+# signs on the maintainer's machines, uploads to the draft and then starts this.
+# Here the files a person downloads get the statement that travels with them,
+# and the release is still a draft when this finishes.
+#
+# It DOWNLOADS what the draft holds rather than trusting the digest it was
+# handed, so everything attested here is a statement about bytes this job is
+# holding. The digest is a cross check: if it disagrees with the checksum file
+# on the draft, something moved between signing and this run, and it stops.
+#
+# What it does NOT make is build provenance. That belongs to the workflow that
+# built something, and release.yml makes it, over the unsigned build. Claiming
+# here that this workflow produced files a person signed on their own machine
+# would be false in the one document nobody should have to doubt.
+#
+# Adapted on 2026-11-18 from the same workflow in Cert Doctor, a project of the
+# same owner under the same licence, which ran it for its releases 0.2.0 and
+# 0.3.0.
+name: attest-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The release tag, for example v0.2.0"
+        required: true
+      digest:
+        description: "The sha256 of verify-SHA256SUMS.txt, as sign_release.py printed it"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  attest:
+    name: attest the signed files
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      # Reading the draft's files and attaching the statement to it.
+      contents: write
+      # id-token mints the short lived token that signs the statement, and
+      # attestations writes it to this repository's store.
+      id-token: write
+      attestations: write
+    steps:
+      # The checksums first, because they are the list of what to fetch. The
+      # names come out of the file being verified, so adding a file to a
+      # release cannot leave a second list behind. In the project this came
+      # from, a list of patterns written by hand missed one file and stopped
+      # the first real release after the signing was done.
+      - name: fetch what the maintainer signed
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          CLAIMED: ${{ inputs.digest }}
+        run: |
+          set -euo pipefail
+          if ! printf '%s' "$TAG" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'
+          then
+            echo "::error::'$TAG' is not the tag of a release, which looks like v0.2.0"
+            exit 1
+          fi
+          if ! printf '%s' "$CLAIMED" | grep -qE '^[0-9a-f]{64}$'
+          then
+            echo "::error::'$CLAIMED' is not a sha256, and sign_release.py prints one"
+            exit 1
+          fi
+          # Nothing in a release publishes it, so a release that is no longer a
+          # draft was published by somebody or something else, and a statement
+          # added to it now would change a release people may have downloaded.
+          draft="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)"
+          if [ "$draft" != "true" ]
+          then
+            echo "::error::$TAG is not a draft, so nothing is attached to it from here"
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/signed"
+          cd "$RUNNER_TEMP/signed"
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern 'verify-SHA256SUMS.txt'
+          actual="$(sha256sum verify-SHA256SUMS.txt | cut -d' ' -f1)"
+          echo "the draft carries: $actual"
+          if [ "$actual" != "$CLAIMED" ]
+          then
+            echo "::error::the checksum file on the draft hashes to $actual, but this run"
+            echo "::error::was started for $CLAIMED. Something changed in between."
+            exit 1
+          fi
+          # Collected before anything is fetched, because gh reads standard
+          # input and a download inside the read loop eats the rest of the list.
+          # Each name is a pattern to gh, so it is held to a file name with
+          # nothing a pattern would read as more than itself.
+          names=()
+          while read -r _ name
+          do
+            if ! printf '%s' "$name" | grep -qE '^[A-Za-z0-9][A-Za-z0-9._-]*$'
+            then
+              echo "::error::verify-SHA256SUMS.txt names '$name', which is not a file of a release"
+              exit 1
+            fi
+            names+=("$name")
+          done < verify-SHA256SUMS.txt
+          if [ "${#names[@]}" -eq 0 ]
+          then
+            echo "::error::verify-SHA256SUMS.txt names no files, so there is nothing to attest"
+            exit 1
+          fi
+          echo "the checksums describe ${#names[@]} file(s)"
+          for name in "${names[@]}"
+          do
+            gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern "$name"
+          done
+          sha256sum -c verify-SHA256SUMS.txt
+          sbom="verify-qadg_${TAG#v}.spdx.json"
+          if [ ! -f "$sbom" ]
+          then
+            echo "::error::the signed files carry no $sbom, and the statement is about it"
+            exit 1
+          fi
+          echo "SBOM=$RUNNER_TEMP/signed/$sbom" >> "$GITHUB_ENV"
+          echo "SUMS=$RUNNER_TEMP/signed/verify-SHA256SUMS.txt" >> "$GITHUB_ENV"
+
+      # The bill of materials, bound to the files a person actually downloads.
+      # Signing changed the bytes of the Windows and macOS archives, and a
+      # statement about the wrong bytes verifies against nothing.
+      - name: attest what is inside the signed files
+        id: attestation
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-checksums: ${{ env.SUMS }}
+          sbom-path: ${{ env.SBOM }}
+
+      # The release note tells people to pass --predicate-type, because gh asks
+      # for build provenance unless told otherwise. That type is written by
+      # hand, so it is checked here against the statement that was actually
+      # made, the one moment the real value exists. A wrong type makes a
+      # correct release look broken, and the message a person gets is "no
+      # attestation found".
+      - name: the release note promises a command, so check the command works
+        shell: bash
+        env:
+          BUNDLE: ${{ steps.attestation.outputs.bundle-path }}
+        run: |
+          set -euo pipefail
+          promised="https://spdx.dev/Document/v2.3"
+          actual="$(jq -r '.dsseEnvelope.payload' "$BUNDLE" | base64 -d | jq -r '.predicateType')"
+          echo "the statement carries: $actual"
+          if [ "$actual" != "$promised" ]
+          then
+            echo "::error::the release note tells people to pass --predicate-type $promised"
+            echo "::error::and the statement just made is $actual. Fix .github/release-notes.md,"
+            echo "::error::because as written the command answers that there is no attestation."
+            exit 1
+          fi
+
+      # As a file of the release, not only in the attestation store, so that
+      # gh attestation verify answers offline with --bundle. The people this
+      # program is for are often the ones whose network gets in the way of the
+      # API.
+      - name: put the statement beside the files
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          BUNDLE: ${{ steps.attestation.outputs.bundle-path }}
+        run: |
+          set -euo pipefail
+          name="$RUNNER_TEMP/verify-qadg_${TAG#v}.sbom.sigstore.json"
+          cp "$BUNDLE" "$name"
+          jq -e . "$name" > /dev/null
+          gh release upload "$TAG" "$name" --repo "$GITHUB_REPOSITORY" --clobber
+          echo "attached $(basename "$name") to $TAG, which is still a draft"
