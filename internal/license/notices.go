@@ -15,9 +15,9 @@ import _ "embed"
 //
 // # Why this embeds a copy of the file in the root
 //
-// go:embed cannot reach out of its own package, and a package in the root of
-// the module would be public API, which DEC-134 rejected for the catalog for
-// that reason. So the file is embedded from a copy beside this one, and
+// The embed directive cannot reach out of its own package, and a package in the
+// root of the module would be public API, which DEC-134 rejected for the catalog
+// for that reason. So the file is embedded from a copy beside this one, and
 // TestTheEmbeddedNoticesAreTheOnesInTheRoot holds the copy to the root file
 // byte for byte. tools/noty/rozwin.ps1 writes both.
 //
