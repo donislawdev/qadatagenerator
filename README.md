@@ -512,5 +512,6 @@ The window contains much more: the Fyne toolkit and the modules it brings, the G
 the IBM Plex typefaces, the Lucide icons and the same lists. Their notices are in
 [THIRD-PARTY-NOTICES-GUI.md](THIRD-PARTY-NOTICES-GUI.md), and the button Save the third-party
 licenses on the About screen writes the same text to a file. The same check keeps that file equal to
-what each build of the window links, apart from the code the C compiler adds of its own, which that
-file does not list yet.
+what each build of the window links. The file also covers the code the C compiler adds to the window
+of its own, and every build of the window checks that this code is still the code the file was
+written for.

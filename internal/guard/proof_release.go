@@ -23,6 +23,18 @@ var releaseGuards = []Guard{
 	{"an #include is followed to where the compiler finds the file, and no further", "TestAnIncludeIsFollowedTheWayTheCompilerLooks", "internal/guard", ByProbe},
 	{"a copyright statement in a source comment is read off it, and a sentence about copyright is not", "TestACopyrightStatementIsReadOffAComment", "internal/guard", ByProbe},
 
+	// The code the C compiler links into the window of its own, which no walk
+	// of go list reaches. The pin is loud when it is empty, because it then
+	// says nothing about each of the three targets, and the walk of .github
+	// stops when it never arrives at ci.yml. On 2026-11-18 a version of
+	// MinGW-w64 changed in the pin, the reader's call taken out of ci.yml and
+	// the compiler's sections taken out of the window's row were each caught
+	// once by hand. The reader itself is a shell script on the runner, and
+	// tools/noty/atrapa-mapy.ps1 runs it on three real maps and their spoiled
+	// copies.
+	{"the compiler's own code in the window is the code its notices answer for, and a build reads the linker's map", "TestTheCompilersOwnCodeInTheWindowIsTheCodeItsNoticesAnswerFor", "internal/guard", ByProbe},
+	{"the toolchain check sees a library nobody read, a gap in the pin, a section at another version and a build that skips the reader", "TestTheToolchainGuardCanFail", "internal/guard", ByProbe},
+
 	// The owner's decision of 2026-11-18 that --license ends with those
 	// notices. Both tests ask their check for a planted fault first, and on
 	// the same day a report without the notices and a copy with one changed

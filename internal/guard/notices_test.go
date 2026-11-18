@@ -38,6 +38,12 @@ type noticedProgram struct {
 	// this guard green after the road to it is lost, so a road that matters
 	// names a file it has to reach.
 	landmarks [][2]string
+
+	// byCompiler are the sections for code the C compiler's linker puts in of
+	// its own. It comes with the compiler, not from this tree, so no walk
+	// arrives at it, and toolchain_test.go holds these sections to the
+	// linker's map through the pin.
+	byCompiler []string
 }
 
 // noticedPrograms are the binaries and their notices. The command line answers
@@ -47,13 +53,14 @@ type noticedProgram struct {
 // the command line links two of those modules and none of the rest.
 var noticedPrograms = []noticedProgram{
 	{pkg: "./cmd/qadg", notices: "THIRD-PARTY-NOTICES.md", targets: releaseTargets},
-	{pkg: "./cmd/qadg-gui", notices: "THIRD-PARTY-NOTICES-GUI.md", targets: windowTargets, cgo: true,
+	{pkg: "./cmd/qadg-gui", notices: windowNotices, targets: windowTargets, cgo: true,
 		landmarks: [][2]string{
 			{"github.com/go-gl/glfw/v3.4/glfw", "glfw/src/win32_init.c"}, // only an #include reaches it
 			{"github.com/go-gl/glfw/v3.4/glfw", "glfw/LICENSE.md"},       // only from beside the files an #include reaches
 			{"fyne.io/fyne/v2", "theme/font/LICENSE_Inter.txt"},          // only from beside the fonts go:embed takes in
 			{"github.com/go-gl/gl", "LICENSE"},                           // only through the replace in go.mod, in this tree
-		}},
+		},
+		byCompiler: toolchainHeadings()},
 }
 
 // stdHeading is the one section every notices file has that is not named after
@@ -591,6 +598,11 @@ func gatherLinked(t *testing.T, root, goroot string, program noticedProgram, rea
 		for heading, version := range headings {
 			code.headings[heading] = version
 		}
+	}
+	// No version here: the pin states it, and toolchain_test.go holds the
+	// section to the pin.
+	for _, heading := range program.byCompiler {
+		code.headings[heading] = ""
 	}
 	for _, mark := range program.landmarks {
 		dir, linked := code.dirs[mark[0]]

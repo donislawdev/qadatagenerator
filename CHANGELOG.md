@@ -609,8 +609,9 @@ repository once they are released.
   screen writes the whole file. It replaces the button that saved only the
   licences of the fonts and icons, which are in the new file too. The report
   that Save the license report as JSON writes now carries the same text in
-  `third_party_notices`. The file does not list yet the code that the C
-  compiler adds to the window of its own.
+  `third_party_notices`. The file also covers the code that the C compiler
+  adds to the window of its own: the MinGW-w64 runtime on Windows and the
+  start files of the GNU C Library on Linux.
 - **The window remembers its size and the folder its file chooser was last
   in.** It opens next time at the size it was closed at, and the file chooser
   starts in the last folder. Both are kept on your computer in the settings

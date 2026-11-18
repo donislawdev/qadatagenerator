@@ -78,6 +78,36 @@ jobs:
       - name: build
         run: go build ./...
 
+      # What the C compiler linked into the window of its own, read off the
+      # linker's map and held to .github/window-toolchain, which the window's
+      # notices were written for (DEC-327). That code comes with the compiler on
+      # the runner, not from this tree, so no other check sees it, and a new
+      # runner image can change it without a line changing here. The window is
+      # linked into the runner's temporary directory, never into the checkout.
+      # The go command splits -ldflags at spaces, so a path with one would reach
+      # the linker in pieces, and the linker on Windows reads a Windows path.
+      - name: the C compiler's own code in the window
+        shell: bash
+        run: |
+          map="$RUNNER_TEMP/qadg-gui.map"
+          if [ "$RUNNER_OS" = "Windows" ]
+          then
+            map="$(cygpath -m "$map")"
+          fi
+          if [ "$map" != "${map// /}" ]
+          then
+            echo "the map would be written at $map, and the go command splits -ldflags at spaces" >&2
+            exit 1
+          fi
+          if [ "$RUNNER_OS" = "macOS" ]
+          then
+            flag="-extldflags=-Wl,-map,$map"
+          else
+            flag="-extldflags=-Wl,-Map=$map"
+          fi
+          go build "-ldflags=$flag" -o "$RUNNER_TEMP/qadg-gui-mapped" ./cmd/qadg-gui
+          bash .github/scripts/window_toolchain.sh "$(go env GOOS)/$(go env GOARCH)" "$map" "$(go env CC)"
+
       - name: vet
         run: go vet ./...
 
