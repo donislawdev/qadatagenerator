@@ -30,14 +30,15 @@ import "slices"
 // It is deliberately not every test in the project. A test that checks one
 // function does its arithmetic is not a guard. A guard is a test standing
 // between the product and a promise it makes to somebody outside it.
-var Guards = slices.Concat(toolGuards, windowGuards, damageGuards)
+var Guards = slices.Concat(toolGuards, windowGuards, damageGuards, releaseGuards)
 
 // toolGuards is the part of the register about the tool itself and about the
 // first pillar: the architecture, the identifiers, the engine that writes
 // correct data, and the command line somebody's pipeline meets. The window has
-// a part of its own, windowGuards in proof_window.go.
+// a part of its own, windowGuards in proof_window.go, and so has what a release
+// carries beside the binaries, releaseGuards in proof_release.go.
 //
-// # Why the register is in three files rather than one
+// # Why the register is in several files rather than one
 //
 // It reached the ceiling on the size of a file on 2026-09-05, at 500 lines of
 // code against a limit of 500, and the limit may be lowered but never raised.

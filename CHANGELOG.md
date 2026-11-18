@@ -590,6 +590,13 @@ repository once they are released.
 
 ### Added
 
+- **The licence texts of the work by other people inside the command line
+  are in `THIRD-PARTY-NOTICES.md`.** That is the Go runtime and standard
+  library, two Go modules, and the lists of names and places that generated
+  values are drawn from. The file includes the MIT licence of Faker, the
+  Python library the lists of names were read from, which `qadg --license`
+  only named until now. A check in the source fails when the file stops
+  matching what a build of `qadg` links.
 - **The window remembers its size and the folder its file chooser was last
   in.** It opens next time at the size it was closed at, and the file chooser
   starts in the last folder. Both are kept on your computer in the settings
