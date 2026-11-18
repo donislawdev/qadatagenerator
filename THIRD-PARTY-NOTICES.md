@@ -10,8 +10,9 @@ Every `qadg` binary also contains work that other people made: the Go runtime
 and standard library, two Go modules, and the lists of names and places that
 generated values are drawn from. Their licences ask that their notices travel
 with every copy, a binary one included, so this file is part of every release
-archive that carries `qadg`. Each of these licences is compatible with GPL-3.0,
-and the list of places is in the public domain.
+archive that carries `qadg`, and it is compiled into `qadg` itself, which prints
+it at the end of `qadg --license`. Each of these licences is compatible with
+GPL-3.0, and the list of places is in the public domain.
 
 The same modules are in all five builds: Windows and Linux on amd64 and arm64,
 and macOS on arm64. One notice below belongs to a file of the Go runtime that

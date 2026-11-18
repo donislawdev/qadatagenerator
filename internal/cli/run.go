@@ -715,7 +715,9 @@ func printVersion(out *streams, machineReadable bool) {
 // below, and text written for a person changes wording without changing meaning.
 func printLicense(out *streams, machineReadable bool) {
 	if machineReadable {
-		encoded, err := json.Marshal(license.Current())
+		report := license.Current()
+		report.ThirdPartyNotices = license.CommandLineNotices
+		encoded, err := json.Marshal(report)
 		if err != nil {
 			// Nothing in the report is unencodable, so this cannot fire. It is
 			// reported rather than dropped for the same reason as in the
@@ -750,6 +752,13 @@ func printLicense(out *streams, machineReadable bool) {
 	out.emit(license.GeneratedDataNotice)
 	out.emit("")
 	out.emit(license.SyntheticDataNotice)
+
+	// The notices come last and whole, because they are what the licences of
+	// the code inside this binary ask to travel with it, and a binary copied
+	// on its own has nothing else beside it (DEC-327). They open with their
+	// own heading, so they need none from here.
+	out.emit("")
+	out.emit(strings.TrimRight(license.CommandLineNotices, "\n"))
 }
 
 // printLicensedData is the part of the licence report that names the reference

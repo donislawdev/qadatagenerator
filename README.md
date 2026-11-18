@@ -505,5 +505,5 @@ window shows the same on its About screen.
 
 The command line also contains work by other people: the Go runtime and standard library, two Go
 modules, and lists of names and places. Their licence texts and copyright notices are in
-[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md), and a check in the source keeps that file equal to
-what each build of `qadg` links.
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md), and `qadg --license` prints the same text at the
+end of its report. A check in the source keeps that file equal to what each build of `qadg` links.

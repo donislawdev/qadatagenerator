@@ -109,6 +109,51 @@ func TestLicenseSaysEveryValueIsSynthetic(t *testing.T) {
 	}
 }
 
+// TestLicenseEndsWithTheThirdPartyNotices holds the owner's decision of
+// 2026-11-18 (DEC-327): --license ends with the notices of the work by other
+// people inside the binary, whole, and the machine readable form carries the
+// same text.
+//
+// A suffix check over an empty text would pass on any report, because every
+// report ends with a newline, so the embedded text is first required to be the
+// notices and the check is first shown a report that does not end with them.
+func TestLicenseEndsWithTheThirdPartyNotices(t *testing.T) {
+	if !strings.HasPrefix(license.CommandLineNotices, "# Third party notices\n") {
+		t.Fatalf("the embedded notices are not the notices file: %.60q", license.CommandLineNotices)
+	}
+	want := strings.TrimRight(license.CommandLineNotices, "\n") + "\n"
+	if strings.HasSuffix(license.SyntheticDataNotice+"\n", want) {
+		t.Fatal("the check passes on a report that stops before the notices")
+	}
+
+	printed := run("--license")
+	if printed.code != 0 {
+		t.Fatalf("ended with %d", printed.code)
+	}
+	if !strings.HasSuffix(printed.data, want) {
+		t.Errorf("--license does not end with the notices, its last lines are %q", lastLines(printed.data, 3))
+	}
+
+	machine := run("--license", "--json")
+	var report license.Report
+	if err := json.Unmarshal([]byte(machine.data), &report); err != nil {
+		t.Fatalf("the license report is not a JSON document: %v", err)
+	}
+	if report.ThirdPartyNotices != license.CommandLineNotices {
+		t.Errorf("third_party_notices carries %d bytes, the notices are %d", len(report.ThirdPartyNotices), len(license.CommandLineNotices))
+	}
+}
+
+// lastLines is the end of a report, for a failure that has to say what the
+// report ended with instead.
+func lastLines(text string, count int) []string {
+	lines := strings.Split(strings.TrimRight(text, "\n"), "\n")
+	if len(lines) > count {
+		lines = lines[len(lines)-count:]
+	}
+	return lines
+}
+
 // The machine readable form has to carry everything the printed one does.
 //
 // # Why this is checked field by field rather than against a fixture

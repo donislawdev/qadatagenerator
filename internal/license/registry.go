@@ -625,6 +625,11 @@ type Report struct {
 	// faces, which is exactly what it knew before.
 	Embedded []Asset `json:"embedded"`
 	Notices  Notices `json:"notices"`
+	// ThirdPartyNotices is the whole text of the notices file of the binary
+	// that writes the report, added under the rule on this shape (DEC-327).
+	// Current leaves it empty, because the window links this package too and
+	// carries other code, and the command line fills it with its own.
+	ThirdPartyNotices string `json:"third_party_notices,omitempty"`
 }
 
 // Terms is one license and what it covers.

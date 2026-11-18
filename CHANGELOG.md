@@ -597,6 +597,10 @@ repository once they are released.
   Python library the lists of names were read from, which `qadg --license`
   only named until now. A check in the source fails when the file stops
   matching what a build of `qadg` links.
+- **`qadg --license` ends with those notices, in full.** Everything it printed
+  before stays where it was, and the notices follow it, so a copy of `qadg`
+  that travels without its archive still carries them. `qadg --license --json`
+  carries the same text in a new field, `third_party_notices`.
 - **The window remembers its size and the folder its file chooser was last
   in.** It opens next time at the size it was closed at, and the file chooser
   starts in the last folder. Both are kept on your computer in the settings

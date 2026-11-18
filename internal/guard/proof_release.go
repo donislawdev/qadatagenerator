@@ -21,4 +21,11 @@ var releaseGuards = []Guard{
 	{"the notices check sees a missing module, a wrong version, a missing text and a section for nothing", "TestTheNoticesGuardCanFail", "internal/guard", ByProbe},
 	{"an #include is followed to where the compiler finds the file, and no further", "TestAnIncludeIsFollowedTheWayTheCompilerLooks", "internal/guard", ByProbe},
 	{"a copyright statement in a source comment is read off it, and a sentence about copyright is not", "TestACopyrightStatementIsReadOffAComment", "internal/guard", ByProbe},
+
+	// The owner's decision of 2026-11-18 that --license ends with those
+	// notices. Both tests ask their check for a planted fault first, and on
+	// the same day a report without the notices and a copy with one changed
+	// byte were each caught once by hand.
+	{"the notices compiled into the command line are the notices file in the root, byte for byte", "TestTheEmbeddedNoticesAreTheOnesInTheRoot", "internal/license", ByProbe},
+	{"--license ends with those notices, whole, and its machine readable form carries them", "TestLicenseEndsWithTheThirdPartyNotices", "internal/cli", ByProbe},
 }
