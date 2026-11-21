@@ -25,8 +25,9 @@ seam between them.
 The Apple key is the same problem in another shape: Apple's notary service only
 talks to credentials held in a keychain, and that keychain is on the
 maintainer's Mac. So five of the eight archives are signed here, in two places,
-the three for Windows at the card and the two for macOS on the Mac, and the
-checksums are written once at the end over everything.
+the three for Windows at the card and the two for macOS on the Mac, the Windows
+installer is built here from the signed window archive and signed at the card,
+and the checksums are written once at the end over everything.
 
 What it does, in order, and what it refuses
 -------------------------------------------
@@ -35,15 +36,19 @@ What it does, in order, and what it refuses
     each one against the statement release.yml made about it, made by that
     workflow, for that tag, on a runner GitHub hosts. Signing something nobody
     checked is how a supply chain gets a signature on it.
- 3. finds the pinned certificate among those this machine offers, before
+ 3. exports the tree of the tag with git archive and asks build_msi.py from it
+    whether this machine can build the Windows installer (the template, the
+    icon, WiX at the version it builds with), before anything is signed. A
+    release candidate gets no installer.
+ 4. finds the pinned certificate among those this machine offers, before
     anything is signed anywhere.
- 4. hands the two macOS archives to the Mac, which signs each program in the
+ 5. hands the two macOS archives to the Mac, which signs each program in the
     .app bundle inside each one and then the bundle, notarises it with Apple and
     staples the ticket on. The Mac goes before the card because Apple is the
     step that refuses for reasons of its own. In the project this script comes
     from, both refusals of the first rehearsal came from Apple, after the card
     had already signed.
- 5. signs every program and library in the three Windows archives with the
+ 6. signs every program and library in the three Windows archives with the
     card, each with an RFC 3161 timestamp, because without one a signature dies
     with the certificate. Each distinct file is signed ONCE: the window's
     archive carries the very qadg.exe the command line's archive does. Each
@@ -51,11 +56,16 @@ What it does, in order, and what it refuses
     signature has to carry a timestamp, and the file without its signature has
     to be the file that went in, byte for byte. The two files of the software
     renderer have to be the files their pin names before they are signed.
- 6. writes verify-SHA256SUMS.txt over everything it is about to publish, signed
+ 7. builds the Windows installer from the window's SIGNED archive with the
+    tagged tree's build_msi.py, signs it with the product's name as the
+    description Windows shows when it asks an administrator, and reads the
+    certificate back out of it. An installer made before the card signed the
+    programs would carry unsigned copies of them.
+ 8. writes verify-SHA256SUMS.txt over everything it is about to publish, signed
     and unsigned alike.
- 7. uploads the lot to the DRAFT release, refusing if it is no longer a draft,
+ 9. uploads the lot to the DRAFT release, refusing if it is no longer a draft,
     and asks attest-release.yml for the statement about the signed bytes.
- 8. waits for that statement and confirms the draft holds exactly the files of
+10. waits for that statement and confirms the draft holds exactly the files of
     a release, because a draft missing one file looks almost exactly like a
     finished one.
 
@@ -66,7 +76,8 @@ The rehearsal
 -------------
 --rehearsal RUN takes the build of a run of release.yml on main, started by hand
 or by a push that changed the release, instead of the build of a tag, and does
-steps 1 to 6 on it for real: the Mac signs, Apple notarises and the card signs.
+steps 1 to 8 on it for real: the Mac signs, Apple notarises, the card signs and
+the installer is built from the tree of the commit that run built.
 It uploads nothing, dispatches nothing and touches no draft. A run on main has
 no provenance statement, because the job that makes one is fenced behind a tag,
 so what stands in for step 2 is GitHub's own account of the run and of its
@@ -81,8 +92,10 @@ the notes beside them say where.
 """
 import argparse
 import base64
+import contextlib
 import datetime
 import hashlib
+import io
 import json
 import os
 import re
@@ -91,6 +104,8 @@ import shutil
 import struct
 import subprocess
 import sys
+import tarfile
+import tempfile
 import time
 import zipfile
 
@@ -136,6 +151,17 @@ SIGNED_INSIDE = {
 }
 RENDERER_PIN = os.path.join(".github", "mesa-dist-win")
 
+# The Windows installer, one for a release and none for a release candidate
+# (DEC-331). Built after the card signed the programs in it, because an
+# installer made before would carry unsigned copies, by build_msi.py taken from
+# the tree of the tag, so it is built from what was tagged. Signed with the
+# product's name as its description, which is the name Windows shows when it
+# asks an administrator to let the installer run. Without it the prompt showed
+# the digits of a temporary copy's name (measured in another Go project of the
+# same owner on 2026-09-29, as Cert Doctor's release script records).
+INSTALLER = "qadg-setup_%s_windows_amd64.msi"
+BUILD_MSI = os.path.join(".github", "scripts", "build_msi.py")
+
 # The files a person uses to CHECK a download rather than the download itself.
 # GitHub lists the files of a release by name and nothing else, so the prefix is
 # what puts these at the end of the list.
@@ -171,6 +197,14 @@ TAG_SHAPE = re.compile(r"^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$")
 # starting with a dash would be an option to ssh.
 HOST_SHAPE = re.compile(r"^(?:[A-Za-z0-9][A-Za-z0-9._-]*@)?[A-Za-z0-9][A-Za-z0-9._-]*$")
 PROFILE_SHAPE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+
+
+def is_candidate(version):
+    """A release candidate: a hyphen in the version, the rule release.yml marks
+    a pre-release by and build_msi.py refuses an installer by, because Windows
+    Installer reads only the three numbers of a version, and a candidate's
+    installer would take the release's own version."""
+    return "-" in version
 
 
 def run(argv, **kw):
@@ -571,11 +605,12 @@ def rehearsal_run(run_id):
                          % (run_id, sha, (status or {}).get("status")))
     print("  run %d: %s, a %s on main at %s, %s" % (
         run_id, RELEASE_WORKFLOW, meta.get("event"), sha[:12], meta.get("conclusion")))
+    return sha
 
 
 def fetch_rehearsal(run_id, into):
     """The build of a run on main, checked against the digest GitHub keeps for
-    it, and its version.
+    it, its version, and the commit it built, which the installer is built from.
 
     The artefact is downloaded as the zip GitHub stored and its sha256 compared
     with the digest the API gives for it before anything is unpacked. In the
@@ -583,7 +618,7 @@ def fetch_rehearsal(run_id, into):
     goes beside the folder rather than into it, because everything in the
     folder gets a checksum, and it is gone once unpacked.
     """
-    rehearsal_run(run_id)
+    sha = rehearsal_run(run_id)
     found = gh_json("api", "repos/%s/actions/runs/%d/artifacts" % (REPO, run_id))
     builds = [a for a in (found or {}).get("artifacts", []) if a.get("name") == "build"]
     if len(builds) != 1 or builds[0].get("expired"):
@@ -631,7 +666,7 @@ def fetch_rehearsal(run_id, into):
     if not TAG_SHAPE.match("v" + version):
         raise SystemExit("sign_release: the build of run %d names version %r" % (run_id, version))
     print("  %d file(s) of version %s: %s" % (len(names), version, ", ".join(sorted(names))))
-    return version
+    return version, sha
 
 
 def check_build(directory, version, tagged):
@@ -676,6 +711,97 @@ def verify_before_touching(directory, tag):
              "--source-ref", "refs/tags/%s" % tag,
              "--deny-self-hosted-runners"])
     print("  %d file(s) verified against the build's own statement" % len(subjects))
+
+
+@contextlib.contextmanager
+def tagged_tree(ref):
+    """The tree of ref, the tag or the commit a rehearsal's run built, exported
+    with git archive into a temporary folder and removed afterwards.
+
+    The installer is built from what was tagged, whatever this checkout stands
+    on: the template, the names and the script that fills them all come from
+    ref. filter="data" refuses a link or a name that leads out of the folder,
+    which an archive of this tree never holds.
+    """
+    where = tempfile.mkdtemp(prefix="qadg-tree-")
+    try:
+        out = subprocess.run(["git", "archive", "--format=tar", ref], capture_output=True)
+        if out.returncode != 0:
+            raise SystemExit(
+                "sign_release: git archive %s failed, so there is no tree to build the installer "
+                "from. Fetch it first (git fetch --tags origin) and run this again.\n%s"
+                % (ref, out.stderr.decode(errors="replace").strip()))
+        with tarfile.open(fileobj=io.BytesIO(out.stdout)) as archive:
+            archive.extractall(where, filter="data")
+        print("  the tree of %s, exported for the installer" % ref)
+        yield where
+    finally:
+        shutil.rmtree(where, ignore_errors=True)
+
+
+def build_msi(tree, *args):
+    """build_msi.py from the tagged tree, with these arguments, and what it
+    printed. Its refusals are sentences that name the input, so a failure is
+    said in its words and nothing goes on."""
+    script = os.path.join(tree, BUILD_MSI)
+    if not os.path.isfile(script):
+        raise SystemExit("sign_release: the tree this release is built from has no %s, so it is "
+                         "from before the installer existed, and it cannot have one. Nothing has "
+                         "been signed or uploaded." % BUILD_MSI.replace(os.sep, "/"))
+    print("    $ build_msi.py %s" % " ".join(args))
+    out = subprocess.run([sys.executable, script, *args], capture_output=True, text=True)
+    for line in out.stdout.strip().splitlines():
+        print("      %s" % line)
+    if out.returncode != 0:
+        # build_msi.py refuses on stderr in one sentence. It ends this message
+        # rather than standing above WiX's output, where nobody reads it.
+        raise SystemExit("sign_release: the installer cannot be built.\n%s\nNothing has been uploaded."
+                         % (out.stderr.strip() or "build_msi.py exited %d" % out.returncode))
+    for line in out.stderr.strip().splitlines():
+        print("      %s" % line)
+    return out.stdout
+
+
+def check_installer(tree, version):
+    """Before anything is signed: whether this machine can build the installer
+    of version from the tagged tree, its template, its icon, WiX."""
+    if is_candidate(version):
+        print("  %s is a release candidate, which gets no installer" % version)
+        return
+    build_msi(tree, "--tag", "v" + version, "--check")
+
+
+def build_installer(tree, directory, version, thumbprint, pin, signtool, dry_run):
+    """The installer, built from the signed window archive, signed with the
+    product's name, and the certificate read back out of it."""
+    if is_candidate(version):
+        print("  %s is a release candidate, which gets no installer" % version)
+        return
+    tag = "v" + version
+    name = build_msi(tree, "--tag", tag, "--product-name").strip()
+    if not name:
+        raise SystemExit("sign_release: build_msi.py --product-name said nothing, and the "
+                         "installer is signed with that name. Nothing has been uploaded.")
+    build_msi(tree, "--tag", tag, "--archives", directory, "--out-dir", directory)
+    path = os.path.join(directory, INSTALLER % version)
+    if not os.path.isfile(path):
+        raise SystemExit("sign_release: build_msi.py wrote no %s. Nothing has been uploaded."
+                         % os.path.basename(path))
+    command = [signtool, "sign", "/sha1", thumbprint, "/fd", "sha256",
+               "/tr", TIMESTAMP_URL, "/td", "sha256", "/d", name, "/v", path]
+    if dry_run:
+        print("    DRY RUN, would run: %s" % " ".join(command))
+        print("  %s built from an unsigned archive, and not signed" % os.path.basename(path))
+        return
+    run(command)
+    run([signtool, "verify", "/pa", "/v", path])
+    actual = certificate_of(path)
+    if actual != pin:
+        raise SystemExit(
+            "sign_release: %s was signed by a DIFFERENT certificate\n"
+            "  expected %s\n  got      %s\nNothing has been uploaded."
+            % (os.path.basename(path), pin, actual))
+    print("  %s built, and signed as %s" % (os.path.basename(path), name))
 
 
 def unpack_windows(directory, version):
@@ -890,13 +1016,19 @@ def ask_for_the_statement(tag, digest, dry_run):
 
 
 def release_files(version):
-    """Every file a finished draft of version holds, and no other."""
-    return sorted(set(archive_names(version)) | {
+    """Every file a finished draft of version holds, and no other. The
+    installer is one of them for a release and never for a candidate, the rule
+    build_msi.py refuses a candidate's installer by."""
+    files = set(archive_names(version)) | {
         SUMS,
         bill_of_materials(version),
         "%sqadg_%s.provenance.sigstore.json" % (AUX_PREFIX, version),
         "%sqadg_%s.sbom.sigstore.json" % (AUX_PREFIX, version),
-    })
+    }
+    if not is_candidate(version):
+        installer = INSTALLER % version
+        files.add(installer)
+    return sorted(files)
 
 
 def confirm_draft(tag, wait_seconds, dry_run):
@@ -986,32 +1118,40 @@ def main(argv=None):
     print("\nbefore anything: can the Mac be reached")
     reach_the_mac(args.macos_host)
 
-    steps = 6 if rehearsal else 8
+    steps = 8 if rehearsal else 10
     if rehearsal:
         print("\n[1/%d] fetching the build of run %d, a REHEARSAL, nothing will be uploaded"
               % (steps, args.rehearsal))
-        version = fetch_rehearsal(args.rehearsal, work)
+        version, ref = fetch_rehearsal(args.rehearsal, work)
         print("\n[2/%d] checking it before touching it" % steps)
         check_build(work, version, tagged=False)
     else:
         version = args.tag[1:]
+        ref = "refs/tags/" + args.tag
         print("\n[1/%d] fetching the build for %s" % (steps, args.tag))
         fetch_build(args.tag, work)
         print("\n[2/%d] checking it before touching it" % steps)
         verify_before_touching(work, args.tag)
 
-    print("\n[3/%d] the card's certificate, before anything is signed anywhere" % steps)
-    thumbprint = signing_thumbprint(windows_pin)
-    signtool = find_signtool()
-    print("  signtool: %s" % signtool)
+    print("\n[3/%d] whether the installer can be built, before anything is signed" % steps)
+    with tagged_tree(ref) as tree:
+        check_installer(tree, version)
 
-    print("\n[4/%d] signing the macOS bundles on %s" % (steps, args.macos_host))
-    sign_macos(label, work, version, args.macos_host, args.notary_profile, args.dry_run)
+        print("\n[4/%d] the card's certificate, before anything is signed anywhere" % steps)
+        thumbprint = signing_thumbprint(windows_pin)
+        signtool = find_signtool()
+        print("  signtool: %s" % signtool)
 
-    print("\n[5/%d] signing the Windows programs and libraries with the card" % steps)
-    sign_windows(work, version, thumbprint, windows_pin, signtool, args.dry_run)
+        print("\n[5/%d] signing the macOS bundles on %s" % (steps, args.macos_host))
+        sign_macos(label, work, version, args.macos_host, args.notary_profile, args.dry_run)
 
-    print("\n[6/%d] checksums over what will be published" % steps)
+        print("\n[6/%d] signing the Windows programs and libraries with the card" % steps)
+        sign_windows(work, version, thumbprint, windows_pin, signtool, args.dry_run)
+
+        print("\n[7/%d] building and signing the Windows installer" % steps)
+        build_installer(tree, work, version, thumbprint, windows_pin, signtool, args.dry_run)
+
+    print("\n[8/%d] checksums over what will be published" % steps)
     if not rehearsal:
         name_for_publication(work, version)
     digest = write_checksums(work)
@@ -1027,11 +1167,11 @@ def main(argv=None):
         print("NOT a release: look at them, then delete the folder.")
         return 0
 
-    print("\n[7/%d] uploading to the draft" % steps)
+    print("\n[9/%d] uploading to the draft" % steps)
     upload_to_draft(args.tag, work, args.dry_run)
     ask_for_the_statement(args.tag, digest, args.dry_run)
 
-    print("\n[8/%d] waiting for the statement and checking the draft" % steps)
+    print("\n[10/%d] waiting for the statement and checking the draft" % steps)
     confirm_draft(args.tag, args.wait, args.dry_run)
 
     print("\nDone. %s is a complete DRAFT." % args.tag)

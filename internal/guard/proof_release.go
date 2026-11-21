@@ -93,4 +93,13 @@ var releaseGuards = []Guard{
 	{"the signing script signs the archives the release builds, reads the renderer's files from their pin and names this repository", "TestTheSigningScriptSignsTheArchivesTheReleaseBuilds", "internal/guard", ByProbe},
 	{"the note, the attestation workflow and the bill of materials name one SPDX version", "TestEveryFileNamesThePredicateTheDocumentIs", "internal/guard", ByProbe},
 	{"nothing after the build publishes a release, and both steps that add files ask whether it is still a draft", "TestTheSigningLeavesTheReleaseADraft", "internal/guard", ByProbe},
+
+	// The Windows installer (DEC-331). The same shape again. What the
+	// installer DOES is asked of Windows by check_msi.ps1, which ran on
+	// Windows Server 2025 on 2026-11-21 before these were written, and failed
+	// there on a package built without the line the shape guard holds first.
+	{"the installer template is the shape that was measured: for every account, upgrades after the new files, nothing running closed, one PATH entry and one shortcut", "TestTheInstallerIsTheShapeThatWasMeasured", "internal/guard", ByProbe},
+	{"the installer's upgrade code, file name, product name, publisher and WiX are one value each wherever they are written", "TestTheInstallerIsNamedTheSameEverywhere", "internal/guard", ByProbe},
+	{"every place that builds, installs or signs the installer asks the same question of a release candidate", "TestEveryPlaceAsksTheSameQuestionOfACandidate", "internal/guard", ByProbe},
+	{"the signing builds the installer after the card and before the checksums, and the draft waits for the job that installs it", "TestTheSigningBuildsTheInstallerAfterTheCardAndBeforeTheSums", "internal/guard", ByProbe},
 }
