@@ -271,14 +271,19 @@ func checkSigningTable(script, repository string) []string {
 func TestEveryFileNamesThePredicateTheDocumentIs(t *testing.T) {
 	root := rootOrFail(t)
 	files := map[string]string{}
-	for _, rel := range []string{draftNotes, attestWorkflow, sbomDocument} {
+	for _, rel := range []string{draftNotes, attestWorkflow, verifyWorkflow, sbomDocument} {
 		files[rel] = readRepoFile(t, root, rel)
 	}
 	broken := maps.Clone(files)
 	broken[attestWorkflow] = planted(t, attestWorkflow, files[attestWorkflow], `promised="`+spdxPredicate+`"`, `promised="https://spdx.dev/Document/v2.2"`)
 	broken[sbomDocument] = planted(t, sbomDocument, files[sbomDocument], `"SPDX-2.3"`, `"SPDX-3.0"`)
+	// Both commands the verifier runs with the predicate, so both are planted.
+	for range 2 {
+		broken[verifyWorkflow] = planted(t, verifyWorkflow, broken[verifyWorkflow], "--predicate-type "+spdxPredicate, "--predicate-type https://spdx.dev/Document/v2.2")
+	}
 	found := checkPredicate(broken)
 	requireFinding(t, found, attestWorkflow+" never names "+spdxPredicate)
+	requireFinding(t, found, verifyWorkflow+" never names "+spdxPredicate)
 	requireFinding(t, found, sbomDocument+` writes no "SPDX-2.3"`)
 
 	requireNone(t, checkPredicate(files), "the predicate type")
@@ -288,7 +293,7 @@ func TestEveryFileNamesThePredicateTheDocumentIs(t *testing.T) {
 // document of another SPDX version than the predicate names.
 func checkPredicate(files map[string]string) []string {
 	var problems []string
-	for _, rel := range []string{draftNotes, attestWorkflow} {
+	for _, rel := range []string{draftNotes, attestWorkflow, verifyWorkflow} {
 		if !strings.Contains(files[rel], spdxPredicate) {
 			problems = append(problems, rel+" never names "+spdxPredicate)
 		}

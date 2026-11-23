@@ -263,7 +263,7 @@ func installerFiles(t *testing.T) map[string]string {
 	root := rootOrFail(t)
 	files := map[string]string{}
 	for _, rel := range []string{installerScript, installerCheck, signingScript, releaseWorkflow,
-		commandResources, windowResources, windowWords, draftNotes} {
+		commandResources, windowResources, windowWords, draftNotes, verifyWorkflow} {
 		files[rel] = readRepoFile(t, root, rel)
 	}
 	return files
@@ -284,6 +284,8 @@ func TestTheInstallerIsNamedTheSameEverywhere(t *testing.T) {
 		{releaseWorkflow, "--global wix --version 5.0.2", "--global wix --version 7.0.1", "the WiX " + releaseWorkflow},
 		{installerCheck, "$name = 'QA Data Generator'", "$name = 'QA Data Gen'", installerCheck + " does not hold"},
 		{draftNotes, installerFile, "`qadg_<version>_windows_amd64.msi`", draftNotes + " does not hold"},
+		{verifyWorkflow, `'PFiles64\QA Data Generator'`, `'PFiles64\QA Data Gen'`, verifyWorkflow + " does not unpack"},
+		{verifyWorkflow, `expected+=("qadg-setup_${version}_windows_amd64.msi")`, `expected+=("qadg_setup_${version}_windows_amd64.msi")`, verifyWorkflow + " does not hold"},
 	} {
 		broken := map[string]string{}
 		for k, v := range files {
@@ -327,10 +329,17 @@ func checkInstallerNames(files map[string]string) []string {
 		installerCheck:  "$name = '" + app + "'",
 		releaseWorkflow: `$msi = "qadg-setup_$($env:VERSION)_windows_amd64.msi"`,
 		draftNotes:      installerFile,
+		verifyWorkflow:  `expected+=("qadg-setup_${version}_windows_amd64.msi")`,
 	} {
 		if !strings.Contains(files[path], text) {
 			found = append(found, fmt.Sprintf("%s does not hold %q, so it names the installer otherwise", path, text))
 		}
+	}
+	// Where the verifier finds the installed files in an administrative
+	// install of the published installer: the folder the template names after
+	// the product, under the source name of Program Files.
+	if unpacked := `$inside = Join-Path $image 'PFiles64\` + app + `'`; !strings.Contains(files[verifyWorkflow], unpacked) {
+		found = append(found, fmt.Sprintf("%s does not unpack the installer into %q, the folder named after the product", verifyWorkflow, unpacked))
 	}
 	if !strings.Contains(files[installerCheck], "$publisher = '"+publisher+"'") {
 		found = append(found, installerCheck+" does not hold the publisher "+publisher)
@@ -355,6 +364,7 @@ func TestEveryPlaceAsksTheSameQuestionOfACandidate(t *testing.T) {
 		{signingScript, `return "-" in version`, `return "-rc" in version`, signingScript + " no longer builds"},
 		{installerScript, `if "-" in tag:`, `if "-rc" in tag:`, installerScript + " no longer refuses"},
 		{releaseWorkflow, `$env:VERSION.Contains('-')`, `$env:VERSION.Contains('-rc')`, releaseWorkflow + " no longer installs"},
+		{verifyWorkflow, `if [[ "$TAG" == *-* ]]`, `if [[ "$TAG" == *-rc* ]]`, verifyWorkflow + " no longer expects"},
 	} {
 		broken := map[string]string{}
 		for k, v := range files {
@@ -373,6 +383,7 @@ func checkCandidateRule(files map[string]string) []string {
 		{signingScript, `return "-" in version`, "builds no installer for a candidate"},
 		{releaseWorkflow, `$env:VERSION.Contains('-')`, "installs no installer for a candidate"},
 		{releaseWorkflow, `if [[ "${GITHUB_REF_NAME}" == *-* ]]`, "marks a candidate as a pre-release"},
+		{verifyWorkflow, `if [[ "$TAG" == *-* ]]`, "expects no installer for a candidate"},
 	} {
 		if !strings.Contains(files[c.path], c.text) {
 			found = append(found, fmt.Sprintf("%s no longer %s by %q", c.path, c.what, c.text))

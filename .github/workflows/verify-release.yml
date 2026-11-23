@@ -1,0 +1,696 @@
+# The last phase of a release: check the page a person actually sees.
+#
+# release.yml checks the tree and builds, sign_release.py checks the build
+# before it signs and confirms the draft holds a whole release, and
+# attest-release.yml checks the files it attests against the checksums it was
+# handed. None of them looks at the PUBLISHED release, which is the one thing a
+# person downloads. So this downloads what a person downloads and does what the
+# release notes tell them to do, with the commands taken from the notes rather
+# than invented here.
+#
+# What it does not check: the wording of the published page, which the
+# maintainer may edit by hand before publishing. The commands come from the
+# note the draft opens with, .github/release-notes.md, and a guard in
+# internal/guard holds the note and this file to one statement type. Nor does
+# it open the window, because a runner has no screen to show it on. It starts
+# the command line of every archive a runner can start.
+#
+# Read only, and that is not a detail: a verifier that can publish is not a
+# verifier any more. A guard in internal/guard holds it to that.
+#
+# Adapted on 2026-11-23 from the same workflow in Cert Doctor, a project of the
+# same owner under the same licence, where it passed on its releases 0.2.0 and
+# 0.3.0.
+name: verify-release
+
+on:
+  release:
+    types: [published]
+  # Again by hand against any published tag, because "does that old release
+  # still verify" is worth being able to ask without cutting a new one.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Published tag to check, for example v0.2.0"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  # On a Mac, because nothing but a Mac reads a notarisation ticket, and a
+  # checksum says the bytes did not move and nothing about who signed them.
+  verify-macos:
+    name: check the macOS downloads the way a Mac does
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - name: check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: which release this is
+        id: which
+        shell: bash
+        env:
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          tag="${EVENT_TAG:-$INPUT_TAG}"
+          if ! printf '%s' "$tag" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'
+          then
+            echo "::error::'$tag' is not the tag of a release, which looks like v0.2.0"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "checking $tag"
+
+      - name: download the macOS archives
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.which.outputs.tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/published"
+          cd "$RUNNER_TEMP/published"
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern '*macos*.tar.gz'
+          ls -l
+
+      # Both archives, and in each one every program, not only the bundle: the
+      # window's bundle carries the command line beside the window, and a
+      # program inside a bundle is signed on its own before the bundle is. What
+      # the archive holds and whether its command line starts come first, so a
+      # signature that fails does not hide a second thing wrong with the same
+      # archive.
+      - name: every bundle and every program in it is signed by our certificate, stapled, and starts
+        shell: bash
+        env:
+          TAG: ${{ steps.which.outputs.tag }}
+        run: |
+          set -euo pipefail
+          # Read out of the file the signing script reads, so there is one copy
+          # of the digest rather than two that can drift apart.
+          pinned="$(awk '$1 == "apple-developer-id" { print $2 }' .github/signing-certificates.txt)"
+          if ! printf '%s' "$pinned" | grep -qE '^[0-9a-f]{64}$'
+          then
+            echo "could not read the pinned Apple certificate out of .github/signing-certificates.txt"
+            exit 1
+          fi
+          echo "pinned: $pinned"
+
+          cd "$RUNNER_TEMP/published"
+          version="${TAG#v}"
+          shopt -s nullglob
+          found=(*macos*.tar.gz)
+          shopt -u nullglob
+          if [ "${#found[@]}" -ne 2 ]
+          then
+            echo "expected two macOS archives, found ${#found[@]}"
+            exit 1
+          fi
+          checked=0
+          # Each archive with the programs its bundle holds in Contents/MacOS,
+          # sorted, as build_release.sh packs them.
+          for entry in "qadg_${version}_macos_arm64.tar.gz:qadg" \
+              "qadg-gui_${version}_macos_arm64.tar.gz:qadg qadg-gui"
+          do
+            programs="${entry#*:}"
+            archive="${entry%%:*}"
+            if [ ! -f "$archive" ]
+            then
+              echo "missing: $archive"
+              exit 1
+            fi
+            work="unpacked_${archive%.tar.gz}"
+            rm -rf "$work"
+            mkdir -p "$work"
+            tar -xzf "$archive" -C "$work"
+
+            shopt -s nullglob
+            apps=("$work"/*.app)
+            shopt -u nullglob
+            if [ "${#apps[@]}" -ne 1 ]
+            then
+              echo "$archive holds ${#apps[@]} bundles, and an archive holds one"
+              exit 1
+            fi
+            app="${apps[0]}"
+            names=()
+            for path in "$app"/Contents/MacOS/*
+            do
+              names+=("$(basename "$path")")
+            done
+            held="$(printf '%s\n' "${names[@]}" | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//')"
+            if [ "$held" != "$programs" ]
+            then
+              echo "$archive: $(basename "$app") holds \"$held\", and should hold \"$programs\""
+              exit 1
+            fi
+
+            # What is beside the bundle has to be a link, one for each program.
+            # A copy of a binary out there is refused by Gatekeeper, and ln
+            # makes a copy silently where links do not work.
+            for program in $programs
+            do
+              if [ ! -L "$work/$program" ]
+              then
+                echo "$archive does not carry a link called $program beside the bundle"
+                exit 1
+              fi
+            done
+            said="$("$work/qadg" --version | head -n 1)"
+            if [ "$said" != "qadg ${version}" ]
+            then
+              echo "qadg in $archive says \"$said\", and this release is ${version}"
+              exit 1
+            fi
+
+            codesign --verify --strict --deep "$app"
+            # The ticket, read out of the file itself. It does not depend on
+            # Gatekeeper being switched on.
+            xcrun stapler validate "$app"
+
+            for code in "$app" "$app"/Contents/MacOS/*
+            do
+              certs="$(mktemp -d)"
+              codesign -d --extract-certificates="$certs/cert" "$code" > /dev/null 2>&1
+              if [ ! -f "$certs/cert0" ]
+              then
+                echo "$archive: ${code#"$work"/} carries no certificate"
+                exit 1
+              fi
+              actual="$(shasum -a 256 "$certs/cert0" | awk '{ print $1 }')"
+              rm -rf "$certs"
+              if [ "$actual" != "$pinned" ]
+              then
+                echo "$archive: ${code#"$work"/} was signed by a DIFFERENT certificate: $actual"
+                exit 1
+              fi
+              checked=$((checked + 1))
+            done
+            echo "$archive: $(basename "$app") and $programs signed by the pinned certificate, stapled, and qadg says $said"
+          done
+          echo "$checked signatures read, each by the pinned certificate"
+
+          # Gatekeeper last, and only when it is on. A runner with it disabled
+          # answers "accepted" to everything, and a check that cannot fail
+          # reads like proof.
+          if spctl --status 2>/dev/null | grep -q "assessments enabled"
+          then
+            for app in unpacked_*/*.app
+            do
+              spctl -a -vv -t exec "$app"
+            done
+            echo "Gatekeeper accepts both bundles"
+          else
+            echo "NOTE: Gatekeeper assessments are off on this runner, so spctl was not asked."
+            echo "The tickets and the certificates were checked above, and neither needs it."
+          fi
+
+  verify:
+    name: download what users download, then check it
+    # Windows, because one of these questions cannot be asked anywhere else: a
+    # checksum says the bytes did not change and nothing about who signed them.
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: which release this is
+        id: which
+        shell: bash
+        env:
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          tag="${EVENT_TAG:-$INPUT_TAG}"
+          if ! printf '%s' "$tag" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'
+          then
+            echo "::error::'$tag' is not the tag of a release, which looks like v0.2.0"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "checking $tag"
+
+      - name: download every published file
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.which.outputs.tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p published
+          cd published
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY"
+          ls -l
+
+      # A release missing one file looks almost exactly like a finished one,
+      # and a file added by hand after signing looks like part of it, which is
+      # why this compares the whole list rather than glancing at it. Eight
+      # archives, the five of the command line and the three of the window,
+      # the checksums, the bill of materials, the two statements, and the
+      # installer, which a release candidate does not have: a hyphen in the
+      # tag, the rule release.yml marks a pre-release by and build_msi.py
+      # refuses a candidate's installer by (DEC-331).
+      - name: everything a release is made of is there, and nothing else
+        id: assets
+        continue-on-error: true
+        shell: bash
+        working-directory: published
+        env:
+          TAG: ${{ steps.which.outputs.tag }}
+        run: |
+          set -euo pipefail
+          version="${TAG#v}"
+          expected=(
+            "qadg_${version}_windows_amd64.zip"
+            "qadg_${version}_windows_arm64.zip"
+            "qadg_${version}_linux_amd64.tar.gz"
+            "qadg_${version}_linux_arm64.tar.gz"
+            "qadg_${version}_macos_arm64.tar.gz"
+            "qadg-gui_${version}_windows_amd64.zip"
+            "qadg-gui_${version}_linux_amd64.tar.gz"
+            "qadg-gui_${version}_macos_arm64.tar.gz"
+            "verify-SHA256SUMS.txt"
+            "verify-qadg_${version}.spdx.json"
+            "verify-qadg_${version}.provenance.sigstore.json"
+            "verify-qadg_${version}.sbom.sigstore.json"
+          )
+          if [[ "$TAG" == *-* ]]
+          then
+            echo "$TAG is a release candidate, which has no installer"
+          else
+            expected+=("qadg-setup_${version}_windows_amd64.msi")
+          fi
+          wrong=0
+          for name in "${expected[@]}"
+          do
+            if [ ! -f "$name" ]
+            then
+              echo "missing: $name"
+              wrong=1
+            fi
+          done
+          shopt -s nullglob
+          for name in *
+          do
+            known=0
+            for want in "${expected[@]}"
+            do
+              if [ "$name" = "$want" ]
+              then
+                known=1
+              fi
+            done
+            if [ "$known" = "0" ]
+            then
+              echo "not a file of a release: $name"
+              wrong=1
+            fi
+          done
+          test "$wrong" = "0"
+          echo "the ${#expected[@]} files of a release are published, and nothing else"
+
+      # The notes say the file lists every file of the release except itself
+      # and the statement made over it, so that is asked too: a checksum file
+      # that left one out says nothing about that one.
+      - name: the checksums a user is told to compare
+        id: checksums
+        continue-on-error: true
+        shell: bash
+        working-directory: published
+        env:
+          TAG: ${{ steps.which.outputs.tag }}
+        run: |
+          set -euo pipefail
+          sha256sum -c verify-SHA256SUMS.txt
+          version="${TAG#v}"
+          listed="$(awk '{ print $2 }' verify-SHA256SUMS.txt | LC_ALL=C sort)"
+          present="$(for name in *
+          do
+            if [ "$name" != "verify-SHA256SUMS.txt" ] && [ "$name" != "verify-qadg_${version}.sbom.sigstore.json" ]
+            then
+              printf '%s\n' "$name"
+            fi
+          done | LC_ALL=C sort)"
+          if [ "$listed" != "$present" ]
+          then
+            echo "verify-SHA256SUMS.txt does not list exactly the files of this release but itself and the statement made over it"
+            diff <(printf '%s\n' "$listed") <(printf '%s\n' "$present") || true
+            exit 1
+          fi
+          echo "every file but those two is listed, and each matches"
+
+      # Run against the real downloads, as written in the notes, for every file
+      # the notes promise each command answers for. The statement about the
+      # signed bytes answers for every archive and the installer, and the one
+      # about the build for what nothing signed: the Linux archives and the
+      # bill of materials. The predicate type is given because gh asks for
+      # build provenance unless told otherwise, and then answers "no
+      # attestation found". Every file is asked, because a statement that left
+      # one file out looks like nothing at all on the page.
+      - name: the commands the notes tell people to run
+        id: commands_api
+        continue-on-error: true
+        shell: bash
+        working-directory: published
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.which.outputs.tag }}
+        run: |
+          set -euo pipefail
+          version="${TAG#v}"
+          refused=0
+          shopt -s nullglob
+          for file in *.zip *.tar.gz *.msi
+          do
+            echo "what is inside: $file"
+            if ! gh attestation verify "$file" -R "$GITHUB_REPOSITORY" --predicate-type https://spdx.dev/Document/v2.3
+            then
+              echo "REFUSED: $file"
+              refused=1
+            fi
+          done
+          for file in qadg_"${version}"_linux_*.tar.gz qadg-gui_"${version}"_linux_*.tar.gz "verify-qadg_${version}.spdx.json"
+          do
+            echo "where it came from: $file"
+            if ! gh attestation verify "$file" -R "$GITHUB_REPOSITORY"
+            then
+              echo "REFUSED: $file"
+              refused=1
+            fi
+          done
+          test "$refused" = "0"
+
+      # The notes promise the same with --bundle, reading the statement from
+      # the file instead of asking GitHub for it, which is what a person behind
+      # a proxy that blocks the API has.
+      - name: the same commands with the statements from the release
+        id: commands_offline
+        continue-on-error: true
+        shell: bash
+        working-directory: published
+        env:
+          TAG: ${{ steps.which.outputs.tag }}
+        run: |
+          set -euo pipefail
+          version="${TAG#v}"
+          refused=0
+          shopt -s nullglob
+          for file in *.zip *.tar.gz *.msi
+          do
+            echo "what is inside: $file"
+            if ! gh attestation verify "$file" -R "$GITHUB_REPOSITORY" \
+                --bundle "verify-qadg_${version}.sbom.sigstore.json" --predicate-type https://spdx.dev/Document/v2.3
+            then
+              echo "REFUSED: $file"
+              refused=1
+            fi
+          done
+          for file in qadg_"${version}"_linux_*.tar.gz qadg-gui_"${version}"_linux_*.tar.gz "verify-qadg_${version}.spdx.json"
+          do
+            echo "where it came from: $file"
+            if ! gh attestation verify "$file" -R "$GITHUB_REPOSITORY" \
+                --bundle "verify-qadg_${version}.provenance.sigstore.json"
+            then
+              echo "REFUSED: $file"
+              refused=1
+            fi
+          done
+          test "$refused" = "0"
+
+      # The step this job runs on Windows for. Every archive and every program
+      # and library in each, not the first one found: signing two of three and
+      # publishing the third unsigned is a mistake that looks like nothing at
+      # all on the page. The window's archive carries the software renderer
+      # beside it, its two files named by the pin they were fetched by, so an
+      # archive that lost one is refused here as well. Every problem is listed
+      # before the step fails.
+      - name: every Windows program and library is signed, stamped, by our certificate, and the command line starts
+        id: signatures
+        continue-on-error: true
+        shell: pwsh
+        working-directory: published
+        env:
+          TAG: ${{ steps.which.outputs.tag }}
+        run: |
+          $line = Select-String -Path ../.github/signing-certificates.txt -Pattern '^windows-code-signing\s+([0-9a-f]{64})\s'
+          if (-not $line) { throw "could not read the pinned certificate out of .github/signing-certificates.txt" }
+          $pinned = $line.Matches[0].Groups[1].Value
+          "pinned: $pinned"
+
+          $renderer = @(Select-String -Path ../.github/mesa-dist-win -Pattern '^file=\S*/([^/\s]+)\s' |
+            ForEach-Object { 'opengl/' + $_.Matches[0].Groups[1].Value })
+          if ($renderer.Count -lt 1) { throw "could not read the software renderer's files out of .github/mesa-dist-win" }
+          "renderer: $($renderer -join ', ')"
+
+          $version = $env:TAG.Substring(1)
+          $archives = [ordered]@{
+            "qadg_${version}_windows_amd64.zip"     = @('qadg.exe')
+            "qadg_${version}_windows_arm64.zip"     = @('qadg.exe')
+            "qadg-gui_${version}_windows_amd64.zip" = @('qadg-gui.exe', 'qadg.exe') + $renderer
+          }
+          $problems = [System.Collections.Generic.List[string]]::new()
+          $zips = @(Get-ChildItem -Filter *windows*.zip)
+          if ($zips.Count -ne $archives.Count) { $problems.Add("expected $($archives.Count) Windows archives, found $($zips.Count)") }
+
+          $checked = 0
+          $commandLine = @{}
+          foreach ($name in $archives.Keys) {
+            if (-not (Test-Path -LiteralPath $name)) {
+              $problems.Add("missing: $name")
+              continue
+            }
+            # Unpacked outside the folder of downloads, which the steps above
+            # read as the list of what was published.
+            $into = Join-Path $env:RUNNER_TEMP ("unpacked_" + [IO.Path]::GetFileNameWithoutExtension($name))
+            Expand-Archive -LiteralPath $name -DestinationPath $into -Force
+            $found = @(Get-ChildItem -LiteralPath $into -Recurse -File |
+              Where-Object { $_.Extension -in '.exe', '.dll' } |
+              ForEach-Object { $_.FullName.Substring($into.Length + 1).Replace('\', '/') } | Sort-Object)
+            $wanted = @($archives[$name] | Sort-Object)
+            if (($found -join ', ') -ne ($wanted -join ', ')) {
+              $problems.Add("$name holds $($found -join ', '), and should hold $($wanted -join ', ')")
+            }
+
+            foreach ($rel in $found) {
+              $sig = Get-AuthenticodeSignature -LiteralPath (Join-Path $into $rel)
+              "$name -> ${rel}: $($sig.Status)"
+              if ($sig.Status -ne 'Valid') {
+                $problems.Add("$rel in ${name}: the signature status is $($sig.Status)")
+                continue
+              }
+              # Without a timestamp the signature dies when the certificate
+              # expires, so its absence is a defect rather than a detail.
+              if (-not $sig.TimeStamperCertificate) { $problems.Add("$rel in ${name}: the signature carries no timestamp") }
+              $actual = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($sig.SignerCertificate.RawData)).ToLowerInvariant()
+              if ($actual -ne $pinned) {
+                $problems.Add("$rel in $name was signed by a DIFFERENT certificate: $actual")
+                continue
+              }
+              $checked++
+            }
+
+            $program = Join-Path $into 'qadg.exe'
+            if (-not (Test-Path -LiteralPath $program)) { continue }
+            $commandLine[$name] = (Get-FileHash -Algorithm SHA256 -LiteralPath $program).Hash
+            # The runner is amd64, and Windows on amd64 does not run an arm64
+            # program, so only the builds for this machine are started.
+            if ($name -like '*_windows_amd64.zip') {
+              $out = @(& $program --version)
+              $code = $LASTEXITCODE
+              $said = $out | Select-Object -First 1
+              if ($code -ne 0 -or $said -ne "qadg $version") {
+                $problems.Add("qadg.exe in $name exits $code and says '$said', and this release is $version")
+              } else {
+                "$name -> qadg.exe starts and says $said"
+              }
+            }
+          }
+          # The signing script signs each distinct file once and copies it, so
+          # the command line in the window's archive is the very file the
+          # command line's archive carries. Two signatures would be two files.
+          if ($commandLine["qadg_${version}_windows_amd64.zip"] -ne $commandLine["qadg-gui_${version}_windows_amd64.zip"]) {
+            $problems.Add("qadg.exe in the window's archive is not the file the command line's archive carries")
+          }
+          "$checked file(s) signed by the pinned certificate, each with a timestamp"
+          if ($problems.Count -gt 0) {
+            $problems | ForEach-Object { "FAILED: $_" }
+            throw "$($problems.Count) problem(s) with the Windows programs and libraries"
+          }
+          exit 0
+
+      # A signature says who signed a library and nothing about what it is, and
+      # the card signs whatever it is handed. So the signature comes back off
+      # each of the renderer's two files, and what is left has to be the file
+      # its pin names, the file as the renderer's own release ships it.
+      - name: the software renderer is the one its pin names, with only a signature added
+        id: renderer
+        continue-on-error: true
+        shell: bash
+        env:
+          TAG: ${{ steps.which.outputs.tag }}
+        run: python .github/scripts/check_renderer.py "published/qadg-gui_${TAG#v}_windows_amd64.zip" .github/mesa-dist-win
+
+      # The installer is what an administrator runs with the machine's highest
+      # rights, so it is checked the way the programs are, on a line of its own
+      # in the verdict. Its files are unpacked with an administrative install,
+      # which installs nothing, and compared with the window's archive byte for
+      # byte: an installer built before the card signed the programs would
+      # carry unsigned copies inside a valid signature. A release candidate
+      # publishes no installer, and the list of files above says whether that
+      # held.
+      - name: the installer is signed, stamped, by our certificate, and carries the signed files
+        id: installer
+        continue-on-error: true
+        shell: pwsh
+        working-directory: published
+        env:
+          TAG: ${{ steps.which.outputs.tag }}
+        run: |
+          $installers = @(Get-ChildItem -Filter *.msi)
+          if ($installers.Count -eq 0) {
+            "no installer is published, so there is nothing to check here"
+            exit 0
+          }
+          $pinLine = Select-String -Path ../.github/signing-certificates.txt -Pattern '^windows-code-signing\s+([0-9a-f]{64})\s'
+          if (-not $pinLine) { throw "could not read the pinned certificate out of .github/signing-certificates.txt" }
+          $pinned = $pinLine.Matches[0].Groups[1].Value
+          $version = $env:TAG.Substring(1)
+          $archive = "qadg-gui_${version}_windows_amd64.zip"
+          if (-not (Test-Path -LiteralPath $archive)) { throw "missing: $archive, which the installer is made of" }
+          $window = Join-Path $env:RUNNER_TEMP 'installer_window_archive'
+          Expand-Archive -LiteralPath $archive -DestinationPath $window -Force
+          $listing = {
+            param($dir)
+            @(Get-ChildItem -LiteralPath $dir -Recurse -File | ForEach-Object {
+              $_.FullName.Substring($dir.Length + 1).Replace('\', '/') + ' ' + (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash
+            } | Sort-Object)
+          }
+          $want = & $listing $window
+          $problems = [System.Collections.Generic.List[string]]::new()
+          foreach ($msi in $installers) {
+            $sig = Get-AuthenticodeSignature -LiteralPath $msi.FullName
+            "$($msi.Name): $($sig.Status)"
+            if ($sig.Status -ne 'Valid') {
+              $problems.Add("$($msi.Name): the signature status is $($sig.Status)")
+            } else {
+              if (-not $sig.TimeStamperCertificate) { $problems.Add("$($msi.Name): the signature carries no timestamp") }
+              $actual = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($sig.SignerCertificate.RawData)).ToLowerInvariant()
+              if ($actual -ne $pinned) { $problems.Add("$($msi.Name) was signed by a DIFFERENT certificate: $actual") }
+            }
+
+            # msiexec with its arguments in a variable and a limit on the wait:
+            # without a file it waits for a help window nobody can close.
+            $image = Join-Path $env:RUNNER_TEMP ('installer_image_' + $msi.BaseName)
+            New-Item -ItemType Directory -Force -Path $image | Out-Null
+            $log = Join-Path $env:RUNNER_TEMP ($msi.BaseName + '.admin.log')
+            $argv = @('/a', ('"' + $msi.FullName + '"'), '/qn', ('TARGETDIR="' + $image + '"'), '/l*v', ('"' + $log + '"'))
+            $p = Start-Process -FilePath (Join-Path $env:SystemRoot 'System32\msiexec.exe') -ArgumentList $argv -PassThru
+            if (-not $p.WaitForExit(600000)) {
+              $problems.Add("msiexec /a $($msi.Name) did not finish in ten minutes")
+              continue
+            }
+            if ($p.ExitCode -ne 0) {
+              $problems.Add("msiexec /a $($msi.Name) exited $($p.ExitCode)")
+              continue
+            }
+            $inside = Join-Path $image 'PFiles64\QA Data Generator'
+            if (-not (Test-Path -LiteralPath $inside)) {
+              $problems.Add("$($msi.Name) unpacks no 'QA Data Generator' folder under Program Files")
+              continue
+            }
+            $have = & $listing $inside
+            if (($have -join "`n") -ne ($want -join "`n")) {
+              $problems.Add("$($msi.Name) does not carry the window archive's files byte for byte`n  installer: " +
+                ($have -join ', ') + "`n  archive:   " + ($want -join ', '))
+              continue
+            }
+            "$($msi.Name): its $($have.Count) files are the window archive's, byte for byte"
+          }
+          if ($problems.Count -gt 0) {
+            $problems | ForEach-Object { "FAILED: $_" }
+            throw "$($problems.Count) problem(s) with the installer"
+          }
+          exit 0
+
+      # GitHub offers the release it marks Latest first, on the repository's
+      # page and at /releases/latest, so "published" and "what people get" are
+      # the same thing only while this holds. Asked of the API rather than of
+      # the event, because a run by hand has no event, and a prerelease is
+      # supposed to be skipped here. Asked by hand about an older release, this
+      # line says it is no longer the one people get, which is true.
+      - name: a full release is the one people are offered
+        id: latest
+        continue-on-error: true
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.which.outputs.tag }}
+        run: |
+          set -euo pipefail
+          prerelease="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isPrerelease --jq .isPrerelease)"
+          if [ "$prerelease" = "true" ]
+          then
+            echo "$TAG is a prerelease, so it must not be latest and is not checked here"
+            exit 0
+          fi
+          latest="$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name)"
+          echo "latest is $latest, this release is $TAG"
+          test "$latest" = "$TAG"
+
+      # Every check above carries continue-on-error, so this step is reached
+      # whatever happened, and this is the one that decides. A person reads a
+      # release page once and wants the whole list of what is wrong with it,
+      # not the first line.
+      #
+      # outcome and not conclusion: continue-on-error rewrites conclusion to
+      # success and leaves outcome alone, so reading conclusion here would
+      # report every check as passing however it went.
+      - name: one verdict, not the first failure
+        if: always()
+        shell: bash
+        env:
+          ASSETS: ${{ steps.assets.outcome }}
+          CHECKSUMS: ${{ steps.checksums.outcome }}
+          COMMANDS_API: ${{ steps.commands_api.outcome }}
+          COMMANDS_OFFLINE: ${{ steps.commands_offline.outcome }}
+          SIGNATURES: ${{ steps.signatures.outcome }}
+          RENDERER: ${{ steps.renderer.outcome }}
+          INSTALLER: ${{ steps.installer.outcome }}
+          LATEST: ${{ steps.latest.outcome }}
+        run: |
+          set -euo pipefail
+          failed=0
+          report() {
+            printf '  %-60s %s\n' "$2" "$1"
+            if [ "$1" != "success" ]
+            then
+              failed=1
+            fi
+          }
+          echo "what this release page answers for:"
+          report "$ASSETS" "everything a release is made of is there, and nothing else"
+          report "$CHECKSUMS" "the checksums a user is told to compare"
+          report "$COMMANDS_API" "the commands the notes tell people to run"
+          report "$COMMANDS_OFFLINE" "the same commands with the statements from the release"
+          report "$SIGNATURES" "every Windows program and library by our certificate"
+          report "$RENDERER" "the software renderer is the one its pin names"
+          report "$INSTALLER" "the installer by our certificate, with the signed files"
+          report "$LATEST" "a full release is the one people are offered"
+          echo
+          if [ "$failed" != "0" ]
+          then
+            echo "This release page does not answer for itself."
+            echo "Every line above that is not success is a separate thing to fix,"
+            echo "and they are all listed rather than found one release at a time."
+            exit 1
+          fi
+          echo "the release page answers for itself"

@@ -91,7 +91,7 @@ var releaseGuards = []Guard{
 	// the Mac's script refused its own wrong inputs on the Mac.
 	{"each certificate a release is signed with is pinned once, by a digest with a date, and the signing script reads that copy", "TestThePinnedCertificatesAreDigestsWithADate", "internal/guard", ByProbe},
 	{"the signing script signs the archives the release builds, reads the renderer's files from their pin and names this repository", "TestTheSigningScriptSignsTheArchivesTheReleaseBuilds", "internal/guard", ByProbe},
-	{"the note, the attestation workflow and the bill of materials name one SPDX version", "TestEveryFileNamesThePredicateTheDocumentIs", "internal/guard", ByProbe},
+	{"the note, the attestation workflow, the verifier and the bill of materials name one SPDX version", "TestEveryFileNamesThePredicateTheDocumentIs", "internal/guard", ByProbe},
 	{"nothing after the build publishes a release, and both steps that add files ask whether it is still a draft", "TestTheSigningLeavesTheReleaseADraft", "internal/guard", ByProbe},
 
 	// The Windows installer (DEC-331). The same shape again. What the
@@ -100,6 +100,14 @@ var releaseGuards = []Guard{
 	// there on a package built without the line the shape guard holds first.
 	{"the installer template is the shape that was measured: for every account, upgrades after the new files, nothing running closed, one PATH entry and one shortcut", "TestTheInstallerIsTheShapeThatWasMeasured", "internal/guard", ByProbe},
 	{"the installer's upgrade code, file name, product name, publisher and WiX are one value each wherever they are written", "TestTheInstallerIsNamedTheSameEverywhere", "internal/guard", ByProbe},
-	{"every place that builds, installs or signs the installer asks the same question of a release candidate", "TestEveryPlaceAsksTheSameQuestionOfACandidate", "internal/guard", ByProbe},
+	{"every place that builds, installs, signs or expects the installer asks the same question of a release candidate", "TestEveryPlaceAsksTheSameQuestionOfACandidate", "internal/guard", ByProbe},
 	{"the signing builds the installer after the card and before the checksums, and the draft waits for the job that installs it", "TestTheSigningBuildsTheInstallerAfterTheCardAndBeforeTheSums", "internal/guard", ByProbe},
+
+	// The check of a published release (B-419 (f)). The same shape again.
+	// What its steps DO was asked of them on 2026-11-23 by running them on the
+	// signing script's rehearsal of an unsigned build and on another project's
+	// signed release, before these were written.
+	{"the verifier of a published release reads and changes nothing, and starts on a published release or by hand", "TestTheVerifierOnlyReads", "internal/guard", ByProbe},
+	{"every check of a published release goes on after a failure and is read by the verdict through its outcome", "TestNoReleaseCheckCanHideTheOnesBehindIt", "internal/guard", ByProbe},
+	{"the verifier asks for every file the signing script makes, expects what it signs and reads the pins it reads", "TestTheVerifierChecksWhatTheSigningScriptMakes", "internal/guard", ByProbe},
 }
