@@ -88,7 +88,28 @@ var HandmadeAllowed = map[string]Handmade{
 	"Editor": {
 		Instead: "widget.Entry drawn as it is, the same as FieldEntry",
 		Why: "the same caret and the same edge, in the recipe editor, which the owner was typing into " +
-			"when they reported it. One helper, parts.withoutEdge, does it for both",
+			"when they reported it. One helper, parts.withoutEdge, does it for both. Since 2026-11-23 the " +
+			"same renderer also carries the pane of wheelLayer, for the reason given there",
+	},
+	// The table and the pane over it hand back the toolkit's own renderer and
+	// its own scrolling, with one object added that answers the wheel. Nothing
+	// is drawn again.
+	"KeyTable": {
+		Instead: "widget.Table drawn as it is, its own renderer handed back",
+		Why: "the toolkit keeps the table's scrolling area inside that renderer, widget/table.go:164 of " +
+			"v2.8.2, and moves it 25 units a notch whatever the system is set to (B-420). The renderer is " +
+			"the only place the area can be reached from, so the table's CreateRenderer lays the pane of " +
+			"wheelLayer over it",
+	},
+	"wheelLayer": {
+		Instead: "the scrolling of widget.Table and widget.Entry as the toolkit drives it, and an extension " +
+			"of their scrolling area, which is how parts.Scroll changes the step everywhere else",
+		Why: "the area inside a table or a field is a type of the toolkit built inside its renderer, so " +
+			"there is nothing to extend, and the driver hands the wheel to the last object under the " +
+			"pointer that answers Scrolled (internal/driver/util.go:57 of v2.8.2), which is that area. A " +
+			"pane that draws nothing and answers only Scrolled, laid over the control, is found instead " +
+			"and hands the area the same event with the window's distance in it. The owner chose on " +
+			"2026-11-23 to cover the table and the editor rather than leave them at the toolkit's step",
 	},
 	"TapRow": {
 		Instead: "widget.List, which holds a highlight, moves it with the arrow keys and only builds " +
@@ -247,11 +268,18 @@ var HandmadeAllowed = map[string]Handmade{
 // 🔴 Lowered from 15 to 14 on 2026-11-12, when one layout that builds only the
 // rows in view took the place of evenRows and fitHeight (B-370).
 //
+// 🔴 Raised from 14 to 16 on 2026-11-23 for KeyTable and wheelLayer, and the
+// raise is not a control drawn over again either: the table hands back the
+// toolkit's renderer with one pane laid over it, and the pane draws nothing
+// and answers only the wheel, so that a notch moves the table and the recipe
+// editor as far as every other area (B-420). The owner was asked first whether
+// to cover those two at the price of a mechanism of our own, and chose to.
+//
 // What lowers it again: a control going back to the library, which will happen
-// if the toolkit ever lets a caller supply the content of a button, or draws
-// its caret at a width of its own rather than the width of its edge. Nothing
-// else does.
-const HandmadeCeiling = 14
+// if the toolkit ever lets a caller supply the content of a button, draws its
+// caret at a width of its own rather than the width of its edge, or moves a
+// notch of the wheel as far as the system is set to. Nothing else does.
+const HandmadeCeiling = 16
 
 // Handmades reports every layout and widget written inside the window, and
 // every register entry naming one that is no longer there.

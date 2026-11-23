@@ -459,6 +459,10 @@
 																		</widget>
 																	</widget>
 																</widget>
+																<widget size="401x136" type="*parts.wheelLayer">
+																	<container size="401x136">
+																	</container>
+																</widget>
 															</widget>
 															<rectangle radius="6" size="401x136" strokeWidth="2"/>
 														</container>
@@ -597,6 +601,10 @@
 																			<rectangle fillColor="scrollbar" radius="3" size="3x82"/>
 																		</widget>
 																	</widget>
+																</widget>
+																<widget size="401x136" type="*parts.wheelLayer">
+																	<container size="401x136">
+																	</container>
 																</widget>
 															</widget>
 															<rectangle radius="6" size="401x136" strokeColor="focus" strokeWidth="2"/>

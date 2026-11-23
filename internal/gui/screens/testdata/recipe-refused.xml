@@ -292,6 +292,10 @@
 															</widget>
 														</widget>
 													</widget>
+													<widget size="497x339" type="*parts.wheelLayer">
+														<container size="497x339">
+														</container>
+													</widget>
 												</widget>
 											</container>
 										</container>

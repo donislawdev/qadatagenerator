@@ -308,6 +308,10 @@
 															</widget>
 														</widget>
 													</widget>
+													<widget size="497x339" type="*parts.wheelLayer">
+														<container size="497x339">
+														</container>
+													</widget>
 												</widget>
 											</container>
 										</container>
@@ -649,6 +653,10 @@
 																						</widget>
 																					</widget>
 																				</widget>
+																				<widget size="481x148" type="*parts.wheelLayer">
+																					<container size="481x148">
+																					</container>
+																				</widget>
 																			</widget>
 																			<rectangle radius="6" size="481x148" strokeWidth="2"/>
 																		</container>
@@ -780,6 +788,10 @@
 																							<text pos="4,4" size="85x16">48120288430</text>
 																						</widget>
 																					</widget>
+																				</widget>
+																				<widget size="481x345" type="*parts.wheelLayer">
+																					<container size="481x345">
+																					</container>
 																				</widget>
 																			</widget>
 																			<rectangle radius="6" size="481x345" strokeWidth="2"/>

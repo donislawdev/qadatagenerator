@@ -1010,7 +1010,7 @@
 									</container>
 								</container>
 								<container pos="0,44" size="456x336">
-									<widget size="456x336" type="*widget.Scroll">
+									<widget size="456x336" type="*parts.Scroll">
 										<container pos="0,-126" size="456x979">
 											<container size="456x34">
 												<text bold color="focus" pos="12,16" size="440x14" textSize="11">UNITED STATES</text>

@@ -287,6 +287,10 @@
 															<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 														</widget>
 													</widget>
+													<widget size="497x339" type="*parts.wheelLayer">
+														<container size="497x339">
+														</container>
+													</widget>
 												</widget>
 											</container>
 										</container>

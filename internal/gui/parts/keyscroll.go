@@ -2,13 +2,12 @@ package parts
 
 import (
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/container"
 
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 )
 
-// KeyScroll is the toolkit's scrolling container, reachable by Tab and driven
-// by the keys a person expects to drive one with.
+// KeyScroll is a scrolling area of this window (Scroll), reachable by Tab and
+// driven by the keys a person expects to drive one with.
 //
 // # What the toolkit does, and why that is not enough here
 //
@@ -27,7 +26,8 @@ import (
 // # Why an extension rather than a widget of our own
 //
 // Everything a scrolling container does stays the toolkit's: the layout, the
-// bars, the wheel, the clamping at both ends. What is added is the keyboard.
+// bars, the clamping at both ends. What is added is the keyboard here, and the
+// distance of a notch of the wheel in Scroll.
 // That is the toolkit's own extension mechanism, the same one the button next
 // door uses, so the register of pieces this project rebuilt is not touched and
 // there is no renderer here to go stale when the toolkit moves.
@@ -56,7 +56,7 @@ import (
 // is the size of one and, on the screen where what scrolls IS a card, a
 // control sized ring would land inside the card's own edge.
 type KeyScroll struct {
-	container.Scroll
+	Scroll
 	ring ring
 }
 
@@ -76,8 +76,7 @@ func NewKeyScroll(content fyne.CanvasObject) *KeyScroll {
 // the same area and then extends the base widget with itself.
 func (s *KeyScroll) setUp(content fyne.CanvasObject) {
 	s.ring = newRing(palette.RadiusCard)
-	s.Direction = container.ScrollVerticalOnly
-	s.Content = content
+	s.Scroll.setUp(content)
 }
 
 // Framed is this scrolling area together with the frame that says when it holds

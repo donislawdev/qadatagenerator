@@ -304,6 +304,17 @@ repository once they are released.
 
 ### Changed
 
+- **One notch of the mouse wheel scrolls three lines of text, or as many as
+  Windows is set to.** Every scrolling area of the window, the tables and the
+  recipe field included, used to move a short fixed step of about one and a
+  half lines per notch, so the About page took 67 notches from top to bottom.
+  On Windows a notch now moves as many lines as Settings, Bluetooth and
+  devices, Mouse, "Lines to scroll at a time" says, or a whole screen when it is
+  set to scroll one screen at a time, and a change there reaches a window that
+  is already open. On Linux a notch moves three lines. On macOS the wheel moves
+  the window the way the system moves every other program, as before. Turning
+  the wheel over a text field of one line still does not scroll the panel
+  around it.
 - **Damage that cannot be applied says what it needs in plain words.** The
   manifest and Check results used to give the reason with an internal name,
   such as "this run cannot schema.surname, which this damage needs". They now

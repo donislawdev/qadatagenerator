@@ -99,7 +99,7 @@ type picker struct {
 	// current is the row the keyboard is on, as an index into rows, or -1
 	// when the filter left nothing.
 	current int
-	scroll  *container.Scroll
+	scroll  *Scroll
 	list    *fyne.Container
 	nothing fyne.CanvasObject
 	foot    *canvas.Text
@@ -176,7 +176,7 @@ func (p *picker) buildRows() {
 		items = append(items, row.tap)
 	}
 	p.list = paint.Column(palette.NameStepHairline, items...)
-	p.scroll = container.NewVScroll(p.list)
+	p.scroll = NewScroll(p.list)
 	p.current = p.indexOf(p.chosen)
 	if p.current < 0 && len(p.rows) > 0 {
 		p.current = 0

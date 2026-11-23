@@ -526,6 +526,10 @@
 															</widget>
 														</widget>
 													</widget>
+													<widget size="1058x339" type="*parts.wheelLayer">
+														<container size="1058x339">
+														</container>
+													</widget>
 												</widget>
 												<rectangle radius="6" size="1058x339" strokeColor="focus" strokeWidth="2"/>
 											</container>

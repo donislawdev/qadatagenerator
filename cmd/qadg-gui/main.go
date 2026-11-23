@@ -36,11 +36,13 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/gui/manifestview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/outward"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
+	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/gui/quickview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/recipeview"
 	"github.com/donislawdev/qadatagenerator/internal/gui/screens"
 	"github.com/donislawdev/qadatagenerator/internal/gui/shell"
 	"github.com/donislawdev/qadatagenerator/internal/gui/takeview"
+	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 	"github.com/donislawdev/qadatagenerator/internal/version"
 )
@@ -82,6 +84,10 @@ func main() {
 	// are two and where neither reaches.
 	application.SetIcon(fyne.NewStaticResource(appicon.Name, appicon.SVG))
 	application.Settings().SetTheme(fynetheme.Current())
+	// How far a notch of the wheel moves is what the system is set to, asked at
+	// every notch rather than left at the toolkit's step (parts.Scroll says why,
+	// wheel_windows.go how).
+	parts.WheelLines = wheelLines
 
 	// The toolkit's own words, in the language of this window rather than of
 	// the desktop (B-290). A refusal leaves them in the desktop's language,
@@ -158,6 +164,15 @@ func lastCatch() {
 		_, heard := speakThroughParentConsole()
 		stop(heard, fmt.Sprint(fault.FromPanic(recovered))+"\n"+fault.CrashedDo, failed)
 	}
+}
+
+// wheelLines is the system's lines for a notch of the wheel, or the window's
+// default where the system has none to give.
+func wheelLines() int {
+	if lines, ok := systemWheelLines(); ok {
+		return lines
+	}
+	return palette.WheelLinesDefault
 }
 
 // frameFor is the frame the command line asked for: the catalogue of controls

@@ -220,4 +220,18 @@ var windowGuards = []Guard{
 	{"the About screen says what the window keeps and Forget forgets it", "TestTheScreenSaysWhatTheWindowKeepsAndForgetsIt", "internal/gui/about", ByProbe},
 	{"a size larger than the room on the screen is cut to what a centred window has", "TestASizeLargerThanTheScreenIsCutToWhatStaysClearOfTheTaskbar", "internal/gui/kept", ByProbe},
 	{"a size within the room on the screen is left as it is", "TestASizeThatFitsTheScreenIsLeftAsItIs", "internal/gui/kept", ByProbe},
+
+	// --- the wheel (B-420) ---------------------------------------------------
+	//
+	// Probes. Each test turns the toolkit's own scroll and its own multi line
+	// field the same way and requires them to come out wrong, the screen-wide
+	// one requires every kind of area to have been turned, and the reading of
+	// the toolkit's step and of the Windows setting each reads a planted
+	// declaration first. On 2026-11-23 a table without the pane, an editor
+	// without it, a Scroll handing the wheel over unchanged and a reading of the
+	// setting one line too high were each caught once by hand.
+	{"every scrolling area of every screen moves as far for a notch of the wheel as the system says, the table and the recipe editor included", "TestEveryScrollingAreaMovesAsFarAsTheSystemSays", "internal/gui/screens", ByProbe},
+	{"every kind of scrolling area the window builds moves as far for a notch as the system says", "TestEveryKindOfAreaMovesAsFarAsTheSystemSays", "internal/gui/parts", ByProbe},
+	{"the step the window divides a turn of the wheel by is the toolkit's own", "TestTheWheelStepIsTheToolkitsStep", "internal/gui/parts", ByProbe},
+	{"the lines a notch moves are what Windows is set to", "TestTheWheelLinesAreWhatWindowsIsSetTo", "cmd/qadg-gui", ByProbe},
 }

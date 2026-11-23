@@ -42,6 +42,13 @@ var CgoAllowed = map[string][]string{
 		"ATTACH_PARENT_PROCESS", "MB_ICONERROR", "MB_OK", "MB_SETFOREGROUND", "UOI_FLAGS", "WSF_VISIBLE",
 		"DWORD", "HANDLE", "PVOID", "USEROBJECTFLAGS", "WCHAR",
 	},
+	// How many lines Windows is set to scroll for one notch of the mouse
+	// wheel, so the window moves as far as every other program does (B-420).
+	// Allowed by the owner on 2026-11-23. The rest are the type and the two
+	// constants the one call takes and answers with.
+	"cmd/qadg-gui/wheel_windows.go": {
+		"SystemParametersInfoW", "SPI_GETWHEELSCROLLLINES", "WHEEL_PAGESCROLL", "PVOID", "UINT",
+	},
 }
 
 // CgoLinkerFlags are the only flags a #cgo line may pass, and only to the

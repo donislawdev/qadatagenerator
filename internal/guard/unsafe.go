@@ -15,6 +15,9 @@ var UnsafeAllowed = map[string][]string{
 	// Handing text and a buffer to the Windows calls in CgoAllowed, which take
 	// C pointers (DEC-315, DEC-316).
 	"cmd/qadg-gui/console_windows.go": {"Pointer", "Sizeof"},
+	// The place Windows writes the lines a notch of the wheel scrolls, handed
+	// to the call in CgoAllowed (B-420).
+	"cmd/qadg-gui/wheel_windows.go": {"Pointer"},
 }
 
 // unsafePackage is the import being controlled.

@@ -917,6 +917,24 @@ const (
 	RowHeightMax float32 = 64
 )
 
+// WheelLinesDefault is how many lines of text one notch of a mouse wheel moves
+// a scrolling area by where the system has no setting for it, which is every
+// system but Windows. Three is the number Windows ships with, so a Linux desktop
+// scrolls this window the way a Windows one does out of the box. A line is the
+// height of the body rung, measured rather than written (parts.Scroll).
+const WheelLinesDefault = 3
+
+// ToolkitWheelStep is the distance the toolkit hands a scrolling area for one
+// notch of a mouse wheel on Windows and Linux: GLFW reports a notch as 1 and
+// the toolkit multiplies it by scrollSpeed in fyne
+// internal/driver/glfw/scroll_speed_default.go, 25 in v2.8.2. The window
+// divides by it to count the notches turned (parts/wheel_other.go), and
+// TestTheWheelStepIsTheToolkitsStep reads that file, so a toolkit that changes
+// its step turns a test red rather than every notch silently moving a
+// different distance. It is not a choice of this window, which is why it
+// stands apart from the scale.
+const ToolkitWheelStep float32 = 25
+
 // HairlineThickness is how thick a drawn line is, as opposed to a stroke
 // around a shape.
 //

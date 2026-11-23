@@ -114,6 +114,15 @@ func NewKeyTable(
 // toolkit's way uses the table bare and the ring is never mounted.
 func (t *KeyTable) Framed() fyne.CanvasObject { return t.ring.framed(t) }
 
+// CreateRenderer is the toolkit's own renderer of the table with a pane laid
+// over it, so that a notch of the wheel moves the rows as far as it moves every
+// other area of this window. The toolkit keeps the table's scrolling area
+// inside this renderer, where nothing else can reach it, and wheelLayer says
+// how the pane does.
+func (t *KeyTable) CreateRenderer() fyne.WidgetRenderer {
+	return withWheel(t.Table.CreateRenderer())
+}
+
 // Widths sets every column, and hands one of them whatever the table has left.
 //
 // # Why one column takes the remainder rather than every column having a width

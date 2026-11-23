@@ -395,6 +395,10 @@
 																				</widget>
 																			</widget>
 																		</widget>
+																		<widget size="71x58" type="*parts.wheelLayer">
+																			<container size="71x58">
+																			</container>
+																		</widget>
 																	</widget>
 																</container>
 															</container>
@@ -422,6 +426,10 @@
 																					<text monospace pos="4,2" size="0x16"></text>
 																				</widget>
 																			</widget>
+																		</widget>
+																		<widget size="71x58" type="*parts.wheelLayer">
+																			<container size="71x58">
+																			</container>
 																		</widget>
 																	</widget>
 																</container>
@@ -452,6 +460,10 @@
 																				<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																			</widget>
 																		</widget>
+																		<widget size="71x58" type="*parts.wheelLayer">
+																			<container size="71x58">
+																			</container>
+																		</widget>
 																	</widget>
 																</container>
 															</container>
@@ -477,6 +489,10 @@
 																					<text color="disabled" monospace pos="4,2" size="0x16"></text>
 																				</widget>
 																			</widget>
+																		</widget>
+																		<widget size="71x58" type="*parts.wheelLayer">
+																			<container size="71x58">
+																			</container>
 																		</widget>
 																	</widget>
 																</container>
@@ -572,6 +588,10 @@
 																				</widget>
 																			</widget>
 																		</widget>
+																		<widget size="71x58" type="*parts.wheelLayer">
+																			<container size="71x58">
+																			</container>
+																		</widget>
 																	</widget>
 																</container>
 															</container>
@@ -653,6 +673,10 @@
 																					<rectangle fillColor="scrollbar" radius="3" size="3x6"/>
 																				</widget>
 																			</widget>
+																		</widget>
+																		<widget size="71x58" type="*parts.wheelLayer">
+																			<container size="71x58">
+																			</container>
 																		</widget>
 																	</widget>
 																</container>
@@ -737,6 +761,10 @@
 																				</widget>
 																			</widget>
 																		</widget>
+																		<widget size="71x58" type="*parts.wheelLayer">
+																			<container size="71x58">
+																			</container>
+																		</widget>
 																	</widget>
 																</container>
 															</container>
@@ -816,6 +844,10 @@
 																					<rectangle fillColor="scrollbar" radius="3" size="3x6"/>
 																				</widget>
 																			</widget>
+																		</widget>
+																		<widget size="71x58" type="*parts.wheelLayer">
+																			<container size="71x58">
+																			</container>
 																		</widget>
 																	</widget>
 																</container>

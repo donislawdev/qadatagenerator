@@ -375,9 +375,12 @@ func (e *Editor) Framed() fyne.CanvasObject {
 }
 
 // CreateRenderer is the toolkit's drawing of the editor without its edge, the
-// same as the field of one line. See withoutEdge.
+// same as the field of one line (see withoutEdge), with a pane laid over it so
+// that a notch of the wheel moves the lines as far as it moves every other area
+// of this window. The toolkit keeps the editor's scrolling area inside this
+// renderer, and wheelLayer says how the pane reaches it.
 func (e *Editor) CreateRenderer() fyne.WidgetRenderer {
-	return withoutEdge(e.Entry.CreateRenderer())
+	return withWheel(withoutEdge(e.Entry.CreateRenderer()))
 }
 
 // FocusGained tells the grounds the keyboard is here, then lets the toolkit
