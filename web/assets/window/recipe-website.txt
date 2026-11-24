@@ -39,7 +39,6 @@ max_length: 30 }
 output:
   format: csv
   dir: ./data
-  file_per_entity: true
 policy:
   layers: [L2, L3, REV]
   rows: 5%

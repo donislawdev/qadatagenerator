@@ -128,7 +128,6 @@ entities:
 output:
   format: csv
   dir: ./data
-  file_per_entity: true
 ```
 
 Check it, then run it:
@@ -378,13 +377,19 @@ once, and the Recipe screen checks it as you type.
 | `consistency` | entity | rules such as `first_name matches: [gender]` |
 | `generator` | field | what fills the column |
 | `values` | field | a list to draw from, such as `[free, pro, team]` |
-| `type: integer` or `type: decimal` | field | a number |
+| `type: integer` or `type: decimal` | field | a random number: a whole number from 0 to 999999, or one with two decimal places from 0.00 to 999.99 |
+| `min_value` and `max_value` | field | the smallest and the largest number a `type: integer` or `type: decimal` field draws, both included, such as `min_value: 1` and `max_value: 10`. Either can be left out, and either can be negative |
 | `unique` | field | no value repeats |
 | `required` | field | the column is never empty |
 | `max_length` | field | the longest value allowed, counted in characters unless `counted_in` says `bytes` or `graphemes` |
 | `empty` | field | the share of rows left empty, such as `15%` |
 | `policy` | top | what to damage: `layers`, the share of `rows`, `per_row` and `exclude_fields` |
-| `output` | top | `format` (`csv` or `json`), `dir`, `file_per_entity` and the CSV `delimiter` |
+| `output` | top | which files a run writes and where, with the keys below |
+| `format` | output | `csv`, the default, or `json` |
+| `dir` | output | the folder the files go to, relative to where you run `qadg`. `--out` takes its place, and the Recipe screen writes to the folder chosen at its top |
+| `delimiter` | output | for `csv`, the one character between values: a comma when left out, or any other in quotes, such as a semicolon or a tab written `"\t"`. A double quote and a line break are refused |
+| `file_per_entity` | output | for `json` only: `true` writes a file per table, such as `customer.json`, and `false`, the default, writes one `dataset.json` with each row's children inside it. `csv` always writes a file per table |
+| `encoding` | output | `utf-8`, the only encoding written today |
 
 The [examples](examples/) folder holds ready-made recipes, from one table of people to a shop in three
 related tables and data with damage to catch. Its [identifiers](examples/identifiers/) folder has one

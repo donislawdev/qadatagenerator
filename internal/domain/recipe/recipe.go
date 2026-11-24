@@ -162,6 +162,16 @@ type Field struct {
 	HasEmptyShare bool
 	// Values is a dictionary the field draws from.
 	Values []string
+	// MinValue and MaxValue are the smallest and the largest number a field
+	// described by type alone may take, both included, and empty when the
+	// recipe sets no such bound.
+	//
+	// Each is the decimal text of the number the recipe wrote, such as -5 or
+	// 99.99, rather than a float. A float would round a large whole number,
+	// and how many places a bound has is part of what the type of the field
+	// checks, which only whoever makes the value knows.
+	MinValue string
+	MaxValue string
 	// Parameters are the settings a generator understands and this build
 	// does not, such as the age range of a date of birth. They are carried
 	// rather than rejected, because rejecting them would reject the shape
@@ -251,6 +261,10 @@ func (f Field) Unit() LengthUnit {
 	}
 	return f.LengthUnit
 }
+
+// Bounded reports whether the recipe gives the field a smallest or a largest
+// number.
+func (f Field) Bounded() bool { return f.MinValue != "" || f.MaxValue != "" }
 
 // Parent is a relation, declared at the child and carrying how many children
 // one parent has.

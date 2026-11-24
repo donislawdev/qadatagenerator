@@ -51,6 +51,10 @@ type Request struct {
 	// Values is the list the recipe wrote under the field, empty when it wrote
 	// none. A field with a list draws from it and from nothing else.
 	Values []string
+	// MinValue and MaxValue bound the number a field described by type alone
+	// draws, as the recipe wrote them, and are empty when it wrote none.
+	MinValue string
+	MaxValue string
 }
 
 // Domain is every value a request can produce, when the source knows them all.
@@ -102,15 +106,21 @@ type Values interface {
 	// this from the run instead would mean either a failure late or a quiet
 	// blank column, and the blank column is what this project calls silence.
 	ProducesType(kind string) bool
-	// TypeFits reports whether a field described by that type alone can hold
-	// a value in the length it declares, and says why not when it cannot.
+	// TypeFits refuses a field described by type alone whose length and bounds
+	// do not hold together, with what to do instead, and returns nil for one
+	// that can be filled.
 	//
-	// 🔴 Asked by the plan since 2026-10-26. A decimal declared three
-	// characters long passed every check, and the run wrote 0.44 into every
-	// row, four characters each, because the shortest decimal this build makes
-	// is a digit, a point and two places. Only whoever builds the value knows
-	// how short it can be, so the answer is here rather than in the plan.
-	TypeFits(kind string, maxLength int) (bool, string)
+	// 🔴 Asked by the plan, because a decimal declared three characters long
+	// passed every check and the run wrote 0.44 into every row, four
+	// characters each (measured 2026-10-26). The same holds for a range: a
+	// bound with three places on a decimal, a bound longer than the field, a
+	// smallest number above the largest. Only whoever builds the value knows
+	// how short it can be and what a range of its type looks like, so the
+	// answer is here rather than in the plan.
+	//
+	// The refusal carries its own next step because the reasons differ in
+	// what fixes them, and one sentence for all of them would be true of none.
+	TypeFits(req Request) error
 	// CanProduce reports whether this build can fill a field with that
 	// generator in a locale, and says why not when it cannot.
 	//

@@ -16,6 +16,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
+	"github.com/donislawdev/qadatagenerator/internal/produce"
 )
 
 // validateWith reads a recipe and says whether it can be used, once its
@@ -120,7 +121,10 @@ func alsoAskTheEngine(report *validate.Report, rec recipe.Recipe,
 	if outlook.wrong == nil {
 		return outlook, nil
 	}
-	report.Problems = append(report.Problems, recipe.Problem{What: outlook.wrong.Error()})
+	// The refusal's own next step goes with it, since one engine refusal can
+	// be fixed in several ways and only the refusal knows which.
+	report.Problems = append(report.Problems, recipe.Problem{What: outlook.wrong.Error(),
+		Hint: fault.InsteadOf(outlook.wrong)})
 	return outlook, fault.New(fault.Config,
 		counted(len(report.Problems), "problem")+" in "+path)
 }
@@ -190,7 +194,10 @@ type whatARunWouldDo struct {
 // signal, so an interrupt ends the process the way the system ends any other,
 // and there is nothing on the disk to take back.
 func askThePlan(rec recipe.Recipe) whatARunWouldDo {
-	plan, err := generate.Prepare(rec, values.New(rec.Locale, rec.Seed), generate.NeverStops{})
+	// The plan generate and the window follow, notes about settings the form
+	// asked for ignores included, so that this verb cannot be the one surface
+	// silent about them.
+	prepared, err := produce.Prepare(rec, values.New(rec.Locale, rec.Seed), generate.NeverStops{})
 	// The writer of the tree refuses a parent field named after a child, and
 	// validate asks it the same question so that the two verbs agree.
 	if err == nil {
@@ -198,6 +205,7 @@ func askThePlan(rec recipe.Recipe) whatARunWouldDo {
 	}
 	switch {
 	case err == nil:
+		plan := prepared.Plan()
 		return whatARunWouldDo{tables: len(plan.Entities), rows: plan.TotalRows(),
 			notes: plan.Notes, implied: plan.Implied}
 	case fault.KindOf(err) == fault.Config:

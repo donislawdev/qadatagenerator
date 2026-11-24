@@ -511,24 +511,35 @@ func TestMovingTheDirectoryRecordsBothSidesAndMovesTheRecipe(t *testing.T) {
 	}
 }
 
-// 🔴 The note about file_per_entity is said only when the recipe wrote it.
+// 🔴 A setting the form asked for ignores is noted, and only when the recipe
+// wrote it.
 //
-// It was said whenever the setting was false, and false is also what a recipe
-// that never mentions it carries, so every comma separated recipe was told
-// about a line nobody had written (B-301). Both halves are held here: the note
-// that is owed and the note that is not.
+// The note about file_per_entity was said whenever the setting was false, and
+// false is also what a recipe that never mentions it carries, so every comma
+// separated recipe was told about a line nobody had written (B-301). A
+// delimiter under the object form was ignored without a word until 2026-11-24.
+// Both halves are held here for both settings: the note that is owed and the
+// note that is not.
 func TestASettingNobodyWroteIsNotReportedAsChangingNothing(t *testing.T) {
 	for _, given := range []struct {
-		what   string
-		output recipe.Output
-		noted  bool
+		what    string
+		setting string
+		output  recipe.Output
+		noted   bool
 	}{
-		{"not written at all", recipe.Output{}, false},
-		{"written false for the comma separated form",
+		{"not written at all", "output.file_per_entity", recipe.Output{}, false},
+		{"written false for the comma separated form", "output.file_per_entity",
 			recipe.Output{FilePerEntityGiven: true}, true},
-		{"written false for the form that reads it",
+		{"written false for the form that reads it", "output.file_per_entity",
 			recipe.Output{Format: "json", FilePerEntityGiven: true}, false},
-		{"written true", recipe.Output{FilePerEntity: true, FilePerEntityGiven: true}, false},
+		{"written true", "output.file_per_entity",
+			recipe.Output{FilePerEntity: true, FilePerEntityGiven: true}, false},
+		{"a delimiter for the form that reads it", "output.delimiter",
+			recipe.Output{Delimiter: ";"}, false}, // punctuation: test data
+		{"a delimiter for the object form", "output.delimiter",
+			recipe.Output{Format: "json", Delimiter: ";"}, true}, // punctuation: test data
+		{"no delimiter for the object form", "output.delimiter",
+			recipe.Output{Format: "json"}, false},
 	} {
 		rec := related(3)
 		rec.Output = given.output
@@ -538,12 +549,12 @@ func TestASettingNobodyWroteIsNotReportedAsChangingNothing(t *testing.T) {
 		}
 		noted := false
 		for _, note := range prepared.Plan().Notes {
-			if note.Where == "output.file_per_entity" {
+			if note.Where == given.setting {
 				noted = true
 			}
 		}
 		if noted != given.noted {
-			t.Errorf("file_per_entity %s: noted is %v, want %v", given.what, noted, given.noted)
+			t.Errorf("%s %s: noted is %v, want %v", given.setting, given.what, noted, given.noted)
 		}
 	}
 }

@@ -1,5 +1,5 @@
 ---
-translatedFrom: c07997b35a6d5c090398116d7bc07562bdeee3e0
+translatedFrom: b1437f014783642d534ce201e6313222aaa601fc
 title: Okno
 seoTitle: "Okno programu: cztery ekrany"
 description: "Quick value, Recipe, Damage a file i Check results: co robi każdy ekran okna i które polecenie robi to samo."

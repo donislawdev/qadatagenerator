@@ -41,7 +41,7 @@ entities:
       order_number: { generator: order_number }
       line_no:      { type: integer }
       sku:          { generator: sku }
-      quantity:     { type: integer }
+      quantity:     { type: integer, min_value: 1, max_value: 20 }
 
 output:
   format: csv

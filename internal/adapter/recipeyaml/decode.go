@@ -43,7 +43,7 @@ var (
 	// failures cascade.
 	perRowChoices = []string{"exactly_one", "any"}
 	entityKeys    = []string{"count", "primary_key", "fields", "consistency", "belongs_to"}
-	fieldKeys     = []string{"type", "generator", "expression", "unique", "required", "max_length", "counted_in", "empty", "values"}
+	fieldKeys     = []string{"type", "generator", "expression", "unique", "required", "max_length", "counted_in", "empty", "values", "min_value", "max_value"}
 	outputKeys    = []string{"format", "dir", "file_per_entity", "encoding", "delimiter"}
 
 	// How a maximum length can be counted, taken from the model so that the
@@ -622,6 +622,10 @@ func (r *reader) fieldKey(built *recipe.Field, where, key string, value any) {
 		built.EmptyShare, built.HasEmptyShare = r.share(where+".empty", value)
 	case "values":
 		built.Values = r.valueList(where+".values", value)
+	case "min_value":
+		built.MinValue = r.bound(where+".min_value", value)
+	case "max_value":
+		built.MaxValue = r.bound(where+".max_value", value)
 	default:
 		// A generator setting, such as the age range of a date of birth. It is
 		// kept rather than refused, because the format documents this shape,
@@ -800,6 +804,12 @@ func (r *reader) output(node any) recipe.Output {
 			built.FilePerEntityGiven = true
 		case "encoding":
 			built.Encoding, _ = r.text(where, item.Value)
+			// The writer's rule, asked here so that validate and generate
+			// agree about a recipe naming an encoding this build does not write.
+			if !dataset.UsableEncoding(built.Encoding) {
+				r.report(where, "this build writes UTF-8 and the recipe asks for "+
+					strconv.Quote(built.Encoding), "utf-8", "leave the line out for UTF-8")
+			}
 		case "delimiter":
 			built.Delimiter, _ = r.text(where, item.Value)
 			// 🔴 Asked here as well as by the writer since 2026-10-26. Until

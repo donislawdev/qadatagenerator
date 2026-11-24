@@ -12,6 +12,11 @@ repository once they are released.
 
 ### BREAKING
 
+- **validate refuses a recipe asking for an encoding other than UTF-8.** Such
+  a recipe used to pass validate with exit code 0, and generate then refused
+  it with exit code 3, because every file this tool writes is UTF-8. validate
+  now ends with exit code 3 as well, names the line and says to leave
+  `encoding` out.
 - **The same seed damages a file differently.** corrupt and Damage a file
   choose the column for each damaged row on its own, where one kind of damage
   used to land in the same column in every row. A file of a few rows with
@@ -97,6 +102,16 @@ repository once they are released.
 
 ### Fixed
 
+- **validate warns about a setting of `output` that changes nothing.**
+  `file_per_entity: false` in a csv recipe and a `delimiter` in a json recipe
+  do nothing, because csv always writes a file per table and json has no
+  delimiter. generate and the Recipe screen already warned about the first,
+  validate said nothing about either, and nothing warned about the second.
+  All three now warn about both.
+- **The examples of a recipe no longer carry `file_per_entity: true` beside
+  `format: csv`.** The example in the README and the one the Recipe screen
+  types in for you both did, where the setting changes nothing, so turning it
+  off and seeing no change looked like a defect.
 - **On Windows the window opens without a console window beside it.** A
   double click on qadg-gui.exe used to open a black console window as well.
   Started from a terminal, qadg-gui -h and a flag it does not know still answer
@@ -601,6 +616,19 @@ repository once they are released.
 
 ### Added
 
+- **A number field can have a smallest and a largest value.** `min_value` and
+  `max_value` on a field of `type: integer` or `type: decimal` set the range
+  its random numbers are drawn from, both ends included, such as
+  `quantity: { type: integer, min_value: 1, max_value: 10 }`. Either end can be
+  left out and either can be negative. Without them a field draws as before,
+  from 0 to 999999 or from 0.00 to 999.99, with the same values for the same
+  seed. validate refuses a range the field cannot hold and says why: the two
+  ends the wrong way round, a decimal bound with more than two places, a bound
+  of an integer with any, or an end longer than `max_length`.
+- **The Recipes page of the website explains every key of `output`.** What
+  `format`, `dir`, `delimiter`, `file_per_entity` and `encoding` each do, which
+  delimiters work and how to write a tab, and that `file_per_entity` matters to
+  json only.
 - **The licence texts of the work by other people inside the command line
   are in `THIRD-PARTY-NOTICES.md`.** That is the Go runtime and standard
   library, two Go modules, and the lists of names and places that generated

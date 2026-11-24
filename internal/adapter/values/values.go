@@ -17,7 +17,6 @@ package values
 import (
 	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/provider/corpus"
@@ -414,21 +413,28 @@ func (s Source) Produce(req generate.Request) (string, error) {
 // on every row for reasons the reader cannot see.
 const decimalPlaces = 2
 
-// TypeFits reports whether a field of this type can hold a value in the
-// length it declares.
+// TypeFits refuses a field described by type alone whose length and bounds do
+// not hold together, which spanOf says in full.
 //
 // The shortest integer is one digit, and the shortest decimal is one digit, a
 // point and the places. Every character of both is a single byte, so the unit
 // the length is counted in does not change the answer.
-func (s Source) TypeFits(kind string, maxLength int) (bool, string) {
-	switch {
-	case kind == TypeInteger && maxLength < 1:
-		return false, fmt.Sprintf("an integer needs at least one digit, and the field accepts %d", maxLength)
-	case kind == TypeDecimal && maxLength < decimalPlaces+2:
-		return false, fmt.Sprintf("a decimal needs at least %d characters, a digit, a point and %d places, "+
-			"and the field accepts %d", decimalPlaces+2, decimalPlaces, maxLength)
+func (s Source) TypeFits(req generate.Request) error {
+	_, err := spanOf(req)
+	return err
+}
+
+// digitsOf is how many characters a number described by its type is drawn
+// to, when the recipe gives no bound: six, or the maximum length when that is
+// shorter.
+func digitsOf(req generate.Request) int {
+	if req.HasMaxLength && req.MaxLength < defaultDigits {
+		// A number longer than the column is a value that fits by our
+		// arithmetic and is rejected on arrival, which is the failure the unit
+		// on max_length exists to prevent.
+		return req.MaxLength
 	}
-	return true, ""
+	return defaultDigits
 }
 
 // Digits a number gets when the field declares no maximum length.
@@ -439,8 +445,8 @@ func (s Source) TypeFits(kind string, maxLength int) (bool, string) {
 // project treats a number that pretends to be a measurement as a defect. Six
 // digits keeps a value readable, stays far inside every integer type a database
 // offers, and is wide enough that a column of them does not look like a counter.
-// A recipe that needs a particular range has nowhere to say so yet: field
-// parameters are carried and unread, which the plan reports rather than hides.
+// A recipe that needs a particular range says so with min_value and max_value,
+// and spanOf takes an end it leaves out from these digits.
 const defaultDigits = 6
 
 // fromType produces a value for a field described by type alone.
@@ -450,35 +456,26 @@ const defaultDigits = 6
 // with the generator that owns it rather than with a fallback, and inventing
 // one here would put an unowned format into people's data.
 func (s Source) fromType(req generate.Request) (string, error) {
-	digits := defaultDigits
-	if req.HasMaxLength && req.MaxLength < digits {
-		// A number longer than the column is a value that fits by our
-		// arithmetic and is rejected on arrival, which is the failure the unit
-		// on max_length exists to prevent.
-		digits = req.MaxLength
-	}
-	switch req.Type {
-	case TypeInteger:
-		return strconv.FormatInt(s.wholeNumber(req, digits), 10), nil
-	case TypeDecimal:
-		// 🔴 Room for a digit as well as the point and the places. The check
-		// read digits <= places until 2026-10-26, which let three through:
-		// nought digits were drawn for the whole part, the number came back
-		// as 0, and 0.44 is four characters in a field accepting three. The
-		// plan refuses such a field first, through TypeFits, and this stays
-		// for a request that did not come through a plan.
-		if fine, why := s.TypeFits(TypeDecimal, digits); !fine {
-			return "", fault.New(fault.Data, req.At.Field+": "+why)
-		}
-		whole := s.wholeNumber(req, digits-decimalPlaces-1)
-		fraction := s.seed.IntN(coordinate(req, ":fraction"), 100)
-		return fmt.Sprintf("%d.%02d", whole, fraction), nil
-	default:
+	if req.Type != TypeInteger && req.Type != TypeDecimal {
 		return "", fault.New(fault.Config, fmt.Sprintf(
 			"%s is declared as %s, and this build produces values for %s and %s only",
 			req.At.Field, req.Type, TypeInteger, TypeDecimal)).
 			DoInstead("give the field a generator, or change the type")
 	}
+	// 🔴 The span is asked here as well as by the plan, for a request that did
+	// not come through a plan. Room for a digit beside the point and the places
+	// is part of it: a check reading digits <= places let a decimal three
+	// characters long through, and 0.44 is four (measured 2026-10-26).
+	drawn, err := spanOf(req)
+	if err != nil {
+		return "", fault.Wrap(fault.Config, err, req.At.Field).DoInstead(fault.InsteadOf(err))
+	}
+	if req.Type == TypeDecimal && !drawn.bounded {
+		whole := s.wholeNumber(req, digitsOf(req)-decimalPlaces-1)
+		fraction := s.seed.IntN(coordinate(req, ":fraction"), hundredths)
+		return drawn.text(whole*hundredths + fraction), nil
+	}
+	return drawn.text(drawn.low + s.seed.IntN(coordinate(req, ":number"), drawn.size())), nil
 }
 
 // widestDrawn is the most digits a draw can be asked for.

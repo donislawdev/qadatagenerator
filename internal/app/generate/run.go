@@ -290,7 +290,8 @@ func requestFor(entity string, field recipe.Field, row int, purpose string) Requ
 		Generator: field.Generator, Type: field.Type, Values: field.Values,
 		At:        seed.Coordinate{Entity: entity, Row: int64(row), Field: field.Name, Purpose: purpose},
 		MaxLength: field.MaxLength, HasMaxLength: field.HasMaxLength,
-		Unit: string(field.Unit()),
+		Unit:     string(field.Unit()),
+		MinValue: field.MinValue, MaxValue: field.MaxValue,
 	}
 }
 

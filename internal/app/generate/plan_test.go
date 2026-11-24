@@ -31,6 +31,11 @@ type knownValues struct {
 	// refused are the entries under values this stub does not accept, each
 	// with the reason it gives.
 	refused map[string]string
+	// misfit is the refusal this stub gives every field described by type
+	// alone it is asked about, and nil when it accepts them all.
+	misfit error
+	// asked counts the fields the plan asked the stub about.
+	asked *int
 }
 
 func (v knownValues) DomainOf(req generate.Request) (generate.Domain, bool) {
@@ -85,7 +90,12 @@ func (v knownValues) ProducesType(kind string) bool {
 
 func (v knownValues) Produce(generate.Request) (string, error) { return "", nil }
 
-func (v knownValues) TypeFits(string, int) (bool, string) { return true, "" }
+func (v knownValues) TypeFits(generate.Request) error {
+	if v.asked != nil {
+		*v.asked++
+	}
+	return v.misfit
+}
 
 func (v knownValues) CanProduce(generator, locale string) (bool, string) {
 	if v.missing[generator] == locale {
@@ -224,6 +234,38 @@ func TestAColumnThisBuildWillLeaveEmptyIsNamed(t *testing.T) {
 	}
 	if !strings.Contains(note.What, "empty") {
 		t.Errorf("the note does not say the column will be empty: %q", note.What)
+	}
+}
+
+// A field given a smallest or a largest number is asked about before a row is
+// written, with or without a maximum length, and the refusal names the field and
+// keeps the next step the source gave. A field with neither is not asked, since
+// nothing in it can disagree.
+func TestABoundedFieldIsAskedWhetherItHoldsTogether(t *testing.T) {
+	asked := 0
+	values := knownValues{produces: []string{"integer"}, asked: &asked,
+		misfit: fault.New(fault.Config, "the range is upside down").DoInstead("swap the two")}
+	_, err := generate.Prepare(oneEntity(
+		recipe.Field{Name: "quantity", Type: "integer", MinValue: "10", MaxValue: "1"},
+	), values, generate.NeverStops{})
+	if err == nil {
+		t.Fatal("the plan accepted a field the source refused")
+	}
+	if got := err.Error(); got != "entities.order.fields.quantity: the range is upside down" {
+		t.Errorf("the refusal reads %q, and should name the field before the reason", got)
+	}
+	if fault.KindOf(err) != fault.Config || fault.InsteadOf(err) != "swap the two" {
+		t.Errorf("refused as %v with %q to do instead, and the source said swap the two",
+			fault.KindOf(err), fault.InsteadOf(err))
+	}
+
+	asked = 0
+	if _, err := generate.Prepare(oneEntity(recipe.Field{Name: "quantity", Type: "integer"}),
+		knownValues{produces: []string{"integer"}, asked: &asked}, generate.NeverStops{}); err != nil {
+		t.Fatal(err)
+	}
+	if asked != 0 {
+		t.Errorf("a field with no bound and no limit was asked about %d times", asked)
 	}
 }
 

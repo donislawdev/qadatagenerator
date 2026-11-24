@@ -203,15 +203,14 @@ func usableDelimiter(given, from string) (string, error) {
 // usableEncoding refuses an encoding this build does not write.
 //
 // It refuses by name rather than writing the bytes of one encoding under the
-// label of another, which is the failure the recipe reader already avoids on
-// the way in.
+// label of another. The rule is dataset.UsableEncoding, the one the reader of
+// recipes asks as well. It stays here because a recipe built by a screen
+// rather than read from a file reaches this writer without passing that reader.
 func usableEncoding(encoding string) error {
-	switch strings.ToLower(encoding) {
-	case "", "utf-8", "utf8":
+	if dataset.UsableEncoding(encoding) {
 		return nil
-	default:
-		return fault.New(fault.Config, "this build writes UTF-8 and the recipe asks for "+
-			encoding).
-			DoInstead("remove the setting, or ask for utf-8")
 	}
+	return fault.New(fault.Config, "this build writes UTF-8 and the recipe asks for "+
+		encoding).
+		DoInstead("remove the setting, or ask for utf-8")
 }

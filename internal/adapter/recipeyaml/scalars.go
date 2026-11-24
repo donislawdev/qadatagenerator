@@ -155,6 +155,57 @@ func (r *reader) maxLength(where string, node any) (int, bool) {
 	return number, true
 }
 
+// largestExactPointed is where a number written with a decimal point stops
+// arriving as exactly what was typed.
+//
+// YAML hands such a number over as a float, and a float holds fifteen
+// significant digits for certain. A bound below ten to the thirteenth with two
+// places has at most fifteen, so its shortest text is the text that was
+// written. Past it the shortest text may be a neighbour of what was written,
+// and the range would quietly be a different one.
+const largestExactPointed = 1e13
+
+// bound reads one end of the range a number is drawn from, as the decimal text
+// of the number written, and returns nothing after reporting why when it cannot.
+//
+// It asks only whether this is a number. Whether the number suits the field,
+// which depends on its type and on its maximum length, is a question for
+// whoever makes the value, and the plan asks it there.
+func (r *reader) bound(where string, node any) string {
+	const quoted = "write it in plain digits without quotes, such as max_value: 100"
+	switch value := node.(type) {
+	case int:
+		return strconv.Itoa(value)
+	case int64:
+		return strconv.FormatInt(value, 10)
+	case uint64:
+		return strconv.FormatUint(value, 10)
+	case float64:
+		if math.IsNaN(value) || math.IsInf(value, 0) {
+			r.report(where, fmt.Sprintf("the bound has to be a number and YAML read %v", value),
+				"a number such as 1 or 99.99", quoted)
+			return ""
+		}
+		if math.Abs(value) >= largestExactPointed {
+			r.report(where, "a number this large is read exactly only when it is written without a decimal point",
+				"a whole number, or a number with a point below 10000000000000",
+				"write it as a whole number, or write a smaller bound")
+			return ""
+		}
+		return strconv.FormatFloat(value, 'f', -1, 64)
+	case string:
+		r.report(where, "the bound has to be a number and the recipe gives the text "+strconv.Quote(value),
+			"a number such as 1 or 99.99", quoted)
+		return ""
+	case nil:
+		r.report(where, "the value is missing", "a number such as 1 or 99.99", "write the number or remove the line")
+		return ""
+	default:
+		r.report(where, "the bound has to be a single number", "a number such as 1 or 99.99", quoted)
+		return ""
+	}
+}
+
 func (r *reader) flag(where string, node any) bool {
 	value, ok := node.(bool)
 	if !ok {

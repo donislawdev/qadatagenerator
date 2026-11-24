@@ -47,6 +47,10 @@ import (
 // full rather than half empty. Measured with the real binary on 2026-09-03:
 // validate answers that it can be used and would write 10 rows in 1 table, and
 // a run of it writes ten rows of five columns.
+//
+// The output section names the form and nothing more. file_per_entity changes
+// nothing in the comma separated form, and an example carrying it invites
+// somebody to turn it off, see nothing change and conclude it is broken.
 const exampleRecipe = `version: "0.1"
 seed: "example"
 locale: pl-PL
@@ -64,7 +68,6 @@ entities:
       - pesel matches: [birth_date, gender]
 output:
   format: csv
-  file_per_entity: true
 `
 
 // buildHints makes the two controls that answer what can be written here.

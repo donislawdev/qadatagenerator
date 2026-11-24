@@ -83,31 +83,19 @@ func listDomain(key string, entries []string) generate.Domain {
 }
 
 // typeDomain is the domain of a number described by its type alone, in the
-// order of the numbers, the same digits fromType draws.
+// order of the numbers, the same span fromType draws from. A field whose span
+// cannot be made has an empty domain, which is the answer the draw gives.
 func typeDomain(req generate.Request) (generate.Domain, bool) {
-	digits := defaultDigits
-	if req.HasMaxLength && req.MaxLength < digits {
-		digits = req.MaxLength
+	if req.Type != TypeInteger && req.Type != TypeDecimal {
+		return generate.Domain{}, false
 	}
-	switch req.Type {
-	case TypeInteger:
-		if digits < 1 {
-			return generate.Domain{Key: TypeInteger}, true
-		}
-		return generate.Domain{Key: TypeInteger, Size: power(digits), At: func(index int64) string {
-			return strconv.FormatInt(index, 10)
-		}}, true
-	case TypeDecimal:
-		if fine, _ := (Source{}).TypeFits(TypeDecimal, digits); !fine {
-			return generate.Domain{Key: TypeDecimal}, true
-		}
-		const places = 100
-		return generate.Domain{Key: TypeDecimal, Size: power(digits-decimalPlaces-1) * places,
-			At: func(index int64) string {
-				return fmt.Sprintf("%d.%02d", index/places, index%places)
-			}}, true
+	drawn, err := spanOf(req)
+	if err != nil {
+		return generate.Domain{Key: req.Type}, true
 	}
-	return generate.Domain{}, false
+	return generate.Domain{Key: req.Type, Size: drawn.size(), At: func(index int64) string {
+		return drawn.text(drawn.low + index)
+	}}, true
 }
 
 // power is ten to the given number of digits, which the callers keep within

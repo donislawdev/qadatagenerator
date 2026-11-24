@@ -527,6 +527,43 @@ entities:
 	}
 }
 
+// validate and generate say the same about the output section: a setting the
+// form asked for ignores is a warning from both, and an encoding this build
+// does not write is a refusal from both.
+//
+// validate asked the engine directly and missed the notes generate added, and
+// it called a recipe usable that asked for windows-1250, which generate then
+// refused (both measured 2026-11-24 through the built binary).
+func TestValidateAndGenerateAgreeAboutTheOutputSection(t *testing.T) {
+	const entities = `version: "0.1"
+entities:
+  customer:
+    count: 2
+    fields:
+      x: { generator: city }
+`
+	for _, given := range []struct {
+		what, output, says string
+		code               exitCode
+	}{
+		{"a file per table turned off for csv", "output:\n  file_per_entity: false\n",
+			"warning: output.file_per_entity", codeOK},
+		{"a delimiter for json", "output:\n  format: json\n  delimiter: \";\"\n", // punctuation: test data
+			"warning: output.delimiter", codeOK},
+		{"an encoding this build does not write", "output:\n  encoding: windows-1250\n",
+			"this build writes UTF-8", codeConfig},
+	} {
+		path := recipeFile(t, entities+given.output)
+		for _, verb := range [][]string{{commandValidate, path}, {commandGenerate, "--dry-run", path}} {
+			got := run(verb...)
+			if got.code != int(given.code) || !strings.Contains(got.log, given.says) {
+				t.Errorf("%s: %s ended with %d and should end with %d saying %q: %s",
+					given.what, verb[0], got.code, given.code, given.says, got.log)
+			}
+		}
+	}
+}
+
 // A recipe that reads correctly and cannot be carried out is warned about, and
 // the answer is still yes.
 //

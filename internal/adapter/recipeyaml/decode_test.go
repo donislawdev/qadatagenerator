@@ -159,6 +159,34 @@ func TestTheDocumentedShapeIsAccepted(t *testing.T) {
 	}
 }
 
+// A bound is kept as the decimal text of the number written, which is what
+// lets whoever makes the value count its places and hold a large whole number
+// exactly. A whole number written with a point loses only the point.
+func TestABoundIsKeptAsTheNumberWritten(t *testing.T) {
+	result := decode(t, `
+version: "0.1"
+entities:
+  line:
+    count: 3
+    fields:
+      quantity: { type: integer, min_value: 1, max_value: 999999999999999999 }
+      refund:   { type: decimal, min_value: -5.25, max_value: 0 }
+      rate:     { type: decimal, max_value: 2.0 }
+`)
+	line, _ := result.Recipe.Entity("line")
+	for _, want := range []struct{ field, low, high string }{
+		{"quantity", "1", "999999999999999999"},
+		{"refund", "-5.25", "0"},
+		{"rate", "", "2"},
+	} {
+		got, _ := line.Field(want.field)
+		if got.MinValue != want.low || got.MaxValue != want.high {
+			t.Errorf("%s is bounded by %q and %q, and the recipe wrote %q and %q",
+				want.field, got.MinValue, got.MaxValue, want.low, want.high)
+		}
+	}
+}
+
 // A list under values is where a value comes from on its own, and a type
 // beside it says what every entry is (DEC-266). Until 2026-10-26 the reader
 // carried the list and refused the field for naming no source.
@@ -479,6 +507,44 @@ func TestProblems(t *testing.T) {
 			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y, max_length: 10, counted_in: furlongs }\n",
 			where: "entities.a.fields.x.counted_in",
 			what:  "does not know furlongs",
+		},
+		{
+			// validate called this usable while generate refused it, which
+			// the writer's rule asked here now settles.
+			name:  "an encoding this build does not write",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y }\noutput:\n  encoding: windows-1250\n",
+			where: "output.encoding",
+			what:  "this build writes UTF-8",
+		},
+		{
+			name:  "a bound written as text",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { type: integer, max_value: \"100\" }\n",
+			where: "entities.a.fields.x.max_value",
+			what:  "gives the text \"100\"",
+		},
+		{
+			name:  "a bound YAML reads as infinity",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { type: decimal, min_value: -.inf }\n",
+			where: "entities.a.fields.x.min_value",
+			what:  "has to be a number",
+		},
+		{
+			name:  "a bound with a point too large to arrive as written",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { type: decimal, max_value: 12345678901234.5 }\n",
+			where: "entities.a.fields.x.max_value",
+			what:  "read exactly only when it is written without a decimal point",
+		},
+		{
+			name:  "a bound beside a generator",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y, max_value: 5 }\n",
+			where: "entities.a.fields.x.max_value",
+			what:  "takes its value from the generator y",
+		},
+		{
+			name:  "a bound beside a list",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { type: integer, values: [\"1\", \"2\"], min_value: 1 }\n",
+			where: "entities.a.fields.x.min_value",
+			what:  "takes its value from the list under values",
 		},
 	}
 

@@ -52,6 +52,39 @@ func (r *reader) checkField(built recipe.Field, where string) {
 	}
 
 	r.checkSource(built, where)
+	r.checkBounds(built, where)
+}
+
+// checkBounds asks whether a field given a smallest or a largest number draws
+// a number at all.
+//
+// The bounds shape the number a type draws. A generator, an expression and a
+// list each make the value in a way the bounds cannot reach, so a bound beside
+// one of them would be a range the column does not follow, written in a recipe
+// that reads as though it does. Whether the type is a number is asked by the
+// plan, because only whoever makes the value knows which types take a range.
+func (r *reader) checkBounds(built recipe.Field, where string) {
+	if !built.Bounded() {
+		return
+	}
+	var source string
+	switch {
+	case built.Values != nil:
+		source = "the list under values"
+	case built.Generator != "":
+		source = "the generator " + built.Generator
+	case built.Expression != "":
+		source = "an expression"
+	default:
+		return
+	}
+	at := where + ".min_value"
+	if built.MinValue == "" {
+		at = where + ".max_value"
+	}
+	r.report(at, "min_value and max_value bound a number drawn from the type of the field, and this field takes its value from "+source,
+		"a field described by type: integer or type: decimal",
+		"remove the bound, or describe the field by its type alone")
 }
 
 // checkSource asks whether the field names exactly one place its value comes

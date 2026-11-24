@@ -391,23 +391,10 @@ func checkGenerators(entity recipe.Entity, values Values, locale string, plan *P
 		case field.Expression != "":
 			plan.Notes = append(plan.Notes, Note{where,
 				"expressions are not evaluated by this build, so the column will be empty"})
-		case field.Generator == "" && !values.ProducesType(field.Type):
-			// A type this build cannot fill. Until 2026-08-10 this case said
-			// nothing at all, so a declared column arrived empty and no part of
-			// the run mentioned it. The expression above has been reported
-			// since the first day and this one had not, which is why it was
-			// invisible: the two look alike in the recipe and only one of them
-			// spoke.
-			plan.Notes = append(plan.Notes, Note{where,
-				"this build produces no value for a field declared only as " +
-					strconv.Quote(field.Type) + ", so the column will be empty"})
-		case field.Generator == "" && field.HasMaxLength:
-			if fine, why := values.TypeFits(field.Type, field.MaxLength); !fine {
-				return fault.New(fault.Config, where+": "+why).
-					DoInstead("raise max_length, or describe the field with a generator")
-			}
 		case field.Generator == "":
-			continue
+			if err := checkTyped(entity.Name, field, where, values, plan); err != nil {
+				return err
+			}
 		case !values.Known(field.Generator):
 			return fault.New(fault.Config, where+": this build has no generator called "+
 				strconv.Quote(field.Generator)+". It has "+join(values.Names()))
@@ -421,6 +408,28 @@ func checkGenerators(entity recipe.Entity, values Values, locale string, plan *P
 			}
 		}
 	}
+	return nil
+}
+
+// checkTyped refuses a field described by type alone that cannot be filled as
+// it is declared, and notes one whose type this build leaves empty.
+func checkTyped(entity string, field recipe.Field, where string, values Values, plan *Plan) error {
+	if field.HasMaxLength || field.Bounded() {
+		if err := values.TypeFits(requestFor(entity, field, 0, "value")); err != nil {
+			return fault.Wrap(fault.Config, err, where).DoInstead(fault.InsteadOf(err))
+		}
+	}
+	if values.ProducesType(field.Type) {
+		return nil
+	}
+	// A type this build cannot fill. Until 2026-08-10 this case said nothing at
+	// all, so a declared column arrived empty and no part of the run mentioned
+	// it. The expression above has been reported since the first day and this
+	// one had not, which is why it was invisible: the two look alike in the
+	// recipe and only one of them spoke.
+	plan.Notes = append(plan.Notes, Note{where,
+		"this build produces no value for a field declared only as " +
+			strconv.Quote(field.Type) + ", so the column will be empty"})
 	return nil
 }
 
