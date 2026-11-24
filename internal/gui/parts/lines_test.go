@@ -503,9 +503,9 @@ func largestRecipe() string {
 // the text changed since the last time (a key press) and unchanged (a scroll),
 // beside the cost of the toolkit's own field taking one typed character on the
 // same text, so the share of a key press the column takes can be read off
-// (DEC-337). Run with -bench Lines -count 5.
+// (DEC-337). Measured with -bench 'Lines|TheToolkitTaking' -count 6.
 func BenchmarkLinesAfterAKeyPress(b *testing.B) {
-	editor, _ := framedEditor(b,largestRecipe(), fyne.NewSize(500, 700))
+	editor, _ := framedEditor(b, largestRecipe(), fyne.NewSize(500, 700))
 	b.ResetTimer()
 	for range b.N {
 		editor.lines = lineMap{}
@@ -514,7 +514,7 @@ func BenchmarkLinesAfterAKeyPress(b *testing.B) {
 }
 
 func BenchmarkLinesAfterAScroll(b *testing.B) {
-	editor, _ := framedEditor(b,largestRecipe(), fyne.NewSize(500, 700))
+	editor, _ := framedEditor(b, largestRecipe(), fyne.NewSize(500, 700))
 	b.ResetTimer()
 	for range b.N {
 		editor.redrawLines()
@@ -522,7 +522,7 @@ func BenchmarkLinesAfterAScroll(b *testing.B) {
 }
 
 func BenchmarkTheToolkitTakingOneCharacter(b *testing.B) {
-	editor, _ := framedEditor(b,largestRecipe(), fyne.NewSize(500, 700))
+	editor, _ := framedEditor(b, largestRecipe(), fyne.NewSize(500, 700))
 	editor.OnCursorChanged = nil
 	b.ResetTimer()
 	for range b.N {
