@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/test"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
@@ -308,6 +309,61 @@ func TestTheCountFieldShowsARefusalWhileItIsTyped(t *testing.T) {
 				"so the mark and the press disagree", typed, marked, refused)
 		}
 	}
+}
+
+// TestTheCountFieldSaysItsCeilingAndTheNoteTurnsRedWithIt holds DEC-335: the
+// most values this screen draws is said under the count field from the start,
+// and the line turns red the keystroke the field does, before any press.
+//
+// The note is found on the screen by its words rather than reached through the
+// view, so a note built and never put in the row fails here.
+func TestTheCountFieldSaysItsCeilingAndTheNoteTurnsRedWithIt(t *testing.T) {
+	view := New(i18n.English, &heldClipboard{})
+	view.UseSeed("for-the-test")
+	words := CountNote(i18n.English)
+	if !strings.HasSuffix(words, " "+strconv.Itoa(MostShown())) {
+		t.Fatalf("the note under the count field says %q and not the ceiling %d", words, MostShown())
+	}
+	note := textOnScreen(view.Content(), words)
+	if note == nil {
+		t.Fatalf("no line on the screen says %q", words)
+	}
+	rest := note.Color
+	view.howMany.SetText(strconv.Itoa(MostShown() + 1))
+	if note.Color == rest {
+		t.Errorf("a count over the ceiling is typed and the note under it keeps its colour %v", rest)
+	}
+	view.howMany.SetText(strconv.Itoa(MostShown()))
+	if note.Color != rest {
+		t.Errorf("the ceiling itself is typed and the note stays %v rather than %v", note.Color, rest)
+	}
+}
+
+// textOnScreen is the first visible piece of text on a screen saying exactly
+// those words.
+func textOnScreen(object fyne.CanvasObject, words string) *canvas.Text {
+	if object == nil || !object.Visible() {
+		return nil
+	}
+	switch shape := object.(type) {
+	case *canvas.Text:
+		if shape.Text == words {
+			return shape
+		}
+	case *fyne.Container:
+		for _, child := range shape.Objects {
+			if found := textOnScreen(child, words); found != nil {
+				return found
+			}
+		}
+	case fyne.Widget:
+		for _, child := range test.WidgetRenderer(shape).Objects() {
+			if found := textOnScreen(child, words); found != nil {
+				return found
+			}
+		}
+	}
+	return nil
 }
 
 // TestTheLocaleIsOfferedOnlyBesideAKindItChanges holds B-367: the choice of

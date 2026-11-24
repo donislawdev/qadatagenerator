@@ -230,14 +230,14 @@
 				</container>
 				<container pos="0,55" size="1122x844">
 					<container size="1122x844">
-						<container size="1122x117">
-							<container pos="32,16" size="1058x85">
+						<container size="1122x135">
+							<container pos="32,16" size="1058x103">
 								<text color="disabled" size="1058x16">Make test values to copy into a form or a test. Nothing on this screen is written to a file.</text>
-								<container pos="0,32" size="1058x52">
-									<container size="1058x52">
-										<container size="458x52">
-											<container size="355x52">
-												<container size="118x52">
+								<container pos="0,32" size="1058x70">
+									<container size="1058x70">
+										<container size="458x70">
+											<container size="355x70">
+												<container size="118x70">
 													<text color="disabled" size="118x14" textSize="11">Kind</text>
 													<widget pos="0,18" size="118x34" type="*parts.Select">
 														<container size="118x34">
@@ -268,32 +268,35 @@
 														</container>
 													</widget>
 												</container>
-												<container pos="130,0" size="79x52">
+												<container pos="130,0" size="79x70">
 													<text color="disabled" size="79x14" textSize="11">How many</text>
-													<container pos="0,18" size="79x34">
-														<rectangle size="79x34"/>
-														<container size="79x34">
-															<rectangle size="79x34"/>
+													<container pos="0,18" size="79x52">
+														<rectangle size="79x52"/>
+														<container size="79x52">
 															<container size="79x34">
+																<rectangle size="79x34"/>
 																<container size="79x34">
-																	<rectangle fillColor="button" pos="1,1" radius="6" size="77x32" strokeColor="inputBorder" strokeWidth="2"/>
-																</container>
-																<container size="79x34">
-																	<widget pos="8,8" size="63x26" type="*parts.FieldEntry">
-																		<widget pos="0,2" size="63x22" type="*widget.Scroll">
-																			<widget size="63x22" type="*widget.entryContent">
-																				<widget size="63x22" type="*widget.RichText">
-																					<text pos="4,2" size="15x16">10</text>
+																	<container size="79x34">
+																		<rectangle fillColor="button" pos="1,1" radius="6" size="77x32" strokeColor="inputBorder" strokeWidth="2"/>
+																	</container>
+																	<container size="79x34">
+																		<widget pos="8,8" size="63x26" type="*parts.FieldEntry">
+																			<widget pos="0,2" size="63x22" type="*widget.Scroll">
+																				<widget size="63x22" type="*widget.entryContent">
+																					<widget size="63x22" type="*widget.RichText">
+																						<text pos="4,2" size="15x16">10</text>
+																					</widget>
 																				</widget>
 																			</widget>
 																		</widget>
-																	</widget>
+																	</container>
 																</container>
 															</container>
+															<text color="disabled" pos="0,38" size="79x14" textSize="11">Up to 100000</text>
 														</container>
 													</container>
 												</container>
-												<container pos="221,0" size="134x52">
+												<container pos="221,0" size="134x70">
 													<text color="disabled" size="134x14" textSize="11">Seed</text>
 													<container pos="0,18" size="134x34">
 														<rectangle size="134x34"/>
@@ -319,8 +322,8 @@
 													</container>
 												</container>
 											</container>
-											<container pos="355,0" size="103x52">
-												<container pos="16,0" size="87x52">
+											<container pos="355,0" size="103x70">
+												<container pos="16,0" size="87x70">
 													<container size="87x14">
 														<rectangle size="87x14"/>
 														<rectangle size="87x14"/>
@@ -349,15 +352,15 @@
 												</container>
 											</container>
 										</container>
-										<spacer pos="458,0" size="599x52"/>
+										<spacer pos="458,0" size="599x70"/>
 									</container>
 								</container>
 							</container>
 						</container>
-						<container pos="0,117" size="1122x669">
-							<container pos="32,24" size="1058x621">
-								<container size="700x621">
-									<container size="700x621">
+						<container pos="0,135" size="1122x651">
+							<container pos="32,24" size="1058x603">
+								<container size="700x603">
+									<container size="700x603">
 										<container size="700x82">
 											<container pos="4,4" size="692x66">
 												<container size="692x34">
@@ -433,245 +436,245 @@
 												</widget>
 											</container>
 										</container>
-										<container pos="0,82" size="700x538">
-											<widget size="700x538" type="*parts.ScrolledRows">
-												<container size="700x538">
-													<rectangle fillColor="menuBackground" radius="10" size="700x538"/>
-													<widget pos="8,8" size="684x52" type="*parts.TapRow">
-														<container size="684x52">
-															<container size="684x52">
-																<rectangle size="684x52"/>
-																<container size="684x52">
-																	<container pos="16,4" size="652x44">
-																		<container size="297x44">
-																			<container size="13x44">
+										<container pos="0,82" size="700x520">
+											<widget size="700x520" type="*parts.ScrolledRows">
+												<container size="700x520">
+													<rectangle fillColor="menuBackground" radius="10" size="700x520"/>
+													<widget pos="8,8" size="684x50" type="*parts.TapRow">
+														<container size="684x50">
+															<container size="684x50">
+																<rectangle size="684x50"/>
+																<container size="684x50">
+																	<container pos="16,4" size="652x42">
+																		<container size="297x42">
+																			<container size="13x42">
 																				<spacer size="13x14"/>
 																				<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 1</text>
-																				<spacer pos="0,29" size="13x14"/>
+																				<spacer pos="0,28" size="13x14"/>
 																			</container>
-																			<container pos="29,0" size="268x44">
-																				<spacer size="268x11"/>
-																				<text monospace pos="0,11" size="268x20" textSize="16">PL21720505430388326568309147</text>
-																				<spacer pos="0,32" size="268x11"/>
+																			<container pos="29,0" size="268x42">
+																				<spacer size="268x10"/>
+																				<text monospace pos="0,10" size="268x20" textSize="16">PL21720505430388326568309147</text>
+																				<spacer pos="0,31" size="268x10"/>
 																			</container>
 																		</container>
-																		<rectangle pos="651,0" size="1x44"/>
+																		<rectangle pos="651,0" size="1x42"/>
 																	</container>
 																</container>
 															</container>
 														</container>
 													</widget>
-													<widget pos="8,60" size="684x52" type="*parts.TapRow">
-														<container size="684x52">
-															<container size="684x52">
-																<rectangle fillColor="button" size="684x52"/>
-																<container size="684x52">
-																	<container pos="16,4" size="652x44">
-																		<container size="297x44">
-																			<container size="13x44">
+													<widget pos="8,58" size="684x50" type="*parts.TapRow">
+														<container size="684x50">
+															<container size="684x50">
+																<rectangle fillColor="button" size="684x50"/>
+																<container size="684x50">
+																	<container pos="16,4" size="652x42">
+																		<container size="297x42">
+																			<container size="13x42">
 																				<spacer size="13x14"/>
 																				<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 2</text>
-																				<spacer pos="0,29" size="13x14"/>
+																				<spacer pos="0,28" size="13x14"/>
 																			</container>
-																			<container pos="29,0" size="268x44">
-																				<spacer size="268x11"/>
-																				<text monospace pos="0,11" size="268x20" textSize="16">PL49167313274604006275517452</text>
-																				<spacer pos="0,32" size="268x11"/>
+																			<container pos="29,0" size="268x42">
+																				<spacer size="268x10"/>
+																				<text monospace pos="0,10" size="268x20" textSize="16">PL49167313274604006275517452</text>
+																				<spacer pos="0,31" size="268x10"/>
 																			</container>
 																		</container>
-																		<rectangle pos="651,0" size="1x44"/>
+																		<rectangle pos="651,0" size="1x42"/>
 																	</container>
 																</container>
 															</container>
 														</container>
 													</widget>
-													<widget pos="8,112" size="684x52" type="*parts.TapRow">
-														<container size="684x52">
-															<container size="684x52">
-																<rectangle size="684x52"/>
-																<container size="684x52">
-																	<container pos="16,4" size="652x44">
-																		<container size="297x44">
-																			<container size="13x44">
+													<widget pos="8,108" size="684x50" type="*parts.TapRow">
+														<container size="684x50">
+															<container size="684x50">
+																<rectangle size="684x50"/>
+																<container size="684x50">
+																	<container pos="16,4" size="652x42">
+																		<container size="297x42">
+																			<container size="13x42">
 																				<spacer size="13x14"/>
 																				<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 3</text>
-																				<spacer pos="0,29" size="13x14"/>
+																				<spacer pos="0,28" size="13x14"/>
 																			</container>
-																			<container pos="29,0" size="268x44">
-																				<spacer size="268x11"/>
-																				<text monospace pos="0,11" size="268x20" textSize="16">PL25266203541268665452621184</text>
-																				<spacer pos="0,32" size="268x11"/>
+																			<container pos="29,0" size="268x42">
+																				<spacer size="268x10"/>
+																				<text monospace pos="0,10" size="268x20" textSize="16">PL25266203541268665452621184</text>
+																				<spacer pos="0,31" size="268x10"/>
 																			</container>
 																		</container>
-																		<rectangle pos="651,0" size="1x44"/>
+																		<rectangle pos="651,0" size="1x42"/>
 																	</container>
 																</container>
 															</container>
 														</container>
 													</widget>
-													<widget pos="8,164" size="684x52" type="*parts.TapRow">
-														<container size="684x52">
-															<container size="684x52">
-																<rectangle fillColor="button" size="684x52"/>
-																<container size="684x52">
-																	<container pos="16,4" size="652x44">
-																		<container size="297x44">
-																			<container size="13x44">
+													<widget pos="8,159" size="684x50" type="*parts.TapRow">
+														<container size="684x50">
+															<container size="684x50">
+																<rectangle fillColor="button" size="684x50"/>
+																<container size="684x50">
+																	<container pos="16,4" size="652x42">
+																		<container size="297x42">
+																			<container size="13x42">
 																				<spacer size="13x14"/>
 																				<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 4</text>
-																				<spacer pos="0,29" size="13x14"/>
+																				<spacer pos="0,28" size="13x14"/>
 																			</container>
-																			<container pos="29,0" size="268x44">
-																				<spacer size="268x11"/>
-																				<text monospace pos="0,11" size="268x20" textSize="16">PL34018465089412327019313674</text>
-																				<spacer pos="0,32" size="268x11"/>
+																			<container pos="29,0" size="268x42">
+																				<spacer size="268x10"/>
+																				<text monospace pos="0,10" size="268x20" textSize="16">PL34018465089412327019313674</text>
+																				<spacer pos="0,31" size="268x10"/>
 																			</container>
 																		</container>
-																		<rectangle pos="651,0" size="1x44"/>
+																		<rectangle pos="651,0" size="1x42"/>
 																	</container>
 																</container>
 															</container>
 														</container>
 													</widget>
-													<widget pos="8,216" size="684x52" type="*parts.TapRow">
-														<container size="684x52">
-															<container size="684x52">
-																<rectangle size="684x52"/>
-																<container size="684x52">
-																	<container pos="16,4" size="652x44">
-																		<container size="297x44">
-																			<container size="13x44">
+													<widget pos="8,209" size="684x50" type="*parts.TapRow">
+														<container size="684x50">
+															<container size="684x50">
+																<rectangle size="684x50"/>
+																<container size="684x50">
+																	<container pos="16,4" size="652x42">
+																		<container size="297x42">
+																			<container size="13x42">
 																				<spacer size="13x14"/>
 																				<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 5</text>
-																				<spacer pos="0,29" size="13x14"/>
+																				<spacer pos="0,28" size="13x14"/>
 																			</container>
-																			<container pos="29,0" size="268x44">
-																				<spacer size="268x11"/>
-																				<text monospace pos="0,11" size="268x20" textSize="16">PL90971516696434377185266540</text>
-																				<spacer pos="0,32" size="268x11"/>
+																			<container pos="29,0" size="268x42">
+																				<spacer size="268x10"/>
+																				<text monospace pos="0,10" size="268x20" textSize="16">PL90971516696434377185266540</text>
+																				<spacer pos="0,31" size="268x10"/>
 																			</container>
 																		</container>
-																		<rectangle pos="651,0" size="1x44"/>
+																		<rectangle pos="651,0" size="1x42"/>
 																	</container>
 																</container>
 															</container>
 														</container>
 													</widget>
-													<widget pos="8,269" size="684x52" type="*parts.TapRow">
-														<container size="684x52">
-															<container size="684x52">
-																<rectangle fillColor="button" size="684x52"/>
-																<container size="684x52">
-																	<container pos="16,4" size="652x44">
-																		<container size="297x44">
-																			<container size="13x44">
+													<widget pos="8,260" size="684x50" type="*parts.TapRow">
+														<container size="684x50">
+															<container size="684x50">
+																<rectangle fillColor="button" size="684x50"/>
+																<container size="684x50">
+																	<container pos="16,4" size="652x42">
+																		<container size="297x42">
+																			<container size="13x42">
 																				<spacer size="13x14"/>
 																				<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 6</text>
-																				<spacer pos="0,29" size="13x14"/>
+																				<spacer pos="0,28" size="13x14"/>
 																			</container>
-																			<container pos="29,0" size="268x44">
-																				<spacer size="268x11"/>
-																				<text monospace pos="0,11" size="268x20" textSize="16">PL66342832933235052859740013</text>
-																				<spacer pos="0,32" size="268x11"/>
+																			<container pos="29,0" size="268x42">
+																				<spacer size="268x10"/>
+																				<text monospace pos="0,10" size="268x20" textSize="16">PL66342832933235052859740013</text>
+																				<spacer pos="0,31" size="268x10"/>
 																			</container>
 																		</container>
-																		<rectangle pos="651,0" size="1x44"/>
+																		<rectangle pos="651,0" size="1x42"/>
 																	</container>
 																</container>
 															</container>
 														</container>
 													</widget>
-													<widget pos="8,321" size="684x52" type="*parts.TapRow">
-														<container size="684x52">
-															<container size="684x52">
-																<rectangle size="684x52"/>
-																<container size="684x52">
-																	<container pos="16,4" size="652x44">
-																		<container size="297x44">
-																			<container size="13x44">
+													<widget pos="8,310" size="684x50" type="*parts.TapRow">
+														<container size="684x50">
+															<container size="684x50">
+																<rectangle size="684x50"/>
+																<container size="684x50">
+																	<container pos="16,4" size="652x42">
+																		<container size="297x42">
+																			<container size="13x42">
 																				<spacer size="13x14"/>
 																				<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 7</text>
-																				<spacer pos="0,29" size="13x14"/>
+																				<spacer pos="0,28" size="13x14"/>
 																			</container>
-																			<container pos="29,0" size="268x44">
-																				<spacer size="268x11"/>
-																				<text monospace pos="0,11" size="268x20" textSize="16">PL21369024286191510999386336</text>
-																				<spacer pos="0,32" size="268x11"/>
+																			<container pos="29,0" size="268x42">
+																				<spacer size="268x10"/>
+																				<text monospace pos="0,10" size="268x20" textSize="16">PL21369024286191510999386336</text>
+																				<spacer pos="0,31" size="268x10"/>
 																			</container>
 																		</container>
-																		<rectangle pos="651,0" size="1x44"/>
+																		<rectangle pos="651,0" size="1x42"/>
 																	</container>
 																</container>
 															</container>
 														</container>
 													</widget>
-													<widget pos="8,373" size="684x52" type="*parts.TapRow">
-														<container size="684x52">
-															<container size="684x52">
-																<rectangle fillColor="button" size="684x52"/>
-																<container size="684x52">
-																	<container pos="16,4" size="652x44">
-																		<container size="297x44">
-																			<container size="13x44">
+													<widget pos="8,360" size="684x50" type="*parts.TapRow">
+														<container size="684x50">
+															<container size="684x50">
+																<rectangle fillColor="button" size="684x50"/>
+																<container size="684x50">
+																	<container pos="16,4" size="652x42">
+																		<container size="297x42">
+																			<container size="13x42">
 																				<spacer size="13x14"/>
 																				<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 8</text>
-																				<spacer pos="0,29" size="13x14"/>
+																				<spacer pos="0,28" size="13x14"/>
 																			</container>
-																			<container pos="29,0" size="268x44">
-																				<spacer size="268x11"/>
-																				<text monospace pos="0,11" size="268x20" textSize="16">PL31724802492638712416794818</text>
-																				<spacer pos="0,32" size="268x11"/>
+																			<container pos="29,0" size="268x42">
+																				<spacer size="268x10"/>
+																				<text monospace pos="0,10" size="268x20" textSize="16">PL31724802492638712416794818</text>
+																				<spacer pos="0,31" size="268x10"/>
 																			</container>
 																		</container>
-																		<rectangle pos="651,0" size="1x44"/>
+																		<rectangle pos="651,0" size="1x42"/>
 																	</container>
 																</container>
 															</container>
 														</container>
 													</widget>
-													<widget pos="8,425" size="684x52" type="*parts.TapRow">
-														<container size="684x52">
-															<container size="684x52">
-																<rectangle size="684x52"/>
-																<container size="684x52">
-																	<container pos="16,4" size="652x44">
-																		<container size="297x44">
-																			<container size="13x44">
+													<widget pos="8,411" size="684x50" type="*parts.TapRow">
+														<container size="684x50">
+															<container size="684x50">
+																<rectangle size="684x50"/>
+																<container size="684x50">
+																	<container pos="16,4" size="652x42">
+																		<container size="297x42">
+																			<container size="13x42">
 																				<spacer size="13x14"/>
 																				<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11"> 9</text>
-																				<spacer pos="0,29" size="13x14"/>
+																				<spacer pos="0,28" size="13x14"/>
 																			</container>
-																			<container pos="29,0" size="268x44">
-																				<spacer size="268x11"/>
-																				<text monospace pos="0,11" size="268x20" textSize="16">PL67688607058655894906328981</text>
-																				<spacer pos="0,32" size="268x11"/>
+																			<container pos="29,0" size="268x42">
+																				<spacer size="268x10"/>
+																				<text monospace pos="0,10" size="268x20" textSize="16">PL67688607058655894906328981</text>
+																				<spacer pos="0,31" size="268x10"/>
 																			</container>
 																		</container>
-																		<rectangle pos="651,0" size="1x44"/>
+																		<rectangle pos="651,0" size="1x42"/>
 																	</container>
 																</container>
 															</container>
 														</container>
 													</widget>
-													<widget pos="8,478" size="684x52" type="*parts.TapRow">
-														<container size="684x52">
-															<container size="684x52">
-																<rectangle fillColor="button" size="684x52"/>
-																<container size="684x52">
-																	<container pos="16,4" size="652x44">
-																		<container size="297x44">
-																			<container size="13x44">
+													<widget pos="8,461" size="684x50" type="*parts.TapRow">
+														<container size="684x50">
+															<container size="684x50">
+																<rectangle fillColor="button" size="684x50"/>
+																<container size="684x50">
+																	<container pos="16,4" size="652x42">
+																		<container size="297x42">
+																			<container size="13x42">
 																				<spacer size="13x14"/>
 																				<text alignment="trailing" color="disabled" monospace pos="0,14" size="13x14" textSize="11">10</text>
-																				<spacer pos="0,29" size="13x14"/>
+																				<spacer pos="0,28" size="13x14"/>
 																			</container>
-																			<container pos="29,0" size="268x44">
-																				<spacer size="268x11"/>
-																				<text monospace pos="0,11" size="268x20" textSize="16">PL24093366035587826345176269</text>
-																				<spacer pos="0,32" size="268x11"/>
+																			<container pos="29,0" size="268x42">
+																				<spacer size="268x10"/>
+																				<text monospace pos="0,10" size="268x20" textSize="16">PL24093366035587826345176269</text>
+																				<spacer pos="0,31" size="268x10"/>
 																			</container>
 																		</container>
-																		<rectangle pos="651,0" size="1x44"/>
+																		<rectangle pos="651,0" size="1x42"/>
 																	</container>
 																</container>
 															</container>
@@ -679,11 +682,11 @@
 													</widget>
 												</container>
 											</widget>
-											<rectangle radius="10" size="700x538" strokeWidth="2"/>
+											<rectangle radius="10" size="700x520" strokeWidth="2"/>
 										</container>
 									</container>
 								</container>
-								<container pos="700,0" size="358x621">
+								<container pos="700,0" size="358x603">
 									<container size="358x464">
 										<container size="358x464">
 											<container pos="24,4" size="330x456">

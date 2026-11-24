@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/test"
 	toolkit "fyne.io/fyne/v2/theme"
@@ -425,4 +426,139 @@ func sameInk(first, second color.Color) bool {
 	fr, fg, fb, fa := first.RGBA()
 	sr, sg, sb, sa := second.RGBA()
 	return fr == sr && fg == sg && fb == sb && fa == sa
+}
+
+// 🔴 A field holding more than it shows draws no scroll bar, and the caret
+// still pulls the text along.
+//
+// DEC-335. Every seed the Quick screen draws for itself is longer than its
+// field, so the toolkit's bar stood under the seed from the moment the window
+// opened, and the owner called it ugly. The canary is the same field scrolling
+// the way the toolkit does by default: it has to show the bar, or this test
+// would pass for want of anything to find.
+func TestAFieldHoldingMoreThanItShowsDrawsNoScrollBar(t *testing.T) {
+	long := strings.Repeat("0123456789abcdef", 4)
+	build := func(scroll fyne.ScrollDirection, override bool) (*FieldEntry, fyne.CanvasObject) {
+		field := NewFieldEntry()
+		dressed := Field(field)
+		if override {
+			field.Scroll = scroll
+		}
+		window := test.NewWindow(Standing(dressed))
+		t.Cleanup(window.Close)
+		window.Resize(fyne.NewSize(fieldProbeWidth, palette.ControlHeight*2))
+		field.SetText(long)
+		window.Canvas().Focus(field)
+		return field, dressed
+	}
+
+	_, canary := build(fyne.ScrollBoth, true)
+	if scrollBarsIn(canary) == 0 {
+		t.Fatal("the canary, a field scrolling both ways, shows no bar, so this cannot see one")
+	}
+
+	field, dressed := build(0, false)
+	if bars := scrollBarsIn(dressed); bars != 0 {
+		t.Errorf("a field holding more than it shows draws %d scroll bars, want none", bars)
+	}
+	field.TypedKey(&fyne.KeyEvent{Name: fyne.KeyEnd})
+	if offset := scrollOffsetIn(field); offset <= 0 {
+		t.Errorf("the caret went to the end of the text and the text did not move, offset %v", offset)
+	}
+}
+
+// fieldProbeWidth is a field far narrower than the text the test types, so
+// that the text overflows whatever the font measures today.
+const fieldProbeWidth = 120
+
+// scrollBarsIn counts the visible bar areas of the toolkit's scrollers in a
+// drawing. The type is the toolkit's own and unexported, so it is named.
+func scrollBarsIn(object fyne.CanvasObject) int {
+	count := 0
+	var walk func(fyne.CanvasObject)
+	walk = func(each fyne.CanvasObject) {
+		if each == nil || !each.Visible() {
+			return
+		}
+		if fmt.Sprintf("%T", each) == "*widget.scrollBarArea" {
+			count++
+			return
+		}
+		switch shape := each.(type) {
+		case *fyne.Container:
+			for _, child := range shape.Objects {
+				walk(child)
+			}
+		case fyne.Widget:
+			for _, child := range test.WidgetRenderer(shape).Objects() {
+				walk(child)
+			}
+		}
+	}
+	walk(object)
+	return count
+}
+
+// scrollOffsetIn is how far the text inside a field has been moved left.
+func scrollOffsetIn(field *FieldEntry) float32 {
+	offset := float32(0)
+	var walk func(fyne.CanvasObject)
+	walk = func(each fyne.CanvasObject) {
+		if each == nil {
+			return
+		}
+		if area, ok := each.(*container.Scroll); ok {
+			offset = max(offset, area.Offset.X)
+		}
+		if widget, ok := each.(fyne.Widget); ok {
+			for _, child := range test.WidgetRenderer(widget).Objects() {
+				walk(child)
+			}
+		}
+	}
+	walk(field)
+	return offset
+}
+
+// 🔴 The note under a field turns the colour of a refusal with the field, and
+// starts in it when the field was judged before it was noted.
+//
+// DEC-335: the limit is said the moment the edge turns red. The two are told
+// by one call, SetInvalid, so a note that missed it would stay grey beside a
+// red edge, which says the number is fine and the field says it is not.
+func TestTheNoteUnderAFieldTurnsRedWithTheField(t *testing.T) {
+	inkOf := func(noted fyne.CanvasObject) color.Color {
+		column := noted.(*fyne.Container)
+		return column.Objects[len(column.Objects)-1].(*canvas.Text).Color
+	}
+	field := NewFieldEntry()
+	noted := Noted(field, "Up to 10")
+	if got := inkOf(noted); !sameInk(got, palette.Ink(palette.TextSecondary)) {
+		t.Errorf("the note of a field at rest is %v, want the colour of a label", got)
+	}
+	field.SetInvalid(true)
+	if got := inkOf(noted); !sameInk(got, palette.Ink(palette.StateDanger)) {
+		t.Errorf("the note of a refused field is %v, want the colour of a refusal", got)
+	}
+	field.SetInvalid(false)
+	if got := inkOf(noted); !sameInk(got, palette.Ink(palette.TextSecondary)) {
+		t.Errorf("the note of a field taken back from refused is %v, want the colour of a label", got)
+	}
+
+	judged := NewFieldEntry()
+	judged.SetInvalid(true)
+	judgedNote := Noted(judged, "Up to 10")
+	if got := inkOf(judgedNote); !sameInk(got, palette.Ink(palette.StateDanger)) {
+		t.Errorf("a field refused before it was noted has a note in %v, want the colour of a refusal", got)
+	}
+	// Out of reach nobody can change the value, so the note says nothing about
+	// it, as the edge says nothing, and it comes back red with the field.
+	judged.Disable()
+	if got := inkOf(judgedNote); !sameInk(got, palette.Ink(palette.TextSecondary)) {
+		t.Errorf("a refused field out of reach has a note in %v, want the colour of a label", got)
+	}
+	judged.Enable()
+	if got := inkOf(judgedNote); !sameInk(got, palette.Ink(palette.StateDanger)) {
+		t.Errorf("a refused field back in reach has a note in %v, want the colour of a refusal", got)
+	}
 }

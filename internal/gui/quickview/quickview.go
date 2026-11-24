@@ -186,9 +186,11 @@ func (v *View) buildFields() {
 	v.howMany = parts.NewFieldEntry()
 	v.howMany.OnSubmitted = func(string) { v.draw() }
 	// 🔴 Judged on every keystroke and NOT produced on any (DEC-235): the field
-	// turns red the moment it holds a number Generate would refuse, and the
-	// sentence saying why still waits for the press (B-363). Set before Bounded,
-	// which keeps whatever was set here and calls it after its own filter.
+	// turns red the moment it holds a number Generate would refuse (B-363), and
+	// the note under it, which says the ceiling all along, turns red with it
+	// (DEC-335). The sentence saying why in full still waits for the press. Set
+	// before Bounded, which keeps whatever was set here and calls it after its
+	// own filter.
 	v.howMany.OnChanged = func(typed string) { v.howMany.SetInvalid(v.countIsWrong(typed)) }
 	// 🔴 The field will not take a character that could never be a count, and
 	// it will not take more digits than the ceiling has. Added on 2026-09-09
@@ -776,8 +778,10 @@ func (v *View) settingsRow(showing map[string]bool) fyne.CanvasObject {
 		// because how many is asked of every generator alike. The fields below
 		// it come and go with what was chosen, so a field that never leaves
 		// belongs before the ones that do.
+		// The note under it says the ceiling from the start and turns red with
+		// the field, so the limit is known before Generate is pressed (DEC-335).
 		labelled(v.text.T(i18n.QuickLabelCount),
-			paint.AtLeast(paint.FieldWidth(countSample), 0, parts.Standing(parts.Field(v.howMany)))),
+			paint.AtLeast(paint.FieldWidth(countSample), 0, parts.Noted(v.howMany, CountNote(v.text)))),
 	}
 	// Before the gender, because the locale decides whether a surname reads one.
 	if showing[settingLocale] {
@@ -863,6 +867,18 @@ func (v *View) placeSettings(withSeed fyne.CanvasObject) {
 		paint.Lead(container.NewHBox(withSeed, padded), paint.Spacer()),
 	}
 	v.settings.Refresh()
+}
+
+// CountNote is the line under the count field saying the most values this
+// screen draws at once, exported so that the catalogue of controls shows the
+// very words the screen does.
+//
+// The number is put beside the words here rather than into the catalogue, for
+// the reason the refusal of a count over the ceiling carries its own: a
+// translated sentence must not have to be edited when a measurement moves the
+// ceiling.
+func CountNote(text i18n.Catalogue) string {
+	return text.T(i18n.QuickCountNote) + " " + strconv.Itoa(mostShown)
 }
 
 // countDigits is how many digits the count field takes: ONE MORE than the

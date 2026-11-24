@@ -145,7 +145,7 @@ catalogue.variant.unbanded: Row without a band
 catalogue.variant.banded: Row with a band
 catalogue.variant.empty: Empty
 catalogue.variant.hinted: Empty, with a hint
-catalogue.variant.short: One word
+catalogue.variant.noted: One word, with a note under it
 catalogue.variant.refused: A value the screen refuses
 catalogue.variant.extreme: Wider than the field
 catalogue.variant.lines: Several lines, some too long
@@ -602,6 +602,7 @@ quick.label.seed: Seed
 quick.label.gender: Gender
 quick.label.born: Born
 quick.label.count: How many
+quick.note.count: Up to
 quick.gender.any: any
 # tekst-ok: the same verb the toolkit's menu on a text field says in toolkit.copy, with one meaning
 quick.copy: Copy

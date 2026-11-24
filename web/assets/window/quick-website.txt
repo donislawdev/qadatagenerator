@@ -14,6 +14,7 @@ Kind
 vin
 How many
 10
+Up to 100000
 Seed
 readme
 Generate

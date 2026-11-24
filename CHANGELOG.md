@@ -102,6 +102,12 @@ repository once they are released.
 
 ### Fixed
 
+- **A text field holding more than it shows no longer draws a scroll bar along
+  its foot.** The seed the Quick value screen draws for itself is longer than
+  its field, so the bar stood under the seed from the moment the window
+  opened, and a long path in Write to or on the damage screen showed one too.
+  The text is now cut at the edge of the field, as in any text field of the
+  system, and it still moves along with the caret.
 - **validate warns about a setting of `output` that changes nothing.**
   `file_per_entity: false` in a csv recipe and a `delimiter` in a json recipe
   do nothing, because csv always writes a file per table and json has no
@@ -616,6 +622,10 @@ repository once they are released.
 
 ### Added
 
+- **How many on the Quick value screen says its limit under the field.** The
+  line reads Up to 100000 from the start and turns red together with the
+  field as soon as a number over it is typed, where until now the reason came
+  only after pressing Generate. The command line has no such limit.
 - **A number field can have a smallest and a largest value.** `min_value` and
   `max_value` on a field of `type: integer` or `type: decimal` set the range
   its random numbers are drawn from, both ends included, such as

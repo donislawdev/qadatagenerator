@@ -318,7 +318,7 @@
 				<container pos="0,55" size="1122x844">
 					<container size="1122x844">
 						<container pos="32,24" size="1058x796">
-							<container size="1058x539">
+							<container size="1058x630">
 								<container size="1058x18">
 									<spacer pos="60,0" size="997x18"/>
 									<container size="60x18">
@@ -327,13 +327,13 @@
 										<spacer pos="0,18" size="60x0"/>
 									</container>
 								</container>
-								<container pos="0,34" size="1058x272">
+								<container pos="0,34" size="1058x363">
 									<container size="1058x22">
-										<container size="169x22">
-											<rectangle size="169x22"/>
-											<rectangle size="169x22"/>
+										<container size="191x22">
+											<rectangle size="191x22"/>
+											<rectangle size="191x22"/>
 										</container>
-										<container pos="169,0" size="888x22">
+										<container pos="191,0" size="866x22">
 											<container size="101x22">
 												<container pos="4,4" size="89x14">
 													<container size="89x14">
@@ -364,18 +364,18 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,30" size="1058x42">
-										<container size="169x42">
-											<rectangle size="169x42"/>
-											<container size="169x42">
-												<spacer size="169x12"/>
-												<text pos="0,12" size="169x16">Empty</text>
-												<spacer pos="0,29" size="169x12"/>
+									<container pos="0,30" size="1058x60">
+										<container size="191x60">
+											<rectangle size="191x60"/>
+											<container size="191x60">
+												<spacer size="191x21"/>
+												<text pos="0,21" size="191x16">Empty</text>
+												<spacer pos="0,38" size="191x21"/>
 											</container>
 										</container>
-										<container pos="169,0" size="888x42">
-											<container size="101x42">
-												<container pos="4,4" size="89x34">
+										<container pos="191,0" size="866x60">
+											<container size="101x60">
+												<container pos="4,4" size="89x52">
 													<container size="89x34">
 														<container size="87x34">
 															<rectangle size="87x34"/>
@@ -405,8 +405,8 @@
 													</container>
 												</container>
 											</container>
-											<container pos="101,0" size="101x42">
-												<container pos="4,4" size="89x34">
+											<container pos="101,0" size="101x60">
+												<container pos="4,4" size="89x52">
 													<container size="89x34">
 														<container size="87x34">
 															<rectangle size="87x34"/>
@@ -436,8 +436,8 @@
 													</container>
 												</container>
 											</container>
-											<container pos="203,0" size="101x42">
-												<container pos="4,4" size="89x34">
+											<container pos="203,0" size="101x60">
+												<container pos="4,4" size="89x52">
 													<container size="89x34">
 														<container size="87x34">
 															<rectangle size="87x34"/>
@@ -468,8 +468,8 @@
 													</container>
 												</container>
 											</container>
-											<container pos="305,0" size="101x42">
-												<container pos="4,4" size="89x34">
+											<container pos="305,0" size="101x60">
+												<container pos="4,4" size="89x52">
 													<container size="89x34">
 														<container size="87x34">
 															<rectangle size="87x34"/>
@@ -499,122 +499,134 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,80" size="1058x42">
-										<container size="169x42">
-											<rectangle size="169x42"/>
-											<container size="169x42">
-												<spacer size="169x12"/>
-												<text pos="0,12" size="169x16">One word</text>
-												<spacer pos="0,29" size="169x12"/>
+									<container pos="0,98" size="1058x60">
+										<container size="191x60">
+											<rectangle size="191x60"/>
+											<container size="191x60">
+												<spacer size="191x21"/>
+												<text pos="0,21" size="191x16">One word, with a note under it</text>
+												<spacer pos="0,38" size="191x21"/>
 											</container>
 										</container>
-										<container pos="169,0" size="888x42">
-											<container size="101x42">
-												<container pos="4,4" size="89x34">
-													<container size="89x34">
-														<container size="87x34">
-															<rectangle size="87x34"/>
-															<container size="87x34">
-																<rectangle size="87x34"/>
+										<container pos="191,0" size="866x60">
+											<container size="101x60">
+												<container pos="4,4" size="89x52">
+													<container size="89x52">
+														<container size="87x52">
+															<rectangle size="87x52"/>
+															<container size="87x52">
 																<container size="87x34">
+																	<rectangle size="87x34"/>
 																	<container size="87x34">
-																		<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="inputBorder" strokeWidth="2"/>
-																	</container>
-																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
-																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																				<widget size="71x22" type="*widget.entryContent">
-																					<widget size="71x22" type="*widget.RichText">
-																						<text pos="4,2" size="54x16">Generate</text>
+																		<container size="87x34">
+																			<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="inputBorder" strokeWidth="2"/>
+																		</container>
+																		<container size="87x34">
+																			<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																				<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																					<widget size="71x22" type="*widget.entryContent">
+																						<widget size="71x22" type="*widget.RichText">
+																							<text pos="4,2" size="54x16">Generate</text>
+																						</widget>
 																					</widget>
 																				</widget>
 																			</widget>
-																		</widget>
+																		</container>
 																	</container>
 																</container>
+																<text color="disabled" pos="0,38" size="87x14" textSize="11">Up to 100000</text>
 															</container>
 														</container>
 													</container>
 												</container>
 											</container>
-											<container pos="101,0" size="101x42">
-												<container pos="4,4" size="89x34">
-													<container size="89x34">
-														<container size="87x34">
-															<rectangle size="87x34"/>
-															<container size="87x34">
-																<rectangle size="87x34"/>
+											<container pos="101,0" size="101x60">
+												<container pos="4,4" size="89x52">
+													<container size="89x52">
+														<container size="87x52">
+															<rectangle size="87x52"/>
+															<container size="87x52">
 																<container size="87x34">
+																	<rectangle size="87x34"/>
 																	<container size="87x34">
-																		<rectangle fillColor="hover" pos="1,1" radius="6" size="85x32" strokeColor="inputBorder" strokeWidth="2"/>
-																	</container>
-																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
-																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																				<widget size="71x22" type="*widget.entryContent">
-																					<widget size="71x22" type="*widget.RichText">
-																						<text pos="4,2" size="54x16">Generate</text>
+																		<container size="87x34">
+																			<rectangle fillColor="hover" pos="1,1" radius="6" size="85x32" strokeColor="inputBorder" strokeWidth="2"/>
+																		</container>
+																		<container size="87x34">
+																			<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																				<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																					<widget size="71x22" type="*widget.entryContent">
+																						<widget size="71x22" type="*widget.RichText">
+																							<text pos="4,2" size="54x16">Generate</text>
+																						</widget>
 																					</widget>
 																				</widget>
 																			</widget>
-																		</widget>
+																		</container>
 																	</container>
 																</container>
+																<text color="disabled" pos="0,38" size="87x14" textSize="11">Up to 100000</text>
 															</container>
 														</container>
 													</container>
 												</container>
 											</container>
-											<container pos="203,0" size="101x42">
-												<container pos="4,4" size="89x34">
-													<container size="89x34">
-														<container size="87x34">
-															<rectangle size="87x34"/>
-															<container size="87x34">
-																<rectangle size="87x34"/>
+											<container pos="203,0" size="101x60">
+												<container pos="4,4" size="89x52">
+													<container size="89x52">
+														<container size="87x52">
+															<rectangle size="87x52"/>
+															<container size="87x52">
 																<container size="87x34">
+																	<rectangle size="87x34"/>
 																	<container size="87x34">
-																		<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="focus" strokeWidth="2"/>
-																	</container>
-																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
-																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																				<widget size="71x22" type="*widget.entryContent">
-																					<widget size="71x22" type="*widget.RichText">
-																						<text pos="4,2" size="54x16">Generate</text>
+																		<container size="87x34">
+																			<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="focus" strokeWidth="2"/>
+																		</container>
+																		<container size="87x34">
+																			<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																				<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																					<widget size="71x22" type="*widget.entryContent">
+																						<widget size="71x22" type="*widget.RichText">
+																							<text pos="4,2" size="54x16">Generate</text>
+																						</widget>
+																						<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																					</widget>
-																					<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																				</widget>
 																			</widget>
-																		</widget>
+																		</container>
 																	</container>
 																</container>
+																<text color="disabled" pos="0,38" size="87x14" textSize="11">Up to 100000</text>
 															</container>
 														</container>
 													</container>
 												</container>
 											</container>
-											<container pos="305,0" size="101x42">
-												<container pos="4,4" size="89x34">
-													<container size="89x34">
-														<container size="87x34">
-															<rectangle size="87x34"/>
-															<container size="87x34">
-																<rectangle size="87x34"/>
+											<container pos="305,0" size="101x60">
+												<container pos="4,4" size="89x52">
+													<container size="89x52">
+														<container size="87x52">
+															<rectangle size="87x52"/>
+															<container size="87x52">
 																<container size="87x34">
-																	<rectangle fillColor="button" radius="6" size="87x34"/>
+																	<rectangle size="87x34"/>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
-																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																				<widget size="71x22" type="*widget.entryContent">
-																					<widget size="71x22" type="*widget.RichText">
-																						<text color="disabled" pos="4,2" size="54x16">Generate</text>
+																		<rectangle fillColor="button" radius="6" size="87x34"/>
+																		<container size="87x34">
+																			<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																				<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																					<widget size="71x22" type="*widget.entryContent">
+																						<widget size="71x22" type="*widget.RichText">
+																							<text color="disabled" pos="4,2" size="54x16">Generate</text>
+																						</widget>
 																					</widget>
 																				</widget>
 																			</widget>
-																		</widget>
+																		</container>
 																	</container>
 																</container>
+																<text color="disabled" pos="0,38" size="87x14" textSize="11">Up to 100000</text>
 															</container>
 														</container>
 													</container>
@@ -622,127 +634,139 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,130" size="1058x42">
-										<container size="169x42">
-											<rectangle size="169x42"/>
-											<container size="169x42">
-												<spacer size="169x12"/>
-												<text pos="0,12" size="169x16">A value the screen refuses</text>
-												<spacer pos="0,29" size="169x12"/>
+									<container pos="0,166" size="1058x60">
+										<container size="191x60">
+											<rectangle size="191x60"/>
+											<container size="191x60">
+												<spacer size="191x21"/>
+												<text pos="0,21" size="191x16">A value the screen refuses</text>
+												<spacer pos="0,38" size="191x21"/>
 											</container>
 										</container>
-										<container pos="169,0" size="888x42">
-											<container size="101x42">
-												<container pos="4,4" size="89x34">
-													<container size="89x34">
-														<container size="87x34">
-															<rectangle size="87x34"/>
-															<container size="87x34">
-																<rectangle size="87x34"/>
+										<container pos="191,0" size="866x60">
+											<container size="101x60">
+												<container pos="4,4" size="89x52">
+													<container size="89x52">
+														<container size="87x52">
+															<rectangle size="87x52"/>
+															<container size="87x52">
 																<container size="87x34">
-																	<container size="87x34">
-																		<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="error" strokeWidth="2"/>
-																	</container>
-																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
-																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																				<widget size="71x22" type="*widget.entryContent">
-																					<widget size="71x22" type="*widget.RichText">
-																						<text pos="4,2" size="54x16">Generate</text>
-																					</widget>
-																				</widget>
-																			</widget>
-																		</widget>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</container>
-												</container>
-											</container>
-											<container pos="101,0" size="101x42">
-												<container pos="4,4" size="89x34">
-													<container size="89x34">
-														<container size="87x34">
-															<rectangle size="87x34"/>
-															<container size="87x34">
-																<rectangle size="87x34"/>
-																<container size="87x34">
-																	<container size="87x34">
-																		<rectangle fillColor="hover" pos="1,1" radius="6" size="85x32" strokeColor="error" strokeWidth="2"/>
-																	</container>
-																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
-																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																				<widget size="71x22" type="*widget.entryContent">
-																					<widget size="71x22" type="*widget.RichText">
-																						<text pos="4,2" size="54x16">Generate</text>
-																					</widget>
-																				</widget>
-																			</widget>
-																		</widget>
-																	</container>
-																</container>
-															</container>
-														</container>
-													</container>
-												</container>
-											</container>
-											<container pos="203,0" size="101x42">
-												<container pos="4,4" size="89x34">
-													<container size="89x34">
-														<container size="87x34">
-															<rectangle size="87x34"/>
-															<container size="87x34">
-																<rectangle size="87x34"/>
-																<container size="87x34">
+																	<rectangle size="87x34"/>
 																	<container size="87x34">
 																		<container size="87x34">
 																			<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="error" strokeWidth="2"/>
 																		</container>
 																		<container size="87x34">
-																			<rectangle pos="3,3" radius="4" size="81x28" strokeColor="focus" strokeWidth="2"/>
-																		</container>
-																	</container>
-																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
-																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																				<widget size="71x22" type="*widget.entryContent">
-																					<widget size="71x22" type="*widget.RichText">
-																						<text pos="4,2" size="54x16">Generate</text>
+																			<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																				<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																					<widget size="71x22" type="*widget.entryContent">
+																						<widget size="71x22" type="*widget.RichText">
+																							<text pos="4,2" size="54x16">Generate</text>
+																						</widget>
 																					</widget>
-																					<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																				</widget>
 																			</widget>
-																		</widget>
+																		</container>
 																	</container>
 																</container>
+																<text color="error" pos="0,38" size="87x14" textSize="11">Up to 100000</text>
 															</container>
 														</container>
 													</container>
 												</container>
 											</container>
-											<container pos="305,0" size="101x42">
-												<container pos="4,4" size="89x34">
-													<container size="89x34">
-														<container size="87x34">
-															<rectangle size="87x34"/>
-															<container size="87x34">
-																<rectangle size="87x34"/>
+											<container pos="101,0" size="101x60">
+												<container pos="4,4" size="89x52">
+													<container size="89x52">
+														<container size="87x52">
+															<rectangle size="87x52"/>
+															<container size="87x52">
 																<container size="87x34">
-																	<rectangle fillColor="button" radius="6" size="87x34"/>
+																	<rectangle size="87x34"/>
 																	<container size="87x34">
-																		<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
-																			<widget pos="0,2" size="71x22" type="*widget.Scroll">
-																				<widget size="71x22" type="*widget.entryContent">
-																					<widget size="71x22" type="*widget.RichText">
-																						<text color="disabled" pos="4,2" size="54x16">Generate</text>
+																		<container size="87x34">
+																			<rectangle fillColor="hover" pos="1,1" radius="6" size="85x32" strokeColor="error" strokeWidth="2"/>
+																		</container>
+																		<container size="87x34">
+																			<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																				<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																					<widget size="71x22" type="*widget.entryContent">
+																						<widget size="71x22" type="*widget.RichText">
+																							<text pos="4,2" size="54x16">Generate</text>
+																						</widget>
 																					</widget>
 																				</widget>
 																			</widget>
-																		</widget>
+																		</container>
 																	</container>
 																</container>
+																<text color="error" pos="0,38" size="87x14" textSize="11">Up to 100000</text>
+															</container>
+														</container>
+													</container>
+												</container>
+											</container>
+											<container pos="203,0" size="101x60">
+												<container pos="4,4" size="89x52">
+													<container size="89x52">
+														<container size="87x52">
+															<rectangle size="87x52"/>
+															<container size="87x52">
+																<container size="87x34">
+																	<rectangle size="87x34"/>
+																	<container size="87x34">
+																		<container size="87x34">
+																			<container size="87x34">
+																				<rectangle fillColor="button" pos="1,1" radius="6" size="85x32" strokeColor="error" strokeWidth="2"/>
+																			</container>
+																			<container size="87x34">
+																				<rectangle pos="3,3" radius="4" size="81x28" strokeColor="focus" strokeWidth="2"/>
+																			</container>
+																		</container>
+																		<container size="87x34">
+																			<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																				<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																					<widget size="71x22" type="*widget.entryContent">
+																						<widget size="71x22" type="*widget.RichText">
+																							<text pos="4,2" size="54x16">Generate</text>
+																						</widget>
+																						<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
+																					</widget>
+																				</widget>
+																			</widget>
+																		</container>
+																	</container>
+																</container>
+																<text color="error" pos="0,38" size="87x14" textSize="11">Up to 100000</text>
+															</container>
+														</container>
+													</container>
+												</container>
+											</container>
+											<container pos="305,0" size="101x60">
+												<container pos="4,4" size="89x52">
+													<container size="89x52">
+														<container size="87x52">
+															<rectangle size="87x52"/>
+															<container size="87x52">
+																<container size="87x34">
+																	<rectangle size="87x34"/>
+																	<container size="87x34">
+																		<rectangle fillColor="button" radius="6" size="87x34"/>
+																		<container size="87x34">
+																			<widget pos="8,8" size="71x26" type="*parts.FieldEntry">
+																				<widget pos="0,2" size="71x22" type="*widget.Scroll">
+																					<widget size="71x22" type="*widget.entryContent">
+																						<widget size="71x22" type="*widget.RichText">
+																							<text color="disabled" pos="4,2" size="54x16">Generate</text>
+																						</widget>
+																					</widget>
+																				</widget>
+																			</widget>
+																		</container>
+																	</container>
+																</container>
+																<text color="disabled" pos="0,38" size="87x14" textSize="11">Up to 100000</text>
 															</container>
 														</container>
 													</container>
@@ -750,18 +774,18 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,180" size="1058x42">
-										<container size="169x42">
-											<rectangle size="169x42"/>
-											<container size="169x42">
-												<spacer size="169x12"/>
-												<text pos="0,12" size="169x16">Wider than the field</text>
-												<spacer pos="0,29" size="169x12"/>
+									<container pos="0,235" size="1058x60">
+										<container size="191x60">
+											<rectangle size="191x60"/>
+											<container size="191x60">
+												<spacer size="191x21"/>
+												<text pos="0,21" size="191x16">Wider than the field</text>
+												<spacer pos="0,38" size="191x21"/>
 											</container>
 										</container>
-										<container pos="169,0" size="888x42">
-											<container size="101x42">
-												<container pos="4,4" size="89x34">
+										<container pos="191,0" size="866x60">
+											<container size="101x60">
+												<container pos="4,4" size="89x52">
 													<container size="89x34">
 														<container size="87x34">
 															<rectangle size="87x34"/>
@@ -779,14 +803,6 @@
 																						<text pos="4,2" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
 																					</widget>
 																				</widget>
-																				<widget pos="71,0" size="0x22" type="*widget.Shadow">
-																					<linearGradient angle="270" pos="-8,0" size="8x22"/>
-																				</widget>
-																				<widget pos="0,16" size="71x6" type="*widget.scrollBarArea">
-																					<widget pos="0,3" size="6x3" type="*widget.scrollBar">
-																						<rectangle fillColor="scrollbar" radius="3" size="6x3"/>
-																					</widget>
-																				</widget>
 																			</widget>
 																		</widget>
 																	</container>
@@ -796,8 +812,8 @@
 													</container>
 												</container>
 											</container>
-											<container pos="101,0" size="101x42">
-												<container pos="4,4" size="89x34">
+											<container pos="101,0" size="101x60">
+												<container pos="4,4" size="89x52">
 													<container size="89x34">
 														<container size="87x34">
 															<rectangle size="87x34"/>
@@ -815,14 +831,6 @@
 																						<text pos="4,2" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
 																					</widget>
 																				</widget>
-																				<widget pos="71,0" size="0x22" type="*widget.Shadow">
-																					<linearGradient angle="270" pos="-8,0" size="8x22"/>
-																				</widget>
-																				<widget pos="0,16" size="71x6" type="*widget.scrollBarArea">
-																					<widget pos="0,3" size="6x3" type="*widget.scrollBar">
-																						<rectangle fillColor="scrollbar" radius="3" size="6x3"/>
-																					</widget>
-																				</widget>
 																			</widget>
 																		</widget>
 																	</container>
@@ -832,8 +840,8 @@
 													</container>
 												</container>
 											</container>
-											<container pos="203,0" size="101x42">
-												<container pos="4,4" size="89x34">
+											<container pos="203,0" size="101x60">
+												<container pos="4,4" size="89x52">
 													<container size="89x34">
 														<container size="87x34">
 															<rectangle size="87x34"/>
@@ -852,14 +860,6 @@
 																					</widget>
 																					<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																				</widget>
-																				<widget pos="71,0" size="0x22" type="*widget.Shadow">
-																					<linearGradient angle="270" pos="-8,0" size="8x22"/>
-																				</widget>
-																				<widget pos="0,16" size="71x6" type="*widget.scrollBarArea">
-																					<widget pos="0,3" size="6x3" type="*widget.scrollBar">
-																						<rectangle fillColor="scrollbar" radius="3" size="6x3"/>
-																					</widget>
-																				</widget>
 																			</widget>
 																		</widget>
 																	</container>
@@ -869,8 +869,8 @@
 													</container>
 												</container>
 											</container>
-											<container pos="305,0" size="101x42">
-												<container pos="4,4" size="89x34">
+											<container pos="305,0" size="101x60">
+												<container pos="4,4" size="89x52">
 													<container size="89x34">
 														<container size="87x34">
 															<rectangle size="87x34"/>
@@ -886,14 +886,6 @@
 																						<text color="disabled" pos="4,2" size="744x16">WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW</text>
 																					</widget>
 																				</widget>
-																				<widget pos="71,0" size="0x22" type="*widget.Shadow">
-																					<linearGradient angle="270" pos="-8,0" size="8x22"/>
-																				</widget>
-																				<widget pos="0,16" size="71x6" type="*widget.scrollBarArea">
-																					<widget pos="0,3" size="6x3" type="*widget.scrollBar">
-																						<rectangle fillColor="scrollbar" radius="3" size="6x3"/>
-																					</widget>
-																				</widget>
 																			</widget>
 																		</widget>
 																	</container>
@@ -905,18 +897,18 @@
 											</container>
 										</container>
 									</container>
-									<container pos="0,230" size="1058x42">
-										<container size="169x42">
-											<rectangle size="169x42"/>
-											<container size="169x42">
-												<spacer size="169x12"/>
-												<text pos="0,12" size="169x16">Very long value</text>
-												<spacer pos="0,29" size="169x12"/>
+									<container pos="0,303" size="1058x60">
+										<container size="191x60">
+											<rectangle size="191x60"/>
+											<container size="191x60">
+												<spacer size="191x21"/>
+												<text pos="0,21" size="191x16">Very long value</text>
+												<spacer pos="0,38" size="191x21"/>
 											</container>
 										</container>
-										<container pos="169,0" size="888x42">
-											<container size="101x42">
-												<container pos="4,4" size="89x34">
+										<container pos="191,0" size="866x60">
+											<container size="101x60">
+												<container pos="4,4" size="89x52">
 													<container size="89x34">
 														<container size="87x34">
 															<rectangle size="87x34"/>
@@ -934,14 +926,6 @@
 																						<text pos="4,2" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
 																					</widget>
 																				</widget>
-																				<widget pos="71,0" size="0x22" type="*widget.Shadow">
-																					<linearGradient angle="270" pos="-8,0" size="8x22"/>
-																				</widget>
-																				<widget pos="0,16" size="71x6" type="*widget.scrollBarArea">
-																					<widget pos="0,3" size="9x3" type="*widget.scrollBar">
-																						<rectangle fillColor="scrollbar" radius="3" size="9x3"/>
-																					</widget>
-																				</widget>
 																			</widget>
 																		</widget>
 																	</container>
@@ -951,8 +935,8 @@
 													</container>
 												</container>
 											</container>
-											<container pos="101,0" size="101x42">
-												<container pos="4,4" size="89x34">
+											<container pos="101,0" size="101x60">
+												<container pos="4,4" size="89x52">
 													<container size="89x34">
 														<container size="87x34">
 															<rectangle size="87x34"/>
@@ -970,14 +954,6 @@
 																						<text pos="4,2" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
 																					</widget>
 																				</widget>
-																				<widget pos="71,0" size="0x22" type="*widget.Shadow">
-																					<linearGradient angle="270" pos="-8,0" size="8x22"/>
-																				</widget>
-																				<widget pos="0,16" size="71x6" type="*widget.scrollBarArea">
-																					<widget pos="0,3" size="9x3" type="*widget.scrollBar">
-																						<rectangle fillColor="scrollbar" radius="3" size="9x3"/>
-																					</widget>
-																				</widget>
 																			</widget>
 																		</widget>
 																	</container>
@@ -987,8 +963,8 @@
 													</container>
 												</container>
 											</container>
-											<container pos="203,0" size="101x42">
-												<container pos="4,4" size="89x34">
+											<container pos="203,0" size="101x60">
+												<container pos="4,4" size="89x52">
 													<container size="89x34">
 														<container size="87x34">
 															<rectangle size="87x34"/>
@@ -1007,14 +983,6 @@
 																					</widget>
 																					<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
 																				</widget>
-																				<widget pos="71,0" size="0x22" type="*widget.Shadow">
-																					<linearGradient angle="270" pos="-8,0" size="8x22"/>
-																				</widget>
-																				<widget pos="0,16" size="71x6" type="*widget.scrollBarArea">
-																					<widget pos="0,3" size="9x3" type="*widget.scrollBar">
-																						<rectangle fillColor="scrollbar" radius="3" size="9x3"/>
-																					</widget>
-																				</widget>
 																			</widget>
 																		</widget>
 																	</container>
@@ -1024,8 +992,8 @@
 													</container>
 												</container>
 											</container>
-											<container pos="305,0" size="101x42">
-												<container pos="4,4" size="89x34">
+											<container pos="305,0" size="101x60">
+												<container pos="4,4" size="89x52">
 													<container size="89x34">
 														<container size="87x34">
 															<rectangle size="87x34"/>
@@ -1041,14 +1009,6 @@
 																						<text color="disabled" pos="4,2" size="511x16">Write every table of this recipe into the chosen directory and keep the manifest beside it</text>
 																					</widget>
 																				</widget>
-																				<widget pos="71,0" size="0x22" type="*widget.Shadow">
-																					<linearGradient angle="270" pos="-8,0" size="8x22"/>
-																				</widget>
-																				<widget pos="0,16" size="71x6" type="*widget.scrollBarArea">
-																					<widget pos="0,3" size="9x3" type="*widget.scrollBar">
-																						<rectangle fillColor="scrollbar" radius="3" size="9x3"/>
-																					</widget>
-																				</widget>
 																			</widget>
 																		</widget>
 																	</container>
@@ -1061,20 +1021,20 @@
 										</container>
 									</container>
 								</container>
-								<container pos="0,322" size="1058x216">
+								<container pos="0,414" size="1058x216">
 									<text size="1058x16">Empty, with a hint</text>
 									<container pos="0,24" size="1058x42">
-										<container size="169x42">
-											<rectangle size="169x42"/>
-											<container size="169x42">
-												<spacer size="169x13"/>
-												<text bold color="focus" pos="0,13" size="169x14" textSize="11">AT REST</text>
-												<spacer pos="0,28" size="169x13"/>
+										<container size="191x42">
+											<rectangle size="191x42"/>
+											<container size="191x42">
+												<spacer size="191x13"/>
+												<text bold color="focus" pos="0,13" size="191x14" textSize="11">AT REST</text>
+												<spacer pos="0,28" size="191x13"/>
 											</container>
 										</container>
-										<container pos="169,0" size="888x42">
-											<container pos="4,4" size="876x34">
-												<container size="876x34">
+										<container pos="191,0" size="866x42">
+											<container pos="4,4" size="854x34">
+												<container size="854x34">
 													<container size="204x34">
 														<rectangle size="204x34"/>
 														<container size="204x34">
@@ -1105,17 +1065,17 @@
 										</container>
 									</container>
 									<container pos="0,74" size="1058x42">
-										<container size="169x42">
-											<rectangle size="169x42"/>
-											<container size="169x42">
-												<spacer size="169x13"/>
-												<text bold color="focus" pos="0,13" size="169x14" textSize="11">POINTER ON IT</text>
-												<spacer pos="0,28" size="169x13"/>
+										<container size="191x42">
+											<rectangle size="191x42"/>
+											<container size="191x42">
+												<spacer size="191x13"/>
+												<text bold color="focus" pos="0,13" size="191x14" textSize="11">POINTER ON IT</text>
+												<spacer pos="0,28" size="191x13"/>
 											</container>
 										</container>
-										<container pos="169,0" size="888x42">
-											<container pos="4,4" size="876x34">
-												<container size="876x34">
+										<container pos="191,0" size="866x42">
+											<container pos="4,4" size="854x34">
+												<container size="854x34">
 													<container size="204x34">
 														<rectangle size="204x34"/>
 														<container size="204x34">
@@ -1146,17 +1106,17 @@
 										</container>
 									</container>
 									<container pos="0,124" size="1058x42">
-										<container size="169x42">
-											<rectangle size="169x42"/>
-											<container size="169x42">
-												<spacer size="169x13"/>
-												<text bold color="focus" pos="0,13" size="169x14" textSize="11">KEYBOARD ON IT</text>
-												<spacer pos="0,28" size="169x13"/>
+										<container size="191x42">
+											<rectangle size="191x42"/>
+											<container size="191x42">
+												<spacer size="191x13"/>
+												<text bold color="focus" pos="0,13" size="191x14" textSize="11">KEYBOARD ON IT</text>
+												<spacer pos="0,28" size="191x13"/>
 											</container>
 										</container>
-										<container pos="169,0" size="888x42">
-											<container pos="4,4" size="876x34">
-												<container size="876x34">
+										<container pos="191,0" size="866x42">
+											<container pos="4,4" size="854x34">
+												<container size="854x34">
 													<container size="204x34">
 														<rectangle size="204x34"/>
 														<container size="204x34">
@@ -1188,17 +1148,17 @@
 										</container>
 									</container>
 									<container pos="0,174" size="1058x42">
-										<container size="169x42">
-											<rectangle size="169x42"/>
-											<container size="169x42">
-												<spacer size="169x13"/>
-												<text bold color="focus" pos="0,13" size="169x14" textSize="11">OUT OF REACH</text>
-												<spacer pos="0,28" size="169x13"/>
+										<container size="191x42">
+											<rectangle size="191x42"/>
+											<container size="191x42">
+												<spacer size="191x13"/>
+												<text bold color="focus" pos="0,13" size="191x14" textSize="11">OUT OF REACH</text>
+												<spacer pos="0,28" size="191x13"/>
 											</container>
 										</container>
-										<container pos="169,0" size="888x42">
-											<container pos="4,4" size="876x34">
-												<container size="876x34">
+										<container pos="191,0" size="866x42">
+											<container pos="4,4" size="854x34">
+												<container size="854x34">
 													<container size="204x34">
 														<rectangle size="204x34"/>
 														<container size="204x34">

@@ -60,11 +60,10 @@ import (
 // tidy: the toolkit gives such a theme a new scope every time it draws the
 // field again after a minute out of sight, and parses every font for the scope
 // anew, about 6 MB that stay until the program ends (B-370, the reason is
-// beside fynetheme's unpainted). What comes back with that: a field holding
-// more than it shows draws the toolkit's scroll bar along its foot, as thin as
-// a resting bar and as thick as a bar under the pointer, because the theme of
-// the window has one width for the bars of a field and of a list. The owner
-// took that on 2026-11-12, having seen it drawn, as the price of the memory.
+// beside fynetheme's unpainted). The scroll bar the toolkit draws along the
+// foot of a field holding more than it shows is therefore not taken away by a
+// theme. It is taken away by the direction the field scrolls in, see
+// fieldWith.
 //
 // With the edge gone, where the words sit is this file's business, and the space
 // around the field is what places them: eight from the left plus the four the
@@ -82,6 +81,10 @@ type FieldEntry struct {
 	onHover   func(bool)
 	onDisable func(bool)
 	onInvalid func(bool)
+	// onNoted is told whenever onInvalid or onDisable is, by the note standing
+	// under the field when it has one (Noted), so that the note and the edge
+	// turn the colour of a refusal together and leave it together.
+	onNoted func()
 	// invalid is whether the field holds what its screen would refuse. It is
 	// kept here as well as told, because a screen may judge its field before
 	// the field is dressed, and the dressing has to start in that state.
@@ -174,6 +177,9 @@ func (f *FieldEntry) Disable() {
 	if f.onDisable != nil {
 		f.onDisable(true)
 	}
+	if f.onNoted != nil {
+		f.onNoted()
+	}
 }
 
 // Enable gives the field back and tells them so.
@@ -181,6 +187,9 @@ func (f *FieldEntry) Enable() {
 	f.Entry.Enable()
 	if f.onDisable != nil {
 		f.onDisable(false)
+	}
+	if f.onNoted != nil {
+		f.onNoted()
 	}
 }
 
@@ -200,6 +209,50 @@ func (f *FieldEntry) SetInvalid(wrong bool) {
 	if f.onInvalid != nil {
 		f.onInvalid(wrong)
 	}
+	if f.onNoted != nil {
+		f.onNoted()
+	}
+}
+
+// Noted is a field with a line under it saying what the field takes, such as
+// the largest number it accepts. The line has the colour of the label above
+// the field, and the colour of a refusal while the field holds what its screen
+// would refuse.
+//
+// # Why the line is always there rather than coming with the red edge
+//
+// The owner asked on 2026-11-24 for the limit to be said the moment the edge
+// turns red, rather than after a press of the button (DEC-335). A line that
+// came and went with the edge would push everything under the row down by a
+// line on one keystroke and pull it back on the next, which is the jump the
+// rules of this window forbid. Standing there from the start, it also tells a
+// person the limit before they reach it, and the red only says which side of
+// it they are on.
+//
+// The words are the screen's, because what a field takes is the screen's rule
+// and the field only shows it (see SetInvalid). Out of reach the note is the
+// label's colour whatever the field holds, for the reason the edge is: nobody
+// can change the value there, so nothing says it should be changed.
+func Noted(entry *FieldEntry, words string) fyne.CanvasObject {
+	note := paint.Text(words, palette.TypeLabel, palette.TextSecondary)
+	entry.onNoted = func() {
+		note.Color = palette.Ink(entry.noteInk())
+		note.Refresh()
+	}
+	// The field may have been judged before it was noted, and the note has to
+	// start in that state, which is why invalid is kept on the field at all.
+	note.Color = palette.Ink(entry.noteInk())
+	return paint.Column(palette.NameStepHairline, Standing(Field(entry)), note)
+}
+
+// noteInk is the colour of the note under the field: the danger state's while
+// the field is in reach and holds what its screen would refuse, the label's
+// otherwise.
+func (f *FieldEntry) noteInk() string {
+	if f.invalid && !f.Disabled() {
+		return palette.StateDanger
+	}
+	return palette.TextSecondary
 }
 
 // Invalid reports whether the field is marked as holding what its screen would
@@ -244,6 +297,23 @@ func fieldWith(entry *FieldEntry, shown fyne.CanvasObject, leading fyne.CanvasOb
 	if entry.dressed != nil {
 		return entry.dressed
 	}
+
+	// 🔴 The field scrolls with its caret and draws no scroll bar, since
+	// 2026-11-24 (DEC-335). The toolkit's default scrolls both ways and draws a
+	// bar along the foot of a field holding more than it shows, and every seed
+	// the Quick screen draws for itself is thirty two characters in a field as
+	// wide as fourteen, so the bar stood under the seed from the moment the
+	// window opened. The owner called it ugly.
+	//
+	// Vertical only rather than none, read off the source of v2.8.2. None makes
+	// the field ask for the width of its whole text, and the text then draws
+	// past the field, because the toolkit clips only inside a scroller.
+	// Vertical keeps the scroller and its clip, hides the bar along the foot
+	// (internal/widget/scroller.go, updatePosition), and the caret still pulls
+	// the text along, because the field moves its scroller by offset whatever
+	// the direction (widget/entry.go, ensureCursorVisible). A field of one line
+	// is never taller than its text, so no bar stands at its side either.
+	entry.Scroll = fyne.ScrollVerticalOnly
 
 	grounds, look := textGrounds(entry.Disabled(), entry.invalid)
 	entry.onFocus, entry.onHover, entry.onDisable = look.focus, look.hover, look.disable

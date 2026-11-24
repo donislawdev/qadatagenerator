@@ -355,8 +355,13 @@ func checkState(t *testing.T, each control, candidate state) {
 // it was until it was tried: the keyboard also brings the caret, so this
 // picture changed with the mark of the keyboard taken out. The ground alone is
 // held for that in paint, TestEveryLookOfAFieldIsDrawnApart.
+//
+// The refused row is held against the row with a note since 2026-11-24
+// (DEC-335), because the refused field wears the note the quick screen stands
+// under its count, and a row without one would differ by the note alone, out
+// of reach too. That difference found the note staying red out of reach.
 func TestARefusedFieldIsDrawnApartFromTheSameValueAccepted(t *testing.T) {
-	accepted, refused := textVariant(t, i18n.CatalogueShort), textVariant(t, i18n.CatalogueRefused)
+	accepted, refused := textVariant(t, i18n.CatalogueNoted), textVariant(t, i18n.CatalogueRefused)
 	for _, in := range typeable {
 		apart := !bytes.Equal(picture(t, accepted, in), picture(t, refused, in))
 		if want := in != disabled; apart != want {

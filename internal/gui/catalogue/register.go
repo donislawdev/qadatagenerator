@@ -214,7 +214,13 @@ func texts() []control {
 			// cell would widen every row of the field until the states no
 			// longer stood side by side and the page ran past the window.
 			{name: i18n.CatalogueHinted, alone: true, build: hinted},
-			{name: i18n.CatalogueShort, build: field(word)},
+			// One word with a note under it, and below it the same field and
+			// note in the colour of a refusal, which is the pair the count of
+			// the quick screen shows (DEC-335). One row rather than a row of a
+			// bare word and a row with a note: the page gained one row with the
+			// note and ran past the foot of the window it opens in, and a bare
+			// field holding words is drawn by the two rows of long values.
+			{name: i18n.CatalogueNoted, build: notedField},
 			// A row rather than a column, because a screen marks a field as
 			// refused for what it holds, which is what a row is (B-363). The
 			// guard beside this file holds it apart from the row above.
@@ -243,11 +249,20 @@ func field(value func(Samples) string) builder {
 	}
 }
 
-// refusedField is the field of one word marked as holding what its screen
-// would refuse, which is how the count of the quick screen stands while
-// somebody types a number Generate would not take.
+// notedField is the field of one word with the note the quick screen stands
+// under its count, in the words that screen uses.
+func notedField(text i18n.Catalogue, samples Samples) (any, fyne.CanvasObject) {
+	made := parts.NewFieldEntry()
+	made.SetText(word(samples))
+	return made, paint.AtLeast(paint.FieldWidth(samples.Word), 0,
+		parts.Noted(made, quickview.CountNote(text)))
+}
+
+// refusedField is the noted field marked as holding what its screen would
+// refuse, which is how the count of the quick screen stands while somebody
+// types a number Generate would not take: the edge and the note both red.
 func refusedField(text i18n.Catalogue, samples Samples) (any, fyne.CanvasObject) {
-	made, drawn := field(word)(text, samples)
+	made, drawn := notedField(text, samples)
 	made.(*parts.FieldEntry).SetInvalid(true)
 	return made, drawn
 }

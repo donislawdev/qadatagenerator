@@ -561,6 +561,10 @@ const (
 	// QuickRefusedCount is a nought or less typed into the field saying how
 	// many values to produce.
 	QuickRefusedCount Key = "quick.refused.count"
+	// QuickCountNote stands under that field before the ceiling, which the
+	// screen puts after it, so that the limit is read before it is reached and
+	// turns red with the field when it is passed (DEC-335).
+	QuickCountNote Key = "quick.note.count"
 
 	// The refusals this mode can produce, in the words of this surface.
 	//
@@ -673,7 +677,7 @@ var windowKeys = []Key{
 	QuickLabelGender, QuickLabelBorn,
 	QuickLabelLocale, QuickLabelSeed,
 	QuickGenderAny, QuickCopy, QuickCopyAll, QuickAgain, QuickCopied, QuickGenerate,
-	QuickLabelCount, QuickMayRepeat,
+	QuickLabelCount, QuickCountNote, QuickMayRepeat,
 	QuickRefusedGenerator, QuickRefusedRole, QuickRefusedGender, QuickRefusedDate,
 	QuickRefusedUnavailable, QuickRefusedCount, QuickRefusedCountShape, QuickRefusedCountMany,
 	QuickGroupInternational, QuickGroupPeople, QuickGroupPlaces, CountryPL, CountryUS,

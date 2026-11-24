@@ -67,7 +67,7 @@ const (
 	CatalogueBanded     Key = "catalogue.variant.banded"
 	CatalogueEmpty      Key = "catalogue.variant.empty"
 	CatalogueHinted     Key = "catalogue.variant.hinted"
-	CatalogueShort      Key = "catalogue.variant.short"
+	CatalogueNoted      Key = "catalogue.variant.noted"
 	CatalogueRefused    Key = "catalogue.variant.refused"
 	CatalogueExtreme    Key = "catalogue.variant.extreme"
 	CatalogueLines      Key = "catalogue.variant.lines"
@@ -88,7 +88,7 @@ var catalogueKeys = []Key{
 	CatalogueStateDisabled,
 	CatalogueOutlined, CatalogueIcon, CatalogueFilled, CataloguePlace, CatalogueCurrent,
 	CatalogueLongLabel, CatalogueNothing, CatalogueChosen, CatalogueLongValue, CatalogueOff,
-	CatalogueOn, CatalogueUnbanded, CatalogueBanded, CatalogueEmpty, CatalogueHinted, CatalogueShort, CatalogueRefused,
+	CatalogueOn, CatalogueUnbanded, CatalogueBanded, CatalogueEmpty, CatalogueHinted, CatalogueNoted, CatalogueRefused,
 	CatalogueExtreme, CatalogueLines, CatalogueRows, CatalogueClosed, CatalogueOpened,
 	CatalogueOverflowed,
 }

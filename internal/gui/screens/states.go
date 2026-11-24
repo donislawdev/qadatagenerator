@@ -120,6 +120,19 @@ func quickStatesOfAValue() []State {
 			Quick: Quick{Generator: "ssn", Seed: "for-the-picture"},
 		},
 		{
+			// 🔴 Every other state here names a short seed, so that a picture
+			// is the same picture tomorrow, and none of them showed what the
+			// window opens with: a seed the screen drew itself, thirty two
+			// characters in a field as wide as fourteen. The scroll bar the
+			// toolkit drew under it stood in no stored picture until the owner
+			// saw it in the window (DEC-335).
+			Name: "quick-seed-drawn",
+			Purpose: "a seed of the length the screen draws for itself, longer than its field, " +
+				"which shows the start of the seed and no scroll bar",
+			Screen: screenQuick,
+			Quick:  Quick{Generator: "ssn", Seed: "5e7932cfa01177e56a8b6793b30b156a"},
+		},
+		{
 			Name: "quick-country",
 			Purpose: "a scheme of no one country that produces values for one, which " +
 				"the panel beside them names under Generated for (DEC-281)",
