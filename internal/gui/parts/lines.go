@@ -42,9 +42,10 @@ import (
 // is on, so each question moves the two exported fields and the answer is read
 // at once. The fields are put back before anything else runs: nothing in the
 // toolkit reads them between the two lines, nothing is redrawn, and the second
-// copy the toolkit keeps for drawing a selection is never touched. The cost is a
-// constant per row (textPosFromRowCol in widget/selectable.go), and only the rows
-// in sight are asked about.
+// copy the toolkit keeps for drawing a selection is never touched. Where a row
+// begins costs a constant per row (textPosFromRowCol in widget/selectable.go),
+// and only the rows in sight are asked about. Where the first row stands costs
+// one walk through the text, once per drawing (rows says why only once).
 //
 // # Why a number is counted by newlines
 //
