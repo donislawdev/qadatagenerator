@@ -211,6 +211,7 @@ const (
 	MarkActive  = "mark.active"
 	MarkFocus   = "mark.focus"
 	InkIcon     = "ink.icon"
+	InkDanger   = "ink.danger"
 
 	TextPrimary   = "text.primary"
 	TextSecondary = "text.secondary"
@@ -230,7 +231,7 @@ var TokenNames = []string{
 	BgWindow, BgSurface, BgControl, BgCurrent, BgCurrentHover, BgCurrentPressed,
 	BgHover, BgPressed, BgSelection, BgHeader,
 	LineQuiet, LineSection, BorderControl, BorderPressed,
-	FillPrimary, FillHover, FillPressed, MarkCurrent, MarkActive, MarkFocus, InkIcon,
+	FillPrimary, FillHover, FillPressed, MarkCurrent, MarkActive, MarkFocus, InkIcon, InkDanger,
 	TextPrimary, TextSecondary, TextAccent, TextCaption, TextOnFill, TextOnMark,
 	StateSuccess, StateWarning, StateDanger,
 }
@@ -362,8 +363,17 @@ var Tokens = []Token{
 	// accent in navigation, and the open screen is the one place of it every
 	// screen shares. The chosen option of a panel stands on it too, so being
 	// chosen looks the same in both.
+	//
+	// The band across the line of the recipe the caret is on is drawn in it
+	// too since 2026-11-24 (DEC-337), because that line is where somebody is,
+	// the same meaning. It is meant to be faint: it measures 1.05 against the
+	// inside of the field and 1.11 against that field under the pointer, and
+	// is told apart by its hue rather than its lightness. Nothing written on
+	// the band can be lost by it, because the text on it is text.primary,
+	// measured on this ground below, and the band is not drawn while anything
+	// is selected, so a selection never stands on it.
 	{BgCurrent, "accent.3", ThresholdGround, nil,
-		"the sidebar item naming the screen that is open, and the chosen option of a panel"},
+		"the sidebar item naming the screen that is open, the chosen option of a panel, and the line of the recipe the caret is on"},
 	// The pointer on the open screen, which is where it always is right after
 	// a click. Until these two existed the pointer put bg.hover there, a grey
 	// that covered the tint, and the live window of 2026-09-24 showed it.
@@ -556,6 +566,18 @@ var Tokens = []Token{
 	// shape and read by the words next to it: WCAG 1.4.11, not 1.4.3.
 	{InkIcon, "accent.11", ThresholdControl, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgCurrentHover, BgCurrentPressed, BgHover, BgPressed},
 		"the icon on a quiet button and on a sidebar item, which is most of the accent a screen carries"},
+	// 🔴 The red of a refusal as a MARK, which state.danger cannot be on the
+	// inside of a field, and a token of its own for that reason (DEC-337).
+	//
+	// The column of line numbers beside the recipe editor marks the line the
+	// reader found a problem on, and it stands on the ground of the field.
+	// state.danger is text and measures 4.23 there, where text needs 4.5, and
+	// 3.60 on that field under the pointer, both re-measured with tools/zeton.py
+	// on 2026-11-24. As a mark found by its shape beside a number read in
+	// another ink, the threshold is the one of a control, which both clear.
+	// The same shade, so the mark and the sentence it points to are one red.
+	{InkDanger, "semantic.danger", ThresholdControl, []string{BgControl, BgHover},
+		"the mark beside the number of a recipe line the reader found a problem on"},
 
 	{TextPrimary, "neutral.12", ThresholdText, []string{BgWindow, BgSurface, BgControl, BgCurrent, BgCurrentHover, BgCurrentPressed, BgHover, BgPressed, BgSelection},
 		"the value, the label and every word read first"},

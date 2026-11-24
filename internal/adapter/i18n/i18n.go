@@ -391,6 +391,10 @@ const (
 	RecipeHeadingDescribes Key = "recipe.heading.describes"
 	RecipeHeadingResult    Key = "recipe.heading.result"
 	RecipeHeadingProblems  Key = "recipe.heading.problems"
+	// RecipeProblemsGoTo says under that heading that a problem naming a line
+	// takes the caret there when clicked (DEC-337), which nothing on the card
+	// shows until the pointer is on one.
+	RecipeProblemsGoTo Key = "recipe.problems.go.to"
 	// RecipeStepGenerate heads the second of the two numbered steps the
 	// screen reads in since DEC-261. The first is RecipeHeadingRecipe.
 	RecipeStepGenerate Key = "recipe.step.generate"
@@ -787,7 +791,7 @@ var windowKeys = []Key{
 	RecipeExample, RecipeCanGenerate, RecipeGenerator, RecipeGenerators,
 	RecipeNotIn, RecipeNothingToDrawFrom,
 	RecipeHeadingRecipe, RecipeHeadingDescribes, RecipeHeadingResult, RecipeHeadingProblems,
-	RecipeStepGenerate,
+	RecipeProblemsGoTo, RecipeStepGenerate,
 	RecipeNoObjections, RecipeLine, RecipeAllowed, RecipeTry,
 	RecipeUnchecked, RecipeEntity, RecipeEntities, RecipeField, RecipeFields,
 	RecipeShowing, RecipeOf, RecipeRow, RecipeRows, RecipeNoRows, RecipeNoFields,

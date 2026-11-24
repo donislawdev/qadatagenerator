@@ -101,6 +101,25 @@ var HandmadeAllowed = map[string]Handmade{
 			"the only place the area can be reached from, so the table's CreateRenderer lays the pane of " +
 			"wheelLayer over it",
 	},
+	"lineMarks": {
+		Instead: "widget.TextGrid, whose ShowLineNumbers numbers its rows, and widget.Entry, the field the " +
+			"recipe is typed into, read on the source of v2.8.2",
+		Why: "the grid cannot be typed into and does not fold a long line, and the field has no numbers, no " +
+			"marks and one colour for all its text (syncSegments, widget/entry.go:1266). The owner asked " +
+			"for the numbers, a mark at a line with a problem and a band across the caret's line on " +
+			"2026-11-24, knowing the field has none of them (DEC-337). This draws all three beside and " +
+			"under the field, from rows the field reports through what it exports, so the field itself " +
+			"stays the toolkit's",
+	},
+	"clipped": {
+		Instead: "widget.NewSimpleRenderer around a container, and container.Scroll, the one container " +
+			"that cuts what it holds at its edges",
+		Why: "a number half scrolled out of the field has to be half drawn, as the text beside it is, and " +
+			"the simple renderer cuts nothing. The scrolling container would cut, and also draws a bar and " +
+			"shadows of its own the column must not have. The driver cuts the pieces of any widget whose " +
+			"renderer has a method named IsClip (internal/driver/util.go:209), which is the toolkit's own " +
+			"way of asking, and a renderer is the only place that method can stand",
+	},
 	"wheelLayer": {
 		Instead: "the scrolling of widget.Table and widget.Entry as the toolkit drives it, and an extension " +
 			"of their scrolling area, which is how parts.Scroll changes the step everywhere else",
@@ -275,11 +294,19 @@ var HandmadeAllowed = map[string]Handmade{
 // editor as far as every other area (B-420). The owner was asked first whether
 // to cover those two at the price of a mechanism of our own, and chose to.
 //
+// 🔴 Raised from 16 to 18 on 2026-11-24 for lineMarks and clipped, the column
+// of line numbers, the marks and the band of the recipe editor, which the
+// owner asked for knowing the toolkit's field has none of them (DEC-337). Not
+// a control drawn over again: the field stays the toolkit's, and this draws
+// beside and under it. The column and the band were first two widgets, and
+// were made one before the commit so that the raise is two rather than three.
+//
 // What lowers it again: a control going back to the library, which will happen
 // if the toolkit ever lets a caller supply the content of a button, draws its
-// caret at a width of its own rather than the width of its edge, or moves a
-// notch of the wheel as far as the system is set to. Nothing else does.
-const HandmadeCeiling = 16
+// caret at a width of its own rather than the width of its edge, moves a notch
+// of the wheel as far as the system is set to, or numbers the lines of a field
+// that can be typed into. Nothing else does.
+const HandmadeCeiling = 18
 
 // Handmades reports every layout and widget written inside the window, and
 // every register entry naming one that is no longer there.

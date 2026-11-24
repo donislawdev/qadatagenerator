@@ -321,6 +321,17 @@ const EntryDetailHeight float32 = 132
 // of the catalogue that no longer fits the window it opens in.
 const CatalogueAreaRows = 4
 
+// GutterDigitsAtLeast is how many digits the column of line numbers beside the
+// recipe editor is always wide enough for (DEC-337).
+//
+// A choice with a reason rather than a measurement. The column grows with the
+// number of lines, and a column that grew at the tenth and the hundredth line
+// would move every character of the recipe sideways while somebody typed. With
+// three, the text first moves at the thousandth line, and the recipe in the
+// README is 29 lines long (counted on 2026-11-24). What would change it:
+// recipes that are commonly a thousand lines or more.
+const GutterDigitsAtLeast = 3
+
 // PreviewColumnMin and PreviewColumnMax bound a column of the recipe preview.
 //
 // # Why bounds rather than a list of widths

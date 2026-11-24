@@ -162,6 +162,7 @@ catalogue.variant.noted: One word, with a note under it
 catalogue.variant.refused: A value the screen refuses
 catalogue.variant.extreme: Wider than the field
 catalogue.variant.lines: Several lines, some too long
+catalogue.variant.marked.line: A line marked as having a problem
 catalogue.variant.rows: More rows than it shows
 catalogue.variant.closed: Closed
 # tekst-ok: the state of a section that shows what it holds, while toolkit.open is the verb on the button of the file dialog, so a translation may need two different words
@@ -521,6 +522,7 @@ recipe.heading.describes: What it describes
 # tekst-ok: the same heading over the same card on the take screen in take.heading.result, one wording
 recipe.heading.result: What this run did
 recipe.heading.problems: Problems
+recipe.problems.go.to: Click a problem to go to its line in the recipe.
 # The second numbered step, under the editor. The first is recipe.heading.recipe.
 recipe.step.generate: Write the dataset
 recipe.no-objections: No objections. This recipe can be used as it stands.

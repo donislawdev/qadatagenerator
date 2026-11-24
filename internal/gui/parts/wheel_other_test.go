@@ -176,13 +176,13 @@ func TestThePaneOverAToolkitControlFindsItsAreaOrStepsAside(t *testing.T) {
 	area := container.NewVScroll(tallColumn())
 	other := container.NewVScroll(tallColumn())
 
-	none := withWheel(widget.NewSimpleRenderer(widget.NewLabel("no area"))).(*wheeled)
+	none := withWheel(widget.NewSimpleRenderer(widget.NewLabel("no area")))
 	if none.layer.Visible() || none.layer.area != nil {
 		t.Error("a renderer with no scrolling area left the pane up, where it would swallow the wheel")
 	}
 
 	two := &changing{objects: []fyne.CanvasObject{area, other}}
-	both := withWheel(two).(*wheeled)
+	both := withWheel(two)
 	if both.layer.Visible() || both.layer.area != nil {
 		t.Error("a renderer with two scrolling areas left the pane up, handing the wheel to one of them by chance")
 	}

@@ -270,49 +270,78 @@
 												<rectangle fillColor="button" pos="1,1" radius="6" size="511x353" strokeColor="inputBorder" strokeWidth="2"/>
 											</container>
 											<container size="513x355">
-												<widget pos="8,8" size="497x339" type="*parts.Editor">
-													<widget pos="0,2" size="497x335" type="*widget.Scroll">
-														<widget size="497x392" type="*widget.entryContent">
-															<widget size="497x392" type="*widget.RichText">
-																<text monospace pos="4,2" size="109x16">version: "0.1"</text>
-																<text monospace pos="4,18" size="109x16">seed: "sample"</text>
-																<text monospace pos="4,35" size="101x16">locale: pl-PL</text>
-																<text monospace pos="4,52" size="70x16">entities:</text>
-																<text monospace pos="4,69" size="85x16">  customer:</text>
-																<text monospace pos="4,86" size="93x16">    count: 4</text>
-																<text monospace pos="4,103" size="187x16">    primary_key: [pesel]</text>
-																<text monospace pos="4,120" size="85x16">    fields:</text>
-																<text monospace pos="4,137" size="132x16">      first_name:</text>
-																<text monospace pos="4,154" size="226x16">        generator: first_name</text>
-																<text monospace pos="4,171" size="101x16">      gender:</text>
-																<text monospace pos="4,187" size="194x16">        generator: gender</text>
-																<text monospace pos="4,204" size="93x16">      pesel:</text>
-																<text monospace pos="4,221" size="187x16">        generator: pesel</text>
-																<text monospace pos="4,238" size="124x16">    consistency:</text>
-																<text monospace pos="4,255" size="335x16">      - pesel matches: [first_name, gender]</text>
-																<text monospace pos="4,272" size="62x16">  order:</text>
-																<text monospace pos="4,289" size="101x16">    count: 25</text>
-																<text monospace pos="4,306" size="265x16">    belongs_to: { customer: 0-25 }</text>
-																<text monospace pos="4,323" size="85x16">    fields:</text>
-																<text monospace pos="4,340" size="124x16">      placed_at:</text>
-																<text monospace pos="4,357" size="226x16">        generator: birth_date</text>
-																<text monospace pos="4,373" size="0x16"></text>
-															</widget>
-														</widget>
-														<widget pos="0,335" size="497x0" type="*widget.Shadow">
-															<linearGradient pos="0,-8" size="497x8"/>
-														</widget>
-														<widget pos="491,0" size="6x335" type="*widget.scrollBarArea">
-															<widget pos="3,0" size="3x286" type="*widget.scrollBar">
-																<rectangle fillColor="scrollbar" radius="3" size="3x286"/>
-															</widget>
-														</widget>
-													</widget>
-													<widget size="497x339" type="*parts.wheelLayer">
+												<container pos="8,8" size="497x339">
+													<widget size="497x339" type="*parts.lineMarks">
 														<container size="497x339">
+															<text color="disabled" monospace pos="34,4" size="7x16">1</text>
+															<text color="disabled" monospace pos="34,20" size="7x16">2</text>
+															<text color="disabled" monospace pos="34,37" size="7x16">3</text>
+															<text color="disabled" monospace pos="34,54" size="7x16">4</text>
+															<text color="disabled" monospace pos="34,71" size="7x16">5</text>
+															<text color="disabled" monospace pos="34,88" size="7x16">6</text>
+															<text color="disabled" monospace pos="34,105" size="7x16">7</text>
+															<text color="disabled" monospace pos="34,122" size="7x16">8</text>
+															<text color="disabled" monospace pos="34,139" size="7x16">9</text>
+															<text color="disabled" monospace pos="26,156" size="15x16">10</text>
+															<text color="disabled" monospace pos="26,173" size="15x16">11</text>
+															<text color="disabled" monospace pos="26,189" size="15x16">12</text>
+															<text color="disabled" monospace pos="26,206" size="15x16">13</text>
+															<text color="disabled" monospace pos="26,223" size="15x16">14</text>
+															<text color="disabled" monospace pos="26,240" size="15x16">15</text>
+															<text color="disabled" monospace pos="26,257" size="15x16">16</text>
+															<text color="disabled" monospace pos="26,274" size="15x16">17</text>
+															<text color="disabled" monospace pos="26,291" size="15x16">18</text>
+															<text color="disabled" monospace pos="26,308" size="15x16">19</text>
+															<text color="disabled" monospace pos="26,325" size="15x16">20</text>
 														</container>
 													</widget>
-												</widget>
+													<container size="497x339">
+														<rectangle size="54x339"/>
+														<widget pos="54,0" size="442x339" type="*parts.Editor">
+															<widget pos="0,2" size="442x335" type="*widget.Scroll">
+																<widget size="442x392" type="*widget.entryContent">
+																	<widget size="442x392" type="*widget.RichText">
+																		<text monospace pos="4,2" size="109x16">version: "0.1"</text>
+																		<text monospace pos="4,18" size="109x16">seed: "sample"</text>
+																		<text monospace pos="4,35" size="101x16">locale: pl-PL</text>
+																		<text monospace pos="4,52" size="70x16">entities:</text>
+																		<text monospace pos="4,69" size="85x16">  customer:</text>
+																		<text monospace pos="4,86" size="93x16">    count: 4</text>
+																		<text monospace pos="4,103" size="187x16">    primary_key: [pesel]</text>
+																		<text monospace pos="4,120" size="85x16">    fields:</text>
+																		<text monospace pos="4,137" size="132x16">      first_name:</text>
+																		<text monospace pos="4,154" size="226x16">        generator: first_name</text>
+																		<text monospace pos="4,171" size="101x16">      gender:</text>
+																		<text monospace pos="4,187" size="194x16">        generator: gender</text>
+																		<text monospace pos="4,204" size="93x16">      pesel:</text>
+																		<text monospace pos="4,221" size="187x16">        generator: pesel</text>
+																		<text monospace pos="4,238" size="124x16">    consistency:</text>
+																		<text monospace pos="4,255" size="335x16">      - pesel matches: [first_name, gender]</text>
+																		<text monospace pos="4,272" size="62x16">  order:</text>
+																		<text monospace pos="4,289" size="101x16">    count: 25</text>
+																		<text monospace pos="4,306" size="265x16">    belongs_to: { customer: 0-25 }</text>
+																		<text monospace pos="4,323" size="85x16">    fields:</text>
+																		<text monospace pos="4,340" size="124x16">      placed_at:</text>
+																		<text monospace pos="4,357" size="226x16">        generator: birth_date</text>
+																		<text monospace pos="4,373" size="0x16"></text>
+																	</widget>
+																</widget>
+																<widget pos="0,335" size="442x0" type="*widget.Shadow">
+																	<linearGradient pos="0,-8" size="442x8"/>
+																</widget>
+																<widget pos="436,0" size="6x335" type="*widget.scrollBarArea">
+																	<widget pos="3,0" size="3x286" type="*widget.scrollBar">
+																		<rectangle fillColor="scrollbar" radius="3" size="3x286"/>
+																	</widget>
+																</widget>
+															</widget>
+															<widget size="442x339" type="*parts.wheelLayer">
+																<container size="442x339">
+																</container>
+															</widget>
+														</widget>
+													</container>
+												</container>
 											</container>
 										</container>
 										<container pos="0,393" size="513x261">

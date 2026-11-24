@@ -12,6 +12,24 @@ Recipe
 A recipe is a file you keep beside your tests. The same recipe and the same seed produce the same data on every machine.
 1
 Your recipe
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
 version: "0.1"
 seed: "readme"
 locale: en-US
@@ -20,9 +38,10 @@ entities:
     count: 1000
     primary_key: ssn
     fields:
-      first_name: { generator: first_name, required: true }
-      last_name:  { generator: last_name, required: true,
-max_length: 30 }
+      first_name: { generator: first_name, required:
+true }
+      last_name:  { generator: last_name, required:
+true, max_length: 30 }
       gender:     { generator: gender }
       birth_date: { generator: birth_date }
       ssn:        { generator: ssn, unique: true }

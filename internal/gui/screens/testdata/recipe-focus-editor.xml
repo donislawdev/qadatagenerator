@@ -270,28 +270,50 @@
 												<rectangle fillColor="button" pos="1,1" radius="6" size="511x353" strokeColor="focus" strokeWidth="2"/>
 											</container>
 											<container size="513x355">
-												<widget pos="8,8" size="497x339" type="*parts.Editor">
-													<widget pos="0,2" size="497x335" type="*widget.Scroll">
-														<widget size="497x335" type="*widget.entryContent">
-															<widget size="497x335" type="*widget.RichText">
-																<text monospace pos="4,2" size="109x16">version: "0.1"</text>
-																<text monospace pos="4,18" size="109x16">seed: "sample"</text>
-																<text monospace pos="4,35" size="70x16">entities:</text>
-																<text monospace pos="4,52" size="85x16">  customer:</text>
-																<text monospace pos="4,69" size="93x16">    count: 3</text>
-																<text monospace pos="4,86" size="85x16">    fields:</text>
-																<text monospace pos="4,103" size="93x16">      email:</text>
-																<text monospace pos="4,120" size="241x16">        generator: person.email</text>
-																<text monospace pos="4,137" size="0x16"></text>
-															</widget>
-															<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
-														</widget>
-													</widget>
-													<widget size="497x339" type="*parts.wheelLayer">
+												<container pos="8,8" size="497x339">
+													<widget size="497x339" type="*parts.lineMarks">
 														<container size="497x339">
+															<rectangle fillColor="rgba(37,51,72,255)" pos="54,4" size="442x16"/>
+															<text monospace pos="34,4" size="7x16">1</text>
+															<text color="disabled" monospace pos="34,20" size="7x16">2</text>
+															<text color="disabled" monospace pos="34,37" size="7x16">3</text>
+															<text color="disabled" monospace pos="34,54" size="7x16">4</text>
+															<text color="disabled" monospace pos="34,71" size="7x16">5</text>
+															<text color="disabled" monospace pos="34,88" size="7x16">6</text>
+															<text color="disabled" monospace pos="34,105" size="7x16">7</text>
+															<container pos="0,105" size="15x16">
+																<image fillMode="contain" rsc="circle-alert-ee626d-15.svg" size="15x15"/>
+															</container>
+															<text color="disabled" monospace pos="34,122" size="7x16">8</text>
+															<text color="disabled" monospace pos="34,139" size="7x16">9</text>
 														</container>
 													</widget>
-												</widget>
+													<container size="497x339">
+														<rectangle size="54x339"/>
+														<widget pos="54,0" size="442x339" type="*parts.Editor">
+															<widget pos="0,2" size="442x335" type="*widget.Scroll">
+																<widget size="442x335" type="*widget.entryContent">
+																	<widget size="442x335" type="*widget.RichText">
+																		<text monospace pos="4,2" size="109x16">version: "0.1"</text>
+																		<text monospace pos="4,18" size="109x16">seed: "sample"</text>
+																		<text monospace pos="4,35" size="70x16">entities:</text>
+																		<text monospace pos="4,52" size="85x16">  customer:</text>
+																		<text monospace pos="4,69" size="93x16">    count: 3</text>
+																		<text monospace pos="4,86" size="85x16">    fields:</text>
+																		<text monospace pos="4,103" size="93x16">      email:</text>
+																		<text monospace pos="4,120" size="241x16">        generator: person.email</text>
+																		<text monospace pos="4,137" size="0x16"></text>
+																	</widget>
+																	<rectangle fillColor="foreground" pos="3,2" size="2x16"/>
+																</widget>
+															</widget>
+															<widget size="442x339" type="*parts.wheelLayer">
+																<container size="442x339">
+																</container>
+															</widget>
+														</widget>
+													</container>
+												</container>
 											</container>
 										</container>
 										<container pos="0,393" size="513x261">
@@ -503,10 +525,10 @@
 										<container pos="0,34" size="513x621">
 											<widget size="513x621" type="*parts.KeyScroll">
 												<container size="513x621">
-													<container size="513x254">
-														<rectangle fillColor="menuBackground" radius="10" size="513x254"/>
-														<container size="513x254">
-															<container pos="16,16" size="481x222">
+													<container size="513x295">
+														<rectangle fillColor="menuBackground" radius="10" size="513x295"/>
+														<container size="513x295">
+															<container pos="16,16" size="481x263">
 																<container size="481x23">
 																	<container size="27x23">
 																		<container size="27x23">
@@ -515,33 +537,44 @@
 																	</container>
 																	<text bold pos="27,0" size="454x23">Problems (1)</text>
 																</container>
-																<container pos="0,39" size="481x116">
-																	<container size="481x41">
-																		<widget size="481x41" type="*widget.Label">
-																			<widget size="481x41" type="*widget.RichText">
-																				<text pos="4,4" size="416x16">entities.customer.fields.email (line 7): this build has no generator called</text>
-																				<text pos="4,20" size="86x16">"person.email"</text>
-																			</widget>
+																<container pos="0,39" size="481x24">
+																	<widget size="481x24" type="*widget.Label">
+																		<widget size="481x24" type="*widget.RichText">
+																			<text color="disabled" pos="4,4" size="257x16">Click a problem to go to its line in the recipe.</text>
 																		</widget>
-																	</container>
-																	<container pos="0,45" size="481x41">
-																		<widget size="481x41" type="*widget.Label">
-																			<widget size="481x41" type="*widget.RichText">
-																				<text color="disabled" pos="4,4" size="441x16">allowed: aba, birth_date, card, city, ean, first_name, gender, iban, imei, isbn,</text>
-																				<text color="disabled" pos="4,20" size="335x16">last_name, nip, pesel, postal_code, region, regon, ssn, vin</text>
-																			</widget>
-																		</widget>
-																	</container>
-																	<container pos="0,91" size="481x24">
-																		<widget size="481x24" type="*widget.Label">
-																			<widget size="481x24" type="*widget.RichText">
-																				<text color="disabled" pos="4,4" size="460x16">try: pick one of the names above, or drop the generator and give the field a type</text>
-																			</widget>
-																		</widget>
-																	</container>
+																	</widget>
 																</container>
-																<rectangle fillColor="separator" pos="0,171" size="481x1"/>
-																<container pos="0,188" size="481x34">
+																<widget pos="0,79" size="481x116" type="*parts.TapRow">
+																	<container size="481x116">
+																		<container size="481x116">
+																			<container size="481x41">
+																				<widget size="481x41" type="*widget.Label">
+																					<widget size="481x41" type="*widget.RichText">
+																						<text pos="4,4" size="416x16">entities.customer.fields.email (line 7): this build has no generator called</text>
+																						<text pos="4,20" size="86x16">"person.email"</text>
+																					</widget>
+																				</widget>
+																			</container>
+																			<container pos="0,45" size="481x41">
+																				<widget size="481x41" type="*widget.Label">
+																					<widget size="481x41" type="*widget.RichText">
+																						<text color="disabled" pos="4,4" size="441x16">allowed: aba, birth_date, card, city, ean, first_name, gender, iban, imei, isbn,</text>
+																						<text color="disabled" pos="4,20" size="335x16">last_name, nip, pesel, postal_code, region, regon, ssn, vin</text>
+																					</widget>
+																				</widget>
+																			</container>
+																			<container pos="0,91" size="481x24">
+																				<widget size="481x24" type="*widget.Label">
+																					<widget size="481x24" type="*widget.RichText">
+																						<text color="disabled" pos="4,4" size="460x16">try: pick one of the names above, or drop the generator and give the field a type</text>
+																					</widget>
+																				</widget>
+																			</container>
+																		</container>
+																	</container>
+																</widget>
+																<rectangle fillColor="separator" pos="0,212" size="481x1"/>
+																<container pos="0,229" size="481x34">
 																	<widget size="481x34" type="*parts.Button">
 																		<container size="481x34">
 																			<container size="481x34">

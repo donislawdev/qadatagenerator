@@ -622,6 +622,17 @@ repository once they are released.
 
 ### Added
 
+- **Line numbers in the recipe editor.** Every line of the recipe on the
+  Recipe screen is numbered, counted the way `qadg validate` counts the line
+  it names in a message. A long line folded under itself keeps one number. The
+  number of the line you are typing on is brighter, and a faint band runs
+  across that line while the field has the keyboard and nothing is selected.
+- **Problems marked beside their line.** A line the recipe has a problem on
+  carries a red mark beside its number. Clicking a problem in the list on the
+  right puts the cursor on its line and scrolls the editor to it.
+- **Enter keeps the indentation in the recipe editor.** A new line starts as
+  far in as the line above it, and one step (two spaces) further after a line
+  that ends in a colon, such as `fields:`. Ctrl+Z takes the spaces back.
 - **Open folder on the Recipe and Damage a file screens.** After a run, the
   button under the list of written files shows their folder in the file
   manager of your system: File Explorer, Finder or the one your Linux desktop

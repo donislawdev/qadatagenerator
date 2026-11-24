@@ -278,14 +278,38 @@ func hinted(text i18n.Catalogue, _ Samples) (any, fyne.CanvasObject) {
 	return made, paint.AtLeast(paint.FieldWidth(hint), 0, parts.Standing(parts.Field(made)))
 }
 
-// editor is the field of several lines, sized like the single line one so
-// that its lines are clipped the way the recipe editor clips a long one.
+// editor is the field of several lines, its text as wide as the single line
+// one, so that its lines fold the way the recipe editor folds a long one.
 func editor(value func(Samples) string) builder {
 	return func(_ i18n.Catalogue, samples Samples) (any, fyne.CanvasObject) {
 		made := parts.NewEditor(nil)
 		made.SetText(value(samples))
-		return made, paint.AtLeast(paint.FieldWidth(samples.Word), 0, made.Framed())
+		return made, editorSized(made, samples)
 	}
+}
+
+// markedEditor is the same editor with its first line marked the way the
+// recipe screen marks a line the reader found a problem on (DEC-337), so the
+// mark is seen in every state of the field: under the pointer, with the
+// keyboard and the band across the caret's line, and out of reach. The first
+// line, because it is the one in sight in a field this small.
+func markedEditor(_ i18n.Catalogue, samples Samples) (any, fyne.CanvasObject) {
+	made := parts.NewEditor(nil)
+	made.SetText(samples.Lines)
+	made.MarkLines([]int{1})
+	return made, editorSized(made, samples)
+}
+
+// editorSized is an editor framed with room for its text as wide as one word,
+// beside the column of line numbers.
+//
+// 🔴 The column is added to the width rather than taken out of it. Sized like
+// the field of one line, as it was until 2026-11-24, the field gave the column
+// most of its width once the column existed, and the render showed the sample
+// folded one letter to a row (DEC-337).
+func editorSized(made *parts.Editor, samples Samples) fyne.CanvasObject {
+	framed := made.Framed()
+	return paint.AtLeast(paint.FieldWidth(samples.Word)+framed.MinSize().Width, 0, framed)
 }
 
 // lists is the page of the controls that show records a row at a time.
@@ -327,6 +351,7 @@ func editors() []control {
 		variants: []variant{
 			{name: i18n.CatalogueEmpty, build: editor(nothing)},
 			{name: i18n.CatalogueLines, build: editor(severalLines)},
+			{name: i18n.CatalogueMarkedLine, build: markedEditor},
 		},
 	}}
 }

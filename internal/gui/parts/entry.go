@@ -79,6 +79,19 @@ type Editor struct {
 	// shiftDown is whether Shift is held, as this field has seen it, for when
 	// the driver cannot say. See shifted.
 	shiftDown bool
+
+	// The column of line numbers, the band across the line the caret is on, and
+	// what they are drawn from (lines.go, DEC-337). marks exists once the
+	// editor is framed. area is the toolkit's scrolling area inside this field,
+	// found among the objects of its renderer, and nil while it has not been
+	// found. lines is the map of the text, kept until the text changes.
+	marks    *lineMarks
+	area     *container.Scroll
+	lines    lineMap
+	problems map[int]bool
+	// keyboard is whether this field holds the keyboard, which the toolkit
+	// keeps in a field of its own nobody else can read.
+	keyboard bool
 }
 
 // Asserted so that dropping one of these is a compile error rather than a field
@@ -119,6 +132,10 @@ func NewEditor(changed func(string)) *Editor {
 	// person has to see in a recipe is the one thing the font hides.
 	editor.TextStyle = fyne.TextStyle{Monospace: true}
 	editor.OnChanged = changed
+	// Called by the toolkit after every move of the caret and every change of
+	// the text, once it has scrolled the caret into sight, which is also the
+	// only report of that scroll (lines.go).
+	editor.OnCursorChanged = editor.redrawLines
 	editor.ExtendBaseWidget(editor)
 	return editor
 }
@@ -134,7 +151,8 @@ func NewEditor(changed func(string)) *Editor {
 func (e *Editor) AcceptsTab() bool { return true }
 
 // TypedKey indents on Tab, takes the indent back on Shift+Tab, arms the way out
-// on Esc, and hands every other key to the toolkit.
+// on Esc, indents the line Enter begins, and hands every other key to the
+// toolkit.
 //
 // A key that only modifies another, Shift above all, leaves the way out armed:
 // the driver hands this field a press of Shift on its own before Shift+Tab, and
@@ -155,6 +173,12 @@ func (e *Editor) TypedKey(key *fyne.KeyEvent) {
 		e.leaving = true
 	case modifierKeys[key.Name]:
 		e.Entry.TypedKey(key)
+	case key.Name == fyne.KeyReturn || key.Name == fyne.KeyEnter:
+		// A new line begins indented like the one it ends, and one step
+		// deeper after a line that opens a block (indentAfter, DEC-337).
+		e.leaving = false
+		e.Entry.TypedKey(key)
+		e.indentNewLine()
 	default:
 		e.leaving = false
 		e.Entry.TypedKey(key)
@@ -360,6 +384,12 @@ func (e *Editor) MouseDown(event *desktop.MouseEvent) {
 // The words are placed by this padding rather than by the toolkit: a step of
 // the scale on every side, which is where a field's text sits. No theme of the
 // editor's own stands around it, for the reason FieldEntry gives.
+//
+// Inside the padding the layout leaves a gap at the leading edge for the
+// column of line numbers, and what the column and the band across the line of
+// the caret draw lies under the gap and the text (lineMarks), so both are
+// inside the field's frame and on its ground (DEC-337). Nothing of it takes
+// the keyboard, so the keyboard's walk is unchanged.
 func (e *Editor) Framed() fyne.CanvasObject {
 	if e.dressed != nil {
 		return e.dressed
@@ -368,8 +398,11 @@ func (e *Editor) Framed() fyne.CanvasObject {
 	// editor, and an edge in red would point at the whole document.
 	grounds, look := textGrounds(e.Disabled(), false)
 	e.onFocus, e.onHover, e.onDisable = look.focus, look.hover, look.disable
+	e.marks = newLineMarks(e)
+	lined := container.New(layout.NewBorderLayout(nil, nil, e.marks.room, nil), e.marks.room, e)
 	step := palette.StepOf(palette.NameStepTight)
-	inside := container.New(layout.NewCustomPaddedLayout(step, step, step, step), e)
+	inside := container.New(layout.NewCustomPaddedLayout(step, step, step, step),
+		container.NewStack(e.marks, lined))
 	e.dressed = container.NewStack(append(grounds, inside)...)
 	return e.dressed
 }
@@ -378,31 +411,80 @@ func (e *Editor) Framed() fyne.CanvasObject {
 // same as the field of one line (see withoutEdge), with a pane laid over it so
 // that a notch of the wheel moves the lines as far as it moves every other area
 // of this window. The toolkit keeps the editor's scrolling area inside this
-// renderer, and wheelLayer says how the pane reaches it.
+// renderer, and wheelLayer says how the pane reaches it. The same area is what
+// the column of numbers follows (editorRenderer).
 func (e *Editor) CreateRenderer() fyne.WidgetRenderer {
-	return withWheel(withoutEdge(e.Entry.CreateRenderer()))
+	wheel := withWheel(withoutEdge(e.Entry.CreateRenderer()))
+	drawing := &editorRenderer{wheeled: wheel, editor: e}
+	e.follow(wheel.layer.area)
+	return drawing
+}
+
+// editorRenderer is the wheeled drawing of the editor that also tells the
+// column of numbers when the rows can have moved.
+//
+// A change of width folds the text again inside the toolkit's layout of the
+// field, and the toolkit says nothing about it (the layout of its content at
+// widget/entry.go:1817 of v2.8.2 resizes the text and calls no one). So the
+// numbers are put back after every layout, once the toolkit has finished it.
+type editorRenderer struct {
+	*wheeled
+	editor *Editor
+}
+
+// Layout lets the toolkit and the pane lay out, then puts the numbers back.
+func (r *editorRenderer) Layout(size fyne.Size) {
+	r.wheeled.Layout(size)
+	r.editor.follow(r.layer.area)
+	r.editor.redrawLines()
+}
+
+// Objects is the wheeled list, and follows the area when the toolkit's renderer
+// handed over another list and the pane found another area in it.
+func (r *editorRenderer) Objects() []fyne.CanvasObject {
+	objects := r.wheeled.Objects()
+	r.editor.follow(r.layer.area)
+	return objects
+}
+
+// follow keeps the area the column follows, and asks it to say when the wheel
+// or its bar moved it. The toolkit's entry sets nothing on that field of its
+// area (no OnScrolled in widget/entry.go of v2.8.2), so taking it takes nothing
+// from the toolkit.
+func (e *Editor) follow(area *container.Scroll) {
+	if area == e.area {
+		return
+	}
+	e.area = area
+	if area != nil {
+		area.OnScrolled = func(fyne.Position) { e.redrawLines() }
+	}
 }
 
 // FocusGained tells the grounds the keyboard is here, then lets the toolkit
 // place the caret. The way out starts disarmed, whatever happened on the last
-// visit.
+// visit. The number of the caret's line and the band across it follow.
 func (e *Editor) FocusGained() {
 	e.leaving = false
+	e.keyboard = true
 	if e.onFocus != nil {
 		e.onFocus(true)
 	}
 	e.Entry.FocusGained()
+	e.redrawLines()
 }
 
 // FocusLost tells them it left, then lets the toolkit take the caret. The way
 // out is disarmed, and Shift is forgotten, because its release will go to
-// whatever holds the keyboard next.
+// whatever holds the keyboard next. The band goes with the caret.
 func (e *Editor) FocusLost() {
 	e.leaving, e.shiftDown = false, false
+	e.keyboard = false
 	if e.onFocus != nil {
 		e.onFocus(false)
 	}
 	e.Entry.FocusLost()
+	e.redrawLines()
 }
 
 // MouseIn tells the grounds the pointer is on the field, which the toolkit's

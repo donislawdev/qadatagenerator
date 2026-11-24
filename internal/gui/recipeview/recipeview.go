@@ -50,6 +50,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
 	"github.com/donislawdev/qadatagenerator/internal/damage"
+	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/damageparts"
@@ -325,6 +326,14 @@ func (v *View) SetRecipe(recipe string) {
 // Report is what the last finished check said, and whether there has been one.
 func (v *View) Report() (validate.Report, bool) { return v.answer.Report, v.checked }
 
+// Marked is the lines marked beside their numbers, and LineOfCaret the line
+// the caret is on, both for a caller with nobody looking at the screen, as
+// Report is.
+func (v *View) Marked() []int { return v.editor.Marked() }
+
+// LineOfCaret: see Marked.
+func (v *View) LineOfCaret() int { return v.editor.LineOfCaret() }
+
 // Recheck judges what is on the screen, off the thread that draws.
 //
 // # Why this cannot happen where it is asked for
@@ -424,9 +433,11 @@ func (v *View) judge(recipe string) {
 func (v *View) Checking() bool { return v.checking }
 
 // draw puts on the screen everything that depends on its state: the card and
-// its heading, the one action in the band, and the terminal line.
+// its heading, the marks beside the lines it names, the one action in the
+// band, and the terminal line.
 func (v *View) draw() {
 	v.drawCard()
+	v.markProblems()
 	v.drawAction()
 	v.drawCommand()
 }
@@ -565,17 +576,61 @@ func (v *View) problems() []fyne.CanvasObject {
 		v.told(paint.IconAlert, palette.StateDanger, v.text.T(i18n.RecipeHeadingProblems)+" ("+
 			strconv.Itoa(len(v.answer.Report.Problems))+")"),
 	}
+	if len(v.problemLines()) > 0 {
+		blocks = append(blocks, v.paragraph(v.text.T(i18n.RecipeProblemsGoTo)))
+	}
 	for _, found := range v.answer.Report.Problems {
-		lines := []fyne.CanvasObject{sentence(v.place(found.Where, found.Line) + found.What)}
-		if found.Allowed != "" {
-			lines = append(lines, v.paragraph(v.text.T(i18n.RecipeAllowed)+": "+found.Allowed))
-		}
-		if found.Hint != "" {
-			lines = append(lines, v.paragraph(v.text.T(i18n.RecipeTry)+": "+found.Hint))
-		}
-		blocks = append(blocks, paint.Column(palette.NameStepHairline, lines...))
+		blocks = append(blocks, v.problem(found))
 	}
 	return blocks
+}
+
+// problem is one entry of the list. An entry that names a line is a row a
+// click on takes the caret to that line, the way a list of problems in a code
+// editor does (DEC-337), and it lights under the pointer to say so.
+//
+// It does not take the keyboard, for the reason the rows of values on the
+// quick screen do not (TapRow): a recipe can have hundreds of problems, and a
+// stop for each would put them all between the editor and the button. The
+// keyboard reaches the same line with the arrow keys, the number in sight in
+// the column beside the editor.
+func (v *View) problem(found recipe.Problem) fyne.CanvasObject {
+	lines := []fyne.CanvasObject{sentence(v.place(found.Where, found.Line) + found.What)}
+	if found.Allowed != "" {
+		lines = append(lines, v.paragraph(v.text.T(i18n.RecipeAllowed)+": "+found.Allowed))
+	}
+	if found.Hint != "" {
+		lines = append(lines, v.paragraph(v.text.T(i18n.RecipeTry)+": "+found.Hint))
+	}
+	entry := paint.Column(palette.NameStepHairline, lines...)
+	if found.Line <= 0 {
+		return entry
+	}
+	line := found.Line
+	return parts.NewTapRow(func(hovered bool) fyne.CanvasObject {
+		if !hovered {
+			return entry
+		}
+		return container.NewStack(paint.Fill(palette.BgHover, palette.RadiusControl), entry)
+	}, func() { v.editor.GoToLine(line) })
+}
+
+// markProblems marks, in the column beside the editor, the lines the answer on
+// the card names a problem on, and nothing when the card says anything else.
+func (v *View) markProblems() { v.editor.MarkLines(v.problemLines()) }
+
+// problemLines is every line the answer on the card names a problem on, and
+// nothing when the card says anything else.
+func (v *View) problemLines() []int {
+	var lines []int
+	if v.checked && v.crashed == nil {
+		for _, found := range v.answer.Report.Problems {
+			if found.Line > 0 {
+				lines = append(lines, found.Line)
+			}
+		}
+	}
+	return lines
 }
 
 // clean says the recipe can be used, what was read to say so, and what a run

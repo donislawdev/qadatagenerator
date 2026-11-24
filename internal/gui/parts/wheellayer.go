@@ -101,7 +101,7 @@ type wheeled struct {
 }
 
 // withWheel lays the pane over a renderer of the toolkit.
-func withWheel(toolkit fyne.WidgetRenderer) fyne.WidgetRenderer {
+func withWheel(toolkit fyne.WidgetRenderer) *wheeled {
 	inner := toolkit.Objects()
 	wrapped := &wheeled{WidgetRenderer: toolkit, layer: newWheelLayer(inner)}
 	wrapped.keep(inner)

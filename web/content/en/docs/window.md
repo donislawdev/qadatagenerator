@@ -17,6 +17,8 @@ Ten VINs from the seed `readme`. The first three are the ones the example in [Ge
 
 Write or paste a recipe. It is checked as you type, shows what it describes, and runs when you ask. It does what `qadg validate` and `qadg generate` do.
 
+Every line of the recipe is numbered, the same way `qadg validate` counts lines in its messages. A line with a problem has a red mark beside its number, and a click on the problem on the right takes you to that line. Enter starts the next line indented like the one above, one step deeper after a line ending in a colon.
+
 {{< window name="recipe-website" alt="The Recipe screen checking the shop.yaml recipe, with the files a run would write and the first rows of customers" >}}
 The recipe from [Getting started](/docs/getting-started/), pasted in. The window checks it as you type, lists the files a run would write, says how much of the ordered damage this build carries out, and shows the first rows before anything is written.
 {{< /window >}}

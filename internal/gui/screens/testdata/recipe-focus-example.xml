@@ -270,22 +270,32 @@
 												<rectangle fillColor="button" pos="1,1" radius="6" size="511x353" strokeColor="inputBorder" strokeWidth="2"/>
 											</container>
 											<container size="513x355">
-												<widget pos="8,8" size="497x339" type="*parts.Editor">
-													<widget pos="0,2" size="497x335" type="*widget.Scroll">
-														<widget size="497x335" type="*widget.entryContent">
-															<widget size="497x335" type="*widget.RichText">
-																<text color="disabled" monospace pos="4,2" size="132x16">A recipe, in YAML</text>
-															</widget>
-															<widget size="497x335" type="*widget.RichText">
-																<text monospace pos="4,2" size="0x16"></text>
-															</widget>
-														</widget>
-													</widget>
-													<widget size="497x339" type="*parts.wheelLayer">
+												<container pos="8,8" size="497x339">
+													<widget size="497x339" type="*parts.lineMarks">
 														<container size="497x339">
+															<text color="disabled" monospace pos="34,4" size="7x16">1</text>
 														</container>
 													</widget>
-												</widget>
+													<container size="497x339">
+														<rectangle size="54x339"/>
+														<widget pos="54,0" size="442x339" type="*parts.Editor">
+															<widget pos="0,2" size="442x335" type="*widget.Scroll">
+																<widget size="442x335" type="*widget.entryContent">
+																	<widget size="442x335" type="*widget.RichText">
+																		<text color="disabled" monospace pos="4,2" size="132x16">A recipe, in YAML</text>
+																	</widget>
+																	<widget size="442x335" type="*widget.RichText">
+																		<text monospace pos="4,2" size="0x16"></text>
+																	</widget>
+																</widget>
+															</widget>
+															<widget size="442x339" type="*parts.wheelLayer">
+																<container size="442x339">
+																</container>
+															</widget>
+														</widget>
+													</container>
+												</container>
 											</container>
 										</container>
 										<container pos="0,393" size="513x261">
