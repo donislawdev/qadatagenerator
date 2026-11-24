@@ -308,10 +308,14 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	// The clipboard is nothing at all, for the same reason the way to write is:
 	// a state of this list is a picture, and a picture that reached the
 	// clipboard of the machine taking it would change something outside itself.
+	// The Open folder button opens nothing, for the same reason: a picture that
+	// opened a folder on the machine taking it would change something outside
+	// itself.
+	folders := outward.NewFolders(text, outward.Nowhere{}, background.ReadHere, nil)
 	takeScreen := takeview.New(text, nil, describedDamage(), take.Open, background.Work{
 		Run:  outcomeOf(state.Ran),
 		Read: readingFor(state.Reading),
-	}, nil)
+	}, folders, nil)
 	// 🔴 The way to write never writes. A state of this list is a picture, and a
 	// picture that wrote a dataset would leave it either in this repository or
 	// in a directory whose name then appears in every stored tree. For a state
@@ -320,7 +324,7 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	// really writes is held by a test in the screen's own package against a
 	// directory of its own.
 	recipeScreen := recipeview.New(text, recipeview.Checker(describedDamage()), recipeRunFor(state.Wrote),
-		background.Work{Read: readingFor(state.Checking), Produce: producedHere}, nil)
+		background.Work{Read: readingFor(state.Checking), Produce: producedHere}, folders, nil)
 	// The clipboard is nothing at all here, for the same reason the way to
 	// write is: a state of this list is a picture, and a picture that reached
 	// the clipboard of the machine taking it would change something outside

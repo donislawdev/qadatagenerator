@@ -705,7 +705,7 @@
 								</container>
 								<container pos="696,0" size="362x681">
 									<container pos="24,0" size="338x681">
-										<container size="338x393">
+										<container size="338x435">
 											<container size="338x34">
 												<container size="338x34">
 													<container pos="4,4" size="330x18">
@@ -719,13 +719,13 @@
 													</container>
 												</container>
 											</container>
-											<container pos="0,34" size="338x359">
-												<container size="338x359">
-													<rectangle fillColor="menuBackground" radius="10" size="338x359"/>
-													<container size="338x359">
-														<container pos="16,16" size="306x327">
-															<container size="306x327">
-																<container size="306x327">
+											<container pos="0,34" size="338x401">
+												<container size="338x401">
+													<rectangle fillColor="menuBackground" radius="10" size="338x401"/>
+													<container size="338x401">
+														<container pos="16,16" size="306x369">
+															<container size="306x369">
+																<container size="306x369">
 																	<container size="306x60">
 																		<text bold color="focus" size="306x14" textSize="11">FILES WRITTEN</text>
 																		<container pos="0,18" size="306x41">
@@ -737,11 +737,42 @@
 																			</widget>
 																		</container>
 																	</container>
-																	<container pos="0,68" size="306x16">
+																	<container pos="0,68" size="306x34">
+																		<widget size="123x34" type="*parts.Button">
+																			<container size="123x34">
+																				<container size="123x34">
+																					<rectangle size="123x34"/>
+																					<container size="123x34">
+																						<container size="123x34">
+																							<rectangle pos="1,1" radius="6" size="121x32" strokeColor="inputBorder" strokeWidth="2"/>
+																						</container>
+																						<container size="123x34">
+																							<container pos="16,4" size="91x26">
+																								<container pos="0,4" size="91x16">
+																									<container size="15x16">
+																										<spacer size="15x0"/>
+																										<image fillMode="contain" rsc="folder-open-72abff-15.svg" size="15x15"/>
+																										<spacer pos="0,15" size="15x0"/>
+																									</container>
+																									<container pos="23,0" size="68x16">
+																										<spacer size="68x0"/>
+																										<text size="68x16">Open folder</text>
+																										<spacer pos="0,16" size="68x0"/>
+																									</container>
+																								</container>
+																							</container>
+																						</container>
+																					</container>
+																				</container>
+																			</container>
+																		</widget>
+																		<spacer pos="123,0" size="182x34"/>
+																	</container>
+																	<container pos="0,110" size="306x16">
 																		<text bold size="132x16">Too large to read back</text>
 																		<text color="disabled" pos="140,0" size="152x16">expectation-manifest.json</text>
 																	</container>
-																	<container pos="0,93" size="306x109">
+																	<container pos="0,135" size="306x109">
 																		<container size="27x109">
 																			<container size="27x23">
 																				<image fillMode="contain" pos="4,4" rsc="triangle-alert-e8a33d-15.svg" size="15x15"/>
@@ -760,19 +791,19 @@
 																			</widget>
 																		</container>
 																	</container>
-																	<container pos="0,210" size="306x16">
+																	<container pos="0,252" size="306x16">
 																		<text bold size="96x16">Defects ordered</text>
 																		<text color="disabled" pos="104,0" size="15x16">14</text>
 																	</container>
-																	<container pos="0,235" size="306x16">
+																	<container pos="0,277" size="306x16">
 																		<text bold size="102x16">Of those, applied</text>
 																		<text color="disabled" pos="110,0" size="15x16">14</text>
 																	</container>
-																	<container pos="0,260" size="306x16">
+																	<container pos="0,302" size="306x16">
 																		<text bold size="119x16">Never ordered at all</text>
 																		<text color="disabled" pos="127,0" size="7x16">2</text>
 																	</container>
-																	<container pos="0,285" size="306x41">
+																	<container pos="0,327" size="306x41">
 																		<widget size="306x41" type="*widget.Label">
 																			<widget size="306x41" type="*widget.RichText">
 																				<text color="disabled" pos="4,4" size="275x16">Damage to the integrity of a set needs a second</text>
@@ -787,15 +818,15 @@
 												</container>
 											</container>
 										</container>
-										<container pos="0,393" size="338x288">
-											<container pos="4,24" size="330x260">
-												<rectangle size="330x260"/>
-												<container size="330x260">
-													<container size="330x260">
-														<rectangle fillColor="menuBackground" radius="10" size="330x260"/>
-														<container size="330x260">
-															<container pos="16,16" size="298x228">
-																<widget size="298x228" type="*parts.KeyScroll">
+										<container pos="0,435" size="338x246">
+											<container pos="4,24" size="330x218">
+												<rectangle size="330x218"/>
+												<container size="330x218">
+													<container size="330x218">
+														<rectangle fillColor="menuBackground" radius="10" size="330x218"/>
+														<container size="330x218">
+															<container pos="16,16" size="298x186">
+																<widget size="298x186" type="*parts.KeyScroll">
 																	<container size="298x993">
 																		<container size="298x993">
 																			<container size="298x18">
@@ -928,16 +959,16 @@
 																			</container>
 																		</container>
 																	</container>
-																	<widget pos="0,228" size="298x0" type="*widget.Shadow">
+																	<widget pos="0,186" size="298x0" type="*widget.Shadow">
 																		<linearGradient pos="0,-8" size="298x8"/>
 																	</widget>
-																	<widget pos="292,0" size="6x228" type="*widget.scrollBarArea">
-																		<widget pos="3,0" size="3x52" type="*widget.scrollBar">
-																			<rectangle fillColor="scrollbar" radius="3" size="3x52"/>
+																	<widget pos="292,0" size="6x186" type="*widget.scrollBarArea">
+																		<widget pos="3,0" size="3x34" type="*widget.scrollBar">
+																			<rectangle fillColor="scrollbar" radius="3" size="3x34"/>
 																		</widget>
 																	</widget>
 																</widget>
-																<rectangle radius="10" size="298x228" strokeWidth="2"/>
+																<rectangle radius="10" size="298x186" strokeWidth="2"/>
 															</container>
 														</container>
 													</container>

@@ -29,7 +29,7 @@ func TestTheExampleThisScreenOffersIsARecipeThatRuns(t *testing.T) {
 		t.Fatalf("this build cannot read its own catalog of damage: %v", err)
 	}
 	view := New(i18n.English, Checker(described), nil,
-		background.Work{Read: background.ReadHere}, nil)
+		background.Work{Read: background.ReadHere}, folderless, nil)
 	window := test.NewWindow(view.Content())
 	t.Cleanup(window.Close)
 	window.Resize(fyne.NewSize(900, 700))

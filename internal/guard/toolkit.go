@@ -50,11 +50,21 @@ const WindowProgram = "cmd/qadg-gui"
 type ToolkitAllowance struct {
 	Call      string
 	Addresses []string
-	Why       string
+	// Scheme is set for a file that opens what a person chose rather than a
+	// page named in it, and is then the one scheme an address built there may
+	// carry. Such a file takes a path from its caller, so the rule against
+	// taking one does not hold for it, and this rule stands in its place: each
+	// address is built from parts, as a url.URL with this scheme written out,
+	// and never parsed from text or changed after it is built. A path handed
+	// in can then become a file address and nothing else.
+	Scheme string
+	Why    string
 }
 
-// ToolkitNetworkAllowed is the one place in the window allowed to hand an
-// address to the desktop (DEC-276).
+// ToolkitNetworkAllowed are the places in the window allowed to hand an
+// address to the desktop: two pages fixed in one file (DEC-276), and the
+// folder a run wrote into, on the systems where the toolkit opens it
+// (DEC-336).
 //
 // # Why this is an exception and not a hole
 //
@@ -79,6 +89,17 @@ var ToolkitNetworkAllowed = map[string]ToolkitAllowance{
 		},
 		Why: "the source of this program and the page supporting its author, opened in the browser " +
 			"when a person presses the button for one (DEC-276)",
+	},
+	// The folder a run wrote into, shown in the file manager when a person
+	// presses Open folder, on macOS and Linux. Windows takes another way,
+	// because there the toolkit did not open a folder named in letters outside
+	// ASCII (measured 2026-11-24, DEC-336), so the file for Windows is in
+	// CgoAllowed instead. Allowed by the owner on 2026-11-24.
+	"cmd/qadg-gui/folder_other.go": {
+		Call:   "OpenURL",
+		Scheme: "file",
+		Why: "the folder a run wrote into, opened in the file manager when a person presses " +
+			"Open folder, on macOS and Linux (DEC-336)",
 	},
 }
 
@@ -202,12 +223,15 @@ func toolkitNetworkIn(path, name string, allowance ToolkitAllowance, isAllowed b
 		return findings, nil
 	}
 	findings = append(findings, allowedFileFindings(parsed, fileSet, name, allowance, called, named)...)
+	if allowance.Scheme != "" {
+		findings = append(findings, schemeFindings(parsed, fileSet, name, allowance.Scheme)...)
+	}
 	return findings, nil
 }
 
-// allowedFileFindings is what the one allowed file must keep true: it calls
-// what it is allowed, it names exactly the addresses listed, and nothing it
-// exports takes an address from a caller.
+// allowedFileFindings is what an allowed file must keep true: it calls what it
+// is allowed, it names exactly the addresses listed, and, unless it is bound to
+// a scheme instead, nothing it exports takes an address from a caller.
 func allowedFileFindings(parsed *ast.File, fileSet *token.FileSet, name string, allowance ToolkitAllowance,
 	called bool, named map[string]bool) []string {
 	var findings []string
@@ -229,6 +253,9 @@ func allowedFileFindings(parsed *ast.File, fileSet *token.FileSet, name string, 
 				"A page this window may open is a decision (DEC-276), so it goes into the register first",
 				name, address))
 		}
+	}
+	if allowance.Scheme != "" {
+		return findings
 	}
 	for _, declared := range parsed.Decls {
 		function, ok := declared.(*ast.FuncDecl)
@@ -261,4 +288,109 @@ func takesAnAddress(expression ast.Expr) bool {
 		return typed.Sel.Name == "URL"
 	}
 	return false
+}
+
+// urlPackage is the parser of addresses, the one package under net the network
+// rule lets through.
+const urlPackage = "net/url"
+
+// partsOfAnAddress are the parts of a url.URL that could carry it somewhere
+// other than a file, which a file bound to a scheme may not set or change.
+var partsOfAnAddress = map[string]bool{
+	"Scheme": true, "Opaque": true, "User": true, "Host": true, "RawPath": true, "RawQuery": true,
+	"Fragment": true, "RawFragment": true, "OmitHost": true, "ForceQuery": true,
+}
+
+// schemeFindings is what a file bound to a scheme must keep true: every address
+// it builds is a url.URL literal holding that scheme and a path, it parses none
+// from text, and it changes none after building it.
+//
+// It follows the name net/url is imported under, so an alias changes nothing,
+// and refuses a dot import, under which the parser would carry no name to
+// follow.
+func schemeFindings(parsed *ast.File, fileSet *token.FileSet, name, scheme string) []string {
+	var findings []string
+	at := func(node ast.Node) string { return fmt.Sprintf("%s:%d", name, fileSet.Position(node.Pos()).Line) }
+	local := ""
+	for _, imported := range parsed.Imports {
+		if path, err := strconv.Unquote(imported.Path.Value); err != nil || path != urlPackage {
+			continue
+		}
+		local = "url"
+		if imported.Name != nil {
+			local = imported.Name.Name
+		}
+		if local == "." {
+			findings = append(findings, fmt.Sprintf("%s imports %s with a dot, so its parser carries no "+
+				"name this guard can follow", at(imported), urlPackage))
+		}
+	}
+	ofURL := func(expression ast.Expr, member string) bool {
+		selector, isSelector := expression.(*ast.SelectorExpr)
+		if !isSelector || selector.Sel.Name != member {
+			return false
+		}
+		owner, isIdent := selector.X.(*ast.Ident)
+		return isIdent && local != "" && owner.Name == local
+	}
+	ast.Inspect(parsed, func(node ast.Node) bool {
+		switch typed := node.(type) {
+		case *ast.CallExpr:
+			if ofURL(typed.Fun, "Parse") || ofURL(typed.Fun, "ParseRequestURI") {
+				findings = append(findings, fmt.Sprintf("%s parses an address from text, which could carry "+
+					"any scheme, where this file may build only %s addresses", at(typed), scheme))
+			}
+		case *ast.CompositeLit:
+			if ofURL(typed.Type, "URL") {
+				findings = append(findings, builtAddressFindings(typed, at, scheme)...)
+			}
+		case *ast.SelectorExpr:
+			if partsOfAnAddress[typed.Sel.Name] {
+				findings = append(findings, fmt.Sprintf("%s reaches the %s of an address after it is built, "+
+					"where this file may build only %s addresses", at(typed), typed.Sel.Name, scheme))
+			}
+		}
+		return true
+	})
+	return findings
+}
+
+// builtAddressFindings is what is wrong with one url.URL literal in a file
+// bound to a scheme: a scheme other than the one written out, or a part beside
+// the scheme and the path.
+func builtAddressFindings(literal *ast.CompositeLit, at func(ast.Node) string, scheme string) []string {
+	var findings []string
+	holdsScheme := false
+	for _, element := range literal.Elts {
+		pair, isPair := element.(*ast.KeyValueExpr)
+		if !isPair {
+			// Once for the literal: parts in order are all in order or none.
+			return []string{at(element) + " builds an address from parts given in order, so " +
+				"which part is the scheme is not written"}
+		}
+		key, _ := pair.Key.(*ast.Ident)
+		switch {
+		case key == nil:
+		case key.Name == "Scheme":
+			value, isText := pair.Value.(*ast.BasicLit)
+			written, err := "", error(nil)
+			if isText && value.Kind == token.STRING {
+				written, err = strconv.Unquote(value.Value)
+			}
+			if !isText || err != nil || written != scheme {
+				findings = append(findings, fmt.Sprintf("%s builds an address whose scheme is not %q "+
+					"written out", at(pair), scheme))
+				continue
+			}
+			holdsScheme = true
+		case key.Name != "Path":
+			findings = append(findings, fmt.Sprintf("%s sets the %s of an address, where this file may set "+
+				"only the scheme and the path", at(pair), key.Name))
+		}
+	}
+	if !holdsScheme && len(findings) == 0 {
+		findings = append(findings, fmt.Sprintf("%s builds an address with no scheme, which the system "+
+			"may read as a page rather than a %s", at(literal), scheme))
+	}
+	return findings
 }

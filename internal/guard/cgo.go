@@ -49,6 +49,14 @@ var CgoAllowed = map[string][]string{
 	"cmd/qadg-gui/wheel_windows.go": {
 		"SystemParametersInfoW", "SPI_GETWHEELSCROLLLINES", "WHEEL_PAGESCROLL", "PVOID", "UINT",
 	},
+	// Showing the folder a run wrote into in File Explorer, when a person
+	// presses Open folder, with COM set up around the call as its
+	// documentation asks (DEC-336). Allowed by the owner on 2026-11-24. The
+	// rest are the constants and the type the three calls take.
+	"cmd/qadg-gui/folder_windows.go": {
+		"ShellExecuteW", "CoInitializeEx", "CoUninitialize",
+		"COINIT_APARTMENTTHREADED", "COINIT_DISABLE_OLE1DDE", "SW_SHOWNORMAL", "WCHAR",
+	},
 }
 
 // CgoLinkerFlags are the only flags a #cgo line may pass, and only to the
@@ -64,6 +72,9 @@ var CgoLinkerFlags = map[string]bool{
 	// Makes the window a GUI program on Windows, so no console opens beside
 	// it (DEC-315).
 	"-Wl,--subsystem,windows": true,
+	// Joins the library of COM, set up around the call that shows a folder in
+	// File Explorer (DEC-336). MinGW does not join it by itself.
+	"-lole32": true,
 }
 
 // cgoPackage is the import being controlled. It is not a package but the

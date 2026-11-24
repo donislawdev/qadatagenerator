@@ -51,7 +51,7 @@ func screenWaitingOnAFile(t *testing.T, window fyne.Window) (*View, *heldReads, 
 	reads, runs := &heldReads{}, &held{}
 	view := New(i18n.English, window, described, take.Open, background.Work{
 		Run: runs.background, Read: reads.read,
-	}, nil)
+	}, folderless, nil)
 	view.Content()
 	return view, reads, runs
 }
@@ -122,7 +122,7 @@ func TestAReadAskedAgainIsToldToStop(t *testing.T) {
 	reads := &heldReads{}
 	view := New(i18n.English, window, described, opener, background.Work{
 		Run: (&held{}).background, Read: reads.read,
-	}, nil)
+	}, folderless, nil)
 	view.Content()
 
 	source := sourceFile(t, t.TempDir())

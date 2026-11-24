@@ -49,6 +49,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/app/corrupt"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
+	"github.com/donislawdev/qadatagenerator/internal/gui/outward"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
@@ -124,6 +125,11 @@ type View struct {
 	stage  stage
 	result take.Result
 	failed error
+	// ranInto is the directory the last run was handed, and openFolder the
+	// button that shows it once the run has ended (DEC-336), for the reason
+	// the recipe screen keeps the same pair.
+	ranInto    string
+	openFolder *parts.Button
 	// halt is how the run in flight is asked to end, and nothing while there is
 	// none.
 	halt *background.Stopper
@@ -193,9 +199,10 @@ type Clipboard interface{ SetContent(string) }
 // The clipboard is handed in like everything else, and may be nothing at all.
 // A screen built to be rendered rather than shown has no application behind it,
 // and a picture that reached the clipboard of the machine taking it would
-// change something outside itself.
+// change something outside itself. The Open folder button is handed in for the
+// same reason, so a test or a picture of this screen opens nothing.
 func New(text i18n.Catalogue, window fyne.Window, described catalog.Catalog,
-	openFile Opener, work background.Work, clipboard Clipboard) *View {
+	openFile Opener, work background.Work, folders outward.Folders, clipboard Clipboard) *View {
 	view := &View{
 		text: text, window: window, described: described, openFile: openFile,
 		work: work, clipboard: clipboard, chosen: take.Defaults(),
@@ -205,6 +212,7 @@ func New(text i18n.Catalogue, window fyne.Window, described catalog.Catalog,
 		fileBox: container.NewStack(), panel: container.NewStack(),
 		reads: background.NewLatest(work.Read),
 	}
+	view.openFolder = folders.Button(func() string { return view.ranInto })
 	view.buildControls()
 	view.lay()
 	view.redraw()

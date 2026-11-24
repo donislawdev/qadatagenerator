@@ -503,10 +503,10 @@
 										<container pos="0,34" size="513x621">
 											<widget size="513x621" type="*parts.KeyScroll">
 												<container size="513x621">
-													<container size="513x287">
-														<rectangle fillColor="menuBackground" radius="10" size="513x287"/>
-														<container size="513x287">
-															<container pos="16,16" size="481x255">
+													<container size="513x337">
+														<rectangle fillColor="menuBackground" radius="10" size="513x337"/>
+														<container size="513x337">
+															<container pos="16,16" size="481x305">
 																<container size="481x23">
 																	<container size="27x23">
 																		<container size="27x23">
@@ -522,7 +522,38 @@
 																		</widget>
 																	</widget>
 																</container>
-																<container pos="0,79" size="481x43">
+																<container pos="0,79" size="481x34">
+																	<widget size="123x34" type="*parts.Button">
+																		<container size="123x34">
+																			<container size="123x34">
+																				<rectangle size="123x34"/>
+																				<container size="123x34">
+																					<container size="123x34">
+																						<rectangle pos="1,1" radius="6" size="121x32" strokeColor="inputBorder" strokeWidth="2"/>
+																					</container>
+																					<container size="123x34">
+																						<container pos="16,4" size="91x26">
+																							<container pos="0,4" size="91x16">
+																								<container size="15x16">
+																									<spacer size="15x0"/>
+																									<image fillMode="contain" rsc="folder-open-72abff-15.svg" size="15x15"/>
+																									<spacer pos="0,15" size="15x0"/>
+																								</container>
+																								<container pos="23,0" size="68x16">
+																									<spacer size="68x0"/>
+																									<text size="68x16">Open folder</text>
+																									<spacer pos="0,16" size="68x0"/>
+																								</container>
+																							</container>
+																						</container>
+																					</container>
+																				</container>
+																			</container>
+																		</container>
+																	</widget>
+																	<spacer pos="123,0" size="357x34"/>
+																</container>
+																<container pos="0,129" size="481x43">
 																	<text bold color="focus" size="481x14" textSize="11">ROWS WRITTEN</text>
 																	<container pos="0,18" size="481x24">
 																		<widget size="481x24" type="*widget.Label">
@@ -532,7 +563,7 @@
 																		</widget>
 																	</container>
 																</container>
-																<container pos="0,139" size="481x116">
+																<container pos="0,189" size="481x116">
 																	<container size="481x16">
 																		<text bold size="96x16">Defects ordered</text>
 																		<text color="disabled" pos="104,0" size="7x16">3</text>

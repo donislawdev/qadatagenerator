@@ -1,5 +1,6 @@
-// Package outward is the one place in the window that hands an address to the
-// system, and the two addresses it may hand over.
+// Package outward is what the window hands to the system to open in another
+// program: the two pages it may open, and the folder a run wrote into
+// (folder.go, DEC-336).
 //
 // # Why this does not break untouchable rule 8
 //
@@ -9,13 +10,14 @@
 // program is registered for it, and only because a person pressed the button
 // (DEC-276). This program sends nothing and fetches nothing.
 //
-// # Why it is a package with nothing else in it
+// # Why the pages are a file with nothing else in it
 //
 // The guard over the toolkit's calls that leave this machine refuses OpenURL
-// everywhere in the window except in this file, and refuses this file naming
-// any address beyond the two it lists. An exception living in a file that also
-// does other work is an exception covering more than it says, so the file does
-// this and nothing besides.
+// everywhere in the window except in this file and in the one that opens a
+// folder on macOS and Linux, and refuses this file naming any address beyond
+// the two it lists. An exception living in a file that also does other work is
+// an exception covering more than it says, so the file does this and nothing
+// besides.
 package outward
 
 import (

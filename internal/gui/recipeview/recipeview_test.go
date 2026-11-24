@@ -22,7 +22,7 @@ import (
 // can look at the answer on the line after it asked for one.
 func here(t *testing.T, check recipeview.Check) *recipeview.View {
 	t.Helper()
-	view := recipeview.New(i18n.English, check, nil, background.Work{Read: background.ReadHere}, nil)
+	view := recipeview.New(i18n.English, check, nil, background.Work{Read: background.ReadHere}, nowhere, nil)
 	view.Content()
 	return view
 }
@@ -143,7 +143,7 @@ func TestAnAnswerAboutARecipeNobodyIsWaitingForIsNotDrawn(t *testing.T) {
 		// The report names the recipe it was asked about, so the assertion
 		// below is about WHICH answer was kept rather than about how many.
 		return recipeview.Answer{Report: validate.Report{Name: string(data)}}
-	}, nil, later, nil)
+	}, nil, later, nowhere, nil)
 	view.Content()
 
 	view.SetRecipe("first")
@@ -182,7 +182,7 @@ func TestAnAnswerArrivingAfterTheRecipeWasClearedIsNotDrawn(t *testing.T) {
 	}}
 	view := recipeview.New(i18n.English, func(_ string, data []byte, _ generate.Halt) recipeview.Answer {
 		return recipeview.Answer{Report: validate.Report{Name: string(data)}}
-	}, nil, later, nil)
+	}, nil, later, nowhere, nil)
 	view.Content()
 
 	view.SetRecipe("first")
@@ -208,7 +208,7 @@ func TestACheckAskedAgainIsToldToStop(t *testing.T) {
 	view := recipeview.New(i18n.English, func(_ string, _ []byte, stop generate.Halt) recipeview.Answer {
 		stale = append(stale, stop.Stopped() != nil)
 		return recipeview.Answer{}
-	}, nil, later, nil)
+	}, nil, later, nowhere, nil)
 	view.Content()
 
 	view.SetRecipe("first")
@@ -239,7 +239,7 @@ func TestLettersTypedDuringACheckWaitForIt(t *testing.T) {
 	view := recipeview.New(i18n.English, func(_ string, data []byte, _ generate.Halt) recipeview.Answer {
 		asked = append(asked, string(data))
 		return recipeview.Answer{Report: validate.Report{Name: string(data)}}
-	}, nil, later, nil)
+	}, nil, later, nowhere, nil)
 	view.Content()
 
 	for _, typed := range []string{"v", "ve", "ver", "vers"} {
@@ -264,7 +264,7 @@ func TestTheScreenSaysThatItIsChecking(t *testing.T) {
 	waiting := background.Work{Read: func(func() func(), func(error) func()) {}}
 	view := recipeview.New(i18n.English, func(string, []byte, generate.Halt) recipeview.Answer {
 		return recipeview.Answer{}
-	}, nil, waiting, nil)
+	}, nil, waiting, nowhere, nil)
 	view.Content()
 
 	view.SetRecipe(screens.CleanRecipe)
@@ -289,7 +289,7 @@ func TestTypingDoesNotBlankTheAnswerWhileTheNextCheckRuns(t *testing.T) {
 	held := background.Work{Read: func(read func() func(), _ func(error) func()) {
 		answer = append(answer, read())
 	}}
-	view := recipeview.New(i18n.English, check, nil, held, nil)
+	view := recipeview.New(i18n.English, check, nil, held, nowhere, nil)
 	view.Content()
 
 	view.SetRecipe(screens.BrokenRecipe)
@@ -401,7 +401,7 @@ func TestACheckThatComesApartIsDrawnAsADefectOfThisBuildRatherThanARefusal(t *te
 	}}
 	view := recipeview.New(i18n.English, func(string, []byte, generate.Halt) recipeview.Answer {
 		return recipeview.Answer{}
-	}, nil, crashing, nil)
+	}, nil, crashing, nowhere, nil)
 	view.Content()
 
 	view.SetRecipe(screens.CleanRecipe)
@@ -439,7 +439,7 @@ func TestACheckThatFinishesTakesTheCrashOffTheScreen(t *testing.T) {
 	}}
 	view := recipeview.New(i18n.English, func(string, []byte, generate.Halt) recipeview.Answer {
 		return recipeview.Answer{}
-	}, nil, work, nil)
+	}, nil, work, nowhere, nil)
 	view.Content()
 
 	view.SetRecipe(screens.CleanRecipe)

@@ -97,6 +97,19 @@ sidebar.link.refused.title: The page did not open
 sidebar.link.refused.body: "Your system did not open this page in a browser. You can type the address into a browser yourself:"
 sidebar.link.refused.reason: "What the system reported:"
 
+# The button on both screens that write, beside the sentence naming the folder a
+# run wrote into, or under the reason a run did not finish. Pressing it shows that
+# folder in the file manager of the system. The second group is what the window
+# says when the folder does not open, with the folder's path under the body and
+# the system's own reason under that, or with the path alone when the folder is
+# gone.
+folder.open: Open folder
+folder.refused.title: The folder did not open
+folder.refused.body: "Your system did not open this folder. You can open it yourself in a file manager:"
+# tekst-ok: the same line over the system's own words in sidebar.link.refused.reason, one wording for one fact
+folder.refused.reason: "What the system reported:"
+folder.refused.missing: "This folder is not there any more, so there is nothing to open. It may have been moved or deleted since the run:"
+
 screen.about: About
 screen.manifest: Check results
 screen.take: Damage a file

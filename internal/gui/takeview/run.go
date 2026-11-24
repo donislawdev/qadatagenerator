@@ -87,6 +87,7 @@ func (v *View) Start() {
 	if take.CheckOutput(v.path, settings).Refused() {
 		return
 	}
+	v.ranInto = settings.Out
 	halt := background.NewStopper()
 	v.halt = halt
 	v.stage = stageRunning
@@ -326,10 +327,19 @@ func (v *View) outcome() fyne.CanvasObject {
 		return paint.Column(palette.NameStepTight,
 			v.told(i18n.TakeResultFailed, paint.IconWarn, palette.StateWarning),
 			v.paragraph(fault.Says(v.failed)),
-			v.paragraph(v.text.T(i18n.TakeResultFailedWhy)))
+			v.paragraph(v.text.T(i18n.TakeResultFailedWhy)),
+			v.folderButton())
 	default:
 		return nil
 	}
+}
+
+// folderButton is the Open folder button at its own width, at the start of
+// its line, after a run that wrote and after one that failed, for the reasons
+// the recipe screen gives beside its own (DEC-336). A run somebody stopped
+// wrote nothing and is told so.
+func (v *View) folderButton() fyne.CanvasObject {
+	return paint.Lead(v.openFolder.OnScreen(), paint.Spacer())
 }
 
 // written says what a finished run produced: the files and where, then what
@@ -340,6 +350,9 @@ func (v *View) written() fyne.CanvasObject {
 	lines := []fyne.CanvasObject{
 		v.fact(i18n.TakeResultWritten,
 			listOf(v.result.Written)+" "+v.text.T(i18n.TakeResultIn)+" "+v.result.Out),
+		// Under the sentence naming the folder, which is what it opens, and
+		// above the counts.
+		v.folderButton(),
 	}
 	lines = append(lines, damageparts.Counts(v.text, v.result.Counts, v.result.Oversized)...)
 	return paint.Column(palette.NameStepTight, lines...)

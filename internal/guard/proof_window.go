@@ -57,6 +57,7 @@ var windowGuards = []Guard{
 	{"nothing we wrote asks the toolkit to leave this machine", "TestNothingInTheWindowAsksTheToolkitToLeaveThisMachine", "internal/guard", ByMutation},
 	{"the scanner sees a call that leaves the machine", "TestTheToolkitGuardSeesACallThatLeavesTheMachine", "internal/guard", ByProbe},
 	{"the one file allowed to open a page names only its own addresses, takes none from a caller and is reported when it moves", "TestTheOneFileAllowedToOpenAPageMayOpenOnlyItsOwnPages", "internal/guard", ByProbe},
+	{"the file allowed to open a folder builds file addresses from parts and nothing else, under any name for the parser", "TestTheFileAllowedToOpenAFolderMayBuildOnlyFileAddresses", "internal/guard", ByProbe},
 	{"a window that is gone is reported rather than read as clean", "TestTheToolkitGuardIsLoudWhenTheWindowIsGone", "internal/guard", ByProbe},
 	{"every banned call records why it is banned", "TestEveryBannedToolkitCallSaysWhyItIsBanned", "internal/guard", ByProbe},
 	{"nothing in the window gives itself a theme of its own, which would cost a set of fonts on every return to a screen", "TestNothingInTheWindowGivesItselfAThemeOfItsOwn", "internal/guard", ByMutation},

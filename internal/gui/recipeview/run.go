@@ -75,6 +75,7 @@ func (v *View) Start() {
 	// on a control staying disabled.
 	recipe := []byte(v.editor.Text)
 	settings := v.runSettings()
+	v.ranInto = settings.Into
 	halt := background.NewStopper()
 	v.halt = halt
 	v.stage = stageRunning
@@ -236,10 +237,27 @@ func (v *View) outcome() []fyne.CanvasObject {
 	case stageFailed:
 		return []fyne.CanvasObject{
 			paint.Marked(paint.IconWarn, palette.StateWarning, v.paragraph(fault.Says(v.failed))),
-			v.paragraph(v.text.T(i18n.RecipeRunFailed))}
+			v.paragraph(v.text.T(i18n.RecipeRunFailed)),
+			v.folderButton()}
 	default:
 		return nil
 	}
+}
+
+// folderButton is the Open folder button at its own width, at the start of
+// its line.
+//
+// # Why after a run that failed as well as after one that wrote
+//
+// The reasons a run of this screen fails at the disk each tell a person to do
+// something in that folder: a file already there to delete, a marker of a
+// stopped run to delete, a directory standing where a file goes (DEC-336). A
+// run somebody stopped wrote nothing and is told so, and gets no button. A
+// folder that is not there when the button is pressed is said in a dialog
+// rather than guessed at here, because asking the disk belongs off the thread
+// that draws.
+func (v *View) folderButton() fyne.CanvasObject {
+	return paint.Lead(v.openFolder.OnScreen(), paint.Spacer())
 }
 
 // wrote says what the run left and where, and the where is the path as it was
@@ -257,7 +275,10 @@ func (v *View) outcome() []fyne.CanvasObject {
 func (v *View) wrote() []fyne.CanvasObject {
 	lines := []fyne.CanvasObject{
 		v.told(paint.IconCheck, palette.StateSuccess, v.text.T(i18n.RecipeResultWritten)),
-		v.paragraph(listOf(v.written.Files) + " " + v.text.T(i18n.RecipeIn) + " " + v.out.Text),
+		v.paragraph(listOf(v.written.Files) + " " + v.text.T(i18n.RecipeIn) + " " + v.ranInto),
+		// Under the sentence naming the folder, which is what it opens, and
+		// above the counts, which grow with the damage a recipe orders.
+		v.folderButton(),
 		v.fact(i18n.RecipeResultRows, strconv.Itoa(v.written.Rows)),
 	}
 	if v.written.Damaged {

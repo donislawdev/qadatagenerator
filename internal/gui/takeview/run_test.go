@@ -21,9 +21,14 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
+	"github.com/donislawdev/qadatagenerator/internal/gui/outward"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 )
+
+// folderless is the Open folder button for a screen built by a test, which
+// opens nothing and has nothing to refuse.
+var folderless = outward.NewFolders(i18n.English, outward.Nowhere{}, background.ReadHere, nil)
 
 // The kinds of damage every test here orders, and the column none of them may
 // touch.
@@ -62,6 +67,12 @@ func (h *held) carryOut(t *testing.T) {
 // screenOn builds the screen with a run that goes nowhere until a test says so.
 func screenOn(t *testing.T, window fyne.Window) (*View, *held) {
 	t.Helper()
+	return screenWith(t, window, folderless)
+}
+
+// screenWith is screenOn with the Open folder button a test hands in.
+func screenWith(t *testing.T, window fyne.Window, folders outward.Folders) (*View, *held) {
+	t.Helper()
 	described, err := catalogyaml.Load()
 	if err != nil {
 		t.Fatalf("the catalog inside this binary could not be read: %v", err)
@@ -77,7 +88,7 @@ func screenOn(t *testing.T, window fyne.Window) (*View, *held) {
 		// than a stand-in for it.
 		work.Hold = background.NewClosing(window, nil).Hold
 	}
-	view := New(i18n.English, window, described, take.Open, work, nil)
+	view := New(i18n.English, window, described, take.Open, work, folders, nil)
 	// The tree is built the way the shell builds it, so that everything a test
 	// reads is what a person would be looking at.
 	view.Content()

@@ -18,6 +18,9 @@ var UnsafeAllowed = map[string][]string{
 	// The place Windows writes the lines a notch of the wheel scrolls, handed
 	// to the call in CgoAllowed (B-420).
 	"cmd/qadg-gui/wheel_windows.go": {"Pointer"},
+	// The path and the verb handed to ShellExecuteW, and the number it answers
+	// with in the shape of a handle (DEC-336).
+	"cmd/qadg-gui/folder_windows.go": {"Pointer"},
 }
 
 // unsafePackage is the import being controlled.

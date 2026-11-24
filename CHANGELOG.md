@@ -622,6 +622,13 @@ repository once they are released.
 
 ### Added
 
+- **Open folder on the Recipe and Damage a file screens.** After a run, the
+  button under the list of written files shows their folder in the file
+  manager of your system: File Explorer, Finder or the one your Linux desktop
+  uses. It is there as well when a run did not finish, for instance because a
+  file of the same name is already in the folder, so you can delete or move
+  that file. A folder that is gone by the time you press the button is said in
+  a message with its path. A run you stopped wrote nothing and has no button.
 - **How many on the Quick value screen says its limit under the field.** The
   line reads Up to 100000 from the start and turns red together with the
   field as soon as a number over it is typed, where until now the reason came

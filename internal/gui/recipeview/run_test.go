@@ -23,7 +23,7 @@ func ready(t *testing.T) (*recipeview.View, string) {
 	t.Helper()
 	dir := t.TempDir()
 	view := recipeview.New(i18n.English, real(t), recipeview.Writer(),
-		background.Work{Read: background.ReadHere, Produce: produceHere}, nil)
+		background.Work{Read: background.ReadHere, Produce: produceHere}, nowhere, nil)
 	view.Content()
 	view.SetRecipe(screens.RelatedRecipe)
 	view.SetOut(dir)
@@ -85,7 +85,7 @@ func TestTheScreenWritesTheDatasetAndSaysWhatItWrote(t *testing.T) {
 // did wrong, and the card is where the one thing this screen knows is said.
 func TestADisabledButtonSaysWhatIsMissingInTheCard(t *testing.T) {
 	view := recipeview.New(i18n.English, real(t), recipeview.Writer(),
-		background.Work{Read: background.ReadHere, Produce: produceHere}, nil)
+		background.Work{Read: background.ReadHere, Produce: produceHere}, nowhere, nil)
 	view.Content()
 
 	if drawn := spoken(rendered(t, view)); !strings.Contains(drawn, i18n.English.T(i18n.RecipeEmpty)) {
@@ -120,7 +120,7 @@ func TestADisabledButtonSaysWhatIsMissingInTheCard(t *testing.T) {
 // than the button's: a caller reaching Start directly gets the same answer.
 func TestAScreenWithNowhereToWriteStartsNothing(t *testing.T) {
 	view := recipeview.New(i18n.English, real(t), recipeview.Writer(),
-		background.Work{Read: background.ReadHere, Produce: produceHere}, nil)
+		background.Work{Read: background.ReadHere, Produce: produceHere}, nowhere, nil)
 	view.Content()
 	view.SetRecipe(screens.CleanRecipe)
 
@@ -137,7 +137,7 @@ func readyWith(t *testing.T, recipe string) (*recipeview.View, string) {
 	t.Helper()
 	dir := t.TempDir()
 	view := recipeview.New(i18n.English, real(t), recipeview.Writer(),
-		background.Work{Read: background.ReadHere, Produce: produceHere}, nil)
+		background.Work{Read: background.ReadHere, Produce: produceHere}, nowhere, nil)
 	view.Content()
 	view.SetRecipe(recipe)
 	view.SetOut(dir)

@@ -705,7 +705,7 @@
 								</container>
 								<container pos="696,0" size="362x681">
 									<container pos="24,0" size="338x681">
-										<container size="338x222">
+										<container size="338x264">
 											<container size="338x34">
 												<container size="338x34">
 													<container pos="4,4" size="330x18">
@@ -719,13 +719,13 @@
 													</container>
 												</container>
 											</container>
-											<container pos="0,34" size="338x188">
-												<container size="338x188">
-													<rectangle fillColor="menuBackground" radius="10" size="338x188"/>
-													<container size="338x188">
-														<container pos="16,16" size="306x156">
-															<container size="306x156">
-																<container size="306x156">
+											<container pos="0,34" size="338x230">
+												<container size="338x230">
+													<rectangle fillColor="menuBackground" radius="10" size="338x230"/>
+													<container size="338x230">
+														<container pos="16,16" size="306x198">
+															<container size="306x198">
+																<container size="306x198">
 																	<container size="306x23">
 																		<container size="27x23">
 																			<container size="27x23">
@@ -752,6 +752,37 @@
 																			</widget>
 																		</widget>
 																	</container>
+																	<container pos="0,164" size="306x34">
+																		<widget size="123x34" type="*parts.Button">
+																			<container size="123x34">
+																				<container size="123x34">
+																					<rectangle size="123x34"/>
+																					<container size="123x34">
+																						<container size="123x34">
+																							<rectangle pos="1,1" radius="6" size="121x32" strokeColor="inputBorder" strokeWidth="2"/>
+																						</container>
+																						<container size="123x34">
+																							<container pos="16,4" size="91x26">
+																								<container pos="0,4" size="91x16">
+																									<container size="15x16">
+																										<spacer size="15x0"/>
+																										<image fillMode="contain" rsc="folder-open-72abff-15.svg" size="15x15"/>
+																										<spacer pos="0,15" size="15x0"/>
+																									</container>
+																									<container pos="23,0" size="68x16">
+																										<spacer size="68x0"/>
+																										<text size="68x16">Open folder</text>
+																										<spacer pos="0,16" size="68x0"/>
+																									</container>
+																								</container>
+																							</container>
+																						</container>
+																					</container>
+																				</container>
+																			</container>
+																		</widget>
+																		<spacer pos="123,0" size="182x34"/>
+																	</container>
 																</container>
 															</container>
 														</container>
@@ -759,15 +790,15 @@
 												</container>
 											</container>
 										</container>
-										<container pos="0,222" size="338x459">
-											<container pos="4,24" size="330x431">
-												<rectangle size="330x431"/>
-												<container size="330x431">
-													<container size="330x431">
-														<rectangle fillColor="menuBackground" radius="10" size="330x431"/>
-														<container size="330x431">
-															<container pos="16,16" size="298x399">
-																<widget size="298x399" type="*parts.KeyScroll">
+										<container pos="0,264" size="338x417">
+											<container pos="4,24" size="330x389">
+												<rectangle size="330x389"/>
+												<container size="330x389">
+													<container size="330x389">
+														<rectangle fillColor="menuBackground" radius="10" size="330x389"/>
+														<container size="330x389">
+															<container pos="16,16" size="298x357">
+																<widget size="298x357" type="*parts.KeyScroll">
 																	<container size="298x993">
 																		<container size="298x993">
 																			<container size="298x18">
@@ -900,16 +931,16 @@
 																			</container>
 																		</container>
 																	</container>
-																	<widget pos="0,399" size="298x0" type="*widget.Shadow">
+																	<widget pos="0,357" size="298x0" type="*widget.Shadow">
 																		<linearGradient pos="0,-8" size="298x8"/>
 																	</widget>
-																	<widget pos="292,0" size="6x399" type="*widget.scrollBarArea">
-																		<widget pos="3,0" size="3x160" type="*widget.scrollBar">
-																			<rectangle fillColor="scrollbar" radius="3" size="3x160"/>
+																	<widget pos="292,0" size="6x357" type="*widget.scrollBarArea">
+																		<widget pos="3,0" size="3x128" type="*widget.scrollBar">
+																			<rectangle fillColor="scrollbar" radius="3" size="3x128"/>
 																		</widget>
 																	</widget>
 																</widget>
-																<rectangle radius="10" size="298x399" strokeWidth="2"/>
+																<rectangle radius="10" size="298x357" strokeWidth="2"/>
 															</container>
 														</container>
 													</container>

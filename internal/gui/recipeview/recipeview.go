@@ -53,6 +53,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
 	"github.com/donislawdev/qadatagenerator/internal/gui/damageparts"
+	"github.com/donislawdev/qadatagenerator/internal/gui/outward"
 	"github.com/donislawdev/qadatagenerator/internal/gui/paint"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	palette "github.com/donislawdev/qadatagenerator/internal/gui/theme"
@@ -199,19 +200,29 @@ type View struct {
 	halt    *background.Stopper
 	written produce.Written
 	failed  error
+	// ranInto is the directory the last run was handed, as typed, and
+	// openFolder the button that shows it once the run has ended (DEC-336).
+	// The directory is kept rather than read from the field at the press, so
+	// the button names the folder of the run whatever the field says by then.
+	ranInto    string
+	openFolder *parts.Button
 	// letGo gives back the window held for the run in flight, and is nothing
 	// outside a run.
 	letGo func()
 }
 
 // New builds the screen.
+//
+// folders is the Open folder button of the window, handed in like the ways to
+// read and write, so a test or a picture of this screen opens nothing.
 func New(text i18n.Catalogue, check Check, write Write, work background.Work,
-	window fyne.Window) *View {
+	folders outward.Folders, window fyne.Window) *View {
 	view := &View{
 		text: text, check: check, write: write, work: work, window: window,
 		cardHeading: container.NewStack(), action: container.NewStack(),
 		checks: background.NewLatest(work.Read),
 	}
+	view.openFolder = folders.Button(func() string { return view.ranInto })
 	view.buildBand()
 	view.editor = parts.NewEditor(view.Recheck)
 	view.editor.SetPlaceHolder(text.T(i18n.RecipePlaceholder))

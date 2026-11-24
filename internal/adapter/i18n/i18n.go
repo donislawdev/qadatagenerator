@@ -117,6 +117,14 @@ const (
 	SidebarLinkRefusedTitle  Key = "sidebar.link.refused.title"
 	SidebarLinkRefusedBody   Key = "sidebar.link.refused.body"
 	SidebarLinkRefusedReason Key = "sidebar.link.refused.reason"
+
+	// The button that shows the folder a run wrote into, on both screens that
+	// write (DEC-336), and what the window says when the folder does not open.
+	FolderOpen           Key = "folder.open"
+	FolderRefusedTitle   Key = "folder.refused.title"
+	FolderRefusedBody    Key = "folder.refused.body"
+	FolderRefusedReason  Key = "folder.refused.reason"
+	FolderRefusedMissing Key = "folder.refused.missing"
 )
 
 // The keys of the About screen.
@@ -667,6 +675,7 @@ var windowKeys = []Key{
 	SidebarGroupMake, SidebarGroupCheck, SidebarOffline,
 	SidebarLinkProject, SidebarLinkSupport, SidebarLinkRefusedTitle, SidebarLinkRefusedBody,
 	SidebarLinkRefusedReason,
+	FolderOpen, FolderRefusedTitle, FolderRefusedBody, FolderRefusedReason, FolderRefusedMissing,
 
 	QuickNothingWritten, QuickLabelValue, QuickValueHeading, QuickValuesCounted,
 	QuickAboutProduces, QuickAboutCheckDigit, QuickAboutRange,

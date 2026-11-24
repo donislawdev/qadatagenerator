@@ -73,7 +73,7 @@ func writing(t *testing.T, window fyne.Window) (*View, *heldRun, *heldWatch) {
 	view := New(i18n.English, Checker(described), stillRun, background.Work{
 		Read: background.ReadHere, Produce: runs.produce,
 		Hold: background.NewClosing(window, watch.watch).Hold,
-	}, window)
+	}, folderless, window)
 	view.Content()
 	view.SetRecipe(cleanEnough)
 	view.SetOut(t.TempDir())

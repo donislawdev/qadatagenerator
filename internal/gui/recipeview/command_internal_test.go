@@ -8,7 +8,12 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestexport"
 	"github.com/donislawdev/qadatagenerator/internal/commandline"
 	"github.com/donislawdev/qadatagenerator/internal/gui/background"
+	"github.com/donislawdev/qadatagenerator/internal/gui/outward"
 )
+
+// folderless is the Open folder button for a screen built by a test inside the
+// package, which opens nothing and has nothing to refuse.
+var folderless = outward.NewFolders(i18n.English, outward.Nowhere{}, background.ReadHere, nil)
 
 // The line for a terminal carries the extra form of the manifest that was
 // picked, and nothing when none was.
@@ -18,7 +23,7 @@ import (
 // the screen holds. What a person copies is the whole line, and the whole line
 // is what is asked for.
 func TestTheLineForATerminalCarriesTheFormThatWasPicked(t *testing.T) {
-	view := New(i18n.English, nil, nil, background.Work{Read: background.ReadHere}, nil)
+	view := New(i18n.English, nil, nil, background.Work{Read: background.ReadHere}, folderless, nil)
 	view.Content()
 
 	if strings.Contains(view.commandText.Text, commandline.Manifest) {

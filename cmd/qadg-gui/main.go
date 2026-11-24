@@ -280,6 +280,12 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 	// other does not can no longer be written here.
 	//
 	work := placesOfWork(window)
+	// A page or a folder the system did not open is said in a dialog with its
+	// address or its path, so a button that did nothing is never silent.
+	refused := func(title, message string) { dialog.ShowInformation(title, message, window) }
+	// One Open folder button for both screens that write, so it looks and
+	// answers alike on both (DEC-336).
+	folders := outward.NewFolders(text, newFileManager(desktop), work.Read, refused)
 	browser := manifestview.New(text, window, manifestview.Readers{
 		Manifest: manifestjson.Load,
 		Response: responsejson.Load,
@@ -292,14 +298,14 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 	if err != nil {
 		return nil, fmt.Errorf("this build cannot read its own catalog of damage: %w", err)
 	}
-	damage := takeview.New(text, window, described, take.Open, work, clipboard)
+	damage := takeview.New(text, window, described, take.Open, work, folders, clipboard)
 	// The recipe screen uses two of the places of work. A recipe is allowed to
 	// be 256 KB and parsing one inside that limit can cost hundreds of
 	// megabytes, so judging what is typed belongs anywhere except the thread
 	// that draws. Writing the dataset belongs there even less: it is the one
 	// thing on this screen that can take minutes.
 	editor := recipeview.New(text, recipeview.Checker(described), recipeview.Writer(),
-		work, window)
+		work, folders, window)
 
 	// The one screen that reaches outside this tool's own files and channels,
 	// and the way out is handed in rather than reached for, like every other
@@ -308,9 +314,7 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 	value := quickview.New(text, clipboard)
 
 	// The two pages outside this program open through the application, off
-	// the thread that draws, and a page the system did not open is said in a
-	// dialog with its address, so a button that did nothing is never silent.
-	refused := func(title, message string) { dialog.ShowInformation(title, message, window) }
+	// the thread that draws, and are refused in the dialog above.
 	return shell.New(sidebar(text, window, value, damage, editor, browser, software, remembered),
 		screens.WindowBrand(text, desktop, work.Read, refused)), nil
 }

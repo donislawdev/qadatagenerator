@@ -146,6 +146,67 @@ func TestTheOneFileAllowedToOpenAPageMayOpenOnlyItsOwnPages(t *testing.T) {
 	}
 }
 
+// The file allowed to open a folder takes a path from its caller, which the
+// file of the two pages may not, and it holds instead to building file
+// addresses and nothing else (DEC-336).
+//
+// Each case is a way a path or a page could become an address of another
+// kind, written into a copy of the file, and the clean copy is asked first so
+// that a guard objecting to everything cannot pass by objecting.
+func TestTheFileAllowedToOpenAFolderMayBuildOnlyFileAddresses(t *testing.T) {
+	const file = WindowProgram + "/folder_other.go"
+	allowed := map[string]ToolkitAllowance{file: {Call: "OpenURL", Scheme: "file", Why: "the case under test"}}
+	const clean = "package main\n\nimport (\n\t\"net/url\"\n\t\"path/filepath\"\n)\n\n" +
+		"type opener interface{ OpenURL(*url.URL) error }\n\n" +
+		"type fileManager struct{ desktop opener }\n\n" +
+		"func (m fileManager) ShowFolder(path string) error {\n" +
+		"\treturn m.desktop.OpenURL(&url.URL{Scheme: \"file\", Path: filepath.ToSlash(path)})\n}\n"
+	built := "&url.URL{Scheme: \"file\", Path: filepath.ToSlash(path)}"
+	with := func(instead string) string { return strings.Replace(clean, built, instead, 1) }
+
+	cases := []struct {
+		name, body, finding string
+	}{
+		{"clean", clean, ""},
+		{"another scheme", with("&url.URL{Scheme: \"https\", Path: path}"), "whose scheme is not \"file\""},
+		{"a scheme from elsewhere", with("&url.URL{Scheme: path, Path: path}"), "whose scheme is not \"file\""},
+		{"no scheme", with("&url.URL{Path: path}"), "with no scheme"},
+		{"a host beside the path", with("&url.URL{Scheme: \"file\", Host: \"example.invalid\", Path: path}"),
+			"sets the Host"},
+		{"parts in order", with("&url.URL{\"file\", \"\", nil, \"\", path, \"\", false, false, \"\", \"\", \"\"}"),
+			"given in order"},
+		{"an address parsed", with("func() *url.URL {\n\t\tu, _ := url.Parse(path)\n\t\treturn u\n\t}()"),
+			"parses an address from text"},
+		{"an address parsed under another name", strings.ReplaceAll(
+			strings.Replace(with("func() *url.URL {\n\t\tu, _ := address.Parse(path)\n\t\treturn u\n\t}()"),
+				"\"net/url\"", "address \"net/url\"", 1), "*url.URL", "*address.URL"),
+			"parses an address from text"},
+		{"a part changed after", with("func() *url.URL {\n\t\tu := &url.URL{Scheme: \"file\", Path: path}\n" +
+			"\t\tu.Scheme = \"https\"\n\t\treturn u\n\t}()"), "reaches the Scheme"},
+		{"a page named", clean + "\nconst page = \"https://example.invalid/\"\n", "names https://example.invalid/"},
+	}
+	for _, each := range cases {
+		t.Run(each.name, func(t *testing.T) {
+			root := t.TempDir()
+			writtenUnder(t, root, ViewRoot)("clean.go", "package gui\n")
+			writtenUnder(t, root, WindowProgram)("folder_other.go", each.body)
+			findings, err := ToolkitNetwork(root, allowed)
+			if err != nil {
+				t.Fatalf("cannot read the tree: %v", err)
+			}
+			if each.finding == "" {
+				if len(findings) > 0 {
+					t.Fatalf("the allowed file as it should be drew findings:\n%s", strings.Join(findings, "\n"))
+				}
+				return
+			}
+			if len(findings) != 1 || !strings.Contains(findings[0], each.finding) {
+				t.Errorf("want one finding saying %q, got:\n%s", each.finding, strings.Join(findings, "\n"))
+			}
+		})
+	}
+}
+
 // A guard that answers quietly when its subject is gone is the failure this
 // project has paid for before. Either half missing is that silence.
 func TestTheToolkitGuardIsLoudWhenTheWindowIsGone(t *testing.T) {
@@ -180,8 +241,10 @@ func TestEveryBannedToolkitCallSaysWhyItIsBanned(t *testing.T) {
 		if _, banned := ToolkitNetworkNames[allowance.Call]; !banned {
 			t.Errorf("%s is allowed %s, which this guard does not ban", file, allowance.Call)
 		}
-		if len(allowance.Addresses) == 0 {
-			t.Errorf("%s is allowed %s with no address, so it may name none and the allowance is empty",
+		// A file bound to a scheme names no address by design, and the rule
+		// on what it builds is what holds it instead.
+		if len(allowance.Addresses) == 0 && allowance.Scheme == "" {
+			t.Errorf("%s is allowed %s with no address and no scheme, so the allowance holds it to nothing",
 				file, allowance.Call)
 		}
 	}
