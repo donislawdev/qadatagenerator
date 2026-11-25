@@ -336,6 +336,7 @@ any computer. Where the driver works, the folder is never used.
 | `city`, `region`, `postal_code` | places. In `en-US` a city, its state and its ZIP code belong together. In `pl-PL` a town and a voivodeship are drawn apart, and there are no postal codes yet |
 | `card` | card numbers, only from the published test numbers |
 | `isbn`, `ean`, `imei`, `vin` | book numbers, barcodes, mobile phone identities and vehicle identification numbers |
+| `email` | email addresses such as `anna.nowak07@example.com`, made of the first and last name of the same row when it has them, at `example.com`, `example.net` or `example.org`, which take no mail |
 | `uuid` | random unique IDs in the form `919108f7-52d1-4320-9bac-f847db4148a8` (UUID version 4) |
 | `password` | passwords in plain text, 12 to 16 characters with a lowercase and an uppercase letter, a digit and one of `! # $ % & * + - = ? @ ^ _`. They come from the seed, so use them for tests only |
 | `ssn`, `aba` | US social security numbers and bank routing numbers |

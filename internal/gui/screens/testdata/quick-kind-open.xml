@@ -1007,14 +1007,14 @@
 									<rectangle fillColor="separator" size="456x1"/>
 									<container pos="0,1" size="456x26">
 										<container pos="12,8" size="432x14">
-											<text color="disabled" size="42x14" textSize="11">20 kinds</text>
+											<text color="disabled" size="42x14" textSize="11">21 kinds</text>
 											<text color="disabled" pos="369,0" size="62x14" textSize="11">Enter to pick</text>
 										</container>
 									</container>
 								</container>
 								<container pos="0,44" size="456x336">
 									<widget size="456x336" type="*parts.rowScroll">
-										<container size="456x1105">
+										<container size="456x1149">
 											<container size="456x34">
 												<text bold color="focus" pos="12,16" size="440x14" textSize="11">UNITED STATES</text>
 											</container>
@@ -1765,6 +1765,39 @@
 																			<rectangle size="71x32"/>
 																			<container size="71x32">
 																				<spacer size="71x7"/>
+																				<text pos="0,7" size="71x16">email</text>
+																				<spacer pos="0,24" size="71x7"/>
+																			</container>
+																		</container>
+																		<container pos="83,0" size="204x32">
+																			<spacer size="204x7"/>
+																			<text color="disabled" pos="0,7" size="204x16">Email address that reaches nobody</text>
+																			<spacer pos="0,24" size="204x7"/>
+																		</container>
+																	</container>
+																	<container pos="417,0" size="15x32">
+																		<rectangle size="15x32"/>
+																		<rectangle size="15x32"/>
+																	</container>
+																</container>
+															</container>
+														</container>
+													</container>
+												</container>
+											</widget>
+											<widget pos="0,1109" size="456x40" type="*parts.TapRow">
+												<container size="456x40">
+													<container size="456x40">
+														<rectangle size="456x40"/>
+														<container size="456x40">
+															<rectangle size="456x40"/>
+															<container size="456x40">
+																<container pos="12,4" size="432x32">
+																	<container size="417x32">
+																		<container size="71x32">
+																			<rectangle size="71x32"/>
+																			<container size="71x32">
+																				<spacer size="71x7"/>
 																				<text pos="0,7" size="71x16">password</text>
 																				<spacer pos="0,24" size="71x7"/>
 																			</container>
@@ -1790,8 +1823,8 @@
 											<linearGradient pos="0,-8" size="456x8"/>
 										</widget>
 										<widget pos="450,0" size="6x336" type="*widget.scrollBarArea">
-											<widget pos="3,0" size="3x102" type="*widget.scrollBar">
-												<rectangle fillColor="scrollbar" radius="3" size="3x102"/>
+											<widget pos="3,0" size="3x98" type="*widget.scrollBar">
+												<rectangle fillColor="scrollbar" radius="3" size="3x98"/>
 											</widget>
 										</widget>
 									</widget>

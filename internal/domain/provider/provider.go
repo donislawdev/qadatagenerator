@@ -181,6 +181,12 @@ const (
 	// generator of the locale writes it, which a postal code takes account of
 	// together with the city (DEC-282).
 	RoleRegion = "region"
+	// RoleGivenName is the given name of the person a row describes, which an
+	// email address is made of (DEC-340).
+	RoleGivenName = "given_name"
+	// RoleSurname is the family name of that person, which an email address is
+	// made of together with the given name (DEC-340).
+	RoleSurname = "surname"
 )
 
 // Agreement is the values a generated value has to be consistent with, keyed

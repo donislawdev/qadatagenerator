@@ -43,6 +43,10 @@ func TestEveryGeneratorReadsExactlyTheRolesTheRegisterSays(t *testing.T) {
 		// Two states with no code in common, so a postal code taking any
 		// account of the region has to move (DEC-282).
 		provider.RoleRegion: {"TX", "AK"},
+		// Names that share no letter at the start, so an address taking any
+		// account of them has to move (DEC-340).
+		provider.RoleGivenName: {"Anna", "Robert"},
+		provider.RoleSurname:   {"Nowak", "Smith"},
 	}
 
 	// Every locale, because the register answers per locale and a surname
@@ -104,6 +108,7 @@ func TestARoleTheRegisterNamesIsARoleThatExists(t *testing.T) {
 	known := map[string]bool{
 		provider.RoleBirthDate: true, provider.RoleGender: true,
 		provider.RoleCity: true, provider.RoleRegion: true,
+		provider.RoleGivenName: true, provider.RoleSurname: true,
 	}
 	for _, locale := range Locales() {
 		source := New(locale, "")

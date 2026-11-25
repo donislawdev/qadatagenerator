@@ -627,6 +627,13 @@ repository once they are released.
 
 ### Added
 
+- **Email addresses that reach nobody.** `generator: email` writes addresses
+  such as `anna.nowak07@example.com` at `example.com`, `example.net` or
+  `example.org`, domains set aside for documentation that take no mail. A row
+  with a first and a last name gets an address made of them, with no rule
+  needed, and Polish letters lose their marks. A row without them gets a name
+  drawn for the address. `max_length` shortens the address down to 13
+  characters, and a shorter limit is refused before anything is written.
 - **Passwords in plain text.** `generator: password` fills a column with
   passwords of 12 to 16 characters, each with a lowercase letter, an uppercase
   letter, a digit and one of `! # $ % & * + - = ? @ ^ _`, which is what common

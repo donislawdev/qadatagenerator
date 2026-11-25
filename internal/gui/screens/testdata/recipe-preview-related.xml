@@ -554,11 +554,11 @@
 										</container>
 										<container pos="0,34" size="513x621">
 											<widget size="513x621" type="*parts.KeyScroll">
-												<container size="513x929">
-													<container size="513x929">
-														<rectangle fillColor="menuBackground" radius="10" size="513x929"/>
-														<container size="513x929">
-															<container pos="16,16" size="481x897">
+												<container size="513x912">
+													<container size="513x912">
+														<rectangle fillColor="menuBackground" radius="10" size="513x912"/>
+														<container size="513x912">
+															<container pos="16,16" size="481x880">
 																<container size="481x55">
 																	<container size="481x23">
 																		<container size="27x23">
@@ -830,20 +830,19 @@
 																		<rectangle size="0x345"/>
 																	</container>
 																</container>
-																<container pos="0,753" size="481x77">
+																<container pos="0,753" size="481x60">
 																	<text bold color="focus" size="481x14" textSize="11">WHAT THIS RUN WILL NOT DO (1)</text>
-																	<container pos="0,18" size="481x58">
-																		<widget size="481x58" type="*widget.Label">
-																			<widget size="481x58" type="*widget.RichText">
+																	<container pos="0,18" size="481x41">
+																		<widget size="481x41" type="*widget.Label">
+																			<widget size="481x41" type="*widget.RichText">
 																				<text color="disabled" pos="4,4" size="470x16">entities.customer.consistency.pesel: pesel is asked to agree with first_name, and</text>
-																				<text color="disabled" pos="4,20" size="418x16">first_name plays no role an identifier can read, so the two are generated</text>
-																				<text color="disabled" pos="4,37" size="83x16">independently</text>
+																				<text color="disabled" pos="4,20" size="460x16">pesel takes no account of given_name, so the two are generated independently</text>
 																			</widget>
 																		</widget>
 																	</container>
 																</container>
-																<rectangle fillColor="separator" pos="0,846" size="481x1"/>
-																<container pos="0,863" size="481x34">
+																<rectangle fillColor="separator" pos="0,829" size="481x1"/>
+																<container pos="0,846" size="481x34">
 																	<widget size="481x34" type="*parts.Button">
 																		<container size="481x34">
 																			<container size="481x34">
@@ -860,7 +859,7 @@
 																								</container>
 																								<container pos="23,0" size="254x26">
 																									<spacer size="254x4"/>
-																									<text pos="0,4" size="254x16">What this build can generate, 20 generators</text>
+																									<text pos="0,4" size="254x16">What this build can generate, 21 generators</text>
 																									<spacer pos="0,21" size="254x4"/>
 																								</container>
 																							</container>
@@ -879,8 +878,8 @@
 													<linearGradient pos="0,-8" size="513x8"/>
 												</widget>
 												<widget pos="507,0" size="6x621" type="*widget.scrollBarArea">
-													<widget pos="3,0" size="3x415" type="*widget.scrollBar">
-														<rectangle fillColor="scrollbar" radius="3" size="3x415"/>
+													<widget pos="3,0" size="3x422" type="*widget.scrollBar">
+														<rectangle fillColor="scrollbar" radius="3" size="3x422"/>
 													</widget>
 												</widget>
 											</widget>

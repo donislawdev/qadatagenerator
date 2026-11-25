@@ -49,8 +49,8 @@ good:
       text: A city, its state and its ZIP code that belong together.
       generators: [city, region, postal_code]
     - title: Accounts
-      text: Random UUIDs for user and record IDs, and passwords in plain text that common password rules accept.
-      generators: [uuid, password]
+      text: Email addresses made of the name in the same row at domains that take no mail, passwords in plain text that common password rules accept, and random UUIDs.
+      generators: [email, password, uuid]
     - title: Products and payments
       text: Book numbers, product barcodes, mobile phone identities, vehicle identification numbers, and card numbers taken only from the published test numbers.
       generators: [isbn, ean, imei, vin, card]

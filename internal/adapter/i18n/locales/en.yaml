@@ -700,6 +700,7 @@ kind.birth_date: Date of birth
 kind.card: Test payment card number
 kind.city: City or town
 kind.ean: Product barcode number
+kind.email: Email address that reaches nobody
 kind.first_name: Given name
 kind.gender: Female or male
 kind.iban: Bank account number

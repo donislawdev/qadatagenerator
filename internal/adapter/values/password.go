@@ -87,10 +87,10 @@ func (s Source) password(req generate.Request) (string, error) {
 
 	drawn := make([]byte, 0, length)
 	for index, class := range passwordClasses {
-		drawn = append(drawn, pick(s, req, ":class:"+strconv.Itoa(index), class))
+		drawn = append(drawn, drawFrom(s, req, ":class:"+strconv.Itoa(index), class))
 	}
 	for index := len(drawn); index < length; index++ {
-		drawn = append(drawn, pick(s, req, ":char:"+strconv.Itoa(index), passwordAlphabet))
+		drawn = append(drawn, drawFrom(s, req, ":char:"+strconv.Itoa(index), passwordAlphabet))
 	}
 	for index := len(drawn) - 1; index > 0; index-- {
 		other := s.seed.IntN(coordinate(req, ":shuffle:"+strconv.Itoa(index)), int64(index+1))
@@ -108,8 +108,8 @@ func (s Source) password(req generate.Request) (string, error) {
 	return string(drawn), nil
 }
 
-// pick draws one character of an alphabet at one part of a value.
-func pick(s Source, req generate.Request, part, alphabet string) byte {
+// drawFrom draws one character of an alphabet at one part of a value.
+func drawFrom(s Source, req generate.Request, part, alphabet string) byte {
 	return alphabet[s.seed.IntN(coordinate(req, part), int64(len(alphabet)))]
 }
 

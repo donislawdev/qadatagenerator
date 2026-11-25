@@ -53,6 +53,7 @@ const (
 	Card       = "card"
 	UUID       = "uuid"
 	Password   = "password"
+	Email      = "email"
 )
 
 // roles maps a generator onto the role it plays in a consistency rule.
@@ -70,6 +71,11 @@ var roles = map[string]string{
 	// a chain of two rules the run draws in order (DEC-283).
 	City:   provider.RoleCity,
 	Region: provider.RoleRegion,
+	// A first name and a last name are what an email address is made of
+	// (DEC-340). Nothing else reads them, so a recipe without an email column
+	// draws them exactly as it did before.
+	FirstName: provider.RoleGivenName,
+	LastName:  provider.RoleSurname,
 }
 
 // nameParts maps a generator of people's names onto the part of a name it
@@ -93,6 +99,7 @@ const (
 	TypePostalCode = "postal_code"
 	TypeInteger    = "integer"
 	TypeDecimal    = "decimal"
+	TypeEmail      = "email"
 )
 
 // types says what kind of value each generator produces.
@@ -137,6 +144,7 @@ var types = map[string]string{
 	Card:       TypeIdentifier,
 	UUID:       TypeIdentifier,
 	Password:   TypeString,
+	Email:      TypeEmail,
 }
 
 // Source produces values for one locale.
@@ -704,6 +712,19 @@ var producers = map[string]generator{
 	UUID: {produce: fromProvider(intl.UUID{}), behind: intl.UUID{}},
 	// Arithmetic over four alphabets, the same in every locale (password.go).
 	Password: {produce: Source.password, topic: TopicAccounts},
+	// The name of the row, or one drawn from the lists of the locale when the
+	// row has none, at a domain reserved for documentation (email.go).
+	Email: {produce: Source.email, needs: nameLists,
+		reads: everywhere(provider.RoleGivenName, provider.RoleSurname), byLocale: true, topic: TopicAccounts},
+}
+
+// nameLists answers whether a locale carries the lists an email address draws
+// a name from when its row has none.
+func nameLists(locale string) (bool, string) {
+	if fine, why := fromLists("first-names-female", "first-names-male")(locale); !fine {
+		return false, why
+	}
+	return surnameLists(locale)
 }
 
 // fromProvider adapts an identifier provider to this registry.

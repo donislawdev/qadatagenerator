@@ -681,6 +681,7 @@ const (
 	KindCard       Key = "kind.card"
 	KindCity       Key = "kind.city"
 	KindEan        Key = "kind.ean"
+	KindEmail      Key = "kind.email"
 	KindFirstName  Key = "kind.first_name"
 	KindGender     Key = "kind.gender"
 	KindIban       Key = "kind.iban"
@@ -750,7 +751,7 @@ var windowKeys = []Key{
 	QuickRefusedUnavailable, QuickRefusedCount, QuickRefusedCountShape, QuickRefusedCountMany,
 	QuickGroupInternational, QuickGroupPeople, QuickGroupPlaces, QuickGroupAccounts, CountryPL, CountryUS,
 	QuickPickPrompt, QuickPickKinds, QuickPickMatches, QuickPickEnter, QuickPickNothing,
-	KindAba, KindBirthDate, KindCard, KindCity, KindEan, KindFirstName, KindGender, KindIban, KindImei,
+	KindAba, KindBirthDate, KindCard, KindCity, KindEan, KindEmail, KindFirstName, KindGender, KindIban, KindImei,
 	KindIsbn, KindLastName, KindNip, KindPassword, KindPesel, KindPostalCode, KindRegion, KindRegon, KindSsn, KindUUID,
 	KindVin,
 	CommandHeading, CommandCopy, CommandCopied,

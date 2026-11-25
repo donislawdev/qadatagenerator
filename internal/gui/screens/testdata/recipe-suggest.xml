@@ -299,19 +299,19 @@
 																</container>
 															</widget>
 															<container size="442x322">
-																<widget pos="143,75" size="294x243" type="*parts.picker">
-																	<container size="294x243">
-																		<rectangle fillColor="menuBackground" radius="10" shadowBlurRadius="26" shadowColor="rgba(0,0,0,156)" shadowOffset="0,10" shadowSpread="2" shadowVariant="1" size="294x243" strokeColor="separator" strokeWidth="2"/>
-																		<container size="294x243">
-																			<widget pos="8,8" size="278x227" type="*parts.rowScroll">
-																				<container size="278x574">
-																					<widget size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle fillColor="hover" radius="6" size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																<widget pos="95,75" size="342x243" type="*parts.picker">
+																	<container size="342x243">
+																		<rectangle fillColor="menuBackground" radius="10" shadowBlurRadius="26" shadowColor="rgba(0,0,0,156)" shadowOffset="0,10" shadowSpread="2" shadowVariant="1" size="342x243" strokeColor="separator" strokeWidth="2"/>
+																		<container size="342x243">
+																			<widget pos="8,8" size="326x227" type="*parts.rowScroll">
+																				<container size="326x603">
+																					<widget size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle fillColor="hover" radius="6" size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -326,7 +326,7 @@
 																												<spacer pos="0,16" size="122x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -335,13 +335,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,28" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,28" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -356,7 +356,7 @@
 																												<spacer pos="0,16" size="72x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -365,13 +365,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,57" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,57" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -386,7 +386,7 @@
 																												<spacer pos="0,16" size="156x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -395,13 +395,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,86" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,86" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -416,7 +416,7 @@
 																												<spacer pos="0,16" size="69x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -425,13 +425,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,115" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,115" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -446,7 +446,7 @@
 																												<spacer pos="0,16" size="145x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -455,13 +455,43 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,144" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,144" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
+																											<container size="71x16">
+																												<rectangle size="71x16"/>
+																												<container size="71x16">
+																													<spacer size="71x0"/>
+																													<text size="71x16">email</text>
+																													<spacer pos="0,16" size="71x0"/>
+																												</container>
+																											</container>
+																											<container pos="83,0" size="204x16">
+																												<spacer size="204x0"/>
+																												<text color="disabled" size="204x16">Email address that reaches nobody</text>
+																												<spacer pos="0,16" size="204x0"/>
+																											</container>
+																										</container>
+																										<container pos="287,0" size="15x16">
+																											<rectangle size="15x16"/>
+																											<rectangle size="15x16"/>
+																										</container>
+																									</container>
+																								</container>
+																							</container>
+																						</container>
+																					</widget>
+																					<widget pos="0,173" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -476,7 +506,7 @@
 																												<spacer pos="0,16" size="68x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -485,13 +515,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,173" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,202" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -506,7 +536,7 @@
 																												<spacer pos="0,16" size="90x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -515,13 +545,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,202" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,231" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -536,7 +566,7 @@
 																												<spacer pos="0,16" size="127x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -545,13 +575,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,231" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,260" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -566,7 +596,7 @@
 																												<spacer pos="0,16" size="128x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -575,13 +605,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,260" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,289" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -596,7 +626,7 @@
 																												<spacer pos="0,16" size="78x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -605,13 +635,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,289" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,317" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -626,7 +656,7 @@
 																												<spacer pos="0,16" size="74x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -635,13 +665,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,317" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,346" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -656,7 +686,7 @@
 																												<spacer pos="0,16" size="148x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -665,13 +695,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,346" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,375" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -686,7 +716,7 @@
 																												<spacer pos="0,16" size="127x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -695,13 +725,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,375" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,404" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -716,7 +746,7 @@
 																												<spacer pos="0,16" size="114x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -725,13 +755,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,404" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,433" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -746,7 +776,7 @@
 																												<spacer pos="0,16" size="52x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -755,13 +785,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,433" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,462" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -776,7 +806,7 @@
 																												<spacer pos="0,16" size="131x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -785,13 +815,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,462" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,491" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -806,7 +836,7 @@
 																												<spacer pos="0,16" size="148x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -815,13 +845,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,491" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,520" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -836,7 +866,7 @@
 																												<spacer pos="0,16" size="134x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -845,13 +875,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,520" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,549" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -866,7 +896,7 @@
 																												<spacer pos="0,16" size="152x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -875,13 +905,13 @@
 																							</container>
 																						</container>
 																					</widget>
-																					<widget pos="0,549" size="278x24" type="*parts.TapRow">
-																						<container size="278x24">
-																							<container size="278x24">
-																								<rectangle size="278x24"/>
-																								<container size="278x24">
-																									<container pos="12,4" size="254x16">
-																										<container size="239x16">
+																					<widget pos="0,578" size="326x24" type="*parts.TapRow">
+																						<container size="326x24">
+																							<container size="326x24">
+																								<rectangle size="326x24"/>
+																								<container size="326x24">
+																									<container pos="12,4" size="302x16">
+																										<container size="287x16">
 																											<container size="71x16">
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
@@ -896,7 +926,7 @@
 																												<spacer pos="0,16" size="108x0"/>
 																											</container>
 																										</container>
-																										<container pos="239,0" size="15x16">
+																										<container pos="287,0" size="15x16">
 																											<rectangle size="15x16"/>
 																											<rectangle size="15x16"/>
 																										</container>
@@ -906,12 +936,12 @@
 																						</container>
 																					</widget>
 																				</container>
-																				<widget pos="0,227" size="278x0" type="*widget.Shadow">
-																					<linearGradient pos="0,-8" size="278x8"/>
+																				<widget pos="0,227" size="326x0" type="*widget.Shadow">
+																					<linearGradient pos="0,-8" size="326x8"/>
 																				</widget>
-																				<widget pos="272,0" size="6x227" type="*widget.scrollBarArea">
-																					<widget pos="3,0" size="3x89" type="*widget.scrollBar">
-																						<rectangle fillColor="scrollbar" radius="3" size="3x89"/>
+																				<widget pos="320,0" size="6x227" type="*widget.scrollBarArea">
+																					<widget pos="3,0" size="3x85" type="*widget.scrollBar">
+																						<rectangle fillColor="scrollbar" radius="3" size="3x85"/>
 																					</widget>
 																				</widget>
 																			</widget>
@@ -1180,7 +1210,7 @@
 																								</container>
 																								<container pos="23,0" size="254x26">
 																									<spacer size="254x4"/>
-																									<text pos="0,4" size="254x16">What this build can generate, 20 generators</text>
+																									<text pos="0,4" size="254x16">What this build can generate, 21 generators</text>
 																									<spacer pos="0,21" size="254x4"/>
 																								</container>
 																							</container>

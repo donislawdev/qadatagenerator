@@ -1004,7 +1004,7 @@
 									<rectangle fillColor="separator" size="456x1"/>
 									<container pos="0,1" size="456x26">
 										<container pos="12,8" size="432x14">
-											<text color="disabled" size="42x14" textSize="11">0 of 20 match</text>
+											<text color="disabled" size="42x14" textSize="11">0 of 21 match</text>
 											<text color="disabled" pos="369,0" size="62x14" textSize="11">Enter to pick</text>
 										</container>
 									</container>

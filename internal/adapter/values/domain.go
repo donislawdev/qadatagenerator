@@ -57,6 +57,8 @@ func (s Source) DomainOf(req generate.Request) (generate.Domain, bool) {
 		return birthDates(req), true
 	case req.Generator == Password:
 		return passwordDomain(req)
+	case req.Generator == Email:
+		return emailDomain(req)
 	}
 	return generate.Domain{}, false
 }
