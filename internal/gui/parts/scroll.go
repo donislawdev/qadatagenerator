@@ -11,9 +11,10 @@ import (
 // moving it as far as the system says a notch moves.
 //
 // Every scrolling area of this window moves that way: KeyScroll and
-// ScrolledRows by embedding this type, the list of a chooser by being one, and
-// the table and the recipe editor, which keep their scrolling inside the
-// toolkit, through wheelLayer.
+// ScrolledRows by embedding this type, the panels of a chooser and of an
+// editor's suggestions through rowScroll, which embeds it too and then stops on
+// a row, and the table and the recipe editor, which keep their scrolling inside
+// the toolkit, through wheelLayer.
 //
 // # Why the toolkit's own step is not kept
 //

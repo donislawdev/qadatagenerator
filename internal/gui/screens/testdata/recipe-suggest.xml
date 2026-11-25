@@ -303,7 +303,7 @@
 																	<container size="294x243">
 																		<rectangle fillColor="menuBackground" radius="10" shadowBlurRadius="26" shadowColor="rgba(0,0,0,156)" shadowOffset="0,10" shadowSpread="2" shadowVariant="1" size="294x243" strokeColor="separator" strokeWidth="2"/>
 																		<container size="294x243">
-																			<widget pos="8,8" size="278x227" type="*parts.Scroll">
+																			<widget pos="8,8" size="278x227" type="*parts.rowScroll">
 																				<container size="278x516">
 																					<widget size="278x24" type="*parts.TapRow">
 																						<container size="278x24">

@@ -102,6 +102,11 @@ repository once they are released.
 
 ### Fixed
 
+- **The mouse wheel stops a list on a whole row.** The lists that open under a
+  chooser, such as Kind on the Quick value screen, and the suggestions in the
+  recipe editor used to stop wherever a notch left them, with the top row cut
+  off and the bottom one with it. A notch now moves a list about as far as it moves text and stops on the
+  nearest row. A small turn of a touchpad adds up until it reaches a row.
 - **A text field holding more than it shows no longer draws a scroll bar along
   its foot.** The seed the Quick value screen draws for itself is longer than
   its field, so the bar stood under the seed from the moment the window

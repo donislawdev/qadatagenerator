@@ -1010,7 +1010,7 @@
 									</container>
 								</container>
 								<container pos="0,44" size="456x210">
-									<widget size="456x210" type="*parts.Scroll">
+									<widget size="456x210" type="*parts.rowScroll">
 										<container size="456x210">
 											<container size="456x34">
 												<text bold color="focus" pos="12,16" size="440x14" textSize="11">POLAND</text>

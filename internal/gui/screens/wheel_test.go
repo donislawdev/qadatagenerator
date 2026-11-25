@@ -62,7 +62,7 @@ func TestEveryScrollingAreaMovesAsFarAsTheSystemSays(t *testing.T) {
 	t.Logf("areas turned, by kind, over %d states: %v", len(All()), checked)
 	// What the window is made of, so a walk that found nothing cannot pass:
 	// each kind of area has to have been turned at least once.
-	for _, kind := range []string{"Scroll", "KeyScroll", "ScrolledRows", "KeyTable", "Editor"} {
+	for _, kind := range []string{panelOfRows, "KeyScroll", "ScrolledRows", "KeyTable", "Editor"} {
 		if checked[kind] == 0 {
 			t.Errorf("no state has a %s with anything below its fold, so the wheel was never tried on one (checked %v)", kind, checked)
 		}
@@ -119,6 +119,11 @@ func wheelFindings(canvas fyne.Canvas, checked map[string]int) []string {
 		var wrong []string
 		for _, lines := range []int{palette.WheelLinesDefault, 5, -1, 0} {
 			parts.WheelLines = func() int { return lines }
+			if found.rows != nil {
+				// A panel of rows is turned from the top, so that where it
+				// stops depends on nothing but the notch.
+				found.area.ScrollToOffset(fyne.Position{})
+			}
 			if lines == 0 {
 				// Nothing may move wherever the wheel is turned, so every
 				// point is turned and what moved is added up.
@@ -142,6 +147,10 @@ func wheelFindings(canvas fyne.Canvas, checked map[string]int) []string {
 				checked[found.kind]++
 			}
 			want := min(notchMoves(lines, line, found.area.Size().Height), room)
+			if found.rows != nil {
+				// The system's distance, then the row nearest it (B-429).
+				want = found.rows.StopNear(want)
+			}
 			if moved < want-0.5 || moved > want+0.5 {
 				wrong = append(wrong, fmt.Sprintf("%.1f rather than %.1f at %d line(s)", moved, want, lines))
 			}
@@ -196,10 +205,21 @@ func notchMoves(lines int, line, view float32) float32 {
 // can see, in the coordinates of the canvas.
 type scrollingArea struct {
 	area *container.Scroll
+	// rows is the area again when it is a panel of rows, and nil otherwise.
+	rows rowStops
 	kind string
 	at   fyne.Position
 	size fyne.Size
 }
+
+// rowStops is what a panel of rows answers, a chooser's or an editor's
+// suggestions: where the view stands once the wheel has taken it to an aim.
+type rowStops interface {
+	StopNear(aim float32) float32
+}
+
+// panelOfRows is the kind of area whose wheel stops on a row.
+const panelOfRows = "panel of rows"
 
 // scrollingAreas walks what is drawn under root and returns every area with
 // something below its fold and some of itself in sight.
@@ -222,7 +242,8 @@ func scrollingAreas(root fyne.CanvasObject) []scrollingArea {
 			room := area.Content.MinSize().Height - area.Size().Height
 			vertical := area.Direction == container.ScrollVerticalOnly || area.Direction == container.ScrollBoth
 			if vertical && room > 0.5 && clipSize.Width > 2 && clipSize.Height > 2 {
-				found = append(found, scrollingArea{area: area, kind: kindOf(object, owner), at: clipAt, size: clipSize})
+				rows, _ := object.(rowStops)
+				found = append(found, scrollingArea{area: area, rows: rows, kind: kindOf(object, owner), at: clipAt, size: clipSize})
 			}
 		}
 		var children []fyne.CanvasObject
@@ -250,6 +271,8 @@ func kindOf(object fyne.CanvasObject, owner string) string {
 		return "KeyScroll"
 	case *parts.Scroll:
 		return "Scroll"
+	case rowStops:
+		return panelOfRows
 	}
 	if owner != "" {
 		return owner
