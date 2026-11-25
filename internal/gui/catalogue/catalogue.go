@@ -84,7 +84,9 @@ type Samples struct {
 // opens at, and the page of areas given the editor instead asked for 995. The
 // eighth came on 2026-11-12 with the list of values (B-370): the page of lists
 // holding it as well asked for 1077 units, and the page of areas 1096, so the
-// row of a value and the list it stands in became a page of their own. A
+// row of a value and the list it stands in became a page of their own. The
+// ninth came on 2026-11-25 with the question asked in a dialog: the page of
+// areas holding it as well asked for 916 units. A
 // page is a family of controls a person would look for together. What would
 // change the number: a control added to a family, or a change to the size the
 // window opens in.
@@ -97,6 +99,7 @@ const (
 	PageLists
 	PageValues
 	PageAreas
+	PageQuestions
 	// PageCount is how many pages there are, so that a caller can ask for a
 	// picture of every one of them.
 	PageCount
@@ -130,6 +133,8 @@ func Frame(text i18n.Catalogue, brand shell.Brand, samples Samples) *shell.Shell
 		Icon: paint.IconCopy, Content: page(text, samples, values())}
 	pages[PageAreas] = shell.Screen{Name: text.T(i18n.CataloguePageAreas), Group: controls,
 		Icon: paint.IconChevron, Content: page(text, samples, areas())}
+	pages[PageQuestions] = shell.Screen{Name: text.T(i18n.CataloguePageQuestions), Group: controls,
+		Icon: paint.IconInfo, Content: page(text, samples, questions())}
 	return shell.New(pages, brand)
 }
 

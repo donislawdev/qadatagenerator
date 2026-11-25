@@ -12,6 +12,7 @@ import (
 	"github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/token"
 
+	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
 
@@ -440,24 +441,54 @@ func firstLine(text string) string {
 // reads the syntax tree that Decode builds once. Anything added here has to
 // answer from the bytes alone, or it belongs on the other side of the parse.
 func refusedBeforeParsing(r *reader, data []byte) bool {
+	if problem, refused := unreadable(data); refused {
+		r.report(problem.Where, problem.What, problem.Allowed, problem.Hint)
+		return true
+	}
+	return refusedForNesting(r, data)
+}
+
+// Unreadable says why these bytes cannot be a recipe whatever they say: they
+// are larger than this build reads, or they are not UTF-8 text. It answers from
+// the bytes alone and in the words Decode uses for the same refusal.
+//
+// # Why it is exported
+//
+// The window opens a recipe file into a field a person edits, and that field
+// holds text. A file refused here cannot be put there faithfully: bytes that are
+// not UTF-8 would come back changed the moment the field is saved, and a file
+// past the size limit is one this build would refuse to run anyway. So the
+// window declines to open such a file and says why with this answer, rather than
+// with a second copy of the rule that a later change would leave behind.
+//
+// A leading byte order mark is skipped first, as Decode skips it.
+func Unreadable(data []byte) (recipe.Problem, bool) {
+	return unreadable(stripBOM(data))
+}
+
+// unreadable is Unreadable for bytes whose mark is already gone, which is how
+// Decode holds them by the time it asks.
+func unreadable(data []byte) (recipe.Problem, bool) {
 	// The size is not quoted back, and that is deliberate rather than terse.
 	// Knowing it would mean holding the whole file, which is the cost this
 	// limit exists to refuse, so whoever reads the file stops one byte past
 	// the limit and this can only say which side of it the recipe fell on.
 	if len(data) > MaxSize {
-		r.report("", fmt.Sprintf("the recipe is larger than the %d kB this build reads at most", MaxSize/1024),
-			fmt.Sprintf("a recipe up to %d kB", MaxSize/1024),
-			"split it into several recipes, or check that the file is a recipe and not something else")
-		return true
+		return recipe.Problem{
+			What:    fmt.Sprintf("the recipe is larger than the %d kB this build reads at most", MaxSize/1024),
+			Allowed: fmt.Sprintf("a recipe up to %d kB", MaxSize/1024),
+			Hint:    "split it into several recipes, or check that the file is a recipe and not something else",
+		}, true
 	}
 
 	// The encoding is answered before the shape, because a file in the wrong
 	// one produces a complaint about its shape that names the wrong culprit.
 	if encoding, wrong := notUTF8(data); wrong {
-		r.report("", "the recipe is saved as "+encoding+" and this build reads UTF-8",
-			"UTF-8, with or without a byte order mark",
-			"save the file again as UTF-8. In the Notepad save dialog that is the entry named UTF-8, not the ones named Unicode")
-		return true
+		return recipe.Problem{
+			What:    "the recipe is saved as " + encoding + " and this build reads UTF-8",
+			Allowed: "UTF-8, with or without a byte order mark",
+			Hint:    "save the file again as UTF-8. In the Notepad save dialog that is the entry named UTF-8, not the ones named Unicode",
+		}, true
 	}
 
 	// A single byte encoding announces nothing, so it is caught by the bytes
@@ -480,13 +511,13 @@ func refusedBeforeParsing(r *reader, data []byte) bool {
 	// YAML itself requires UTF-8, UTF-16 or UTF-32, so refusing anything else
 	// follows the format rather than adding a rule of ours.
 	if !utf8.Valid(data) {
-		r.report("", "the recipe is not valid UTF-8, so it was saved in some other encoding",
-			"UTF-8, with or without a byte order mark",
-			"save the file again as UTF-8. A Polish Windows writes Windows-1250 when the save dialog says ANSI")
-		return true
+		return recipe.Problem{
+			What:    "the recipe is not valid UTF-8, so it was saved in some other encoding",
+			Allowed: "UTF-8, with or without a byte order mark",
+			Hint:    "save the file again as UTF-8. A Polish Windows writes Windows-1250 when the save dialog says ANSI",
+		}, true
 	}
-
-	return refusedForNesting(r, data)
+	return recipe.Problem{}, false
 }
 
 // refusedForNesting answers the spellings of one bomb, and reports whether one

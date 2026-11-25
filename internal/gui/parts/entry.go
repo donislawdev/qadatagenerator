@@ -101,6 +101,12 @@ type Editor struct {
 	// pointerOnText and pointerOnRow are where the pointer is on the field:
 	// on the text, or on a row of the list, which takes it from the text.
 	pointerOnText, pointerOnRow bool
+
+	// OnSave is what Ctrl+S does in the field, Cmd+S on a Mac, and nothing
+	// when it is nil. The toolkit hands a shortcut to the field holding the
+	// keyboard and to nothing else, so the screen holding the field cannot
+	// hear the key any other way while somebody is typing.
+	OnSave func()
 }
 
 // Asserted so that dropping one of these is a compile error rather than a field
@@ -377,6 +383,12 @@ func (e *Editor) TypedShortcut(shortcut fyne.Shortcut) {
 	if custom, ok := shortcut.(*desktop.CustomShortcut); ok &&
 		custom.KeyName == fyne.KeySpace && custom.Modifier == fyne.KeyModifierControl {
 		e.SuggestHere()
+		return
+	}
+	if custom, ok := shortcut.(*desktop.CustomShortcut); ok && e.OnSave != nil &&
+		custom.KeyName == fyne.KeyS && custom.Modifier == fyne.KeyModifierShortcutDefault {
+		e.closeSuggestions()
+		e.OnSave()
 		return
 	}
 	e.closeSuggestions()

@@ -110,6 +110,10 @@ type Work struct {
 	// or is nothing for a caller with no window behind the screen. It is the
 	// port of the one Closing of the window, and the reasons stand there.
 	Hold Hold
+	// AskFirst puts a question to whoever closes the window before it goes,
+	// or is nothing for a caller with no window behind the screen. It is the
+	// second port of the same Closing.
+	AskFirst AskFirst
 }
 
 // Run is where the work of a run happens and how its answer comes back.

@@ -888,6 +888,25 @@ const (
 	PanelHeight float32 = 470
 )
 
+// QuestionWidth is how wide the words of a question asked in a dialog stand.
+//
+// # Why a width at all
+//
+// A dialog is as wide as what it holds, and a sentence that folds asks for the
+// width of its longest word, so without one the dialog would stand as a narrow
+// column of short lines. Three buttons side by side ask for more than that, and
+// the sentence needs the room they leave to read as a sentence.
+//
+// # Why this number
+//
+// The sentence of a question is the length of a line of the aside, two or three
+// of them, and the widest row of buttons asked of one is three words of a few
+// letters each. The panel's width already holds a heading and a column beside it
+// and reads well at the size the window opens at, so a question stands at the
+// same width rather than at a third one. A judgement, not a measurement, and
+// what would change it is a question with a fourth answer or a longer word.
+const QuestionWidth float32 = PanelWidth
+
 // OptionHeight is how tall a row of a panel is, which is a little more than a
 // control: a row is read in a column of its like rather than beside other
 // controls, and the owner found the column of kinds cramped on 2026-10-21.

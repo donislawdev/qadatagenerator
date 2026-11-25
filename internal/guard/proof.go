@@ -671,4 +671,6 @@ var toolGuards = []Guard{
 	{"a failed write to standard output does not send the reader to check a path that does not exist", "TestAFailedWriteToTheOutputDoesNotSendTheReaderToAPath", "internal/cli", ByMutation},
 	{"a date of birth a PESEL cannot carry is refused as a request that cannot be met, naming the date and the years it could have been", "TestADateOfBirthThePeselCannotCarryIsARequestThatCannotBeMet", "internal/cli", ByMutation},
 	{"a date the PESEL scheme cannot express is refused with the date named and a kind saying the request cannot be met", "TestADateOutsideTheSchemeIsRefused", "internal/adapter/provider/pl", ByMutation},
+	{"a saved recipe reaches its name by a rename, so a save failing half way leaves the earlier file whole", "TestASaveReplacesTheFileRatherThanWritingIntoIt", "internal/adapter/recipefile", ByMutation},
+	{"closing the window asks first when the recipe on the screen is in no file, and only the answer letting it go closes it", "TestTheCrossAsksBeforeAnUnsavedRecipeIsLost", "internal/gui/recipeview", ByMutation},
 }

@@ -12,6 +12,10 @@ Recipe
 A recipe is a file you keep beside your tests. The same recipe and the same seed produce the same data on every machine.
 1
 Your recipe
+Open...
+Save
+Save as...
+Not saved to a file yet
 1
 2
 3
@@ -27,8 +31,6 @@ Your recipe
 13
 14
 15
-16
-17
 version: "0.1"
 seed: "readme"
 locale: en-US
@@ -193,7 +195,7 @@ What this build can generate, 21 generators
 qadg generate your-recipe.yaml
 $
 Copy command
-The file name above is an example. This window does not write the recipe file, so save the recipe beside your tests and use its name in the command.
+The file name above is an example. Save the recipe to a file, and this line names that file and can be copied.
 GitHub
 Donate
 v0.1.0  ·  fully offline

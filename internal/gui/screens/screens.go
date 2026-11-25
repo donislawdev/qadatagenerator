@@ -31,6 +31,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/catalogyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestjson"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/recipefile"
 	"github.com/donislawdev/qadatagenerator/internal/damage"
 	"github.com/donislawdev/qadatagenerator/internal/domain/catalog"
 	"github.com/donislawdev/qadatagenerator/internal/domain/manifest"
@@ -214,6 +215,10 @@ type State struct {
 	// taken. It goes in through the field a person types into, so the state is
 	// one somebody reaches by typing rather than one only this list produces.
 	Recipe string
+	// RecipeFile is the file that recipe came from, for the states showing a
+	// recipe held in a file, and RecipeEdited what was typed after it without
+	// being saved. The file arrives the way a finished read hands it over.
+	RecipeFile, RecipeEdited string
 	// Into is the directory the recipe editor writes to, as somebody typed it.
 	//
 	// 🔴 A word rather than a real path, and never one this machine has. A
@@ -367,7 +372,7 @@ func screenColumn(text i18n.Catalogue, quickScreen *quickview.View, takeScreen *
 	column[screenTake] = shell.Screen{Name: text.T(i18n.ScreenTake), Group: making, Icon: paint.IconBreak,
 		Content: takeScreen.Content(), OnDropped: takeScreen.Dropped}
 	column[screenRecipe] = shell.Screen{Name: text.T(i18n.ScreenRecipe), Group: making, Icon: paint.IconRecipe,
-		Content: recipeScreen.Content()}
+		Content: recipeScreen.Content(), OnDropped: recipeScreen.Dropped}
 	column[screenManifest] = shell.Screen{Name: text.T(i18n.ScreenManifest), Group: checking, Icon: paint.IconChecklist,
 		Content: view.Content()}
 	// 🔴 A way to write that writes nowhere, and the notices this build carries,
@@ -400,7 +405,15 @@ func settleScreens(state State, data Data, quickScreen *quickview.View, takeScre
 	if state.Into != "" {
 		recipeScreen.SetOut(state.Into)
 	}
-	if state.Recipe != "" {
+	switch {
+	case state.RecipeFile != "":
+		// What a read of that file would have answered, handed over, since a
+		// picture reads no disk.
+		recipeScreen.Took(recipefile.Opened{Path: state.RecipeFile, Text: state.Recipe})
+		if state.RecipeEdited != "" {
+			recipeScreen.SetRecipe(state.Recipe + state.RecipeEdited)
+		}
+	case state.Recipe != "":
 		recipeScreen.SetRecipe(state.Recipe)
 	}
 	if state.Generators {

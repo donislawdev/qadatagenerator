@@ -42,11 +42,13 @@ import (
 	"strconv"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/recipefile"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
@@ -214,7 +216,31 @@ type View struct {
 	// letGo gives back the window held for the run in flight, and is nothing
 	// outside a run.
 	letGo func()
+
+	// The file the recipe on the screen came from or was last saved to, as it
+	// was then, which is what is compared with the field to say whether
+	// anything is unsaved (file.go). Empty for a recipe never saved.
+	kept recipefile.Opened
+	// opening is the file being read, saving says a save is going on and
+	// savingText is what it writes, and question is what the screen waits for
+	// an answer to.
+	opening    string
+	saving     bool
+	savingText string
+	question   *parts.Question
+	// files is the queue the reads of files go through, apart from the
+	// checks, so that a file chosen twice in a row is read once.
+	files                          *background.Latest
+	openFile, saveFile, saveFileAs *parts.Button
+	fileName                       *widget.Label
+	// clipboard is where the line for a terminal goes, once the recipe is in
+	// a file, or nothing.
+	clipboard   Clipboard
+	commandNote *canvas.Text
 }
+
+// Clipboard is where the line that would do this in a terminal goes.
+type Clipboard interface{ SetContent(string) }
 
 // New builds the screen.
 //
@@ -233,6 +259,11 @@ func New(text i18n.Catalogue, check Check, write Write, work background.Work,
 	view.editor.SetPlaceHolder(text.T(i18n.RecipePlaceholder))
 	view.vocabulary = buildVocabulary()
 	view.editor.Suggest(view.suggest)
+	// Ctrl+S in the field, where a person writing a recipe presses it. The
+	// toolkit hands a shortcut to the field holding the keyboard and to
+	// nothing else, so a shortcut of the window would not hear it there.
+	view.editor.OnSave = func() { view.Save(nil) }
+	view.buildFile()
 	view.buildHints()
 	view.buildCommand()
 	view.lay()
@@ -267,7 +298,7 @@ func (v *View) lay() {
 	// editor takes what the two leave.
 	steps := paint.StepHeadings(v.text.T(i18n.RecipeHeadingRecipe), v.text.T(i18n.RecipeStepGenerate))
 	recipeHeading := paint.Pad(palette.NameStepHairline, palette.NameStepRelated,
-		palette.NameStepHairline, palette.NameStepHairline, steps[0])
+		palette.NameStepHairline, palette.NameStepHairline, v.fileHeading(steps[0]))
 	generate := paint.Pad(palette.NameStepSection, palette.NameStepHairline,
 		palette.NameStepHairline, palette.NameStepHairline, v.generateStep(steps[1]))
 	// What Tab does in the field and how the keyboard leaves it, right under
@@ -300,12 +331,24 @@ func (v *View) lay() {
 		band, body, v.command)
 }
 
-// heading is the title of one column, with the line every section heading of
-// this window carries.
+// heading is the title of the right column, standing level with the heading of
+// the left one and taking the same height, so that the card under it starts
+// where the editor does.
+//
+// # Why the height is taken from the controls of the left column
+//
+// The left heading carries the buttons of the file at its far end and the name
+// of the file under it (file.go), so it is the height of a button plus a line.
+// A heading here without them stood its words a few units higher and its card
+// a line higher than the editor, seen on the render of 2026-11-25. The height
+// is asked of the very button and line the left column draws rather than of a
+// number, so the two cannot drift apart when either changes.
 func (v *View) heading(key i18n.Key) fyne.CanvasObject {
+	row := paint.AtLeast(0, v.saveFile.MinSize().Height,
+		paint.Middle(paint.SectionHeading(v.text.T(key), paint.Spacer())))
 	return paint.Pad(palette.NameStepHairline, palette.NameStepRelated,
 		palette.NameStepHairline, palette.NameStepHairline,
-		paint.SectionHeading(v.text.T(key), paint.Spacer()))
+		container.NewVBox(row, paint.Space(0, v.fileName.MinSize().Height)))
 }
 
 // SetRecipe puts a recipe on the screen and judges it, without anybody typing.
@@ -361,6 +404,11 @@ func (v *View) Recheck(recipe string) {
 	if !v.busy() {
 		v.forgetLastRun()
 	}
+	// Whether the recipe is saved changes with the letter just typed, and the
+	// answer of the check below may arrive later, so the line beside the
+	// heading and the note under the command are said now.
+	v.drawFile()
+	v.drawCommand()
 
 	// An empty screen is not a recipe with no problems. It gets a sentence
 	// saying what to do, which is point eight of the GUI checklist, and no
@@ -446,6 +494,7 @@ func (v *View) draw() {
 	v.markProblems()
 	v.drawAction()
 	v.drawCommand()
+	v.drawFile()
 }
 
 // drawCard fills the card with the one thing it says, and the heading over it

@@ -243,57 +243,147 @@
 							<container pos="32,24" size="1058x663">
 								<container size="529x663">
 									<container pos="4,4" size="513x655">
-										<container size="513x38">
-											<container pos="4,4" size="505x22">
-												<container size="22x22">
-													<spacer size="22x0"/>
-													<container size="22x22">
-														<rectangle size="22x22"/>
-														<container size="22x22">
-															<rectangle fillColor="rgba(37,51,72,255)" radius="999" size="22x22"/>
+										<container size="513x74">
+											<container pos="4,4" size="505x58">
+												<container size="505x34">
+													<container size="103x34">
+														<spacer size="103x6"/>
+														<container pos="0,6" size="103x22">
 															<container size="22x22">
-																<text bold color="focus" pos="7,3" size="6x14" textSize="11">1</text>
+																<spacer size="22x0"/>
+																<container size="22x22">
+																	<rectangle size="22x22"/>
+																	<container size="22x22">
+																		<rectangle fillColor="rgba(37,51,72,255)" radius="999" size="22x22"/>
+																		<container size="22x22">
+																			<text bold color="focus" pos="7,3" size="6x14" textSize="11">1</text>
+																		</container>
+																	</container>
+																</container>
+																<spacer pos="0,22" size="22x0"/>
+															</container>
+															<container pos="30,0" size="73x22">
+																<spacer size="73x1"/>
+																<text bold pos="0,1" size="73x18" textSize="14">Your recipe</text>
+																<spacer pos="0,20" size="73x1"/>
 															</container>
 														</container>
+														<spacer pos="0,28" size="103x6"/>
 													</container>
-													<spacer pos="0,22" size="22x0"/>
+													<container pos="260,0" size="244x34">
+														<widget size="73x34" type="*parts.Button">
+															<container size="73x34">
+																<container size="73x34">
+																	<rectangle size="73x34"/>
+																	<container size="73x34">
+																		<container size="73x34">
+																			<rectangle pos="1,1" radius="6" size="71x32" strokeColor="inputBorder" strokeWidth="2"/>
+																		</container>
+																		<container size="73x34">
+																			<container pos="16,4" size="41x26">
+																				<container pos="0,4" size="41x16">
+																					<container size="41x16">
+																						<spacer size="41x0"/>
+																						<text size="41x16">Open...</text>
+																						<spacer pos="0,16" size="41x0"/>
+																					</container>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</widget>
+														<widget pos="85,0" size="59x34" type="*parts.Button">
+															<container size="59x34">
+																<container size="59x34">
+																	<rectangle size="59x34"/>
+																	<container size="59x34">
+																		<container size="59x34">
+																			<rectangle pos="1,1" radius="6" size="57x32" strokeColor="inputBorder" strokeWidth="2"/>
+																		</container>
+																		<container size="59x34">
+																			<container pos="16,4" size="27x26">
+																				<container pos="0,4" size="27x16">
+																					<container size="27x16">
+																						<spacer size="27x0"/>
+																						<text size="27x16">Save</text>
+																						<spacer pos="0,16" size="27x0"/>
+																					</container>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</widget>
+														<widget pos="157,0" size="86x34" type="*parts.Button">
+															<container size="86x34">
+																<container size="86x34">
+																	<rectangle size="86x34"/>
+																	<container size="86x34">
+																		<container size="86x34">
+																			<rectangle pos="1,1" radius="6" size="84x32" strokeColor="inputBorder" strokeWidth="2"/>
+																		</container>
+																		<container size="86x34">
+																			<container pos="16,4" size="54x26">
+																				<container pos="0,4" size="54x16">
+																					<container size="54x16">
+																						<spacer size="54x0"/>
+																						<text size="54x16">Save as...</text>
+																						<spacer pos="0,16" size="54x0"/>
+																					</container>
+																				</container>
+																			</container>
+																		</container>
+																	</container>
+																</container>
+															</container>
+														</widget>
+													</container>
 												</container>
-												<container pos="30,0" size="73x22">
-													<spacer size="73x1"/>
-													<text bold pos="0,1" size="73x18" textSize="14">Your recipe</text>
-													<spacer pos="0,20" size="73x1"/>
+												<container pos="0,34" size="505x24">
+													<container size="26x24">
+														<rectangle size="26x24"/>
+														<rectangle size="26x24"/>
+													</container>
+													<widget pos="26,0" size="479x24" type="*widget.Label">
+														<widget size="479x24" type="*widget.RichText">
+															<text color="disabled" pos="4,4" size="0x16"></text>
+														</widget>
+													</widget>
 												</container>
 											</container>
 										</container>
-										<container pos="0,38" size="513x338">
-											<container size="513x338">
-												<rectangle fillColor="button" pos="1,1" radius="6" size="511x336" strokeColor="inputBorder" strokeWidth="2"/>
+										<container pos="0,74" size="513x302">
+											<container size="513x302">
+												<rectangle fillColor="button" pos="1,1" radius="6" size="511x300" strokeColor="inputBorder" strokeWidth="2"/>
 											</container>
-											<container size="513x338">
-												<container pos="8,8" size="497x322">
-													<widget size="497x322" type="*parts.lineMarks">
-														<container size="497x322">
+											<container size="513x302">
+												<container pos="8,8" size="497x286">
+													<widget size="497x286" type="*parts.lineMarks">
+														<container size="497x286">
 															<text color="disabled" monospace pos="34,4" size="7x16">1</text>
 														</container>
 													</widget>
-													<container size="497x322">
-														<rectangle size="54x322"/>
-														<widget pos="54,0" size="442x322" type="*parts.Editor">
-															<widget pos="0,2" size="442x318" type="*widget.Scroll">
-																<widget size="442x318" type="*widget.entryContent">
-																	<widget size="442x318" type="*widget.RichText">
+													<container size="497x286">
+														<rectangle size="54x286"/>
+														<widget pos="54,0" size="442x286" type="*parts.Editor">
+															<widget pos="0,2" size="442x282" type="*widget.Scroll">
+																<widget size="442x282" type="*widget.entryContent">
+																	<widget size="442x282" type="*widget.RichText">
 																		<text color="disabled" monospace pos="4,2" size="132x16">A recipe, in YAML</text>
 																	</widget>
-																	<widget size="442x318" type="*widget.RichText">
+																	<widget size="442x282" type="*widget.RichText">
 																		<text monospace pos="4,2" size="0x16"></text>
 																	</widget>
 																</widget>
 															</widget>
-															<widget size="442x322" type="*parts.wheelLayer">
-																<container size="442x322">
+															<widget size="442x286" type="*parts.wheelLayer">
+																<container size="442x286">
 																</container>
 															</widget>
-															<container size="442x322">
+															<container size="442x286">
 															</container>
 														</widget>
 													</container>
@@ -494,22 +584,35 @@
 								</container>
 								<container pos="529,0" size="529x663">
 									<container pos="12,4" size="513x655">
-										<container size="513x34">
-											<container size="513x34">
-												<container pos="4,4" size="505x18">
-													<spacer pos="113,0" size="391x18"/>
-													<container size="113x18">
-														<spacer size="113x0"/>
-														<text bold size="113x18" textSize="14">What it describes</text>
-														<spacer pos="0,18" size="113x0"/>
+										<container size="513x74">
+											<container size="513x74">
+												<container pos="4,4" size="505x58">
+													<container size="505x34">
+														<rectangle size="505x34"/>
+														<container size="505x34">
+															<spacer size="505x7"/>
+															<container pos="0,7" size="505x18">
+																<spacer pos="113,0" size="391x18"/>
+																<container size="113x18">
+																	<spacer size="113x0"/>
+																	<text bold size="113x18" textSize="14">What it describes</text>
+																	<spacer pos="0,18" size="113x0"/>
+																</container>
+																<spacer pos="505,0" size="0x18"/>
+															</container>
+															<spacer pos="0,26" size="505x7"/>
+														</container>
 													</container>
-													<spacer pos="505,0" size="0x18"/>
+													<container pos="0,34" size="505x24">
+														<rectangle size="505x24"/>
+														<rectangle size="505x24"/>
+													</container>
 												</container>
 											</container>
 										</container>
-										<container pos="0,34" size="513x621">
-											<widget size="513x621" type="*parts.KeyScroll">
-												<container size="513x621">
+										<container pos="0,74" size="513x580">
+											<widget size="513x580" type="*parts.KeyScroll">
+												<container size="513x580">
 													<container size="513x190">
 														<rectangle fillColor="menuBackground" radius="10" size="513x190"/>
 														<container size="513x190">
@@ -587,7 +690,7 @@
 													</container>
 												</container>
 											</widget>
-											<rectangle radius="10" size="513x621" strokeWidth="2"/>
+											<rectangle radius="10" size="513x580" strokeWidth="2"/>
 										</container>
 									</container>
 								</container>
@@ -643,7 +746,7 @@
 											<spacer pos="0,34" size="145x0"/>
 										</container>
 									</container>
-									<text color="disabled" pos="0,38" size="1058x14" textSize="11">The file name above is an example. This window does not write the recipe file, so save the recipe beside your tests and use its name in the command.</text>
+									<text color="disabled" pos="0,38" size="1058x14" textSize="11">The file name above is an example. Save the recipe to a file, and this line names that file and can be copied.</text>
 								</container>
 							</container>
 						</container>

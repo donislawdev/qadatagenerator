@@ -502,7 +502,28 @@ const (
 	// recipe file.
 	RecipeCommandFile    Key = "recipe.command.file"
 	RecipeCommandExample Key = "recipe.command.example"
+	RecipeCommandSaved   Key = "recipe.command.saved"
+	RecipeCommandUnsaved Key = "recipe.command.unsaved"
 	RecipeStopRun        Key = "recipe.stop-run"
+	// The recipe as a file (DEC-342, piece 8a): the buttons beside the heading
+	// of the field, the line naming the file, and the questions asked before a
+	// recipe nobody saved is lost or a file changed behind the window replaced.
+	RecipeOpen          Key = "recipe.file.open"
+	RecipeSave          Key = "recipe.file.save"
+	RecipeSaveAs        Key = "recipe.file.save-as"
+	RecipeFileOpening   Key = "recipe.file.opening"
+	RecipeFileSaving    Key = "recipe.file.saving"
+	RecipeFileNone      Key = "recipe.file.none"
+	RecipeFileChanged   Key = "recipe.file.changed"
+	RecipeNotOpened     Key = "recipe.file.not-opened"
+	RecipeNotSaved      Key = "recipe.file.not-saved"
+	RecipeKeepTitle     Key = "recipe.keep.title"
+	RecipeKeepUntitled  Key = "recipe.keep.untitled"
+	RecipeKeepChanged   Key = "recipe.keep.changed"
+	RecipeKeepDiscard   Key = "recipe.keep.discard"
+	RecipeChangedTitle  Key = "recipe.changed.title"
+	RecipeChangedOnDisk Key = "recipe.changed.on-disk"
+	RecipeReplaceFile   Key = "recipe.changed.replace"
 	// What the card says about a run: the files it would write before one, and
 	// what it left behind after one.
 	RecipePlanWrites    Key = "recipe.plan.writes"
@@ -880,7 +901,10 @@ var windowKeys = []Key{
 	RecipeShowing, RecipeOf, RecipeRow, RecipeRows, RecipeNoRows, RecipeNoFields,
 	RecipeAsText, RecipeParentOutside, RecipeRefused, RecipeCrashed, RecipeWillNotDo,
 	RecipeWriteTo, RecipeChooseDir, RecipeReplace, RecipeGenerate, RecipeStopRun,
-	RecipeCommandFile, RecipeCommandExample,
+	RecipeCommandFile, RecipeCommandExample, RecipeCommandSaved, RecipeCommandUnsaved,
+	RecipeOpen, RecipeSave, RecipeSaveAs, RecipeFileOpening, RecipeFileSaving, RecipeFileNone,
+	RecipeFileChanged, RecipeNotOpened, RecipeNotSaved, RecipeKeepTitle, RecipeKeepUntitled,
+	RecipeKeepChanged, RecipeKeepDiscard, RecipeChangedTitle, RecipeChangedOnDisk, RecipeReplaceFile,
 	RecipePlanWrites, RecipeNeedDirectory, RecipeDirHint, RecipeWriting, RecipeStopping,
 	RecipeResultWritten, RecipeResultRows, RecipeIn, RecipeRunStopped, RecipeRunFailed,
 	RecipeSampleBeforeDamage, RecipeFormUnused,

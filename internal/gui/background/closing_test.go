@@ -168,3 +168,142 @@ func TestLettingGoTwiceEndsNoOtherHolding(t *testing.T) {
 		t.Error("the last run let go and the cross is still taken over")
 	}
 }
+
+// handAnswered is a question a test answers by hand: it counts how often it was
+// asked and keeps the two answers of the last asking.
+type handAnswered struct {
+	asked      int
+	goOn, stay func()
+}
+
+func (q *handAnswered) ask(goOn, stay func()) {
+	q.asked++
+	q.goOn, q.stay = goOn, stay
+}
+
+// 🔴 With something to lose, the cross asks before the window goes, and the
+// window goes only on the answer that lets it.
+//
+// Until 2026-11-25 the cross ended the window at once whenever nothing was
+// being written, and a recipe typed and never saved went with it.
+func TestTheCrossAsksBeforeTheWindowGoes(t *testing.T) {
+	window, asking := &askedWindow{}, &handAnswered{}
+	closing := NewClosing(window, nil)
+	closing.AskFirst(asking.ask)
+	if window.intercept == nil {
+		t.Fatal("a question stands and the cross is still the toolkit's, so it would close without asking")
+	}
+
+	window.intercept()
+	if asking.asked != 1 || window.closed != 0 {
+		t.Fatalf("the cross asked %d times and closed the window %d times, want one question and no close",
+			asking.asked, window.closed)
+	}
+	asking.goOn()
+	if window.closed != 1 {
+		t.Errorf("the answer letting the window go closed it %d times rather than once", window.closed)
+	}
+}
+
+// Keeping the window keeps it, and the next press of the cross asks again.
+func TestStayingKeepsTheWindowAndTheNextCrossAsksAgain(t *testing.T) {
+	window, asking := &askedWindow{}, &handAnswered{}
+	closing := NewClosing(window, nil)
+	closing.AskFirst(asking.ask)
+
+	window.intercept()
+	asking.stay()
+	if window.closed != 0 {
+		t.Fatal("the answer keeping the window closed it")
+	}
+	window.intercept()
+	if asking.asked != 2 {
+		t.Errorf("the cross pressed after staying asked %d times in all rather than twice", asking.asked)
+	}
+}
+
+// A second press of the cross while the question is open asks nothing.
+func TestASecondCrossWhileAskingAsksNothing(t *testing.T) {
+	window, asking := &askedWindow{}, &handAnswered{}
+	closing := NewClosing(window, nil)
+	closing.AskFirst(asking.ask)
+
+	window.intercept()
+	window.intercept()
+	if asking.asked != 1 {
+		t.Fatalf("two presses opened the question %d times", asking.asked)
+	}
+	asking.goOn()
+	asking.goOn()
+	if window.closed != 1 {
+		t.Errorf("one answer given twice closed the window %d times", window.closed)
+	}
+}
+
+// The question comes after the runs have ended, so that a save still going on
+// has finished, well or not, by the time anybody is asked what there is to keep.
+func TestTheQuestionComesAfterTheRunsHaveEnded(t *testing.T) {
+	window, asking := &askedWindow{}, &handAnswered{}
+	closing := NewClosing(window, nil)
+	closing.AskFirst(asking.ask)
+	held := heldBy(closing)
+
+	window.intercept()
+	if held.stopped != 1 || asking.asked != 0 {
+		t.Fatalf("the cross stopped the run %d times and asked %d times, want the run first",
+			held.stopped, asking.asked)
+	}
+	held.letGo()
+	if asking.asked != 1 || window.closed != 0 {
+		t.Fatalf("the run ended, the question was asked %d times and the window closed %d times",
+			asking.asked, window.closed)
+	}
+	asking.goOn()
+	if window.closed != 1 {
+		t.Errorf("the window closed %d times rather than once", window.closed)
+	}
+	if window.intercept == nil {
+		t.Error("the run let go and gave the cross back, though a question still stands")
+	}
+}
+
+// 🔴 A signal asks nothing. It comes from a system that will kill the process a
+// few seconds later whatever it is shown.
+func TestASignalAsksNothing(t *testing.T) {
+	window, watch, asking := &askedWindow{}, &askedWatch{}, &handAnswered{}
+	closing := NewClosing(window, watch.watch)
+	closing.AskFirst(asking.ask)
+	held := heldBy(closing)
+
+	// A person pressed the cross first and the system asked after them.
+	window.intercept()
+	watch.asked()
+	held.letGo()
+	if asking.asked != 0 {
+		t.Errorf("a signal ended in a question asked %d times", asking.asked)
+	}
+	if window.closed != 1 {
+		t.Errorf("the signal closed the window %d times rather than once", window.closed)
+	}
+}
+
+// A question that saves before letting the window go keeps the window until the
+// save it started has ended.
+func TestAQuestionThatSavesKeepsTheWindowUntilTheSaveEnds(t *testing.T) {
+	window := &askedWindow{}
+	closing := NewClosing(window, nil)
+	var saving func()
+	closing.AskFirst(func(goOn, _ func()) {
+		saving = closing.Hold(func() {})
+		goOn()
+	})
+
+	window.intercept()
+	if window.closed != 0 {
+		t.Fatal("the window went while the save the question started was still going on")
+	}
+	saving()
+	if window.closed != 1 {
+		t.Errorf("the save ended and the window closed %d times rather than once", window.closed)
+	}
+}

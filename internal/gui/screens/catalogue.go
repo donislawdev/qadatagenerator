@@ -65,6 +65,12 @@ func catalogueStates() []State {
 			Screen:    catalogue.PageAreas,
 			Catalogue: true,
 		},
+		{
+			Name:      "catalogue-questions",
+			Purpose:   "the question a dialog asks, with the way out first and the main answer last and filled",
+			Screen:    catalogue.PageQuestions,
+			Catalogue: true,
+		},
 	}
 }
 

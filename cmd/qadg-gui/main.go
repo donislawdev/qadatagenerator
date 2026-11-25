@@ -308,6 +308,8 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 		work, folders, window)
 	// The list under the caret offers the layers the checks are made against.
 	editor.OfferLayersOf(described)
+	// The line for a terminal can be copied once the recipe is in a file.
+	editor.CopyCommandTo(clipboard)
 
 	// The one screen that reaches outside this tool's own files and channels,
 	// and the way out is handed in rather than reached for, like every other
@@ -331,10 +333,11 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 func placesOfWork(window background.Window) background.Work {
 	closing := background.NewClosing(window, background.WatchForClosing)
 	return background.Work{
-		Run:     background.InBackground,
-		Produce: background.ProduceInBackground,
-		Read:    background.ReadInBackground,
-		Hold:    closing.Hold,
+		Run:      background.InBackground,
+		Produce:  background.ProduceInBackground,
+		Read:     background.ReadInBackground,
+		Hold:     closing.Hold,
+		AskFirst: closing.AskFirst,
 	}
 }
 
@@ -388,7 +391,7 @@ func sidebar(text i18n.Catalogue, window fyne.Window, value *quickview.View, dam
 		{Name: text.T(i18n.ScreenTake), Group: making, Icon: paint.IconBreak,
 			Content: damage.Content(), OnDropped: damage.Dropped},
 		{Name: text.T(i18n.ScreenRecipe), Group: making, Icon: paint.IconRecipe,
-			Content: editor.Content()},
+			Content: editor.Content(), OnDropped: editor.Dropped},
 		{Name: text.T(i18n.ScreenManifest), Group: checking, Icon: paint.IconChecklist,
 			Content: browser.Content()},
 		{Name: text.T(i18n.ScreenAbout), Icon: paint.IconInfo,

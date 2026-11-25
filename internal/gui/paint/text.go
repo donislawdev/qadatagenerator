@@ -110,6 +110,23 @@ func Paragraph(words string) fyne.CanvasObject {
 	return container.NewStack(label)
 }
 
+// Cut is one line in the type of the body and the ink of an explanation that
+// takes the width it is given and ends in an ellipsis where it does not fit.
+//
+// For a slot that is one line beside or under other things: a piece of canvas
+// text would ask for its whole width and take it from whatever stands beside
+// it, and a file name is as long as somebody made it. It was the take screen's
+// own until the recipe screen needed the same line for the name of its file on
+// 2026-11-25, and two screens with one look is one look.
+func Cut(words string) *widget.Label {
+	label := widget.NewLabel(words)
+	label.Wrapping = fyne.TextWrapOff
+	label.Truncation = fyne.TextTruncateEllipsis
+	label.Importance = widget.LowImportance
+	label.SizeName = fyne.ThemeSizeName(theme.TypeBody)
+	return label
+}
+
 func styled(words, rung, token string, style fyne.TextStyle) *canvas.Text {
 	text := canvas.NewText(words, theme.Ink(token))
 	text.TextSize = theme.TypeSize(rung)

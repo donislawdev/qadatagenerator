@@ -94,21 +94,10 @@ func (v *View) ShowGenerators() { v.generators.Open() }
 //
 // The keyboard is put in the field afterwards, because the button it was on is
 // no longer on the screen and because editing what just arrived is the only
-// thing anybody wants to do next. The toolkit clears focus on a tap of its own
-// accord, so this is not taking the keyboard from somebody, it is giving it
-// somewhere to be.
+// thing anybody wants to do next.
 func (v *View) startFromExample() {
 	v.SetRecipe(exampleRecipe)
-	// No application means nothing is running this screen, which happens to a
-	// screen built to be read rather than shown. Asking the driver for a canvas
-	// then would end the process inside a courtesy.
-	app := fyne.CurrentApp()
-	if app == nil {
-		return
-	}
-	if canvas := app.Driver().CanvasForObject(v.editor); canvas != nil {
-		canvas.Focus(v.editor)
-	}
+	v.focusEditor()
 }
 
 // generatorsTitle names the list and says how many are in it.

@@ -372,14 +372,15 @@ func TestEveryStateOpensTheScreenItsNameSays(t *testing.T) {
 	// in full: the word before the dash names the frame, the word after it the
 	// page.
 	pageOfName := map[string]int{
-		"catalogue-buttons":  catalogue.PageButtons,
-		"catalogue-choosers": catalogue.PageChoosers,
-		"catalogue-checks":   catalogue.PageChecks,
-		"catalogue-text":     catalogue.PageText,
-		"catalogue-lines":    catalogue.PageLines,
-		"catalogue-lists":    catalogue.PageLists,
-		"catalogue-values":   catalogue.PageValues,
-		"catalogue-areas":    catalogue.PageAreas,
+		"catalogue-buttons":   catalogue.PageButtons,
+		"catalogue-choosers":  catalogue.PageChoosers,
+		"catalogue-checks":    catalogue.PageChecks,
+		"catalogue-text":      catalogue.PageText,
+		"catalogue-lines":     catalogue.PageLines,
+		"catalogue-lists":     catalogue.PageLists,
+		"catalogue-values":    catalogue.PageValues,
+		"catalogue-areas":     catalogue.PageAreas,
+		"catalogue-questions": catalogue.PageQuestions,
 	}
 	for _, state := range All() {
 		prefix, _, split := strings.Cut(state.Name, "-")

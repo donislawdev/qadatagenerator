@@ -128,6 +128,7 @@ catalogue.page.lines: Several lines
 catalogue.page.lists: Lists
 catalogue.page.values: Values
 catalogue.page.areas: Areas
+catalogue.page.questions: Questions
 catalogue.control.button: Button
 catalogue.control.select: Chooser
 catalogue.control.check: Check box
@@ -138,6 +139,7 @@ catalogue.control.editor: Text of several lines
 catalogue.control.table: Table
 catalogue.control.scroll: Scrolling area
 catalogue.control.disclosure: Section that opens
+catalogue.control.question: Question in a dialog
 catalogue.state.rest: At rest
 catalogue.state.pointer: Pointer on it
 catalogue.state.pressed: Pressed
@@ -168,6 +170,7 @@ catalogue.variant.closed: Closed
 # tekst-ok: the state of a section that shows what it holds, while toolkit.open is the verb on the button of the file dialog, so a translation may need two different words
 catalogue.variant.opened: Open
 catalogue.variant.overflowed: More lines than it shows
+catalogue.variant.three.answers: Three answers, the main one last
 
 about.heading.versions: Versions
 about.heading.licenses: Licenses
@@ -607,7 +610,25 @@ recipe.choose-dir: Choose...
 recipe.replace: Replace files already there
 recipe.generate: Generate this dataset
 recipe.command.file: your-recipe.yaml
-recipe.command.example: The file name above is an example. This window does not write the recipe file, so save the recipe beside your tests and use its name in the command.
+recipe.command.example: The file name above is an example. Save the recipe to a file, and this line names that file and can be copied.
+recipe.command.saved: This command runs the recipe saved in the file, which is what this screen shows.
+recipe.command.unsaved: This command runs the file as it was last saved, without the changes on this screen. Save first to include them.
+recipe.file.open: Open...
+recipe.file.save: Save
+recipe.file.save-as: Save as...
+recipe.file.opening: Opening
+recipe.file.saving: Saving...
+recipe.file.none: Not saved to a file yet
+recipe.file.changed: changes not saved
+recipe.file.not-opened: The file was not opened
+recipe.file.not-saved: The recipe was not saved
+recipe.keep.title: Save the recipe?
+recipe.keep.untitled: The recipe on this screen is not saved to a file. If you do not save it, it is lost.
+recipe.keep.changed: has changes that are not saved. If you do not save them, they are lost.
+recipe.keep.discard: Don't save
+recipe.changed.title: Replace the file?
+recipe.changed.on-disk: was changed by another program after this window opened it. Saving replaces those changes with the recipe on this screen.
+recipe.changed.replace: Replace
 # tekst-ok: the same action on the take screen in take.stop, one wording
 recipe.stop-run: Stop this run
 # tekst-ok: the same heading over the same fact on the take screen in take.plan.writes, one wording

@@ -373,6 +373,29 @@ func areas() []control {
 	}}
 }
 
+// questions is the page of what the window asks in a dialog.
+func questions() []control {
+	return []control{{
+		// Shown without the dialog around it, which is the toolkit's and the
+		// same for every question: what a screen decides is the sentence and
+		// the answers. Its buttons are the buttons of the first page, so their
+		// states are shown there.
+		kind: "Question", name: i18n.CatalogueQuestion, states: still,
+		variants: []variant{{name: i18n.CatalogueThreeAnswers, alone: true, build: question}},
+	}}
+}
+
+// question is a long sentence with three answers, the way out first and the
+// main answer last, as a screen asks one.
+func question(_ i18n.Catalogue, samples Samples) (any, fyne.CanvasObject) {
+	replies := make([]parts.Reply, 0, len(samples.Values))
+	for _, value := range samples.Values {
+		replies = append(replies, parts.Reply{Words: value})
+	}
+	made := parts.NewQuestion(samples.Long, replies...)
+	return made, made.OnScreen()
+}
+
 // areaHeight is how tall a table or a scrolling area stands: a few rows, fewer
 // than the samples hold.
 func areaHeight() float32 { return palette.ControlHeight * palette.CatalogueAreaRows }

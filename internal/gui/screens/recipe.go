@@ -53,6 +53,12 @@ func recipeRunFor(ran RecipeRun) recipeview.Write {
 	}
 }
 
+// SampleRecipeFile is the file the states holding a recipe in a file say it came
+// from. A path nobody's disk has, for the reason pictureKept gives, and written
+// with forward slashes because every system this is drawn on reads those as
+// separators, so its last part is the same name on all of them.
+const SampleRecipeFile = "/home/you/tests/customers.yaml"
+
 // producedHere carries a run out where it is asked for, so that the screen has
 // finished answering by the time the picture is taken.
 func producedHere(work func() (produce.Written, error), done func(produce.Written, error)) {
@@ -212,6 +218,23 @@ func recipeStatesOfTheHints() []State {
 			Screen:     screenRecipe,
 			Generators: true,
 		},
+		{
+			Name: "recipe-file",
+			Purpose: "a recipe opened from a file and not changed: the name of the file under the " +
+				"heading, and the line for a terminal naming that file, with the copy beside it alive (DEC-342)",
+			Screen:     screenRecipe,
+			Recipe:     CleanRecipe,
+			RecipeFile: SampleRecipeFile,
+		},
+		{
+			Name: "recipe-file-edited",
+			Purpose: "the same file with a change typed and not saved: the name says so, and the " +
+				"line for a terminal says it runs the file without the change",
+			Screen:       screenRecipe,
+			Recipe:       CleanRecipe,
+			RecipeFile:   SampleRecipeFile,
+			RecipeEdited: "# a change not saved yet\n",
+		},
 	}
 }
 
@@ -233,7 +256,7 @@ func recipeStatesOfTheKeyboard() []State {
 			Purpose:  "the keyboard on the preview itself, which is where the arrow keys move a cell at a time",
 			Screen:   screenRecipe,
 			Recipe:   CleanRecipe,
-			Keyboard: Keyboard{Tabs: 12},
+			Keyboard: Keyboard{Tabs: 15},
 		},
 		{
 			Name: "recipe-focus-button",
@@ -242,42 +265,50 @@ func recipeStatesOfTheKeyboard() []State {
 			Screen:   screenRecipe,
 			Recipe:   CleanRecipe,
 			Into:     "a-directory",
-			Keyboard: Keyboard{Tabs: 11},
+			Keyboard: Keyboard{Tabs: 14},
 		},
 		{
 			Name: "recipe-focus-example",
 			Purpose: "the keyboard on the offer of a recipe that runs, which is in the card " +
 				"on the empty screen and nowhere else",
 			Screen:   screenRecipe,
-			Keyboard: Keyboard{Tabs: 12},
+			Keyboard: Keyboard{Tabs: 15},
 		},
 		{
 			Name: "recipe-focus-generators",
 			Purpose: "the keyboard on the list of what this build can generate, which is a " +
 				"heading somebody opens rather than a wall of names nobody asked for",
 			Screen:   screenRecipe,
-			Keyboard: Keyboard{Tabs: 13},
+			Keyboard: Keyboard{Tabs: 16},
 		},
 		{
 			Name:     "recipe-focus-editor",
 			Purpose:  "the keyboard in the field the recipe is written in, which it can also leave",
 			Screen:   screenRecipe,
 			Recipe:   BrokenRecipe,
-			Keyboard: Keyboard{Tabs: 6},
+			Keyboard: Keyboard{Tabs: 9},
+		},
+		{
+			Name: "recipe-focus-save",
+			Purpose: "the keyboard on the button that saves the recipe into its file, the second of the three " +
+				"beside the heading of the field, which come before the field itself (DEC-342)",
+			Screen:   screenRecipe,
+			Recipe:   BrokenRecipe,
+			Keyboard: Keyboard{Tabs: 7},
 		},
 		{
 			Name: "recipe-suggest",
 			Purpose: "the list under the caret saying what can be written there, each offer with " +
 				"what it means, opened by typing the way a code editor suggests (DEC-338)",
 			Screen:   screenRecipe,
-			Keyboard: Keyboard{Tabs: 6, Typed: "entities:\n  customer:\n    fields:\n      id: { generator: "},
+			Keyboard: Keyboard{Tabs: 9, Typed: "entities:\n  customer:\n    fields:\n      id: { generator: "},
 		},
 		{
 			Name:     "recipe-focus-answer",
 			Purpose:  "the keyboard on the card holding the answer, which the toolkit's own scrolling area never lets it reach",
 			Screen:   screenRecipe,
 			Recipe:   BrokenRecipe,
-			Keyboard: Keyboard{Tabs: 11},
+			Keyboard: Keyboard{Tabs: 14},
 		},
 	}
 }

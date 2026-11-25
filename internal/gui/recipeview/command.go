@@ -23,17 +23,16 @@ import (
 // field, and the command line takes a path.
 //
 // The owner settled it on 2026-09-08: the line is always there, with the name
-// of the file left as a filled in example, and the copy beside it cannot be
-// pressed. Turned down was hiding the line until there is a path, which takes
-// the bridge away from exactly the person who is learning what a recipe is, and
-// turned down was writing a path this window guessed, which hands somebody a
-// command naming a file that may not exist.
+// of the file left as a filled in example until there is a file, and the copy
+// beside it cannot be pressed until then. Turned down was hiding the line until
+// there is a path, which takes the bridge away from exactly the person who is
+// learning what a recipe is, and turned down was writing a path this window
+// guessed, which hands somebody a command naming a file that may not exist.
 //
-// 🔴 Worth knowing before changing this: nothing in this build writes a recipe
-// file, so there is no state this screen can reach where the copy becomes
-// pressable. It is disabled in all of them, and the sentence beside it says so
-// in words. The day this screen learns to save a recipe is the day the button
-// has something to become.
+// Since 2026-11-25 the screen opens and saves recipe files (file.go), so the
+// line names the real file once there is one and the copy can be pressed. The
+// sentence under it says which of the three it is: an example, the file as it
+// is on the screen, or the file without the changes not saved yet.
 func (v *View) buildCommand() {
 	v.commandText = widget.NewLabelWithStyle("", fyne.TextAlignLeading,
 		fyne.TextStyle{Monospace: true})
@@ -44,12 +43,26 @@ func (v *View) buildCommand() {
 	// it and what stays visible is the verb and the first flags.
 	v.commandText.Wrapping = fyne.TextWrapOff
 	v.commandText.Truncation = fyne.TextTruncateEllipsis
-	// No clipboard is taken for this screen, because a control that cannot be
-	// pressed cannot copy. Adding the port now would be a wire to nowhere, and
-	// the screens that do copy show exactly what to add when it is needed.
-	v.copyCommand = parts.NewButton(v.text.T(i18n.CommandCopy), func() {})
+	v.copyCommand = parts.NewButton(v.text.T(i18n.CommandCopy), v.putCommandInClipboard)
 	v.copyCommand.ShowIcon(paint.IconCopy)
+	v.copyCommand.Confirmed = v.text.T(i18n.CommandCopied)
 	v.copyCommand.Disable()
+	v.commandNote = paint.Text("", palette.TypeLabel, palette.TextSecondary)
+}
+
+// CopyCommandTo is where the copy button puts the line, handed in after the
+// screen is built, like the layers it offers, so that the many callers that
+// build this screen to look at it need not name a clipboard they never use.
+func (v *View) CopyCommandTo(clipboard Clipboard) { v.clipboard = clipboard }
+
+// putCommandInClipboard copies the line and says that it did, as the take
+// screen does: what is in a clipboard cannot be seen, so the button says it.
+func (v *View) putCommandInClipboard() {
+	if v.clipboard == nil || v.kept.Path == "" {
+		return
+	}
+	v.clipboard.SetContent(v.commandText.Text)
+	v.copyCommand.Confirm()
 }
 
 // commandBand is the band at the foot: the mark of a terminal, the line, the
@@ -67,9 +80,7 @@ func (v *View) commandBand() fyne.CanvasObject {
 		paint.Middle(v.copyCommand.OnScreen()),
 		paint.Middle(v.commandText))
 	return paint.Band(paint.BandAbove, palette.NameStepRelated, palette.NameStepMajor,
-		paint.Column(palette.NameStepHairline,
-			line,
-			paint.Text(v.text.T(i18n.RecipeCommandExample), palette.TypeLabel, palette.TextSecondary)))
+		paint.Column(palette.NameStepHairline, line, v.commandNote))
 }
 
 // commandPrompt is the mark a terminal writes before a line, so that the
@@ -81,16 +92,31 @@ const commandPrompt = "$"
 // The settings that ARE real here are written as they stand: the directory
 // somebody typed, whether they ticked replace, and the extra form of the
 // manifest they picked, which is --manifest in a terminal and is left out when
-// they picked none. Only the file is an example,
-// which is what keeps the rest of the line worth reading. It moves with the
-// settings, so it is written on every draw rather than once when the screen is
-// built - a bridge showing the directory somebody typed two edits ago is worse
-// than none.
+// they picked none. The file is the one the recipe came from or was saved to,
+// and an example name while there is none. It moves with the settings, so it
+// is written on every draw rather than once when the screen is built - a bridge
+// showing the directory somebody typed two edits ago is worse than none.
 func (v *View) drawCommand() {
+	file, note := v.text.T(i18n.RecipeCommandFile), i18n.RecipeCommandExample
+	switch {
+	case v.kept.Path != "" && v.unsaved():
+		file, note = v.kept.Path, i18n.RecipeCommandUnsaved
+	case v.kept.Path != "":
+		file, note = v.kept.Path, i18n.RecipeCommandSaved
+	}
 	v.commandText.SetText(commandline.New(commandline.Generate).
 		Flag(commandline.Out, v.out.Text).
 		Switch(commandline.Overwrite, v.replace.Checked).
 		Flag(commandline.Manifest, v.form).
-		Argument(v.text.T(i18n.RecipeCommandFile)).
+		Argument(file).
 		String())
+	v.commandNote.Text = v.text.T(note)
+	v.commandNote.Refresh()
+	// Alive once there is a file, whether or not a clipboard was handed in, so
+	// a picture of the screen shows the button a person sees.
+	if v.kept.Path != "" {
+		v.copyCommand.Enable()
+	} else {
+		v.copyCommand.Disable()
+	}
 }

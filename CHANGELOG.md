@@ -632,6 +632,19 @@ repository once they are released.
 
 ### Added
 
+- **The Recipe screen opens and saves recipe files.** Open..., Save and Save
+  as... stand beside the heading of the recipe, Ctrl+S (Cmd+S on a Mac) saves
+  while you type, and a recipe file dropped onto the window opens on the Recipe
+  screen. The line under the heading names the file and says when the screen
+  has changes the file does not. A save replaces the file in one step, so a
+  save that fails leaves the file as it was, and it keeps the line endings and
+  the byte order mark the file had. Closing the window, opening another file
+  or dropping one asks first when the recipe on the screen is in no file, and
+  saving asks before it replaces a file another program changed since it was
+  opened. Once the recipe is in a file, the command line at the foot names that
+  file and Copy command copies it. The window still keeps no recipe between
+  runs. A file larger than 256 kB or not in UTF-8 is not opened, and the
+  window says why.
 - **SQL files.** `format: sql` writes every row as an INSERT statement for the
   database named under the new `dialect` key: `postgresql`, `mysql` (MySQL and
   MariaDB), `sqlserver` or `sqlite`. `qadg generate --format sql --dialect

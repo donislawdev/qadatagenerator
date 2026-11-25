@@ -571,15 +571,8 @@ func labelled(name string, control fyne.CanvasObject) fyne.CanvasObject {
 
 // cut is a sentence that takes the width it is given and ends in an ellipsis
 // where it does not fit, for the one slot of this screen that is a single
-// line beside other things.
-func (v *View) cut(words string) fyne.CanvasObject {
-	label := widget.NewLabel(words)
-	label.Wrapping = fyne.TextWrapOff
-	label.Truncation = fyne.TextTruncateEllipsis
-	label.Importance = widget.LowImportance
-	label.SizeName = fyne.ThemeSizeName(palette.TypeBody)
-	return label
-}
+// line beside other things. It is the drawing next door.
+func (v *View) cut(words string) fyne.CanvasObject { return paint.Cut(words) }
 
 // paragraph is a sentence that wraps to the width it is given, in the type of
 // the body and the ink of an explanation. It is the drawing next door, named

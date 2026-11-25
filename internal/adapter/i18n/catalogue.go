@@ -22,15 +22,16 @@ const (
 
 	// The heading the pages stand under in the column, and the pages, one per
 	// family of controls.
-	CatalogueGroup        Key = "catalogue.group"
-	CataloguePageButtons  Key = "catalogue.page.buttons"
-	CataloguePageChoosers Key = "catalogue.page.choosers"
-	CataloguePageChecks   Key = "catalogue.page.checks"
-	CataloguePageText     Key = "catalogue.page.text"
-	CataloguePageLines    Key = "catalogue.page.lines"
-	CataloguePageLists    Key = "catalogue.page.lists"
-	CataloguePageValues   Key = "catalogue.page.values"
-	CataloguePageAreas    Key = "catalogue.page.areas"
+	CatalogueGroup         Key = "catalogue.group"
+	CataloguePageButtons   Key = "catalogue.page.buttons"
+	CataloguePageChoosers  Key = "catalogue.page.choosers"
+	CataloguePageChecks    Key = "catalogue.page.checks"
+	CataloguePageText      Key = "catalogue.page.text"
+	CataloguePageLines     Key = "catalogue.page.lines"
+	CataloguePageLists     Key = "catalogue.page.lists"
+	CataloguePageValues    Key = "catalogue.page.values"
+	CataloguePageAreas     Key = "catalogue.page.areas"
+	CataloguePageQuestions Key = "catalogue.page.questions"
 
 	// The controls, one per type of internal/gui/parts a screen builds.
 	CatalogueButton     Key = "catalogue.control.button"
@@ -43,6 +44,7 @@ const (
 	CatalogueTable      Key = "catalogue.control.table"
 	CatalogueScroll     Key = "catalogue.control.scroll"
 	CatalogueDisclosure Key = "catalogue.control.disclosure"
+	CatalogueQuestion   Key = "catalogue.control.question"
 
 	// The states a control is shown in, one per column.
 	CatalogueStateRest     Key = "catalogue.state.rest"
@@ -52,46 +54,47 @@ const (
 	CatalogueStateDisabled Key = "catalogue.state.disabled"
 
 	// The variants a control is shown in, one per row.
-	CatalogueOutlined   Key = "catalogue.variant.outlined"
-	CatalogueIcon       Key = "catalogue.variant.icon"
-	CatalogueFilled     Key = "catalogue.variant.filled"
-	CataloguePlace      Key = "catalogue.variant.place"
-	CatalogueCurrent    Key = "catalogue.variant.current"
-	CatalogueLongLabel  Key = "catalogue.variant.long.label"
-	CatalogueNothing    Key = "catalogue.variant.nothing"
-	CatalogueChosen     Key = "catalogue.variant.chosen"
-	CatalogueLongValue  Key = "catalogue.variant.long.value"
-	CatalogueOff        Key = "catalogue.variant.off"
-	CatalogueOn         Key = "catalogue.variant.on"
-	CatalogueUnbanded   Key = "catalogue.variant.unbanded"
-	CatalogueBanded     Key = "catalogue.variant.banded"
-	CatalogueEmpty      Key = "catalogue.variant.empty"
-	CatalogueHinted     Key = "catalogue.variant.hinted"
-	CatalogueNoted      Key = "catalogue.variant.noted"
-	CatalogueRefused    Key = "catalogue.variant.refused"
-	CatalogueExtreme    Key = "catalogue.variant.extreme"
-	CatalogueLines      Key = "catalogue.variant.lines"
-	CatalogueMarkedLine Key = "catalogue.variant.marked.line"
-	CatalogueRows       Key = "catalogue.variant.rows"
-	CatalogueClosed     Key = "catalogue.variant.closed"
-	CatalogueOpened     Key = "catalogue.variant.opened"
-	CatalogueOverflowed Key = "catalogue.variant.overflowed"
+	CatalogueOutlined     Key = "catalogue.variant.outlined"
+	CatalogueIcon         Key = "catalogue.variant.icon"
+	CatalogueFilled       Key = "catalogue.variant.filled"
+	CataloguePlace        Key = "catalogue.variant.place"
+	CatalogueCurrent      Key = "catalogue.variant.current"
+	CatalogueLongLabel    Key = "catalogue.variant.long.label"
+	CatalogueNothing      Key = "catalogue.variant.nothing"
+	CatalogueChosen       Key = "catalogue.variant.chosen"
+	CatalogueLongValue    Key = "catalogue.variant.long.value"
+	CatalogueOff          Key = "catalogue.variant.off"
+	CatalogueOn           Key = "catalogue.variant.on"
+	CatalogueUnbanded     Key = "catalogue.variant.unbanded"
+	CatalogueBanded       Key = "catalogue.variant.banded"
+	CatalogueEmpty        Key = "catalogue.variant.empty"
+	CatalogueHinted       Key = "catalogue.variant.hinted"
+	CatalogueNoted        Key = "catalogue.variant.noted"
+	CatalogueRefused      Key = "catalogue.variant.refused"
+	CatalogueExtreme      Key = "catalogue.variant.extreme"
+	CatalogueLines        Key = "catalogue.variant.lines"
+	CatalogueMarkedLine   Key = "catalogue.variant.marked.line"
+	CatalogueRows         Key = "catalogue.variant.rows"
+	CatalogueClosed       Key = "catalogue.variant.closed"
+	CatalogueOpened       Key = "catalogue.variant.opened"
+	CatalogueOverflowed   Key = "catalogue.variant.overflowed"
+	CatalogueThreeAnswers Key = "catalogue.variant.three.answers"
 )
 
 // catalogueKeys is every key the catalogue of controls may ask for.
 var catalogueKeys = []Key{
 	CataloguePromise, CatalogueGroup,
 	CataloguePageButtons, CataloguePageChoosers, CataloguePageChecks, CataloguePageText,
-	CataloguePageLines, CataloguePageLists, CataloguePageValues, CataloguePageAreas,
+	CataloguePageLines, CataloguePageLists, CataloguePageValues, CataloguePageAreas, CataloguePageQuestions,
 	CatalogueButton, CatalogueSelect, CatalogueCheck, CatalogueTapRow, CatalogueValueList, CatalogueField,
-	CatalogueEditor, CatalogueTable, CatalogueScroll, CatalogueDisclosure,
+	CatalogueEditor, CatalogueTable, CatalogueScroll, CatalogueDisclosure, CatalogueQuestion,
 	CatalogueStateRest, CatalogueStatePointer, CatalogueStatePressed, CatalogueStateFocus,
 	CatalogueStateDisabled,
 	CatalogueOutlined, CatalogueIcon, CatalogueFilled, CataloguePlace, CatalogueCurrent,
 	CatalogueLongLabel, CatalogueNothing, CatalogueChosen, CatalogueLongValue, CatalogueOff,
 	CatalogueOn, CatalogueUnbanded, CatalogueBanded, CatalogueEmpty, CatalogueHinted, CatalogueNoted, CatalogueRefused,
 	CatalogueExtreme, CatalogueLines, CatalogueMarkedLine, CatalogueRows, CatalogueClosed, CatalogueOpened,
-	CatalogueOverflowed,
+	CatalogueOverflowed, CatalogueThreeAnswers,
 }
 
 // Keys is every key the window may ask for, the screens and the catalogue of

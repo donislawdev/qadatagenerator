@@ -93,6 +93,11 @@ type Button struct {
 	// nothing beside it moves when it changes.
 	Confirmed string
 
+	// OnEscape is what Escape does while the keyboard is on the button, and
+	// nothing when it is nil. A button of a Question sets it to the answer that
+	// changes nothing, the way a person backs out of a dialog.
+	OnEscape func()
+
 	// confirm is whether Confirmed is what it says now, and the count back.
 	confirm confirmation
 
@@ -303,6 +308,9 @@ func (b *Button) TypedKey(event *fyne.KeyEvent) {
 	}
 	if event.Name == fyne.KeyReturn || event.Name == fyne.KeyEnter || event.Name == fyne.KeySpace {
 		b.Tapped(nil)
+	}
+	if event.Name == fyne.KeyEscape && b.OnEscape != nil {
+		b.OnEscape()
 	}
 }
 
