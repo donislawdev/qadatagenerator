@@ -7,6 +7,7 @@ import (
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/domain/capability"
+	"github.com/donislawdev/qadatagenerator/internal/domain/provider"
 	"github.com/donislawdev/qadatagenerator/internal/quick"
 )
 
@@ -62,6 +63,19 @@ func TestEveryDescribedSchemeSaysWhatItsProviderDeclares(t *testing.T) {
 				"tells somebody whether a value could belong to a real person",
 				generator, about.ReservedRange, scheme, declares[capability.IdentifierReservedRange])
 		}
+		unissued := false
+		if says, saysSo := numbering.(provider.Unissued); saysSo {
+			unissued = says.Unissued()
+		}
+		if about.Unissued != unissued {
+			t.Errorf("%s says nobody issues its values is %v and %s declares %v",
+				generator, about.Unissued, scheme, unissued)
+		}
+		// A block set aside by an issuer and no issuer at all cannot both be
+		// true, and the panel would draw only one of them.
+		if about.Unissued && about.ReservedRange {
+			t.Errorf("%s claims a reserved range and no issuer at once", generator)
+		}
 		checked++
 	}
 	if checked == 0 {
@@ -87,10 +101,10 @@ func TestAKindWithNoSchemeClaimsNothingAboutOne(t *testing.T) {
 		if about.Generator != generator {
 			t.Errorf("a description of %q names %q", generator, about.Generator)
 		}
-		if about.Scheme != "" || about.CheckDigit || about.ReservedRange {
+		if about.Scheme != "" || about.CheckDigit || about.ReservedRange || about.Unissued {
 			t.Errorf("%s has no numbering scheme and its description claims scheme %q, "+
-				"check digit %v, reserved range %v",
-				generator, about.Scheme, about.CheckDigit, about.ReservedRange)
+				"check digit %v, reserved range %v, no issuer %v",
+				generator, about.Scheme, about.CheckDigit, about.ReservedRange, about.Unissued)
 		}
 	}
 }

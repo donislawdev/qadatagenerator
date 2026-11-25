@@ -63,6 +63,12 @@ type Description struct {
 	// this must say what false means rather than leaving it out, since a
 	// missing line reads as reassurance.
 	ReservedRange bool
+	// Unissued says nobody hands out values of this scheme, so there is no
+	// issued value one from here could match and no block needs setting aside
+	// (provider.Unissued). A UUID is one. A surface showing ReservedRange shows
+	// this instead of it where it is true, because false there would tell a
+	// person to treat the value as real data.
+	Unissued bool
 	// ReadsGender and ReadsBirthDate are the settings this kind takes account
 	// of, which is why a surface offers those fields beside it.
 	ReadsGender    bool
@@ -188,6 +194,9 @@ func Describe(generator, locale string) Description {
 	}
 	if shaped, saysSo := numbering.(provider.Shaped); saysSo {
 		about.Masks = shaped.Masks()
+	}
+	if unissued, saysSo := numbering.(provider.Unissued); saysSo {
+		about.Unissued = unissued.Unissued()
 	}
 	for _, declared := range numbering.Capabilities() {
 		switch declared {

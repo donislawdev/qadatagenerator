@@ -579,6 +579,11 @@ const (
 	// QuickAboutHarbour is the badge on a kind whose values come from a block
 	// nobody is ever issued.
 	QuickAboutHarbour Key = "quick.about.harbour"
+	// QuickAboutUnissued is the badge on a kind whose values nobody hands out,
+	// and QuickAboutRangeUnissued the sentence under it. Neither a block set
+	// aside nor its absence is true of such a scheme (provider.Unissued).
+	QuickAboutUnissued      Key = "quick.about.unissued"
+	QuickAboutRangeUnissued Key = "quick.about.range.unissued"
 	// QuickAboutUnavailable heads the reason this build cannot produce the
 	// chosen kind in the chosen locale.
 	QuickAboutUnavailable Key = "quick.about.unavailable"
@@ -742,7 +747,7 @@ var windowKeys = []Key{
 	QuickAboutFormat, QuickAboutCountries, QuickAboutDigits, QuickAboutLettersOrDigits, QuickAboutOr,
 	QuickAboutCheckDigitCarried, QuickAboutCheckDigitNone,
 	QuickAboutRangeReserved, QuickAboutRangeNone,
-	QuickAboutHarbour, QuickAboutUnavailable,
+	QuickAboutHarbour, QuickAboutUnissued, QuickAboutRangeUnissued, QuickAboutUnavailable,
 	QuickLabelGender, QuickLabelBorn,
 	QuickLabelLocale, QuickLabelSeed,
 	QuickGenderAny, QuickCopy, QuickCopyAll, QuickAgain, QuickCopied, QuickGenerate,

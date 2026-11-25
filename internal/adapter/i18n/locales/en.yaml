@@ -656,6 +656,8 @@ quick.about.check-digit.none: None. One wrong character cannot be caught by the 
 quick.about.range.reserved: Values come from a block the issuer never assigns, so none of them can belong to anybody.
 quick.about.range.none: No block of this scheme is set aside for testing, so a value here may match one that was really issued. Treat it as you would real data.
 quick.about.harbour: Reserved test range
+quick.about.range.unissued: Nobody issues values of this scheme. Each one is drawn at random from so many possible values that one drawn here is not expected to match any drawn elsewhere.
+quick.about.unissued: No issuer
 quick.about.unavailable: Not available in this locale
 quick.label.locale: Locale
 # tekst-ok: the same setting on the take screen and in the manifest browser, one word

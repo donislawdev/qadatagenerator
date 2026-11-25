@@ -217,10 +217,19 @@ func (v *View) checkDigit(about quick.Description) fyne.CanvasObject {
 // a sentence saying exactly that rather than an absence. An absence reads as
 // reassurance, and rule nine of the handbook is about this sentence more than
 // about any other on the screen.
+//
+// A scheme nobody issues values of gets an answer of its own, in the colour of
+// the harbour and with a mark of its own. Neither a block set aside nor its
+// absence is true of it, and the warning drawn for the absence told a person on
+// 2026-11-25 to treat a UUID as real data (B-435).
 func (v *View) reservedRange(about quick.Description) fyne.CanvasObject {
 	said, mark := i18n.QuickAboutRangeNone, paint.Pill(
 		v.text.T(i18n.QuickAboutRange), palette.StateWarning, paint.IconWarn)
-	if about.ReservedRange {
+	switch {
+	case about.Unissued:
+		said, mark = i18n.QuickAboutRangeUnissued, paint.Pill(
+			v.text.T(i18n.QuickAboutUnissued), palette.StateSuccess, paint.IconCheck)
+	case about.ReservedRange:
 		said, mark = i18n.QuickAboutRangeReserved, paint.Pill(
 			v.text.T(i18n.QuickAboutHarbour), palette.StateSuccess, paint.IconShield)
 	}

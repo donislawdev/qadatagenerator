@@ -546,6 +546,26 @@ type RangeAware interface {
 	ReservedRanges() []string
 }
 
+// Unissued is a scheme whose values nobody hands out. Whoever needs one draws
+// it at random, from so many possible values that two drawn apart are not
+// expected to meet. A version 4 UUID is one: 122 random bits (RFC 9562,
+// section 5.4).
+//
+// # Why this is an answer of its own and not a missing harbour
+//
+// A scheme with a registrar either has a block it never issues from or it
+// does not, and a value outside such a block may match one that was issued.
+// Neither answer is true of a scheme with no registrar. It has no block set
+// aside, and it needs none, because there is no issued value to match. A
+// surface asking only about a harbour would tell a person to treat a UUID as
+// real data, which is advice about a risk that does not exist.
+//
+// Optional, like Shaped. A scheme that does not implement it has an issuer.
+type Unissued interface {
+	// Unissued reports that no issuer hands out values of this scheme.
+	Unissued() bool
+}
+
 // UnassignedWritable is required of a provider declaring
 // identifier.unassigned-target.
 //

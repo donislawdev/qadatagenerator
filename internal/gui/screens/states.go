@@ -139,6 +139,17 @@ func quickStatesOfAValue() []State {
 			Screen: screenQuick,
 			Quick:  Quick{Generator: "iban", Seed: "for-the-picture"},
 		},
+		{
+			// The widest values this screen shows and the one mask that breaks
+			// over two lines. Both pushed the panel past the right edge of the
+			// window on the day the kind arrived, and no state stood here to
+			// show it (B-435).
+			Name: "quick-uuid",
+			Purpose: "the widest values this screen shows, beside a panel whose mask goes on " +
+				"two lines and whose scheme nobody issues values from",
+			Screen: screenQuick,
+			Quick:  Quick{Generator: "uuid", Seed: "for-the-picture"},
+		},
 	}
 }
 

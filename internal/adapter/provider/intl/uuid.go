@@ -49,8 +49,11 @@ import (
 // the identifiers of people do.
 type UUID struct{}
 
-// Contract check.
-var _ provider.Provider = UUID{}
+// Contract checks.
+var (
+	_ provider.Provider = UUID{}
+	_ provider.Unissued = UUID{}
+)
 
 const (
 	// uuidLength is the written form of section 4: thirty two digits and four
@@ -99,6 +102,11 @@ func (UUID) ID() string { return "uuid" }
 // Capabilities are what this provider brings, and it brings none: nothing in
 // the registry describes a part of this value.
 func (UUID) Capabilities() []capability.Name { return nil }
+
+// Unissued is true: nobody hands out UUIDs. Whoever needs one draws it, and a
+// version 4 value is 122 random bits (section 5.4), so the panel beside the
+// values says that rather than telling a person to treat one as real data.
+func (UUID) Unissued() bool { return true }
 
 // Masks are thirty two places that each take a digit or a letter, in the five
 // groups of section 4.
