@@ -44,7 +44,7 @@ var (
 	perRowChoices = []string{"exactly_one", "any"}
 	entityKeys    = []string{"count", "primary_key", "fields", "consistency", "belongs_to"}
 	fieldKeys     = []string{"type", "generator", "expression", "unique", "required", "max_length", "counted_in", "empty", "values", "min_value", "max_value"}
-	outputKeys    = []string{"format", "dialect", "dir", "file_per_entity", "encoding", "delimiter"}
+	outputKeys    = []string{"format", "dialect", "create_tables", "dir", "file_per_entity", "encoding", "delimiter"}
 
 	// How a maximum length can be counted, taken from the model so that the
 	// list a user is shown cannot drift from the list the model accepts.
@@ -812,6 +812,8 @@ func (r *reader) output(node any) recipe.Output {
 		case "file_per_entity":
 			built.FilePerEntity = r.flag(where, item.Value)
 			built.FilePerEntityGiven = true
+		case "create_tables":
+			built.CreateTables = r.flag(where, item.Value)
 		case "encoding":
 			built.Encoding, _ = r.text(where, item.Value)
 			// The writer's rule, asked here so that validate and generate

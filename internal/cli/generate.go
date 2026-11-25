@@ -317,7 +317,7 @@ func usableFormat(built recipe.Recipe, applied []produce.Override) error {
 		return fault.New(fault.Config, "this build writes "+strings.Join(dataset.Forms(), ", ")+
 			", and "+asked[settingFormat]+built.Output.Format)
 	}
-	return format.Fits(built)
+	return format.Fits(built, values.New(built.Locale, built.Seed))
 }
 
 // impliedLine says which columns a field follows without a rule saying so.

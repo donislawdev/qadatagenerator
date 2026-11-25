@@ -408,6 +408,7 @@ const (
 	RecipeKeyExcludeFields Key = "recipe.key.exclude_fields"
 	RecipeKeyFormat        Key = "recipe.key.format"
 	RecipeKeyDialect       Key = "recipe.key.dialect"
+	RecipeKeyCreateTables  Key = "recipe.key.create_tables"
 	RecipeKeyDir           Key = "recipe.key.dir"
 	RecipeKeyFilePerEntity Key = "recipe.key.file_per_entity"
 	RecipeKeyEncoding      Key = "recipe.key.encoding"
@@ -862,7 +863,7 @@ var windowKeys = []Key{
 	RecipeKeyType, RecipeKeyGenerator, RecipeKeyUnique, RecipeKeyRequired, RecipeKeyMaxLength,
 	RecipeKeyCountedIn, RecipeKeyEmpty, RecipeKeyValues, RecipeKeyMinValue, RecipeKeyMaxValue,
 	RecipeKeyLayers, RecipeKeyRows, RecipeKeyPerRow, RecipeKeyExcludeFields,
-	RecipeKeyFormat, RecipeKeyDialect, RecipeKeyDir, RecipeKeyFilePerEntity, RecipeKeyEncoding,
+	RecipeKeyFormat, RecipeKeyDialect, RecipeKeyCreateTables, RecipeKeyDir, RecipeKeyFilePerEntity, RecipeKeyEncoding,
 	RecipeKeyDelimiter,
 	RecipeValueVersion, RecipeValueTypeInteger, RecipeValueTypeDecimal, RecipeValueTypeUUID,
 	RecipeValueCountedInCharacters, RecipeValueCountedInBytes, RecipeValueCountedInGraphemes,

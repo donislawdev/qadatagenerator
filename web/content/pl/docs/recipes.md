@@ -1,5 +1,5 @@
 ---
-translatedFrom: c856a7a20cfdb0f9e1b309af630727d085d426a0
+translatedFrom: 813b39643882df8ef852223358a44179ff56bf7c
 title: Przepisy
 seoTitle: "Przepisy danych testowych w YAML: każdy klucz"
 description: "Opisz tabele, liczbę wierszy, relacje i reguły kolumn w jednym pliku YAML. Każdy klucz przepisu, co robi i jak validate zgłasza problem."
@@ -47,6 +47,8 @@ readmeTables:
         to: ["`format`", "output", "`csv`, domyślnie, `json` albo `sql`, czyli instrukcje INSERT"]
       - from: "`dialect` | output | for `sql`, the database the statements are written for: `postgresql`, `mysql` (MySQL and MariaDB), `sqlserver` or `sqlite`. `sql` needs one"
         to: ["`dialect`", "output", "dla `sql` baza, dla której pisane są instrukcje: `postgresql`, `mysql` (MySQL i MariaDB), `sqlserver` albo `sqlite`. `sql` go wymaga"]
+      - from: "`create_tables` | output | for `sql`: `true` starts each table with a `CREATE TABLE` typed from the recipe, with its keys and checks, and `false`, the default, fills tables that are already there"
+        to: ["`create_tables`", "output", "dla `sql`: `true` zaczyna każdą tabelę od `CREATE TABLE` z typami z przepisu, z jej kluczami i warunkami, a `false`, domyślnie, wypełnia tabele, które już są"]
       - from: "`dir` | output | the folder the files go to, relative to where you run `qadg`. `--out` takes its place, and the Recipe screen writes to the folder chosen at its top"
         to: ["`dir`", "output", "folder, do którego trafiają pliki, względem miejsca, w którym uruchamiasz `qadg`. `--out` go zastępuje, a ekran Recipe zapisuje do folderu wybranego na jego górze"]
       - from: "`delimiter` | output | for `csv`, the one character between values: a comma when left out, or any other in quotes, such as a semicolon or a tab written `\"\\t\"`. A double quote and a line break are refused"
@@ -101,6 +103,7 @@ output:
 
 - `format` to `csv`, domyślnie, `json` albo `sql`, który zapisuje instrukcję INSERT dla każdego wiersza.
 - `dialect` wskazuje bazę, dla której jest plik `sql`: `postgresql`, `mysql`, `sqlserver` albo `sqlite`. `mysql` obejmuje też MariaDB. `sql` go wymaga, a `validate` mówi o tym, gdy go brakuje. `qadg generate --dialect` go zastępuje.
+- `create_tables: true` sprawia, że plik `sql` zaczyna każdą tabelę od `CREATE TABLE` z typami z przepisu, opisanego w [Tabele z przepisu](#tabele-z-przepisu). `false`, domyślnie, zapisuje same wiersze. Inne formy nie tworzą tabel, a `validate` ostrzega, gdy podasz tam `true`.
 - `dir` to folder, do którego trafiają pliki, względem miejsca, w którym uruchamiasz `qadg`, a gdy go nie ma, sam ten folder. `qadg generate --out` go zastępuje, a ekran Recipe zapisuje do folderu wybranego na jego górze.
 - `delimiter` to znak między wartościami w pliku `csv`, przecinek, gdy klucza nie ma. Każdy inny pojedynczy znak działa w cudzysłowie, na przykład średnik dla arkusza, który go używa, albo `"\t"` dla tabulatora. Cudzysłów i koniec linii są odrzucane, bo już coś w pliku znaczą. `json` i `sql` nie mają separatora i `validate` ostrzega, gdy go podasz.
 - `file_per_entity` ma znaczenie dla `json` i `sql`. Dla `json` `true` zapisuje plik na tabelę, na przykład `customer.json` i `payment.json`, każdy jako listę wierszy, w której wiersz podrzędny wskazuje rodzica w polu, a `false`, domyślnie, zapisuje jeden `dataset.json` z wierszami podrzędnymi wewnątrz swoich rodziców. Dla `sql` `true` zapisuje `customer.sql` i `payment.sql`, a `false` jeden `dataset.sql` z tabelami nadrzędnymi na początku. `csv` zawsze zapisuje plik na tabelę, więc `validate` ostrzega, że `false` nic tam nie zmienia.
@@ -125,7 +128,7 @@ INSERT INTO "order" ("total", "customer") VALUES ('230.73', '746861');
 INSERT INTO "order" ("total", "customer") VALUES ('85.20', '516920');
 ```
 
-Plik nie tworzy tabel. Wczytaj go do bazy, w której tabele o tych nazwach i kolumnach już są.
+Bez `create_tables` plik nie tworzy tabel: wczytaj go do bazy, w której tabele o tych nazwach i kolumnach już są. [Tabele z przepisu](#tabele-z-przepisu) niżej pokazuje, jak sprawić, żeby plik je utworzył.
 
 - Każda wartość jest zapisana jako tekst w apostrofach, a baza zamienia ją na typ swojej kolumny, tak jak przy imporcie pliku CSV. Wartość, której kolumna nie przyjmie, na przykład tekst w kolumnie liczbowej, baza odrzuca, i często właśnie to chce zobaczyć test zepsutych danych.
 - Komórka zostawiona pusta przez `empty` to `NULL`. Wartość będąca pustym tekstem, którą potrafi zapisać uszkodzenie, zostaje `''`.
@@ -152,6 +155,54 @@ sqlite3 test.db "BEGIN" ".read dataset.sql" "COMMIT"
 ```
 
 psql kończy się kodem 0 nawet wtedy, gdy wycofał transakcję, więc szukaj w jego wypisie `ERROR`.
+
+### Tabele z przepisu
+
+Z `create_tables: true` pod `output` każda tabela zaczyna się od instrukcji `CREATE TABLE`, tabela nadrzędna przed podrzędnymi. Dla przepisu wyżej:
+
+```sql
+CREATE TABLE "customer" (
+  "customer_id" integer NOT NULL,
+  "last_name" text,
+  "coupon" text,
+  PRIMARY KEY ("customer_id"),
+  CHECK ("coupon" IN ('SPRING10', 'WELCOME'))
+);
+
+CREATE TABLE "order" (
+  "total" numeric(5,2),
+  "customer" integer NOT NULL,
+  FOREIGN KEY ("customer") REFERENCES "customer" ("customer_id")
+);
+```
+
+Typ każdej kolumny bierze się z przepisu:
+
+| W przepisie | PostgreSQL | MySQL, MariaDB | SQL Server | SQLite |
+|---|---|---|---|---|
+| tekst z `max_length: 40` | `varchar(40)` | `varchar(40)` | `nvarchar(40)` | `varchar(40)` |
+| tekst bez `max_length` | `text` | `longtext` | `nvarchar(max)` | `text` |
+| `type: integer` | `integer`, `bigint` powyżej dziewięciu cyfr | `int`, `bigint` powyżej dziewięciu cyfr | `int`, `bigint` powyżej dziewięciu cyfr | `integer` |
+| `type: decimal` | `numeric(5,2)` | `decimal(5,2)` | `decimal(5,2)` | `decimal(5,2)` |
+| data | `date` | `date` | `date` | `date` |
+| UUID | `uuid` | `varchar(36)` | `uniqueidentifier` | `varchar(36)` |
+
+Kolumna ułamków jest tak szeroka jak najszersza liczba, którą pole może mieć, czyli `999.99` bez `min_value` i `max_value`, i ma dwa miejsca po przecinku albo tyle, ile ma najdłuższa liczba na liście `values`.
+
+- `required: true` i pola `primary_key` są `NOT NULL`. `primary_key` to `PRIMARY KEY`, `unique: true` to `UNIQUE`, a kolumna wskazująca rodzica ma `FOREIGN KEY` do klucza rodzica.
+- `min_value` i `max_value` stają się warunkiem `CHECK` na zakres, a lista pod `values` warunkiem `CHECK`, że wartość jest na liście. Pusta komórka przechodzi oba.
+- W MySQL i SQL Server kolumna tekstowa w kluczu porównuje tekst dokładnie (`utf8mb4_bin`, `Latin1_General_100_BIN2`), bo ich domyślne porównanie bierze `Zak` i `zak` za jedną wartość i odrzuciłoby wiersz, który przepis nazywa poprawnym. Pole tekstowe w kluczu bez `max_length` jest tam `varchar(255)` albo `nvarchar(255)`, bo żadna z tych baz nie indeksuje dłuższego tekstu.
+- W SQL Server kolumna unikalna, która może być pusta, dostaje indeks filtrowany zamiast `UNIQUE`, bo SQL Server pozwala zostawić pustą kolumnę `UNIQUE` tylko w jednym wierszu.
+- Tabela MySQL mówi `DEFAULT CHARSET=utf8mb4`, żeby baza utworzona z innym zestawem znaków przyjęła polskie litery i emoji.
+- Plik nigdy nie usuwa tabeli. Tabela, która już jest, sprawia, że `CREATE TABLE` się nie uda, a wiersze trafiają do istniejącej tabeli.
+
+Co dzieje się w bazie, zmierzone na PostgreSQL 18, MySQL, MariaDB 12, SQL Server 2025 i SQLite 3.53:
+
+- Każdy wiersz przepisu bez uszkodzeń się wczytuje, poza dwoma przypadkami niżej. Wiersz zepsuty baza przyjmuje albo odrzuca według typu, klucza lub warunku, który łamie, a wiersze odrzuconego rodzica odrzuca ich klucz obcy.
+- SQL Server liczy w `nvarchar(n)` znak taki jak emoji jako dwa, więc wartość n znaków z emoji może zostać odrzucona.
+- SQLite trzyma ułamek jako liczbę zmiennoprzecinkową, więc `12.30` wraca jako `12.3`. Nie sprawdza długości `varchar(n)`, a klucze obce sprawdza dopiero po `PRAGMA foreign_keys = ON`.
+- MySQL i SQL Server porównują tekst poza kluczem bez względu na wielkość liter, więc `FREE` przechodzi warunek dla `free`.
+- `validate` odrzuca tabele, których baza by nie utworzyła: w MySQL klucz dłuższy niż 3072 bajty, wiersz dłuższy niż 65 535 bajtów (4 bajty na każdy znak kolumny tekstowej) albo tabelę, której ograniczeniom MySQL nadałby nazwy dłuższe niż 64 bajty, a w SQL Server tekst dłuższy niż 4000 znaków w kluczu.
 
 ## Powiązane tabele
 

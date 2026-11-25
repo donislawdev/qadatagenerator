@@ -166,7 +166,7 @@ func (p Prepared) Write(settings Settings, stop generate.Halt, at time.Time) (Wr
 	}()
 
 	files := &named{set: set}
-	writer, err := format.For(files, rec, stop)
+	writer, err := format.For(files, rec, source, stop)
 	if err != nil {
 		return Written{}, err
 	}

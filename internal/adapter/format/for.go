@@ -35,14 +35,19 @@ import (
 // it is the one writer that has to be told what would stop a run. Handing it in
 // here rather than at each surface keeps the two callers from having to know
 // which form needs it, which is the same reason the switch itself is here.
-func For(files Files, rec recipe.Recipe, stop generate.Halt) (generate.Writer, error) {
+//
+// # Why the source of values comes in
+//
+// The SQL form creates tables when a recipe asks it to, typed from what the
+// values of each field are, and only the source of values knows that.
+func For(files Files, rec recipe.Recipe, values generate.Values, stop generate.Halt) (generate.Writer, error) {
 	switch rec.Output.Format {
 	case "", NameCSV:
 		return NewCSV(files, rec)
 	case NameJSON:
 		return NewJSON(files, rec, stop)
 	case NameSQL:
-		return NewSQL(files, rec)
+		return NewSQL(files, rec, values)
 	}
 	return nil, fault.New(fault.Config, "this build writes "+strings.Join(dataset.Forms(), ", ")+
 		", and this run asks for "+rec.Output.Format)
@@ -59,9 +64,9 @@ func For(files Files, rec recipe.Recipe, stop generate.Halt) (generate.Writer, e
 // nought and the same command without --dry-run with three. Surfaces that stop
 // short of writing ask here, and so does every writer, so a question added to a
 // form is asked by all of them at once.
-func Fits(rec recipe.Recipe) error {
+func Fits(rec recipe.Recipe, values generate.Values) error {
 	if err := NestingCollision(rec); err != nil {
 		return err
 	}
-	return SQLFits(rec)
+	return SQLFits(rec, values)
 }

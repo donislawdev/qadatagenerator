@@ -539,6 +539,7 @@ recipe.key.per_row: How many values to damage in one row
 recipe.key.exclude_fields: Columns to leave undamaged
 recipe.key.format: The form of the files, csv, json or sql
 recipe.key.dialect: For sql, the database the statements are written for
+recipe.key.create_tables: For sql, a CREATE TABLE for each table, with column types from the recipe
 recipe.key.dir: The folder the files go to
 recipe.key.file_per_entity: For json and sql, a file for each table
 recipe.key.encoding: The text encoding of the files

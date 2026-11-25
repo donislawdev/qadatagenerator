@@ -90,6 +90,10 @@ func (v knownValues) ProducesType(kind string) bool {
 
 func (v knownValues) Produce(generate.Request) (string, error) { return "", nil }
 
+func (v knownValues) ShapeOf(generate.Request) generate.Shape {
+	return generate.Shape{Kind: generate.ShapeText}
+}
+
 func (v knownValues) TypeFits(generate.Request) error {
 	if v.asked != nil {
 		*v.asked++

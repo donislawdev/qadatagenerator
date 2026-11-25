@@ -57,6 +57,25 @@ func TestARecipeSavedByNotepadIsRead(t *testing.T) {
 // word. Measured before this guard: a file declaring two entities reported one
 // entity, no problems and exit zero. Somebody gets half the recipe they wrote
 // and a run that says everything went well.
+// The tables a recipe asks the SQL form to create reach the model, and a
+// recipe that does not ask for them asks for none.
+func TestTablesAskedForInARecipeReachTheModel(t *testing.T) {
+	base := "version: \"0.1\"\nentities:\n  a:\n    count: 1\n    fields:\n      x: { type: integer }\n" +
+		"output:\n  format: sql\n  dialect: sqlite\n"
+	for _, given := range []struct {
+		lines string
+		want  bool
+	}{{"", false}, {"  create_tables: true\n", true}, {"  create_tables: false\n", false}} {
+		result := recipeyaml.Decode([]byte(base + given.lines))
+		if !result.Valid() {
+			t.Fatalf("%q was refused: %+v", given.lines, result.Problems)
+		}
+		if result.Recipe.Output.CreateTables != given.want {
+			t.Errorf("%q read as create_tables %v", given.lines, result.Recipe.Output.CreateTables)
+		}
+	}
+}
+
 func TestAFileHoldingTwoRecipesIsRefusedRatherThanHalfRead(t *testing.T) {
 	two := oneRecipe + "---\n" + strings.Replace(oneRecipe, "  a:", "  b:", 1)
 
@@ -530,6 +549,12 @@ func TestProblems(t *testing.T) {
 			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y }\noutput:\n  format: sql\n  dialect: oracle\n",
 			where: "output.dialect",
 			what:  "oracle",
+		},
+		{
+			name:  "tables asked for in words",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y }\noutput:\n  create_tables: \"yes\"\n",
+			where: "output.create_tables",
+			what:  "true or false",
 		},
 		{
 			name:  "a bound written as text",

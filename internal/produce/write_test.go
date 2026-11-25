@@ -540,6 +540,12 @@ func TestASettingNobodyWroteIsNotReportedAsChangingNothing(t *testing.T) {
 			recipe.Output{Format: "json", Delimiter: ";"}, true}, // punctuation: test data
 		{"no delimiter for the object form", "output.delimiter",
 			recipe.Output{Format: "json"}, false},
+		{"tables asked of the comma separated form", "output.create_tables",
+			recipe.Output{CreateTables: true}, true},
+		{"tables asked of the form that creates them", "output.create_tables",
+			recipe.Output{Format: "sql", Dialect: "sqlite", CreateTables: true}, false},
+		{"no tables asked of the object form", "output.create_tables",
+			recipe.Output{Format: "json"}, false},
 	} {
 		rec := related(3)
 		rec.Output = given.output

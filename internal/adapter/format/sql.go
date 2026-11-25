@@ -45,7 +45,10 @@ type SQL struct {
 	files   Files
 	rec     recipe.Recipe
 	dialect dialect
-	keys    keys
+	// values says what the values of each field are, which the table a recipe
+	// asks the file to create is typed from (output.create_tables).
+	values generate.Values
+	keys   keys
 	// shared is the file every table goes into when the recipe does not ask
 	// for one per table. The first table opens it and Finish closes it.
 	shared *statements
@@ -83,15 +86,22 @@ func (s *statements) write(text string) { _, _ = s.to.WriteString(text) }
 func (s *statements) close() error { return finish(s.to, s.file) }
 
 // NewSQL returns a writer of statements for the database the recipe names.
-func NewSQL(files Files, rec recipe.Recipe) (*SQL, error) {
+//
+// values is where the run takes its values from, asked what the values of each
+// field are when the recipe asks the file to create its tables.
+func NewSQL(files Files, rec recipe.Recipe, values generate.Values) (*SQL, error) {
 	if err := usableEncoding(rec.Output.Encoding); err != nil {
 		return nil, err
 	}
-	if err := SQLFits(rec); err != nil {
+	if rec.Output.CreateTables && values == nil {
+		return nil, fault.New(fault.Runtime, "the sql form was asked to create tables and given "+
+			"nothing to type their columns from")
+	}
+	if err := SQLFits(rec, values); err != nil {
 		return nil, err
 	}
 	written, _ := dialectOf(rec.Output.Dialect)
-	return &SQL{files: files, rec: rec, dialect: written, keys: newKeys(rec)}, nil
+	return &SQL{files: files, rec: rec, dialect: written, values: values, keys: newKeys(rec)}, nil
 }
 
 // Begin starts a table, opening its file when each table goes to its own and
@@ -120,6 +130,13 @@ func (w *SQL) Begin(planned dataset.Table) error {
 	w.current = &sqlTable{entity: entity, planned: planned, column: column, into: into,
 		insert: "INSERT INTO " + w.dialect.quote(planned.Entity) + " (" +
 			strings.Join(quoted, ", ") + ") VALUES ("}
+	if w.rec.Output.CreateTables {
+		// The table comes before its rows, and the plan puts a parent before
+		// its children, so a link to a parent always names a table that is
+		// there.
+		into.write(shapeOfTable(w.rec, entity, planned.Columns, w.values).create(w.dialect))
+		into.written++
+	}
 	return nil
 }
 
@@ -231,8 +248,9 @@ func (w *SQL) Finish() error {
 //
 // It is exported so that validate asks the question the writer asks, and the
 // two cannot answer differently about one recipe, the arrangement
-// NestingCollision has for the tree.
-func SQLFits(rec recipe.Recipe) error {
+// NestingCollision has for the tree. values answers what the values of a field
+// are, for the tables a recipe asks the file to create.
+func SQLFits(rec recipe.Recipe, values generate.Values) error {
 	if rec.Output.Format != NameSQL {
 		return nil
 	}
@@ -246,7 +264,10 @@ func SQLFits(rec recipe.Recipe) error {
 	if err := parentsHaveOneKey(rec); err != nil {
 		return err
 	}
-	return namesFit(rec, written)
+	if err := namesFit(rec, written); err != nil {
+		return err
+	}
+	return tablesFit(rec, values, written)
 }
 
 // parentsHaveOneKey refuses a relation the statements could not express.

@@ -46,7 +46,7 @@ func writeWith(t *testing.T, rec recipe.Recipe, files format.Files) error {
 	if err != nil {
 		t.Fatalf("the plan was refused: %v", err)
 	}
-	writer, err := format.For(files, rec, generate.NeverStops{})
+	writer, err := format.For(files, rec, source, generate.NeverStops{})
 	if err != nil {
 		t.Fatalf("the writer was refused: %v", err)
 	}
@@ -121,7 +121,7 @@ func heldAfter(t *testing.T, rec recipe.Recipe, rows int) uint64 {
 	if err != nil {
 		t.Fatalf("the plan was refused: %v", err)
 	}
-	warm, err := format.For(&watched{}, rec, generate.NeverStops{})
+	warm, err := format.For(&watched{}, rec, source, generate.NeverStops{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -132,7 +132,7 @@ func heldAfter(t *testing.T, rec recipe.Recipe, rows int) uint64 {
 	var before, after runtime.MemStats
 	runtime.GC()
 	runtime.ReadMemStats(&before)
-	writer, err := format.For(&watched{}, rec, generate.NeverStops{})
+	writer, err := format.For(&watched{}, rec, source, generate.NeverStops{})
 	if err != nil {
 		t.Fatal(err)
 	}

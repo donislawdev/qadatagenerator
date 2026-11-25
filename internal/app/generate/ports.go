@@ -77,6 +77,42 @@ type Domain struct {
 	At func(index int64) string
 }
 
+// Shape is what the values a request produces are, as far as a table made to
+// hold them needs to know (DEC-341).
+//
+// # Why records stay text and this is a separate answer
+//
+// A record carries every value as text, damage included, and the writers write
+// text. A shape describes the values a run puts in a column when nothing damages
+// them, which is what a table declared for them has to hold. Damage is free to
+// put anything into the column, and the database the table lives in decides
+// whether to take it, which is what a test of broken data wants to see.
+type Shape struct {
+	Kind ShapeKind
+	// Digits is how many digits the whole part of the longest number has, for
+	// ShapeInteger and ShapeDecimal.
+	Digits int
+	// Places is how many digits follow the point, for ShapeDecimal.
+	Places int
+}
+
+// ShapeKind is the closed set of kinds of values a column can hold.
+type ShapeKind string
+
+// The kinds of values a column can hold.
+const (
+	// ShapeText is any text, and what a column is when nothing says otherwise.
+	ShapeText ShapeKind = "text"
+	// ShapeInteger is a whole number written in digits.
+	ShapeInteger ShapeKind = "integer"
+	// ShapeDecimal is a number written in digits with a point.
+	ShapeDecimal ShapeKind = "decimal"
+	// ShapeDate is a day written as year-month-day.
+	ShapeDate ShapeKind = "date"
+	// ShapeUUID is a UUID written in its 36 characters.
+	ShapeUUID ShapeKind = "uuid"
+)
+
 // Values is where a generated value comes from.
 //
 // One port rather than one per kind of source, because the use case has no
@@ -121,6 +157,14 @@ type Values interface {
 	// The refusal carries its own next step because the reasons differ in
 	// what fixes them, and one sentence for all of them would be true of none.
 	TypeFits(req Request) error
+	// ShapeOf says what the values of a field are, for a table made to hold
+	// them.
+	//
+	// Only whoever builds a value knows the type a generator gives and the
+	// longest number a range allows, the reason TypeFits is here as well. The
+	// request needs no address, since the answer is the same for every row:
+	// FieldRequest makes it.
+	ShapeOf(req Request) Shape
 	// CanProduce reports whether this build can fill a field with that
 	// generator in a locale, and says why not when it cannot.
 	//

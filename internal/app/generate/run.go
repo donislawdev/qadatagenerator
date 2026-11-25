@@ -324,9 +324,18 @@ func (t *tableRun) oneValue(field recipe.Field, row, attempt int, agrees provide
 // requestFor is what the source is asked for one field, the same question from
 // the plan and from the run.
 func requestFor(entity string, field recipe.Field, row int, purpose string) Request {
+	request := FieldRequest(field)
+	request.At = seed.Coordinate{Entity: entity, Row: int64(row), Field: field.Name, Purpose: purpose}
+	return request
+}
+
+// FieldRequest is what a field asks of the source of values, without the
+// address of one value in it. A question about every row of the field, such as
+// the shape of its values, is asked with this, and the run adds the address.
+func FieldRequest(field recipe.Field) Request {
 	return Request{
 		Generator: field.Generator, Type: field.Type, Values: field.Values,
-		At:        seed.Coordinate{Entity: entity, Row: int64(row), Field: field.Name, Purpose: purpose},
+		At:        seed.Coordinate{Field: field.Name},
 		MaxLength: field.MaxLength, HasMaxLength: field.HasMaxLength,
 		Unit:     string(field.Unit()),
 		MinValue: field.MinValue, MaxValue: field.MaxValue,

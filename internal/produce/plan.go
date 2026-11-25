@@ -68,4 +68,13 @@ func noteUnreadSettings(rec recipe.Recipe, plan *generate.Plan) {
 				"here. The " + format.NameSQL + " form is the one that reads it",
 		})
 	}
+	// false is what a recipe that never mentions create_tables carries, and it
+	// asks for nothing, so only true is a setting the other forms ignore.
+	if form != format.NameSQL && rec.Output.CreateTables {
+		plan.Notes = append(plan.Notes, generate.Note{
+			Where: "output.create_tables",
+			What: "the " + form + " form creates no tables, so this changes nothing here. The " +
+				format.NameSQL + " form is the one that reads it",
+		})
+	}
 }

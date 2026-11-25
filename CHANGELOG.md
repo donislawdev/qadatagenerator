@@ -637,15 +637,21 @@ repository once they are released.
   MariaDB), `sqlserver` or `sqlite`. `qadg generate --format sql --dialect
   postgresql` asks for the same from the command line. A run writes one
   `dataset.sql` with the parent tables first, or a file per table with
-  `file_per_entity: true`, and creates no tables, so the file goes into a
-  database whose tables are already there. Each value is quoted text, written
+  `file_per_entity: true`. With `create_tables: true` under `output` each
+  table starts with a `CREATE TABLE` typed from the recipe: text as long as
+  `max_length`, whole numbers and decimals as wide as the field allows, dates,
+  UUIDs, `NOT NULL` for required fields, the primary key, unique columns, a
+  foreign key to the parent and a `CHECK` for `min_value`, `max_value` and
+  `values`. Without it the file goes into a database whose tables are already
+  there, and it never drops a table. Each value is quoted text, written
   so that its database reads back every byte, quotes, backslashes and line
   breaks included, and a cell left empty by `empty` is `NULL`. Each row is its
   own statement, so a row the database refuses stops only itself. With `sql`,
   a table that has child rows needs a `primary_key` of one field, and a name
-  the database would refuse, such as one over 64 bytes in MySQL, is refused
-  before anything is written. Recipes explains how to load the file into
-  each database.
+  or a table the database would refuse, such as a name over 64 bytes or a key
+  over 3072 bytes in MySQL, is refused before anything is written. Recipes
+  explains how to load the file into each database and what each database does
+  with the tables.
 - **Email addresses that reach nobody.** `generator: email` writes addresses
   such as `anna.nowak07@example.com` at `example.com`, `example.net` or
   `example.org`, domains set aside for documentation that take no mail. A row

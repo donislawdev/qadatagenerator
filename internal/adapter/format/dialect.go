@@ -35,6 +35,8 @@ type dialect struct {
 	// keeps every one. Two names equal in their first clipped bytes are one
 	// name to it.
 	clipped int
+	// table is what a table the file creates needs in this database.
+	table tableRules
 }
 
 // statementEnd ends a statement in every one of these databases. It is the one
@@ -58,6 +60,7 @@ func dialectOf(name string) (dialect, bool) {
 			// notice, the same way in the CREATE TABLE a person wrote, so a
 			// long name works and two that share their first 63 bytes collide.
 			clipped: 63,
+			table:   tableRules{typeOf: postgresType, nativeUUID: true, refuses: postgresRefuses},
 		}, true
 	case dataset.DialectMySQL:
 		return dialect{
@@ -73,6 +76,10 @@ func dialectOf(name string) (dialect, bool) {
 			quote:    quotedWith("`", "`"),
 			literal:  mysqlLiteral,
 			nameFits: mysqlNameFits,
+			table: tableRules{typeOf: mysqlType, keyCollation: "utf8mb4_bin",
+				// A database of another character set made the table of that
+				// set, and it refused Polish letters (measured).
+				options: " DEFAULT CHARSET=utf8mb4", refuses: mysqlRefuses},
 		}, true
 	case dataset.DialectSQLServer:
 		return dialect{
@@ -94,6 +101,8 @@ func dialectOf(name string) (dialect, bool) {
 			// itself.
 			after:    "GO\n",
 			nameFits: sqlServerNameFits,
+			table: tableRules{typeOf: sqlServerType, nativeUUID: true,
+				keyCollation: "Latin1_General_100_BIN2", filteredUnique: true, refuses: sqlServerRefuses},
 		}, true
 	case dataset.DialectSQLite:
 		return dialect{
@@ -101,6 +110,8 @@ func dialectOf(name string) (dialect, bool) {
 			quote:    quotedWith(`"`, `"`),
 			literal:  sqliteLiteral,
 			nameFits: func(string) string { return "" },
+			table: tableRules{typeOf: sqliteType,
+				refuses: func(sqlTableShape) (string, string) { return "", "" }},
 		}, true
 	}
 	return dialect{}, false

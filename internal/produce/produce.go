@@ -128,7 +128,7 @@ func Preview(rec recipe.Recipe, values generate.Values, rows int, stop generate.
 	}
 
 	held := newHeld()
-	writer, err := format.For(held, rec, stop)
+	writer, err := format.For(held, rec, values, stop)
 	if err != nil {
 		return Sample{}, err
 	}

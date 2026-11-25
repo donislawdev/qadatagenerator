@@ -391,6 +391,7 @@ once, and the Recipe screen checks it as you type.
 | `output` | top | which files a run writes and where, with the keys below |
 | `format` | output | `csv`, the default, `json`, or `sql` for INSERT statements |
 | `dialect` | output | for `sql`, the database the statements are written for: `postgresql`, `mysql` (MySQL and MariaDB), `sqlserver` or `sqlite`. `sql` needs one |
+| `create_tables` | output | for `sql`: `true` starts each table with a `CREATE TABLE` typed from the recipe, with its keys and checks, and `false`, the default, fills tables that are already there |
 | `dir` | output | the folder the files go to, relative to where you run `qadg`. `--out` takes its place, and the Recipe screen writes to the folder chosen at its top |
 | `delimiter` | output | for `csv`, the one character between values: a comma when left out, or any other in quotes, such as a semicolon or a tab written `"\t"`. A double quote and a line break are refused |
 | `file_per_entity` | output | for `json` and `sql`: `true` writes a file per table, such as `customer.json`, and `false`, the default, writes one `dataset.json` with each row's children inside it, or one `dataset.sql` with the tables in order. `csv` always writes a file per table |

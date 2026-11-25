@@ -197,13 +197,14 @@ func askThePlan(rec recipe.Recipe) whatARunWouldDo {
 	// The plan generate and the window follow, notes about settings the form
 	// asked for ignores included, so that this verb cannot be the one surface
 	// silent about them.
-	prepared, err := produce.Prepare(rec, values.New(rec.Locale, rec.Seed), generate.NeverStops{})
+	source := values.New(rec.Locale, rec.Seed)
+	prepared, err := produce.Prepare(rec, source, generate.NeverStops{})
 	// The writer of each form asks questions of its own, such as whether a
-	// parent field is named after a child in the tree or whether a parent of
-	// the SQL form has a key of one field, and validate asks them too so that
-	// the two verbs agree.
+	// parent field is named after a child in the tree, whether a parent of the
+	// SQL form has a key of one field or whether the database would create the
+	// tables asked for, and validate asks them too so that the two verbs agree.
 	if err == nil {
-		err = format.Fits(rec)
+		err = format.Fits(rec, source)
 	}
 	switch {
 	case err == nil:

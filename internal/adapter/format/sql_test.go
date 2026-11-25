@@ -6,6 +6,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
@@ -32,7 +33,7 @@ type table struct {
 func writtenBy(t *testing.T, rec recipe.Recipe, tables ...table) *held {
 	t.Helper()
 	files := newHeld()
-	writer, err := format.NewSQL(files, rec)
+	writer, err := format.NewSQL(files, rec, values.New(rec.Locale, rec.Seed))
 	if err != nil {
 		t.Fatalf("the writer was refused: %v", err)
 	}
@@ -235,7 +236,7 @@ func TestAChildNamesItsParentByKeyOrByNothing(t *testing.T) {
 }
 
 func asSQL(files *held, rec recipe.Recipe) (generate.Writer, error) {
-	return format.NewSQL(files, rec)
+	return format.NewSQL(files, rec, values.New(rec.Locale, rec.Seed))
 }
 
 // A long value with a character to escape is not cut to 4000 on SQL Server,
@@ -297,11 +298,12 @@ func TestARecipeTheStatementsCannotExpressIsRefused(t *testing.T) {
 	} {
 		t.Run(one.name, func(t *testing.T) {
 			rec := sqlRecipe(one.dialect, false, one.entities...)
-			err := format.Fits(rec)
+			source := values.New(rec.Locale, rec.Seed)
+			err := format.Fits(rec, source)
 			if err == nil || fault.KindOf(err) != fault.Config || !strings.Contains(err.Error(), one.said) {
 				t.Fatalf("Fits answered %v, want a refusal saying %q", err, one.said)
 			}
-			if _, built := format.NewSQL(newHeld(), rec); built == nil {
+			if _, built := format.NewSQL(newHeld(), rec, source); built == nil {
 				t.Error("validate refuses the recipe and the writer takes it")
 			}
 		})
@@ -310,11 +312,12 @@ func TestARecipeTheStatementsCannotExpressIsRefused(t *testing.T) {
 	fitting := []recipe.Entity{parent("id"), child, named(strings.Repeat("ż", 32)), {Name: "u", Count: 1,
 		HasCount: true, Fields: []recipe.Field{field(long63 + "x"), field(strings.Repeat("😀", 64))}}}
 	for _, dialect := range []string{"postgresql", "sqlserver", "sqlite"} {
-		if err := format.Fits(sqlRecipe(dialect, false, fitting...)); err != nil {
+		if err := format.Fits(sqlRecipe(dialect, false, fitting...), values.New("", "")); err != nil {
 			t.Errorf("%s refused a recipe it can express: %v", dialect, err)
 		}
 	}
-	if err := format.Fits(sqlRecipe("mysql", false, parent("id"), child, named(strings.Repeat("ż", 32)))); err != nil {
+	if err := format.Fits(sqlRecipe("mysql", false, parent("id"), child, named(strings.Repeat("ż", 32))),
+		values.New("", "")); err != nil {
 		t.Errorf("mysql refused a recipe it can express: %v", err)
 	}
 }

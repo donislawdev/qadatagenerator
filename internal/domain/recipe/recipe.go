@@ -293,6 +293,10 @@ type Output struct {
 	// one, because no file of statements means the same in every database
 	// (DEC-341). The other forms do not read it.
 	Dialect string
+	// CreateTables asks the SQL form to start every table with a CREATE TABLE
+	// statement, its columns typed from the recipe (DEC-341). Without it the
+	// file fills tables that already exist. The other forms do not read it.
+	CreateTables bool
 }
 
 // Problem is one reason a recipe cannot be used, described in parts rather
