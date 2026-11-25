@@ -234,6 +234,51 @@ output:
 	}
 }
 
+// The database a recipe names for the SQL form is the one the run writes for,
+// and the card names the file before the button is pressed.
+//
+// The window has no control for it for the reason the format has none: the
+// line is in the recipe the screen edits. SQL Server is the database whose
+// file differs most from the others, with a batch separator after every
+// statement and a letter before every value, so it cannot arrive by accident.
+func TestTheDatabaseInTheRecipeReachesTheRunFromTheScreen(t *testing.T) {
+	view, dir := readyWith(t, `version: "0.1"
+seed: "dialect"
+entities:
+  customer:
+    count: 2
+    primary_key: [id]
+    fields:
+      id: { type: integer, unique: true }
+  order:
+    belongs_to: { customer: 1-1 }
+    fields:
+      total: { type: decimal }
+output:
+  format: sql
+  dialect: sqlserver
+`)
+	before := spoken(rendered(t, view))
+	if !strings.Contains(before, "dataset.sql") {
+		t.Error("the card does not name dataset.sql before the run")
+	}
+
+	view.Start()
+
+	if _, failed, ran := view.Written(); !ran || failed != nil {
+		t.Fatalf("the run did not finish: ran %v, failed %v", ran, failed)
+	}
+	written, err := os.ReadFile(filepath.Join(dir, "dataset.sql"))
+	if err != nil {
+		t.Fatalf("output.format: sql did not reach the run: %v", err)
+	}
+	for _, said := range []string{"SET NOCOUNT ON;\nGO\n", "INSERT INTO [order] ([total], [customer]) VALUES (N'"} { // punctuation: test data
+		if !strings.Contains(string(written), said) {
+			t.Errorf("output.dialect: sqlserver did not reach the run, the file lacks %q:\n%s", said, written)
+		}
+	}
+}
+
 // An extra form of the manifest on a recipe that orders no damage says, before
 // the run and after it, that there is nothing to export, and nothing is.
 //

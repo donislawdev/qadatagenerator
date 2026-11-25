@@ -28,10 +28,11 @@ func planOf(rec recipe.Recipe, values generate.Values, stop generate.Halt) (gene
 
 // noteUnreadSettings records the settings this run carries and does not read.
 //
-// Each of the two forms reads a setting the other has no use for: the object
-// form a file per table, the comma separated one a delimiter. A setting that
-// does nothing and says nothing about doing nothing is the silence this
-// product exists to find, so each is named when the form asked for ignores it.
+// Each form reads settings the others have no use for: the object form and the
+// SQL form a file per table, the comma separated one a delimiter, the SQL form
+// a database. A setting that does nothing and says nothing about doing nothing
+// is the silence this product exists to find, so each is named when the form
+// asked for ignores it.
 //
 // 🔴 A note is given only for a setting the recipe WROTE. false is also what a
 // recipe that never mentions file_per_entity carries, and a note given for it
@@ -39,21 +40,32 @@ func planOf(rec recipe.Recipe, values generate.Values, stop generate.Halt) (gene
 // note about nothing is noise that teaches a reader to skip the list the real
 // notes stand in.
 func noteUnreadSettings(rec recipe.Recipe, plan *generate.Plan) {
-	csv := rec.Output.Format == "" || rec.Output.Format == format.NameCSV
+	form := rec.Output.Format
+	if form == "" {
+		form = format.NameCSV
+	}
 	// file_per_entity: true asks the comma separated form for what it does
 	// anyway, so only false is a setting it ignores.
-	if csv && rec.Output.FilePerEntityGiven && !rec.Output.FilePerEntity {
+	if form == format.NameCSV && rec.Output.FilePerEntityGiven && !rec.Output.FilePerEntity {
 		plan.Notes = append(plan.Notes, generate.Note{
 			Where: "output.file_per_entity",
 			What: "the " + format.NameCSV + " form writes one file per table whatever this says, so " +
-				"it changes nothing here. The " + format.NameJSON + " form is the one that reads it",
+				"it changes nothing here. The " + format.NameJSON + " and " + format.NameSQL +
+				" forms are the ones that read it",
 		})
 	}
-	if !csv && rec.Output.Delimiter != "" {
+	if form != format.NameCSV && rec.Output.Delimiter != "" {
 		plan.Notes = append(plan.Notes, generate.Note{
 			Where: "output.delimiter",
-			What: "the " + format.NameJSON + " form has no delimiter, so it changes nothing here. The " +
+			What: "the " + form + " form has no delimiter, so it changes nothing here. The " +
 				format.NameCSV + " form is the one that reads it",
+		})
+	}
+	if form != format.NameSQL && rec.Output.Dialect != "" {
+		plan.Notes = append(plan.Notes, generate.Note{
+			Where: "output.dialect",
+			What: "the " + form + " form is not written for a database, so this changes nothing " +
+				"here. The " + format.NameSQL + " form is the one that reads it",
 		})
 	}
 }

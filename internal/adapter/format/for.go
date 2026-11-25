@@ -1,7 +1,10 @@
 package format
 
 import (
+	"strings"
+
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
+	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 )
@@ -38,7 +41,27 @@ func For(files Files, rec recipe.Recipe, stop generate.Halt) (generate.Writer, e
 		return NewCSV(files, rec)
 	case NameJSON:
 		return NewJSON(files, rec, stop)
+	case NameSQL:
+		return NewSQL(files, rec)
 	}
-	return nil, fault.New(fault.Config, "this build writes "+NameCSV+" and "+NameJSON+
+	return nil, fault.New(fault.Config, "this build writes "+strings.Join(dataset.Forms(), ", ")+
 		", and this run asks for "+rec.Output.Format)
+}
+
+// Fits asks a recipe every question the writer of its form asks before it
+// writes, and says nothing about the questions of other forms.
+//
+// # Why one door for them
+//
+// 🔴 A dry run returns before any writer is made, so a refusal that lived only
+// in a writer reached a real run and never a dry one: on 2026-11-25 a recipe
+// whose tree would give one object two members of one name ended a dry run with
+// nought and the same command without --dry-run with three. Surfaces that stop
+// short of writing ask here, and so does every writer, so a question added to a
+// form is asked by all of them at once.
+func Fits(rec recipe.Recipe) error {
+	if err := NestingCollision(rec); err != nil {
+		return err
+	}
+	return SQLFits(rec)
 }

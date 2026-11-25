@@ -37,6 +37,7 @@ var placesOfARecipe = []string{
 	"policy:\n  per_row: " + caretMark,
 	"output:\n  " + caretMark,
 	"output:\n  format: " + caretMark,
+	"output:\n  dialect: " + caretMark,
 	"output:\n  file_per_entity: " + caretMark,
 	"output:\n  encoding: " + caretMark,
 }

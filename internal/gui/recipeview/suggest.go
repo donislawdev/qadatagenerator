@@ -75,7 +75,7 @@ func (v *View) describe(offer recipeyaml.Offer) string {
 // valuesSaid are the keys whose values have a line of their own in the
 // catalogue. The values of the others are words such as true, false and utf-8,
 // which say what they mean.
-var valuesSaid = []string{"type", "counted_in", "format", "consistency"}
+var valuesSaid = []string{"type", "counted_in", "format", "dialect", "consistency"}
 
 // describedBy is the key of the catalogue saying what an offer means, and
 // false for an offer that means only itself or whose name comes from another

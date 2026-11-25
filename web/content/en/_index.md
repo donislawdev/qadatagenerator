@@ -6,7 +6,7 @@ hero:
   eyebrow: Test data generator for QA
   title: Good data. Bad data.
   turn: And the right answer.
-  lead: "**QA Data Generator** turns a short YAML recipe into whole datasets that pass validation, in CSV or JSON. Then it breaks them on purpose, and writes beside the data what your application should do with every value it damaged."
+  lead: "**QA Data Generator** turns a short YAML recipe into whole datasets that pass validation, in CSV, JSON or SQL. Then it breaks them on purpose, and writes beside the data what your application should do with every value it damaged."
   facts:
     - Free and open source, GPL-3.0
     - Offline, no account, no telemetry

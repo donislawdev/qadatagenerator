@@ -44,7 +44,7 @@ var (
 	perRowChoices = []string{"exactly_one", "any"}
 	entityKeys    = []string{"count", "primary_key", "fields", "consistency", "belongs_to"}
 	fieldKeys     = []string{"type", "generator", "expression", "unique", "required", "max_length", "counted_in", "empty", "values", "min_value", "max_value"}
-	outputKeys    = []string{"format", "dir", "file_per_entity", "encoding", "delimiter"}
+	outputKeys    = []string{"format", "dialect", "dir", "file_per_entity", "encoding", "delimiter"}
 
 	// How a maximum length can be counted, taken from the model so that the
 	// list a user is shown cannot drift from the list the model accepts.
@@ -55,8 +55,12 @@ var (
 
 	// Formats this build can write. The others are named in the
 	// documentation and refused with a reason rather than accepted and
-	// quietly ignored at the end of a long run.
-	writableFormats = []string{"csv", "json"}
+	// quietly ignored at the end of a long run. The list is the one the
+	// writers implement, read from where both read it.
+	writableFormats = dataset.Forms()
+
+	// The databases the SQL form writes for, from the same place.
+	writableDialects = dataset.Dialects()
 
 	// The one encoding this build writes, which is also what a run writes
 	// when the recipe names none.
@@ -801,6 +805,8 @@ func (r *reader) output(node any) recipe.Output {
 		switch key {
 		case "format":
 			built.Format = r.oneOf(where, item.Value, writableFormats)
+		case "dialect":
+			built.Dialect = r.oneOf(where, item.Value, writableDialects)
 		case "dir":
 			built.Dir, _ = r.text(where, item.Value)
 		case "file_per_entity":
@@ -831,6 +837,14 @@ func (r *reader) output(node any) recipe.Output {
 			r.report(where, "the output section has no such key", strings.Join(outputKeys, ", "),
 				"remove the line or check the spelling")
 		}
+	}
+	// Reported against the format, which is the line that was written. A
+	// guess here would be a file that changes values in every database but
+	// the guessed one (dataset.Dialects says why).
+	if built.Format == dataset.FormSQL && built.Dialect == "" {
+		r.report("output.format", "the sql form writes statements for one database, and the "+
+			"recipe does not say which", strings.Join(writableDialects, ", "),
+			"add dialect: under output, naming the database the file will be loaded into")
 	}
 	return built
 }

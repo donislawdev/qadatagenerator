@@ -24,7 +24,7 @@ faq:
   - question: Are the card numbers real?
     answer: "They are the test numbers payment providers publish, not numbers the program makes up. None of the providers promises that no bank has issued the same number to a real card, so keep them in test systems."
   - question: Which output formats does it write?
-    answer: "CSV and JSON for the data. The manifest is JSON, and can also be written as a Gherkin Examples table, as CSV or as Markdown."
+    answer: "CSV, JSON or SQL INSERT statements for the data, the last for PostgreSQL, MySQL and MariaDB, SQL Server or SQLite. The manifest is JSON, and can also be written as a Gherkin Examples table, as CSV or as Markdown."
   - question: Need test files rather than test records?
     answer: "[Testing Files Generator](https://github.com/donislawdev/TestingFilesGenerator) makes real files in dozens of formats at any exact size, with a manifest of its own."
 ---

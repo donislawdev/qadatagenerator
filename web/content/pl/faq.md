@@ -1,5 +1,5 @@
 ---
-translatedFrom: 7c626d61f0033d07ece116f443f74abb1225ecc3
+translatedFrom: f6364ed696767089af74d0724829e26eefa3f906
 title: Pytania
 seoTitle: "QA Data Generator FAQ: dane testowe, seed, licencja"
 description: "Odpowiedzi o QA Data Generator: co robi, czy można go używać w pracy za darmo, czy potrzebuje internetu i dlaczego na innej maszynie daje te same dane."
@@ -25,7 +25,7 @@ faq:
   - question: Czy numery kart są prawdziwe?
     answer: "To numery testowe publikowane przez operatorów płatności, a nie numery wymyślone przez program. Żaden z operatorów nie obiecuje, że żaden bank nie wydał tego samego numeru prawdziwej karcie, więc trzymaj je w systemach testowych."
   - question: W jakich formatach zapisuje wyniki?
-    answer: "Dane w CSV i JSON. Manifest w JSON, a do tego może go zapisać jako tabelę Examples w Gherkinie, jako CSV albo jako Markdown."
+    answer: "Dane w CSV, JSON albo jako instrukcje SQL INSERT, te ostatnie dla PostgreSQL, MySQL i MariaDB, SQL Server albo SQLite. Manifest w JSON, a do tego może go zapisać jako tabelę Examples w Gherkinie, jako CSV albo jako Markdown."
   - question: Potrzebujesz plików testowych, a nie rekordów?
     answer: "[Testing Files Generator](https://github.com/donislawdev/TestingFilesGenerator) tworzy prawdziwe pliki w dziesiątkach formatów, o dowolnym dokładnym rozmiarze, z własnym manifestem."
 ---

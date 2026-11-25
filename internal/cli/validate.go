@@ -198,10 +198,12 @@ func askThePlan(rec recipe.Recipe) whatARunWouldDo {
 	// asked for ignores included, so that this verb cannot be the one surface
 	// silent about them.
 	prepared, err := produce.Prepare(rec, values.New(rec.Locale, rec.Seed), generate.NeverStops{})
-	// The writer of the tree refuses a parent field named after a child, and
-	// validate asks it the same question so that the two verbs agree.
+	// The writer of each form asks questions of its own, such as whether a
+	// parent field is named after a child in the tree or whether a parent of
+	// the SQL form has a key of one field, and validate asks them too so that
+	// the two verbs agree.
 	if err == nil {
-		err = format.NestingCollision(rec)
+		err = format.Fits(rec)
 	}
 	switch {
 	case err == nil:

@@ -269,6 +269,8 @@ func valuesOf(where section, key string, known Vocabulary) []string {
 		switch key {
 		case "format":
 			return writableFormats
+		case "dialect":
+			return writableDialects
 		case "file_per_entity":
 			return trueFalse
 		case "encoding":

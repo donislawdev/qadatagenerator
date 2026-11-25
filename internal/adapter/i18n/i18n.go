@@ -407,6 +407,7 @@ const (
 	RecipeKeyPerRow        Key = "recipe.key.per_row"
 	RecipeKeyExcludeFields Key = "recipe.key.exclude_fields"
 	RecipeKeyFormat        Key = "recipe.key.format"
+	RecipeKeyDialect       Key = "recipe.key.dialect"
 	RecipeKeyDir           Key = "recipe.key.dir"
 	RecipeKeyFilePerEntity Key = "recipe.key.file_per_entity"
 	RecipeKeyEncoding      Key = "recipe.key.encoding"
@@ -423,6 +424,11 @@ const (
 	RecipeValueCountedInGraphemes     Key = "recipe.value.counted_in.graphemes"
 	RecipeValueFormatCSV              Key = "recipe.value.format.csv"
 	RecipeValueFormatJSON             Key = "recipe.value.format.json"
+	RecipeValueFormatSQL              Key = "recipe.value.format.sql"
+	RecipeValueDialectPostgreSQL      Key = "recipe.value.dialect.postgresql"
+	RecipeValueDialectMySQL           Key = "recipe.value.dialect.mysql"
+	RecipeValueDialectSQLServer       Key = "recipe.value.dialect.sqlserver"
+	RecipeValueDialectSQLite          Key = "recipe.value.dialect.sqlite"
 	RecipeValueConsistencyMatches     Key = "recipe.value.consistency.matches"
 	RecipeValueConsistencyDerivedFrom Key = "recipe.value.consistency.derived_from"
 
@@ -856,10 +862,13 @@ var windowKeys = []Key{
 	RecipeKeyType, RecipeKeyGenerator, RecipeKeyUnique, RecipeKeyRequired, RecipeKeyMaxLength,
 	RecipeKeyCountedIn, RecipeKeyEmpty, RecipeKeyValues, RecipeKeyMinValue, RecipeKeyMaxValue,
 	RecipeKeyLayers, RecipeKeyRows, RecipeKeyPerRow, RecipeKeyExcludeFields,
-	RecipeKeyFormat, RecipeKeyDir, RecipeKeyFilePerEntity, RecipeKeyEncoding, RecipeKeyDelimiter,
+	RecipeKeyFormat, RecipeKeyDialect, RecipeKeyDir, RecipeKeyFilePerEntity, RecipeKeyEncoding,
+	RecipeKeyDelimiter,
 	RecipeValueVersion, RecipeValueTypeInteger, RecipeValueTypeDecimal, RecipeValueTypeUUID,
 	RecipeValueCountedInCharacters, RecipeValueCountedInBytes, RecipeValueCountedInGraphemes,
-	RecipeValueFormatCSV, RecipeValueFormatJSON,
+	RecipeValueFormatCSV, RecipeValueFormatJSON, RecipeValueFormatSQL,
+	RecipeValueDialectPostgreSQL, RecipeValueDialectMySQL, RecipeValueDialectSQLServer,
+	RecipeValueDialectSQLite,
 	RecipeValueConsistencyMatches, RecipeValueConsistencyDerivedFrom,
 	RecipeExample, RecipeCanGenerate, RecipeGenerator, RecipeGenerators,
 	RecipeNotIn, RecipeNothingToDrawFrom,

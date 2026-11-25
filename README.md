@@ -22,7 +22,7 @@
 **QA Data Generator** makes test data for QA engineers and developers, and then breaks it on purpose.
 
 You describe your tables in a short YAML recipe, say a thousand customers with up to five payments
-each, and get them as CSV or JSON. The values agree with each other: first names fit the gender
+each, and get them as CSV, JSON or SQL. The values agree with each other: first names fit the gender
 column, the city, state and ZIP code belong together, and every card number, ISBN or VIN carries a
 correct check digit. Data like that gets past your validation instead of failing on the first screen.
 
@@ -386,13 +386,14 @@ once, and the Recipe screen checks it as you type.
 | `unique` | field | no value repeats |
 | `required` | field | the column is never empty |
 | `max_length` | field | the longest value allowed, counted in characters unless `counted_in` says `bytes` or `graphemes` |
-| `empty` | field | the share of rows left empty, such as `15%` |
+| `empty` | field | the share of rows left empty, such as `15%`. In `sql` an empty cell is `NULL` |
 | `policy` | top | what to damage: `layers`, the share of `rows`, `per_row` and `exclude_fields` |
 | `output` | top | which files a run writes and where, with the keys below |
-| `format` | output | `csv`, the default, or `json` |
+| `format` | output | `csv`, the default, `json`, or `sql` for INSERT statements |
+| `dialect` | output | for `sql`, the database the statements are written for: `postgresql`, `mysql` (MySQL and MariaDB), `sqlserver` or `sqlite`. `sql` needs one |
 | `dir` | output | the folder the files go to, relative to where you run `qadg`. `--out` takes its place, and the Recipe screen writes to the folder chosen at its top |
 | `delimiter` | output | for `csv`, the one character between values: a comma when left out, or any other in quotes, such as a semicolon or a tab written `"\t"`. A double quote and a line break are refused |
-| `file_per_entity` | output | for `json` only: `true` writes a file per table, such as `customer.json`, and `false`, the default, writes one `dataset.json` with each row's children inside it. `csv` always writes a file per table |
+| `file_per_entity` | output | for `json` and `sql`: `true` writes a file per table, such as `customer.json`, and `false`, the default, writes one `dataset.json` with each row's children inside it, or one `dataset.sql` with the tables in order. `csv` always writes a file per table |
 | `encoding` | output | `utf-8`, the only encoding written today |
 
 The [examples](examples/) folder holds ready-made recipes, from one table of people to a shop in three

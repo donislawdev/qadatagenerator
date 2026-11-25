@@ -130,8 +130,10 @@ func TestEachPlaceOffersWhatTheFormatTakesThere(t *testing.T) {
 			shop + "policy:\n  exclude_fields: [" + caretMark + "]",
 			[]string{"id", "imię", "pesel", "birth_date", "amount"}},
 		{"the output takes its keys", "output:\n  " + caretMark,
-			[]string{"format", "dir", "file_per_entity", "encoding", "delimiter"}},
-		{"a form is one this build writes", "output:\n  format: " + caretMark, []string{"csv", "json"}},
+			[]string{"format", "dialect", "dir", "file_per_entity", "encoding", "delimiter"}},
+		{"a form is one this build writes", "output:\n  format: " + caretMark, []string{"csv", "json", "sql"}},
+		{"a dialect is a database the sql form writes for", "output:\n  dialect: " + caretMark,
+			[]string{"postgresql", "mysql", "sqlserver", "sqlite"}},
 		{"a line ending in a carriage return is one line", "version: \"0.1\"\r\nent" + caretMark,
 			[]string{"entities"}},
 	} {

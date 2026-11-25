@@ -517,6 +517,21 @@ func TestProblems(t *testing.T) {
 			what:  "this build writes UTF-8",
 		},
 		{
+			// A guess would be a file that changes values in every database
+			// but the guessed one (DEC-341), so the line that was written is
+			// the one the refusal points at.
+			name:  "the sql form without a database",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y }\noutput:\n  format: sql\n",
+			where: "output.format",
+			what:  "does not say which",
+		},
+		{
+			name:  "a database the sql form does not write for",
+			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { generator: y }\noutput:\n  format: sql\n  dialect: oracle\n",
+			where: "output.dialect",
+			what:  "oracle",
+		},
+		{
 			name:  "a bound written as text",
 			yaml:  "version: \"0.1\"\nentities:\n  a:\n    fields:\n      x: { type: integer, max_value: \"100\" }\n",
 			where: "entities.a.fields.x.max_value",

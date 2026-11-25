@@ -1,5 +1,5 @@
 ---
-translatedFrom: 6a8be219bd49a4f460e7efa95386ba530e4226a3
+translatedFrom: 22676e6828f6b28ff5c5bd5cbc5c7db5f74582a0
 title: Faker i QA Data Generator
 linkTitle: Faker
 seoTitle: "Faker czy QA Data Generator: dane testowe"
@@ -21,7 +21,7 @@ Fakty na tej stronie pochodzą z wersji 40.54.0, wydanej 10 listopada 2026, i z 
 
 ## Co QA Data Generator robi inaczej?
 
-- **Zapisuje zestawy danych z przepisu, a nie z kodu.** Plik YAML wymienia tabele, kolumny, liczbę wierszy i klucze między tabelami, a `qadg generate` zapisuje je jako CSV albo JSON. Okno na pulpicie czyta ten sam przepis.
+- **Zapisuje zestawy danych z przepisu, a nie z kodu.** Plik YAML wymienia tabele, kolumny, liczbę wierszy i klucze między tabelami, a `qadg generate` zapisuje je jako CSV, JSON albo SQL. Okno na pulpicie czyta ten sam przepis.
 - **Celowo psuje dane i mówi, co powinno się stać.** Zna {{< count "damage" >}}, od cyfry kontrolnej przesuniętej o jeden po nazwisko zapisane w innej postaci Unicode. Manifest obok danych wymienia każdą popsutą wartość i oczekiwany wynik, a `qadg verify` porównuje z nim to, co zrobiła twoja aplikacja.
 - **Nowa kolumna zostawia pozostałe bez zmian.** Każda wartość jest losowana ze swojego miejsca: tabeli, wiersza, kolumny i seeda. W Fakerze jeden seed uruchamia jeden ciąg liczb losowych, a każde wywołanie bierze z niego następną. Tabela pięciu wierszy z Fakera 40.54.0 i seedem 4321 zmieniła wszystkie nazwiska i wszystkie imiona od drugiego wiersza, gdy między imię a nazwisko weszła kolumna z adresem e-mail.
 - **SSN, które nie należą do nikogo, i testowe numery kart.** Każdy SSN zaczyna się od 666, obszaru, którego nigdy się nie przydziela, a numery kart to wyłącznie numery testowe publikowane przez operatorów płatności. `ssn()` Fakera daje numery z obszarów, które są przydzielane, jak 042-34-8377 z jego dokumentacji, a według dokumentacji `credit_card_number()` generuje poprawny numer karty kredytowej. [SSN](/identifiers/ssn/) mówi, które obszary są przydzielane.
@@ -44,7 +44,7 @@ Gdy test buduje dane w kodzie, obiekt po obiekcie, i potrzebuje tylko poprawnych
 | Wartości do testu walidacji | na przykład `invalid_ssn()` | {{< count "damage" >}} i oczekiwany wynik dla każdej popsutej wartości |
 | Kolumna dodana w środku | zmienia wartości losowane po niej | zostawia pozostałe kolumny bez zmian |
 | Ten sam seed w nowszej wersji | wyniki nie są gwarantowane nawet między wersjami poprawkowymi | może wylosować część wartości inaczej |
-| Co dostajesz | wartości w swoim kodzie, a `faker` je wypisuje | pliki CSV albo JSON i manifest |
+| Co dostajesz | wartości w swoim kodzie, a `faker` je wypisuje | pliki CSV, JSON albo SQL i manifest |
 | Licencja | MIT | GPL-3.0, a wygenerowane dane należą do ciebie |
 
 ## Czy mogę używać obu?

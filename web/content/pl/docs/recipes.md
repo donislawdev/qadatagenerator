@@ -1,5 +1,5 @@
 ---
-translatedFrom: 07d223b59753796062a5a6c93126cb943f9e2a67
+translatedFrom: e6de61230cc78a01ff279151c4eb21634652a767
 title: Przepisy
 seoTitle: "Przepisy danych testowych w YAML: każdy klucz"
 description: "Opisz tabele, liczbę wierszy, relacje i reguły kolumn w jednym pliku YAML. Każdy klucz przepisu, co robi i jak validate zgłasza problem."
@@ -37,20 +37,22 @@ readmeTables:
         to: ["`required`", "pole", "kolumna nigdy nie jest pusta"]
       - from: "`max_length` | field | the longest value allowed, counted in characters unless `counted_in` says `bytes` or `graphemes`"
         to: ["`max_length`", "pole", "najdłuższa dozwolona wartość, liczona w znakach, chyba że `counted_in` mówi `bytes` albo `graphemes`"]
-      - from: "`empty` | field | the share of rows left empty, such as `15%`"
-        to: ["`empty`", "pole", "udział wierszy zostawionych pustych, na przykład `15%`"]
+      - from: "`empty` | field | the share of rows left empty, such as `15%`. In `sql` an empty cell is `NULL`"
+        to: ["`empty`", "pole", "udział wierszy zostawionych pustych, na przykład `15%`. W `sql` pusta komórka to `NULL`"]
       - from: "`policy` | top | what to damage: `layers`, the share of `rows`, `per_row` and `exclude_fields`"
         to: ["`policy`", "główny poziom", "co popsuć: `layers`, udział wierszy `rows`, `per_row` i `exclude_fields`"]
       - from: "`output` | top | which files a run writes and where, with the keys below"
         to: ["`output`", "główny poziom", "jakie pliki zapisuje przebieg i gdzie, kluczami poniżej"]
-      - from: "`format` | output | `csv`, the default, or `json`"
-        to: ["`format`", "output", "`csv`, domyślnie, albo `json`"]
+      - from: "`format` | output | `csv`, the default, `json`, or `sql` for INSERT statements"
+        to: ["`format`", "output", "`csv`, domyślnie, `json` albo `sql`, czyli instrukcje INSERT"]
+      - from: "`dialect` | output | for `sql`, the database the statements are written for: `postgresql`, `mysql` (MySQL and MariaDB), `sqlserver` or `sqlite`. `sql` needs one"
+        to: ["`dialect`", "output", "dla `sql` baza, dla której pisane są instrukcje: `postgresql`, `mysql` (MySQL i MariaDB), `sqlserver` albo `sqlite`. `sql` go wymaga"]
       - from: "`dir` | output | the folder the files go to, relative to where you run `qadg`. `--out` takes its place, and the Recipe screen writes to the folder chosen at its top"
         to: ["`dir`", "output", "folder, do którego trafiają pliki, względem miejsca, w którym uruchamiasz `qadg`. `--out` go zastępuje, a ekran Recipe zapisuje do folderu wybranego na jego górze"]
       - from: "`delimiter` | output | for `csv`, the one character between values: a comma when left out, or any other in quotes, such as a semicolon or a tab written `\"\\t\"`. A double quote and a line break are refused"
         to: ["`delimiter`", "output", "dla `csv` jeden znak między wartościami: przecinek, gdy klucza nie ma, albo dowolny inny w cudzysłowie, na przykład średnik albo tabulator zapisany jako `\"\\t\"`. Cudzysłów i koniec linii są odrzucane"]
-      - from: "`file_per_entity` | output | for `json` only: `true` writes a file per table, such as `customer.json`, and `false`, the default, writes one `dataset.json` with each row's children inside it. `csv` always writes a file per table"
-        to: ["`file_per_entity`", "output", "tylko dla `json`: `true` zapisuje plik na tabelę, na przykład `customer.json`, a `false`, domyślnie, zapisuje jeden `dataset.json` z wierszami podrzędnymi wewnątrz swoich rodziców. `csv` zawsze zapisuje plik na tabelę"]
+      - from: "`file_per_entity` | output | for `json` and `sql`: `true` writes a file per table, such as `customer.json`, and `false`, the default, writes one `dataset.json` with each row's children inside it, or one `dataset.sql` with the tables in order. `csv` always writes a file per table"
+        to: ["`file_per_entity`", "output", "dla `json` i `sql`: `true` zapisuje plik na tabelę, na przykład `customer.json`, a `false`, domyślnie, zapisuje jeden `dataset.json` z wierszami podrzędnymi wewnątrz swoich rodziców albo jeden `dataset.sql` z tabelami po kolei. `csv` zawsze zapisuje plik na tabelę"]
       - from: "`encoding` | output | `utf-8`, the only encoding written today"
         to: ["`encoding`", "output", "`utf-8`, jedyne kodowanie, w jakim dziś zapisujemy"]
 ---
@@ -97,11 +99,59 @@ output:
   delimiter: "\t"
 ```
 
-- `format` to `csv`, domyślnie, albo `json`.
+- `format` to `csv`, domyślnie, `json` albo `sql`, który zapisuje instrukcję INSERT dla każdego wiersza.
+- `dialect` wskazuje bazę, dla której jest plik `sql`: `postgresql`, `mysql`, `sqlserver` albo `sqlite`. `mysql` obejmuje też MariaDB. `sql` go wymaga, a `validate` mówi o tym, gdy go brakuje. `qadg generate --dialect` go zastępuje.
 - `dir` to folder, do którego trafiają pliki, względem miejsca, w którym uruchamiasz `qadg`, a gdy go nie ma, sam ten folder. `qadg generate --out` go zastępuje, a ekran Recipe zapisuje do folderu wybranego na jego górze.
-- `delimiter` to znak między wartościami w pliku `csv`, przecinek, gdy klucza nie ma. Każdy inny pojedynczy znak działa w cudzysłowie, na przykład średnik dla arkusza, który go używa, albo `"\t"` dla tabulatora. Cudzysłów i koniec linii są odrzucane, bo już coś w pliku znaczą. `json` nie ma separatora i `validate` ostrzega, gdy go podasz.
-- `file_per_entity` ma znaczenie tylko dla `json`. `true` zapisuje plik na tabelę, na przykład `customer.json` i `payment.json`, każdy jako listę wierszy, w której wiersz podrzędny wskazuje rodzica w polu. `false`, domyślnie, zapisuje jeden `dataset.json` z wierszami podrzędnymi wewnątrz swoich rodziców. `csv` zawsze zapisuje plik na tabelę, więc `validate` ostrzega, że `false` nic tam nie zmienia.
+- `delimiter` to znak między wartościami w pliku `csv`, przecinek, gdy klucza nie ma. Każdy inny pojedynczy znak działa w cudzysłowie, na przykład średnik dla arkusza, który go używa, albo `"\t"` dla tabulatora. Cudzysłów i koniec linii są odrzucane, bo już coś w pliku znaczą. `json` i `sql` nie mają separatora i `validate` ostrzega, gdy go podasz.
+- `file_per_entity` ma znaczenie dla `json` i `sql`. Dla `json` `true` zapisuje plik na tabelę, na przykład `customer.json` i `payment.json`, każdy jako listę wierszy, w której wiersz podrzędny wskazuje rodzica w polu, a `false`, domyślnie, zapisuje jeden `dataset.json` z wierszami podrzędnymi wewnątrz swoich rodziców. Dla `sql` `true` zapisuje `customer.sql` i `payment.sql`, a `false` jeden `dataset.sql` z tabelami nadrzędnymi na początku. `csv` zawsze zapisuje plik na tabelę, więc `validate` ostrzega, że `false` nic tam nie zmienia.
 - `encoding` może być tylko `utf-8`, i tak samo zapisuje przebieg bez tego klucza.
+
+## Pliki SQL
+
+`format: sql` zapisuje każdy wiersz jako instrukcję INSERT dla bazy wskazanej w `dialect`:
+
+```yaml
+output:
+  format: sql
+  dialect: postgresql
+```
+
+```sql
+SET client_encoding = 'UTF8';
+INSERT INTO "customer" ("customer_id", "last_name", "coupon") VALUES ('746861', 'Michael', NULL);
+INSERT INTO "customer" ("customer_id", "last_name", "coupon") VALUES ('516920', 'Lara', 'WELCOME');
+
+INSERT INTO "order" ("total", "customer") VALUES ('230.73', '746861');
+INSERT INTO "order" ("total", "customer") VALUES ('85.20', '516920');
+```
+
+Plik nie tworzy tabel. Wczytaj go do bazy, w której tabele o tych nazwach i kolumnach już są.
+
+- Każda wartość jest zapisana jako tekst w apostrofach, a baza zamienia ją na typ swojej kolumny, tak jak przy imporcie pliku CSV. Wartość, której kolumna nie przyjmie, na przykład tekst w kolumnie liczbowej, baza odrzuca, i często właśnie to chce zobaczyć test zepsutych danych.
+- Komórka zostawiona pusta przez `empty` to `NULL`. Wartość będąca pustym tekstem, którą potrafi zapisać uszkodzenie, zostaje `''`.
+- Wiersz podrzędny wskazuje rodzica kluczem głównym rodzica. Przy `sql` każda tabela z wierszami podrzędnymi potrzebuje `primary_key` z jednego pola, a w przeciwnym razie `validate` odrzuca przepis, bo w bazie nie ma numerów wierszy, na które wiersz podrzędny mógłby wskazać.
+- Nazwy tabel i kolumn są zawsze w cudzysłowach, więc `order` albo `first name` działają takie, jakie są. Nazwę, której baza nie przyjmie, na przykład dłuższą niż 64 bajty w MySQL albo 128 znaków w SQL Server, program odrzuca, zanim cokolwiek zapisze. MySQL ogranicza też nazwę tabeli nazwą jej pliku na dysku, czego `validate` nie sprawdza.
+- Każdy plik zaczyna się od ustawień, których jego baza potrzebuje, żeby przeczytać go tak, jak jest zapisany: kodowania klienta dla PostgreSQL, a dla MySQL `SET NAMES utf8mb4` i linii, która zostawia w tej sesji włączone ucieczki ukośnikiem, przy czym reszta `sql_mode` zostaje taka, jak ma ją twój serwer. Plik dla SQL Server zaczyna się od `SET NOCOUNT ON`, a po każdej instrukcji stoi w nim `GO`.
+
+Każdy wiersz to osobna instrukcja, więc wiersz odrzucony przez bazę zatrzymuje tylko siebie:
+
+| Baza | Wczytanie pliku | Gdy wiersz zostanie odrzucony |
+|---|---|---|
+| PostgreSQL | `psql -d testdb -f dataset.sql` | psql zgłasza błąd i idzie dalej |
+| MySQL, MariaDB | `mysql --force testdb < dataset.sql` | bez `--force` klient staje na pierwszym |
+| SQL Server | `sqlcmd -d testdb -f 65001 -i dataset.sql` | sqlcmd zgłasza błąd i idzie dalej |
+| SQLite | `sqlite3 test.db < dataset.sql` | sqlite3 zgłasza błąd i idzie dalej |
+
+`-f 65001` sprawia, że sqlcmd czyta plik jako UTF-8. Bez tego sqlcmd czyta plik w bieżącej stronie kodowej, która na Windows zwykle nie jest UTF-8, więc litery spoza angielskiego mogą się zmienić.
+
+Instrukcja na każdy wiersz wczytuje się wolno, gdy plik jest duży: od jednej do kilku milisekund na wiersz w naszych pomiarach. W jednej transakcji ten sam plik wczytuje się wielokrotnie szybciej, ale wtedy jeden odrzucony wiersz oznacza, że nie wczyta się nic:
+
+```bash
+psql -d testdb --single-transaction -f dataset.sql
+sqlite3 test.db "BEGIN" ".read dataset.sql" "COMMIT"
+```
+
+psql kończy się kodem 0 nawet wtedy, gdy wycofał transakcję, więc szukaj w jego wypisie `ERROR`.
 
 ## Powiązane tabele
 

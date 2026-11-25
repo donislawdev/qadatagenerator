@@ -126,6 +126,7 @@ const (
 	// it part company the first time a format is added.
 	formatCSV  = format.NameCSV
 	formatJSON = format.NameJSON
+	formatSQL  = format.NameSQL
 
 	problemQuickUnknownGenerator    = "no generator called "
 	problemQuickUnknownGeneratorWhy = "the value asked for is not one this build can produce"
@@ -505,14 +506,16 @@ var commandDocs = []commandDoc{
 		name:      commandGenerate,
 		summary:   "Produce the dataset a recipe describes.",
 		arguments: "<recipe>",
-		what: "Reads a recipe, produces the records it describes and writes them as CSV or as JSON,\n" +
-			"beside a note saying what the run made. Nothing appears under its real name until the\n" +
-			"whole run has succeeded, so a run that fails or is stopped leaves nothing behind.",
+		what: "Reads a recipe, produces the records it describes and writes them as CSV, as JSON or\n" +
+			"as SQL statements, beside a note saying what the run made. Nothing appears under its\n" +
+			"real name until the whole run has succeeded, so a run that fails or is stopped leaves\n" +
+			"nothing behind.",
 		example: "qadg generate --out ./data recipe.yaml",
 		flags: []flagDoc{
 			{"--out <dir>", []string{"--out"}, "Write the dataset here rather than where the recipe says."},
 			{"--seed <text>", []string{"--seed"}, "Draw from this seed rather than the one in the recipe. The same seed gives the same data."},
-			{"--format <name>", []string{"--format"}, "Write csv or json rather than the format the recipe asks for."},
+			{"--format <name>", []string{"--format"}, "Write csv, json or sql rather than the format the recipe asks for."},
+			{"--dialect <name>", []string{"--dialect"}, "Write sql for postgresql, mysql, sqlserver or sqlite. sql needs one, from here or from the recipe."},
 			manifestFlagDoc,
 			{"--overwrite", []string{"--overwrite"}, "Write over files that are already there. Without it an existing file stops the run."},
 			{"--dry-run", []string{"--dry-run"}, "Say what would be produced and write nothing."},

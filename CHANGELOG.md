@@ -102,6 +102,11 @@ repository once they are released.
 
 ### Fixed
 
+- **A dry run refuses what a run refuses.** `qadg generate --dry-run` said a
+  recipe would be written, and ended with exit code 0, when its JSON tree would
+  give one object two members of one name, and the same command without
+  `--dry-run` then refused it with exit code 3. The dry run now asks the same
+  question and ends with 3 as well.
 - **The mouse wheel stops a list on a whole row.** The lists that open under a
   chooser, such as Kind on the Quick value screen, and the suggestions in the
   recipe editor used to stop wherever a notch left them, with the top row cut
@@ -627,6 +632,20 @@ repository once they are released.
 
 ### Added
 
+- **SQL files.** `format: sql` writes every row as an INSERT statement for the
+  database named under the new `dialect` key: `postgresql`, `mysql` (MySQL and
+  MariaDB), `sqlserver` or `sqlite`. `qadg generate --format sql --dialect
+  postgresql` asks for the same from the command line. A run writes one
+  `dataset.sql` with the parent tables first, or a file per table with
+  `file_per_entity: true`, and creates no tables, so the file goes into a
+  database whose tables are already there. Each value is quoted text, written
+  so that its database reads back every byte, quotes, backslashes and line
+  breaks included, and a cell left empty by `empty` is `NULL`. Each row is its
+  own statement, so a row the database refuses stops only itself. With `sql`,
+  a table that has child rows needs a `primary_key` of one field, and a name
+  the database would refuse, such as one over 64 bytes in MySQL, is refused
+  before anything is written. Recipes explains how to load the file into
+  each database.
 - **Email addresses that reach nobody.** `generator: email` writes addresses
   such as `anna.nowak07@example.com` at `example.com`, `example.net` or
   `example.org`, domains set aside for documentation that take no mail. A row

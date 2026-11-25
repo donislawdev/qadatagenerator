@@ -5,7 +5,7 @@
       "name": "generate",
       "arguments": "<recipe>",
       "summary": "Produce the dataset a recipe describes.",
-      "what": "Reads a recipe, produces the records it describes and writes them as CSV or as JSON, beside a note saying what the run made. Nothing appears under its real name until the whole run has succeeded, so a run that fails or is stopped leaves nothing behind.",
+      "what": "Reads a recipe, produces the records it describes and writes them as CSV, as JSON or as SQL statements, beside a note saying what the run made. Nothing appears under its real name until the whole run has succeeded, so a run that fails or is stopped leaves nothing behind.",
       "example": "qadg generate --out ./data recipe.yaml",
       "flags": [
         {
@@ -18,7 +18,11 @@
         },
         {
           "name": "--format <name>",
-          "summary": "Write csv or json rather than the format the recipe asks for."
+          "summary": "Write csv, json or sql rather than the format the recipe asks for."
+        },
+        {
+          "name": "--dialect <name>",
+          "summary": "Write sql for postgresql, mysql, sqlserver or sqlite. sql needs one, from here or from the recipe."
         },
         {
           "name": "--manifest <form>",

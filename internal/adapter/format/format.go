@@ -109,6 +109,12 @@ func (k keys) record(entity recipe.Entity, planned dataset.Table, values []strin
 	}
 }
 
+// holds reports whether a parent table has the row a child names, which a
+// writer that has a word for nothing asks before it asks for the key.
+func (k keys) holds(entity string, row int) bool {
+	return row >= 0 && row < k.counted[entity]
+}
+
 // of returns what names one row of a parent table: its primary key when the
 // table declares one, and its row number otherwise.
 func (k keys) of(entity string, row int) string {

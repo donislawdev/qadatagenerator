@@ -537,9 +537,10 @@ recipe.key.layers: Which kinds of damage to apply
 recipe.key.rows: The share of rows to damage, such as 10%
 recipe.key.per_row: How many values to damage in one row
 recipe.key.exclude_fields: Columns to leave undamaged
-recipe.key.format: The form of the files, csv or json
+recipe.key.format: The form of the files, csv, json or sql
+recipe.key.dialect: For sql, the database the statements are written for
 recipe.key.dir: The folder the files go to
-recipe.key.file_per_entity: For json, a file for each table
+recipe.key.file_per_entity: For json and sql, a file for each table
 recipe.key.encoding: The text encoding of the files
 recipe.key.delimiter: For csv, the character between values
 # Beside a value the list offers, where no other screen names it already.
@@ -552,6 +553,11 @@ recipe.value.counted_in.bytes: Bytes of UTF-8, the way many databases count
 recipe.value.counted_in.graphemes: What a reader sees as one symbol
 recipe.value.format.csv: Values separated by commas, a file for each table
 recipe.value.format.json: JSON, in one file or a file for each table
+recipe.value.format.sql: An INSERT statement for each row, for the database under dialect
+recipe.value.dialect.postgresql: PostgreSQL
+recipe.value.dialect.mysql: MySQL and MariaDB
+recipe.value.dialect.sqlserver: Microsoft SQL Server
+recipe.value.dialect.sqlite: SQLite
 recipe.value.consistency.matches: Agrees with the fields named after it
 recipe.value.consistency.derived_from: Is built from the fields named after it
 recipe.checking: Checking this recipe.

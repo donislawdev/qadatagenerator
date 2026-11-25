@@ -20,7 +20,7 @@ The facts on this page are from version 40.54.0, published on 10 November 2026, 
 
 ## What does QA Data Generator do differently?
 
-- **It writes datasets from a recipe, not from code.** A YAML file names the tables, the columns, how many rows and the keys between tables, and `qadg generate` writes them as CSV or JSON. The desktop window reads the same recipe.
+- **It writes datasets from a recipe, not from code.** A YAML file names the tables, the columns, how many rows and the keys between tables, and `qadg generate` writes them as CSV, JSON or SQL. The desktop window reads the same recipe.
 - **It breaks the data on purpose and says what should happen.** It knows {{< count "damage" >}}, from a check digit off by one to a name written in another Unicode form. A manifest beside the data names every damaged value and the expected result, and `qadg verify` compares what your application did with it.
 - **A new column leaves the others as they were.** Each value is drawn from its own place: the table, the row, the column and the seed. In Faker one seed starts one sequence of random numbers, and every call takes the next one. A five-row table drawn with Faker 40.54.0 and the seed 4321 changed in every last name, and in every first name after the first row, when an email column was put between the two.
 - **SSNs that belong to nobody, and test card numbers.** Every SSN starts with 666, an area that is never issued, and card numbers are only the test numbers payment providers publish. Faker's `ssn()` gives numbers in areas that are issued, such as 042-34-8377 from its documentation, and its documentation says `credit_card_number()` generates "a valid credit card number". [SSN](/identifiers/ssn/) says which areas are issued.
@@ -43,7 +43,7 @@ When your test builds its data in code, one object at a time, and needs only val
 | Values made to test validation | for example `invalid_ssn()` | {{< count "damage" >}}, and the expected result for each damaged value |
 | A column added in the middle | changes the values drawn after it | leaves the other columns as they were |
 | The same seed in a newer version | "not guaranteed to be consistent across patch versions" | can draw some values differently |
-| What you get | values in your code, and `faker` prints them | CSV or JSON files, and a manifest |
+| What you get | values in your code, and `faker` prints them | CSV, JSON or SQL files, and a manifest |
 | Licence | MIT | GPL-3.0, and the data you generate is yours |
 
 ## Can I use both?

@@ -28,7 +28,7 @@ The free plan makes up to 1,000 rows per file and answers 200 API requests a day
 
 ## When is Mockaroo enough?
 
-When you need valid data of many kinds quickly, without installing anything, or need it as SQL or Excel. Mockaroo has many more types of data than QA Data Generator, and it mocks APIs, which QA Data Generator does not do.
+When you need valid data of many kinds quickly, without installing anything, or need it as Excel. Mockaroo has many more types of data than QA Data Generator, and it mocks APIs, which QA Data Generator does not do.
 
 ## How do they compare?
 
@@ -40,7 +40,7 @@ When you need valid data of many kinds quickly, without installing anything, or 
 | Types of data | more than 200 | {{< count "generators" >}} |
 | PESEL, NIP, REGON | not in the list of types in its API documentation | yes |
 | Values made to test validation | a blank share for each field, a Naughty String type | {{< count "damage" >}}, and the expected result for each damaged value |
-| Formats | CSV, JSON, SQL, Excel | CSV and JSON, and a manifest |
+| Formats | CSV, JSON, SQL, Excel | CSV, JSON and SQL, and a manifest |
 | Mock APIs | yes | no |
 
 ## Can I use both?

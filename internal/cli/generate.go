@@ -9,10 +9,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/donislawdev/qadatagenerator/internal/adapter/format"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestexport"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/values"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
+	"github.com/donislawdev/qadatagenerator/internal/domain/dataset"
 	"github.com/donislawdev/qadatagenerator/internal/domain/recipe"
 	"github.com/donislawdev/qadatagenerator/internal/fault"
 	"github.com/donislawdev/qadatagenerator/internal/produce"
@@ -32,6 +34,7 @@ type generateFlags struct {
 	out       *string
 	seed      *string
 	format    *string
+	dialect   *string
 	overwrite *bool
 	dryRun    *bool
 	// manifest is the extra form the manifest is exported in, empty for none.
@@ -46,6 +49,7 @@ func declareGenerate(set *flag.FlagSet) *generateFlags {
 		out:       set.String("out", "", ""),
 		seed:      set.String("seed", "", ""),
 		format:    set.String("format", "", ""),
+		dialect:   set.String("dialect", "", ""),
 		overwrite: set.Bool("overwrite", false, ""),
 		dryRun:    set.Bool("dry-run", false, ""),
 		manifest:  set.String("manifest", "", ""),
@@ -225,10 +229,14 @@ func recipeAt(out *streams, path string) (recipe.Recipe, int, bool) {
 	return decoded.Recipe, 0, true
 }
 
-// settingFormat is the name the record of the run gives the output format, in
-// one place because the refusal for an unwritable form reads it to say whether
-// the recipe or the command line asked.
-const settingFormat = "output.format"
+// settingFormat and settingDialect are the names the record of the run gives
+// the output format and the database it is written for, in one place because
+// the refusal for an unwritable form reads them to say whether the recipe or
+// the command line asked.
+const (
+	settingFormat  = "output.format"
+	settingDialect = "output.dialect"
+)
 
 // overrides applies the flags that carry a value and records what they moved.
 //
@@ -257,6 +265,10 @@ func overrides(built *recipe.Recipe, own *generateFlags) []produce.Override {
 		applied = append(applied, moved(settingFormat, built.Output.Format, *own.format))
 		built.Output.Format = *own.format
 	}
+	if own.given["dialect"] {
+		applied = append(applied, moved(settingDialect, built.Output.Dialect, *own.dialect))
+		built.Output.Dialect = *own.dialect
+	}
 	return applied
 }
 
@@ -279,19 +291,33 @@ func moved(setting, fromRecipe, fromFlag string) produce.Override {
 // while the same command without --dry-run ended with three. And the refusal
 // said the recipe had asked for a word that came from the command line, which
 // sends somebody to edit a file that is correct.
+//
+// The questions the writer of the form asks of a recipe are asked here as well,
+// for the same reason: a dry run never makes the writer (format.Fits).
 func usableFormat(built recipe.Recipe, applied []produce.Override) error {
+	asked := map[string]string{settingFormat: "the recipe asks for ", settingDialect: "the recipe asks for "}
+	for _, moved := range applied {
+		asked[moved.Setting] = "the command line asks for "
+	}
 	switch built.Output.Format {
 	case "", formatCSV, formatJSON:
-		return nil
-	}
-	asked := "the recipe asks for "
-	for _, moved := range applied {
-		if moved.Setting == settingFormat {
-			asked = "the command line asks for "
+	case formatSQL:
+		if built.Output.Dialect == "" {
+			return fault.New(fault.Config, "the "+formatSQL+" form writes statements for one "+
+				"database, and neither the recipe nor the command line says which").
+				DoInstead("add --dialect with one of " + strings.Join(dataset.Dialects(), ", ") +
+					", or a dialect: line under output in the recipe")
 		}
+		if !dataset.UsableDialect(built.Output.Dialect) {
+			return fault.New(fault.Config, "this build writes "+formatSQL+" for "+
+				strings.Join(dataset.Dialects(), ", ")+", and "+asked[settingDialect]+
+				built.Output.Dialect)
+		}
+	default:
+		return fault.New(fault.Config, "this build writes "+strings.Join(dataset.Forms(), ", ")+
+			", and "+asked[settingFormat]+built.Output.Format)
 	}
-	return fault.New(fault.Config, "this build writes "+formatCSV+" and "+formatJSON+
-		", and "+asked+built.Output.Format)
+	return format.Fits(built)
 }
 
 // impliedLine says which columns a field follows without a rule saying so.

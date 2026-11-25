@@ -211,6 +211,11 @@ var WindowReach = map[string]Claim{
 			"reads, rather than a control beside it that would say the same thing a second time",
 		Test: "TestEverySettingOfARunReachesItFromTheScreen",
 	},
+	"generate --dialect": {
+		Screen: "the output.dialect: line of the recipe written on the screen, which the run " +
+			"reads, rather than a control beside it that would say the same thing a second time",
+		Test: "TestTheDatabaseInTheRecipeReachesTheRunFromTheScreen",
+	},
 	"generate --manifest": {
 		Screen: "the extra form of the manifest, as the same list the take screen offers, whose " +
 			"first entry names the absence of one. On a recipe that orders no damage the card " +

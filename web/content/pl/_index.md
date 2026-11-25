@@ -1,5 +1,5 @@
 ---
-translatedFrom: 6ffde9bf0efccd55a637c31e578c689cc246f048
+translatedFrom: 812d03950eda8ae6bea29ce407551fcbcb18b960
 title: QA Data Generator
 seoTitle: "Generator danych testowych: dobre i złe dane z odpowiedzią"
 description: "Realistyczne dane testowe z przepisu YAML, potem celowo popsute. Przy każdej popsutej wartości to, co ma z nią zrobić aplikacja. Za darmo, offline, CLI i GUI."
@@ -7,7 +7,7 @@ hero:
   eyebrow: Generator danych testowych dla QA
   title: Dobre dane. Złe dane.
   turn: I właściwa odpowiedź.
-  lead: "**QA Data Generator** zamienia krótki przepis w YAML w całe zestawy danych, które przechodzą walidację, w CSV albo JSON. Potem celowo je psuje i zapisuje obok danych, co twoja aplikacja powinna zrobić z każdą popsutą wartością."
+  lead: "**QA Data Generator** zamienia krótki przepis w YAML w całe zestawy danych, które przechodzą walidację, w CSV, JSON albo SQL. Potem celowo je psuje i zapisuje obok danych, co twoja aplikacja powinna zrobić z każdą popsutą wartością."
   facts:
     - Bezpłatny, z otwartym kodem, GPL-3.0
     - Offline, bez konta i bez telemetrii

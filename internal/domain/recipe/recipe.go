@@ -288,6 +288,11 @@ type Output struct {
 	FilePerEntityGiven bool
 	Encoding           string
 	Delimiter          string
+	// Dialect is the database the SQL form writes for, one of
+	// dataset.Dialects. It has no default, and the SQL form is refused without
+	// one, because no file of statements means the same in every database
+	// (DEC-341). The other forms do not read it.
+	Dialect string
 }
 
 // Problem is one reason a recipe cannot be used, described in parts rather

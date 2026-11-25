@@ -1,5 +1,5 @@
 ---
-translatedFrom: 4432f92a8a0e7966cba5daf3ac644eba99b3de7b
+translatedFrom: 73e1670f1afb696a2d637c96bb684cdd8c35fbc6
 title: Mockaroo i QA Data Generator
 linkTitle: Mockaroo
 seoTitle: "Mockaroo czy QA Data Generator: alternatywa offline"
@@ -29,7 +29,7 @@ Plan bezpłatny tworzy do 1000 wierszy w pliku i odpowiada na 200 zapytań API d
 
 ## Kiedy Mockaroo wystarczy?
 
-Gdy potrzebujesz szybko poprawnych danych wielu rodzajów, bez instalowania czegokolwiek, albo potrzebujesz ich w SQL lub Excelu. Mockaroo ma dużo więcej typów danych niż QA Data Generator i tworzy makiety API, czego QA Data Generator nie robi.
+Gdy potrzebujesz szybko poprawnych danych wielu rodzajów, bez instalowania czegokolwiek, albo potrzebujesz ich w Excelu. Mockaroo ma dużo więcej typów danych niż QA Data Generator i tworzy makiety API, czego QA Data Generator nie robi.
 
 ## Jak wypadają obok siebie?
 
@@ -41,7 +41,7 @@ Gdy potrzebujesz szybko poprawnych danych wielu rodzajów, bez instalowania czeg
 | Rodzaje danych | ponad 200 typów | {{< count "generators" >}} |
 | PESEL, NIP, REGON | nie ma ich na liście typów w dokumentacji API | tak |
 | Wartości do testu walidacji | pusta część wartości każdego pola, typ Naughty String | {{< count "damage" >}} i oczekiwany wynik dla każdej popsutej wartości |
-| Formaty | CSV, JSON, SQL, Excel | CSV i JSON oraz manifest |
+| Formaty | CSV, JSON, SQL, Excel | CSV, JSON i SQL oraz manifest |
 | Makiety API | tak | nie |
 
 ## Czy mogę używać obu?
