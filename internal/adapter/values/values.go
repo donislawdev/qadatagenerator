@@ -52,6 +52,7 @@ const (
 	ISBN       = "isbn"
 	Card       = "card"
 	UUID       = "uuid"
+	Password   = "password"
 )
 
 // roles maps a generator onto the role it plays in a consistency rule.
@@ -135,6 +136,7 @@ var types = map[string]string{
 	ISBN:       TypeIdentifier,
 	Card:       TypeIdentifier,
 	UUID:       TypeIdentifier,
+	Password:   TypeString,
 }
 
 // Source produces values for one locale.
@@ -649,7 +651,7 @@ type generator struct {
 	// topic is the shelf a generator with no scheme behind it stands on, for
 	// a surface that lists every kind this build has.
 	//
-	// # Why it is declared for six generators and derived for the rest
+	// # Why it is declared for the generators with no scheme and derived for the rest
 	//
 	// A generator behind a scheme already says where it belongs: the
 	// identifier of the scheme carries a country (DEC-47), or carries none and
@@ -664,8 +666,9 @@ type generator struct {
 
 // The shelves a generator without a scheme can stand on.
 const (
-	TopicPeople = "people"
-	TopicPlaces = "places"
+	TopicPeople   = "people"
+	TopicPlaces   = "places"
+	TopicAccounts = "accounts"
 )
 
 // producers is the registry. It is a map rather than a switch so that the list
@@ -699,6 +702,8 @@ var producers = map[string]generator{
 	// entries as a word list does and a unique column can count them.
 	Card: {entries: cardNumbers, behind: intl.Card{}},
 	UUID: {produce: fromProvider(intl.UUID{}), behind: intl.UUID{}},
+	// Arithmetic over four alphabets, the same in every locale (password.go).
+	Password: {produce: Source.password, topic: TopicAccounts},
 }
 
 // fromProvider adapts an identifier provider to this registry.

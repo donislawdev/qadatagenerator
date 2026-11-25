@@ -657,6 +657,7 @@ const (
 	QuickGroupInternational Key = "quick.group.international"
 	QuickGroupPeople        Key = "quick.group.people"
 	QuickGroupPlaces        Key = "quick.group.places"
+	QuickGroupAccounts      Key = "quick.group.accounts"
 	CountryPL               Key = "country.PL"
 	CountryUS               Key = "country.US"
 	// QuickPickPrompt is what the empty search field says. QuickPickKinds is
@@ -688,6 +689,7 @@ const (
 	KindLastName   Key = "kind.last_name"
 	KindNip        Key = "kind.nip"
 	KindPesel      Key = "kind.pesel"
+	KindPassword   Key = "kind.password"
 	KindPostalCode Key = "kind.postal_code"
 	KindRegion     Key = "kind.region"
 	KindRegon      Key = "kind.regon"
@@ -746,10 +748,10 @@ var windowKeys = []Key{
 	QuickLabelCount, QuickCountNote, QuickMayRepeat,
 	QuickRefusedGenerator, QuickRefusedRole, QuickRefusedGender, QuickRefusedDate,
 	QuickRefusedUnavailable, QuickRefusedCount, QuickRefusedCountShape, QuickRefusedCountMany,
-	QuickGroupInternational, QuickGroupPeople, QuickGroupPlaces, CountryPL, CountryUS,
+	QuickGroupInternational, QuickGroupPeople, QuickGroupPlaces, QuickGroupAccounts, CountryPL, CountryUS,
 	QuickPickPrompt, QuickPickKinds, QuickPickMatches, QuickPickEnter, QuickPickNothing,
 	KindAba, KindBirthDate, KindCard, KindCity, KindEan, KindFirstName, KindGender, KindIban, KindImei,
-	KindIsbn, KindLastName, KindNip, KindPesel, KindPostalCode, KindRegion, KindRegon, KindSsn, KindUUID,
+	KindIsbn, KindLastName, KindNip, KindPassword, KindPesel, KindPostalCode, KindRegion, KindRegon, KindSsn, KindUUID,
 	KindVin,
 	CommandHeading, CommandCopy, CommandCopied,
 	PurposeTake, PurposeRecipe, PurposeManifest, PurposeAbout, AboutSaveJSON,

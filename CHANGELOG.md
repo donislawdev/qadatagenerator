@@ -627,6 +627,16 @@ repository once they are released.
 
 ### Added
 
+- **Passwords in plain text.** `generator: password` fills a column with
+  passwords of 12 to 16 characters, each with a lowercase letter, an uppercase
+  letter, a digit and one of `! # $ % & * + - = ? @ ^ _`, which is what common
+  password rules ask for. None of them needs escaping in CSV or JSON, and none
+  begins with `=`, `+`, `-` or `@`, which a spreadsheet would read as a
+  formula. `max_length` makes them shorter, down to 4, and a shorter limit is
+  refused before anything is written. They come from the seed, so anybody with
+  the seed gets the same ones: use them for tests, never for a real account.
+  `qadg quick password` makes them without a recipe, and the Kind list shows
+  them under a new heading, Accounts.
 - **UUIDs.** `generator: uuid` fills a column with random UUIDs such as
   `919108f7-52d1-4320-9bac-f847db4148a8`, version 4 of RFC 9562, in lowercase.
   `type: uuid` gives the same values, where it used to leave the column empty

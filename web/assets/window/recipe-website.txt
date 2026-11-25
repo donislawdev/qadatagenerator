@@ -189,7 +189,7 @@ applied
 policy.layers: 3 kinds of damage in REV - described in the catalog and not
 implemented in this build yet, so the manifest will record every one as not
 applied
-What this build can generate, 19 generators
+What this build can generate, 20 generators
 qadg generate your-recipe.yaml
 $
 Copy command

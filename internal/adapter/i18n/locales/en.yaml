@@ -684,6 +684,7 @@ quick.refused.count-many: values is the most this screen shows at once. The comm
 quick.group.international: International
 quick.group.people: People
 quick.group.places: Places
+quick.group.accounts: Accounts
 country.PL: Poland
 country.US: United States
 quick.pick.prompt: Type to filter, for example pesel or bank
@@ -706,6 +707,7 @@ kind.imei: Mobile device number
 kind.isbn: Book number
 kind.last_name: Family name
 kind.nip: Tax identification number
+kind.password: Password in plain text
 kind.pesel: National ID number
 kind.postal_code: ZIP code
 kind.region: Province (voivodeship)

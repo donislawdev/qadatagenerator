@@ -161,7 +161,7 @@ func TestEveryKindStandsOnAShelfAListCanName(t *testing.T) {
 					t.Errorf("%s is shelved as international and produces for %s alone",
 						generator, about.Countries[0])
 				}
-			case quick.GroupPeople, quick.GroupPlaces:
+			case quick.GroupPeople, quick.GroupPlaces, quick.GroupAccounts:
 				if about.Scheme != "" {
 					t.Errorf("%s is shelved under %s and still has the scheme %q", generator, about.Group.Kind, about.Scheme)
 				}

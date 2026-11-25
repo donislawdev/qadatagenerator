@@ -94,7 +94,7 @@ type Description struct {
 // language of the interface. The mode hands over a kind and a code, never a
 // sentence.
 type Group struct {
-	// Kind is one of the four constants below, or empty for a name this build
+	// Kind is one of the constants below, or empty for a name this build
 	// does not know.
 	Kind string
 	// Country is the ISO 3166-1 alpha-2 code the scheme carries, for
@@ -114,6 +114,9 @@ const (
 	GroupPeople = "people"
 	// GroupPlaces is a kind with no scheme that describes a place.
 	GroupPlaces = "places"
+	// GroupAccounts is a kind with no scheme that a person signs up or logs in
+	// with.
+	GroupAccounts = "accounts"
 )
 
 // groupOf reads the shelf off a scheme, or off a declared topic where there is
@@ -143,6 +146,8 @@ func groupOf(scheme, topic string, countries []string) Group {
 		return Group{Kind: GroupPeople}
 	case values.TopicPlaces:
 		return Group{Kind: GroupPlaces}
+	case values.TopicAccounts:
+		return Group{Kind: GroupAccounts}
 	}
 	return Group{}
 }

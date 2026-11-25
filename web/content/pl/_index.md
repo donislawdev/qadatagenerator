@@ -1,5 +1,5 @@
 ---
-translatedFrom: f98b43795de0c6360f2dcce0dfd3421e4ca4ea37
+translatedFrom: a7cb576d5db9c07dd987db1690d926eedff3621a
 title: QA Data Generator
 seoTitle: "Generator danych testowych: dobre i złe dane z odpowiedzią"
 description: "Realistyczne dane testowe z przepisu YAML, potem celowo popsute. Przy każdej popsutej wartości to, co ma z nią zrobić aplikacja. Za darmo, offline, CLI i GUI."
@@ -50,8 +50,8 @@ good:
       text: Miasto, jego stan i kod ZIP, które do siebie pasują.
       generators: [city, region, postal_code]
     - title: Konta
-      text: Losowe UUID-y na identyfikatory użytkowników i rekordów.
-      generators: [uuid]
+      text: Losowe UUID-y na identyfikatory użytkowników i rekordów oraz hasła w postaci jawnej, które przyjmują typowe reguły haseł.
+      generators: [uuid, password]
     - title: Produkty i płatności
       text: Numery ISBN, kody kreskowe EAN, numery IMEI telefonów komórkowych, numery VIN pojazdów oraz numery kart wyłącznie z opublikowanych numerów testowych.
       generators: [isbn, ean, imei, vin, card]

@@ -396,7 +396,8 @@ func TestEveryGeneratorStandsOnExactlyOneShelf(t *testing.T) {
 			t.Errorf("%s is behind a scheme AND declares the topic %q, which is two answers", generator, topic)
 		case !behindScheme && !declared:
 			t.Errorf("%s is behind no scheme and declares no topic, so no list can shelve it", generator)
-		case declared && topic != values.TopicPeople && topic != values.TopicPlaces:
+		case declared && topic != values.TopicPeople && topic != values.TopicPlaces &&
+			topic != values.TopicAccounts:
 			t.Errorf("%s declares the topic %q, which is not a shelf this build names", generator, topic)
 		}
 	}

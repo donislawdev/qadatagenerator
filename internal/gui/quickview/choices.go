@@ -49,8 +49,8 @@ func (v *View) choices() []parts.Choice {
 }
 
 // groupRank is the order of the headings: the country of the locale first,
-// then the other countries, then what belongs to no country, then people and
-// places.
+// then the other countries, then what belongs to no country, then people,
+// places and accounts.
 //
 // # Why the locale's country comes first
 //
@@ -71,6 +71,8 @@ func groupRank(group quick.Group, home string) int {
 		return rankPeople
 	case quick.GroupPlaces:
 		return rankPlaces
+	case quick.GroupAccounts:
+		return rankAccounts
 	}
 	return rankUnknown
 }
@@ -82,6 +84,7 @@ const (
 	rankInternational
 	rankPeople
 	rankPlaces
+	rankAccounts
 	rankUnknown
 )
 
@@ -108,6 +111,8 @@ func (v *View) groupName(group quick.Group) string {
 		return v.text.T(i18n.QuickGroupPeople)
 	case quick.GroupPlaces:
 		return v.text.T(i18n.QuickGroupPlaces)
+	case quick.GroupAccounts:
+		return v.text.T(i18n.QuickGroupAccounts)
 	}
 	return ""
 }

@@ -272,6 +272,10 @@
       "produces": "identifier (PL.nip)"
     },
     {
+      "name": "password",
+      "produces": "string"
+    },
+    {
       "name": "pesel",
       "produces": "identifier (PL.pesel)"
     },

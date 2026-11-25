@@ -337,6 +337,7 @@ any computer. Where the driver works, the folder is never used.
 | `card` | card numbers, only from the published test numbers |
 | `isbn`, `ean`, `imei`, `vin` | book numbers, barcodes, mobile phone identities and vehicle identification numbers |
 | `uuid` | random unique IDs in the form `919108f7-52d1-4320-9bac-f847db4148a8` (UUID version 4) |
+| `password` | passwords in plain text, 12 to 16 characters with a lowercase and an uppercase letter, a digit and one of `! # $ % & * + - = ? @ ^ _`. They come from the seed, so use them for tests only |
 | `ssn`, `aba` | US social security numbers and bank routing numbers |
 | `pesel`, `nip`, `regon`, `iban` | Polish national ID, tax and business numbers, and Polish bank account numbers |
 
