@@ -41,6 +41,11 @@ type OptionLook struct {
 	// called it ugly (DEC-260).
 	Current bool
 	Hovered bool
+	// Compact gives up the floor under the height of a row, so the row is as
+	// tall as its words. The list under a code editor's caret is read that way,
+	// a line of text to a row, and it opens inside a field where every row
+	// taller than a line is a row fewer in sight (DEC-338).
+	Compact bool
 }
 
 // OptionFace is the look of one option in the panel.
@@ -74,9 +79,55 @@ func OptionFace(look OptionLook) fyne.CanvasObject {
 	}
 	inner := container.NewBorder(nil, nil, nil, end, columns)
 
-	return AtLeast(0, theme.OptionHeight, container.NewStack(ground,
+	face := container.NewStack(ground,
 		Pad(theme.NameStepHairline, theme.NameStepHairline,
-			theme.NameStepRelated, theme.NameStepRelated, inner)))
+			theme.NameStepRelated, theme.NameStepRelated, inner))
+	if look.Compact {
+		return face
+	}
+	return AtLeast(0, theme.OptionHeight, face)
+}
+
+// OptionInset is how far from the edge of a row its name begins, which is
+// what a list placed under a word moves left by so that the names in it stand
+// under the word.
+func OptionInset() float32 { return theme.StepOf(theme.NameStepRelated) }
+
+// OptionWidth is how wide the face of an option is with everything on it in
+// full, measured from the face for the reason OptionNameWidth gives.
+func OptionWidth(look OptionLook) float32 { return OptionFace(look).MinSize().Width }
+
+// ellipsis ends words cut to a width.
+const ellipsis = "…"
+
+// CutToWidth is words at a rung of the type ladder that take no more than a
+// width: the words themselves when they fit, otherwise as many whole
+// characters as fit with an ellipsis after them, and nothing when not even the
+// ellipsis does. Never cut inside a character, for the reason TableCell gives.
+//
+// The cut is guessed from the share of the width that fits and then moved a
+// character at a time, so a sentence costs a few measurements rather than one
+// per character.
+func CutToWidth(words, rung string, width float32) string {
+	size := theme.TypeSize(rung)
+	measure := func(text string) float32 { return fyne.MeasureText(text, size, fyne.TextStyle{}).Width }
+	full := measure(words)
+	if full <= width {
+		return words
+	}
+	runes := []rune(words)
+	fits := func(count int) bool { return measure(string(runes[:count])+ellipsis) <= width }
+	count := min(max(int(float32(len(runes))*width/full), 0), len(runes))
+	for count > 0 && !fits(count) {
+		count--
+	}
+	for count < len(runes) && fits(count+1) {
+		count++
+	}
+	if count == 0 && !fits(0) {
+		return ""
+	}
+	return string(runes[:count]) + ellipsis
 }
 
 // OptionNameWidth is how wide the column of names has to be to hold any of

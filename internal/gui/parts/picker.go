@@ -84,6 +84,13 @@ type picker struct {
 	chosen  string
 	onPick  func(string)
 	onClose func()
+	// compact is the panel of an editor's suggestions: rows as tall as their
+	// words and a tight margin (newSuggestionPanel). natural is how wide such a
+	// panel is with every detail in full, kept from before any was cut.
+	compact bool
+	natural float32
+	// nameWidth is the floor under the column of names, the same on every row.
+	nameWidth float32
 	// onShape is told when the rows the filter left changed, so that
 	// whoever placed the panel can size it to them again.
 	//
@@ -107,9 +114,12 @@ type picker struct {
 }
 
 // pickRow is one choice, its heading if it opens a group, and whether the
-// filter left it on screen.
+// filter left it on screen. The choice is what the row shows, which in a
+// compact panel may carry its detail cut to the panel's width (fitDetails), and
+// full is the choice as it was given.
 type pickRow struct {
 	choice  Choice
+	full    Choice
 	tap     *TapRow
 	heading fyne.CanvasObject
 	shown   bool
@@ -136,6 +146,64 @@ func newPicker(choices []Choice, chosen string, words PanelWords,
 	return p
 }
 
+// suggestionMargin is the margin of the panel of an editor's suggestions,
+// tighter than a chooser's, because it opens among the lines of a text.
+const suggestionMargin = palette.NameStepTight
+
+// newSuggestionPanel is the panel of a chooser made for the list under an
+// editor's caret (suggest.go): flat, nothing chosen, its rows as tall as their
+// words and its margin the tight step. A code editor's list is read a line to a
+// row, and it opens inside a field, where every row taller than a line is a row
+// fewer in sight. Measured on the render of the recipe screen on 2026-11-24:
+// with the rows of a chooser the list under the fourth line of the field held
+// two rows.
+//
+// pointer is told when the pointer arrives on a row and leaves it, because the
+// rows take the pointer from the field the panel stands in.
+func newSuggestionPanel(choices []Choice, pick func(string), dismiss func(), pointer func(bool)) *picker {
+	p := &picker{choices: choices, onPick: pick, onClose: dismiss, compact: true}
+	p.ExtendBaseWidget(p)
+	p.buildRows()
+	for _, row := range p.rows {
+		row.tap.OnPointer = pointer
+	}
+	p.body = paint.On(paint.PanelGround(), paint.PadAll(suggestionMargin, p.scroll))
+	p.natural = p.body.MinSize().Width
+	return p
+}
+
+// nameInset is how far from the panel's edge the names in its rows begin.
+func (p *picker) nameInset() float32 {
+	return palette.StepOf(suggestionMargin) + paint.OptionInset()
+}
+
+// fitDetails cuts the detail of every row of a compact panel to what a panel
+// of that width leaves beside the name, or gives it back in full where it fits.
+//
+// # Why cut rather than let the panel run wider
+//
+// The panel stands inside the field, which is what keeps the keyboard in the
+// field (suggest.go), so it can be no wider than the field. A field at the size
+// the window opens in is about 335 wide at the recipe screen, measured in the
+// live window on 2026-11-24, where the longest meaning of a key ran under the
+// panel's edge and stopped in the middle of a word. The name stays whole,
+// because it is what gets written.
+func (p *picker) fitDetails(width float32) {
+	if !p.compact {
+		return
+	}
+	margin := palette.StepOf(suggestionMargin)
+	room := width - margin - margin
+	for _, row := range p.rows {
+		bare := paint.OptionWidth(paint.OptionLook{Name: row.full.Value, NameWidth: p.nameWidth, Compact: true})
+		cut := paint.CutToWidth(row.full.Detail, palette.TypeBody, room-bare)
+		if cut != row.choice.Detail {
+			row.choice.Detail = cut
+			row.tap.Refresh()
+		}
+	}
+}
+
 // grouped says whether any choice stands under a heading, which is what
 // decides between the two shapes of the panel.
 func (p *picker) grouped() bool {
@@ -154,22 +222,24 @@ func (p *picker) buildRows() {
 	for _, choice := range p.choices {
 		names = append(names, choice.Value)
 	}
-	nameWidth := paint.OptionNameWidth(names...)
+	p.nameWidth = paint.OptionNameWidth(names...)
 
 	items := make([]fyne.CanvasObject, 0, len(p.choices))
 	group := ""
 	for index, choice := range p.choices {
-		row := &pickRow{choice: choice, shown: true}
+		row := &pickRow{choice: choice, full: choice, shown: true}
 		if choice.Group != "" && choice.Group != group {
 			group = choice.Group
 			row.heading = paint.OptionHeading(choice.Group)
 			items = append(items, row.heading)
 		}
-		at, this := index, choice
+		at := index
 		row.tap = NewTapRow(func(hovered bool) fyne.CanvasObject {
+			this := p.rows[at].choice
 			return paint.OptionFace(paint.OptionLook{
-				Name: this.Value, Detail: this.Detail, Note: this.Note, NameWidth: nameWidth,
+				Name: this.Value, Detail: this.Detail, Note: this.Note, NameWidth: p.nameWidth,
 				Chosen: this.Value == p.chosen, Current: p.current == at, Hovered: hovered,
+				Compact: p.compact,
 			})
 		}, func() { p.pick(at) })
 		p.rows = append(p.rows, row)
@@ -445,6 +515,11 @@ func (p *picker) Tapped(*fyne.PointEvent) {}
 // seen on the real window on 2026-09-14, where the two locales stood in a
 // panel four times wider than either of them.
 func (p *picker) Width(chooser float32) float32 {
+	if p.compact {
+		// As wide as its rows with every detail in full, whatever was cut to
+		// fit the last place it stood in.
+		return max(chooser, p.natural)
+	}
 	if p.grouped() {
 		return palette.PanelWidth
 	}

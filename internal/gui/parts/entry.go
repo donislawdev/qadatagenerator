@@ -1,6 +1,8 @@
 package parts
 
 import (
+	"slices"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -92,6 +94,13 @@ type Editor struct {
 	// keyboard is whether this field holds the keyboard, which the toolkit
 	// keeps in a field of its own nobody else can read.
 	keyboard bool
+
+	// hints is the list under the caret saying what can be written there
+	// (suggest.go, DEC-338), and nil for an editor nobody turned it on for.
+	hints *suggestions
+	// pointerOnText and pointerOnRow are where the pointer is on the field:
+	// on the text, or on a row of the list, which takes it from the text.
+	pointerOnText, pointerOnRow bool
 }
 
 // Asserted so that dropping one of these is a compile error rather than a field
@@ -135,7 +144,7 @@ func NewEditor(changed func(string)) *Editor {
 	// Called by the toolkit after every move of the caret and every change of
 	// the text, once it has scrolled the caret into sight, which is also the
 	// only report of that scroll (lines.go).
-	editor.OnCursorChanged = editor.redrawLines
+	editor.OnCursorChanged = editor.rowsMoved
 	editor.ExtendBaseWidget(editor)
 	return editor
 }
@@ -152,7 +161,8 @@ func (e *Editor) AcceptsTab() bool { return true }
 
 // TypedKey indents on Tab, takes the indent back on Shift+Tab, arms the way out
 // on Esc, indents the line Enter begins, and hands every other key to the
-// toolkit.
+// toolkit. While the list of suggestions is open, the keys that move in it,
+// pick from it and close it are its own (suggestKey).
 //
 // A key that only modifies another, Shift above all, leaves the way out armed:
 // the driver hands this field a press of Shift on its own before Shift+Tab, and
@@ -163,7 +173,7 @@ func (e *Editor) AcceptsTab() bool { return true }
 // character with it, which is the one character a recipe may not be indented
 // with.
 func (e *Editor) TypedKey(key *fyne.KeyEvent) {
-	if key == nil || e.Disabled() {
+	if key == nil || e.Disabled() || e.suggestKey(key) {
 		return
 	}
 	switch {
@@ -182,6 +192,9 @@ func (e *Editor) TypedKey(key *fyne.KeyEvent) {
 	default:
 		e.leaving = false
 		e.Entry.TypedKey(key)
+		// A key that moved the caret or took a character away changed the
+		// word an open list is about.
+		e.again()
 	}
 }
 
@@ -336,20 +349,45 @@ func (e *Editor) rowStart(row int) (int, bool) {
 
 // TypedRune types a character, and never a tab character: Tab is a key this
 // field answers in TypedKey, and a tab cannot indent a recipe. Typing disarms
-// the way out, because a person typing is still writing.
+// the way out, because a person typing is still writing, and it opens the list
+// of suggestions or asks it again (typedRune).
+//
+// The space of Ctrl+Space is not typed. The shortcut opens the list, and on
+// Windows the system sends the space after it as well, as a character of its
+// own. Ctrl with Alt is AltGr on a Windows keyboard, which types characters, so
+// a space with both held is typed.
 func (e *Editor) TypedRune(r rune) {
 	e.leaving = false
 	if r == '\t' {
 		return
 	}
+	if held := e.held(); r == ' ' && held&fyne.KeyModifierControl != 0 && held&fyne.KeyModifierAlt == 0 {
+		return
+	}
 	e.Entry.TypedRune(r)
+	e.typedRune(r)
 }
 
-// TypedShortcut disarms the way out, for the same reason typing does, and lets
-// the toolkit copy, paste and undo.
+// TypedShortcut disarms the way out, for the same reason typing does, opens
+// the list of suggestions on Ctrl+Space, and lets the toolkit copy, paste and
+// undo. Any other shortcut closes the list, because what it was about may no
+// longer be in the text.
 func (e *Editor) TypedShortcut(shortcut fyne.Shortcut) {
 	e.leaving = false
+	if custom, ok := shortcut.(*desktop.CustomShortcut); ok &&
+		custom.KeyName == fyne.KeySpace && custom.Modifier == fyne.KeyModifierControl {
+		e.SuggestHere()
+		return
+	}
+	e.closeSuggestions()
 	e.Entry.TypedShortcut(shortcut)
+}
+
+// SetText replaces the text, and closes the list of suggestions, which was
+// about the text replaced.
+func (e *Editor) SetText(text string) {
+	e.closeSuggestions()
+	e.Entry.SetText(text)
 }
 
 // KeyDown notes Shift for when the driver cannot say, and lets the toolkit
@@ -370,9 +408,11 @@ func (e *Editor) KeyUp(key *fyne.KeyEvent) {
 }
 
 // MouseDown disarms the way out: a click in the field is a person going on
-// writing, not leaving.
+// writing, not leaving. It closes the list of suggestions, because the caret
+// goes wherever the click was.
 func (e *Editor) MouseDown(event *desktop.MouseEvent) {
 	e.leaving = false
+	e.closeSuggestions()
 	e.Entry.MouseDown(event)
 }
 
@@ -421,30 +461,50 @@ func (e *Editor) CreateRenderer() fyne.WidgetRenderer {
 }
 
 // editorRenderer is the wheeled drawing of the editor that also tells the
-// column of numbers when the rows can have moved.
+// column of numbers when the rows can have moved, and draws the list of
+// suggestions on top of everything else (suggest.go).
 //
 // A change of width folds the text again inside the toolkit's layout of the
 // field, and the toolkit says nothing about it (the layout of its content at
 // widget/entry.go:1817 of v2.8.2 resizes the text and calls no one). So the
-// numbers are put back after every layout, once the toolkit has finished it.
+// numbers and the list are put back after every layout, once the toolkit has
+// finished it.
 type editorRenderer struct {
 	*wheeled
 	editor *Editor
+	// objects is the wheeled list with the holder of the list of suggestions
+	// after it, kept so that a frame asking several times allocates nothing.
+	objects []fyne.CanvasObject
 }
 
-// Layout lets the toolkit and the pane lay out, then puts the numbers back.
+// Layout lets the toolkit and the pane lay out, then puts the numbers and the
+// list back.
 func (r *editorRenderer) Layout(size fyne.Size) {
 	r.wheeled.Layout(size)
+	if hints := r.editor.hints; hints != nil {
+		hints.holder.Resize(size)
+	}
 	r.editor.follow(r.layer.area)
-	r.editor.redrawLines()
+	r.editor.rowsMoved()
 }
 
-// Objects is the wheeled list, and follows the area when the toolkit's renderer
-// handed over another list and the pane found another area in it.
+// Objects is the wheeled list with the holder of the list of suggestions last,
+// so that the list is drawn over the text and found under the pointer before
+// the pane of the wheel. It follows the area when the toolkit's renderer handed
+// over another list and the pane found another area in it.
 func (r *editorRenderer) Objects() []fyne.CanvasObject {
 	objects := r.wheeled.Objects()
 	r.editor.follow(r.layer.area)
-	return objects
+	hints := r.editor.hints
+	if hints == nil {
+		return objects
+	}
+	kept := len(r.objects) == len(objects)+1 && slices.Equal(r.objects[:len(objects)], objects) &&
+		r.objects[len(objects)] == fyne.CanvasObject(hints.holder)
+	if !kept {
+		r.objects = append(append(make([]fyne.CanvasObject, 0, len(objects)+1), objects...), hints.holder)
+	}
+	return r.objects
 }
 
 // follow keeps the area the column follows, and asks it to say when the wheel
@@ -457,8 +517,15 @@ func (e *Editor) follow(area *container.Scroll) {
 	}
 	e.area = area
 	if area != nil {
-		area.OnScrolled = func(fyne.Position) { e.redrawLines() }
+		area.OnScrolled = func(fyne.Position) { e.rowsMoved() }
 	}
+}
+
+// rowsMoved puts back everything drawn where the rows of the text are: the
+// numbers, the marks and the band (lines.go), and the list of suggestions.
+func (e *Editor) rowsMoved() {
+	e.redrawLines()
+	e.placeSuggestions()
 }
 
 // FocusGained tells the grounds the keyboard is here, then lets the toolkit
@@ -476,10 +543,12 @@ func (e *Editor) FocusGained() {
 
 // FocusLost tells them it left, then lets the toolkit take the caret. The way
 // out is disarmed, and Shift is forgotten, because its release will go to
-// whatever holds the keyboard next. The band goes with the caret.
+// whatever holds the keyboard next. The band and the list of suggestions go
+// with the caret.
 func (e *Editor) FocusLost() {
 	e.leaving, e.shiftDown = false, false
 	e.keyboard = false
+	e.closeSuggestions()
 	if e.onFocus != nil {
 		e.onFocus(false)
 	}
@@ -491,8 +560,24 @@ func (e *Editor) FocusLost() {
 // entry does not (B-282): it answers a pointer with the shape of the cursor and
 // nothing a picture can see.
 func (e *Editor) MouseIn(*desktop.MouseEvent) {
+	e.pointerOnText = true
+	e.showPointer()
+}
+
+// pointerOnList is the pointer arriving on a row of the list of suggestions
+// and leaving it. The row takes the pointer from the field it stands in, and
+// the field would go dark under a pointer that never left it (DEC-338), the
+// way it would under the column of numbers without lineMarks passing it on.
+func (e *Editor) pointerOnList(here bool) {
+	e.pointerOnRow = here
+	e.showPointer()
+}
+
+// showPointer tells the grounds whether the pointer is anywhere on the field:
+// on its text or on a row of its list.
+func (e *Editor) showPointer() {
 	if e.onHover != nil {
-		e.onHover(true)
+		e.onHover(e.pointerOnText || e.pointerOnRow)
 	}
 }
 
@@ -500,16 +585,16 @@ func (e *Editor) MouseIn(*desktop.MouseEvent) {
 // ground shows.
 func (e *Editor) MouseMoved(*desktop.MouseEvent) {}
 
-// MouseOut tells them the pointer left.
+// MouseOut tells them the pointer left, unless it went onto the list.
 func (e *Editor) MouseOut() {
-	if e.onHover != nil {
-		e.onHover(false)
-	}
+	e.pointerOnText = false
+	e.showPointer()
 }
 
 // Disable puts the editor out of reach and tells the grounds, which the
 // toolkit cannot: see FieldEntry.Disable.
 func (e *Editor) Disable() {
+	e.closeSuggestions()
 	e.Entry.Disable()
 	if e.onDisable != nil {
 		e.onDisable(true)

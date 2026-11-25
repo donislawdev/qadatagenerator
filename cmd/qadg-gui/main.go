@@ -306,6 +306,8 @@ func assemble(text i18n.Catalogue, window fyne.Window, clipboard quickview.Clipb
 	// thing on this screen that can take minutes.
 	editor := recipeview.New(text, recipeview.Checker(described), recipeview.Writer(),
 		work, folders, window)
+	// The list under the caret offers the layers the checks are made against.
+	editor.OfferLayersOf(described)
 
 	// The one screen that reaches outside this tool's own files and channels,
 	// and the way out is handed in rather than reached for, like every other

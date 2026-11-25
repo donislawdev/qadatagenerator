@@ -57,6 +57,10 @@ var (
 	// documentation and refused with a reason rather than accepted and
 	// quietly ignored at the end of a long run.
 	writableFormats = []string{"csv", "json"}
+
+	// The one encoding this build writes, which is also what a run writes
+	// when the recipe names none.
+	writableEncodings = []string{"utf-8"}
 )
 
 // MaxSize is the largest recipe this build will read.
@@ -808,7 +812,8 @@ func (r *reader) output(node any) recipe.Output {
 			// agree about a recipe naming an encoding this build does not write.
 			if !dataset.UsableEncoding(built.Encoding) {
 				r.report(where, "this build writes UTF-8 and the recipe asks for "+
-					strconv.Quote(built.Encoding), "utf-8", "leave the line out for UTF-8")
+					strconv.Quote(built.Encoding), strings.Join(writableEncodings, ", "),
+					"leave the line out for UTF-8")
 			}
 		case "delimiter":
 			built.Delimiter, _ = r.text(where, item.Value)

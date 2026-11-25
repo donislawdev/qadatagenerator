@@ -3,31 +3,14 @@ package takeview
 import (
 	"fyne.io/fyne/v2"
 
-	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/gui/damageparts"
 	"github.com/donislawdev/qadatagenerator/internal/gui/parts"
 	"github.com/donislawdev/qadatagenerator/internal/take"
 )
 
-// nameOfPerRow is how many defects one record may carry, said in words.
-//
-// Same reason as the map above and the same closing test: the engine takes
-// exactly_one and any, and a list offering those two spellings asks somebody
-// to read a settings file in order to use a window.
-var nameOfPerRow = map[string]i18n.Key{
-	"exactly_one": i18n.TakePerRowExactlyOne,
-	"any":         i18n.TakePerRowAny,
-}
-
-// labelOfPerRow is one such setting named, or the bare value if nothing names
-// it, for the reason given at labelOfLayer.
-func (v *View) labelOfPerRow(value string) string {
-	key, named := nameOfPerRow[value]
-	if !named {
-		return value
-	}
-	return v.text.T(key)
-}
+// labelOfPerRow is how many defects one record may carry, said in words, by
+// the names both screens ordering damage share (damageparts.PerRowLabel).
+func (v *View) labelOfPerRow(value string) string { return damageparts.PerRowLabel(v.text, value) }
 
 // perRowLabels is every such setting said the way a person reads it.
 func (v *View) perRowLabels() []string {

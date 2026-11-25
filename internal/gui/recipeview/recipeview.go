@@ -47,6 +47,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
+	"github.com/donislawdev/qadatagenerator/internal/adapter/recipeyaml"
 	"github.com/donislawdev/qadatagenerator/internal/app/generate"
 	"github.com/donislawdev/qadatagenerator/internal/app/validate"
 	"github.com/donislawdev/qadatagenerator/internal/damage"
@@ -170,6 +171,9 @@ type View struct {
 	// rebuilt when the answer changes.
 	example    *parts.Button
 	generators *parts.Disclosure
+	// vocabulary is what the list under the caret offers from the build rather
+	// than from the recipe (suggest.go).
+	vocabulary recipeyaml.Vocabulary
 
 	// The band along the top: where a run writes, whether it may replace what
 	// is there, and the one action, which is the button that generates or the
@@ -227,6 +231,8 @@ func New(text i18n.Catalogue, check Check, write Write, work background.Work,
 	view.buildBand()
 	view.editor = parts.NewEditor(view.Recheck)
 	view.editor.SetPlaceHolder(text.T(i18n.RecipePlaceholder))
+	view.vocabulary = buildVocabulary()
+	view.editor.Suggest(view.suggest)
 	view.buildHints()
 	view.buildCommand()
 	view.lay()

@@ -16,6 +16,7 @@ package values
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 
@@ -355,16 +356,25 @@ func (s Source) Schemes() []provider.Provider {
 	return schemes
 }
 
-// ProducesType reports whether this build can fill a field described by that
-// type alone.
+// filledTypes are the types this build fills a field described by type alone
+// with.
 //
 // The list is short on purpose and is not the whole catalog vocabulary. Each
 // remaining type is a decision about shape that belongs with the generator
 // owning it, and inventing an email or a money format here would put an unowned
 // format into somebody's data.
+var filledTypes = []string{TypeInteger, TypeDecimal}
+
+// ProducesType reports whether this build can fill a field described by that
+// type alone.
 func (s Source) ProducesType(kind string) bool {
-	return kind == TypeInteger || kind == TypeDecimal
+	return slices.Contains(filledTypes, kind)
 }
+
+// FilledTypes are the types this build fills a field described by type alone
+// with, in the order a list offers them. It is the list ProducesType answers
+// from, so the editor's offers and the run cannot disagree.
+func (s Source) FilledTypes() []string { return slices.Clone(filledTypes) }
 
 // Produce returns one value.
 //

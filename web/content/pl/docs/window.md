@@ -1,5 +1,5 @@
 ---
-translatedFrom: 0f5ea9b6c989c91e106c50f3b1de2f4d9564e24a
+translatedFrom: ed7efb02f9a2a1833d0101b6a3833a9e62f2bc7d
 title: Okno
 seoTitle: "Okno programu: cztery ekrany"
 description: "Quick value, Recipe, Damage a file i Check results: co robi każdy ekran okna i które polecenie robi to samo."
@@ -19,6 +19,8 @@ Dziesięć numerów VIN z seeda `readme`. Pierwsze trzy to te, które wypisuje p
 Napisz albo wklej przepis. Okno sprawdza go w trakcie pisania, pokazuje, co opisuje, i uruchamia go, kiedy zechcesz. Ekran robi to samo co `qadg validate` i `qadg generate`.
 
 Każda linia przepisu ma numer, liczony tak samo, jak liczy linie `qadg validate` w swoich komunikatach. Linia z problemem ma czerwony znak przy numerze, a kliknięcie problemu po prawej przenosi do tej linii. Enter zaczyna następną linię z takim samym wcięciem jak linia wyżej, a po linii zakończonej dwukropkiem o jeden poziom głębiej.
+
+W trakcie pisania lista przy kursorze pokazuje, co można w tym miejscu wpisać: klucze pasujące do tego miejsca przepisu, a po kluczu takim jak `generator` albo `type` wartości, które przyjmuje, każdą z opisem. Pisanie zawęża listę. Strzałki wybierają, Enter albo Tab wpisuje wybraną pozycję, a Esc zamyka listę. Ctrl+Spacja otwiera ją w dowolnej chwili.
 
 {{< window name="recipe-website" alt="Ekran Recipe sprawdzający przepis shop.yaml, z plikami, które zapisałby przebieg, i pierwszymi wierszami klientów" >}}
 Przepis z [Pierwszych kroków](/docs/getting-started/), wklejony do okna. Okno sprawdza go w trakcie pisania, wypisuje pliki, które zapisałby przebieg, mówi, jaką część zamówionych uszkodzeń ta wersja wykonuje, i pokazuje pierwsze wiersze, zanim cokolwiek zostanie zapisane.

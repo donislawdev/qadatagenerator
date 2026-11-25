@@ -29,6 +29,10 @@
 //     states of the recipe policy and of the take and corrupt screen.
 //   - the open panel of a chooser. It is an overlay, one per window, and it is
 //     photographed by the states of the quick screen that open it.
+//   - the open list of suggestions of the editor. It is the same panel drawn
+//     inside the field, it opens only while somebody types there, and it is
+//     photographed by the state of the recipe screen that opens it,
+//     recipe-suggest (DEC-338).
 //   - parts.Standing, which is a floor under a height rather than a control.
 package catalogue
 

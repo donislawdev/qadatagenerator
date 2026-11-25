@@ -506,8 +506,53 @@ screen.recipe: Recipe
 recipe.empty: Write or paste a recipe on the left. It is checked as you type, and nothing is written to disk until you ask for it.
 recipe.placeholder: A recipe, in YAML
 # Under the field. Tab indents in it, so the way out has to be said where the
-# person typing can see it.
-recipe.editor.keys: Tab indents by two spaces. Esc, then Tab, leaves the field.
+# person typing can see it. The list of what can be written opens by itself
+# while typing, and Ctrl+Space is the one way to open it that nothing shows.
+recipe.editor.keys: Tab indents by two spaces. Ctrl+Space shows what can be written. Esc, then Tab, leaves the field.
+# Beside each key the list under the caret offers: what the key does.
+recipe.key.version: Which version of the recipe format the file uses
+recipe.key.seed: Makes every run give the same rows
+recipe.key.locale: Whose names, places and numbers to make
+recipe.key.name: A name for the recipe, written into the manifest
+recipe.key.tag: A label for the run, written into the manifest
+recipe.key.entities: The tables to make
+recipe.key.output: Which files a run writes and where
+recipe.key.policy: What to damage when the recipe runs
+recipe.key.count: How many rows the table gets
+recipe.key.primary_key: The column, or columns, that identify a row
+recipe.key.fields: The columns of the table
+recipe.key.consistency: Rules that keep columns in agreement
+recipe.key.belongs_to: The parent table and how many rows each parent gets
+recipe.key.type: The kind of value, such as a whole number
+recipe.key.generator: What fills the column
+recipe.key.unique: No value repeats in the column
+recipe.key.required: The column is never empty
+recipe.key.max_length: The longest value allowed
+recipe.key.counted_in: How the longest value is counted
+recipe.key.empty: The share of rows left empty, such as 15%
+recipe.key.values: A list of values to draw from
+recipe.key.min_value: The smallest number to draw
+recipe.key.max_value: The largest number to draw
+recipe.key.layers: Which kinds of damage to apply
+recipe.key.rows: The share of rows to damage, such as 10%
+recipe.key.per_row: How many values to damage in one row
+recipe.key.exclude_fields: Columns to leave undamaged
+recipe.key.format: The form of the files, csv or json
+recipe.key.dir: The folder the files go to
+recipe.key.file_per_entity: For json, a file for each table
+recipe.key.encoding: The text encoding of the files
+recipe.key.delimiter: For csv, the character between values
+# Beside a value the list offers, where no other screen names it already.
+recipe.value.version: The version this program reads
+recipe.value.type.integer: A whole number from 0 to 999999
+recipe.value.type.decimal: A number with two decimal places, 0.00 to 999.99
+recipe.value.counted_in.characters: Each character, the way Unicode counts them
+recipe.value.counted_in.bytes: Bytes of UTF-8, the way many databases count
+recipe.value.counted_in.graphemes: What a reader sees as one symbol
+recipe.value.format.csv: Values separated by commas, a file for each table
+recipe.value.format.json: JSON, in one file or a file for each table
+recipe.value.consistency.matches: Agrees with the fields named after it
+recipe.value.consistency.derived_from: Is built from the fields named after it
 recipe.checking: Checking this recipe.
 recipe.name: this recipe
 recipe.example: Start from an example

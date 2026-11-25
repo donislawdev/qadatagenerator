@@ -265,14 +265,14 @@
 												</container>
 											</container>
 										</container>
-										<container pos="0,38" size="513x355">
-											<container size="513x355">
-												<rectangle fillColor="button" pos="1,1" radius="6" size="511x353" strokeColor="inputBorder" strokeWidth="2"/>
+										<container pos="0,38" size="513x338">
+											<container size="513x338">
+												<rectangle fillColor="button" pos="1,1" radius="6" size="511x336" strokeColor="inputBorder" strokeWidth="2"/>
 											</container>
-											<container size="513x355">
-												<container pos="8,8" size="497x339">
-													<widget size="497x339" type="*parts.lineMarks">
-														<container size="497x339">
+											<container size="513x338">
+												<container pos="8,8" size="497x322">
+													<widget size="497x322" type="*parts.lineMarks">
+														<container size="497x322">
 															<text color="disabled" monospace pos="34,4" size="7x16">1</text>
 															<text color="disabled" monospace pos="34,20" size="7x16">2</text>
 															<text color="disabled" monospace pos="34,37" size="7x16">3</text>
@@ -284,12 +284,12 @@
 															<text color="disabled" monospace pos="34,139" size="7x16">9</text>
 														</container>
 													</widget>
-													<container size="497x339">
-														<rectangle size="54x339"/>
-														<widget pos="54,0" size="442x339" type="*parts.Editor">
-															<widget pos="0,2" size="442x335" type="*widget.Scroll">
-																<widget size="442x335" type="*widget.entryContent">
-																	<widget size="442x335" type="*widget.RichText">
+													<container size="497x322">
+														<rectangle size="54x322"/>
+														<widget pos="54,0" size="442x322" type="*parts.Editor">
+															<widget pos="0,2" size="442x318" type="*widget.Scroll">
+																<widget size="442x318" type="*widget.entryContent">
+																	<widget size="442x318" type="*widget.RichText">
 																		<text monospace pos="4,2" size="109x16">version: "0.1"</text>
 																		<text monospace pos="4,18" size="109x16">seed: "sample"</text>
 																		<text monospace pos="4,35" size="70x16">entities:</text>
@@ -302,26 +302,29 @@
 																	</widget>
 																</widget>
 															</widget>
-															<widget size="442x339" type="*parts.wheelLayer">
-																<container size="442x339">
+															<widget size="442x322" type="*parts.wheelLayer">
+																<container size="442x322">
 																</container>
 															</widget>
+															<container size="442x322">
+															</container>
 														</widget>
 													</container>
 												</container>
 											</container>
 										</container>
-										<container pos="0,393" size="513x261">
-											<container size="513x36">
-												<container pos="4,8" size="505x24">
-													<widget size="505x24" type="*widget.Label">
-														<widget size="505x24" type="*widget.RichText">
-															<text color="disabled" pos="4,4" size="335x16">Tab indents by two spaces. Esc, then Tab, leaves the field.</text>
+										<container pos="0,376" size="513x278">
+											<container size="513x53">
+												<container pos="4,8" size="505x41">
+													<widget size="505x41" type="*widget.Label">
+														<widget size="505x41" type="*widget.RichText">
+															<text color="disabled" pos="4,4" size="470x16">Tab indents by two spaces. Ctrl+Space shows what can be written. Esc, then Tab,</text>
+															<text color="disabled" pos="4,20" size="91x16">leaves the field.</text>
 														</widget>
 													</widget>
 												</container>
 											</container>
-											<container pos="0,36" size="513x224">
+											<container pos="0,53" size="513x224">
 												<container pos="4,24" size="505x196">
 													<container size="505x22">
 														<container size="22x22">

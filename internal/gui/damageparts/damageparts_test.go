@@ -8,6 +8,7 @@ import (
 	"github.com/donislawdev/qadatagenerator/internal/adapter/i18n"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/manifestexport"
 	"github.com/donislawdev/qadatagenerator/internal/adapter/mutators"
+	"github.com/donislawdev/qadatagenerator/internal/take"
 )
 
 // Every kind of damage this build offers has a name a person can read.
@@ -42,6 +43,33 @@ func TestEveryKindOfDamageOfferedCarriesAName(t *testing.T) {
 		if !carried[code] {
 			t.Errorf("%q is named here and this build offers no such kind of damage, so the name "+
 				"is a rule about nothing sitting where a rule should be", code)
+		}
+	}
+}
+
+// Every setting for how many defects a record may carry has a name too.
+//
+// The same shape as the guard above and for the same reason: the engine takes
+// exactly_one and any, and a list offering those two spellings is a settings
+// file shown to somebody who opened a window to avoid one. Moved here from the
+// take screen with the names on 2026-11-24.
+func TestEverySettingForDefectsPerRecordCarriesAName(t *testing.T) {
+	offered := take.PerRowChoices()
+	if len(offered) == 0 {
+		t.Fatal("this build offers no setting at all, so this guard would check nothing")
+	}
+	carried := make(map[string]bool, len(offered))
+	for _, value := range offered {
+		carried[value] = true
+		if _, named := nameOfPerRow[value]; !named {
+			t.Errorf("this build offers %q and nothing names it, so the list shows the value the "+
+				"engine takes rather than a choice a person can make", value)
+		}
+	}
+	for value := range nameOfPerRow {
+		if !carried[value] {
+			t.Errorf("%q is named here and this build offers no such setting, so the name is a "+
+				"rule about nothing", value)
 		}
 	}
 }

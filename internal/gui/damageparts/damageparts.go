@@ -78,6 +78,39 @@ func LayerLabel(text i18n.Catalogue, code string) string {
 	return fmt.Sprintf(text.T(i18n.TakeLayerCode), text.T(key), code)
 }
 
+// LayerName is one kind of damage named without its code, for a place that
+// shows the code already, such as the list of what can be written in a
+// recipe's policy. A code with no name falls back to itself, as above.
+func LayerName(text i18n.Catalogue, code string) string {
+	key, named := nameOfLayer[code]
+	if !named {
+		return code
+	}
+	return text.T(key)
+}
+
+// nameOfPerRow is how many defects one record may carry, said in words.
+//
+// Same reason as the map of layers and the same closing test: the engine takes
+// exactly_one and any, and a list offering those two spellings asks somebody
+// to read a settings file in order to use a window. It moved here from the
+// take screen on 2026-11-24, when the recipe editor began to offer the same
+// two values.
+var nameOfPerRow = map[string]i18n.Key{
+	"exactly_one": i18n.TakePerRowExactlyOne,
+	"any":         i18n.TakePerRowAny,
+}
+
+// PerRowLabel is one such setting named, or the bare value if nothing names it,
+// for the reason given at LayerLabel.
+func PerRowLabel(text i18n.Catalogue, value string) string {
+	key, named := nameOfPerRow[value]
+	if !named {
+		return value
+	}
+	return text.T(key)
+}
+
 // FormChoices is every extra form of the manifest, with the absence of one named
 // rather than left blank.
 //

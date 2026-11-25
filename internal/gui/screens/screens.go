@@ -325,6 +325,7 @@ func Assemble(text i18n.Catalogue, data Data, state State) fyne.CanvasObject {
 	// directory of its own.
 	recipeScreen := recipeview.New(text, recipeview.Checker(describedDamage()), recipeRunFor(state.Wrote),
 		background.Work{Read: readingFor(state.Checking), Produce: producedHere}, folders, nil)
+	recipeScreen.OfferLayersOf(describedDamage())
 	// The clipboard is nothing at all here, for the same reason the way to
 	// write is: a state of this list is a picture, and a picture that reached
 	// the clipboard of the machine taking it would change something outside

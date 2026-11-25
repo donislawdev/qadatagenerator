@@ -266,6 +266,13 @@ func recipeStatesOfTheKeyboard() []State {
 			Keyboard: Keyboard{Tabs: 6},
 		},
 		{
+			Name: "recipe-suggest",
+			Purpose: "the list under the caret saying what can be written there, each offer with " +
+				"what it means, opened by typing the way a code editor suggests (DEC-338)",
+			Screen:   screenRecipe,
+			Keyboard: Keyboard{Tabs: 6, Typed: "entities:\n  customer:\n    fields:\n      id: { generator: "},
+		},
+		{
 			Name:     "recipe-focus-answer",
 			Purpose:  "the keyboard on the card holding the answer, which the toolkit's own scrolling area never lets it reach",
 			Screen:   screenRecipe,

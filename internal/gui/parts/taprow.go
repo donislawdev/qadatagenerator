@@ -54,6 +54,11 @@ type TapRow struct {
 	Draw func(hovered bool) fyne.CanvasObject
 	// OnTapped is what a click on this row does.
 	OnTapped func()
+	// OnPointer is told when the pointer arrives on this row and when it
+	// leaves, for whoever the row stands inside and has to answer the pointer
+	// too: the editor whose list of suggestions it is a row of, which would
+	// otherwise go dark under a pointer that never left it (DEC-338).
+	OnPointer func(here bool)
 
 	pointerIsHere bool
 	// confirm is whether the row says, for a while, that a click did what it
@@ -86,7 +91,15 @@ func (r *TapRow) Tapped(*fyne.PointEvent) {
 // MouseIn notes that the pointer arrived and redraws.
 func (r *TapRow) MouseIn(*desktop.MouseEvent) {
 	r.pointerIsHere = true
+	r.tellPointer(true)
 	r.Refresh()
+}
+
+// tellPointer hands where the pointer is to whoever asked for it.
+func (r *TapRow) tellPointer(here bool) {
+	if r.OnPointer != nil {
+		r.OnPointer(here)
+	}
 }
 
 // MouseMoved puts the pointer back on a row that forgot it.
@@ -101,6 +114,7 @@ func (r *TapRow) MouseIn(*desktop.MouseEvent) {
 func (r *TapRow) MouseMoved(*desktop.MouseEvent) {
 	if !r.pointerIsHere {
 		r.pointerIsHere = true
+		r.tellPointer(true)
 		r.Refresh()
 	}
 }
@@ -124,6 +138,7 @@ func (r *TapRow) Rebind(draw func(hovered bool) fyne.CanvasObject, tapped func()
 // MouseOut notes that the pointer left and redraws.
 func (r *TapRow) MouseOut() {
 	r.pointerIsHere = false
+	r.tellPointer(false)
 	r.Refresh()
 }
 

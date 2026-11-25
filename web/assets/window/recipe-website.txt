@@ -29,7 +29,6 @@ Your recipe
 15
 16
 17
-18
 version: "0.1"
 seed: "readme"
 locale: en-US
@@ -61,7 +60,8 @@ output:
 policy:
   layers: [L2, L3, REV]
   rows: 5%
-Tab indents by two spaces. Esc, then Tab, leaves the field.
+Tab indents by two spaces. Ctrl+Space shows what can be written. Esc, then Tab,
+leaves the field.
 2
 Write the dataset
 Write to

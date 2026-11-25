@@ -374,6 +374,57 @@ const (
 	// person is told it.
 	RecipeEditorKeys Key = "recipe.editor.keys"
 
+	// What each key the list under the caret offers does, beside its name
+	// (DEC-338). One per key the list offers. The key of the catalogue is
+	// built from the recipe's key when the list is drawn, so the guard beside
+	// the recipe screen walks every place of a recipe and holds both ways that
+	// each offer has its line here and each line here is offered.
+	RecipeKeyVersion       Key = "recipe.key.version"
+	RecipeKeySeed          Key = "recipe.key.seed"
+	RecipeKeyLocale        Key = "recipe.key.locale"
+	RecipeKeyName          Key = "recipe.key.name"
+	RecipeKeyTag           Key = "recipe.key.tag"
+	RecipeKeyEntities      Key = "recipe.key.entities"
+	RecipeKeyOutput        Key = "recipe.key.output"
+	RecipeKeyPolicy        Key = "recipe.key.policy"
+	RecipeKeyCount         Key = "recipe.key.count"
+	RecipeKeyPrimaryKey    Key = "recipe.key.primary_key"
+	RecipeKeyFields        Key = "recipe.key.fields"
+	RecipeKeyConsistency   Key = "recipe.key.consistency"
+	RecipeKeyBelongsTo     Key = "recipe.key.belongs_to"
+	RecipeKeyType          Key = "recipe.key.type"
+	RecipeKeyGenerator     Key = "recipe.key.generator"
+	RecipeKeyUnique        Key = "recipe.key.unique"
+	RecipeKeyRequired      Key = "recipe.key.required"
+	RecipeKeyMaxLength     Key = "recipe.key.max_length"
+	RecipeKeyCountedIn     Key = "recipe.key.counted_in"
+	RecipeKeyEmpty         Key = "recipe.key.empty"
+	RecipeKeyValues        Key = "recipe.key.values"
+	RecipeKeyMinValue      Key = "recipe.key.min_value"
+	RecipeKeyMaxValue      Key = "recipe.key.max_value"
+	RecipeKeyLayers        Key = "recipe.key.layers"
+	RecipeKeyRows          Key = "recipe.key.rows"
+	RecipeKeyPerRow        Key = "recipe.key.per_row"
+	RecipeKeyExcludeFields Key = "recipe.key.exclude_fields"
+	RecipeKeyFormat        Key = "recipe.key.format"
+	RecipeKeyDir           Key = "recipe.key.dir"
+	RecipeKeyFilePerEntity Key = "recipe.key.file_per_entity"
+	RecipeKeyEncoding      Key = "recipe.key.encoding"
+	RecipeKeyDelimiter     Key = "recipe.key.delimiter"
+	// What a value the list offers means, for the values no other screen
+	// names already. Generators, locales, layers and defects per row take the
+	// names the other screens give them.
+	RecipeValueVersion                Key = "recipe.value.version"
+	RecipeValueTypeInteger            Key = "recipe.value.type.integer"
+	RecipeValueTypeDecimal            Key = "recipe.value.type.decimal"
+	RecipeValueCountedInCharacters    Key = "recipe.value.counted_in.characters"
+	RecipeValueCountedInBytes         Key = "recipe.value.counted_in.bytes"
+	RecipeValueCountedInGraphemes     Key = "recipe.value.counted_in.graphemes"
+	RecipeValueFormatCSV              Key = "recipe.value.format.csv"
+	RecipeValueFormatJSON             Key = "recipe.value.format.json"
+	RecipeValueConsistencyMatches     Key = "recipe.value.consistency.matches"
+	RecipeValueConsistencyDerivedFrom Key = "recipe.value.consistency.derived_from"
+
 	// What this screen says to somebody who has never written a recipe: the
 	// offer of one that runs, and the vocabulary this build carries.
 	RecipeExample           Key = "recipe.example"
@@ -788,6 +839,17 @@ var windowKeys = []Key{
 	VerifyKindHole, VerifyKindOverzealous, VerifyKindSilent, VerifyKindMissing,
 
 	RecipeEmpty, RecipePlaceholder, RecipeChecking, RecipeName, RecipeEditorKeys,
+	RecipeKeyVersion, RecipeKeySeed, RecipeKeyLocale, RecipeKeyName, RecipeKeyTag,
+	RecipeKeyEntities, RecipeKeyOutput, RecipeKeyPolicy,
+	RecipeKeyCount, RecipeKeyPrimaryKey, RecipeKeyFields, RecipeKeyConsistency, RecipeKeyBelongsTo,
+	RecipeKeyType, RecipeKeyGenerator, RecipeKeyUnique, RecipeKeyRequired, RecipeKeyMaxLength,
+	RecipeKeyCountedIn, RecipeKeyEmpty, RecipeKeyValues, RecipeKeyMinValue, RecipeKeyMaxValue,
+	RecipeKeyLayers, RecipeKeyRows, RecipeKeyPerRow, RecipeKeyExcludeFields,
+	RecipeKeyFormat, RecipeKeyDir, RecipeKeyFilePerEntity, RecipeKeyEncoding, RecipeKeyDelimiter,
+	RecipeValueVersion, RecipeValueTypeInteger, RecipeValueTypeDecimal,
+	RecipeValueCountedInCharacters, RecipeValueCountedInBytes, RecipeValueCountedInGraphemes,
+	RecipeValueFormatCSV, RecipeValueFormatJSON,
+	RecipeValueConsistencyMatches, RecipeValueConsistencyDerivedFrom,
 	RecipeExample, RecipeCanGenerate, RecipeGenerator, RecipeGenerators,
 	RecipeNotIn, RecipeNothingToDrawFrom,
 	RecipeHeadingRecipe, RecipeHeadingDescribes, RecipeHeadingResult, RecipeHeadingProblems,

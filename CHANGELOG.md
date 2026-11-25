@@ -622,6 +622,16 @@ repository once they are released.
 
 ### Added
 
+- **Suggestions while you write a recipe.** As you type in the recipe editor,
+  a list at the cursor shows what can be written there: the keys that fit that
+  place in the recipe, and after a key such as `generator`, `type`, `locale` or
+  `per_row`, the values it takes, each with a short description. Typing
+  narrows the list. The arrow keys choose, Enter or Tab writes the choice, a
+  click on a row writes it as well, and Esc closes the list. Ctrl+Space opens
+  it at any time. Ctrl+Z takes a written suggestion back, and whatever you
+  copied before stays on the clipboard. The list leaves out two keys:
+  `only_when`, which this build refuses, and `expression`, which this build
+  leaves empty.
 - **Line numbers in the recipe editor.** Every line of the recipe on the
   Recipe screen is numbered, counted the way `qadg validate` counts the line
   it names in a message. A long line folded under itself keeps one number. The
