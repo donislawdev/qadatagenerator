@@ -76,12 +76,19 @@ func (r *recorder) Add(defect manifest.Defect) error {
 }
 
 // silent is the writer the records reach once the damage is done to them.
-type silent struct{ rows int }
+type silent struct {
+	rows int
+	kept []dataset.Record
+}
 
-func (s *silent) Begin(dataset.Table) error  { return nil }
-func (s *silent) Write(dataset.Record) error { s.rows++; return nil }
-func (s *silent) End(dataset.Table) error    { return nil }
-func (s *silent) Finish() error              { return nil }
+func (s *silent) Begin(dataset.Table) error { return nil }
+func (s *silent) Write(record dataset.Record) error {
+	s.rows++
+	s.kept = append(s.kept, record)
+	return nil
+}
+func (s *silent) End(dataset.Table) error { return nil }
+func (s *silent) Finish() error           { return nil }
 
 func entry(id catalog.ID, summary string) catalog.Entry {
 	return catalog.Entry{
@@ -189,6 +196,32 @@ func TestAnEntryNoDocumentCanRecordEndsTheRunBeforeItsRecordGoesOn(t *testing.T)
 	}
 	if next.rows != 0 {
 		t.Errorf("%d records reached the data after their entry was refused", next.rows)
+	}
+}
+
+// Damage that puts a value in a cell left without one takes the mark away.
+//
+// A writer for a database writes a marked cell as NULL (DEC-341). Left marked
+// after the damage, the cell would reach the database as NULL while the
+// manifest says what value was written there. Every row of the fixture is
+// damaged, so a cell nothing touched is not tried here, and nothing in the
+// writer changes a mark it did not write over.
+func TestDamageThatWritesACellLeftWithoutAValueTakesTheMarkAway(t *testing.T) {
+	writer, next, table := writerInto(t, corrupted.Tee{}, 4)
+	for row := 0; row < table.Rows; row++ {
+		record := dataset.Record{Values: []string{""}, Absent: []bool{true}, Parent: dataset.NoParent}
+		if err := writer.Write(record); err != nil {
+			t.Fatalf("row %d was refused: %v", row, err)
+		}
+	}
+	if len(next.kept) != table.Rows {
+		t.Fatalf("%d records of %d reached the data", len(next.kept), table.Rows)
+	}
+	for row, record := range next.kept {
+		if record.Values[0] == "" || record.AbsentAt(0) {
+			t.Errorf("row %d holds %q after damage and is marked absent: %v",
+				row, record.Values[0], record.AbsentAt(0))
+		}
 	}
 }
 

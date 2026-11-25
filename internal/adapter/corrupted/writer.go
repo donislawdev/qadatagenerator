@@ -177,7 +177,14 @@ func (w *Writer) apply(order corrupt.Order, record dataset.Record, row int) mani
 		return cell, addressed
 	})
 	if wrote {
-		record.Values[w.columns[change.Field]] = change.Value
+		column := w.columns[change.Field]
+		record.Values[column] = change.Value
+		// Damage puts a value in the cell, the empty text included, so a cell
+		// that held none holds one now. Left marked, a database would be handed
+		// NULL where the manifest says the value is the empty text.
+		if record.AbsentAt(column) {
+			record.Absent[column] = false
+		}
 	}
 	return entry
 }

@@ -113,12 +113,32 @@ func (o Ownership) Cut(rows int) Ownership {
 type Record struct {
 	// Values are the fields, in the order of the table's columns.
 	Values []string
+	// Absent marks the cells that hold no value at all, in the order of
+	// Values, and is nil when every cell holds one.
+	//
+	// # Why the empty text is not enough
+	//
+	// A share of empty values leaves a cell with nothing in it, and so does a
+	// field nothing in this build fills. Damage that empties a value, and a
+	// list that offers the empty text, leave a value that happens to be empty.
+	// Both have the empty text in Values. A comma separated file cannot tell
+	// them apart and does not try, but a database can, and the difference is
+	// the one between NULL and an empty string: a column that refuses the
+	// first may accept the second. Whoever reads a file somebody else wrote
+	// knows nothing of the kind, and leaves this nil.
+	Absent []bool
 	// Parent is the row index of the parent record, or NoParent.
 	//
 	// It travels with the row rather than being looked up later, because the
 	// nested form of the output needs it and a writer that had to ask for it
 	// would need the whole dataset in memory to answer.
 	Parent int
+}
+
+// AbsentAt reports whether the cell in the given column holds no value at all,
+// rather than a value that may be the empty text.
+func (r Record) AbsentAt(column int) bool {
+	return column >= 0 && column < len(r.Absent) && r.Absent[column]
 }
 
 // NoParent is the parent index of a record that belongs to nobody.

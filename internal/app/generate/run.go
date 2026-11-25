@@ -76,11 +76,11 @@ func writeTable(planned dataset.Table, entity recipe.Entity, values Values, writ
 		if ended := stop.Stopped(); ended != nil {
 			return ended
 		}
-		built, err := table.row(row)
+		built, absent, err := table.row(row)
 		if err != nil {
 			return err
 		}
-		record := dataset.Record{Values: built, Parent: dataset.NoParent}
+		record := dataset.Record{Values: built, Absent: absent, Parent: dataset.NoParent}
 		if planned.Parent != "" {
 			record.Parent = planned.Ownership.ParentOf(row)
 		}
@@ -138,29 +138,34 @@ func newTableRun(planned dataset.Table, entity recipe.Entity, values Values,
 // else and lets every agreement be worked out once more from what changed. What
 // unique columns claimed in the attempt is given back first, so the second
 // build sees the table as the first one did.
-func (t *tableRun) row(row int) ([]string, error) {
+//
+// The second slice marks the cells given no value at all, and is nil when every
+// cell has one (dataset.Record.Absent).
+func (t *tableRun) row(row int) ([]string, []bool, error) {
 	for attempt := 0; attempt < uniqueTries; attempt++ {
-		built, err := t.build(row, attempt, nil)
+		built, absent, err := t.build(row, attempt, nil)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		if t.key == nil || t.key.claim(built) {
 			t.taken.keep()
-			return t.ordered(built), nil
+			values, marks := t.ordered(built, absent)
+			return values, marks, nil
 		}
 		t.taken.release()
 	}
 	forced, err := t.key.walk(t, row)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	built, err := t.build(row, 0, forced)
+	built, absent, err := t.build(row, 0, forced)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	t.key.claim(built)
 	t.taken.keep()
-	return t.ordered(built), nil
+	values, marks := t.ordered(built, absent)
+	return values, marks, nil
 }
 
 // build produces the values of one row.
@@ -173,21 +178,36 @@ func (t *tableRun) row(row int) ([]string, error) {
 //
 // Forced values are the parts of a key the run chose by walking, and they take
 // the place of a draw.
-func (t *tableRun) build(row, attempt int, forced map[string]string) (map[string]string, error) {
+//
+// The second map holds the fields given no value at all, and stays nil in a
+// row where every field has one, which is most rows of most recipes.
+func (t *tableRun) build(row, attempt int, forced map[string]string) (map[string]string, map[string]bool, error) {
 	built := make(map[string]string, len(t.entity.Fields))
+	var absent map[string]bool
+	keep := func(name, value string, given bool) {
+		built[name] = value
+		switch {
+		case given:
+			delete(absent, name)
+		case absent == nil:
+			absent = map[string]bool{name: true}
+		default:
+			absent[name] = true
+		}
+	}
 	for _, field := range t.entity.Fields {
 		if t.bound[field.Name] {
 			continue
 		}
 		if value, chosen := forced[field.Name]; chosen {
-			built[field.Name] = value
+			keep(field.Name, value, true)
 			continue
 		}
-		value, err := t.oneValue(field, row, attempt, provider.Agreement{})
+		value, given, err := t.oneValue(field, row, attempt, provider.Agreement{})
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
-		built[field.Name] = value
+		keep(field.Name, value, given)
 	}
 
 	for _, rule := range t.rules {
@@ -197,24 +217,34 @@ func (t *tableRun) build(row, attempt int, forced map[string]string) (map[string
 		}
 		agreement, err := agreementFor(rule, t.entity, built, t.bound, t.values)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
-		value, err := t.oneValue(field, row, attempt, agreement)
+		value, given, err := t.oneValue(field, row, attempt, agreement)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
-		built[field.Name] = value
+		keep(field.Name, value, given)
 	}
-	return built, nil
+	return built, absent, nil
 }
 
-// ordered lays the values of a row out in the order of the fields.
-func (t *tableRun) ordered(built map[string]string) []string {
+// ordered lays the values of a row out in the order of the fields, with the
+// marks of the cells given no value in the same order, or nil when there are
+// none.
+func (t *tableRun) ordered(built map[string]string, absent map[string]bool) ([]string, []bool) {
 	ordered := make([]string, 0, len(t.entity.Fields))
-	for _, field := range t.entity.Fields {
+	var marks []bool
+	for at, field := range t.entity.Fields {
 		ordered = append(ordered, built[field.Name])
+		if !absent[field.Name] {
+			continue
+		}
+		if marks == nil {
+			marks = make([]bool, len(t.entity.Fields))
+		}
+		marks[at] = true
 	}
-	return ordered
+	return ordered, marks
 }
 
 // agreementFor gathers what a bound field has to agree with, keyed by role.
@@ -262,7 +292,11 @@ func agreementFor(rule recipe.Rule, entity recipe.Entity, built map[string]strin
 //
 // A part of the key built again for its key is drawn at an address of its own,
 // value:key#1 and on, and every other field at the address it always has.
-func (t *tableRun) oneValue(field recipe.Field, row, attempt int, agrees provider.Agreement) (string, error) {
+//
+// The second result says whether the field was given a value at all. A cell
+// left empty by its share, or blank because nothing fills it, has none, which
+// is not the same as a value that is the empty text (dataset.Record.Absent).
+func (t *tableRun) oneValue(field recipe.Field, row, attempt int, agrees provider.Agreement) (string, bool, error) {
 	purpose := "value"
 	if attempt > 0 && t.key.holds(field.Name) {
 		purpose = fmt.Sprintf("value:key#%d", attempt)
@@ -270,17 +304,21 @@ func (t *tableRun) oneValue(field recipe.Field, row, attempt int, agrees provide
 	request := requestFor(t.entity.Name, field, row, purpose)
 	request.Agrees = agrees
 	if leftEmpty(field, request.At, t.source) {
-		return "", nil
+		return "", false, nil
 	}
 	if leftBlank(field, t.values) {
 		// An expression, or a type this build cannot fill. Both are named in
 		// the plan, so the empty column is stated rather than silent.
-		return "", nil
+		return "", false, nil
 	}
-	if !field.Unique {
-		return t.values.Produce(request)
+	var value string
+	var err error
+	if field.Unique {
+		value, err = t.uniqueValue(field, request)
+	} else {
+		value, err = t.values.Produce(request)
 	}
-	return t.uniqueValue(field, request)
+	return value, true, err
 }
 
 // requestFor is what the source is asked for one field, the same question from
