@@ -40,7 +40,7 @@ damage:
 good:
   eyebrow: Good data
   title: Values that pass validation, and agree with each other
-  text: "Every identifier carries a correct check digit, and card numbers are only the published test numbers. Names, cities and regions come from word lists for the United States and Poland."
+  text: "Every identifier that has a check digit carries a correct one, and card numbers are only the published test numbers. Names, cities and regions come from word lists for the United States and Poland."
   cards:
     - title: People
       text: First and last names that can follow the gender column, and birth dates.
@@ -48,12 +48,12 @@ good:
     - title: Places
       text: A city, its state and its ZIP code that belong together.
       generators: [city, region, postal_code]
-    - title: Test card numbers
-      text: Card numbers that pass validation, taken only from the published test numbers.
-      generators: [card]
-    - title: Books, barcodes, phones, vehicles
-      text: Book numbers, product barcodes, mobile phone identities and vehicle identification numbers.
-      generators: [isbn, ean, imei, vin]
+    - title: Accounts
+      text: Random UUIDs for user and record IDs.
+      generators: [uuid]
+    - title: Products and payments
+      text: Book numbers, product barcodes, mobile phone identities, vehicle identification numbers, and card numbers taken only from the published test numbers.
+      generators: [isbn, ean, imei, vin, card]
     - title: United States
       text: Social security numbers that belong to nobody, and bank routing numbers.
       generators: [ssn, aba]

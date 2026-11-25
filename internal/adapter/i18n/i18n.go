@@ -417,6 +417,7 @@ const (
 	RecipeValueVersion                Key = "recipe.value.version"
 	RecipeValueTypeInteger            Key = "recipe.value.type.integer"
 	RecipeValueTypeDecimal            Key = "recipe.value.type.decimal"
+	RecipeValueTypeUUID               Key = "recipe.value.type.uuid"
 	RecipeValueCountedInCharacters    Key = "recipe.value.counted_in.characters"
 	RecipeValueCountedInBytes         Key = "recipe.value.counted_in.bytes"
 	RecipeValueCountedInGraphemes     Key = "recipe.value.counted_in.graphemes"
@@ -691,6 +692,7 @@ const (
 	KindRegion     Key = "kind.region"
 	KindRegon      Key = "kind.regon"
 	KindSsn        Key = "kind.ssn"
+	KindUUID       Key = "kind.uuid"
 	KindVin        Key = "kind.vin"
 
 	// The line a person can paste into a terminal to get the same thing.
@@ -747,7 +749,8 @@ var windowKeys = []Key{
 	QuickGroupInternational, QuickGroupPeople, QuickGroupPlaces, CountryPL, CountryUS,
 	QuickPickPrompt, QuickPickKinds, QuickPickMatches, QuickPickEnter, QuickPickNothing,
 	KindAba, KindBirthDate, KindCard, KindCity, KindEan, KindFirstName, KindGender, KindIban, KindImei,
-	KindIsbn, KindLastName, KindNip, KindPesel, KindPostalCode, KindRegion, KindRegon, KindSsn, KindVin,
+	KindIsbn, KindLastName, KindNip, KindPesel, KindPostalCode, KindRegion, KindRegon, KindSsn, KindUUID,
+	KindVin,
 	CommandHeading, CommandCopy, CommandCopied,
 	PurposeTake, PurposeRecipe, PurposeManifest, PurposeAbout, AboutSaveJSON,
 
@@ -846,7 +849,7 @@ var windowKeys = []Key{
 	RecipeKeyCountedIn, RecipeKeyEmpty, RecipeKeyValues, RecipeKeyMinValue, RecipeKeyMaxValue,
 	RecipeKeyLayers, RecipeKeyRows, RecipeKeyPerRow, RecipeKeyExcludeFields,
 	RecipeKeyFormat, RecipeKeyDir, RecipeKeyFilePerEntity, RecipeKeyEncoding, RecipeKeyDelimiter,
-	RecipeValueVersion, RecipeValueTypeInteger, RecipeValueTypeDecimal,
+	RecipeValueVersion, RecipeValueTypeInteger, RecipeValueTypeDecimal, RecipeValueTypeUUID,
 	RecipeValueCountedInCharacters, RecipeValueCountedInBytes, RecipeValueCountedInGraphemes,
 	RecipeValueFormatCSV, RecipeValueFormatJSON,
 	RecipeValueConsistencyMatches, RecipeValueConsistencyDerivedFrom,

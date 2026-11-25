@@ -627,6 +627,14 @@ repository once they are released.
 
 ### Added
 
+- **UUIDs.** `generator: uuid` fills a column with random UUIDs such as
+  `919108f7-52d1-4320-9bac-f847db4148a8`, version 4 of RFC 9562, in lowercase.
+  `type: uuid` gives the same values, where it used to leave the column empty
+  with a warning. A `max_length` below 36 is refused before anything is
+  written. `qadg quick uuid` and the Kind list on the Quick value screen make
+  them without a recipe, under International. A UUID has no check digit, so
+  damage aimed at check digits leaves it alone, and Damage a file reads a
+  column of UUIDs in a file of yours as plain text.
 - **Suggestions while you write a recipe.** As you type in the recipe editor,
   a list at the cursor shows what can be written there: the keys that fit that
   place in the recipe, and after a key such as `generator`, `type`, `locale` or

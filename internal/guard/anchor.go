@@ -294,6 +294,25 @@ var Anchors = []Anchor{
 		Detail:   "TestTheCalculationWorkedByTheRegulationComesOutTheSameHere",
 	},
 
+	// --- uuid ---------------------------------------------------------------
+	//
+	// An IETF standard published in full, with a worked example of the version
+	// this build draws and the final value of an example of every other version.
+	{
+		Rule:     "the written form of 8, 4, 4, 4 and 12 hexadecimal digits, and version 4 as sixteen random octets with the version 4 in the top half of octet 6 and the bits 1 and 0 at the top of octet 8",
+		Provider: "uuid",
+		Source:   "RFC 9562, sections 4, 4.1, 4.2 and 5.4, with the random octets of Appendix A.3 worked through to the final value, read at rfc-editor.org on 2026-11-25",
+		State:    ByWorkedExample,
+		Detail:   "TestTheRFCExampleOfAVersionFourValueIsReproduced",
+	},
+	{
+		Rule:     "the variant read from octet 8 and the versions 1 to 8 read from octet 6, together with the Nil and Max values, as Validate accepts them",
+		Provider: "uuid",
+		Source:   "RFC 9562, Tables 1 and 2 of sections 4.1 and 4.2, sections 5.9 and 5.10, and the final values of Figure 1 and of Appendices A and B, read at rfc-editor.org on 2026-11-25",
+		State:    ByWorkedExample,
+		Detail:   "TestEveryExampleValueOfTheRFCIsAccepted",
+	},
+
 	// --- ean ----------------------------------------------------------------
 	//
 	// The only scheme here anchored on two first party documents that were

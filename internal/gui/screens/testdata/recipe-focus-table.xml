@@ -639,7 +639,7 @@
 																								</container>
 																								<container pos="23,0" size="254x26">
 																									<spacer size="254x4"/>
-																									<text pos="0,4" size="254x16">What this build can generate, 18 generators</text>
+																									<text pos="0,4" size="254x16">What this build can generate, 19 generators</text>
 																									<spacer pos="0,21" size="254x4"/>
 																								</container>
 																							</container>

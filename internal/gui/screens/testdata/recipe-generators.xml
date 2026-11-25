@@ -509,11 +509,11 @@
 										</container>
 										<container pos="0,34" size="513x621">
 											<widget size="513x621" type="*parts.KeyScroll">
-												<container size="513x771">
-													<container size="513x771">
-														<rectangle fillColor="menuBackground" radius="10" size="513x771"/>
-														<container size="513x771">
-															<container pos="16,16" size="481x739">
+												<container size="513x800">
+													<container size="513x800">
+														<rectangle fillColor="menuBackground" radius="10" size="513x800"/>
+														<container size="513x800">
+															<container pos="16,16" size="481x768">
 																<container size="481x41">
 																	<widget size="481x41" type="*widget.Label">
 																		<widget size="481x41" type="*widget.RichText">
@@ -554,7 +554,7 @@
 																	<spacer pos="184,0" size="296x34"/>
 																</container>
 																<rectangle fillColor="separator" pos="0,107" size="481x1"/>
-																<container pos="0,124" size="481x614">
+																<container pos="0,124" size="481x643">
 																	<widget size="481x34" type="*parts.Button">
 																		<container size="481x34">
 																			<container size="481x34">
@@ -571,7 +571,7 @@
 																								</container>
 																								<container pos="23,0" size="254x26">
 																									<spacer size="254x4"/>
-																									<text pos="0,4" size="254x16">What this build can generate, 18 generators</text>
+																									<text pos="0,4" size="254x16">What this build can generate, 19 generators</text>
 																									<spacer pos="0,21" size="254x4"/>
 																								</container>
 																							</container>
@@ -581,7 +581,7 @@
 																			</container>
 																		</container>
 																	</widget>
-																	<container pos="0,34" size="481x580">
+																	<container pos="0,34" size="481x609">
 																		<container size="481x24">
 																			<widget size="481x24" type="*widget.Label">
 																				<widget size="481x24" type="*widget.RichText">
@@ -704,12 +704,19 @@
 																		<container pos="0,491" size="481x24">
 																			<widget size="481x24" type="*widget.Label">
 																				<widget size="481x24" type="*widget.RichText">
+																					<text pos="4,4" size="126x16">uuid - identifier (uuid)</text>
+																				</widget>
+																			</widget>
+																		</container>
+																		<container pos="0,520" size="481x24">
+																			<widget size="481x24" type="*widget.Label">
+																				<widget size="481x24" type="*widget.RichText">
 																					<text pos="4,4" size="109x16">vin - identifier (vin)</text>
 																				</widget>
 																			</widget>
 																		</container>
-																		<text bold color="focus" pos="0,520" size="481x14" textSize="11">WHERE THIS BUILD HAS NOTHING TO DRAW FROM</text>
-																		<container pos="0,538" size="481x41">
+																		<text bold color="focus" pos="0,549" size="481x14" textSize="11">WHERE THIS BUILD HAS NOTHING TO DRAW FROM</text>
+																		<container pos="0,567" size="481x41">
 																			<widget size="481x41" type="*widget.Label">
 																				<widget size="481x41" type="*widget.RichText">
 																					<text color="disabled" pos="4,4" size="469x16">postal_code is not available in pl-PL: this build has no register of postal codes for</text>
@@ -727,8 +734,8 @@
 													<linearGradient pos="0,-8" size="513x8"/>
 												</widget>
 												<widget pos="507,0" size="6x621" type="*widget.scrollBarArea">
-													<widget pos="3,0" size="3x500" type="*widget.scrollBar">
-														<rectangle fillColor="scrollbar" radius="3" size="3x500"/>
+													<widget pos="3,0" size="3x482" type="*widget.scrollBar">
+														<rectangle fillColor="scrollbar" radius="3" size="3x482"/>
 													</widget>
 												</widget>
 											</widget>

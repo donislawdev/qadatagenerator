@@ -295,6 +295,10 @@
       "produces": "identifier (US.ssn)"
     },
     {
+      "name": "uuid",
+      "produces": "identifier (uuid)"
+    },
+    {
       "name": "vin",
       "produces": "identifier (vin)"
     }

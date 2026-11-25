@@ -546,6 +546,7 @@ recipe.key.delimiter: For csv, the character between values
 recipe.value.version: The version this program reads
 recipe.value.type.integer: A whole number from 0 to 999999
 recipe.value.type.decimal: A number with two decimal places, 0.00 to 999.99
+recipe.value.type.uuid: A random UUID of 36 characters, the same as generator uuid
 recipe.value.counted_in.characters: Each character, the way Unicode counts them
 recipe.value.counted_in.bytes: Bytes of UTF-8, the way many databases count
 recipe.value.counted_in.graphemes: What a reader sees as one symbol
@@ -710,4 +711,5 @@ kind.postal_code: ZIP code
 kind.region: Province (voivodeship)
 kind.regon: Business register number
 kind.ssn: Social Security number
+kind.uuid: Random unique ID (UUID)
 kind.vin: Vehicle ID number

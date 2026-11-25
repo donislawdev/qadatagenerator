@@ -53,9 +53,20 @@ func (s Schema) FieldsOf(entity string) []recipe.FieldInfo {
 	}
 	for i := range fields {
 		field, has := found.Field(fields[i].Name)
-		if !has || field.Generator == "" {
+		if !has {
 			continue
 		}
+		// A field described by a type that a generator fills is that
+		// generator under another name (fillers), so damage reads it as the
+		// generator's column, with its type and its scheme.
+		generator := field.Generator
+		if filler, filled := s.source.FillerOf(field.Type); generator == "" && filled {
+			generator = filler
+		}
+		if generator == "" {
+			continue
+		}
+		field.Generator = generator
 		// 🔴 There is deliberately no check here for a type the recipe stated
 		// itself, and the reason is worth keeping. One was written, and a
 		// mutation came back PRZEOCZONA against it: a field naming a type never

@@ -11,7 +11,7 @@ Recipes
  - describe your own dataset in YAML, get thousands
 of rows in CSV or JSON
 Good data
- - SSN, VIN, ISBN, IMEI, PESEL and 6 more
+ - SSN, VIN, ISBN, IMEI, PESEL and 7 more
 Bad data
  - 18 ways to break a value
 The right answer

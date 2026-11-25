@@ -336,6 +336,7 @@ any computer. Where the driver works, the folder is never used.
 | `city`, `region`, `postal_code` | places. In `en-US` a city, its state and its ZIP code belong together. In `pl-PL` a town and a voivodeship are drawn apart, and there are no postal codes yet |
 | `card` | card numbers, only from the published test numbers |
 | `isbn`, `ean`, `imei`, `vin` | book numbers, barcodes, mobile phone identities and vehicle identification numbers |
+| `uuid` | random unique IDs in the form `919108f7-52d1-4320-9bac-f847db4148a8` (UUID version 4) |
 | `ssn`, `aba` | US social security numbers and bank routing numbers |
 | `pesel`, `nip`, `regon`, `iban` | Polish national ID, tax and business numbers, and Polish bank account numbers |
 
@@ -378,6 +379,7 @@ once, and the Recipe screen checks it as you type.
 | `generator` | field | what fills the column |
 | `values` | field | a list to draw from, such as `[free, pro, team]` |
 | `type: integer` or `type: decimal` | field | a random number: a whole number from 0 to 999999, or one with two decimal places from 0.00 to 999.99 |
+| `type: uuid` | field | a random UUID, the same as `generator: uuid` |
 | `min_value` and `max_value` | field | the smallest and the largest number a `type: integer` or `type: decimal` field draws, both included, such as `min_value: 1` and `max_value: 10`. Either can be left out, and either can be negative |
 | `unique` | field | no value repeats |
 | `required` | field | the column is never empty |

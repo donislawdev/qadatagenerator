@@ -1,5 +1,5 @@
 ---
-translatedFrom: 52b5c9132d3794d83a793c964f0543e150d52118
+translatedFrom: f98b43795de0c6360f2dcce0dfd3421e4ca4ea37
 title: QA Data Generator
 seoTitle: "Generator danych testowych: dobre i złe dane z odpowiedzią"
 description: "Realistyczne dane testowe z przepisu YAML, potem celowo popsute. Przy każdej popsutej wartości to, co ma z nią zrobić aplikacja. Za darmo, offline, CLI i GUI."
@@ -41,7 +41,7 @@ damage:
 good:
   eyebrow: Dobre dane
   title: Wartości, które przechodzą walidację i zgadzają się ze sobą
-  text: "Każdy identyfikator ma poprawną cyfrę kontrolną, a numery kart to wyłącznie opublikowane numery testowe. Imiona, nazwiska, miasta i regiony pochodzą z list słów dla Stanów Zjednoczonych i Polski."
+  text: "Każdy identyfikator, który ma cyfrę kontrolną, ma ją poprawną, a numery kart to wyłącznie opublikowane numery testowe. Imiona, nazwiska, miasta i regiony pochodzą z list słów dla Stanów Zjednoczonych i Polski."
   cards:
     - title: Ludzie
       text: Imiona i nazwiska, które mogą iść za kolumną płci, oraz daty urodzenia.
@@ -49,12 +49,12 @@ good:
     - title: Miejsca
       text: Miasto, jego stan i kod ZIP, które do siebie pasują.
       generators: [city, region, postal_code]
-    - title: Testowe numery kart
-      text: Numery kart, które przechodzą walidację, wyłącznie z opublikowanych numerów testowych.
-      generators: [card]
-    - title: Książki, kody kreskowe, telefony, pojazdy
-      text: Numery ISBN, kody kreskowe EAN, numery IMEI telefonów komórkowych i numery VIN pojazdów.
-      generators: [isbn, ean, imei, vin]
+    - title: Konta
+      text: Losowe UUID-y na identyfikatory użytkowników i rekordów.
+      generators: [uuid]
+    - title: Produkty i płatności
+      text: Numery ISBN, kody kreskowe EAN, numery IMEI telefonów komórkowych, numery VIN pojazdów oraz numery kart wyłącznie z opublikowanych numerów testowych.
+      generators: [isbn, ean, imei, vin, card]
     - title: Stany Zjednoczone
       text: Numery ubezpieczenia społecznego (SSN), które nie należą do nikogo, i numery rozliczeniowe banków (ABA).
       generators: [ssn, aba]

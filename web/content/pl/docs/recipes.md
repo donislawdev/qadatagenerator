@@ -27,6 +27,8 @@ readmeTables:
         to: ["`values`", "pole", "lista, z której losować, na przykład `[free, pro, team]`"]
       - from: "`type: integer` or `type: decimal` | field | a random number: a whole number from 0 to 999999, or one with two decimal places from 0.00 to 999.99"
         to: ["`type: integer` albo `type: decimal`", "pole", "losowa liczba: całkowita od 0 do 999999 albo z dwoma miejscami po przecinku od 0.00 do 999.99"]
+      - from: "`type: uuid` | field | a random UUID, the same as `generator: uuid`"
+        to: ["`type: uuid`", "pole", "losowy UUID, to samo co `generator: uuid`"]
       - from: "`min_value` and `max_value` | field | the smallest and the largest number a `type: integer` or `type: decimal` field draws, both included, such as `min_value: 1` and `max_value: 10`. Either can be left out, and either can be negative"
         to: ["`min_value` i `max_value`", "pole", "najmniejsza i największa liczba, jaką losuje pole `type: integer` albo `type: decimal`, obie włącznie, na przykład `min_value: 1` i `max_value: 10`. Każdą z nich można pominąć i każda może być ujemna"]
       - from: "`unique` | field | no value repeats"

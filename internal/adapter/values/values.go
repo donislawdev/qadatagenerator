@@ -51,6 +51,7 @@ const (
 	IMEI       = "imei"
 	ISBN       = "isbn"
 	Card       = "card"
+	UUID       = "uuid"
 )
 
 // roles maps a generator onto the role it plays in a consistency rule.
@@ -133,6 +134,7 @@ var types = map[string]string{
 	IMEI:       TypeIdentifier,
 	ISBN:       TypeIdentifier,
 	Card:       TypeIdentifier,
+	UUID:       TypeIdentifier,
 }
 
 // Source produces values for one locale.
@@ -363,7 +365,34 @@ func (s Source) Schemes() []provider.Provider {
 // remaining type is a decision about shape that belongs with the generator
 // owning it, and inventing an email or a money format here would put an unowned
 // format into somebody's data.
-var filledTypes = []string{TypeInteger, TypeDecimal}
+var filledTypes = []string{TypeInteger, TypeDecimal, TypeUUID}
+
+// TypeUUID is a field described by type alone as a UUID, the way the example
+// of the recipe format writes a key (docs/04). It is not a word of the catalog:
+// such a field is the uuid generator under another name (fillers), so damage
+// reads it as that generator's identifier.
+const TypeUUID = "uuid"
+
+// fillers are the types a generator of this build fills, by the generator.
+//
+// # Why a type can be a generator under another name
+//
+// A recipe describing a key writes type: uuid as readily as generator: uuid,
+// and until 2026-11-25 the first gave an empty column with a note while the
+// second did not exist. A UUID has exactly one shape here, so there is nothing
+// for the type to say that the generator does not, and two ways of making one
+// would be two places for its shape to part company. Every answer about such a
+// field, what it produces, its scheme, its domain and its fit, is the answer
+// about the generator.
+var fillers = map[string]string{TypeUUID: UUID}
+
+// FillerOf names the generator that fills a field described by that type
+// alone, and whether one does. integer and decimal are filled by arithmetic of
+// their own and name none.
+func (s Source) FillerOf(kind string) (string, bool) {
+	generator, filled := fillers[kind]
+	return generator, filled
+}
 
 // ProducesType reports whether this build can fill a field described by that
 // type alone.
@@ -430,6 +459,13 @@ const decimalPlaces = 2
 // point and the places. Every character of both is a single byte, so the unit
 // the length is counted in does not change the answer.
 func (s Source) TypeFits(req generate.Request) error {
+	if _, filled := fillers[req.Type]; filled && req.HasMaxLength {
+		// Every value of such a generator has the same length, so the first
+		// one answers for the column, before a row is written rather than on
+		// the first of them.
+		_, err := s.fromType(req)
+		return err
+	}
 	_, err := spanOf(req)
 	return err
 }
@@ -466,6 +502,20 @@ const defaultDigits = 6
 // with the generator that owns it rather than with a fallback, and inventing
 // one here would put an unowned format into people's data.
 func (s Source) fromType(req generate.Request) (string, error) {
+	if generator, filled := fillers[req.Type]; filled {
+		if bounded := req.MinValue != "" || req.MaxValue != ""; bounded {
+			_, err := spanOf(req)
+			return "", fault.Wrap(fault.Config, err, req.At.Field).DoInstead(fault.InsteadOf(err))
+		}
+		value, err := producers[generator].produce(s, req)
+		if err != nil || fits(value, req) {
+			return value, err
+		}
+		return "", fault.New(fault.Config, fmt.Sprintf(
+			"a field declared as %s takes values of %d %s and %s accepts %d",
+			req.Type, measure(value, req.Unit), req.Unit, req.At.Field, req.MaxLength)).
+			DoInstead("raise max_length, or leave it out")
+	}
 	if req.Type != TypeInteger && req.Type != TypeDecimal {
 		return "", fault.New(fault.Config, fmt.Sprintf(
 			"%s is declared as %s, and this build produces values for %s and %s only",
@@ -648,6 +698,7 @@ var producers = map[string]generator{
 	// The one scheme drawn from a list rather than computed, so it names its
 	// entries as a word list does and a unique column can count them.
 	Card: {entries: cardNumbers, behind: intl.Card{}},
+	UUID: {produce: fromProvider(intl.UUID{}), behind: intl.UUID{}},
 }
 
 // fromProvider adapts an identifier provider to this registry.

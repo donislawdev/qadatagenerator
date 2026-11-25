@@ -304,7 +304,7 @@
 																		<rectangle fillColor="menuBackground" radius="10" shadowBlurRadius="26" shadowColor="rgba(0,0,0,156)" shadowOffset="0,10" shadowSpread="2" shadowVariant="1" size="294x243" strokeColor="separator" strokeWidth="2"/>
 																		<container size="294x243">
 																			<widget pos="8,8" size="278x227" type="*parts.rowScroll">
-																				<container size="278x516">
+																				<container size="278x545">
 																					<widget size="278x24" type="*parts.TapRow">
 																						<container size="278x24">
 																							<container size="278x24">
@@ -826,6 +826,36 @@
 																												<rectangle size="71x16"/>
 																												<container size="71x16">
 																													<spacer size="71x0"/>
+																													<text size="71x16">uuid</text>
+																													<spacer pos="0,16" size="71x0"/>
+																												</container>
+																											</container>
+																											<container pos="83,0" size="152x16">
+																												<spacer size="152x0"/>
+																												<text color="disabled" size="152x16">Random unique ID (UUID)</text>
+																												<spacer pos="0,16" size="152x0"/>
+																											</container>
+																										</container>
+																										<container pos="239,0" size="15x16">
+																											<rectangle size="15x16"/>
+																											<rectangle size="15x16"/>
+																										</container>
+																									</container>
+																								</container>
+																							</container>
+																						</container>
+																					</widget>
+																					<widget pos="0,520" size="278x24" type="*parts.TapRow">
+																						<container size="278x24">
+																							<container size="278x24">
+																								<rectangle size="278x24"/>
+																								<container size="278x24">
+																									<container pos="12,4" size="254x16">
+																										<container size="239x16">
+																											<container size="71x16">
+																												<rectangle size="71x16"/>
+																												<container size="71x16">
+																													<spacer size="71x0"/>
 																													<text size="71x16">vin</text>
 																													<spacer pos="0,16" size="71x0"/>
 																												</container>
@@ -850,8 +880,8 @@
 																					<linearGradient pos="0,-8" size="278x8"/>
 																				</widget>
 																				<widget pos="272,0" size="6x227" type="*widget.scrollBarArea">
-																					<widget pos="3,0" size="3x99" type="*widget.scrollBar">
-																						<rectangle fillColor="scrollbar" radius="3" size="3x99"/>
+																					<widget pos="3,0" size="3x94" type="*widget.scrollBar">
+																						<rectangle fillColor="scrollbar" radius="3" size="3x94"/>
 																					</widget>
 																				</widget>
 																			</widget>
@@ -1120,7 +1150,7 @@
 																								</container>
 																								<container pos="23,0" size="254x26">
 																									<spacer size="254x4"/>
-																									<text pos="0,4" size="254x16">What this build can generate, 18 generators</text>
+																									<text pos="0,4" size="254x16">What this build can generate, 19 generators</text>
 																									<spacer pos="0,21" size="254x4"/>
 																								</container>
 																							</container>

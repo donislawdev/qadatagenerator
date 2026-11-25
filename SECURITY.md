@@ -49,6 +49,7 @@ can say its own output could not belong to anybody.
 | `US.ssn` | yes, the area the administration never assigns | a value outside it would be a defect worth reporting |
 | `ean` | yes, the prefix 952, which GS1 sets aside for demonstrations and examples of its own system | a value outside it would be a defect worth reporting. What has not been established is whether a company prefix was issued there before GS1 carved it out, so a resemblance to a real article number is possible and is worth telling us about |
 | `PL.pesel`, `PL.nip`, `PL.regon`, `US.aba`, `iban`, `vin`, `imei`, `isbn`, `card` | **none** | the registrar issues, or reserves the right to issue, across the whole space |
+| `uuid` | **none, and none is needed** | nobody issues UUIDs. Every one is version 4, 122 random bits, so matching an existing UUID is as unlikely as for any other random UUID, and a UUID names no person |
 
 `imei`, `isbn` and `card` are the three worth a sentence of their own, because
 each narrows what it writes without claiming anything about it.

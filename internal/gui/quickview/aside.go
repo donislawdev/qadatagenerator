@@ -1,6 +1,8 @@
 package quickview
 
 import (
+	"unicode"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
@@ -120,13 +122,69 @@ func produces(about quick.Description) string {
 //
 // A scheme with two forms gets two lines of mask, one under the other and
 // shortest first, so that the shapes can be compared as easily as the values.
+// A form wider than the panel goes on as many lines as it needs, broken after
+// its separators (maskLines).
 func (v *View) format(about quick.Description) fyne.CanvasObject {
 	lines := []fyne.CanvasObject{paint.Caption(v.text.T(i18n.QuickAboutFormat))}
 	for _, mask := range about.Masks {
-		lines = append(lines, paint.Mono(mask, palette.TypeValue, palette.TextPrimary))
+		for _, line := range maskLines(mask, maskFits) {
+			lines = append(lines, paint.Mono(line, palette.TypeValue, palette.TextPrimary))
+		}
 	}
 	lines = append(lines, v.paragraph(v.length(about.Masks)))
 	return paint.Column(palette.NameStepHairline, lines...)
+}
+
+// maskRoom is the width a line of a mask has: the panel less the margin of the
+// card on either side of it.
+func maskRoom() float32 {
+	margin := palette.StepOf(palette.NameStepGroup)
+	return palette.AsideWidth - margin - margin
+}
+
+// maskFits says whether a line of a mask fits the room the panel leaves it.
+func maskFits(line string) bool {
+	return fyne.MeasureText(line, palette.TypeSize(palette.TypeValue),
+		fyne.TextStyle{Monospace: true}).Width <= maskRoom()
+}
+
+// maskLines breaks a mask into the lines it is drawn on: whole, when it fits,
+// and otherwise after a separator, as many groups to a line as fit.
+//
+// # Why a mask breaks at all
+//
+// A mask is canvas text and canvas text does not wrap, so a mask wider than the
+// panel would widen the whole panel and narrow the values beside it
+// (TestEveryMaskFitsThePanelItIsDrawnIn says how that was paid for). The UUID,
+// added on 2026-11-25, was the first mask to do it: thirty six characters, 345
+// units where the panel leaves 298. A separator stays at the end of its line,
+// so the line reads as one that goes on. A group with no separator in it that
+// is wider than the panel still comes back whole, and the guard refuses it.
+func maskLines(mask string, fits func(string) bool) []string {
+	if fits(mask) {
+		return []string{mask}
+	}
+	var lines []string
+	line, group := "", ""
+	for _, r := range mask {
+		group += string(r)
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			continue
+		}
+		line, lines = placeGroup(line, group, lines, fits)
+		group = ""
+	}
+	line, lines = placeGroup(line, group, lines, fits)
+	return append(lines, line)
+}
+
+// placeGroup puts a group on the line being built, or starts a new line with
+// it when the line would no longer fit.
+func placeGroup(line, group string, lines []string, fits func(string) bool) (string, []string) {
+	if line != "" && !fits(line+group) {
+		return group, append(lines, line)
+	}
+	return line + group, lines
 }
 
 // countries names the countries a scheme of no one country produces values for,
