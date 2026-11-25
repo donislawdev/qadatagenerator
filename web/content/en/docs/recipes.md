@@ -79,7 +79,7 @@ The file creates no tables. Load it into a database whose tables already have th
 - A cell left empty by `empty` is `NULL`. A value that is an empty text, which damage can write, stays `''`.
 - A child row names its parent by the parent's primary key. With `sql`, every table that has child rows needs a `primary_key` of one field, and `validate` refuses the recipe otherwise, because a database has no row numbers for a child to point at.
 - Names of tables and columns are always quoted, so `order` or `first name` work as they are. A name the database refuses, such as one longer than 64 bytes in MySQL or 128 characters in SQL Server, is refused before anything is written. MySQL also limits the name of a table by the name of its file on disk, which `validate` does not check.
-- Each file starts with the settings its database needs to read it as written: the client encoding for PostgreSQL, and for MySQL `SET NAMES utf8mb4` and a line that keeps backslash escapes on for this session, with the rest of its `sql_mode` left as your server has it. A SQL Server file starts with `SET NOCOUNT ON`, and every statement in it is followed by `GO`.
+- Each file starts with the settings its database needs to read it as written: the client encoding for PostgreSQL, and for MySQL `SET NAMES utf8mb4` and a line that keeps backslash escapes on for this session, with the rest of its `sql_mode` left as your server has it. A SQL Server file starts with `SET NOCOUNT ON` and `SET QUOTED_IDENTIFIER ON`, without which sqlcmd cannot insert a row into a table that has a filtered index, and every statement in it is followed by `GO`.
 
 Each row is its own statement, so a row the database refuses stops only that row:
 

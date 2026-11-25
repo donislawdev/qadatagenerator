@@ -76,20 +76,24 @@ var entityT = recipe.Entity{Name: "t", Count: 1, HasCount: true, Fields: []recip
 func TestEachDatabaseIsHandedEveryValueInTheFormItReadsBack(t *testing.T) {
 	replacement := string(utf8.RuneError)
 	values := []string{"plain", "O'Brien", `a\b`, "a\nb", "\r", "x\x00y", "\x1a",
-		"Zażółć 😀", "", "Null", "\xff", "a'\\\n"}
+		"Zażółć 😀", "", "Null", "\xff", "a'\\\n", "$(SQLCMDSERVER)", "x$$(y\nz"}
 	want := map[string][]string{
 		"postgresql": {`'plain'`, `'O''Brien'`, `E'a\\b'`, `E'a\nb'`, `E'\r'`, `E'x\x00y'`, `E'\x1a'`,
-			`'Zażółć 😀'`, `''`, `'Null'`, `'` + replacement + `'`, `E'a''\\\n'`},
+			`'Zażółć 😀'`, `''`, `'Null'`, `'` + replacement + `'`, `E'a''\\\n'`, `'$(SQLCMDSERVER)'`,
+			`E'x$$(y\nz'`},
 		"mysql": {`'plain'`, `'O''Brien'`, `'a\\b'`, `'a\nb'`, `'\r'`, `'x\0y'`, `'\Z'`,
-			`'Zażółć 😀'`, `''`, `'Null'`, `'` + replacement + `'`, `'a''\\\n'`},
+			`'Zażółć 😀'`, `''`, `'Null'`, `'` + replacement + `'`, `'a''\\\n'`, `'$(SQLCMDSERVER)'`,
+			`'x$$(y\nz'`},
 		"sqlserver": {`N'plain'`, `N'O''Brien'`, `N'a\b'`,
 			`CAST(N'a' AS nvarchar(max)) + NCHAR(10) + N'b'`, `CAST(N'' AS nvarchar(max)) + NCHAR(13)`,
 			`CAST(N'x' AS nvarchar(max)) + NCHAR(0) + N'y'`, `CAST(N'' AS nvarchar(max)) + NCHAR(26)`,
 			`N'Zażółć 😀'`, `N''`, `N'Null'`, `N'` + replacement + `'`,
-			`CAST(N'a''\' AS nvarchar(max)) + NCHAR(10)`},
+			`CAST(N'a''\' AS nvarchar(max)) + NCHAR(10)`,
+			`CAST(N'' AS nvarchar(max)) + NCHAR(36) + N'(SQLCMDSERVER)'`,
+			`CAST(N'x$' AS nvarchar(max)) + NCHAR(36) + N'(y' + NCHAR(10) + N'z'`},
 		"sqlite": {`'plain'`, `'O''Brien'`, `'a\b'`, `'a' || char(10) || 'b'`, `'' || char(13)`,
 			`'x' || char(0) || 'y'`, `'' || char(26)`, `'Zażółć 😀'`, `''`, `'Null'`,
-			`'` + replacement + `'`, `'a''\' || char(10)`},
+			`'` + replacement + `'`, `'a''\' || char(10)`, `'$(SQLCMDSERVER)'`, `'x$$(y' || char(10) || 'z'`},
 	}
 	quoted := map[string]string{"postgresql": `"t" ("v")`, "mysql": "`t` (`v`)",
 		"sqlserver": `[t] ([v])`, "sqlite": `"t" ("v")`}
@@ -107,6 +111,11 @@ func TestEachDatabaseIsHandedEveryValueInTheFormItReadsBack(t *testing.T) {
 				if strings.Contains(written, raw) {
 					t.Errorf("the file carries the byte %q as it is", raw)
 				}
+			}
+			// sqlcmd replaces a variable inside a quoted value as well, so a
+			// file for SQL Server never holds the opening of one (DEC-341).
+			if dialect == dataset.DialectSQLServer && strings.Contains(written, "$(") {
+				t.Errorf("the file for SQL Server holds a variable for sqlcmd to replace:\n%s", written)
 			}
 			if lines := strings.Count(written, "\n"); lines != strings.Count(written, ";\n")+ // punctuation: test data
 				strings.Count(written, "GO\n") {
@@ -153,7 +162,7 @@ func TestEveryFileStartsWithWhatItsDatabaseNeeds(t *testing.T) {
 			"SET SESSION sql_mode = REPLACE(@@SESSION.sql_mode, 'NO_BACKSLASH_ESCAPES', '');\n" + // punctuation: test data
 			"INSERT INTO `t` (`v`) VALUES ('a');\n\n" + // punctuation: test data
 			"INSERT INTO `u` (`v`) VALUES ('x');\n", // punctuation: test data
-		"sqlserver": "SET NOCOUNT ON;\nGO\n" + // punctuation: test data
+		"sqlserver": "SET NOCOUNT ON;\nGO\nSET QUOTED_IDENTIFIER ON;\nGO\n" + // punctuation: test data
 			"INSERT INTO [t] ([v]) VALUES (N'a');\nGO\n\n" + // punctuation: test data
 			"INSERT INTO [u] ([v]) VALUES (N'x');\nGO\n", // punctuation: test data
 		"sqlite": "INSERT INTO \"t\" (\"v\") VALUES ('a');\n\n" + // punctuation: test data
@@ -171,7 +180,7 @@ func TestEveryFileStartsWithWhatItsDatabaseNeeds(t *testing.T) {
 		if !made {
 			t.Fatalf("a file per table did not give %s, only %v", name, names(perTable))
 		}
-		if !strings.HasPrefix(file.String(), "SET NOCOUNT ON;\nGO\nINSERT INTO ") { // punctuation: test data
+		if !strings.HasPrefix(file.String(), "SET NOCOUNT ON;\nGO\nSET QUOTED_IDENTIFIER ON;\nGO\nINSERT INTO ") { // punctuation: test data
 			t.Errorf("%s does not start with what SQL Server needs:\n%s", name, file)
 		}
 	}
@@ -281,6 +290,7 @@ func TestARecipeTheStatementsCannotExpressIsRefused(t *testing.T) {
 		{"a name with an emoji in MySQL", "mysql", []recipe.Entity{named("name😀")}, "emoji"},
 		{"a name of 129 characters in SQL Server", "sqlserver", []recipe.Entity{named(strings.Repeat("a", 129))}, "128 characters"},
 		{"a name of 65 emoji in SQL Server", "sqlserver", []recipe.Entity{named(strings.Repeat("😀", 65))}, "has 130"},
+		{"a name sqlcmd would change", "sqlserver", []recipe.Entity{named("cost$(x)")}, "variable of its own"},
 		{"two names one in PostgreSQL", "postgresql", []recipe.Entity{{Name: "t", Count: 1, HasCount: true,
 			Fields: []recipe.Field{field(long63 + "x"), field(long63 + "y")}}}, "same 63 bytes"},
 		{"a database this build does not know", "oracle", []recipe.Entity{named("v")}, "asks for \"oracle\""},

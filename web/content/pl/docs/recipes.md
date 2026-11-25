@@ -1,5 +1,5 @@
 ---
-translatedFrom: e6de61230cc78a01ff279151c4eb21634652a767
+translatedFrom: c856a7a20cfdb0f9e1b309af630727d085d426a0
 title: Przepisy
 seoTitle: "Przepisy danych testowych w YAML: każdy klucz"
 description: "Opisz tabele, liczbę wierszy, relacje i reguły kolumn w jednym pliku YAML. Każdy klucz przepisu, co robi i jak validate zgłasza problem."
@@ -131,7 +131,7 @@ Plik nie tworzy tabel. Wczytaj go do bazy, w której tabele o tych nazwach i kol
 - Komórka zostawiona pusta przez `empty` to `NULL`. Wartość będąca pustym tekstem, którą potrafi zapisać uszkodzenie, zostaje `''`.
 - Wiersz podrzędny wskazuje rodzica kluczem głównym rodzica. Przy `sql` każda tabela z wierszami podrzędnymi potrzebuje `primary_key` z jednego pola, a w przeciwnym razie `validate` odrzuca przepis, bo w bazie nie ma numerów wierszy, na które wiersz podrzędny mógłby wskazać.
 - Nazwy tabel i kolumn są zawsze w cudzysłowach, więc `order` albo `first name` działają takie, jakie są. Nazwę, której baza nie przyjmie, na przykład dłuższą niż 64 bajty w MySQL albo 128 znaków w SQL Server, program odrzuca, zanim cokolwiek zapisze. MySQL ogranicza też nazwę tabeli nazwą jej pliku na dysku, czego `validate` nie sprawdza.
-- Każdy plik zaczyna się od ustawień, których jego baza potrzebuje, żeby przeczytać go tak, jak jest zapisany: kodowania klienta dla PostgreSQL, a dla MySQL `SET NAMES utf8mb4` i linii, która zostawia w tej sesji włączone ucieczki ukośnikiem, przy czym reszta `sql_mode` zostaje taka, jak ma ją twój serwer. Plik dla SQL Server zaczyna się od `SET NOCOUNT ON`, a po każdej instrukcji stoi w nim `GO`.
+- Każdy plik zaczyna się od ustawień, których jego baza potrzebuje, żeby przeczytać go tak, jak jest zapisany: kodowania klienta dla PostgreSQL, a dla MySQL `SET NAMES utf8mb4` i linii, która zostawia w tej sesji włączone ucieczki ukośnikiem, przy czym reszta `sql_mode` zostaje taka, jak ma ją twój serwer. Plik dla SQL Server zaczyna się od `SET NOCOUNT ON` i `SET QUOTED_IDENTIFIER ON`, bez którego sqlcmd nie wstawi wiersza do tabeli z indeksem filtrowanym, a po każdej instrukcji stoi w nim `GO`.
 
 Każdy wiersz to osobna instrukcja, więc wiersz odrzucony przez bazę zatrzymuje tylko siebie:
 

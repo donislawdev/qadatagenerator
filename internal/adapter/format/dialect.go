@@ -77,9 +77,16 @@ func dialectOf(name string) (dialect, bool) {
 	case dataset.DialectSQLServer:
 		return dialect{
 			name: name,
-			// The count of rows after every statement says nothing a person
-			// loading thousands of rows needs.
-			opening: []string{"SET NOCOUNT ON" + statementEnd},
+			opening: []string{
+				// The count of rows after every statement says nothing a person
+				// loading thousands of rows needs.
+				"SET NOCOUNT ON" + statementEnd,
+				// sqlcmd starts with this off, and with it off every INSERT into
+				// a table with a filtered index failed (measured, error 1934).
+				// Values here are N'...' and names [...], so turning it on
+				// changes the meaning of nothing this file says.
+				"SET QUOTED_IDENTIFIER ON" + statementEnd,
+			},
 			quote:   quotedWith("[", "]"),
 			literal: sqlServerLiteral,
 			// A value the server cannot convert ends the batch it is in, so
@@ -116,6 +123,27 @@ func quotedWith(open, closing string) func(string) string {
 // statements after it (measured), and the substitute character ends a text
 // file for some readers on Windows. Each dialect writes them its own way.
 const escapedCharacters = "\x00\n\r\x1a"
+
+// escapeAt is where the first character to escape stands in a value, or -1.
+func escapeAt(value string) int { return strings.IndexAny(value, escapedCharacters) }
+
+// sqlcmdVariable opens a variable of sqlcmd, which the tool replaces wherever it
+// stands, inside a quoted value as well. A value of $(SQLCMDSERVER) loaded with
+// the command the recipes page gives went into the table as the name of the
+// server (measured, DEC-341), and any variable of the environment would have
+// gone in the same way.
+const sqlcmdVariable = "$("
+
+// sqlServerEscapeAt is escapeAt for SQL Server, where the dollar sign of a
+// variable is escaped as well, so that the file never holds one for sqlcmd to
+// replace.
+func sqlServerEscapeAt(value string) int {
+	at := escapeAt(value)
+	if variable := strings.Index(value, sqlcmdVariable); variable >= 0 && (at < 0 || variable < at) {
+		return variable
+	}
+	return at
+}
 
 // valid replaces each byte that is not UTF-8 with the replacement character,
 // the rule the object form follows as well. Nothing a run produces today has
@@ -208,11 +236,13 @@ func mysqlLiteral(value string) string {
 func sqlServerLiteral(value string) string {
 	value = valid(value)
 	quote := func(part string) string { return "N'" + strings.ReplaceAll(part, "'", "''") + "'" }
-	if !strings.ContainsAny(value, escapedCharacters) {
+	at := sqlServerEscapeAt(value)
+	if at < 0 {
 		return quote(value)
 	}
-	return joined(value, "CAST("+quote(firstPart(value))+" AS nvarchar(max))", quote,
-		func(symbol byte) string { return "NCHAR(" + strconv.Itoa(int(symbol)) + ")" }, " + ")
+	return joined(value, at, "CAST("+quote(value[:at])+" AS nvarchar(max))", quote,
+		func(symbol byte) string { return "NCHAR(" + strconv.Itoa(int(symbol)) + ")" }, " + ",
+		sqlServerEscapeAt)
 }
 
 // sqliteLiteral writes a value as SQLite reads it. Its literals have no escapes
@@ -220,37 +250,34 @@ func sqlServerLiteral(value string) string {
 func sqliteLiteral(value string) string {
 	value = valid(value)
 	quote := func(part string) string { return "'" + strings.ReplaceAll(part, "'", "''") + "'" }
-	if !strings.ContainsAny(value, escapedCharacters) {
+	at := escapeAt(value)
+	if at < 0 {
 		return quote(value)
 	}
-	return joined(value, quote(firstPart(value)), quote,
-		func(symbol byte) string { return "char(" + strconv.Itoa(int(symbol)) + ")" }, " || ")
+	return joined(value, at, quote(value[:at]), quote,
+		func(symbol byte) string { return "char(" + strconv.Itoa(int(symbol)) + ")" }, " || ", escapeAt)
 }
 
-// firstPart is the text of a value before its first escaped character.
-func firstPart(value string) string {
-	return value[:strings.IndexAny(value, escapedCharacters)]
-}
-
-// joined writes a value as the given start, which holds its first part, then
-// each escaped character as a call and each later part as a literal, joined by
-// the operator of the dialect.
-func joined(value, start string, quote func(string) string, call func(byte) string,
-	operator string) string {
+// joined writes a value as the given start, which holds its text up to the
+// first character to escape at, then each such character as a call and each
+// later part as a literal, joined by the operator of the dialect. next finds
+// the character to escape in what is left.
+func joined(value string, at int, start string, quote func(string) string, call func(byte) string,
+	operator string, next func(string) int) string {
 	var built strings.Builder
 	built.WriteString(start)
-	rest := value[len(firstPart(value)):]
+	rest := value[at:]
 	for rest != "" {
 		built.WriteString(operator + call(rest[0]))
 		rest = rest[1:]
-		next := strings.IndexAny(rest, escapedCharacters)
-		if next < 0 {
-			next = len(rest)
+		plain := next(rest)
+		if plain < 0 {
+			plain = len(rest)
 		}
-		if next > 0 {
-			built.WriteString(operator + quote(rest[:next]))
+		if plain > 0 {
+			built.WriteString(operator + quote(rest[:plain]))
 		}
-		rest = rest[next:]
+		rest = rest[plain:]
 	}
 	return built.String()
 }
@@ -277,7 +304,13 @@ func mysqlNameFits(name string) string {
 
 // sqlServerNameFits says what SQL Server refuses in a name: more than 128
 // characters, counted the way the server counts them, where an emoji is two.
+// It also refuses the opening of a variable of sqlcmd, which the tool replaces
+// inside a name as it does inside a value, and a name has no way to escape it.
 func sqlServerNameFits(name string) string {
+	if strings.Contains(name, sqlcmdVariable) {
+		return "sqlcmd reads " + sqlcmdVariable + " as the start of a variable of its own and would " +
+			"change the name before SQL Server saw it"
+	}
 	units := 0
 	for _, symbol := range name {
 		units++
