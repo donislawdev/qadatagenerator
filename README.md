@@ -286,6 +286,63 @@ is O'Brien, who was turned away. The whole format of that record is in
 
 ---
 
+## Download and run
+
+Take the archive for your system from the
+[latest release](https://github.com/donislawdev/qadatagenerator/releases/latest) and unpack it. The
+programs run from the folder you unpack them to, with no installer and no administrator rights. On
+Windows on x64 you can [install it](#install-it-on-windows) instead.
+
+| Your system | The command line, `qadg` | The window, `qadg-gui`, with `qadg` beside it |
+|---|---|---|
+| Windows on x64 | `qadg_<version>_windows_amd64.zip` | `qadg-gui_<version>_windows_amd64.zip` |
+| Windows on Arm | `qadg_<version>_windows_arm64.zip` | not built |
+| Linux on x64 | `qadg_<version>_linux_amd64.tar.gz` | `qadg-gui_<version>_linux_amd64.tar.gz` |
+| Linux on Arm | `qadg_<version>_linux_arm64.tar.gz` | not built |
+| macOS on Apple silicon | `qadg_<version>_macos_arm64.tar.gz` | `qadg-gui_<version>_macos_arm64.tar.gz` |
+
+There is no build for Macs with an Intel processor.
+
+**On Windows** the programs and the installer are signed with a code signing certificate. The
+window's archive also has an `opengl` folder, a software renderer the window draws with when the
+graphics driver offers no OpenGL, such as in a virtual machine or over a remote desktop. Keep it
+beside `qadg-gui.exe`.
+
+**On macOS** each program is inside an application bundle, `qadg.app` or `qadg-gui.app`, signed with
+an Apple Developer ID and notarised by Apple. Beside each bundle is a link for each program in it, so
+you still type `./qadg`. Keep the bundle and its links together: a program copied out of the bundle
+on its own is refused, because the signature covers the bundle.
+
+**On Linux** the programs are not signed. The command line is one file that needs nothing else. The
+window needs a desktop session with OpenGL.
+
+### Install it on Windows
+
+`qadg-setup_<version>_windows_amd64.msi` installs the window and the command line in
+`C:\Program Files\QA Data Generator` for every account on the machine. It puts the window in the
+Start menu and that folder on the system `PATH`, so a terminal opened afterwards finds `qadg`.
+Installing asks for administrator rights, running the programs does not.
+
+A newer version installs over an older one and closes nothing. If `qadg` or the window is running at
+the time, Windows replaces the files and removes the old copy at the next restart. An older version
+does not install over a newer one. To remove it, uninstall QA Data Generator in Settings, under Apps.
+
+### Check what you downloaded
+
+`verify-SHA256SUMS.txt` on the release page lists the SHA-256 of every archive and of the
+installer. Download it next to what you downloaded, then:
+
+```
+sha256sum -c --ignore-missing verify-SHA256SUMS.txt        # Linux
+shasum -a 256 -c --ignore-missing verify-SHA256SUMS.txt    # macOS
+```
+
+On Windows, `Get-FileHash <file>` in PowerShell prints the SHA-256 to compare with the line of that
+file. The notes of every release also say how to check a file with `gh attestation verify`, against
+statements GitHub signed about that release.
+
+---
+
 ## Build it from source
 
 You need [Go](https://go.dev/dl/) 1.27.4 or newer.
@@ -313,8 +370,9 @@ The first line builds `qadg`, the command line, and needs nothing but Go. The se
 On a Windows computer that gives the window no OpenGL, such as a virtual machine without 3D
 acceleration, a remote desktop session or a server, `qadg-gui` can draw with the processor instead
 of the graphics card. For that it needs Mesa, a software renderer, in a folder named `opengl` beside
-`qadg-gui.exe`. After `go build ./cmd/qadg-gui`, run this in Git Bash from the root of the
-repository:
+`qadg-gui.exe`. The window's archive for Windows and the installer carry that folder. When you build
+the window yourself, run this in Git Bash from the root of the repository after
+`go build ./cmd/qadg-gui`:
 
 ```
 bash .github/scripts/fetch_software_renderer.sh .

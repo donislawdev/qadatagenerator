@@ -1,5 +1,5 @@
 ---
-translatedFrom: 812d03950eda8ae6bea29ce407551fcbcb18b960
+translatedFrom: 4ff0c515353613c0ad6a744aa4bb819e6ef1a9fd
 title: QA Data Generator
 seoTitle: "Generator danych testowych: dobre i złe dane z odpowiedzią"
 description: "Realistyczne dane testowe z przepisu YAML, potem celowo popsute. Przy każdej popsutej wartości to, co ma z nią zrobić aplikacja. Za darmo, offline, CLI i GUI."
@@ -155,5 +155,5 @@ promises:
     page: /security
 cta:
   title: Pierwszy zestaw danych w dwie minuty
-  text: Bezpłatny i z otwartym kodem. Zbuduj go, napisz przepis i zobacz, co twoja aplikacja robi ze złymi danymi.
+  text: Bezpłatny i z otwartym kodem. Pobierz go, napisz przepis i zobacz, co twoja aplikacja robi ze złymi danymi.
 ---

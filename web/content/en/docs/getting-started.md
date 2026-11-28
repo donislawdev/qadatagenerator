@@ -1,12 +1,12 @@
 ---
 title: Getting started
-description: "Build QA Data Generator, print your first valid value, then generate a whole dataset from a recipe and break it on purpose, in a few minutes."
+description: "Get QA Data Generator, print your first valid value, then generate a whole dataset from a recipe and break it on purpose, in a few minutes."
 lead: "From nothing to a dataset, a damaged copy and the answer for every damaged value. Every command and every output on this page comes from a real run."
 ---
 
-## Build it
+## Get it
 
-[Get it](/download/) has the commands and what each system needs first. The command line needs nothing but Go.
+[Get it](/download/) has the archive for each system, the installer for Windows, and how to build it from source. The examples below type `qadg`, so put the folder you unpacked it to on your `PATH`, or install it on Windows.
 
 ## One value
 

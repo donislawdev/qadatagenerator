@@ -274,14 +274,7 @@ func checkVerifierFiles(files map[string]string) []string {
 	}
 	for _, row := range rows {
 		program, goos, goarch := row[0], row[1], row[2]
-		system, ending := goos, ".tar.gz"
-		if goos == "darwin" {
-			system = "macos"
-		}
-		if goos == "windows" {
-			ending = ".zip"
-		}
-		name := program + "_${version}_" + system + "_" + goarch + ending
+		name := archiveName(program, goos, goarch, "${version}")
 		if !asks(name) {
 			at(`does not ask for "` + name + `", an archive the signing script makes`)
 		}

@@ -110,4 +110,7 @@ var releaseGuards = []Guard{
 	{"the verifier of a published release reads and changes nothing, and starts on a published release or by hand", "TestTheVerifierOnlyReads", "internal/guard", ByProbe},
 	{"every check of a published release goes on after a failure and is read by the verdict through its outcome", "TestNoReleaseCheckCanHideTheOnesBehindIt", "internal/guard", ByProbe},
 	{"the verifier asks for every file the signing script makes, expects what it signs and reads the pins it reads", "TestTheVerifierChecksWhatTheSigningScriptMakes", "internal/guard", ByProbe},
+
+	// What a person reads before downloading (B-394). The same shape again.
+	{"the README names every archive the signing script makes, the installer and the checksum file, and the download page shows its table", "TestTheReadmeAndTheDownloadPageNameWhatAReleaseShips", "internal/guard", ByProbe},
 }

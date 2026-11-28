@@ -154,5 +154,5 @@ promises:
     page: /security
 cta:
   title: Your first dataset in two minutes
-  text: Free and open source. Build it, write a recipe, and see what your application does with bad data.
+  text: Free and open source. Download it, write a recipe, and see what your application does with bad data.
 ---

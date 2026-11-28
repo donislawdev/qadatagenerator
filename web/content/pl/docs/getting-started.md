@@ -1,13 +1,13 @@
 ---
-translatedFrom: 1ad54af6b62f1fb94a0554ad330d9430fe9425fb
+translatedFrom: 38e6e35d315301aa15e45c84faa86260fe17073d
 title: Pierwsze kroki
-description: "Zbuduj QA Data Generator, wypisz pierwszą poprawną wartość, potem wygeneruj cały zestaw danych z przepisu i celowo go popsuj, w kilka minut."
+description: "Pobierz QA Data Generator, wypisz pierwszą poprawną wartość, potem wygeneruj cały zestaw danych z przepisu i celowo go popsuj, w kilka minut."
 lead: "Od zera do zestawu danych, jego popsutej kopii i odpowiedzi dla każdej popsutej wartości. Każde polecenie i każdy wynik na tej stronie pochodzą z prawdziwego przebiegu."
 ---
 
-## Zbuduj go
+## Pobierz go
 
-[Instalacja](/download/) podaje polecenia i to, czego każdy system potrzebuje wcześniej. Wiersz poleceń nie potrzebuje niczego poza Go.
+[Instalacja](/download/) podaje archiwum dla każdego systemu, instalator dla Windows i sposób budowania ze źródeł. Przykłady niżej wpisują `qadg`, więc dodaj folder, do którego go rozpakujesz, do zmiennej `PATH` albo zainstaluj go na Windows.
 
 ## Jedna wartość
 
