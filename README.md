@@ -69,7 +69,11 @@ finds out it exists.
   generate is yours.
 
 <p align="center">
-  <img src=".github/social-preview/social-preview.png" width="860" alt="Good data, bad data, and the right answer. On the left what the program does. On the right three values it generated, and three values it damaged, each with what an application should do with it.">
+  <img src=".github/media/qa-in-action.webp" width="860" alt="The QA Data Generator window in use. On Quick value the list of kinds is opened, ten test card numbers are made, made again, and one is copied. On Damage a file the kinds of damage are picked and more options are opened. On Recipe the example recipe is scrolled through.">
+</p>
+
+<p align="center">
+  <img src=".github/media/qa-star.gif" width="860" alt="The Star button on the page of this repository, clicked, turning into Starred.">
 </p>
 
 ---

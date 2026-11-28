@@ -313,7 +313,7 @@
 															</container>
 															<container pos="127,0" size="385x24">
 																<spacer size="385x4"/>
-																<text bold pos="0,4" size="385x16">0.1.0</text>
+																<text bold pos="0,4" size="385x16">0.2.0</text>
 																<spacer pos="0,20" size="385x4"/>
 															</container>
 															<container pos="0,24" size="127x24">
@@ -1547,7 +1547,7 @@
 							<rectangle size="3x14"/>
 						</container>
 						<container pos="3,0" size="205x14">
-							<text color="disabled" pos="12,0" size="193x14" textSize="11">v0.1.0  ·  fully offline</text>
+							<text color="disabled" pos="12,0" size="193x14" textSize="11">v0.2.0  ·  fully offline</text>
 						</container>
 					</container>
 				</container>

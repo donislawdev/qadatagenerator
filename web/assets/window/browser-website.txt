@@ -102,4 +102,4 @@ $
 Copy command
 GitHub
 Donate
-v0.1.0  ·  fully offline
+v0.2.0  ·  fully offline

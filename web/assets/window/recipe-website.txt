@@ -198,4 +198,4 @@ Copy command
 The file name above is an example. Save the recipe to a file, and this line names that file and can be copied.
 GitHub
 Donate
-v0.1.0  ·  fully offline
+v0.2.0  ·  fully offline

@@ -8,10 +8,9 @@ package version
 
 // Tool is the version of this binary. Only the owner raises it.
 //
-// Set to 0.1.0 by the owner on 2026-08-02. Nothing has been released yet, and
-// this number does not claim otherwise: it says which version is being built,
-// not which version somebody can download. A release is a separate act and
-// needs its own decision.
+// Set to 0.2.0 by the owner on 2026-11-28 for the first release. It stays until
+// the owner raises it again, so a build from a later commit says 0.2.0 as well.
+// A release is a separate act and needs its own decision.
 //
 // A major version here is a statement about mutator identifiers and the
 // manifest format, which is to say about files sitting in somebody else's test
@@ -24,7 +23,7 @@ package version
 // means writing the new number in both scripts and compiling them again with
 // the windres command each one carries. A test in internal/guard fails until
 // that is done.
-const Tool = "0.1.0"
+const Tool = "0.2.0"
 
 // Catalog is the version of the corruption catalog this build carries. It
 // mirrors catalog_version in spec/corruption-catalog.yaml, which is the
